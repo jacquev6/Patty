@@ -21,6 +21,18 @@ do
   shift
 done
 
+ok=true
+while read template
+do
+  file=${template%.template}
+  if ! [ -f "$file" ]
+  then
+    echo "Please create '$file' according to '$template'"
+    ok=false
+  fi
+done < <(find . -name '*.template')
+$ok
+
 if ! (diff .venv/requirements-dev.txt backend/requirements-dev.txt && diff .venv/requirements-run.txt backend/requirements-run.txt) >/dev/null 2>&1
 then
   echo "Patty dev-env: venv (for IDE completion only)"

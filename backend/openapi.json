@@ -5,17 +5,17 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/api": {
+    "/api/get-cheese": {
       "get": {
-        "summary": "Get Api Root",
-        "operationId": "get_api_root_api_get",
+        "summary": "Get Cheese",
+        "operationId": "get_cheese_api_get_cheese_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Hello"
+                  "$ref": "#/components/schemas/Cheese"
                 }
               }
             }
@@ -26,18 +26,18 @@
   },
   "components": {
     "schemas": {
-      "Hello": {
+      "Cheese": {
         "properties": {
-          "hello": {
+          "name": {
             "type": "string",
-            "title": "Hello"
+            "title": "Name"
           }
         },
         "type": "object",
         "required": [
-          "hello"
+          "name"
         ],
-        "title": "Hello"
+        "title": "Cheese"
       }
     }
   }

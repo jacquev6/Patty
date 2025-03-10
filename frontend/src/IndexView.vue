@@ -6,20 +6,24 @@ import type { paths } from './openapi'
 
 const client = createClient<paths>()
 
-const who = ref<string>('<loading>')
+const cheeseName = ref<string>('<loading>')
+const disabled = ref<boolean>(false)
 
 async function update() {
-  const res = await client.GET('/api')
+  disabled.value = true
+  const response = await client.GET('/api/get-cheese')
 
-  if (res.data !== undefined) {
-    who.value = res.data.hello
+  if (response.data !== undefined) {
+    cheeseName.value = response.data.name
   }
+
+  setTimeout(() => { disabled.value = false }, 1200)  // Avoid hitting Mistral rate limiting
 }
 
 onMounted(update)
 </script>
 
 <template>
-  <p>Hello {{ who }}!</p>
-  <p><button @click="update">Update</button></p>
+  <p>French cheese: {{ cheeseName }}</p>
+  <p><button @click="update" :disabled>Another?</button></p>
 </template>

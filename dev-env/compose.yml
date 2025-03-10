@@ -13,6 +13,8 @@ services:
       - ..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
+    env_file:
+      - backend/secrets.env
     init: true
     command: ["sleep", "infinity"]
   pip-installer:
@@ -30,6 +32,8 @@ services:
       - ..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
+    env_file:
+      - backend/secrets.env
     command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
       pip-installer:
