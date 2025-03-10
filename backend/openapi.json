@@ -1,0 +1,44 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api": {
+      "get": {
+        "summary": "Get Api Root",
+        "operationId": "get_api_root_api_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hello"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Hello": {
+        "properties": {
+          "hello": {
+            "type": "string",
+            "title": "Hello"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hello"
+        ],
+        "title": "Hello"
+      }
+    }
+  }
+}

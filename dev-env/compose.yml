@@ -1,0 +1,100 @@
+name: patty-dev
+
+services:
+  backend-shell:
+    image: patty-dev_backend
+    build:
+      context: ..
+      dockerfile: dev-env/backend/docker/Dockerfile
+      args:
+        USER_ID: $USER_ID
+        GROUP_ID: $GROUP_ID
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    init: true
+    command: ["sleep", "infinity"]
+  pip-installer:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    command: ["pip", "install", "--user", "-r", "requirements-dev.txt", "-r", "requirements-run.txt"]
+  backend:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
+    depends_on:
+      pip-installer:
+        condition: service_completed_successfully
+  openapi-json-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    command: ["watchmedo", "shell-command", "--command", 'test $${watch_event_type} = closed && echo "Updating backend/openapi.json because $${watch_object} $${watch_src_path} changed" && python -m patty openapi openapi.json', "patty"]
+    depends_on:
+      pip-installer:
+        condition: service_completed_successfully
+
+  frontend-shell:
+    image: patty-dev_frontend
+    build:
+      context: ..
+      dockerfile: dev-env/frontend/docker/Dockerfile
+      args:
+        USER_ID: $USER_ID
+        GROUP_ID: $GROUP_ID
+    volumes:
+      - ..:/app
+    working_dir: /app/frontend
+    init: true
+    command: ["sleep", "infinity"]
+  npm-installer:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+    working_dir: /app/frontend
+    command: ["npm", "install"]
+  openapi-ts-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+    working_dir: /app/frontend
+    environment:
+      SHELL: bash
+    command: ["npx", "chokidar", "../backend/openapi.json", "--initial", "--verbose", "--command", "npx openapi-typescript ../backend/openapi.json >src/openapi.ts"]
+    depends_on:
+      npm-installer:
+        condition: service_completed_successfully
+  frontend:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+    working_dir: /app/frontend
+    command: ["npx", "vite", "--host", "0.0.0.0", "--port", "80", "--strictPort"]
+    depends_on:
+      npm-installer:
+        condition: service_completed_successfully
+
+  fanout:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./fanout/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
