@@ -9,4 +9,6 @@ export function useApiClient() {
   return apiClient
 }
 
+export type MistralModelName =
+  paths['/api/tokenization']['post']['requestBody']['content']['application/json']['mistral_model']
 export type Tokenization = paths['/api/tokenization/{id}']['get']['responses']['200']['content']['application/json']

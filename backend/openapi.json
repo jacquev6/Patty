@@ -635,6 +635,14 @@
       },
       "PostTokenizationRequest": {
         "properties": {
+          "mistral_model": {
+            "type": "string",
+            "enum": [
+              "mistral-large-2411",
+              "mistral-small-2501"
+            ],
+            "title": "Mistral Model"
+          },
           "system_prompt": {
             "type": "string",
             "title": "System Prompt"
@@ -646,6 +654,7 @@
         },
         "type": "object",
         "required": [
+          "mistral_model",
           "system_prompt",
           "input_text"
         ],
@@ -792,6 +801,14 @@
             "type": "string",
             "title": "Id"
           },
+          "mistral_model": {
+            "type": "string",
+            "enum": [
+              "mistral-large-2411",
+              "mistral-small-2501"
+            ],
+            "title": "Mistral Model"
+          },
           "steps": {
             "items": {
               "anyOf": [
@@ -810,6 +827,7 @@
         "type": "object",
         "required": [
           "id",
+          "mistral_model",
           "steps"
         ],
         "title": "Tokenization"

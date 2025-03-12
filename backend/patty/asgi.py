@@ -77,15 +77,20 @@ class AdjustmentStep(pydantic.BaseModel):
 Step = InitialStep | AdjustmentStep
 
 
+MistralModelName = Literal["mistral-large-2411", "mistral-small-2501"]
+
+
 class Tokenization(pydantic.BaseModel):
     id: str
-    steps: list[Step]  # = pydantic.Field(union_mode='left_to_right')
+    mistral_model: MistralModelName
+    steps: list[Step]
 
 
 tokenizations: dict[str, Tokenization] = {}
 
 tokenizations["0"] = Tokenization(
     id="0",
+    mistral_model="mistral-small-2501",
     steps=[
         {  # type: ignore
             "kind": "initial",
@@ -507,6 +512,8 @@ default_tokenization_system_prompt = textwrap.dedent(
     A chaque ajustement, tu dois répondre avec la nouvelle tokenisation du texte initial,
     en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
+    Tu dois séparer les phrases selon la ponctuation.
+
     Le format pour tes réponses comporte deux champs: `prose` et `tokenized_text`.
     Tu dois utiliser `prose` pour interagir avec l'utilisateur, et `tokenized_text` pour renvoyer la tokenisation.
     Par exemple, si les instructions sont ambiguës, ou contradictoire, tu peux demander des clarifications dans `prose`.
@@ -526,6 +533,10 @@ def get_default_tokenization_system_prompt() -> str:
 
 
 class PostTokenizationRequest(pydantic.BaseModel):
+    mistral_model: MistralModelName
+    # @todo Let experimenter set temperature
+    # @todo Let experimenter set top_p
+    # @todo Let experimenter set random_seed
     system_prompt: str
     input_text: str
 
@@ -537,7 +548,7 @@ async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
         mistralai.UserMessage(content=req.input_text),
     ]
 
-    response = mistral.chat.parse(model="mistral-small-latest", messages=messages, response_format=AssistantResponse)
+    response = mistral.chat.parse(model=req.mistral_model, messages=messages, response_format=AssistantResponse)
     assert response.choices is not None
     assert response.choices is not None
     assert response.choices[0].message is not None
@@ -546,6 +557,7 @@ async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
 
     tokenization = Tokenization(
         id=str(uuid.uuid4()),
+        mistral_model=req.mistral_model,
         steps=[
             InitialStep(
                 kind="initial",
@@ -579,7 +591,7 @@ async def post_tokenization_adjustment(id: str, req: PostTokenizationAdjustmentR
     step_messages: list[mistralai.models.Messages] = [mistralai.UserMessage(content=req.adjustment)]
 
     response = mistral.chat.parse(
-        model="mistral-small-latest", messages=previous_messages + step_messages, response_format=AssistantResponse
+        model=tokenization.mistral_model, messages=previous_messages + step_messages, response_format=AssistantResponse
     )
     assert response.choices is not None
     assert response.choices[0].message is not None

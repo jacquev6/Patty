@@ -2,10 +2,13 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useApiClient } from './apiClient'
+import { type MistralModelName, useApiClient } from './apiClient'
 
 const router = useRouter()
 const client = useApiClient()
+
+const mistralModels: MistralModelName[] = ['mistral-large-2411', 'mistral-small-2501']
+const mistralModel = ref<MistralModelName>(mistralModels[0])
 
 const systemPrompt = ref('')
 
@@ -31,6 +34,7 @@ async function submit() {
 
   const responsePromise = client.POST('/api/tokenization', {
     body: {
+      mistral_model: mistralModel.value,
       system_prompt: systemPrompt.value,
       input_text: inputText.value,
     },
@@ -46,6 +50,10 @@ async function submit() {
 </script>
 
 <template>
+  <h1>Mistral model name</h1>
+  <select v-model="mistralModel" :disabled>
+    <option v-for="model in mistralModels">{{ model }}</option>
+  </select>
   <h1>System prompt</h1>
   <textarea v-model="systemPrompt" rows="15" cols="120" :disabled></textarea>
   <h1>Input text</h1>

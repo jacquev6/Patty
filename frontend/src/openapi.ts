@@ -247,6 +247,11 @@ export interface components {
     }
     /** PostTokenizationRequest */
     PostTokenizationRequest: {
+      /**
+       * Mistral Model
+       * @enum {string}
+       */
+      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
       /** System Prompt */
       system_prompt: string
       /** Input Text */
@@ -301,6 +306,11 @@ export interface components {
     Tokenization: {
       /** Id */
       id: string
+      /**
+       * Mistral Model
+       * @enum {string}
+       */
+      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
       /** Steps */
       steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
     }
