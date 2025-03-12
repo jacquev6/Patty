@@ -21,6 +21,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/default-tokenization-system-prompt': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Default Tokenization System Prompt */
+    get: operations['get_default_tokenization_system_prompt_api_default_tokenization_system_prompt_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/tokenization': {
     parameters: {
       query?: never
@@ -213,6 +230,8 @@ export interface components {
     }
     /** PostTokenizationRequest */
     PostTokenizationRequest: {
+      /** System Prompt */
+      system_prompt: string
       /** Input Text */
       input_text: string
     }
@@ -373,6 +392,26 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['Cheese']
+        }
+      }
+    }
+  }
+  get_default_tokenization_system_prompt_api_default_tokenization_system_prompt_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': string
         }
       }
     }

@@ -24,12 +24,13 @@ const adjustment = ref('')
 const disabled = ref(false)
 
 async function submit() {
+  disabled.value = true
+
   const responsePromise = client.POST(`/api/tokenization/{id}/adjustment`, {
     params: { path: { id: props.id } },
     body: { adjustment: adjustment.value },
   })
 
-  disabled.value = true
   adjustment.value = ''
   const response = await responsePromise
   disabled.value = false

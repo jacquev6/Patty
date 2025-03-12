@@ -57,10 +57,6 @@ class Punctuation(pydantic.BaseModel):
 Token = Word | Punctuation
 
 
-class PostTokenizationRequest(pydantic.BaseModel):
-    input_text: str
-
-
 class InitialStep(pydantic.BaseModel):
     kind: Literal["initial"]
     system_prompt: str
@@ -501,7 +497,7 @@ class AssistantResponse(pydantic.BaseModel):
     tokenized_text: TokenizedText | None
 
 
-system_prompt = textwrap.dedent(
+default_tokenization_system_prompt = textwrap.dedent(
     """\
     Le premier message de l'utilisateur sera un texte, que tu dois diviser en phrases et tokens.
     Les tokens peuvent être des mots ou de la ponctuation.
@@ -524,10 +520,20 @@ system_prompt = textwrap.dedent(
 )
 
 
+@app.get("/api/default-tokenization-system-prompt")
+def get_default_tokenization_system_prompt() -> str:
+    return default_tokenization_system_prompt
+
+
+class PostTokenizationRequest(pydantic.BaseModel):
+    system_prompt: str
+    input_text: str
+
+
 @app.post("/api/tokenization")
 async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
     messages: list[mistralai.models.Messages] = [
-        mistralai.SystemMessage(content=system_prompt),
+        mistralai.SystemMessage(content=req.system_prompt),
         mistralai.UserMessage(content=req.input_text),
     ]
 
@@ -543,7 +549,7 @@ async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
         steps=[
             InitialStep(
                 kind="initial",
-                system_prompt=system_prompt,
+                system_prompt=req.system_prompt,
                 input_text=req.input_text,
                 messages=messages,
                 assistant_prose=response.choices[0].message.parsed.prose,
