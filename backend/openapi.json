@@ -188,7 +188,14 @@
             "title": "Assistant Prose"
           },
           "tokenized_text": {
-            "$ref": "#/components/schemas/TokenizedText"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -442,7 +449,14 @@
             "title": "Assistant Prose"
           },
           "tokenized_text": {
-            "$ref": "#/components/schemas/TokenizedText"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

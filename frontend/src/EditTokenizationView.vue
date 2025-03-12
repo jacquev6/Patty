@@ -54,7 +54,8 @@ async function submit() {
             <h1>Assistant's response</h1>
             <pre>{{ step.assistant_prose }}</pre>
             <h1>Tokenized text</h1>
-            <TokenizationRender :tokenizedText="step.tokenized_text" />
+            <p v-if="step.tokenized_text === null">No changes</p>
+            <TokenizationRender v-else :tokenizedText="step.tokenized_text" />
           </template>
           <template v-else-if="step.kind == 'adjustment'">
             <h1>User-requested adjustment</h1>
@@ -62,7 +63,8 @@ async function submit() {
             <h1>Assistant's response</h1>
             <pre>{{ step.assistant_prose }}</pre>
             <h1>Tokenized text</h1>
-            <TokenizationRender :tokenizedText="step.tokenized_text" />
+            <p v-if="step.tokenized_text === null">No changes</p>
+            <TokenizationRender v-else :tokenizedText="step.tokenized_text" />
           </template>
           <template v-else>BUG: {{ ((step: never) => step)(step) }}</template>
         </div>

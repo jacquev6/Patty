@@ -94,7 +94,7 @@ export interface components {
       )[]
       /** Assistant Prose */
       assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText']
+      tokenized_text: components['schemas']['TokenizedText'] | null
     }
     Arguments: Record<string, never> | string
     /** AssistantMessage */
@@ -190,7 +190,7 @@ export interface components {
       )[]
       /** Assistant Prose */
       assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText']
+      tokenized_text: components['schemas']['TokenizedText'] | null
     }
     Nullable_AssistantMessageContent_: components['schemas']['AssistantMessageContent'] | null
     Nullable_List_ToolCall__: components['schemas']['ToolCall'][] | null

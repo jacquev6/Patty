@@ -2,7 +2,7 @@
 import type { Tokenization } from './apiClient'
 
 const props = defineProps<{
-  tokenizedText: Tokenization['steps'][number]['tokenized_text']
+  tokenizedText: Exclude<Tokenization['steps'][number]['tokenized_text'], null>
 }>()
 </script>
 

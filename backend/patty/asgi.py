@@ -67,7 +67,7 @@ class InitialStep(pydantic.BaseModel):
     input_text: str
     messages: list[mistralai.models.Messages]
     assistant_prose: str
-    tokenized_text: TokenizedText
+    tokenized_text: TokenizedText | None
 
 
 class AdjustmentStep(pydantic.BaseModel):
@@ -75,7 +75,7 @@ class AdjustmentStep(pydantic.BaseModel):
     user_prompt: str
     messages: list[mistralai.models.Messages]
     assistant_prose: str
-    tokenized_text: TokenizedText
+    tokenized_text: TokenizedText | None
 
 
 Step = InitialStep | AdjustmentStep
@@ -498,7 +498,7 @@ tokenizations["0"] = Tokenization(
 
 class AssistantResponse(pydantic.BaseModel):
     prose: str
-    tokenized_text: TokenizedText
+    tokenized_text: TokenizedText | None
 
 
 system_prompt = textwrap.dedent(
@@ -519,6 +519,7 @@ system_prompt = textwrap.dedent(
     Ce champs comporte une liste de phrases, et chaque phrase comporte une liste de tokens.
     Les types de tokens sont distingués par le champ `kind`.
     Utilise des tokens de type `word` pour les mots, et de type `punctuation` pour la ponctuation.
+    Tu peux laisser le champ `tokenized_text` null si le message de l'utilisateur ne demande pas de changement à la tokenisation.
     """
 )
 
