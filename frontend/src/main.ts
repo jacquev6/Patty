@@ -1,9 +1,11 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
+import 'modern-normalize/modern-normalize.css'
 
 import IndexView from './IndexView.vue'
 import CreateTokenizationView from './CreateTokenizationView.vue'
 import EditTokenizationView from './EditTokenizationView.vue'
+import './ubiquitous.css'
 
 const router = createRouter({
   history: createWebHistory(),
