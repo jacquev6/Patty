@@ -9,11 +9,11 @@ export function useApiClient() {
   return apiClient
 }
 
-type MistralPostTokenizationRequest =
+type MistralaiPostTokenizationRequest =
   paths['/api/tokenization']['post']['requestBody']['content']['application/json'] & { llm_provider: 'mistralai' }
 type OpenaiPostTokenizationRequest =
   paths['/api/tokenization']['post']['requestBody']['content']['application/json'] & { llm_provider: 'openai' }
 
-export type MistralModelName = MistralPostTokenizationRequest['mistral_model']
+export type MistralaiModelName = MistralaiPostTokenizationRequest['mistralai_model']
 export type OpenaiModelName = OpenaiPostTokenizationRequest['openai_model']
 export type Tokenization = paths['/api/tokenization/{id}']['get']['responses']['200']['content']['application/json']

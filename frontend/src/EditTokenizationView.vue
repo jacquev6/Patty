@@ -61,7 +61,7 @@ async function rewindLastStep() {
     <h1>LLM provider and model name</h1>
     <p>
       {{ tokenization.llm_provider }}:
-      {{ tokenization.llm_provider === 'mistralai' ? tokenization.mistral_model : tokenization.openai_model }}
+      {{ tokenization.llm_provider === 'mistralai' ? tokenization.mistralai_model : tokenization.openai_model }}
     </p>
     <div v-for="(step, stepIndex) in tokenization.steps" class="step">
       <div class="columns">

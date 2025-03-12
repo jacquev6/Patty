@@ -52,7 +52,7 @@
               "schema": {
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/MistralPostTokenizationRequest"
+                    "$ref": "#/components/schemas/MistralAiPostTokenizationRequest"
                   },
                   {
                     "$ref": "#/components/schemas/OpenaiPostTokenizationRequest"
@@ -72,7 +72,7 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/MistralTokenization"
+                      "$ref": "#/components/schemas/MistralaiTokenization"
                     },
                     {
                       "$ref": "#/components/schemas/OpenaiTokenization"
@@ -119,7 +119,7 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/MistralTokenization"
+                      "$ref": "#/components/schemas/MistralaiTokenization"
                     },
                     {
                       "$ref": "#/components/schemas/OpenaiTokenization"
@@ -176,7 +176,7 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/MistralTokenization"
+                      "$ref": "#/components/schemas/MistralaiTokenization"
                     },
                     {
                       "$ref": "#/components/schemas/OpenaiTokenization"
@@ -223,7 +223,7 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/MistralTokenization"
+                      "$ref": "#/components/schemas/MistralaiTokenization"
                     },
                     {
                       "$ref": "#/components/schemas/OpenaiTokenization"
@@ -860,7 +860,40 @@
         ],
         "title": "InputAudio"
       },
-      "MistralAdjustmentStep": {
+      "MistralAiPostTokenizationRequest": {
+        "properties": {
+          "llm_provider": {
+            "type": "string",
+            "const": "mistralai",
+            "title": "Llm Provider"
+          },
+          "mistralai_model": {
+            "type": "string",
+            "enum": [
+              "mistral-large-2411",
+              "mistral-small-2501"
+            ],
+            "title": "Mistralai Model"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "llm_provider",
+          "mistralai_model",
+          "system_prompt",
+          "input_text"
+        ],
+        "title": "MistralAiPostTokenizationRequest"
+      },
+      "MistralaiAdjustmentStep": {
         "properties": {
           "kind": {
             "type": "string",
@@ -914,9 +947,9 @@
           "assistant_prose",
           "tokenized_text"
         ],
-        "title": "MistralAdjustmentStep"
+        "title": "MistralaiAdjustmentStep"
       },
-      "MistralInitialStep": {
+      "MistralaiInitialStep": {
         "properties": {
           "kind": {
             "type": "string",
@@ -975,42 +1008,9 @@
           "assistant_prose",
           "tokenized_text"
         ],
-        "title": "MistralInitialStep"
+        "title": "MistralaiInitialStep"
       },
-      "MistralPostTokenizationRequest": {
-        "properties": {
-          "llm_provider": {
-            "type": "string",
-            "const": "mistralai",
-            "title": "Llm Provider"
-          },
-          "mistral_model": {
-            "type": "string",
-            "enum": [
-              "mistral-large-2411",
-              "mistral-small-2501"
-            ],
-            "title": "Mistral Model"
-          },
-          "system_prompt": {
-            "type": "string",
-            "title": "System Prompt"
-          },
-          "input_text": {
-            "type": "string",
-            "title": "Input Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "llm_provider",
-          "mistral_model",
-          "system_prompt",
-          "input_text"
-        ],
-        "title": "MistralPostTokenizationRequest"
-      },
-      "MistralTokenization": {
+      "MistralaiTokenization": {
         "properties": {
           "id": {
             "type": "string",
@@ -1021,22 +1021,22 @@
             "const": "mistralai",
             "title": "Llm Provider"
           },
-          "mistral_model": {
+          "mistralai_model": {
             "type": "string",
             "enum": [
               "mistral-large-2411",
               "mistral-small-2501"
             ],
-            "title": "Mistral Model"
+            "title": "Mistralai Model"
           },
           "steps": {
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/MistralInitialStep"
+                  "$ref": "#/components/schemas/MistralaiInitialStep"
                 },
                 {
-                  "$ref": "#/components/schemas/MistralAdjustmentStep"
+                  "$ref": "#/components/schemas/MistralaiAdjustmentStep"
                 }
               ]
             },
@@ -1048,10 +1048,10 @@
         "required": [
           "id",
           "llm_provider",
-          "mistral_model",
+          "mistralai_model",
           "steps"
         ],
-        "title": "MistralTokenization"
+        "title": "MistralaiTokenization"
       },
       "Nullable_AssistantMessageContent_": {
         "anyOf": [

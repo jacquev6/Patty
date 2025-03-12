@@ -11,7 +11,7 @@ import openai.types.chat
 import pydantic
 
 
-mistral_client = mistralai.Mistral(api_key=os.environ["MISTRAL_API_KEY"])
+mistralai_client = mistralai.Mistral(api_key=os.environ["MISTRALAI_API_KEY"])
 openai_client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
@@ -30,7 +30,7 @@ messages: list[mistralai.models.Messages] = [
 
 @app.get("/api/get-cheese")
 async def get_cheese() -> Cheese:
-    response = await mistral_client.chat.complete_async(
+    response = await mistralai_client.chat.complete_async(
         model="mistral-small-latest", messages=messages, max_tokens=4000
     )
     assert response.choices is not None
@@ -63,7 +63,7 @@ class Punctuation(pydantic.BaseModel):
 Token = Word | Punctuation
 
 
-class MistralInitialStep(pydantic.BaseModel):
+class MistralaiInitialStep(pydantic.BaseModel):
     kind: Literal["initial"]
     system_prompt: str
     input_text: str
@@ -72,7 +72,7 @@ class MistralInitialStep(pydantic.BaseModel):
     tokenized_text: TokenizedText | None
 
 
-class MistralAdjustmentStep(pydantic.BaseModel):
+class MistralaiAdjustmentStep(pydantic.BaseModel):
     kind: Literal["adjustment"]
     user_prompt: str
     messages: list[mistralai.models.Messages]
@@ -80,17 +80,17 @@ class MistralAdjustmentStep(pydantic.BaseModel):
     tokenized_text: TokenizedText | None
 
 
-MistralStep = MistralInitialStep | MistralAdjustmentStep
+MistralaiStep = MistralaiInitialStep | MistralaiAdjustmentStep
 
 
-MistralModelName = Literal["mistral-large-2411", "mistral-small-2501"]
+MistralaiModelName = Literal["mistral-large-2411", "mistral-small-2501"]
 
 
-class MistralTokenization(pydantic.BaseModel):
+class MistralaiTokenization(pydantic.BaseModel):
     id: str
     llm_provider: Literal["mistralai"]
-    mistral_model: MistralModelName
-    steps: list[MistralStep]
+    mistralai_model: MistralaiModelName
+    steps: list[MistralaiStep]
 
 
 class OpenaiInitialStep(pydantic.BaseModel):
@@ -123,14 +123,14 @@ class OpenaiTokenization(pydantic.BaseModel):
     steps: list[OpenaiStep]
 
 
-Tokenization = MistralTokenization | OpenaiTokenization
+Tokenization = MistralaiTokenization | OpenaiTokenization
 
 tokenizations: dict[str, Tokenization] = {}
 
-tokenizations["mistral-example"] = MistralTokenization(
-    id="mistral-example",
+tokenizations["mistralai-example"] = MistralaiTokenization(
+    id="mistralai-example",
     llm_provider="mistralai",
-    mistral_model="mistral-small-2501",
+    mistralai_model="mistral-small-2501",
     steps=[
         {  # type: ignore
             "kind": "initial",
@@ -755,9 +755,9 @@ def get_default_tokenization_system_prompt() -> str:
     return default_tokenization_system_prompt
 
 
-class MistralPostTokenizationRequest(pydantic.BaseModel):
+class MistralAiPostTokenizationRequest(pydantic.BaseModel):
     llm_provider: Literal["mistralai"]
-    mistral_model: MistralModelName
+    mistralai_model: MistralaiModelName
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed
@@ -772,33 +772,33 @@ class OpenaiPostTokenizationRequest(pydantic.BaseModel):
     input_text: str
 
 
-PostTokenizationRequest = MistralPostTokenizationRequest | OpenaiPostTokenizationRequest
+PostTokenizationRequest = MistralAiPostTokenizationRequest | OpenaiPostTokenizationRequest
 
 
 @app.post("/api/tokenization")
 async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
     tokenization_id = str(uuid.uuid4())
 
-    if isinstance(req, MistralPostTokenizationRequest):
+    if isinstance(req, MistralAiPostTokenizationRequest):
         mistralai_messages: list[mistralai.models.Messages] = [
             mistralai.SystemMessage(content=req.system_prompt),
             mistralai.UserMessage(content=req.input_text),
         ]
 
-        mistralai_response = mistral_client.chat.parse(
-            model=req.mistral_model, messages=mistralai_messages, response_format=AssistantResponse
+        mistralai_response = mistralai_client.chat.parse(
+            model=req.mistralai_model, messages=mistralai_messages, response_format=AssistantResponse
         )
         assert mistralai_response.choices is not None
         assert mistralai_response.choices[0].message is not None
         mistralai_messages.append(mistralai.AssistantMessage(content=mistralai_response.choices[0].message.content))
         assert mistralai_response.choices[0].message.parsed is not None
 
-        tokenization: Tokenization = MistralTokenization(
+        tokenization: Tokenization = MistralaiTokenization(
             id=tokenization_id,
             llm_provider="mistralai",
-            mistral_model=req.mistral_model,
+            mistralai_model=req.mistralai_model,
             steps=[
-                MistralInitialStep(
+                MistralaiInitialStep(
                     kind="initial",
                     system_prompt=req.system_prompt,
                     input_text=req.input_text,
@@ -857,14 +857,14 @@ class PostTokenizationAdjustmentRequest(pydantic.BaseModel):
 @app.post("/api/tokenization/{id}/adjustment")
 async def post_tokenization_adjustment(id: str, req: PostTokenizationAdjustmentRequest) -> Tokenization:
     tokenization = tokenizations[id]
-    if isinstance(tokenization, MistralTokenization):
+    if isinstance(tokenization, MistralaiTokenization):
         previous_mistralai_messages: list[mistralai.models.Messages] = []
         for mistralai_step in tokenization.steps:
             previous_mistralai_messages.extend(mistralai_step.messages)
         mistralai_step_messages: list[mistralai.models.Messages] = [mistralai.UserMessage(content=req.adjustment)]
 
-        mistralai_response = mistral_client.chat.parse(
-            model=tokenization.mistral_model,
+        mistralai_response = mistralai_client.chat.parse(
+            model=tokenization.mistralai_model,
             messages=previous_mistralai_messages + mistralai_step_messages,
             response_format=AssistantResponse,
         )
@@ -876,7 +876,7 @@ async def post_tokenization_adjustment(id: str, req: PostTokenizationAdjustmentR
         assert mistralai_response.choices[0].message.parsed is not None
 
         tokenization.steps.append(
-            MistralAdjustmentStep(
+            MistralaiAdjustmentStep(
                 kind="adjustment",
                 user_prompt=req.adjustment,
                 messages=mistralai_step_messages,

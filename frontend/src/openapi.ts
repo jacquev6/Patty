@@ -353,8 +353,25 @@ export interface components {
        */
       format: 'wav' | 'mp3'
     }
-    /** MistralAdjustmentStep */
-    MistralAdjustmentStep: {
+    /** MistralAiPostTokenizationRequest */
+    MistralAiPostTokenizationRequest: {
+      /**
+       * Llm Provider
+       * @constant
+       */
+      llm_provider: 'mistralai'
+      /**
+       * Mistralai Model
+       * @enum {string}
+       */
+      mistralai_model: 'mistral-large-2411' | 'mistral-small-2501'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+    }
+    /** MistralaiAdjustmentStep */
+    MistralaiAdjustmentStep: {
       /**
        * Kind
        * @constant
@@ -373,8 +390,8 @@ export interface components {
       assistant_prose: string
       tokenized_text: components['schemas']['TokenizedText'] | null
     }
-    /** MistralInitialStep */
-    MistralInitialStep: {
+    /** MistralaiInitialStep */
+    MistralaiInitialStep: {
       /**
        * Kind
        * @constant
@@ -395,25 +412,8 @@ export interface components {
       assistant_prose: string
       tokenized_text: components['schemas']['TokenizedText'] | null
     }
-    /** MistralPostTokenizationRequest */
-    MistralPostTokenizationRequest: {
-      /**
-       * Llm Provider
-       * @constant
-       */
-      llm_provider: 'mistralai'
-      /**
-       * Mistral Model
-       * @enum {string}
-       */
-      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
-    }
-    /** MistralTokenization */
-    MistralTokenization: {
+    /** MistralaiTokenization */
+    MistralaiTokenization: {
       /** Id */
       id: string
       /**
@@ -422,12 +422,12 @@ export interface components {
        */
       llm_provider: 'mistralai'
       /**
-       * Mistral Model
+       * Mistralai Model
        * @enum {string}
        */
-      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
+      mistralai_model: 'mistral-large-2411' | 'mistral-small-2501'
       /** Steps */
-      steps: (components['schemas']['MistralInitialStep'] | components['schemas']['MistralAdjustmentStep'])[]
+      steps: (components['schemas']['MistralaiInitialStep'] | components['schemas']['MistralaiAdjustmentStep'])[]
     }
     Nullable_AssistantMessageContent_: components['schemas']['AssistantMessageContent'] | null
     Nullable_List_ToolCall__: components['schemas']['ToolCall'][] | null
@@ -742,7 +742,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json':
-          | components['schemas']['MistralPostTokenizationRequest']
+          | components['schemas']['MistralAiPostTokenizationRequest']
           | components['schemas']['OpenaiPostTokenizationRequest']
       }
     }
@@ -753,7 +753,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
+          'application/json':
+            | components['schemas']['MistralaiTokenization']
+            | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -784,7 +786,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
+          'application/json':
+            | components['schemas']['MistralaiTokenization']
+            | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -819,7 +823,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
+          'application/json':
+            | components['schemas']['MistralaiTokenization']
+            | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -850,7 +856,9 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
+          'application/json':
+            | components['schemas']['MistralaiTokenization']
+            | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */

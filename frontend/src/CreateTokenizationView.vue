@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type MistralModelName, type OpenaiModelName, useApiClient } from './apiClient'
+import { type MistralaiModelName, type OpenaiModelName, useApiClient } from './apiClient'
 
 const router = useRouter()
 const client = useApiClient()
@@ -10,8 +10,8 @@ const client = useApiClient()
 const llmProviders = ['mistralai', 'openai'] as const
 const llmProvider = ref<(typeof llmProviders)[number]>(llmProviders[0])
 
-const mistralModels: MistralModelName[] = ['mistral-large-2411', 'mistral-small-2501']
-const mistralModel = ref<MistralModelName>(mistralModels[0])
+const mistralaiModels: MistralaiModelName[] = ['mistral-large-2411', 'mistral-small-2501']
+const mistralaiModel = ref<MistralaiModelName>(mistralaiModels[0])
 
 const openaiModels: OpenaiModelName[] = ['gpt-4o-2024-08-06', 'gpt-4o-mini-2024-07-18']
 const openaiModel = ref<OpenaiModelName>(openaiModels[0])
@@ -42,7 +42,7 @@ async function submit() {
     llmProvider.value === 'mistralai'
       ? {
           llm_provider: 'mistralai' as const,
-          mistral_model: mistralModel.value,
+          mistralai_model: mistralaiModel.value,
           system_prompt: systemPrompt.value,
           input_text: inputText.value,
         }
@@ -71,8 +71,8 @@ async function submit() {
   <select v-model="llmProvider" :disabled>
     <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
   </select>
-  <select v-if="llmProvider === 'mistralai'" v-model="mistralModel" :disabled>
-    <option v-for="model in mistralModels">{{ model }}</option>
+  <select v-if="llmProvider === 'mistralai'" v-model="mistralaiModel" :disabled>
+    <option v-for="model in mistralaiModels">{{ model }}</option>
   </select>
   <select v-else v-model="openaiModel" :disabled>
     <option v-for="model in openaiModels">{{ model }}</option>

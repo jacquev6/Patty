@@ -18,7 +18,7 @@ async function update() {
 
   setTimeout(() => {
     disabled.value = false
-  }, 1200) // Avoid hitting Mistral rate limiting
+  }, 1200) // Avoid hitting MistralAi rate limiting
 }
 
 onMounted(update)
