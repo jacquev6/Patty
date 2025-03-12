@@ -50,7 +50,15 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostTokenizationRequest"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MistralPostTokenizationRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OpenaiPostTokenizationRequest"
+                  }
+                ],
+                "title": "Req"
               }
             }
           },
@@ -62,7 +70,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MistralTokenization"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OpenaiTokenization"
+                    }
+                  ],
+                  "title": "Response Post Tokenization Api Tokenization Post"
                 }
               }
             }
@@ -101,7 +117,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MistralTokenization"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OpenaiTokenization"
+                    }
+                  ],
+                  "title": "Response Get Tokenization Api Tokenization  Id  Get"
                 }
               }
             }
@@ -150,7 +174,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MistralTokenization"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OpenaiTokenization"
+                    }
+                  ],
+                  "title": "Response Post Tokenization Adjustment Api Tokenization  Id  Adjustment Post"
                 }
               }
             }
@@ -189,7 +221,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MistralTokenization"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OpenaiTokenization"
+                    }
+                  ],
+                  "title": "Response Delete Tokenization Last Step Api Tokenization  Id  Last Step Delete"
                 }
               }
             }
@@ -210,62 +250,6 @@
   },
   "components": {
     "schemas": {
-      "AdjustmentStep": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "adjustment",
-            "title": "Kind"
-          },
-          "user_prompt": {
-            "type": "string",
-            "title": "User Prompt"
-          },
-          "messages": {
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/AssistantMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/ToolMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "assistant_prose": {
-            "type": "string",
-            "title": "Assistant Prose"
-          },
-          "tokenized_text": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TokenizedText"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "user_prompt",
-          "messages",
-          "assistant_prose",
-          "tokenized_text"
-        ],
-        "title": "AdjustmentStep"
-      },
       "Arguments": {
         "anyOf": [
           {
@@ -341,6 +325,373 @@
           }
         ]
       },
+      "Audio": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "Audio"
+      },
+      "ChatCompletionAssistantMessageParam": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "const": "assistant",
+            "title": "Role"
+          },
+          "audio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Audio"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ChatCompletionContentPartTextParam"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ChatCompletionContentPartRefusalParam"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "function_call": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/openai__types__chat__chat_completion_assistant_message_param__FunctionCall"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "refusal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/ChatCompletionMessageToolCallParam"
+            },
+            "type": "array",
+            "title": "Tool Calls"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "ChatCompletionAssistantMessageParam"
+      },
+      "ChatCompletionContentPartImageParam": {
+        "properties": {
+          "image_url": {
+            "$ref": "#/components/schemas/openai__types__chat__chat_completion_content_part_image_param__ImageURL"
+          },
+          "type": {
+            "type": "string",
+            "const": "image_url",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url",
+          "type"
+        ],
+        "title": "ChatCompletionContentPartImageParam"
+      },
+      "ChatCompletionContentPartInputAudioParam": {
+        "properties": {
+          "input_audio": {
+            "$ref": "#/components/schemas/InputAudio"
+          },
+          "type": {
+            "type": "string",
+            "const": "input_audio",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_audio",
+          "type"
+        ],
+        "title": "ChatCompletionContentPartInputAudioParam"
+      },
+      "ChatCompletionContentPartRefusalParam": {
+        "properties": {
+          "refusal": {
+            "type": "string",
+            "title": "Refusal"
+          },
+          "type": {
+            "type": "string",
+            "const": "refusal",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refusal",
+          "type"
+        ],
+        "title": "ChatCompletionContentPartRefusalParam"
+      },
+      "ChatCompletionContentPartTextParam": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "type": {
+            "type": "string",
+            "const": "text",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "type"
+        ],
+        "title": "ChatCompletionContentPartTextParam"
+      },
+      "ChatCompletionDeveloperMessageParam": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChatCompletionContentPartTextParam"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Content"
+          },
+          "role": {
+            "type": "string",
+            "const": "developer",
+            "title": "Role"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "role"
+        ],
+        "title": "ChatCompletionDeveloperMessageParam"
+      },
+      "ChatCompletionFunctionMessageParam": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "const": "function",
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "name",
+          "role"
+        ],
+        "title": "ChatCompletionFunctionMessageParam"
+      },
+      "ChatCompletionMessageToolCallParam": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "function": {
+            "$ref": "#/components/schemas/Function"
+          },
+          "type": {
+            "type": "string",
+            "const": "function",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "function",
+          "type"
+        ],
+        "title": "ChatCompletionMessageToolCallParam"
+      },
+      "ChatCompletionSystemMessageParam": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChatCompletionContentPartTextParam"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Content"
+          },
+          "role": {
+            "type": "string",
+            "const": "system",
+            "title": "Role"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "role"
+        ],
+        "title": "ChatCompletionSystemMessageParam"
+      },
+      "ChatCompletionToolMessageParam": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChatCompletionContentPartTextParam"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Content"
+          },
+          "role": {
+            "type": "string",
+            "const": "tool",
+            "title": "Role"
+          },
+          "tool_call_id": {
+            "type": "string",
+            "title": "Tool Call Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "role",
+          "tool_call_id"
+        ],
+        "title": "ChatCompletionToolMessageParam"
+      },
+      "ChatCompletionUserMessageParam": {
+        "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ChatCompletionContentPartTextParam"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ChatCompletionContentPartImageParam"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ChatCompletionContentPartInputAudioParam"
+                    },
+                    {
+                      "$ref": "#/components/schemas/File"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Content"
+          },
+          "role": {
+            "type": "string",
+            "const": "user",
+            "title": "Role"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "role"
+        ],
+        "title": "ChatCompletionUserMessageParam"
+      },
       "Cheese": {
         "properties": {
           "name": {
@@ -384,22 +735,59 @@
         ],
         "title": "DocumentURLChunk"
       },
-      "FunctionCall": {
+      "File": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
+          "file": {
+            "$ref": "#/components/schemas/FileFile"
           },
-          "arguments": {
-            "$ref": "#/components/schemas/Arguments"
+          "type": {
+            "type": "string",
+            "const": "file",
+            "title": "Type"
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "arguments"
+          "file",
+          "type"
         ],
-        "title": "FunctionCall"
+        "title": "File"
+      },
+      "FileFile": {
+        "properties": {
+          "file_data": {
+            "type": "string",
+            "title": "File Data"
+          },
+          "file_id": {
+            "type": "string",
+            "title": "File Id"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          }
+        },
+        "type": "object",
+        "title": "FileFile"
+      },
+      "Function": {
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "title": "Arguments"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "arguments",
+          "name"
+        ],
+        "title": "Function"
       },
       "HTTPValidationError": {
         "properties": {
@@ -413,23 +801,6 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
-      },
-      "ImageURL": {
-        "properties": {
-          "url": {
-            "type": "string",
-            "title": "Url"
-          },
-          "detail": {
-            "$ref": "#/components/schemas/OptionalNullable_str_",
-            "default": "~?~unset~?~sentinel~?~"
-          }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "ImageURL"
       },
       "ImageURLChunk": {
         "properties": {
@@ -460,14 +831,92 @@
       "ImageURLChunkImageURL": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/ImageURL"
+            "$ref": "#/components/schemas/mistralai__models__imageurl__ImageURL"
           },
           {
             "type": "string"
           }
         ]
       },
-      "InitialStep": {
+      "InputAudio": {
+        "properties": {
+          "data": {
+            "type": "string",
+            "title": "Data"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "wav",
+              "mp3"
+            ],
+            "title": "Format"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "format"
+        ],
+        "title": "InputAudio"
+      },
+      "MistralAdjustmentStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "adjustment",
+            "title": "Kind"
+          },
+          "user_prompt": {
+            "type": "string",
+            "title": "User Prompt"
+          },
+          "messages": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AssistantMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistant_prose": {
+            "type": "string",
+            "title": "Assistant Prose"
+          },
+          "tokenized_text": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "user_prompt",
+          "messages",
+          "assistant_prose",
+          "tokenized_text"
+        ],
+        "title": "MistralAdjustmentStep"
+      },
+      "MistralInitialStep": {
         "properties": {
           "kind": {
             "type": "string",
@@ -526,7 +975,83 @@
           "assistant_prose",
           "tokenized_text"
         ],
-        "title": "InitialStep"
+        "title": "MistralInitialStep"
+      },
+      "MistralPostTokenizationRequest": {
+        "properties": {
+          "llm_provider": {
+            "type": "string",
+            "const": "mistralai",
+            "title": "Llm Provider"
+          },
+          "mistral_model": {
+            "type": "string",
+            "enum": [
+              "mistral-large-2411",
+              "mistral-small-2501"
+            ],
+            "title": "Mistral Model"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "llm_provider",
+          "mistral_model",
+          "system_prompt",
+          "input_text"
+        ],
+        "title": "MistralPostTokenizationRequest"
+      },
+      "MistralTokenization": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "llm_provider": {
+            "type": "string",
+            "const": "mistralai",
+            "title": "Llm Provider"
+          },
+          "mistral_model": {
+            "type": "string",
+            "enum": [
+              "mistral-large-2411",
+              "mistral-small-2501"
+            ],
+            "title": "Mistral Model"
+          },
+          "steps": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MistralInitialStep"
+                },
+                {
+                  "$ref": "#/components/schemas/MistralAdjustmentStep"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "llm_provider",
+          "mistral_model",
+          "steps"
+        ],
+        "title": "MistralTokenization"
       },
       "Nullable_AssistantMessageContent_": {
         "anyOf": [
@@ -581,6 +1106,211 @@
           }
         ]
       },
+      "OpenaiAdjustmentStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "adjustment",
+            "title": "Kind"
+          },
+          "user_prompt": {
+            "type": "string",
+            "title": "User Prompt"
+          },
+          "messages": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ChatCompletionDeveloperMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionUserMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionAssistantMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionToolMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistant_prose": {
+            "type": "string",
+            "title": "Assistant Prose"
+          },
+          "tokenized_text": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "user_prompt",
+          "messages",
+          "assistant_prose",
+          "tokenized_text"
+        ],
+        "title": "OpenaiAdjustmentStep"
+      },
+      "OpenaiInitialStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "initial",
+            "title": "Kind"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          },
+          "messages": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ChatCompletionDeveloperMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionUserMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionAssistantMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionToolMessageParam"
+                },
+                {
+                  "$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistant_prose": {
+            "type": "string",
+            "title": "Assistant Prose"
+          },
+          "tokenized_text": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "system_prompt",
+          "input_text",
+          "messages",
+          "assistant_prose",
+          "tokenized_text"
+        ],
+        "title": "OpenaiInitialStep"
+      },
+      "OpenaiPostTokenizationRequest": {
+        "properties": {
+          "llm_provider": {
+            "type": "string",
+            "const": "openai",
+            "title": "Llm Provider"
+          },
+          "openai_model": {
+            "type": "string",
+            "enum": [
+              "gpt-4o-2024-08-06",
+              "gpt-4o-mini-2024-07-18"
+            ],
+            "title": "Openai Model"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "llm_provider",
+          "openai_model",
+          "system_prompt",
+          "input_text"
+        ],
+        "title": "OpenaiPostTokenizationRequest"
+      },
+      "OpenaiTokenization": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "llm_provider": {
+            "type": "string",
+            "const": "openai",
+            "title": "Llm Provider"
+          },
+          "openai_model": {
+            "type": "string",
+            "enum": [
+              "gpt-4o-2024-08-06",
+              "gpt-4o-mini-2024-07-18"
+            ],
+            "title": "Openai Model"
+          },
+          "steps": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/OpenaiInitialStep"
+                },
+                {
+                  "$ref": "#/components/schemas/OpenaiAdjustmentStep"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "llm_provider",
+          "openai_model",
+          "steps"
+        ],
+        "title": "OpenaiTokenization"
+      },
       "OptionalNullable_AssistantMessageContent_": {
         "anyOf": [
           {
@@ -632,33 +1362,6 @@
           "adjustment"
         ],
         "title": "PostTokenizationAdjustmentRequest"
-      },
-      "PostTokenizationRequest": {
-        "properties": {
-          "mistral_model": {
-            "type": "string",
-            "enum": [
-              "mistral-large-2411",
-              "mistral-small-2501"
-            ],
-            "title": "Mistral Model"
-          },
-          "system_prompt": {
-            "type": "string",
-            "title": "System Prompt"
-          },
-          "input_text": {
-            "type": "string",
-            "title": "Input Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "mistral_model",
-          "system_prompt",
-          "input_text"
-        ],
-        "title": "PostTokenizationRequest"
       },
       "Punctuation": {
         "properties": {
@@ -795,43 +1498,6 @@
         ],
         "title": "TextChunk"
       },
-      "Tokenization": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "mistral_model": {
-            "type": "string",
-            "enum": [
-              "mistral-large-2411",
-              "mistral-small-2501"
-            ],
-            "title": "Mistral Model"
-          },
-          "steps": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/InitialStep"
-                },
-                {
-                  "$ref": "#/components/schemas/AdjustmentStep"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Steps"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "mistral_model",
-          "steps"
-        ],
-        "title": "Tokenization"
-      },
       "TokenizedText": {
         "properties": {
           "sentences": {
@@ -851,7 +1517,7 @@
       "ToolCall": {
         "properties": {
           "function": {
-            "$ref": "#/components/schemas/FunctionCall"
+            "$ref": "#/components/schemas/mistralai__models__functioncall__FunctionCall"
           },
           "id": {
             "anyOf": [
@@ -1065,6 +1731,80 @@
           "text"
         ],
         "title": "Word"
+      },
+      "mistralai__models__functioncall__FunctionCall": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "arguments": {
+            "$ref": "#/components/schemas/Arguments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "arguments"
+        ],
+        "title": "FunctionCall"
+      },
+      "mistralai__models__imageurl__ImageURL": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/OptionalNullable_str_",
+            "default": "~?~unset~?~sentinel~?~"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "ImageURL"
+      },
+      "openai__types__chat__chat_completion_assistant_message_param__FunctionCall": {
+        "properties": {
+          "arguments": {
+            "type": "string",
+            "title": "Arguments"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "arguments",
+          "name"
+        ],
+        "title": "FunctionCall"
+      },
+      "openai__types__chat__chat_completion_content_part_image_param__ImageURL": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "detail": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "low",
+              "high"
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "ImageURL"
       }
     }
   }

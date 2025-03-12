@@ -58,8 +58,11 @@ async function rewindLastStep() {
 <template>
   <p><RouterLink :to="{ name: 'create-tokenization' }">New tokenization</RouterLink></p>
   <template v-if="tokenization !== null">
-    <h1>Mistral model name</h1>
-    <pre>{{ tokenization.mistral_model }}</pre>
+    <h1>LLM provider and model name</h1>
+    <p>
+      {{ tokenization.llm_provider }}:
+      {{ tokenization.llm_provider === 'mistralai' ? tokenization.mistral_model : tokenization.openai_model }}
+    </p>
     <div v-for="(step, stepIndex) in tokenization.steps" class="step">
       <div class="columns">
         <div class="column">

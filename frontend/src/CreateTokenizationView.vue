@@ -2,13 +2,19 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type MistralModelName, useApiClient } from './apiClient'
+import { type MistralModelName, type OpenaiModelName, useApiClient } from './apiClient'
 
 const router = useRouter()
 const client = useApiClient()
 
+const llmProviders = ['mistralai', 'openai'] as const
+const llmProvider = ref<(typeof llmProviders)[number]>(llmProviders[0])
+
 const mistralModels: MistralModelName[] = ['mistral-large-2411', 'mistral-small-2501']
 const mistralModel = ref<MistralModelName>(mistralModels[0])
+
+const openaiModels: OpenaiModelName[] = ['gpt-4o-2024-08-06', 'gpt-4o-mini-2024-07-18']
+const openaiModel = ref<OpenaiModelName>(openaiModels[0])
 
 const systemPrompt = ref('')
 
@@ -32,12 +38,23 @@ onMounted(async () => {
 async function submit() {
   disabled.value = true
 
+  const body =
+    llmProvider.value === 'mistralai'
+      ? {
+          llm_provider: 'mistralai' as const,
+          mistral_model: mistralModel.value,
+          system_prompt: systemPrompt.value,
+          input_text: inputText.value,
+        }
+      : {
+          llm_provider: 'openai' as const,
+          openai_model: openaiModel.value,
+          system_prompt: systemPrompt.value,
+          input_text: inputText.value,
+        }
+
   const responsePromise = client.POST('/api/tokenization', {
-    body: {
-      mistral_model: mistralModel.value,
-      system_prompt: systemPrompt.value,
-      input_text: inputText.value,
-    },
+    body,
   })
 
   const response = await responsePromise
@@ -50,9 +67,15 @@ async function submit() {
 </script>
 
 <template>
-  <h1>Mistral model name</h1>
-  <select v-model="mistralModel" :disabled>
+  <h1>LLM provider and model name</h1>
+  <select v-model="llmProvider" :disabled>
+    <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
+  </select>
+  <select v-if="llmProvider === 'mistralai'" v-model="mistralModel" :disabled>
     <option v-for="model in mistralModels">{{ model }}</option>
+  </select>
+  <select v-else v-model="openaiModel" :disabled>
+    <option v-for="model in openaiModels">{{ model }}</option>
   </select>
   <h1>System prompt</h1>
   <textarea v-model="systemPrompt" rows="15" cols="120" :disabled></textarea>

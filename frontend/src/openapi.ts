@@ -110,26 +110,6 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** AdjustmentStep */
-    AdjustmentStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adjustment'
-      /** User Prompt */
-      user_prompt: string
-      /** Messages */
-      messages: (
-        | components['schemas']['AssistantMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['ToolMessage']
-        | components['schemas']['UserMessage']
-      )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText'] | null
-    }
     Arguments: Record<string, never> | string
     /** AssistantMessage */
     AssistantMessage: {
@@ -156,6 +136,153 @@ export interface components {
           | components['schemas']['TextChunk']
           | components['schemas']['ReferenceChunk']
         )[]
+    /** Audio */
+    Audio: {
+      /** Id */
+      id: string
+    }
+    /** ChatCompletionAssistantMessageParam */
+    ChatCompletionAssistantMessageParam: {
+      /**
+       * Role
+       * @constant
+       */
+      role: 'assistant'
+      audio?: components['schemas']['Audio'] | null
+      /** Content */
+      content?:
+        | string
+        | (
+            | components['schemas']['ChatCompletionContentPartTextParam']
+            | components['schemas']['ChatCompletionContentPartRefusalParam']
+          )[]
+        | null
+      function_call?:
+        | components['schemas']['openai__types__chat__chat_completion_assistant_message_param__FunctionCall']
+        | null
+      /** Name */
+      name?: string
+      /** Refusal */
+      refusal?: string | null
+      /** Tool Calls */
+      tool_calls?: components['schemas']['ChatCompletionMessageToolCallParam'][]
+    }
+    /** ChatCompletionContentPartImageParam */
+    ChatCompletionContentPartImageParam: {
+      image_url: components['schemas']['openai__types__chat__chat_completion_content_part_image_param__ImageURL']
+      /**
+       * Type
+       * @constant
+       */
+      type: 'image_url'
+    }
+    /** ChatCompletionContentPartInputAudioParam */
+    ChatCompletionContentPartInputAudioParam: {
+      input_audio: components['schemas']['InputAudio']
+      /**
+       * Type
+       * @constant
+       */
+      type: 'input_audio'
+    }
+    /** ChatCompletionContentPartRefusalParam */
+    ChatCompletionContentPartRefusalParam: {
+      /** Refusal */
+      refusal: string
+      /**
+       * Type
+       * @constant
+       */
+      type: 'refusal'
+    }
+    /** ChatCompletionContentPartTextParam */
+    ChatCompletionContentPartTextParam: {
+      /** Text */
+      text: string
+      /**
+       * Type
+       * @constant
+       */
+      type: 'text'
+    }
+    /** ChatCompletionDeveloperMessageParam */
+    ChatCompletionDeveloperMessageParam: {
+      /** Content */
+      content: string | components['schemas']['ChatCompletionContentPartTextParam'][]
+      /**
+       * Role
+       * @constant
+       */
+      role: 'developer'
+      /** Name */
+      name?: string
+    }
+    /** ChatCompletionFunctionMessageParam */
+    ChatCompletionFunctionMessageParam: {
+      /** Content */
+      content: string | null
+      /** Name */
+      name: string
+      /**
+       * Role
+       * @constant
+       */
+      role: 'function'
+    }
+    /** ChatCompletionMessageToolCallParam */
+    ChatCompletionMessageToolCallParam: {
+      /** Id */
+      id: string
+      function: components['schemas']['Function']
+      /**
+       * Type
+       * @constant
+       */
+      type: 'function'
+    }
+    /** ChatCompletionSystemMessageParam */
+    ChatCompletionSystemMessageParam: {
+      /** Content */
+      content: string | components['schemas']['ChatCompletionContentPartTextParam'][]
+      /**
+       * Role
+       * @constant
+       */
+      role: 'system'
+      /** Name */
+      name?: string
+    }
+    /** ChatCompletionToolMessageParam */
+    ChatCompletionToolMessageParam: {
+      /** Content */
+      content: string | components['schemas']['ChatCompletionContentPartTextParam'][]
+      /**
+       * Role
+       * @constant
+       */
+      role: 'tool'
+      /** Tool Call Id */
+      tool_call_id: string
+    }
+    /** ChatCompletionUserMessageParam */
+    ChatCompletionUserMessageParam: {
+      /** Content */
+      content:
+        | string
+        | (
+            | components['schemas']['ChatCompletionContentPartTextParam']
+            | components['schemas']['ChatCompletionContentPartImageParam']
+            | components['schemas']['ChatCompletionContentPartInputAudioParam']
+            | components['schemas']['File']
+          )[]
+      /**
+       * Role
+       * @constant
+       */
+      role: 'user'
+      /** Name */
+      name?: string
+    }
     /** Cheese */
     Cheese: {
       /** Name */
@@ -173,23 +300,35 @@ export interface components {
       /** @default ~?~unset~?~sentinel~?~ */
       document_name: components['schemas']['OptionalNullable_str_']
     }
-    /** FunctionCall */
-    FunctionCall: {
+    /** File */
+    File: {
+      file: components['schemas']['FileFile']
+      /**
+       * Type
+       * @constant
+       */
+      type: 'file'
+    }
+    /** FileFile */
+    FileFile: {
+      /** File Data */
+      file_data?: string
+      /** File Id */
+      file_id?: string
+      /** File Name */
+      file_name?: string
+    }
+    /** Function */
+    Function: {
+      /** Arguments */
+      arguments: string
       /** Name */
       name: string
-      arguments: components['schemas']['Arguments']
     }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
-    }
-    /** ImageURL */
-    ImageURL: {
-      /** Url */
-      url: string
-      /** @default ~?~unset~?~sentinel~?~ */
-      detail: components['schemas']['OptionalNullable_str_']
     }
     /**
      * ImageURLChunk
@@ -203,9 +342,39 @@ export interface components {
        */
       type: 'image_url' | null
     }
-    ImageURLChunkImageURL: components['schemas']['ImageURL'] | string
-    /** InitialStep */
-    InitialStep: {
+    ImageURLChunkImageURL: components['schemas']['mistralai__models__imageurl__ImageURL'] | string
+    /** InputAudio */
+    InputAudio: {
+      /** Data */
+      data: string
+      /**
+       * Format
+       * @enum {string}
+       */
+      format: 'wav' | 'mp3'
+    }
+    /** MistralAdjustmentStep */
+    MistralAdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** User Prompt */
+      user_prompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['AssistantMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['ToolMessage']
+        | components['schemas']['UserMessage']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText'] | null
+    }
+    /** MistralInitialStep */
+    MistralInitialStep: {
       /**
        * Kind
        * @constant
@@ -226,11 +395,125 @@ export interface components {
       assistant_prose: string
       tokenized_text: components['schemas']['TokenizedText'] | null
     }
+    /** MistralPostTokenizationRequest */
+    MistralPostTokenizationRequest: {
+      /**
+       * Llm Provider
+       * @constant
+       */
+      llm_provider: 'mistralai'
+      /**
+       * Mistral Model
+       * @enum {string}
+       */
+      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+    }
+    /** MistralTokenization */
+    MistralTokenization: {
+      /** Id */
+      id: string
+      /**
+       * Llm Provider
+       * @constant
+       */
+      llm_provider: 'mistralai'
+      /**
+       * Mistral Model
+       * @enum {string}
+       */
+      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
+      /** Steps */
+      steps: (components['schemas']['MistralInitialStep'] | components['schemas']['MistralAdjustmentStep'])[]
+    }
     Nullable_AssistantMessageContent_: components['schemas']['AssistantMessageContent'] | null
     Nullable_List_ToolCall__: components['schemas']['ToolCall'][] | null
     Nullable_ToolMessageContent_: components['schemas']['ToolMessageContent'] | null
     Nullable_UserMessageContent_: components['schemas']['UserMessageContent'] | null
     Nullable_str_: string | null
+    /** OpenaiAdjustmentStep */
+    OpenaiAdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** User Prompt */
+      user_prompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['ChatCompletionDeveloperMessageParam']
+        | components['schemas']['ChatCompletionSystemMessageParam']
+        | components['schemas']['ChatCompletionUserMessageParam']
+        | components['schemas']['ChatCompletionAssistantMessageParam']
+        | components['schemas']['ChatCompletionToolMessageParam']
+        | components['schemas']['ChatCompletionFunctionMessageParam']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText'] | null
+    }
+    /** OpenaiInitialStep */
+    OpenaiInitialStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'initial'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+      /** Messages */
+      messages: (
+        | components['schemas']['ChatCompletionDeveloperMessageParam']
+        | components['schemas']['ChatCompletionSystemMessageParam']
+        | components['schemas']['ChatCompletionUserMessageParam']
+        | components['schemas']['ChatCompletionAssistantMessageParam']
+        | components['schemas']['ChatCompletionToolMessageParam']
+        | components['schemas']['ChatCompletionFunctionMessageParam']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText'] | null
+    }
+    /** OpenaiPostTokenizationRequest */
+    OpenaiPostTokenizationRequest: {
+      /**
+       * Llm Provider
+       * @constant
+       */
+      llm_provider: 'openai'
+      /**
+       * Openai Model
+       * @enum {string}
+       */
+      openai_model: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+    }
+    /** OpenaiTokenization */
+    OpenaiTokenization: {
+      /** Id */
+      id: string
+      /**
+       * Llm Provider
+       * @constant
+       */
+      llm_provider: 'openai'
+      /**
+       * Openai Model
+       * @enum {string}
+       */
+      openai_model: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+      /** Steps */
+      steps: (components['schemas']['OpenaiInitialStep'] | components['schemas']['OpenaiAdjustmentStep'])[]
+    }
     OptionalNullable_AssistantMessageContent_:
       | components['schemas']['Nullable_AssistantMessageContent_']
       | components['schemas']['Unset']
@@ -244,18 +527,6 @@ export interface components {
     PostTokenizationAdjustmentRequest: {
       /** Adjustment */
       adjustment: string
-    }
-    /** PostTokenizationRequest */
-    PostTokenizationRequest: {
-      /**
-       * Mistral Model
-       * @enum {string}
-       */
-      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
     }
     /** Punctuation */
     Punctuation: {
@@ -302,18 +573,6 @@ export interface components {
        */
       type: 'text' | null
     }
-    /** Tokenization */
-    Tokenization: {
-      /** Id */
-      id: string
-      /**
-       * Mistral Model
-       * @enum {string}
-       */
-      mistral_model: 'mistral-large-2411' | 'mistral-small-2501'
-      /** Steps */
-      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
-    }
     /** TokenizedText */
     TokenizedText: {
       /** Sentences */
@@ -321,7 +580,7 @@ export interface components {
     }
     /** ToolCall */
     ToolCall: {
-      function: components['schemas']['FunctionCall']
+      function: components['schemas']['mistralai__models__functioncall__FunctionCall']
       /**
        * Id
        * @default null
@@ -394,6 +653,36 @@ export interface components {
       /** Text */
       text: string
     }
+    /** FunctionCall */
+    mistralai__models__functioncall__FunctionCall: {
+      /** Name */
+      name: string
+      arguments: components['schemas']['Arguments']
+    }
+    /** ImageURL */
+    mistralai__models__imageurl__ImageURL: {
+      /** Url */
+      url: string
+      /** @default ~?~unset~?~sentinel~?~ */
+      detail: components['schemas']['OptionalNullable_str_']
+    }
+    /** FunctionCall */
+    openai__types__chat__chat_completion_assistant_message_param__FunctionCall: {
+      /** Arguments */
+      arguments: string
+      /** Name */
+      name: string
+    }
+    /** ImageURL */
+    openai__types__chat__chat_completion_content_part_image_param__ImageURL: {
+      /** Url */
+      url: string
+      /**
+       * Detail
+       * @enum {string}
+       */
+      detail?: 'auto' | 'low' | 'high'
+    }
   }
   responses: never
   parameters: never
@@ -452,7 +741,9 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['PostTokenizationRequest']
+        'application/json':
+          | components['schemas']['MistralPostTokenizationRequest']
+          | components['schemas']['OpenaiPostTokenizationRequest']
       }
     }
     responses: {
@@ -462,7 +753,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Tokenization']
+          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -493,7 +784,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Tokenization']
+          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -528,7 +819,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Tokenization']
+          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
@@ -559,7 +850,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Tokenization']
+          'application/json': components['schemas']['MistralTokenization'] | components['schemas']['OpenaiTokenization']
         }
       }
       /** @description Validation Error */
