@@ -39,12 +39,26 @@ async function submit() {
     tokenization.value = response.data
   }
 }
+
+async function rewindLastStep() {
+  disabled.value = true
+
+  const responsePromise = client.DELETE(`/api/tokenization/{id}/last-step`, {
+    params: { path: { id: props.id } },
+  })
+
+  const response = await responsePromise
+  disabled.value = false
+  if (response.data !== undefined) {
+    tokenization.value = response.data
+  }
+}
 </script>
 
 <template>
   <p><RouterLink :to="{ name: 'create-tokenization' }">New tokenization</RouterLink></p>
   <template v-if="tokenization !== null">
-    <div v-for="step in tokenization.steps" class="step">
+    <div v-for="(step, stepIndex) in tokenization.steps" class="step">
       <div class="columns">
         <div class="column">
           <template v-if="step.kind == 'initial'">
@@ -68,6 +82,9 @@ async function submit() {
             <TokenizationRender v-else :tokenizedText="step.tokenized_text" />
           </template>
           <template v-else>BUG: {{ ((step: never) => step)(step) }}</template>
+          <template v-if="stepIndex === tokenization.steps.length - 1">
+            <button @click="rewindLastStep">Rewind this step</button>
+          </template>
         </div>
         <div class="column">
           <h1>LLM messages</h1>

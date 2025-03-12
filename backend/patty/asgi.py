@@ -597,3 +597,10 @@ async def post_tokenization_adjustment(id: str, req: PostTokenizationAdjustmentR
     )
 
     return tokenization
+
+
+@app.delete("/api/tokenization/{id}/last-step")
+def delete_tokenization_last_step(id: str) -> Tokenization:
+    tokenization = tokenizations[id]
+    tokenization.steps.pop()
+    return tokenization
