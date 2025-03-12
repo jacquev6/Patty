@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import createClient from 'openapi-fetch'
 
-import type { paths } from './openapi'
+import { useApiClient } from './apiClient'
 
-const client = createClient<paths>()
+const client = useApiClient()
 
 const cheeseName = ref<string>('<loading>')
 const disabled = ref<boolean>(false)
@@ -17,7 +16,9 @@ async function update() {
     cheeseName.value = response.data.name
   }
 
-  setTimeout(() => { disabled.value = false }, 1200)  // Avoid hitting Mistral rate limiting
+  setTimeout(() => {
+    disabled.value = false
+  }, 1200) // Avoid hitting Mistral rate limiting
 }
 
 onMounted(update)
@@ -26,4 +27,5 @@ onMounted(update)
 <template>
   <p>French cheese: {{ cheeseName }}</p>
   <p><button @click="update" :disabled>Another?</button></p>
+  <p><RouterLink :to="{ name: 'create-tokenization' }">New tokenization</RouterLink></p>
 </template>

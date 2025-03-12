@@ -22,10 +22,260 @@
           }
         }
       }
+    },
+    "/api/tokenization": {
+      "post": {
+        "summary": "Post Tokenization",
+        "operationId": "post_tokenization_api_tokenization_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTokenizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tokenization"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/{id}": {
+      "get": {
+        "summary": "Get Tokenization",
+        "operationId": "get_tokenization_api_tokenization__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tokenization"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/{id}/adjustment": {
+      "post": {
+        "summary": "Post Tokenization Adjustment",
+        "operationId": "post_tokenization_adjustment_api_tokenization__id__adjustment_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTokenizationAdjustmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tokenization"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AdjustmentStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "adjustment",
+            "title": "Kind"
+          },
+          "user_prompt": {
+            "type": "string",
+            "title": "User Prompt"
+          },
+          "messages": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AssistantMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistant_prose": {
+            "type": "string",
+            "title": "Assistant Prose"
+          },
+          "tokenized_text": {
+            "$ref": "#/components/schemas/TokenizedText"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "user_prompt",
+          "messages",
+          "assistant_prose",
+          "tokenized_text"
+        ],
+        "title": "AdjustmentStep"
+      },
+      "Arguments": {
+        "anyOf": [
+          {
+            "type": "object"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "AssistantMessage": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/OptionalNullable_AssistantMessageContent_",
+            "default": "~?~unset~?~sentinel~?~"
+          },
+          "tool_calls": {
+            "$ref": "#/components/schemas/OptionalNullable_List_ToolCall__",
+            "default": "~?~unset~?~sentinel~?~"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix",
+            "default": false
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "assistant"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "default": "assistant"
+          }
+        },
+        "type": "object",
+        "title": "AssistantMessage"
+      },
+      "AssistantMessageContent": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ImageURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/DocumentURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/TextChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/ReferenceChunk"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        ]
+      },
       "Cheese": {
         "properties": {
           "name": {
@@ -38,6 +288,688 @@
           "name"
         ],
         "title": "Cheese"
+      },
+      "DocumentURLChunk": {
+        "properties": {
+          "document_url": {
+            "type": "string",
+            "title": "Document Url"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "document_url"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "default": "document_url"
+          },
+          "document_name": {
+            "$ref": "#/components/schemas/OptionalNullable_str_",
+            "default": "~?~unset~?~sentinel~?~"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_url"
+        ],
+        "title": "DocumentURLChunk"
+      },
+      "FunctionCall": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "arguments": {
+            "$ref": "#/components/schemas/Arguments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "arguments"
+        ],
+        "title": "FunctionCall"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageURL": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/OptionalNullable_str_",
+            "default": "~?~unset~?~sentinel~?~"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "ImageURL"
+      },
+      "ImageURLChunk": {
+        "properties": {
+          "image_url": {
+            "$ref": "#/components/schemas/ImageURLChunkImageURL"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "image_url"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "default": "image_url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "title": "ImageURLChunk",
+        "description": "{\\\"type\\\":\\\"image_url\\\",\\\"image_url\\\":{\\\"url\\\":\\\"data:image/png;base64,iVBORw0"
+      },
+      "ImageURLChunkImageURL": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ImageURL"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "InitialStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "initial",
+            "title": "Kind"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          },
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          },
+          "messages": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AssistantMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/ToolMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistant_prose": {
+            "type": "string",
+            "title": "Assistant Prose"
+          },
+          "tokenized_text": {
+            "$ref": "#/components/schemas/TokenizedText"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "system_prompt",
+          "input_text",
+          "messages",
+          "assistant_prose",
+          "tokenized_text"
+        ],
+        "title": "InitialStep"
+      },
+      "Nullable_AssistantMessageContent_": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AssistantMessageContent"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "Nullable_List_ToolCall__": {
+        "anyOf": [
+          {
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "Nullable_ToolMessageContent_": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ToolMessageContent"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "Nullable_UserMessageContent_": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/UserMessageContent"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "Nullable_str_": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "OptionalNullable_AssistantMessageContent_": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Nullable_AssistantMessageContent_"
+          },
+          {
+            "$ref": "#/components/schemas/Unset"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "OptionalNullable_List_ToolCall__": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Nullable_List_ToolCall__"
+          },
+          {
+            "$ref": "#/components/schemas/Unset"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "OptionalNullable_str_": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Nullable_str_"
+          },
+          {
+            "$ref": "#/components/schemas/Unset"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "PostTokenizationAdjustmentRequest": {
+        "properties": {
+          "adjustment": {
+            "type": "string",
+            "title": "Adjustment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "adjustment"
+        ],
+        "title": "PostTokenizationAdjustmentRequest"
+      },
+      "PostTokenizationRequest": {
+        "properties": {
+          "input_text": {
+            "type": "string",
+            "title": "Input Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_text"
+        ],
+        "title": "PostTokenizationRequest"
+      },
+      "Punctuation": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "punctuation",
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "Punctuation"
+      },
+      "ReferenceChunk": {
+        "properties": {
+          "reference_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Reference Ids"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "reference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "default": "reference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference_ids"
+        ],
+        "title": "ReferenceChunk"
+      },
+      "Sentence": {
+        "properties": {
+          "tokens": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Word"
+                },
+                {
+                  "$ref": "#/components/schemas/Punctuation"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Tokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tokens"
+        ],
+        "title": "Sentence"
+      },
+      "SystemMessage": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/SystemMessageContent"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "system"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "default": "system"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "SystemMessage"
+      },
+      "SystemMessageContent": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/TextChunk"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "TextChunk": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "text"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type",
+            "default": "text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "TextChunk"
+      },
+      "Tokenization": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "steps": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InitialStep"
+                },
+                {
+                  "$ref": "#/components/schemas/AdjustmentStep"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "steps"
+        ],
+        "title": "Tokenization"
+      },
+      "TokenizedText": {
+        "properties": {
+          "sentences": {
+            "items": {
+              "$ref": "#/components/schemas/Sentence"
+            },
+            "type": "array",
+            "title": "Sentences"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sentences"
+        ],
+        "title": "TokenizedText"
+      },
+      "ToolCall": {
+        "properties": {
+          "function": {
+            "$ref": "#/components/schemas/FunctionCall"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "default": "null"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "function"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "function"
+        ],
+        "title": "ToolCall"
+      },
+      "ToolMessage": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/Nullable_ToolMessageContent_"
+          },
+          "tool_call_id": {
+            "$ref": "#/components/schemas/OptionalNullable_str_",
+            "default": "~?~unset~?~sentinel~?~"
+          },
+          "name": {
+            "$ref": "#/components/schemas/OptionalNullable_str_",
+            "default": "~?~unset~?~sentinel~?~"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "tool"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "default": "tool"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "ToolMessage"
+      },
+      "ToolMessageContent": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ImageURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/DocumentURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/TextChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/ReferenceChunk"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "Unset": {
+        "properties": {},
+        "type": "object",
+        "title": "Unset"
+      },
+      "UserMessage": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/Nullable_UserMessageContent_"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "user"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "default": "user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "UserMessage"
+      },
+      "UserMessageContent": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ImageURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/DocumentURLChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/TextChunk"
+                },
+                {
+                  "$ref": "#/components/schemas/ReferenceChunk"
+                }
+              ]
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Word": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "word",
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "Word"
       }
     }
   }

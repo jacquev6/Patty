@@ -21,4 +21,9 @@ export default defineConfigWithVueTs(
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
   skipFormatting,
+  {
+    rules: {
+      'vue/require-v-for-key': 'off',
+    },
+  },
 )

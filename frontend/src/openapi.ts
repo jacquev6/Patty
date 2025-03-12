@@ -21,14 +21,332 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/tokenization': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Tokenization */
+    post: operations['post_tokenization_api_tokenization_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/tokenization/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Tokenization */
+    get: operations['get_tokenization_api_tokenization__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/tokenization/{id}/adjustment': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Tokenization Adjustment */
+    post: operations['post_tokenization_adjustment_api_tokenization__id__adjustment_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    /** AdjustmentStep */
+    AdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** User Prompt */
+      user_prompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['AssistantMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['ToolMessage']
+        | components['schemas']['UserMessage']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText']
+    }
+    Arguments: Record<string, never> | string
+    /** AssistantMessage */
+    AssistantMessage: {
+      /** @default ~?~unset~?~sentinel~?~ */
+      content: components['schemas']['OptionalNullable_AssistantMessageContent_']
+      /** @default ~?~unset~?~sentinel~?~ */
+      tool_calls: components['schemas']['OptionalNullable_List_ToolCall__']
+      /**
+       * Prefix
+       * @default false
+       */
+      prefix: boolean | null
+      /**
+       * Role
+       * @default assistant
+       */
+      role: 'assistant' | null
+    }
+    AssistantMessageContent:
+      | string
+      | (
+          | components['schemas']['ImageURLChunk']
+          | components['schemas']['DocumentURLChunk']
+          | components['schemas']['TextChunk']
+          | components['schemas']['ReferenceChunk']
+        )[]
     /** Cheese */
     Cheese: {
       /** Name */
       name: string
+    }
+    /** DocumentURLChunk */
+    DocumentURLChunk: {
+      /** Document Url */
+      document_url: string
+      /**
+       * Type
+       * @default document_url
+       */
+      type: 'document_url' | null
+      /** @default ~?~unset~?~sentinel~?~ */
+      document_name: components['schemas']['OptionalNullable_str_']
+    }
+    /** FunctionCall */
+    FunctionCall: {
+      /** Name */
+      name: string
+      arguments: components['schemas']['Arguments']
+    }
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components['schemas']['ValidationError'][]
+    }
+    /** ImageURL */
+    ImageURL: {
+      /** Url */
+      url: string
+      /** @default ~?~unset~?~sentinel~?~ */
+      detail: components['schemas']['OptionalNullable_str_']
+    }
+    /**
+     * ImageURLChunk
+     * @description {\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,iVBORw0
+     */
+    ImageURLChunk: {
+      image_url: components['schemas']['ImageURLChunkImageURL']
+      /**
+       * Type
+       * @default image_url
+       */
+      type: 'image_url' | null
+    }
+    ImageURLChunkImageURL: components['schemas']['ImageURL'] | string
+    /** InitialStep */
+    InitialStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'initial'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+      /** Messages */
+      messages: (
+        | components['schemas']['AssistantMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['ToolMessage']
+        | components['schemas']['UserMessage']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText']
+    }
+    Nullable_AssistantMessageContent_: components['schemas']['AssistantMessageContent'] | null
+    Nullable_List_ToolCall__: components['schemas']['ToolCall'][] | null
+    Nullable_ToolMessageContent_: components['schemas']['ToolMessageContent'] | null
+    Nullable_UserMessageContent_: components['schemas']['UserMessageContent'] | null
+    Nullable_str_: string | null
+    OptionalNullable_AssistantMessageContent_:
+      | components['schemas']['Nullable_AssistantMessageContent_']
+      | components['schemas']['Unset']
+      | null
+    OptionalNullable_List_ToolCall__:
+      | components['schemas']['Nullable_List_ToolCall__']
+      | components['schemas']['Unset']
+      | null
+    OptionalNullable_str_: components['schemas']['Nullable_str_'] | components['schemas']['Unset'] | null
+    /** PostTokenizationAdjustmentRequest */
+    PostTokenizationAdjustmentRequest: {
+      /** Adjustment */
+      adjustment: string
+    }
+    /** PostTokenizationRequest */
+    PostTokenizationRequest: {
+      /** Input Text */
+      input_text: string
+    }
+    /** Punctuation */
+    Punctuation: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'punctuation'
+      /** Text */
+      text: string
+    }
+    /** ReferenceChunk */
+    ReferenceChunk: {
+      /** Reference Ids */
+      reference_ids: number[]
+      /**
+       * Type
+       * @default reference
+       */
+      type: 'reference' | null
+    }
+    /** Sentence */
+    Sentence: {
+      /** Tokens */
+      tokens: (components['schemas']['Word'] | components['schemas']['Punctuation'])[]
+    }
+    /** SystemMessage */
+    SystemMessage: {
+      content: components['schemas']['SystemMessageContent']
+      /**
+       * Role
+       * @default system
+       */
+      role: 'system' | null
+    }
+    SystemMessageContent: string | components['schemas']['TextChunk'][]
+    /** TextChunk */
+    TextChunk: {
+      /** Text */
+      text: string
+      /**
+       * Type
+       * @default text
+       */
+      type: 'text' | null
+    }
+    /** Tokenization */
+    Tokenization: {
+      /** Id */
+      id: string
+      /** Steps */
+      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
+    }
+    /** TokenizedText */
+    TokenizedText: {
+      /** Sentences */
+      sentences: components['schemas']['Sentence'][]
+    }
+    /** ToolCall */
+    ToolCall: {
+      function: components['schemas']['FunctionCall']
+      /**
+       * Id
+       * @default null
+       */
+      id: string | null
+      /** Type */
+      type?: 'function' | string | null
+      /**
+       * Index
+       * @default 0
+       */
+      index: number | null
+    }
+    /** ToolMessage */
+    ToolMessage: {
+      content: components['schemas']['Nullable_ToolMessageContent_']
+      /** @default ~?~unset~?~sentinel~?~ */
+      tool_call_id: components['schemas']['OptionalNullable_str_']
+      /** @default ~?~unset~?~sentinel~?~ */
+      name: components['schemas']['OptionalNullable_str_']
+      /**
+       * Role
+       * @default tool
+       */
+      role: 'tool' | null
+    }
+    ToolMessageContent:
+      | string
+      | (
+          | components['schemas']['ImageURLChunk']
+          | components['schemas']['DocumentURLChunk']
+          | components['schemas']['TextChunk']
+          | components['schemas']['ReferenceChunk']
+        )[]
+    /** Unset */
+    Unset: Record<string, never>
+    /** UserMessage */
+    UserMessage: {
+      content: components['schemas']['Nullable_UserMessageContent_']
+      /**
+       * Role
+       * @default user
+       */
+      role: 'user' | null
+    }
+    UserMessageContent:
+      | string
+      | (
+          | components['schemas']['ImageURLChunk']
+          | components['schemas']['DocumentURLChunk']
+          | components['schemas']['TextChunk']
+          | components['schemas']['ReferenceChunk']
+        )[]
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[]
+      /** Message */
+      msg: string
+      /** Error Type */
+      type: string
+    }
+    /** Word */
+    Word: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'word'
+      /** Text */
+      text: string
     }
   }
   responses: never
@@ -55,6 +373,105 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['Cheese']
+        }
+      }
+    }
+  }
+  post_tokenization_api_tokenization_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTokenizationRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Tokenization']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_tokenization_api_tokenization__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Tokenization']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_tokenization_adjustment_api_tokenization__id__adjustment_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTokenizationAdjustmentRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Tokenization']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
