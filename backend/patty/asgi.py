@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 import textwrap
 from typing import Literal
 import uuid
@@ -8,7 +9,7 @@ import mistralai
 import pydantic
 
 
-mistral = mistralai.Mistral(api_key="9iLjdlvUZDpc77IgNn005O2ggLO6a9Gi")
+mistral = mistralai.Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
 
 app = FastAPI()

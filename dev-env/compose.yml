@@ -45,6 +45,8 @@ services:
       - ..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
+    env_file:
+      - backend/secrets.env
     command: ["watchmedo", "shell-command", "--command", 'test $${watch_event_type} = closed && echo "Updating backend/openapi.json because $${watch_object} $${watch_src_path} changed" && python -m patty openapi openapi.json', "patty"]
     depends_on:
       pip-installer:
