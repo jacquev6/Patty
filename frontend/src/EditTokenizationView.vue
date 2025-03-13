@@ -7,6 +7,7 @@ import ThreeColumns from './ThreeColumns.vue'
 import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
+import Busy from './Busy.vue'
 
 const props = defineProps<{
   id: string
@@ -54,8 +55,11 @@ const tokenizedText = computed(() => {
 
 const adjustment = ref('')
 const disabled = computed(() => adjustment.value.trim() === '')
+const busy = ref(false)
 
 async function submit() {
+  busy.value = true
+
   const responsePromise = client.POST(`/api/tokenization/{id}/adjustment`, {
     params: { path: { id: props.id } },
     body: { adjustment: adjustment.value },
@@ -67,6 +71,8 @@ async function submit() {
   if (response.data !== undefined) {
     tokenization.value = response.data
   }
+
+  busy.value = false
 }
 
 async function rewindLastStep() {
@@ -93,24 +99,26 @@ async function rewindLastStep() {
       <h1>Input text</h1>
       <MarkDown :markdown="inputText" />
       <h1>Adjustments</h1>
-      <template v-for="(step, stepIndex) in tokenization.steps">
-        <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
-          <MarkDown :markdown="step.user_prompt" style="flex-grow: 1" />
-          <div
-            v-if="stepIndex === tokenization.steps.length - 1"
-            title="Rewind the chat: delete this prompt and its effects"
-            style="cursor: pointer"
-            @click="rewindLastStep"
-          >
-            ❌
+      <Busy :busy>
+        <template v-for="(step, stepIndex) in tokenization.steps">
+          <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
+            <MarkDown :markdown="step.user_prompt" style="flex-grow: 1" />
+            <div
+              v-if="stepIndex === tokenization.steps.length - 1"
+              title="Rewind the chat: delete this prompt and its effects"
+              style="cursor: pointer"
+              @click="rewindLastStep"
+            >
+              ❌
+            </div>
           </div>
+          <MarkDown class="assistant-prose" :markdown="step.assistant_prose" />
+        </template>
+        <div class="user-prompt">
+          <TextArea v-model="adjustment"></TextArea>
+          <p><button @click="submit" :disabled>Submit</button></p>
         </div>
-        <MarkDown class="assistant-prose" :markdown="step.assistant_prose" />
-      </template>
-      <div class="user-prompt">
-        <TextArea v-model="adjustment"></TextArea>
-        <p><button @click="submit" :disabled>Submit</button></p>
-      </div>
+      </Busy>
     </template>
     <template #right>
       <TokenizationRender :tokenizedText />

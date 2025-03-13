@@ -5,6 +5,7 @@ import { type PostTokenizationRequest, client } from './apiClient'
 import assert from './assert'
 import { useRouter } from 'vue-router'
 import TextArea from './TextArea.vue'
+import Busy from './Busy.vue'
 
 const props = defineProps<{
   availableLlmModels: PostTokenizationRequest['llm_model'][]
@@ -71,10 +72,10 @@ watch(
   },
 )
 
-const disabled = ref(false)
+const busy = ref(false)
 
 async function submit() {
-  disabled.value = true
+  busy.value = true
 
   assert(llmModel.value !== null)
 
@@ -87,27 +88,33 @@ async function submit() {
   })
 
   const response = await responsePromise
-  disabled.value = false
+  busy.value = false
 
   if (response.data !== undefined) {
     router.push({ name: 'tokenization', params: { id: response.data.id } })
   }
 }
+
+const disabled = computed(() => {
+  return systemPrompt.value.trim() === '' || inputText.value.trim() === ''
+})
 </script>
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <h1>LLM model</h1>
-    <select v-model="llmProvider" :disabled>
-      <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
-    </select>
-    <select v-model="llmName" :disabled>
-      <option v-for="name in llmNames">{{ name }}</option>
-    </select>
-    <h1>System prompt</h1>
-    <TextArea v-model="systemPrompt" :disabled></TextArea>
-    <h1>Input text</h1>
-    <TextArea v-model="inputText" :disabled></TextArea>
-    <p><button @click="submit" :disabled>Submit</button></p>
+    <Busy :busy>
+      <h1>LLM model</h1>
+      <select v-model="llmProvider">
+        <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
+      </select>
+      <select v-model="llmName">
+        <option v-for="name in llmNames">{{ name }}</option>
+      </select>
+      <h1>System prompt</h1>
+      <TextArea v-model="systemPrompt"></TextArea>
+      <h1>Input text</h1>
+      <TextArea v-model="inputText"></TextArea>
+      <p><button @click="submit" :disabled>Submit</button></p>
+    </Busy>
   </div>
 </template>
