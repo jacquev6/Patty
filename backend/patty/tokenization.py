@@ -78,15 +78,15 @@ default_tokenization_system_prompt = textwrap.dedent(
 
     Tu dois séparer les phrases selon la ponctuation.
 
-    Le format pour tes réponses comporte deux champs: `prose` et `tokenized_text`.
-    Tu dois utiliser `prose` pour interagir avec l'utilisateur, et `tokenized_text` pour renvoyer la tokenisation.
+    Le format pour tes réponses comporte deux champs: `prose` et `structured`.
+    Tu dois utiliser `prose` pour interagir avec l'utilisateur, et `structured` pour renvoyer la tokenisation.
     Par exemple, si les instructions sont ambiguës, ou contradictoire, tu peux demander des clarifications dans `prose`.
     Tu peux aussi indiquer brièvement les ajustements que tu as faits dans `prose`.
-    Tu dois utiliser `tokenized_text` pour renvoyer la tokenisation du texte initial, après les ajustements demandés par l'utilisateur.
+    Tu dois utiliser `structured` pour renvoyer la tokenisation du texte initial, après les ajustements demandés par l'utilisateur.
     Ce champs comporte une liste de phrases, et chaque phrase comporte une liste de tokens.
     Les types de tokens sont distingués par le champ `kind`.
     Utilise des tokens de type `word` pour les mots, et de type `punctuation` pour la ponctuation.
-    Tu peux laisser le champ `tokenized_text` null si le message de l'utilisateur ne demande pas de changement à la tokenisation.
+    Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à la tokenisation.
     """
 )
 
