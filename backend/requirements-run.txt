@@ -1,3 +1,4 @@
 fastapi
 mistralai
 openai
+polyfactory  # @todo Make this a development-only requirement

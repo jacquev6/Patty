@@ -18,21 +18,21 @@ client = mistralai.Mistral(api_key=os.environ["MISTRALAI_API_KEY"])
 
 class MistralAiModel(Model):
     provider: Literal["mistralai"] = "mistralai"
-    model: Literal["mistral-large-2411", "mistral-small-2501"]
+    name: Literal["mistral-large-2411", "mistral-small-2501"]
 
     async def complete(
         self, messages: list[SystemMessage | UserMessage | AssistantMessage[T]], structured_type: Type[T]
     ) -> AssistantMessage[T]:
         response_format = make_response_format_type(structured_type)
         response = await client.chat.parse_async(
-            model=self.model,
+            model=self.name,
             messages=list(self.__make_messages(messages, response_format)),
             response_format=response_format,
         )
         assert response.choices is not None
         assert response.choices[0].message is not None
         assert response.choices[0].message.parsed is not None
-        return AssistantMessage(
+        return AssistantMessage[T](
             prose=response.choices[0].message.parsed.prose, structured=response.choices[0].message.parsed.structured
         )
 
@@ -102,12 +102,12 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         )
 
     def test_jsonify_model(self) -> None:
-        model = MistralAiModel(model="mistral-small-2501")
-        self.assertEqual(model.model_dump(), {"provider": "mistralai", "model": "mistral-small-2501"})
+        model = MistralAiModel(name="mistral-small-2501")
+        self.assertEqual(model.model_dump(), {"provider": "mistralai", "name": "mistral-small-2501"})
 
     @unittest.skipUnless("PATTY_RUN_TESTS_COSTING_MONEY" in os.environ, "Costs money")
     async def test_call(self) -> None:
-        model = MistralAiModel(model="mistral-small-2501")
+        model = MistralAiModel(name="mistral-small-2501")
 
         messages: list[SystemMessage | UserMessage | AssistantMessage[MistralAiModelTestCase.Structured]] = [
             SystemMessage(

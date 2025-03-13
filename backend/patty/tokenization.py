@@ -6,12 +6,15 @@ import uuid
 import fastapi
 import pydantic
 
-from .llm import SystemMessage, UserMessage, AssistantMessage, Model as LlmModel, MistralAiModel, OpenAiModel
+from .llm import SystemMessage, UserMessage, AssistantMessage, DummyModel, MistralAiModel, OpenAiModel
 
 
 __all__ = ["router"]
 
 router = fastapi.APIRouter()
+
+
+ConcreteLlmModel = DummyModel | MistralAiModel | OpenAiModel
 
 
 class TokenizedText(pydantic.BaseModel):
@@ -59,7 +62,7 @@ Step = InitialStep | AdjustmentStep
 
 class Tokenization(pydantic.BaseModel):
     id: str
-    llm_model: LlmModel
+    llm_model: ConcreteLlmModel  # Abstract type `llm.Model` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
     steps: list[Step]
 
 
@@ -96,8 +99,22 @@ def get_default_tokenization_system_prompt() -> str:
     return default_tokenization_system_prompt
 
 
+@router.get("/available-llm-models")
+def get_available_llm_models() -> list[ConcreteLlmModel]:
+    # @todo Hide DummyModel in production
+    return [
+        DummyModel(name="dummy-1"),
+        DummyModel(name="dummy-2"),
+        DummyModel(name="dummy-3"),
+        MistralAiModel(name="mistral-large-2411"),
+        MistralAiModel(name="mistral-small-2501"),
+        OpenAiModel(name="gpt-4o-2024-08-06"),
+        OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+    ]
+
+
 class PostTokenizationRequest(pydantic.BaseModel):
-    llm_model: MistralAiModel | OpenAiModel
+    llm_model: ConcreteLlmModel
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed

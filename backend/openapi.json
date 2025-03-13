@@ -24,6 +24,38 @@
         }
       }
     },
+    "/api/tokenization/available-llm-models": {
+      "get": {
+        "summary": "Get Available Llm Models",
+        "operationId": "get_available_llm_models_api_tokenization_available_llm_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/DummyModel"
+                      },
+                      {
+                        "$ref": "#/components/schemas/MistralAiModel"
+                      },
+                      {
+                        "$ref": "#/components/schemas/OpenAiModel"
+                      }
+                    ]
+                  },
+                  "type": "array",
+                  "title": "Response Get Available Llm Models Api Tokenization Available Llm Models Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/tokenization": {
       "post": {
         "summary": "Post Tokenization",
@@ -268,6 +300,30 @@
         ],
         "title": "AssistantMessage[TokenizedText]"
       },
+      "DummyModel": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "const": "dummy",
+            "title": "Provider",
+            "default": "dummy"
+          },
+          "name": {
+            "type": "string",
+            "enum": [
+              "dummy-1",
+              "dummy-2",
+              "dummy-3"
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "DummyModel"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -347,25 +403,20 @@
             "title": "Provider",
             "default": "mistralai"
           },
-          "model": {
+          "name": {
             "type": "string",
             "enum": [
               "mistral-large-2411",
               "mistral-small-2501"
             ],
-            "title": "Model"
+            "title": "Name"
           }
         },
         "type": "object",
         "required": [
-          "model"
+          "name"
         ],
         "title": "MistralAiModel"
-      },
-      "Model": {
-        "properties": {},
-        "type": "object",
-        "title": "Model"
       },
       "OpenAiModel": {
         "properties": {
@@ -375,18 +426,18 @@
             "title": "Provider",
             "default": "openai"
           },
-          "model": {
+          "name": {
             "type": "string",
             "enum": [
               "gpt-4o-2024-08-06",
               "gpt-4o-mini-2024-07-18"
             ],
-            "title": "Model"
+            "title": "Name"
           }
         },
         "type": "object",
         "required": [
-          "model"
+          "name"
         ],
         "title": "OpenAiModel"
       },
@@ -407,6 +458,9 @@
         "properties": {
           "llm_model": {
             "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
               },
@@ -501,7 +555,18 @@
             "title": "Id"
           },
           "llm_model": {
-            "$ref": "#/components/schemas/Model"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Llm Model"
           },
           "steps": {
             "items": {

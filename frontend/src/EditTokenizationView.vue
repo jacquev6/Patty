@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-import { useApiClient, type Tokenization } from './apiClient'
+import { client, type Tokenization } from './apiClient'
 import TokenizationRender from './TokenizationRender.vue'
 
 const props = defineProps<{
   id: string
 }>()
-
-const client = useApiClient()
 
 const tokenization = ref<Tokenization | null>(null)
 
@@ -59,7 +57,7 @@ async function rewindLastStep() {
   <p><RouterLink :to="{ name: 'create-tokenization' }">New tokenization</RouterLink></p>
   <template v-if="tokenization !== null">
     <h1>LLM provider and model name</h1>
-    <p>{{ tokenization.llm_model.provider }}: {{ tokenization.llm_model.model }}</p>
+    <p>{{ tokenization.llm_model.provider }}: {{ tokenization.llm_model.name }}</p>
     <div v-for="(step, stepIndex) in tokenization.steps" class="step">
       <div class="columns">
         <div class="column">

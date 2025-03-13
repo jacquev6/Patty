@@ -21,6 +21,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/tokenization/available-llm-models': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Available Llm Models */
+    get: operations['get_available_llm_models_api_tokenization_available_llm_models_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/tokenization': {
     parameters: {
       query?: never
@@ -124,6 +141,20 @@ export interface components {
       prose: string
       structured: components['schemas']['TokenizedText']
     }
+    /** DummyModel */
+    DummyModel: {
+      /**
+       * Provider
+       * @default dummy
+       * @constant
+       */
+      provider: 'dummy'
+      /**
+       * Name
+       * @enum {string}
+       */
+      name: 'dummy-1' | 'dummy-2' | 'dummy-3'
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -159,13 +190,11 @@ export interface components {
        */
       provider: 'mistralai'
       /**
-       * Model
+       * Name
        * @enum {string}
        */
-      model: 'mistral-large-2411' | 'mistral-small-2501'
+      name: 'mistral-large-2411' | 'mistral-small-2501'
     }
-    /** Model */
-    Model: Record<string, never>
     /** OpenAiModel */
     OpenAiModel: {
       /**
@@ -175,10 +204,10 @@ export interface components {
        */
       provider: 'openai'
       /**
-       * Model
+       * Name
        * @enum {string}
        */
-      model: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+      name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
     /** PostTokenizationAdjustmentRequest */
     PostTokenizationAdjustmentRequest: {
@@ -188,7 +217,10 @@ export interface components {
     /** PostTokenizationRequest */
     PostTokenizationRequest: {
       /** Llm Model */
-      llm_model: components['schemas']['MistralAiModel'] | components['schemas']['OpenAiModel']
+      llm_model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
       /** System Prompt */
       system_prompt: string
       /** Input Text */
@@ -224,7 +256,11 @@ export interface components {
     Tokenization: {
       /** Id */
       id: string
-      llm_model: components['schemas']['Model']
+      /** Llm Model */
+      llm_model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
       /** Steps */
       steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
     }
@@ -288,6 +324,30 @@ export interface operations {
         }
         content: {
           'application/json': string
+        }
+      }
+    }
+  }
+  get_available_llm_models_api_tokenization_available_llm_models_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': (
+            | components['schemas']['DummyModel']
+            | components['schemas']['MistralAiModel']
+            | components['schemas']['OpenAiModel']
+          )[]
         }
       }
     }

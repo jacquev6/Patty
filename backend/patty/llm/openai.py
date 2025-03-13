@@ -16,19 +16,19 @@ client = openai.AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 class OpenAiModel(Model):
     provider: Literal["openai"] = "openai"
-    model: Literal["gpt-4o-2024-08-06", "gpt-4o-mini-2024-07-18"]
+    name: Literal["gpt-4o-2024-08-06", "gpt-4o-mini-2024-07-18"]
 
     async def complete(
         self, messages: list[SystemMessage | UserMessage | AssistantMessage[T]], structured_type: Type[T]
     ) -> AssistantMessage[T]:
         response_format = make_response_format_type(structured_type)
         response = await client.beta.chat.completions.parse(
-            model=self.model,
+            model=self.name,
             messages=list(self.__make_messages(messages, response_format)),
             response_format=response_format,
         )
         assert response.choices[0].message.parsed is not None
-        return AssistantMessage(
+        return AssistantMessage[T](
             prose=response.choices[0].message.parsed.prose, structured=response.choices[0].message.parsed.structured
         )
 
@@ -57,7 +57,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @unittest.skipUnless("PATTY_RUN_TESTS_COSTING_MONEY" in os.environ, "Costs money")
     async def test_call(self) -> None:
-        model = OpenAiModel(model="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
         messages: list[SystemMessage | UserMessage | AssistantMessage[OpenAiModelTestCase.Structured]] = [
             SystemMessage(
