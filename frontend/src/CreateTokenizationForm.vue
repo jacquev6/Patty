@@ -5,7 +5,7 @@ import { type PostTokenizationRequest, client } from './apiClient'
 import assert from './assert'
 import { useRouter } from 'vue-router'
 import TextArea from './TextArea.vue'
-import Busy from './Busy.vue'
+import Busy from './BusyBox.vue'
 
 const props = defineProps<{
   availableLlmModels: PostTokenizationRequest['llm_model'][]

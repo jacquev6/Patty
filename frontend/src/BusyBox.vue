@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <div style="position: relative;">
+  <div style="position: relative">
     <slot></slot>
     <div v-if="busy" class="busy"><div class="spinner"></div></div>
   </div>
@@ -30,15 +30,15 @@ defineProps<{
   border-radius: 50%;
   width: 120px;
   height: 120px;
-  animation: spin 2000ms infinite linear; 
+  animation: spin 2000ms infinite linear;
 }
 
 @keyframes spin {
   from {
-    transform:rotate(0deg);
+    transform: rotate(0deg);
   }
   to {
-    transform:rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 </style>
