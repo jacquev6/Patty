@@ -89,8 +89,7 @@ default_tokenization_system_prompt = textwrap.dedent(
     Ce champs comporte une liste de phrases, et chaque phrase comporte une liste de tokens.
     Les types de tokens sont distingués par le champ `kind`.
     Utilise des tokens de type `word` pour les mots, et de type `punctuation` pour la ponctuation.
-    Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à la tokenisation.
-    """
+    Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à la tokenisation."""
 )
 
 

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { client, type Tokenization } from './apiClient'
 import TokenizationRender from './TokenizationRender.vue'
+import ThreeColumns from './ThreeColumns.vue'
+import TextArea from './TextArea.vue'
+import assert from './assert'
+import MarkDown from './MarkDown.vue'
 
 const props = defineProps<{
   id: string
@@ -18,12 +22,40 @@ onMounted(async () => {
   }
 })
 
+const systemPrompt = computed(() => {
+  if (tokenization.value === null) {
+    return ''
+  } else {
+    assert(tokenization.value.steps.length > 0)
+    assert(tokenization.value.steps[0].kind === 'initial')
+    return tokenization.value.steps[0].system_prompt
+  }
+})
+
+const inputText = computed(() => {
+  if (tokenization.value === null) {
+    return ''
+  } else {
+    assert(tokenization.value.steps.length > 0)
+    assert(tokenization.value.steps[0].kind === 'initial')
+    return tokenization.value.steps[0].input_text
+  }
+})
+
+const tokenizedText = computed(() => {
+  const empty = { sentences: [] }
+  if (tokenization.value === null) {
+    return empty
+  } else {
+    assert(tokenization.value.steps.length > 0)
+    return tokenization.value.steps.map((step) => step.tokenized_text).reduce((old, now) => now ?? old) ?? empty
+  }
+})
+
 const adjustment = ref('')
-const disabled = ref(false)
+const disabled = computed(() => adjustment.value.trim() === '')
 
 async function submit() {
-  disabled.value = true
-
   const responsePromise = client.POST(`/api/tokenization/{id}/adjustment`, {
     params: { path: { id: props.id } },
     body: { adjustment: adjustment.value },
@@ -31,7 +63,6 @@ async function submit() {
 
   adjustment.value = ''
   const response = await responsePromise
-  disabled.value = false
 
   if (response.data !== undefined) {
     tokenization.value = response.data
@@ -39,14 +70,11 @@ async function submit() {
 }
 
 async function rewindLastStep() {
-  disabled.value = true
-
   const responsePromise = client.DELETE(`/api/tokenization/{id}/last-step`, {
     params: { path: { id: props.id } },
   })
 
   const response = await responsePromise
-  disabled.value = false
   if (response.data !== undefined) {
     tokenization.value = response.data
   }
@@ -54,62 +82,56 @@ async function rewindLastStep() {
 </script>
 
 <template>
-  <p><RouterLink :to="{ name: 'create-tokenization' }">New tokenization</RouterLink></p>
-  <template v-if="tokenization !== null">
-    <h1>LLM provider and model name</h1>
-    <p>{{ tokenization.llm_model.provider }}: {{ tokenization.llm_model.name }}</p>
-    <div v-for="(step, stepIndex) in tokenization.steps" class="step">
-      <div class="columns">
-        <div class="column">
-          <template v-if="step.kind == 'initial'">
-            <h1>System prompt</h1>
-            <pre>{{ step.system_prompt }}</pre>
-            <h1>Input text</h1>
-            <pre>{{ step.input_text }}</pre>
-            <h1>Assistant's response</h1>
-            <pre>{{ step.assistant_prose }}</pre>
-            <h1>Tokenized text</h1>
-            <p v-if="step.tokenized_text === null">No changes</p>
-            <TokenizationRender v-else :tokenizedText="step.tokenized_text" />
-          </template>
-          <template v-else-if="step.kind == 'adjustment'">
-            <h1>User-requested adjustment</h1>
-            <pre>{{ step.user_prompt }}</pre>
-            <h1>Assistant's response</h1>
-            <pre>{{ step.assistant_prose }}</pre>
-            <h1>Tokenized text</h1>
-            <p v-if="step.tokenized_text === null">No changes</p>
-            <TokenizationRender v-else :tokenizedText="step.tokenized_text" />
-          </template>
-          <template v-else>BUG: {{ ((step: never) => step)(step) }}</template>
-          <template v-if="stepIndex === tokenization.steps.length - 1">
-            <button @click="rewindLastStep">Rewind this step</button>
-          </template>
+  <ThreeColumns v-if="tokenization !== null">
+    <template #left>
+      <h1>LLM model</h1>
+      <p>{{ tokenization.llm_model.provider }}: {{ tokenization.llm_model.name }}</p>
+      <h1>System prompt</h1>
+      <MarkDown :markdown="systemPrompt" />
+    </template>
+    <template #center>
+      <h1>Input text</h1>
+      <MarkDown :markdown="inputText" />
+      <h1>Adjustments</h1>
+      <template v-for="(step, stepIndex) in tokenization.steps">
+        <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
+          <MarkDown :markdown="step.user_prompt" style="flex-grow: 1" />
+          <div
+            v-if="stepIndex === tokenization.steps.length - 1"
+            title="Rewind the chat: delete this prompt and its effects"
+            style="cursor: pointer"
+            @click="rewindLastStep"
+          >
+            ❌
+          </div>
         </div>
-        <div class="column">
-          <h1>LLM messages</h1>
-          <pre>{{ step.messages }}</pre>
-        </div>
+        <MarkDown class="assistant-prose" :markdown="step.assistant_prose" />
+      </template>
+      <div class="user-prompt">
+        <TextArea v-model="adjustment"></TextArea>
+        <p><button @click="submit" :disabled>Submit</button></p>
       </div>
-    </div>
-    <h1>Adjustments</h1>
-    <textarea v-model="adjustment" rows="5" cols="80" :disabled></textarea>
-    <p><button @click="submit" :disabled>Submit</button></p>
-  </template>
+    </template>
+    <template #right>
+      <TokenizationRender :tokenizedText />
+    </template>
+  </ThreeColumns>
 </template>
 
 <style scoped>
-.step {
+.user-prompt {
+  margin-left: 10%;
+  background-color: lightgrey;
+  border-radius: 5px;
+  padding: 5px;
   margin-bottom: 5px;
 }
 
-.columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-.column {
-  border: 1px solid black;
+.assistant-prose {
+  margin-right: 10%;
+  background-color: lightblue;
+  border-radius: 5px;
   padding: 5px;
-  overflow-x: scroll;
+  margin-bottom: 5px;
 }
 </style>

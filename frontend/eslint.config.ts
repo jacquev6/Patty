@@ -24,6 +24,7 @@ export default defineConfigWithVueTs(
   {
     rules: {
       'vue/require-v-for-key': 'off',
+      'vue/valid-v-for': 'off',
     },
   },
 )

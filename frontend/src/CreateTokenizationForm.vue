@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { type PostTokenizationRequest, client } from './apiClient'
 import assert from './assert'
 import { useRouter } from 'vue-router'
+import TextArea from './TextArea.vue'
 
 const props = defineProps<{
   availableLlmModels: PostTokenizationRequest['llm_model'][]
@@ -95,16 +96,18 @@ async function submit() {
 </script>
 
 <template>
-  <h1>LLM provider and model name</h1>
-  <select v-model="llmProvider" :disabled>
-    <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
-  </select>
-  <select v-model="llmName" :disabled>
-    <option v-for="name in llmNames">{{ name }}</option>
-  </select>
-  <h1>System prompt</h1>
-  <textarea v-model="systemPrompt" rows="15" cols="120" :disabled></textarea>
-  <h1>Input text</h1>
-  <textarea v-model="inputText" rows="10" cols="120" :disabled></textarea>
-  <p><button @click="submit" :disabled>Submit</button></p>
+  <div style="padding-left: 5px; padding-right: 5px">
+    <h1>LLM model</h1>
+    <select v-model="llmProvider" :disabled>
+      <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
+    </select>
+    <select v-model="llmName" :disabled>
+      <option v-for="name in llmNames">{{ name }}</option>
+    </select>
+    <h1>System prompt</h1>
+    <TextArea v-model="systemPrompt" :disabled></TextArea>
+    <h1>Input text</h1>
+    <TextArea v-model="inputText" :disabled></TextArea>
+    <p><button @click="submit" :disabled>Submit</button></p>
+  </div>
 </template>
