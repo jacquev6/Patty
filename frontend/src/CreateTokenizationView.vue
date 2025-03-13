@@ -27,7 +27,7 @@ Ils sont prêts à aller jouer dehors.`)
 const disabled = ref(true)
 
 onMounted(async () => {
-  const response = await client.GET('/api/default-tokenization-system-prompt')
+  const response = await client.GET('/api/tokenization/default-system-prompt')
 
   if (response.data !== undefined) {
     systemPrompt.value = response.data

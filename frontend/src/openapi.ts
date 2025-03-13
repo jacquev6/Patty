@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/api/default-tokenization-system-prompt': {
+  '/api/tokenization/default-system-prompt': {
     parameters: {
       query?: never
       header?: never
@@ -12,7 +12,7 @@ export interface paths {
       cookie?: never
     }
     /** Get Default Tokenization System Prompt */
-    get: operations['get_default_tokenization_system_prompt_api_default_tokenization_system_prompt_get']
+    get: operations['get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get']
     put?: never
     post?: never
     delete?: never
@@ -272,7 +272,7 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  get_default_tokenization_system_prompt_api_default_tokenization_system_prompt_get: {
+  get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get: {
     parameters: {
       query?: never
       header?: never

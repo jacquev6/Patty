@@ -5,10 +5,10 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/api/default-tokenization-system-prompt": {
+    "/api/tokenization/default-system-prompt": {
       "get": {
         "summary": "Get Default Tokenization System Prompt",
-        "operationId": "get_default_tokenization_system_prompt_api_default_tokenization_system_prompt_get",
+        "operationId": "get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -16,7 +16,7 @@
               "application/json": {
                 "schema": {
                   "type": "string",
-                  "title": "Response Get Default Tokenization System Prompt Api Default Tokenization System Prompt Get"
+                  "title": "Response Get Default Tokenization System Prompt Api Tokenization Default System Prompt Get"
                 }
               }
             }
