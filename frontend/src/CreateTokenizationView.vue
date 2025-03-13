@@ -38,23 +38,23 @@ onMounted(async () => {
 async function submit() {
   disabled.value = true
 
-  const body =
+  const llm_model =
     llmProvider.value === 'mistralai'
       ? {
-          llm_provider: 'mistralai' as const,
-          mistralai_model: mistralaiModel.value,
-          system_prompt: systemPrompt.value,
-          input_text: inputText.value,
+          provider: 'mistralai' as const,
+          model: mistralaiModel.value,
         }
       : {
-          llm_provider: 'openai' as const,
-          openai_model: openaiModel.value,
-          system_prompt: systemPrompt.value,
-          input_text: inputText.value,
+          provider: 'openai' as const,
+          model: openaiModel.value,
         }
 
   const responsePromise = client.POST('/api/tokenization', {
-    body,
+    body: {
+      llm_model,
+      system_prompt: systemPrompt.value,
+      input_text: inputText.value,
+    },
   })
 
   const response = await responsePromise

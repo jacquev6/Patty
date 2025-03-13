@@ -18,5 +18,5 @@ def openapi(output: io.StringIO) -> None:
     output.write("\n")
 
 
-assert __name__ == "__main__"
-main()
+if __name__ == "__main__":
+    main()
