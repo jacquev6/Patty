@@ -5,24 +5,6 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/api/get-cheese": {
-      "get": {
-        "summary": "Get Cheese",
-        "operationId": "get_cheese_api_get_cheese_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Cheese"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/default-tokenization-system-prompt": {
       "get": {
         "summary": "Get Default Tokenization System Prompt",
@@ -691,19 +673,6 @@
           "role"
         ],
         "title": "ChatCompletionUserMessageParam"
-      },
-      "Cheese": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "Cheese"
       },
       "DocumentURLChunk": {
         "properties": {

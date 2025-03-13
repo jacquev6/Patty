@@ -18,30 +18,6 @@ openai_client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 app = FastAPI()
 
 
-class Cheese(pydantic.BaseModel):
-    name: str
-
-
-messages: list[mistralai.models.Messages] = [
-    mistralai.SystemMessage(content="Please answer each question with a single word."),
-    mistralai.UserMessage(content="Please name a French cheese."),
-]
-
-
-@app.get("/api/get-cheese")
-async def get_cheese() -> Cheese:
-    response = await mistralai_client.chat.complete_async(
-        model="mistral-small-latest", messages=messages, max_tokens=4000
-    )
-    assert response.choices is not None
-    assert isinstance(response.choices[0].message.content, str)
-
-    messages.append(response.choices[0].message)
-    messages.append(mistralai.UserMessage(content="Please name another French cheese."))
-
-    return Cheese(name=response.choices[0].message.content)
-
-
 class TokenizedText(pydantic.BaseModel):
     sentences: list[Sentence]
 
