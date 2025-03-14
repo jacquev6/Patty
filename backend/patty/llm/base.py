@@ -19,7 +19,7 @@ class UserMessage(pydantic.BaseModel):
 class AssistantMessage[E](pydantic.BaseModel):
     role: Literal["assistant"] = "assistant"
     prose: str
-    structured: E
+    structured: E | None
 
 
 class Model(abc.ABC, pydantic.BaseModel):

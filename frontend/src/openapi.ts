@@ -139,7 +139,7 @@ export interface components {
       role: 'assistant'
       /** Prose */
       prose: string
-      structured: components['schemas']['TokenizedText']
+      structured: components['schemas']['TokenizedText'] | null
     }
     /** DummyModel */
     DummyModel: {

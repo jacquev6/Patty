@@ -8,7 +8,7 @@ T = TypeVar("T")
 
 class ResponseFormat[E](pydantic.BaseModel):
     prose: str
-    structured: E
+    structured: E | None
 
 
 def make_response_format_type(structured_type: Type[T]) -> Type[ResponseFormat[T]]:

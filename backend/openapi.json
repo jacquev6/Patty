@@ -290,7 +290,14 @@
             "title": "Prose"
           },
           "structured": {
-            "$ref": "#/components/schemas/TokenizedText"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TokenizedText"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

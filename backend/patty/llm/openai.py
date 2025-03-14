@@ -67,10 +67,12 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         ]
 
         response1 = await model.complete(messages, OpenAiModelTestCase.Structured)
+        assert response1.structured is not None
         self.assertIn("fromage", response1.prose.lower())
 
         messages.append(response1)
         messages.append(UserMessage(message="Un autre."))
 
         response2 = await model.complete(messages, OpenAiModelTestCase.Structured)
+        assert response2.structured is not None
         self.assertNotEqual(response1.structured.cheese, response2.structured.cheese)

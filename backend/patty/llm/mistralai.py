@@ -62,12 +62,14 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         message = AssistantMessage[MistralAiModelTestCase.Structured](
             prose="Hello", structured=self.Structured(cheese="brie")
         )
+        assert message.structured is not None
         self.assertEqual(message.structured.cheese, "brie")
 
     def test_response_format(self) -> None:
         response = ResponseFormat[MistralAiModelTestCase.Structured](
             prose="Hello", structured=self.Structured(cheese="brie")
         )
+        assert response.structured is not None
         self.assertEqual(response.structured.cheese, "brie")
 
     def test_response_format_schema(self) -> None:
@@ -89,7 +91,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
                         },
                         "properties": {
                             "prose": {"title": "Prose", "type": "string"},
-                            "structured": {"$ref": "#/$defs/Structured"},
+                            "structured": {"anyOf": [{"$ref": "#/$defs/Structured"}, {"type": "null"}]},
                         },
                         "required": ["prose", "structured"],
                         "title": "ResponseFormat[MistralAiModelTestCase.Structured]",
@@ -117,10 +119,12 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         ]
 
         response1 = await model.complete(messages, MistralAiModelTestCase.Structured)
+        assert response1.structured is not None
         self.assertIn("fromage", response1.prose.lower())
 
         messages.append(response1)
         messages.append(UserMessage(message="Un autre."))
 
         response2 = await model.complete(messages, MistralAiModelTestCase.Structured)
+        assert response2.structured is not None
         self.assertNotEqual(response1.structured.cheese, response2.structured.cheese)
