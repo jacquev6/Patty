@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { nextTick, useTemplateRef, watch } from 'vue'
+import { useElementSize } from '@vueuse/core'
+
 import assert from './assert'
 
 const model = defineModel<string>({ required: true })
 
 const textareaRef = useTemplateRef('textarea')
 
+const { width } = useElementSize(textareaRef)
+
 watch(
-  model,
+  [model, width],
   async () => {
     await nextTick()
     assert(textareaRef.value !== null)

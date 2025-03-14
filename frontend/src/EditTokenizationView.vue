@@ -158,7 +158,13 @@ async function rewindLastStep() {
       ></TextArea>
       <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
       <p>
-        <button @click="manualTokenizedText = null" :disabled="manualTokenizedText === null" title="Forget all manual changes; go back to the last version from the LLM">Reset</button>
+        <button
+          @click="manualTokenizedText = null"
+          :disabled="manualTokenizedText === null"
+          title="Forget all manual changes; go back to the last version from the LLM"
+        >
+          Reset
+        </button>
         <!-- @todo Add a button to reformat the JSON -->
         <!-- @todo Save the manual changes to the API -->
       </p>
