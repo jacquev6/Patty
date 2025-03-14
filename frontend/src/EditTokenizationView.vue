@@ -114,6 +114,13 @@ const manualTokenizedTextProxy = computed({
   },
 })
 
+function reformatManualTokenizedText() {
+  assert(manualTokenizedText.value !== null)
+  assert(manualTokenizedText.value.parsed !== null)
+
+  manualTokenizedText.value.raw = jsonStringify(manualTokenizedText.value.parsed)
+}
+
 const adjustment = ref('')
 const disabled = computed(() => adjustment.value.trim() === '' || manualTokenizedText.value !== null)
 const busy = ref(false)
@@ -214,7 +221,12 @@ async function rewindLastStep() {
         >
           Reset
         </button>
-        <!-- @todo Add a button to reformat the JSON -->
+        <button
+          @click="reformatManualTokenizedText"
+          :disabled="manualTokenizedText === null || manualTokenizedText.parsed === null"
+        >
+          Reformat
+        </button>
         <!-- @todo Save the manual changes to the API -->
       </p>
     </template>
