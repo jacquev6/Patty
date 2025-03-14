@@ -8,7 +8,8 @@ const props = defineProps<{
 
 <template>
   <p v-for="sentence in props.tokenizedText.sentences" class="sentence">
-    <template v-for="token in sentence.tokens">
+    <template v-for="(token, tokenIndex) in sentence.tokens">
+      <span v-if="tokenIndex !== 0"> </span>
       <span v-if="token.kind == 'word'" class="word" :title="JSON.stringify(token)">{{ token.text }}</span>
       <span v-else-if="token.kind == 'punctuation'" class="punctuation" :title="JSON.stringify(token)">{{
         token.text
@@ -19,10 +20,6 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-span {
-  margin-right: 0.5em;
-}
-
 .word {
   background-color: yellow;
 }
