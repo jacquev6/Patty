@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
+import Ajv, { type ErrorObject } from 'ajv'
 
 import { client, type Tokenization } from './apiClient'
 import TokenizationRender from './TokenizationRender.vue'
@@ -9,10 +10,14 @@ import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
 import Busy from './BusyBox.vue'
+import tokenizedTextSchema from '../../backend/tokenized-text-schema.json'
 
 const props = defineProps<{
   id: string
 }>()
+
+const ajv = new Ajv()
+const validateTokenizedText = ajv.compile(tokenizedTextSchema)
 
 const tokenization = ref<Tokenization | null>(null)
 
@@ -54,29 +59,58 @@ const llmTokenizedText = computed(() => {
   }
 })
 
+type TokenizedText = typeof llmTokenizedText.value
+
+type ManualTokenizedText = {
+  parsed: TokenizedText | null
+  raw: string
+  syntaxError: SyntaxError | null
+  validationErrors: ErrorObject[]
+}
+
+const manualTokenizedText = ref<ManualTokenizedText | null>(null)
+
 const tokenizedText = computed(() => {
   if (manualTokenizedText.value !== null) {
-    // @todo Catch JSON parse error
-    // @todo Validate against JSON schema
-    // @todo Report these errors to the user
-    return JSON.parse(manualTokenizedText.value)
+    return manualTokenizedText.value.parsed
   } else {
     return llmTokenizedText.value
   }
 })
 
-const manualTokenizedText = ref<string | null>(null)
-
 const manualTokenizedTextProxy = computed({
   get() {
     if (manualTokenizedText.value === null) {
-      return jsonStringify(tokenizedText.value)
+      return jsonStringify(llmTokenizedText.value)
     } else {
-      return manualTokenizedText.value
+      return manualTokenizedText.value.raw
     }
   },
-  set(value: string) {
-    manualTokenizedText.value = value
+  set(raw: string) {
+    let parsed: TokenizedText | null = null
+    try {
+      parsed = JSON.parse(raw)
+    } catch (syntaxError) {
+      if (syntaxError instanceof SyntaxError) {
+        manualTokenizedText.value = { raw, parsed: null, syntaxError, validationErrors: [] }
+        return
+      } else {
+        throw syntaxError
+      }
+    }
+    assert(parsed !== null)
+    if (validateTokenizedText(parsed)) {
+      manualTokenizedText.value = { raw, parsed, syntaxError: null, validationErrors: [] }
+    } else {
+      assert(validateTokenizedText.errors !== undefined)
+      assert(validateTokenizedText.errors !== null)
+      manualTokenizedText.value = {
+        raw,
+        parsed: null,
+        syntaxError: null,
+        validationErrors: validateTokenizedText.errors,
+      }
+    }
   },
 })
 
@@ -150,7 +184,22 @@ async function rewindLastStep() {
     </template>
     <template #right>
       <h1>Tokenized text</h1>
-      <TokenizationRender :tokenizedText />
+      <TokenizationRender v-if="tokenizedText !== null" :tokenizedText />
+      <template v-else-if="manualTokenizedText !== null">
+        <template v-if="manualTokenizedText.syntaxError !== null">
+          <h2>Syntax error</h2>
+          {{ manualTokenizedText?.syntaxError.message }}
+        </template>
+        <template v-else>
+          <h2>Validation errors</h2>
+          <ul>
+            <li v-for="error in manualTokenizedText.validationErrors">
+              {{ error.instancePath }}: {{ error.message }}
+              {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
+            </li>
+          </ul>
+        </template>
+      </template>
       <h1>Manual edition</h1>
       <TextArea
         v-model="manualTokenizedTextProxy"

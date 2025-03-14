@@ -47,7 +47,7 @@ services:
     working_dir: /app
     env_file:
       - backend/secrets.env
-    command: ["rm", "-f", "backend/openapi.json", "frontend/src/openapi.ts"]
+    command: ["rm", "-f", "backend/openapi.json", "backend/tokenized-text-schema.json", "frontend/src/openapi.ts"]
     depends_on:
       pip-installer:
         condition: service_completed_successfully
@@ -84,6 +84,40 @@ services:
     ]
     depends_on:
       openapi-json-generator:
+        condition: service_completed_successfully
+  tokenized-text-json-schema-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/secrets.env
+    command: ["bash", "-c", 'echo "Generating backend/tokenized-text-schema.json for the first time" && python -m patty tokenized-text-schema tokenized-text-schema.json']
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+  tokenized-text-json-schema-regenerator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/secrets.env
+    init: true
+    command: [
+      "watchmedo", "shell-command",
+      "--command", 'test $${watch_event_type} = closed && echo "Updating backend/tokenized-text-schema.json because $${watch_src_path} changed" && python -m patty tokenized-text-schema tokenized-text-schema.json',
+      "--recursive",
+      "--ignore-directories",
+      "--ignore-patterns", "*/__pycache__/*",
+      "patty"
+    ]
+    depends_on:
+      tokenized-text-json-schema-generator:
         condition: service_completed_successfully
 
   frontend-shell:
