@@ -3,6 +3,7 @@ import json
 
 import click
 
+from . import adaptation
 from . import asgi
 from . import tokenization
 
@@ -23,6 +24,13 @@ def openapi(output: io.StringIO) -> None:
 @click.argument("output", type=click.File("w"))
 def tokenized_text_schema(output: io.StringIO) -> None:
     json.dump(tokenization.TokenizedText.model_json_schema(), output, indent=2)
+    output.write("\n")
+
+
+@main.command()
+@click.argument("output", type=click.File("w"))
+def adapted_exercise_schema(output: io.StringIO) -> None:
+    json.dump(adaptation.AdaptedExercise.model_json_schema(), output, indent=2)
     output.write("\n")
 
 

@@ -21,6 +21,91 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/default-system-prompt': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Default System Prompt */
+    get: operations['get_default_system_prompt_api_adaptation_default_system_prompt_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Adaptation */
+    post: operations['post_adaptation_api_adaptation_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Adaptation */
+    get: operations['get_adaptation_api_adaptation__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/{id}/adjustment': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Adaptation Adjustment */
+    post: operations['post_adaptation_adjustment_api_adaptation__id__adjustment_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/{id}/last-step': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    /** Delete Adaptation Last Step */
+    delete: operations['delete_adaptation_last_step_api_adaptation__id__last_step_delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/tokenization/default-system-prompt': {
     parameters: {
       query?: never
@@ -110,24 +195,39 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** AdjustmentStep */
-    AdjustmentStep: {
+    /** Adaptation */
+    Adaptation: {
+      /** Id */
+      id: string
+      /** Llm Model */
+      llm_model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Steps */
+      steps: (
+        | components['schemas']['patty__adaptation__InitialStep']
+        | components['schemas']['patty__adaptation__AdjustmentStep']
+      )[]
+    }
+    /** AdaptedExercise */
+    AdaptedExercise: {
+      /** Instructions */
+      instructions: string
+      /** Wording */
+      wording: string
+    }
+    /** AssistantMessage[AdaptedExercise] */
+    AssistantMessage_AdaptedExercise_: {
       /**
-       * Kind
+       * Role
+       * @default assistant
        * @constant
        */
-      kind: 'adjustment'
-      /** User Prompt */
-      user_prompt: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_TokenizedText_']
-      )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText'] | null
+      role: 'assistant'
+      /** Prose */
+      prose: string
+      structured: components['schemas']['AdaptedExercise'] | null
     }
     /** AssistantMessage[TokenizedText] */
     AssistantMessage_TokenizedText_: {
@@ -160,27 +260,6 @@ export interface components {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
     }
-    /** InitialStep */
-    InitialStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'initial'
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_TokenizedText_']
-      )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText'] | null
-    }
     /** MistralAiModel */
     MistralAiModel: {
       /**
@@ -208,6 +287,23 @@ export interface components {
        * @enum {string}
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+    }
+    /** PostAdaptationAdjustmentRequest */
+    PostAdaptationAdjustmentRequest: {
+      /** Adjustment */
+      adjustment: string
+    }
+    /** PostAdaptationRequest */
+    PostAdaptationRequest: {
+      /** Llm Model */
+      llm_model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
     }
     /** PostTokenizationAdjustmentRequest */
     PostTokenizationAdjustmentRequest: {
@@ -262,7 +358,10 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       /** Steps */
-      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
+      steps: (
+        | components['schemas']['patty__tokenization__InitialStep']
+        | components['schemas']['patty__tokenization__AdjustmentStep']
+      )[]
     }
     /** TokenizedText */
     TokenizedText: {
@@ -299,6 +398,86 @@ export interface components {
       /** Text */
       text: string
     }
+    /** AdjustmentStep */
+    patty__adaptation__AdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** User Prompt */
+      user_prompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_AdaptedExercise_']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      adapted_exercise: components['schemas']['AdaptedExercise'] | null
+    }
+    /** InitialStep */
+    patty__adaptation__InitialStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'initial'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_AdaptedExercise_']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      adapted_exercise: components['schemas']['AdaptedExercise'] | null
+    }
+    /** AdjustmentStep */
+    patty__tokenization__AdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** User Prompt */
+      user_prompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_TokenizedText_']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText'] | null
+    }
+    /** InitialStep */
+    patty__tokenization__InitialStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'initial'
+      /** System Prompt */
+      system_prompt: string
+      /** Input Text */
+      input_text: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_TokenizedText_']
+      )[]
+      /** Assistant Prose */
+      assistant_prose: string
+      tokenized_text: components['schemas']['TokenizedText'] | null
+    }
   }
   responses: never
   parameters: never
@@ -328,6 +507,156 @@ export interface operations {
             | components['schemas']['MistralAiModel']
             | components['schemas']['OpenAiModel']
           )[]
+        }
+      }
+    }
+  }
+  get_default_system_prompt_api_adaptation_default_system_prompt_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': string
+        }
+      }
+    }
+  }
+  post_adaptation_api_adaptation_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostAdaptationRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_adaptation_api_adaptation__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_adaptation_adjustment_api_adaptation__id__adjustment_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostAdaptationAdjustmentRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  delete_adaptation_last_step_api_adaptation__id__last_step_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

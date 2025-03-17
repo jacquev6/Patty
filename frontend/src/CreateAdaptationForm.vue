@@ -79,7 +79,7 @@ async function submit() {
 
   assert(llmModel.value !== null)
 
-  const responsePromise = client.POST('/api/tokenization', {
+  const responsePromise = client.POST('/api/adaptation', {
     body: {
       llm_model: llmModel.value,
       system_prompt: systemPrompt.value,
@@ -91,7 +91,7 @@ async function submit() {
   busy.value = false
 
   if (response.data !== undefined) {
-    router.push({ name: 'tokenization', params: { id: response.data.id } })
+    router.push({ name: 'adaptation', params: { id: response.data.id } })
   }
 }
 

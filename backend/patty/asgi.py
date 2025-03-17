@@ -1,5 +1,6 @@
 import fastapi
 
+from . import adaptation
 from . import llm
 from . import tokenization
 
@@ -20,5 +21,7 @@ def get_available_llm_models() -> list[llm.ConcreteModel]:
         llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
     ]
 
+
+app.include_router(adaptation.router, prefix="/api/adaptation")
 
 app.include_router(tokenization.router, prefix="/api/tokenization")

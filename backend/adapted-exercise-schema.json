@@ -1,0 +1,18 @@
+{
+  "properties": {
+    "instructions": {
+      "title": "Instructions",
+      "type": "string"
+    },
+    "wording": {
+      "title": "Wording",
+      "type": "string"
+    }
+  },
+  "required": [
+    "instructions",
+    "wording"
+  ],
+  "title": "AdaptedExercise",
+  "type": "object"
+}

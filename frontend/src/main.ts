@@ -5,6 +5,8 @@ import 'modern-normalize/modern-normalize.css'
 import IndexView from './IndexView.vue'
 import CreateTokenizationView from './CreateTokenizationView.vue'
 import EditTokenizationView from './EditTokenizationView.vue'
+import CreateAdaptationView from './CreateAdaptationView.vue'
+import EditAdaptationView from './EditAdaptationView.vue'
 import './ubiquitous.css'
 
 const router = createRouter({
@@ -24,6 +26,17 @@ const router = createRouter({
       path: '/tokenization-:id',
       name: 'tokenization',
       component: EditTokenizationView,
+      props: true,
+    },
+    {
+      path: '/new-adaptation',
+      name: 'create-adaptation',
+      component: CreateAdaptationView,
+    },
+    {
+      path: '/adaptation-:id',
+      name: 'adaptation',
+      component: EditAdaptationView,
       props: true,
     },
   ],
