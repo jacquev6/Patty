@@ -1,20 +1,18 @@
 from __future__ import annotations
-import textwrap
+
 from typing import Literal
+import textwrap
 import uuid
 
 import fastapi
 import pydantic
 
-from .llm import SystemMessage, UserMessage, AssistantMessage, DummyModel, MistralAiModel, OpenAiModel
+from . import llm
 
 
 __all__ = ["router"]
 
 router = fastapi.APIRouter()
-
-
-ConcreteLlmModel = DummyModel | MistralAiModel | OpenAiModel
 
 
 class TokenizedText(pydantic.BaseModel):
@@ -37,14 +35,14 @@ class Punctuation(pydantic.BaseModel):
 
 Token = Word | Punctuation
 
-Message = UserMessage | SystemMessage | AssistantMessage[TokenizedText]
+LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[TokenizedText]
 
 
 class InitialStep(pydantic.BaseModel):
     kind: Literal["initial"]
     system_prompt: str
     input_text: str
-    messages: list[Message]
+    messages: list[LlmMessage]
     assistant_prose: str
     tokenized_text: TokenizedText | None
 
@@ -52,7 +50,7 @@ class InitialStep(pydantic.BaseModel):
 class AdjustmentStep(pydantic.BaseModel):
     kind: Literal["adjustment"]
     user_prompt: str
-    messages: list[Message]
+    messages: list[LlmMessage]
     assistant_prose: str
     tokenized_text: TokenizedText | None
 
@@ -62,7 +60,8 @@ Step = InitialStep | AdjustmentStep
 
 class Tokenization(pydantic.BaseModel):
     id: str
-    llm_model: ConcreteLlmModel  # Abstract type `llm.Model` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
+    # Abstract type `llm.AbstractModel` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
+    llm_model: llm.ConcreteModel
     steps: list[Step]
 
 
@@ -99,21 +98,21 @@ def get_default_tokenization_system_prompt() -> str:
 
 
 @router.get("/available-llm-models")
-def get_available_llm_models() -> list[ConcreteLlmModel]:
+def get_available_llm_models() -> list[llm.ConcreteModel]:
     # @todo Hide DummyModel in production
     return [
-        DummyModel(name="dummy-1"),
-        DummyModel(name="dummy-2"),
-        DummyModel(name="dummy-3"),
-        MistralAiModel(name="mistral-large-2411"),
-        MistralAiModel(name="mistral-small-2501"),
-        OpenAiModel(name="gpt-4o-2024-08-06"),
-        OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+        llm.DummyModel(name="dummy-1"),
+        llm.DummyModel(name="dummy-2"),
+        llm.DummyModel(name="dummy-3"),
+        llm.MistralAiModel(name="mistral-large-2411"),
+        llm.MistralAiModel(name="mistral-small-2501"),
+        llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+        llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
     ]
 
 
 class PostTokenizationRequest(pydantic.BaseModel):
-    llm_model: ConcreteLlmModel
+    llm_model: llm.ConcreteModel
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed
@@ -125,7 +124,7 @@ class PostTokenizationRequest(pydantic.BaseModel):
 async def post_tokenization(req: PostTokenizationRequest) -> Tokenization:
     tokenization_id = str(uuid.uuid4())
 
-    messages: list[Message] = [SystemMessage(message=req.system_prompt), UserMessage(message=req.input_text)]
+    messages: list[LlmMessage] = [llm.SystemMessage(message=req.system_prompt), llm.UserMessage(message=req.input_text)]
 
     response = await req.llm_model.complete(messages, TokenizedText)
     messages.append(response)
@@ -162,10 +161,10 @@ class PostTokenizationAdjustmentRequest(pydantic.BaseModel):
 async def post_tokenization_adjustment(id: str, req: PostTokenizationAdjustmentRequest) -> Tokenization:
     tokenization = tokenizations[id]
 
-    previous_messages: list[Message] = []
+    previous_messages: list[LlmMessage] = []
     for step in tokenization.steps:
         previous_messages.extend(step.messages)
-    step_messages: list[Message] = [UserMessage(message=req.adjustment)]
+    step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
     response = await tokenization.llm_model.complete(previous_messages + step_messages, TokenizedText)
     step_messages.append(response)

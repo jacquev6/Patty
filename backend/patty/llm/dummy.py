@@ -6,7 +6,7 @@ import pydantic
 
 
 from .base import Model, SystemMessage, UserMessage, AssistantMessage
-from .utils import T, make_response_format_type
+from .utils import T
 
 
 class DummyModel(Model):
