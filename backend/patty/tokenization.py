@@ -68,7 +68,7 @@ class Tokenization(pydantic.BaseModel):
 tokenizations: dict[str, Tokenization] = {}
 
 
-default_tokenization_system_prompt = textwrap.dedent(
+default_system_prompt = textwrap.dedent(
     """\
     Le premier message de l'utilisateur sera un texte, que tu dois diviser en phrases et tokens.
     Les tokens peuvent être des mots ou de la ponctuation.
@@ -93,8 +93,8 @@ default_tokenization_system_prompt = textwrap.dedent(
 
 
 @router.get("/default-system-prompt")
-def get_default_tokenization_system_prompt() -> str:
-    return default_tokenization_system_prompt
+def get_default_system_prompt() -> str:
+    return default_system_prompt
 
 
 class PostTokenizationRequest(pydantic.BaseModel):

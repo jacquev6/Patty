@@ -28,8 +28,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get Default Tokenization System Prompt */
-    get: operations['get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get']
+    /** Get Default System Prompt */
+    get: operations['get_default_system_prompt_api_tokenization_default_system_prompt_get']
     put?: never
     post?: never
     delete?: never
@@ -332,7 +332,7 @@ export interface operations {
       }
     }
   }
-  get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get: {
+  get_default_system_prompt_api_tokenization_default_system_prompt_get: {
     parameters: {
       query?: never
       header?: never
