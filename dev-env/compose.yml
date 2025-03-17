@@ -164,6 +164,8 @@ services:
         GROUP_ID: $GROUP_ID
     volumes:
       - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Allow running GUI apps in container, displaying on host
     working_dir: /app/frontend
     init: true
     command: ["sleep", "infinity"]
@@ -172,13 +174,26 @@ services:
     pull_policy: never
     volumes:
       - ..:/app
+      - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     command: ["npm", "install"]
+  cypress-installer:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    command: ["npx", "cypress", "install"]
+    depends_on:
+      npm-installer:
+        condition: service_completed_successfully
   openapi-ts-regenerator:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
       - ..:/app
+      - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
       SHELL: bash
@@ -193,6 +208,7 @@ services:
     pull_policy: never
     volumes:
       - ..:/app
+      - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     command: ["npx", "vite", "--host", "0.0.0.0", "--port", "80", "--strictPort"]
     depends_on:
