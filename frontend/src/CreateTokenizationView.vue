@@ -2,9 +2,9 @@
 import { onMounted, ref } from 'vue'
 
 import CreateTokenizationForm from './CreateTokenizationForm.vue'
-import { type PostTokenizationRequest, client } from './apiClient'
+import { type LlmModel, client } from './apiClient'
 
-const availableLlmModels = ref<PostTokenizationRequest['llm_model'][]>([])
+const availableLlmModels = ref<LlmModel[]>([])
 
 const defaultSystemPrompt = ref('')
 
@@ -16,7 +16,7 @@ Ils sont prêts à aller jouer dehors.`)
 
 onMounted(async () => {
   const systemPromptPromise = client.GET('/api/tokenization/default-system-prompt')
-  const llmModelsPromise = client.GET('/api/tokenization/available-llm-models')
+  const llmModelsPromise = client.GET('/api/available-llm-models')
 
   const systemPromptResponse = await systemPromptPromise
   if (systemPromptResponse.data !== undefined) {

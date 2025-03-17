@@ -4,5 +4,6 @@ import type { paths } from './openapi'
 
 export const client = createClient<paths>()
 
-export type PostTokenizationRequest = paths['/api/tokenization']['post']['requestBody']['content']['application/json']
+export type LlmModel =
+  paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
 export type Tokenization = paths['/api/tokenization/{id}']['get']['responses']['200']['content']['application/json']

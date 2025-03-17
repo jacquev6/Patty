@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import { type PostTokenizationRequest, client } from './apiClient'
+import { type LlmModel, client } from './apiClient'
 import assert from './assert'
 import { useRouter } from 'vue-router'
 import TextArea from './TextArea.vue'
 import Busy from './BusyBox.vue'
 
 const props = defineProps<{
-  availableLlmModels: PostTokenizationRequest['llm_model'][]
+  availableLlmModels: LlmModel[]
   defaultSystemPrompt: string
   defaultInputText: string
 }>()
@@ -18,7 +18,7 @@ const router = useRouter()
 const availableLlmModels = computed(() => props.availableLlmModels)
 
 assert(availableLlmModels.value.length !== 0)
-const llmModel = ref<PostTokenizationRequest['llm_model']>(availableLlmModels.value[0])
+const llmModel = ref<LlmModel>(availableLlmModels.value[0])
 
 watch(availableLlmModels, (availableLlmModels) => {
   llmModel.value = availableLlmModels[0]

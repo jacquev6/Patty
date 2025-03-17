@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+  '/api/available-llm-models': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Available Llm Models */
+    get: operations['get_available_llm_models_api_available_llm_models_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/tokenization/default-system-prompt': {
     parameters: {
       query?: never
@@ -13,23 +30,6 @@ export interface paths {
     }
     /** Get Default Tokenization System Prompt */
     get: operations['get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/tokenization/available-llm-models': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Available Llm Models */
-    get: operations['get_available_llm_models_api_tokenization_available_llm_models_get']
     put?: never
     post?: never
     delete?: never
@@ -308,27 +308,7 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': string
-        }
-      }
-    }
-  }
-  get_available_llm_models_api_tokenization_available_llm_models_get: {
+  get_available_llm_models_api_available_llm_models_get: {
     parameters: {
       query?: never
       header?: never
@@ -348,6 +328,26 @@ export interface operations {
             | components['schemas']['MistralAiModel']
             | components['schemas']['OpenAiModel']
           )[]
+        }
+      }
+    }
+  }
+  get_default_tokenization_system_prompt_api_tokenization_default_system_prompt_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': string
         }
       }
     }
