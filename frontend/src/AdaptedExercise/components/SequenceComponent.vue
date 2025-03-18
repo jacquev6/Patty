@@ -1,0 +1,27 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+import type { Component } from '@/apiClient'
+import LineComponent from './LineComponent.vue'
+
+const props = defineProps<{
+  kind: 'sequence'
+  contents: Component[]
+  bold: boolean
+  italic: boolean
+  highlighted: string | null
+  boxed: boolean
+  vertical: boolean
+}>()
+
+const style = computed(() => ({
+  backgroundColor: props.highlighted ?? undefined,
+  fontWeight: props.bold ? 'bold' : undefined,
+  fontStyle: props.italic ? 'italic' : undefined,
+  border: props.boxed ? '1px solid black' : undefined,
+}))
+</script>
+
+<template>
+  <span :style><LineComponent :contents /></span>
+</template>

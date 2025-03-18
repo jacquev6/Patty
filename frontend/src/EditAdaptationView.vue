@@ -4,12 +4,12 @@ import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
 
 import { client, type Adaptation } from './apiClient'
-import AdaptationRender from './AdaptationRender.vue'
+import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import ThreeColumns from './ThreeColumns.vue'
 import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
-import Busy from './BusyBox.vue'
+import BusyBox from './BusyBox.vue'
 import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
 
 const props = defineProps<{
@@ -35,7 +35,7 @@ const systemPrompt = computed(() => {
   } else {
     assert(adaptation.value.steps.length > 0)
     assert(adaptation.value.steps[0].kind === 'initial')
-    return adaptation.value.steps[0].system_prompt
+    return adaptation.value.steps[0].systemPrompt
   }
 })
 
@@ -45,18 +45,18 @@ const inputText = computed(() => {
   } else {
     assert(adaptation.value.steps.length > 0)
     assert(adaptation.value.steps[0].kind === 'initial')
-    return adaptation.value.steps[0].input_text
+    return adaptation.value.steps[0].inputText
   }
 })
 
-type AdaptedExercise = Adaptation['steps'][number]['adapted_exercise']
+type AdaptedExercise = Adaptation['steps'][number]['adaptedExercise']
 
 const llmAdaptedExercise = computed(() => {
   if (adaptation.value === null) {
     return null
   } else {
     assert(adaptation.value.steps.length > 0)
-    return adaptation.value.steps.map((step) => step.adapted_exercise).reduce((old, now) => now ?? old) ?? null
+    return adaptation.value.steps.map((step) => step.adaptedExercise).reduce((old, now) => now ?? old) ?? null
   }
 })
 
@@ -158,7 +158,7 @@ async function rewindLastStep() {
   <ThreeColumns v-if="adaptation !== null">
     <template #left>
       <h1>LLM model</h1>
-      <p>{{ adaptation.llm_model.provider }}: {{ adaptation.llm_model.name }}</p>
+      <p>{{ adaptation.llmModel.provider }}: {{ adaptation.llmModel.name }}</p>
       <h1>System prompt</h1>
       <MarkDown :markdown="systemPrompt" />
     </template>
@@ -167,10 +167,10 @@ async function rewindLastStep() {
       <h1>Input text</h1>
       <MarkDown :markdown="inputText" />
       <h1>Adjustments</h1>
-      <Busy :busy>
+      <BusyBox :busy>
         <template v-for="(step, stepIndex) in adaptation.steps">
           <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
-            <MarkDown :markdown="step.user_prompt" style="flex-grow: 1" />
+            <MarkDown :markdown="step.userPrompt" style="flex-grow: 1" />
             <!-- @todo Add a button letting the user display the adaptation returned during that step (only if an adaptation was returned) -->
             <div
               v-if="stepIndex === adaptation.steps.length - 1"
@@ -181,17 +181,19 @@ async function rewindLastStep() {
               ❌
             </div>
           </div>
-          <MarkDown class="assistant-prose" :markdown="step.assistant_prose" />
+          <MarkDown class="assistant-prose" :markdown="step.assistantProse" />
         </template>
         <div v-if="manualAdaptedExercise === null" class="user-prompt">
           <TextArea v-model="adjustment"></TextArea>
           <p><button @click="submit" :disabled>Submit</button></p>
         </div>
-      </Busy>
+      </BusyBox>
     </template>
     <template #right>
       <h1>Adapted exercise</h1>
-      <AdaptationRender v-if="adaptedExercise !== null" :adaptedExercise />
+      <template v-if="adaptedExercise !== null">
+        <AdaptedExerciseRenderer :adaptedExercise />
+      </template>
       <template v-else-if="manualAdaptedExercise !== null">
         <template v-if="manualAdaptedExercise.syntaxError !== null">
           <h2>Syntax error</h2>

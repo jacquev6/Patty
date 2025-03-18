@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, TypeVar
 import fastapi
 import textwrap
 import uuid
@@ -16,8 +16,84 @@ router = fastapi.APIRouter()
 
 
 class AdaptedExercise(pydantic.BaseModel):
-    instructions: str
-    wording: str
+    format: Literal["v1"]
+    instructions: Page[PassiveComponent]
+    wording: Pages[AnyComponent]
+    references: Line[PassiveComponent] | None
+
+
+Component = TypeVar("Component")
+
+
+class Pages[Component](pydantic.BaseModel):
+    pages: list[Page[Component]]
+
+
+class Page[Component](pydantic.BaseModel):
+    lines: list[Line[Component]]
+
+
+class Line[Component](pydantic.BaseModel):
+    contents: list[Component]
+
+
+class Text(pydantic.BaseModel):
+    kind: Literal["text"]
+    text: str
+
+
+class Whitespace(pydantic.BaseModel):
+    kind: Literal["whitespace"]
+
+
+class Arrow(pydantic.BaseModel):
+    kind: Literal["arrow"]
+
+
+# @todo Find a way to define a generic Sequence[Component] type. Currently this breaks the polyfactory used in llm.dummy.
+# In the mean time, keep PassiveSequence and AnySequence consistent.
+class PassiveSequence(pydantic.BaseModel):
+    kind: Literal["sequence"]
+    contents: list[PassiveComponent]
+    bold: bool
+    italic: bool
+    highlighted: str | None
+    boxed: bool
+    vertical: bool
+
+
+PassiveComponent = Text | Whitespace | Arrow | PassiveSequence
+
+
+class FreeTextInput(pydantic.BaseModel):
+    kind: Literal["freeTextInput"]
+
+
+class MultipleChoicesInput(pydantic.BaseModel):
+    kind: Literal["multipleChoicesInput"]
+    choices: list[Line[PassiveComponent]]
+    showChoicesByDefault: bool
+
+
+class SelectableInput(pydantic.BaseModel):
+    kind: Literal["selectableInput"]
+    contents: Line[PassiveComponent]
+    colors: list[str]
+    boxed: bool
+
+
+# Keep AnySequence and PassiveSequence consistent.
+class AnySequence(pydantic.BaseModel):
+    kind: Literal["sequence"]
+    contents: list[AnyComponent]
+    bold: bool
+    italic: bool
+    highlighted: str | None
+    boxed: bool
+    vertical: bool
+
+
+AnyComponent = PassiveComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence
 
 
 LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[AdaptedExercise]
@@ -25,19 +101,19 @@ LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[AdaptedE
 
 class InitialStep(pydantic.BaseModel):
     kind: Literal["initial"]
-    system_prompt: str
-    input_text: str
+    systemPrompt: str
+    inputText: str
     messages: list[LlmMessage]
-    assistant_prose: str
-    adapted_exercise: AdaptedExercise | None
+    assistantProse: str
+    adaptedExercise: AdaptedExercise | None
 
 
 class AdjustmentStep(pydantic.BaseModel):
     kind: Literal["adjustment"]
-    user_prompt: str
+    userPrompt: str
     messages: list[LlmMessage]
-    assistant_prose: str
-    adapted_exercise: AdaptedExercise | None
+    assistantProse: str
+    adaptedExercise: AdaptedExercise | None
 
 
 Step = InitialStep | AdjustmentStep
@@ -46,7 +122,7 @@ Step = InitialStep | AdjustmentStep
 class Adaptation(pydantic.BaseModel):
     id: str
     # Abstract type `llm.AbstractModel` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
-    llm_model: llm.ConcreteModel
+    llmModel: llm.ConcreteModel
     steps: list[Step]
 
 
@@ -80,34 +156,34 @@ def get_default_system_prompt() -> str:
 
 
 class PostAdaptationRequest(pydantic.BaseModel):
-    llm_model: llm.ConcreteModel
+    llmModel: llm.ConcreteModel
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed
-    system_prompt: str
-    input_text: str
+    systemPrompt: str
+    inputText: str
 
 
 @router.post("")
 async def post_adaptation(req: PostAdaptationRequest) -> Adaptation:
     adaptation_id = str(uuid.uuid4())
 
-    messages: list[LlmMessage] = [llm.SystemMessage(message=req.system_prompt), llm.UserMessage(message=req.input_text)]
+    messages: list[LlmMessage] = [llm.SystemMessage(message=req.systemPrompt), llm.UserMessage(message=req.inputText)]
 
-    response = await req.llm_model.complete(messages, AdaptedExercise)
+    response = await req.llmModel.complete(messages, AdaptedExercise)
     messages.append(response)
 
     adaptation = Adaptation(
         id=adaptation_id,
-        llm_model=req.llm_model,
+        llmModel=req.llmModel,
         steps=[
             InitialStep(
                 kind="initial",
-                system_prompt=req.system_prompt,
-                input_text=req.input_text,
+                systemPrompt=req.systemPrompt,
+                inputText=req.inputText,
                 messages=messages,
-                assistant_prose=response.prose,
-                adapted_exercise=response.structured,
+                assistantProse=response.prose,
+                adaptedExercise=response.structured,
             )
         ],
     )
@@ -134,16 +210,16 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
         previous_messages.extend(step.messages)
     step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
-    response = await adaptation.llm_model.complete(previous_messages + step_messages, AdaptedExercise)
+    response = await adaptation.llmModel.complete(previous_messages + step_messages, AdaptedExercise)
     step_messages.append(response)
 
     adaptation.steps.append(
         AdjustmentStep(
             kind="adjustment",
-            user_prompt=req.adjustment,
+            userPrompt=req.adjustment,
             messages=step_messages,
-            assistant_prose=response.prose,
-            adapted_exercise=response.structured,
+            assistantProse=response.prose,
+            adaptedExercise=response.structured,
         )
     )
 

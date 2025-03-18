@@ -14,4 +14,4 @@ else
   display_option="--env DISPLAY"
 fi
 
-../docker-compose.sh exec $display_option frontend-shell npx cypress open --component
+../docker-compose.sh exec --env PATTY_UNIT_TESTING=true $display_option frontend-shell npx cypress open --component

@@ -9,7 +9,7 @@ import ThreeColumns from './ThreeColumns.vue'
 import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
-import Busy from './BusyBox.vue'
+import BusyBox from './BusyBox.vue'
 import tokenizedTextSchema from '../../backend/tokenized-text-schema.json'
 
 const props = defineProps<{
@@ -168,7 +168,7 @@ async function rewindLastStep() {
       <h1>Input text</h1>
       <MarkDown :markdown="inputText" />
       <h1>Adjustments</h1>
-      <Busy :busy>
+      <BusyBox :busy>
         <template v-for="(step, stepIndex) in tokenization.steps">
           <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
             <MarkDown :markdown="step.user_prompt" style="flex-grow: 1" />
@@ -187,7 +187,7 @@ async function rewindLastStep() {
           <TextArea v-model="adjustment"></TextArea>
           <p><button @click="submit" :disabled>Submit</button></p>
         </div>
-      </Busy>
+      </BusyBox>
     </template>
     <template #right>
       <h1>Tokenized text</h1>

@@ -199,8 +199,8 @@ export interface components {
     Adaptation: {
       /** Id */
       id: string
-      /** Llm Model */
-      llm_model:
+      /** Llmmodel */
+      llmModel:
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
@@ -212,10 +212,51 @@ export interface components {
     }
     /** AdaptedExercise */
     AdaptedExercise: {
-      /** Instructions */
-      instructions: string
-      /** Wording */
-      wording: string
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
+      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
+      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
+    }
+    /** AnySequence */
+    AnySequence: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'sequence'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput']
+        | components['schemas']['SelectableInput']
+        | components['schemas']['AnySequence']
+      )[]
+      /** Bold */
+      bold: boolean
+      /** Italic */
+      italic: boolean
+      /** Highlighted */
+      highlighted: string | null
+      /** Boxed */
+      boxed: boolean
+      /** Vertical */
+      vertical: boolean
+    }
+    /** Arrow */
+    Arrow: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'arrow'
     }
     /** AssistantMessage[AdaptedExercise] */
     AssistantMessage_AdaptedExercise_: {
@@ -255,10 +296,42 @@ export interface components {
        */
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
     }
+    /** FreeTextInput */
+    FreeTextInput: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'freeTextInput'
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence]] */
+    Line_Union_Text__Whitespace__Arrow__PassiveSequence__: {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+      )[]
+    }
+    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput']
+        | components['schemas']['SelectableInput']
+        | components['schemas']['AnySequence']
+      )[]
     }
     /** MistralAiModel */
     MistralAiModel: {
@@ -274,6 +347,18 @@ export interface components {
        */
       name: 'mistral-large-2411' | 'mistral-small-2501'
     }
+    /** MultipleChoicesInput */
+    MultipleChoicesInput: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'multipleChoicesInput'
+      /** Choices */
+      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'][]
+      /** Showchoicesbydefault */
+      showChoicesByDefault: boolean
+    }
     /** OpenAiModel */
     OpenAiModel: {
       /**
@@ -288,6 +373,46 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
+    /** Page[Union[Text, Whitespace, Arrow, PassiveSequence]] */
+    Page_Union_Text__Whitespace__Arrow__PassiveSequence__: {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'][]
+    }
+    /** Page[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+    }
+    /** Pages[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+      /** Pages */
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+    }
+    /** PassiveSequence */
+    PassiveSequence: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'sequence'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+      )[]
+      /** Bold */
+      bold: boolean
+      /** Italic */
+      italic: boolean
+      /** Highlighted */
+      highlighted: string | null
+      /** Boxed */
+      boxed: boolean
+      /** Vertical */
+      vertical: boolean
+    }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {
       /** Adjustment */
@@ -295,15 +420,15 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
-      /** Llm Model */
-      llm_model:
+      /** Llmmodel */
+      llmModel:
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
+      /** Systemprompt */
+      systemPrompt: string
+      /** Inputtext */
+      inputText: string
     }
     /** PostTokenizationAdjustmentRequest */
     PostTokenizationAdjustmentRequest: {
@@ -332,6 +457,19 @@ export interface components {
       /** Text */
       text: string
     }
+    /** SelectableInput */
+    SelectableInput: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'selectableInput'
+      contents: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__']
+      /** Colors */
+      colors: string[]
+      /** Boxed */
+      boxed: boolean
+    }
     /** Sentence */
     Sentence: {
       /** Tokens */
@@ -347,6 +485,16 @@ export interface components {
       role: 'system'
       /** Message */
       message: string
+    }
+    /** Text */
+    Text: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'text'
+      /** Text */
+      text: string
     }
     /** Tokenization */
     Tokenization: {
@@ -388,6 +536,14 @@ export interface components {
       /** Error Type */
       type: string
     }
+    /** Whitespace */
+    Whitespace: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'whitespace'
+    }
     /** Word */
     Word: {
       /**
@@ -405,17 +561,17 @@ export interface components {
        * @constant
        */
       kind: 'adjustment'
-      /** User Prompt */
-      user_prompt: string
+      /** Userprompt */
+      userPrompt: string
       /** Messages */
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
         | components['schemas']['AssistantMessage_AdaptedExercise_']
       )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      adapted_exercise: components['schemas']['AdaptedExercise'] | null
+      /** Assistantprose */
+      assistantProse: string
+      adaptedExercise: components['schemas']['AdaptedExercise'] | null
     }
     /** InitialStep */
     patty__adaptation__InitialStep: {
@@ -424,19 +580,19 @@ export interface components {
        * @constant
        */
       kind: 'initial'
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
+      /** Systemprompt */
+      systemPrompt: string
+      /** Inputtext */
+      inputText: string
       /** Messages */
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
         | components['schemas']['AssistantMessage_AdaptedExercise_']
       )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      adapted_exercise: components['schemas']['AdaptedExercise'] | null
+      /** Assistantprose */
+      assistantProse: string
+      adaptedExercise: components['schemas']['AdaptedExercise'] | null
     }
     /** AdjustmentStep */
     patty__tokenization__AdjustmentStep: {
