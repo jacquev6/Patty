@@ -11,6 +11,7 @@ import assert from './assert'
 import MarkDown from './MarkDown.vue'
 import BusyBox from './BusyBox.vue'
 import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
+import MiniatureScreen from './MiniatureScreen.vue'
 
 const props = defineProps<{
   id: string
@@ -152,6 +153,8 @@ async function rewindLastStep() {
     adaptation.value = response.data
   }
 }
+
+const fullScreen = ref(false)
 </script>
 
 <template>
@@ -192,7 +195,10 @@ async function rewindLastStep() {
     <template #right>
       <h1>Adapted exercise</h1>
       <template v-if="adaptedExercise !== null">
-        <AdaptedExerciseRenderer :adaptedExercise />
+        <MiniatureScreen v-model:fullScreen="fullScreen">
+          <AdaptedExerciseRenderer :adaptedExercise />
+        </MiniatureScreen>
+        <button @click="fullScreen = true">Full screen</button>
       </template>
       <template v-else-if="manualAdaptedExercise !== null">
         <template v-if="manualAdaptedExercise.syntaxError !== null">

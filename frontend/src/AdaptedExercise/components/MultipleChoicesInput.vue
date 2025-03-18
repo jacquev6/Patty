@@ -69,14 +69,17 @@ const choicesLines = computed(() => {
   return lines
 })
 
-const teleportBackdropTo = inject<string>('adaptedExerciseTeleportBackdropTo', 'body')
+const teleportBackdropTo = inject<string /* or anything that can be passed to 'Teleport:to' */>(
+  'adaptedExerciseTeleportBackdropTo',
+  'body',
+)
 </script>
 
 <template>
   <span ref="floatingReference" data-cy="multipleChoicesInput" @click="showChoices = !showChoices">
     <LineComponent :contents="currentChoice.contents" />
   </span>
-  <Teleport v-if="showChoices" :to="teleportBackdropTo">
+  <Teleport v-if="showChoices && teleportBackdropTo !== null" :to="teleportBackdropTo">
     <div data-cy="backdrop" v-if="showBackdrop" class="backdrop" @click="showChoices = false"></div>
     <div ref="floatingElement" :style="floatingStyles">
       <p v-for="choicesLine in choicesLines">
