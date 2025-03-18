@@ -11,13 +11,19 @@ import WhitespaceComponent from './WhitespaceComponent.vue'
 defineProps<{
   component: Component
 }>()
+
+const model = defineModel<string | number>()
 </script>
 
 <template>
   <ArrowComponent v-if="component.kind === 'arrow'" v-bind="component" />
-  <FreeTextInput v-else-if="component.kind === 'freeTextInput'" v-bind="component" />
-  <MultipleChoicesInput v-else-if="component.kind === 'multipleChoicesInput'" v-bind="component" />
-  <SelectableInput v-else-if="component.kind === 'selectableInput'" v-bind="component" />
+  <FreeTextInput v-else-if="component.kind === 'freeTextInput'" v-bind="component" v-model="model as string" />
+  <MultipleChoicesInput
+    v-else-if="component.kind === 'multipleChoicesInput'"
+    v-bind="component"
+    v-model="model as number"
+  />
+  <SelectableInput v-else-if="component.kind === 'selectableInput'" v-bind="component" v-model="model as number" />
   <SequenceComponent v-else-if="component.kind === 'sequence'" v-bind="component" />
   <TextComponent v-else-if="component.kind === 'text'" v-bind="component" />
   <WhitespaceComponent v-else-if="component.kind === 'whitespace'" v-bind="component" />
