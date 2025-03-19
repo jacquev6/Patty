@@ -14,6 +14,7 @@ const rendered = computed(() => marked(props.markdown))
 </template>
 
 <style scoped>
+:deep(pre),
 :deep(code) {
   background-color: lightgrey;
 }
