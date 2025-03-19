@@ -33,21 +33,22 @@ watch(
 </script>
 
 <template>
-  <div ref="container">
-    <PageNavigationControls :pagesCount v-model="page">
-      <p v-for="{ contents } in adaptedExercise.instructions.lines">
-        <LineComponent :contents />
-      </p>
+  <PageNavigationControls :pagesCount v-model="page">
+    <p v-for="{ contents } in adaptedExercise.instructions.lines">
+      <LineComponent :contents />
+    </p>
+    <div ref="container">
       <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
         <LineComponent :contents v-model="model[page][lineIndex]" />
       </p>
-    </PageNavigationControls>
-  </div>
+    </div>
+  </PageNavigationControls>
 </template>
 
 <style scoped>
 div {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  transform: scale(1); /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
 }
 </style>
