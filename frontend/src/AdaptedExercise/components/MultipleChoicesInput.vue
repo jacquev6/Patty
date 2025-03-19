@@ -14,6 +14,7 @@ const props = defineProps<{
   kind: 'multipleChoicesInput'
   choices: Line[]
   showChoicesByDefault: boolean
+  tricolorable: boolean
 }>()
 
 const model = defineModel<number | null>({ default: null })
@@ -78,7 +79,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 <template>
   <div style="display: inline flow-root; vertical-align: top">
     <p ref="floatingReference" data-cy="multipleChoicesInput" class="main" @click="showChoices = !showChoices">
-      <LineComponent :contents="currentChoice.contents" />
+      <LineComponent :contents="currentChoice.contents" :tricolorable />
     </p>
     <!-- Ensure the floating choices does not cover next line -->
     <div style="max-width: 0; visibility: hidden">
@@ -93,7 +94,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
         <template v-for="(choice, choiceIndex) in choicesLine">
           <WhitespaceComponent v-if="choiceIndex !== 0" kind="whitespace" />
           <span :data-cy="`choice${choice.index}`" @click="set(choice.index)" :class="`color-${choice.colorIndex}`">
-            <LineComponent :contents="choice.content.contents" />
+            <LineComponent :contents="choice.content.contents" :tricolorable="false" />
           </span>
         </template>
       </p>

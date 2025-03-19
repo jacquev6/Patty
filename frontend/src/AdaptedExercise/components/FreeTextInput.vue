@@ -6,6 +6,7 @@ import assert from '@/assert'
 
 defineProps<{
   kind: 'freeTextInput'
+  tricolorable: boolean
 }>()
 
 const model = defineModel<string>({ default: '' })
@@ -43,7 +44,7 @@ function forbidNewlines(event: KeyboardEvent) {
     contenteditable
     @input="updateModel"
     @keypress="forbidNewlines"
-    :class="{ empty: model === '' }"
+    :class="{ empty: model === '', tricolorable }"
   ></span>
 </template>
 

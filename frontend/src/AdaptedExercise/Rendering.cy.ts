@@ -3,6 +3,7 @@ import MultipleChoicesInput from './components/MultipleChoicesInput.vue'
 import SelectableInput from './components/SelectableInput.vue'
 import FreeTextInput from './components/FreeTextInput.vue'
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
+import TriColorLines from './TriColorLines.vue'
 
 const screenshotsCounts: Record<string, number> = {}
 
@@ -35,6 +36,7 @@ describe('SequenceComponent', () => {
         highlighted: null,
         boxed: false,
         vertical: false,
+        tricolorable: false,
       },
     })
 
@@ -93,6 +95,7 @@ describe('SequenceComponent', () => {
         highlighted: null,
         boxed: false,
         vertical: false,
+        tricolorable: false,
       },
     })
 
@@ -119,6 +122,7 @@ describe('SelectableInput', () => {
         },
         colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
         boxed: false,
+        tricolorable: false,
       },
     })
 
@@ -144,7 +148,7 @@ describe('FreeTextInput', () => {
   it('accepts text input', () => {
     cy.viewport(120, 30)
 
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput' } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -159,7 +163,7 @@ describe('FreeTextInput', () => {
   })
 
   it('refuses new lines', () => {
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput' } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
@@ -186,7 +190,9 @@ describe('MultipleChoicesInput', () => {
   it('selects choices', () => {
     cy.viewport(140, 120)
 
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+    })
 
     screenshot()
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -210,7 +216,9 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on backdrop', () => {
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+    })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
     cy.get('[data-cy="choice0"]').should('not.exist')
@@ -222,7 +230,9 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on main span', () => {
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true, tricolorable: false },
+    })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
     cy.get('[data-cy="choice0"]').should('exist')
@@ -307,6 +317,35 @@ describe('MultipleChoicesInput', () => {
           },
           references: null,
         },
+      },
+    })
+
+    screenshot()
+  })
+})
+
+describe('TriColorLines', () => {
+  beforeEach(console.clear)
+
+  it('renders lines in alternating colors', () => {
+    cy.viewport(150, 300)
+
+    cy.mount(TriColorLines, {
+      slots: {
+        default:
+          '<p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p>',
+      },
+    })
+
+    screenshot()
+  })
+
+  it('warns about nested tricolorables', () => {
+    cy.viewport(250, 60)
+
+    cy.mount(TriColorLines, {
+      slots: {
+        default: '<p><span class="tricolorable">B<span><span class="tricolorable">la</span></span>h</span></p>',
       },
     })
 

@@ -12,6 +12,7 @@ const props = defineProps<{
   highlighted: string | null
   boxed: boolean
   vertical: boolean
+  tricolorable: boolean
 }>()
 
 const style = computed(() => ({
@@ -23,5 +24,5 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <span :style><LineComponent :contents /></span>
+  <span :style><LineComponent :contents :tricolorable /></span>
 </template>

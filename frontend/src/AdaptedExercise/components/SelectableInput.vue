@@ -8,6 +8,7 @@ const props = defineProps<{
   kind: 'selectableInput'
   contents: Line
   colors: string[]
+  tricolorable: boolean
 }>()
 
 const colorIndex = defineModel<number>({ default: 0 })
@@ -28,7 +29,7 @@ const contents = computed(() => ({
 </script>
 
 <template>
-  <SequenceComponent class="main" v-bind="contents" data-cy="selectableInput" @click="increment()" />
+  <SequenceComponent class="main" v-bind="contents" :tricolorable data-cy="selectableInput" @click="increment()" />
 </template>
 
 <style scoped>

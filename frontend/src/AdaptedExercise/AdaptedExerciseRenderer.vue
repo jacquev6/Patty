@@ -4,6 +4,7 @@ import { computed, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 import type { AdaptedExercise } from '@/apiClient'
 import LineComponent from './components/LineComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
+import TriColorLines from './TriColorLines.vue'
 
 const props = defineProps<{
   adaptedExercise: AdaptedExercise
@@ -35,12 +36,14 @@ watch(
 <template>
   <PageNavigationControls :pagesCount v-model="page">
     <p v-for="{ contents } in adaptedExercise.instructions.lines">
-      <LineComponent :contents />
+      <LineComponent :contents :tricolorable="false" />
     </p>
     <div ref="container">
-      <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
-        <LineComponent :contents v-model="model[page][lineIndex]" />
-      </p>
+      <TriColorLines>
+        <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
+          <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
+        </p>
+      </TriColorLines>
     </div>
   </PageNavigationControls>
 </template>
