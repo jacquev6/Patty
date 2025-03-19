@@ -76,8 +76,15 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 </script>
 
 <template>
-  <span ref="floatingReference" data-cy="multipleChoicesInput" @click="showChoices = !showChoices">
-    <LineComponent :contents="currentChoice.contents" />
+  <span style="display: inline flow-root; vertical-align: top">
+    <span ref="floatingReference" data-cy="multipleChoicesInput" class="main" @click="showChoices = !showChoices">
+      <LineComponent :contents="currentChoice.contents" />
+    </span>
+    <!-- Ensure the floating choices does not cover next line -->
+    <span style="display: block; visibility: hidden; max-width: 0">
+      <span style="display: block; margin-top: 1rem">Blah</span>
+      <span style="display: block; margin-top: 1rem">Blah</span>
+    </span>
   </span>
   <Teleport v-if="showChoices && teleportBackdropTo !== null" :to="teleportBackdropTo">
     <div data-cy="backdrop" v-if="showBackdrop" class="backdrop" @click="showChoices = false"></div>

@@ -2,8 +2,7 @@ import SequenceComponent from './components/SequenceComponent.vue'
 import MultipleChoicesInput from './components/MultipleChoicesInput.vue'
 import SelectableInput from './components/SelectableInput.vue'
 import FreeTextInput from './components/FreeTextInput.vue'
-
-import type { Line } from '@/apiClient'
+import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
 
 const screenshotsCounts: Record<string, number> = {}
 
@@ -172,15 +171,15 @@ describe('FreeTextInput', () => {
 describe('MultipleChoicesInput', () => {
   beforeEach(console.clear)
 
-  const choices: Line[] = [
+  const choices = [
     {
-      contents: [{ kind: 'text', text: 'Alpha' }],
+      contents: [{ kind: 'text' as const, text: 'Alpha' }],
     },
     {
-      contents: [{ kind: 'text', text: 'Bravo' }],
+      contents: [{ kind: 'text' as const, text: 'Bravo' }],
     },
     {
-      contents: [{ kind: 'text', text: 'Charlie' }],
+      contents: [{ kind: 'text' as const, text: 'Charlie' }],
     },
   ]
 
@@ -231,5 +230,51 @@ describe('MultipleChoicesInput', () => {
     cy.get('@input').click()
     cy.get('@input').should('have.text', '....')
     cy.get('[data-cy="choice0"]').should('not.exist')
+  })
+
+  it('moves next lines down', () => {
+    cy.viewport(300, 270)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instructions: {
+            lines: [],
+          },
+          wording: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Hello' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Good' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bye' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          references: null,
+        },
+      },
+    })
+
+    screenshot()
   })
 })
