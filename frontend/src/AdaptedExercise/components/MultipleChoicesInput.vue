@@ -102,6 +102,10 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 </template>
 
 <style scoped>
+.main {
+  cursor: pointer;
+}
+
 div.backdrop {
   position: absolute;
   top: 0;

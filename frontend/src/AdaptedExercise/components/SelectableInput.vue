@@ -28,5 +28,11 @@ const contents = computed(() => ({
 </script>
 
 <template>
-  <SequenceComponent v-bind="contents" data-cy="selectableInput" @click="increment()" />
+  <SequenceComponent class="main" v-bind="contents" data-cy="selectableInput" @click="increment()" />
 </template>
+
+<style scoped>
+.main {
+  cursor: pointer;
+}
+</style>
