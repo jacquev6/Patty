@@ -133,9 +133,7 @@ adaptations: dict[str, Adaptation] = {}
 default_system_prompt = textwrap.dedent(
     """\
     Le premier message de l'utilisateur sera un exercice scolaire.
-    Tu dois répondre en séparant et explicitant la consigne et l'énoncé de cet exercice.
-    On appelle cette opération une "adaptation".
-
+    Ta mission est de fournir une "adaptation" de cet exercice.
     Tu ne dois jamais résoudre les exercices, seulement les adapter.
 
     Dans ses messages suivants, l'utilisateur te demandera de faire des ajustements à ta réponse.
@@ -143,11 +141,144 @@ default_system_prompt = textwrap.dedent(
     en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
     Le format pour tes réponses comporte deux champs: `prose` et `structured`.
-    Tu dois utiliser `prose` pour interagir avec l'utilisateur, et `structured` pour renvoyer la séparation.
-    Par exemple, si les instructions sont ambiguës, ou contradictoire, tu peux demander des clarifications dans `prose`.
-    Tu peux aussi utiliser `prose` pour décrire brièvement les ajustements que tu as faits.
+    Tu dois utiliser `prose` pour interagir avec l'utilisateur.
     Tu dois utiliser `structured` pour renvoyer l'adaptation de l'exercice initial, après les ajustements demandés par l'utilisateur.
-    Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation."""
+    Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation.
+
+    Dans le champs `structured`, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
+    Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
+
+    Voici un exemple. Si l'exercice initial est :
+
+    ```
+    2 Complète avec "l'herbe" ou "les chats"
+    a. Les vaches mangent ...
+    b. Les chiens courent après ...
+    ```
+
+    Alors une adaptation possible est :
+
+    ```
+    {
+      "format": "v1",
+      "instructions": {
+        "lines": [
+          {
+            "contents": [
+              {"kind": "text", "text": "Complète"},
+              {"kind": "whitespace"},
+              {"kind": "text", "text": "avec"},
+              {"kind": "whitespace"},
+              {
+                "kind": "sequence",
+                "contents": [
+                  {"kind": "text", "text": "l'"},
+                  {"kind": "text", "text": "herbe"}
+                ],
+                "bold": false,
+                "italic": false,
+                "highlighted": null,
+                "boxed": true,
+                "vertical": false
+              },
+              {"kind": "whitespace"},
+              {"kind": "text", "text": "ou"},
+              {"kind": "whitespace"},
+              {
+                "kind": "sequence",
+                "contents": [
+                  {"kind": "text", "text": "les"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "chats"}
+                ],
+                "bold": false,
+                "italic": false,
+                "highlighted": null,
+                "boxed": true,
+                "vertical": false
+              }
+            ]
+          }
+        ]
+      },
+      "wording": {
+        "pages": [
+          {
+            "lines": [
+              {
+                "contents": [
+                  {"kind": "text", "text": "a"},
+                  {"kind": "text", "text": "."},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "Les"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "vaches"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "mangent"},
+                  {"kind": "whitespace"},
+                  {
+                    "kind": "multipleChoicesInput",
+                    "choices": [
+                      {
+                        "contents": [
+                          {"kind": "text", "text": "l'"},
+                          {"kind": "text", "text": "herbe"}
+                        ]
+                      },
+                      {
+                        "contents": [
+                          {"kind": "text", "text": "les"},
+                          {"kind": "whitespace"},
+                          {"kind": "text", "text": "chats"}
+                        ]
+                      }
+                    ],
+                    "showChoicesByDefault": false
+                  }
+                ]
+              },
+              {
+                "contents": [
+                  {"kind": "text", "text": "b"},
+                  {"kind": "text", "text": "."},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "Les"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "chiens"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "courent"},
+                  {"kind": "whitespace"},
+                  {"kind": "text", "text": "après"},
+                  {"kind": "whitespace"},
+                  {
+                    "kind": "multipleChoicesInput",
+                    "choices": [
+                      {
+                        "contents": [
+                          {"kind": "text", "text": "l'"},
+                          {"kind": "text", "text": "herbe"}
+                        ]
+                      },
+                      {
+                        "contents": [
+                          {"kind": "text", "text": "les"},
+                          {"kind": "whitespace"},
+                          {"kind": "text", "text": "chats"}
+                        ]
+                      }
+                    ],
+                    "showChoicesByDefault": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "references": null
+    }
+    ```
+    """
 )
 
 

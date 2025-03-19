@@ -8,12 +8,10 @@ const availableLlmModels = ref<LlmModel[]>([])
 
 const defaultSystemPrompt = ref('')
 
-const defaultInputText = ref(`2 Dans chaque liste, un verbe n’est pas au futur. Recopie chaque liste sans l’intrus.
-a. il établira • il dansera • il finira • il marcha
-b. je surgirai • j’accomplirai • je jouais •
-je mangerai
-c. nous bougeons • nous déménagerons •
-nous agrandirons • nous visiterons`)
+const defaultInputText = ref(`5 Complète avec "le vent" ou "la pluie"
+a. Les feuilles sont chahutées par ...
+b. Les vitres sont mouillées par ...
+`)
 
 onMounted(async () => {
   const systemPromptPromise = client.GET('/api/adaptation/default-system-prompt')
