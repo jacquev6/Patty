@@ -17,7 +17,7 @@ describe('SequenceComponent', () => {
   beforeEach(console.clear)
 
   it('renders plain text and whitespace', () => {
-    cy.viewport(180, 40)
+    cy.viewport(150, 30)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -42,7 +42,7 @@ describe('SequenceComponent', () => {
   })
 
   it('renders formatting', () => {
-    cy.viewport(270, 40)
+    cy.viewport(230, 30)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -104,7 +104,7 @@ describe('SelectableInput', () => {
   beforeEach(console.clear)
 
   it('changes color on click', () => {
-    cy.viewport(100, 40)
+    cy.viewport(80, 30)
 
     cy.mount(SelectableInput, {
       props: {
@@ -142,7 +142,7 @@ describe('FreeTextInput', () => {
   beforeEach(console.clear)
 
   it('accepts text input', () => {
-    cy.viewport(150, 40)
+    cy.viewport(120, 30)
 
     cy.mount(FreeTextInput, { props: { kind: 'freeTextInput' } })
 
@@ -184,7 +184,7 @@ describe('MultipleChoicesInput', () => {
   ]
 
   it('selects choices', () => {
-    cy.viewport(200, 130)
+    cy.viewport(140, 120)
 
     cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false } })
 
@@ -233,7 +233,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('moves next lines down', () => {
-    cy.viewport(300, 270)
+    cy.viewport(230, 270)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -279,7 +279,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('does not render choices over the page navigation controls', () => {
-    cy.viewport(300, 270)
+    cy.viewport(290, 270)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {

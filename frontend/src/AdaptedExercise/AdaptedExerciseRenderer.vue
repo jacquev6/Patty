@@ -48,7 +48,7 @@ watch(
 <style scoped>
 div {
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   transform: scale(1); /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
 }
 </style>

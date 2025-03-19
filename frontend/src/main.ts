@@ -7,7 +7,6 @@ import CreateTokenizationView from './CreateTokenizationView.vue'
 import EditTokenizationView from './EditTokenizationView.vue'
 import CreateAdaptationView from './CreateAdaptationView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
-import './ubiquitous.css'
 
 const router = createRouter({
   history: createWebHistory(),
