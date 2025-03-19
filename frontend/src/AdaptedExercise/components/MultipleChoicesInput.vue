@@ -85,7 +85,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
       <p v-for="choicesLine in choicesLines">
         <template v-for="(choice, choiceIndex) in choicesLine">
           <WhitespaceComponent v-if="choiceIndex !== 0" kind="whitespace" />
-          <span :data-cy="`choice${choice.index}`" @click="set(choice.index)">
+          <span :data-cy="`choice${choice.index}`" @click="set(choice.index)" :class="`color-${choice.colorIndex}`">
             <LineComponent :contents="choice.content.contents" />
           </span>
         </template>
@@ -101,5 +101,18 @@ div.backdrop {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Colors provided by client */
+.color-0 {
+  color: #00f;
+}
+
+.color-1 {
+  color: #f00;
+}
+
+.color-2 {
+  color: #0c0;
 }
 </style>
