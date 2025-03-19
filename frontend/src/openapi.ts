@@ -218,7 +218,7 @@ export interface components {
        */
       format: 'v1'
       instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
-      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
+      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
     }
     /** AnySequence */
@@ -233,7 +233,6 @@ export interface components {
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['PassiveSequence']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput']
         | components['schemas']['SelectableInput']
@@ -309,6 +308,19 @@ export interface components {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
     }
+    /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput']
+        | components['schemas']['SelectableInput']
+        | components['schemas']['AnySequence']
+      )[]
+    }
     /** Line[Union[Text, Whitespace, Arrow, PassiveSequence]] */
     Line_Union_Text__Whitespace__Arrow__PassiveSequence__: {
       /** Contents */
@@ -317,20 +329,6 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['PassiveSequence']
-      )[]
-    }
-    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
-      /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['PassiveSequence']
-        | components['schemas']['FreeTextInput']
-        | components['schemas']['MultipleChoicesInput']
-        | components['schemas']['SelectableInput']
-        | components['schemas']['AnySequence']
       )[]
     }
     /** MistralAiModel */
@@ -373,20 +371,20 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
+    /** Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+    }
     /** Page[Union[Text, Whitespace, Arrow, PassiveSequence]] */
     Page_Union_Text__Whitespace__Arrow__PassiveSequence__: {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'][]
     }
-    /** Page[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
-      /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
-    }
-    /** Pages[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+    /** Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
     }
     /** PassiveSequence */
     PassiveSequence: {

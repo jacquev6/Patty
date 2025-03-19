@@ -1,5 +1,7 @@
 from typing import Type, TypeVar
+import os
 import typing
+import unittest
 
 import pydantic
 
@@ -16,3 +18,6 @@ def make_response_format_type(structured_type: Type[T]) -> Type[ResponseFormat[T
         Type[ResponseFormat[T]],
         pydantic.create_model("ResponseFormat", prose=(str, ...), structured=(structured_type, ...)),
     )
+
+
+costs_money = unittest.skipUnless("PATTY_RUN_TESTS_COSTING_MONEY" in os.environ, "Costs money")

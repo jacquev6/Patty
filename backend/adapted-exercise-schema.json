@@ -20,9 +20,6 @@
                 "$ref": "#/$defs/Arrow"
               },
               {
-                "$ref": "#/$defs/PassiveSequence"
-              },
-              {
                 "$ref": "#/$defs/FreeTextInput"
               },
               {
@@ -107,6 +104,44 @@
       "title": "FreeTextInput",
       "type": "object"
     },
+    "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              },
+              {
+                "$ref": "#/$defs/MultipleChoicesInput"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
+              },
+              {
+                "$ref": "#/$defs/AnySequence"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "title": "Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
+      "type": "object"
+    },
     "Line_Union_Text__Whitespace__Arrow__PassiveSequence__": {
       "properties": {
         "contents": {
@@ -136,47 +171,6 @@
       "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence]]",
       "type": "object"
     },
-    "Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/PassiveSequence"
-              },
-              {
-                "$ref": "#/$defs/FreeTextInput"
-              },
-              {
-                "$ref": "#/$defs/MultipleChoicesInput"
-              },
-              {
-                "$ref": "#/$defs/SelectableInput"
-              },
-              {
-                "$ref": "#/$defs/AnySequence"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
-      "type": "object"
-    },
     "MultipleChoicesInput": {
       "properties": {
         "kind": {
@@ -204,6 +198,22 @@
       "title": "MultipleChoicesInput",
       "type": "object"
     },
+    "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "title": "Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
+      "type": "object"
+    },
     "Page_Union_Text__Whitespace__Arrow__PassiveSequence__": {
       "properties": {
         "lines": {
@@ -220,27 +230,11 @@
       "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence]]",
       "type": "object"
     },
-    "Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
-      "properties": {
-        "lines": {
-          "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
-          },
-          "title": "Lines",
-          "type": "array"
-        }
-      },
-      "required": [
-        "lines"
-      ],
-      "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
-      "type": "object"
-    },
-    "Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+    "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
       "properties": {
         "pages": {
           "items": {
-            "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
           },
           "title": "Pages",
           "type": "array"
@@ -249,7 +243,7 @@
       "required": [
         "pages"
       ],
-      "title": "Pages[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
+      "title": "Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
       "type": "object"
     },
     "PassiveSequence": {
@@ -394,7 +388,7 @@
       "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
     },
     "wording": {
-      "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+      "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
     },
     "references": {
       "anyOf": [

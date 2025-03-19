@@ -62,7 +62,8 @@ class PassiveSequence(pydantic.BaseModel):
     vertical: bool
 
 
-PassiveComponent = Text | Whitespace | Arrow | PassiveSequence
+PassiveAtomicComponent = Text | Whitespace | Arrow
+PassiveComponent = PassiveAtomicComponent | PassiveSequence
 
 
 class FreeTextInput(pydantic.BaseModel):
@@ -93,7 +94,7 @@ class AnySequence(pydantic.BaseModel):
     vertical: bool
 
 
-AnyComponent = PassiveComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence
+AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence
 
 
 LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[AdaptedExercise]

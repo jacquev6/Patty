@@ -462,7 +462,7 @@
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
           },
           "wording": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
           },
           "references": {
             "anyOf": [
@@ -502,9 +502,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/PassiveSequence"
                 },
                 {
                   "$ref": "#/components/schemas/FreeTextInput"
@@ -688,6 +685,44 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput"
+                },
+                {
+                  "$ref": "#/components/schemas/AnySequence"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ],
+        "title": "Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+      },
       "Line_Union_Text__Whitespace__Arrow__PassiveSequence__": {
         "properties": {
           "contents": {
@@ -716,47 +751,6 @@
           "contents"
         ],
         "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence]]"
-      },
-      "Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/PassiveSequence"
-                },
-                {
-                  "$ref": "#/components/schemas/FreeTextInput"
-                },
-                {
-                  "$ref": "#/components/schemas/MultipleChoicesInput"
-                },
-                {
-                  "$ref": "#/components/schemas/SelectableInput"
-                },
-                {
-                  "$ref": "#/components/schemas/AnySequence"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "type": "object",
-        "required": [
-          "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
       },
       "MistralAiModel": {
         "properties": {
@@ -831,6 +825,22 @@
         ],
         "title": "OpenAiModel"
       },
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "title": "Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+      },
       "Page_Union_Text__Whitespace__Arrow__PassiveSequence__": {
         "properties": {
           "lines": {
@@ -847,27 +857,11 @@
         ],
         "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence]]"
       },
-      "Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
-        "properties": {
-          "lines": {
-            "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
-            },
-            "type": "array",
-            "title": "Lines"
-          }
-        },
-        "type": "object",
-        "required": [
-          "lines"
-        ],
-        "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
-      },
-      "Pages_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
             },
             "type": "array",
             "title": "Pages"
@@ -877,7 +871,7 @@
         "required": [
           "pages"
         ],
-        "title": "Pages[Union[Text, Whitespace, Arrow, PassiveSequence, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+        "title": "Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
       },
       "PassiveSequence": {
         "properties": {

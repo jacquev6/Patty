@@ -9,7 +9,7 @@ import mistralai.extra
 import pydantic
 
 from .base import Model, SystemMessage, UserMessage, AssistantMessage
-from .utils import T, ResponseFormat, make_response_format_type
+from .utils import T, ResponseFormat, make_response_format_type, costs_money
 
 
 # Using a global client; we'll do dependency injection at a higher abstraction level
@@ -107,7 +107,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         model = MistralAiModel(name="mistral-small-2501")
         self.assertEqual(model.model_dump(), {"provider": "mistralai", "name": "mistral-small-2501"})
 
-    @unittest.skipUnless("PATTY_RUN_TESTS_COSTING_MONEY" in os.environ, "Costs money")
+    @costs_money
     async def test_call(self) -> None:
         model = MistralAiModel(name="mistral-small-2501")
 
@@ -128,3 +128,25 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         response2 = await model.complete(messages, MistralAiModelTestCase.Structured)
         assert response2.structured is not None
         self.assertNotEqual(response1.structured.cheese, response2.structured.cheese)
+
+    @costs_money
+    async def test_tokenization_schema(self) -> None:
+        from ..tokenization import TokenizedText
+
+        model = MistralAiModel(name="mistral-small-2501")
+
+        response = await model.complete(
+            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], TokenizedText
+        )
+        self.assertIsInstance(response.structured, TokenizedText)
+
+    @costs_money
+    async def test_adaptation_schema(self) -> None:
+        from ..adaptation import AdaptedExercise
+
+        model = MistralAiModel(name="mistral-small-2501")
+
+        response = await model.complete(
+            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], AdaptedExercise
+        )
+        self.assertIsInstance(response.structured, AdaptedExercise)
