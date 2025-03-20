@@ -2,12 +2,10 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
 
+import './main.css'
 import IndexView from './IndexView.vue'
-import CreateTokenizationView from './CreateTokenizationView.vue'
-import EditTokenizationView from './EditTokenizationView.vue'
 import CreateAdaptationView from './CreateAdaptationView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
-import './ubiquitous.css'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,17 +14,6 @@ const router = createRouter({
       path: '/',
       name: 'index',
       component: IndexView,
-    },
-    {
-      path: '/new-tokenization',
-      name: 'create-tokenization',
-      component: CreateTokenizationView,
-    },
-    {
-      path: '/tokenization-:id',
-      name: 'tokenization',
-      component: EditTokenizationView,
-      props: true,
     },
     {
       path: '/new-adaptation',

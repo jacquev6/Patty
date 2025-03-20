@@ -2,9 +2,10 @@
 defineProps<{
   kind: 'text'
   text: string
+  tricolorable: boolean
 }>()
 </script>
 
 <template>
-  <span>{{ text }}</span>
+  <span :class="{ tricolorable }">{{ text }}</span>
 </template>

@@ -6,6 +6,7 @@ import { type LlmModel, client } from './apiClient'
 import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
+import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -112,6 +113,8 @@ const disabled = computed(() => {
       </select>
       <h1>System prompt</h1>
       <TextArea v-model="systemPrompt"></TextArea>
+      <h1>Response JSON schema</h1>
+      <AdaptedExerciseJsonSchemaDetails />
       <h1>Input text</h1>
       <TextArea v-model="inputText"></TextArea>
       <p><button @click="submit" :disabled>Submit</button></p>

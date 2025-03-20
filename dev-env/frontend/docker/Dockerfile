@@ -19,6 +19,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       libxtst6 \
       xauth \
       xvfb \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+      fonts-noto \
  && true
 
 RUN deluser --remove-all-files node

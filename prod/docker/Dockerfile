@@ -11,7 +11,6 @@ RUN npm install
 FROM frontend-dependencies AS frontend-builder
 
 RUN mkdir /backend
-ADD backend/tokenized-text-schema.json /backend
 ADD backend/adapted-exercise-schema.json /backend
 ADD frontend .
 

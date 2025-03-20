@@ -321,7 +321,24 @@
           "type": "string"
         },
         "contents": {
-          "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/PassiveSequence"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
         },
         "colors": {
           "items": {

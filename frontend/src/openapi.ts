@@ -106,91 +106,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/tokenization/default-system-prompt': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Default System Prompt */
-    get: operations['get_default_system_prompt_api_tokenization_default_system_prompt_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/tokenization': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Post Tokenization */
-    post: operations['post_tokenization_api_tokenization_post']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/tokenization/{id}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Tokenization */
-    get: operations['get_tokenization_api_tokenization__id__get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/tokenization/{id}/adjustment': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Post Tokenization Adjustment */
-    post: operations['post_tokenization_adjustment_api_tokenization__id__adjustment_post']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/tokenization/{id}/last-step': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    /** Delete Tokenization Last Step */
-    delete: operations['delete_tokenization_last_step_api_tokenization__id__last_step_delete']
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -205,10 +120,7 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       /** Steps */
-      steps: (
-        | components['schemas']['patty__adaptation__InitialStep']
-        | components['schemas']['patty__adaptation__AdjustmentStep']
-      )[]
+      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
     }
     /** AdaptedExercise */
     AdaptedExercise: {
@@ -220,6 +132,25 @@ export interface components {
       instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
       wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
+    }
+    /** AdjustmentStep */
+    AdjustmentStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adjustment'
+      /** Userprompt */
+      userPrompt: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_AdaptedExercise_']
+      )[]
+      /** Assistantprose */
+      assistantProse: string
+      adaptedExercise: components['schemas']['AdaptedExercise'] | null
     }
     /** AnySequence */
     AnySequence: {
@@ -269,18 +200,6 @@ export interface components {
       prose: string
       structured: components['schemas']['AdaptedExercise'] | null
     }
-    /** AssistantMessage[TokenizedText] */
-    AssistantMessage_TokenizedText_: {
-      /**
-       * Role
-       * @default assistant
-       * @constant
-       */
-      role: 'assistant'
-      /** Prose */
-      prose: string
-      structured: components['schemas']['TokenizedText'] | null
-    }
     /** DummyModel */
     DummyModel: {
       /**
@@ -307,6 +226,27 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /** InitialStep */
+    InitialStep: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'initial'
+      /** Systemprompt */
+      systemPrompt: string
+      /** Inputtext */
+      inputText: string
+      /** Messages */
+      messages: (
+        | components['schemas']['UserMessage']
+        | components['schemas']['SystemMessage']
+        | components['schemas']['AssistantMessage_AdaptedExercise_']
+      )[]
+      /** Assistantprose */
+      assistantProse: string
+      adaptedExercise: components['schemas']['AdaptedExercise'] | null
     }
     /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
     Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
@@ -428,33 +368,6 @@ export interface components {
       /** Inputtext */
       inputText: string
     }
-    /** PostTokenizationAdjustmentRequest */
-    PostTokenizationAdjustmentRequest: {
-      /** Adjustment */
-      adjustment: string
-    }
-    /** PostTokenizationRequest */
-    PostTokenizationRequest: {
-      /** Llm Model */
-      llm_model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
-    }
-    /** Punctuation */
-    Punctuation: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'punctuation'
-      /** Text */
-      text: string
-    }
     /** SelectableInput */
     SelectableInput: {
       /**
@@ -462,16 +375,17 @@ export interface components {
        * @constant
        */
       kind: 'selectableInput'
-      contents: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__']
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+      )[]
       /** Colors */
       colors: string[]
       /** Boxed */
       boxed: boolean
-    }
-    /** Sentence */
-    Sentence: {
-      /** Tokens */
-      tokens: (components['schemas']['Word'] | components['schemas']['Punctuation'])[]
     }
     /** SystemMessage */
     SystemMessage: {
@@ -493,26 +407,6 @@ export interface components {
       kind: 'text'
       /** Text */
       text: string
-    }
-    /** Tokenization */
-    Tokenization: {
-      /** Id */
-      id: string
-      /** Llm Model */
-      llm_model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Steps */
-      steps: (
-        | components['schemas']['patty__tokenization__InitialStep']
-        | components['schemas']['patty__tokenization__AdjustmentStep']
-      )[]
-    }
-    /** TokenizedText */
-    TokenizedText: {
-      /** Sentences */
-      sentences: components['schemas']['Sentence'][]
     }
     /** UserMessage */
     UserMessage: {
@@ -541,96 +435,6 @@ export interface components {
        * @constant
        */
       kind: 'whitespace'
-    }
-    /** Word */
-    Word: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'word'
-      /** Text */
-      text: string
-    }
-    /** AdjustmentStep */
-    patty__adaptation__AdjustmentStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adjustment'
-      /** Userprompt */
-      userPrompt: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_AdaptedExercise_']
-      )[]
-      /** Assistantprose */
-      assistantProse: string
-      adaptedExercise: components['schemas']['AdaptedExercise'] | null
-    }
-    /** InitialStep */
-    patty__adaptation__InitialStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'initial'
-      /** Systemprompt */
-      systemPrompt: string
-      /** Inputtext */
-      inputText: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_AdaptedExercise_']
-      )[]
-      /** Assistantprose */
-      assistantProse: string
-      adaptedExercise: components['schemas']['AdaptedExercise'] | null
-    }
-    /** AdjustmentStep */
-    patty__tokenization__AdjustmentStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adjustment'
-      /** User Prompt */
-      user_prompt: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_TokenizedText_']
-      )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText'] | null
-    }
-    /** InitialStep */
-    patty__tokenization__InitialStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'initial'
-      /** System Prompt */
-      system_prompt: string
-      /** Input Text */
-      input_text: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_TokenizedText_']
-      )[]
-      /** Assistant Prose */
-      assistant_prose: string
-      tokenized_text: components['schemas']['TokenizedText'] | null
     }
   }
   responses: never
@@ -802,156 +606,6 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['Adaptation']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  get_default_system_prompt_api_tokenization_default_system_prompt_get: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': string
-        }
-      }
-    }
-  }
-  post_tokenization_api_tokenization_post: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PostTokenizationRequest']
-      }
-    }
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Tokenization']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  get_tokenization_api_tokenization__id__get: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Tokenization']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  post_tokenization_adjustment_api_tokenization__id__adjustment_post: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PostTokenizationAdjustmentRequest']
-      }
-    }
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Tokenization']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  delete_tokenization_last_step_api_tokenization__id__last_step_delete: {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['Tokenization']
         }
       }
       /** @description Validation Error */

@@ -6,13 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 
 const plugins: (ReturnType<typeof vue> | ReturnType<typeof vueDevTools>)[] = [
-  vue({
-    template: {
-      compilerOptions: {
-        whitespace: 'preserve'
-      }
-    }
-  }),
+  vue(),
 ]
 
 if (process.env.PATTY_UNIT_TESTING !== 'true') {

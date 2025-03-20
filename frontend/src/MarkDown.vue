@@ -12,10 +12,3 @@ const rendered = computed(() => marked(props.markdown))
 <template>
   <div v-html="rendered"></div>
 </template>
-
-<style scoped>
-:deep(pre),
-:deep(code) {
-  background-color: lightgrey;
-}
-</style>

@@ -2,8 +2,8 @@ import SequenceComponent from './components/SequenceComponent.vue'
 import MultipleChoicesInput from './components/MultipleChoicesInput.vue'
 import SelectableInput from './components/SelectableInput.vue'
 import FreeTextInput from './components/FreeTextInput.vue'
-
-import type { Line } from '@/apiClient'
+import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
+import TriColorLines from './TriColorLines.vue'
 
 const screenshotsCounts: Record<string, number> = {}
 
@@ -18,7 +18,7 @@ describe('SequenceComponent', () => {
   beforeEach(console.clear)
 
   it('renders plain text and whitespace', () => {
-    cy.viewport(180, 40)
+    cy.viewport(200, 70)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -36,6 +36,7 @@ describe('SequenceComponent', () => {
         highlighted: null,
         boxed: false,
         vertical: false,
+        tricolorable: false,
       },
     })
 
@@ -43,7 +44,7 @@ describe('SequenceComponent', () => {
   })
 
   it('renders formatting', () => {
-    cy.viewport(270, 40)
+    cy.viewport(290, 70)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -94,6 +95,7 @@ describe('SequenceComponent', () => {
         highlighted: null,
         boxed: false,
         vertical: false,
+        tricolorable: false,
       },
     })
 
@@ -105,21 +107,20 @@ describe('SelectableInput', () => {
   beforeEach(console.clear)
 
   it('changes color on click', () => {
-    cy.viewport(100, 40)
+    cy.viewport(130, 70)
 
     cy.mount(SelectableInput, {
       props: {
         kind: 'selectableInput',
-        contents: {
-          contents: [
-            { kind: 'text', text: 'Click' },
-            { kind: 'whitespace' },
-            { kind: 'text', text: 'us' },
-            { kind: 'text', text: '!' },
-          ],
-        },
+        contents: [
+          { kind: 'text', text: 'Click' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'us' },
+          { kind: 'text', text: '!' },
+        ],
         colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
         boxed: false,
+        tricolorable: false,
       },
     })
 
@@ -143,9 +144,9 @@ describe('FreeTextInput', () => {
   beforeEach(console.clear)
 
   it('accepts text input', () => {
-    cy.viewport(150, 40)
+    cy.viewport(170, 70)
 
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput' } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -160,7 +161,7 @@ describe('FreeTextInput', () => {
   })
 
   it('refuses new lines', () => {
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput' } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
@@ -172,22 +173,24 @@ describe('FreeTextInput', () => {
 describe('MultipleChoicesInput', () => {
   beforeEach(console.clear)
 
-  const choices: Line[] = [
+  const choices = [
     {
-      contents: [{ kind: 'text', text: 'Alpha' }],
+      contents: [{ kind: 'text' as const, text: 'Alpha' }],
     },
     {
-      contents: [{ kind: 'text', text: 'Bravo' }],
+      contents: [{ kind: 'text' as const, text: 'Bravo' }],
     },
     {
-      contents: [{ kind: 'text', text: 'Charlie' }],
+      contents: [{ kind: 'text' as const, text: 'Charlie' }],
     },
   ]
 
   it('selects choices', () => {
-    cy.viewport(200, 130)
+    cy.viewport(250, 190)
 
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+    })
 
     screenshot()
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -211,7 +214,9 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on backdrop', () => {
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+    })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
     cy.get('[data-cy="choice0"]').should('not.exist')
@@ -223,7 +228,9 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on main span', () => {
-    cy.mount(MultipleChoicesInput, { props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true } })
+    cy.mount(MultipleChoicesInput, {
+      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true, tricolorable: false },
+    })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
     cy.get('[data-cy="choice0"]').should('exist')
@@ -231,5 +238,115 @@ describe('MultipleChoicesInput', () => {
     cy.get('@input').click()
     cy.get('@input').should('have.text', '....')
     cy.get('[data-cy="choice0"]').should('not.exist')
+  })
+
+  it('moves next lines down', () => {
+    cy.viewport(600, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instructions: {
+            lines: [],
+          },
+          wording: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Hello' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Good' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bye' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          references: null,
+        },
+      },
+    })
+
+    screenshot()
+  })
+
+  it('does not render choices over the page navigation controls', () => {
+    cy.viewport(543, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instructions: {
+            lines: [],
+          },
+          wording: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [{ kind: 'multipleChoicesInput', choices, showChoicesByDefault: true }],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Blaaaaaaaaaaaaaaaaaah' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          references: null,
+        },
+      },
+    })
+
+    screenshot()
+  })
+})
+
+describe('TriColorLines', () => {
+  beforeEach(console.clear)
+
+  it('renders lines in alternating colors', () => {
+    cy.viewport(180, 340)
+
+    cy.mount(TriColorLines, {
+      slots: {
+        default:
+          '<p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p>',
+      },
+    })
+
+    screenshot()
+  })
+
+  it('warns about nested tricolorables', () => {
+    cy.viewport(300, 110)
+
+    cy.mount(TriColorLines, {
+      slots: {
+        default: '<p><span class="tricolorable">B<span><span class="tricolorable">la</span></span>h</span></p>',
+      },
+    })
+
+    screenshot()
   })
 })
