@@ -55,9 +55,11 @@ watch(
       </div>
       <div class="wording">
         <TriColorLines ref="tricolor">
-          <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
-            <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
-          </p>
+          <template v-if="page < pagesCount">
+            <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
+              <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
+            </p>
+          </template>
         </TriColorLines>
       </div>
     </div>
