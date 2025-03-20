@@ -77,23 +77,34 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 </script>
 
 <template>
-  <div style="display: inline flow-root; vertical-align: top">
-    <p ref="floatingReference" data-cy="multipleChoicesInput" class="main" @click="showChoices = !showChoices">
+  <div class="container">
+    <p
+      ref="floatingReference"
+      data-cy="multipleChoicesInput"
+      class="main"
+      :class="{ showChoices }"
+      @click="showChoices = !showChoices"
+    >
       <LineComponent :contents="currentChoice.contents" :tricolorable />
     </p>
     <!-- Ensure the floating choices does not cover next line -->
-    <div style="max-width: 0; visibility: hidden">
-      <p>Alpha</p>
-      <p>Bravo</p>
+    <div class="hidden choices">
+      <p><span class="choice">Alpha</span></p>
+      <p><span class="choice">Bravo</span></p>
     </div>
   </div>
   <Teleport v-if="showChoices && teleportBackdropTo !== null" :to="teleportBackdropTo">
     <div data-cy="backdrop" v-if="showBackdrop" class="backdrop" @click="showChoices = false"></div>
-    <div ref="floatingElement" :style="floatingStyles">
+    <div ref="floatingElement" :style="floatingStyles" class="choices">
       <p v-for="choicesLine in choicesLines">
         <template v-for="(choice, choiceIndex) in choicesLine">
           <WhitespaceComponent v-if="choiceIndex !== 0" kind="whitespace" />
-          <span :data-cy="`choice${choice.index}`" @click="set(choice.index)" :class="`color-${choice.colorIndex}`">
+          <span
+            :data-cy="`choice${choice.index}`"
+            @click="set(choice.index)"
+            :class="`color-${choice.colorIndex}`"
+            class="choice"
+          >
             <LineComponent :contents="choice.content.contents" :tricolorable="false" />
           </span>
         </template>
@@ -103,17 +114,57 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 </template>
 
 <style scoped>
+.container {
+  display: inline flow-root;
+  vertical-align: top;
+}
+
 .main {
   cursor: pointer;
   display: inline;
+  border: 2px outset #888;
 }
 
-div.backdrop {
+.main.showChoices {
+  background-color: #fffdd4;
+}
+
+.hidden {
+  max-width: 0;
+  visibility: hidden;
+}
+
+.backdrop {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.choices {
+  border: 1px dashed green;
+  background-color: white;
+  padding: 5px;
+}
+
+.choices p {
+  margin-top: 34px;
+  margin-bottom: 0;
+}
+
+.choices p:first-child {
+  margin-top: 16px;
+}
+
+.choices p:last-child {
+  margin-bottom: 16px;
+}
+
+.choice {
+  cursor: pointer;
+  border: 1px solid black;
+  padding: 1px 4px;
 }
 
 /* Colors provided by client */

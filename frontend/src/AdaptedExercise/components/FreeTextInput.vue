@@ -44,13 +44,24 @@ function forbidNewlines(event: KeyboardEvent) {
     contenteditable
     @input="updateModel"
     @keypress="forbidNewlines"
+    class="main"
     :class="{ empty: model === '', tricolorable }"
   ></span>
 </template>
 
 <style scoped>
+.main {
+  line-height: 1em; /* Fix caret position on Chrome */
+  padding: 4px;
+  border: 2px outset black;
+}
+
 .empty {
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 1ch;
+  padding-right: 1ch;
+}
+
+.main:hover {
+  background-color: #fffdd4;
 }
 </style>

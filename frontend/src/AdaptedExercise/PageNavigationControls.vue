@@ -12,7 +12,7 @@ const model = defineModel<number>({ required: true })
     <div class="control" :class="{ disabled: model === 0 }" @click="model = Math.max(0, model - 1)">
       <div class="arrow arrowLeft"></div>
     </div>
-    <div style="overflow-x: hidden"><slot></slot></div>
+    <div><slot></slot></div>
     <div
       class="control"
       :class="{ disabled: model === pagesCount - 1 }"
@@ -25,6 +25,7 @@ const model = defineModel<number>({ required: true })
 
 <style scoped>
 .root {
+  height: 100%;
   --control-width: 35px;
   display: grid;
   grid-template-columns: var(--control-width) 1fr var(--control-width);

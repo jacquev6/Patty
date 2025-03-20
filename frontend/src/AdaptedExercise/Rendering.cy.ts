@@ -18,7 +18,7 @@ describe('SequenceComponent', () => {
   beforeEach(console.clear)
 
   it('renders plain text and whitespace', () => {
-    cy.viewport(150, 30)
+    cy.viewport(200, 70)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -44,7 +44,7 @@ describe('SequenceComponent', () => {
   })
 
   it('renders formatting', () => {
-    cy.viewport(230, 30)
+    cy.viewport(290, 70)
 
     cy.mount(SequenceComponent, {
       props: {
@@ -107,7 +107,7 @@ describe('SelectableInput', () => {
   beforeEach(console.clear)
 
   it('changes color on click', () => {
-    cy.viewport(80, 30)
+    cy.viewport(130, 70)
 
     cy.mount(SelectableInput, {
       props: {
@@ -146,7 +146,7 @@ describe('FreeTextInput', () => {
   beforeEach(console.clear)
 
   it('accepts text input', () => {
-    cy.viewport(120, 30)
+    cy.viewport(170, 70)
 
     cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
 
@@ -188,7 +188,7 @@ describe('MultipleChoicesInput', () => {
   ]
 
   it('selects choices', () => {
-    cy.viewport(140, 120)
+    cy.viewport(250, 190)
 
     cy.mount(MultipleChoicesInput, {
       props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
@@ -243,7 +243,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('moves next lines down', () => {
-    cy.viewport(230, 270)
+    cy.viewport(600, 550)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -289,7 +289,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('does not render choices over the page navigation controls', () => {
-    cy.viewport(290, 270)
+    cy.viewport(543, 550)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -328,7 +328,7 @@ describe('TriColorLines', () => {
   beforeEach(console.clear)
 
   it('renders lines in alternating colors', () => {
-    cy.viewport(150, 300)
+    cy.viewport(180, 340)
 
     cy.mount(TriColorLines, {
       slots: {
@@ -341,7 +341,7 @@ describe('TriColorLines', () => {
   })
 
   it('warns about nested tricolorables', () => {
-    cy.viewport(250, 60)
+    cy.viewport(300, 110)
 
     cy.mount(TriColorLines, {
       slots: {

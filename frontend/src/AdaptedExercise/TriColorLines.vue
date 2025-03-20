@@ -49,6 +49,8 @@ function recolor() {
     })
   }
 }
+
+defineExpose({ recolor })
 </script>
 
 <template>

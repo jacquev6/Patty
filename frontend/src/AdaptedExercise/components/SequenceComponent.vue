@@ -19,7 +19,8 @@ const style = computed(() => ({
   backgroundColor: props.highlighted ?? undefined,
   fontWeight: props.bold ? 'bold' : undefined,
   fontStyle: props.italic ? 'italic' : undefined,
-  border: props.boxed ? '1px solid black' : undefined,
+  border: props.boxed ? '2px solid black' : undefined,
+  padding: props.boxed ? '4px' : undefined,
 }))
 </script>
 

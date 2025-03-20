@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, provide, reactive, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 
 import type { AdaptedExercise } from '@/apiClient'
+import assert from '@/assert'
 import LineComponent from './components/LineComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
@@ -31,27 +32,64 @@ watch(
   },
   { immediate: true },
 )
+
+const triColorLines = useTemplateRef('tricolor')
+watch(
+  model,
+  async () => {
+    assert(triColorLines.value !== null)
+    await nextTick()
+    triColorLines.value.recolor()
+  },
+  { deep: true },
+)
 </script>
 
 <template>
   <PageNavigationControls :pagesCount v-model="page">
-    <p v-for="{ contents } in adaptedExercise.instructions.lines">
-      <LineComponent :contents :tricolorable="false" />
-    </p>
-    <div ref="container">
-      <TriColorLines>
-        <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
-          <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
+    <div ref="container" class="container">
+      <div class="instructions">
+        <p v-for="{ contents } in adaptedExercise.instructions.lines">
+          <LineComponent :contents :tricolorable="false" />
         </p>
-      </TriColorLines>
+      </div>
+      <div class="wording">
+        <TriColorLines ref="tricolor">
+          <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
+            <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
+          </p>
+        </TriColorLines>
+      </div>
     </div>
   </PageNavigationControls>
 </template>
 
 <style scoped>
 div {
-  height: 100%;
+  font-family: Arial;
+  font-size: 32px;
+}
+
+.container {
+  /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
   overflow: hidden;
-  transform: scale(1); /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
+  transform: scale(1);
+  height: 100%;
+}
+
+.instructions {
+  text-align: center;
+}
+
+.instructions :deep(p:first-child) {
+  margin-top: 11px;
+}
+
+.wording {
+  padding: 27px 6px;
+}
+
+.wording :deep(*:first-child) {
+  margin-top: 0;
 }
 </style>
