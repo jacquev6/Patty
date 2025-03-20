@@ -220,190 +220,6 @@
           }
         }
       }
-    },
-    "/api/tokenization/default-system-prompt": {
-      "get": {
-        "summary": "Get Default System Prompt",
-        "operationId": "get_default_system_prompt_api_tokenization_default_system_prompt_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "title": "Response Get Default System Prompt Api Tokenization Default System Prompt Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/tokenization": {
-      "post": {
-        "summary": "Post Tokenization",
-        "operationId": "post_tokenization_api_tokenization_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostTokenizationRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/tokenization/{id}": {
-      "get": {
-        "summary": "Get Tokenization",
-        "operationId": "get_tokenization_api_tokenization__id__get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/tokenization/{id}/adjustment": {
-      "post": {
-        "summary": "Post Tokenization Adjustment",
-        "operationId": "post_tokenization_adjustment_api_tokenization__id__adjustment_post",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostTokenizationAdjustmentRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/tokenization/{id}/last-step": {
-      "delete": {
-        "summary": "Delete Tokenization Last Step",
-        "operationId": "delete_tokenization_last_step_api_tokenization__id__last_step_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Tokenization"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -432,10 +248,10 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/patty__adaptation__InitialStep"
+                  "$ref": "#/components/schemas/InitialStep"
                 },
                 {
-                  "$ref": "#/components/schemas/patty__adaptation__AdjustmentStep"
+                  "$ref": "#/components/schemas/AdjustmentStep"
                 }
               ]
             },
@@ -483,6 +299,59 @@
           "references"
         ],
         "title": "AdaptedExercise"
+      },
+      "AdjustmentStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "adjustment",
+            "title": "Kind"
+          },
+          "userPrompt": {
+            "type": "string",
+            "title": "Userprompt"
+          },
+          "messages": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistantProse": {
+            "type": "string",
+            "title": "Assistantprose"
+          },
+          "adaptedExercise": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdaptedExercise"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "userPrompt",
+          "messages",
+          "assistantProse",
+          "adaptedExercise"
+        ],
+        "title": "AdjustmentStep"
       },
       "AnySequence": {
         "properties": {
@@ -604,36 +473,6 @@
         ],
         "title": "AssistantMessage[AdaptedExercise]"
       },
-      "AssistantMessage_TokenizedText_": {
-        "properties": {
-          "role": {
-            "type": "string",
-            "const": "assistant",
-            "title": "Role",
-            "default": "assistant"
-          },
-          "prose": {
-            "type": "string",
-            "title": "Prose"
-          },
-          "structured": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TokenizedText"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "prose",
-          "structured"
-        ],
-        "title": "AssistantMessage[TokenizedText]"
-      },
       "DummyModel": {
         "properties": {
           "provider": {
@@ -684,6 +523,64 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "InitialStep": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "initial",
+            "title": "Kind"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "inputText": {
+            "type": "string",
+            "title": "Inputtext"
+          },
+          "messages": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/SystemMessage"
+                },
+                {
+                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "assistantProse": {
+            "type": "string",
+            "title": "Assistantprose"
+          },
+          "adaptedExercise": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdaptedExercise"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "systemPrompt",
+          "inputText",
+          "messages",
+          "assistantProse",
+          "adaptedExercise"
+        ],
+        "title": "InitialStep"
       },
       "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
         "properties": {
@@ -986,71 +883,6 @@
         ],
         "title": "PostAdaptationRequest"
       },
-      "PostTokenizationAdjustmentRequest": {
-        "properties": {
-          "adjustment": {
-            "type": "string",
-            "title": "Adjustment"
-          }
-        },
-        "type": "object",
-        "required": [
-          "adjustment"
-        ],
-        "title": "PostTokenizationAdjustmentRequest"
-      },
-      "PostTokenizationRequest": {
-        "properties": {
-          "llm_model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Llm Model"
-          },
-          "system_prompt": {
-            "type": "string",
-            "title": "System Prompt"
-          },
-          "input_text": {
-            "type": "string",
-            "title": "Input Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "llm_model",
-          "system_prompt",
-          "input_text"
-        ],
-        "title": "PostTokenizationRequest"
-      },
-      "Punctuation": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "punctuation",
-            "title": "Kind"
-          },
-          "text": {
-            "type": "string",
-            "title": "Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "text"
-        ],
-        "title": "Punctuation"
-      },
       "SelectableInput": {
         "properties": {
           "kind": {
@@ -1081,29 +913,6 @@
           "boxed"
         ],
         "title": "SelectableInput"
-      },
-      "Sentence": {
-        "properties": {
-          "tokens": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Word"
-                },
-                {
-                  "$ref": "#/components/schemas/Punctuation"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Tokens"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tokens"
-        ],
-        "title": "Sentence"
       },
       "SystemMessage": {
         "properties": {
@@ -1142,65 +951,6 @@
           "text"
         ],
         "title": "Text"
-      },
-      "Tokenization": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "llm_model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Llm Model"
-          },
-          "steps": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/patty__tokenization__InitialStep"
-                },
-                {
-                  "$ref": "#/components/schemas/patty__tokenization__AdjustmentStep"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Steps"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "llm_model",
-          "steps"
-        ],
-        "title": "Tokenization"
-      },
-      "TokenizedText": {
-        "properties": {
-          "sentences": {
-            "items": {
-              "$ref": "#/components/schemas/Sentence"
-            },
-            "type": "array",
-            "title": "Sentences"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sentences"
-        ],
-        "title": "TokenizedText"
       },
       "UserMessage": {
         "properties": {
@@ -1267,247 +1017,6 @@
           "kind"
         ],
         "title": "Whitespace"
-      },
-      "Word": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "word",
-            "title": "Kind"
-          },
-          "text": {
-            "type": "string",
-            "title": "Text"
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "text"
-        ],
-        "title": "Word"
-      },
-      "patty__adaptation__AdjustmentStep": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "adjustment",
-            "title": "Kind"
-          },
-          "userPrompt": {
-            "type": "string",
-            "title": "Userprompt"
-          },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "assistantProse": {
-            "type": "string",
-            "title": "Assistantprose"
-          },
-          "adaptedExercise": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AdaptedExercise"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "userPrompt",
-          "messages",
-          "assistantProse",
-          "adaptedExercise"
-        ],
-        "title": "AdjustmentStep"
-      },
-      "patty__adaptation__InitialStep": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "initial",
-            "title": "Kind"
-          },
-          "systemPrompt": {
-            "type": "string",
-            "title": "Systemprompt"
-          },
-          "inputText": {
-            "type": "string",
-            "title": "Inputtext"
-          },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "assistantProse": {
-            "type": "string",
-            "title": "Assistantprose"
-          },
-          "adaptedExercise": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AdaptedExercise"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "systemPrompt",
-          "inputText",
-          "messages",
-          "assistantProse",
-          "adaptedExercise"
-        ],
-        "title": "InitialStep"
-      },
-      "patty__tokenization__AdjustmentStep": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "adjustment",
-            "title": "Kind"
-          },
-          "user_prompt": {
-            "type": "string",
-            "title": "User Prompt"
-          },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_TokenizedText_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "assistant_prose": {
-            "type": "string",
-            "title": "Assistant Prose"
-          },
-          "tokenized_text": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TokenizedText"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "user_prompt",
-          "messages",
-          "assistant_prose",
-          "tokenized_text"
-        ],
-        "title": "AdjustmentStep"
-      },
-      "patty__tokenization__InitialStep": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "initial",
-            "title": "Kind"
-          },
-          "system_prompt": {
-            "type": "string",
-            "title": "System Prompt"
-          },
-          "input_text": {
-            "type": "string",
-            "title": "Input Text"
-          },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_TokenizedText_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "assistant_prose": {
-            "type": "string",
-            "title": "Assistant Prose"
-          },
-          "tokenized_text": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TokenizedText"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "kind",
-          "system_prompt",
-          "input_text",
-          "messages",
-          "assistant_prose",
-          "tokenized_text"
-        ],
-        "title": "InitialStep"
       }
     }
   }

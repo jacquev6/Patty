@@ -130,17 +130,6 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(response1.structured.cheese, response2.structured.cheese)
 
     @costs_money
-    async def test_tokenization_schema(self) -> None:
-        from ..tokenization import TokenizedText
-
-        model = MistralAiModel(name="mistral-small-2501")
-
-        response = await model.complete(
-            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], TokenizedText
-        )
-        self.assertIsInstance(response.structured, TokenizedText)
-
-    @costs_money
     async def test_adaptation_schema(self) -> None:
         from ..adaptation import AdaptedExercise
 

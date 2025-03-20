@@ -2,7 +2,6 @@ import fastapi
 
 from . import adaptation
 from . import llm
-from . import tokenization
 
 
 app = fastapi.FastAPI()
@@ -23,5 +22,3 @@ def get_available_llm_models() -> list[llm.ConcreteModel]:
 
 
 app.include_router(adaptation.router, prefix="/api/adaptation")
-
-app.include_router(tokenization.router, prefix="/api/tokenization")
