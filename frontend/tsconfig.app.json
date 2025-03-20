@@ -11,7 +11,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "strict": true,
-
+    "lib": ["dom", "ESNext"],
     "paths": {
       "@/*": ["./src/*"]
     }

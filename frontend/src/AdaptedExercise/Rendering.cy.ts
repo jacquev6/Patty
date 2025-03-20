@@ -8,10 +8,10 @@ import TriColorLines from './TriColorLines.vue'
 const screenshotsCounts: Record<string, number> = {}
 
 function screenshot() {
-  const baseName = Cypress.currentTest.titlePath.join(' -- ')
+  const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
   screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
-  const name = `${baseName} -- ${screenshotsCounts[baseName]}`
-  cy.screenshot(name)
+  const name = `${baseName}-${screenshotsCounts[baseName]}`
+  cy.compareSnapshot(name)
 }
 
 describe('SequenceComponent', () => {

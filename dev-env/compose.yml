@@ -135,6 +135,8 @@ services:
     working_dir: /app/frontend
     init: true
     command: ["sleep", "infinity"]
+    ports:
+      - 6868:6868  # For 'npx cypress-image-diff-html-report start'
   npm-installer:
     image: patty-dev_frontend
     pull_policy: never
