@@ -12,8 +12,9 @@ const { width: outerContainerWidth } = useElementBounding(useTemplateRef('outerC
 const scale = computed(() => outerContainerWidth.value / windowWidth.value)
 
 const outerContainerStyle = computed<StyleValue>(() => {
+  const height = Math.ceil(windowHeight.value * scale.value)
   return {
-    height: `${windowHeight.value * scale.value}px`,
+    height: `${height}px`,
   }
 })
 
