@@ -170,7 +170,7 @@ watch(Escape, () => {
 
 <template>
   <div v-if="adaptation !== null" class="container">
-    <ThreeColumns >
+    <ThreeColumns>
       <template #left>
         <h1>LLM model</h1>
         <p>{{ adaptation.llmModel.provider }}: {{ adaptation.llmModel.name }}</p>
@@ -256,21 +256,23 @@ watch(Escape, () => {
       </template>
     </ThreeColumns>
     <div v-if="showRaw" class="overlay">
-      <div><div>
-        <h1>Raw conversation with the LLM</h1>
-        <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
-        <template v-for="(step, stepIndex) in adaptation.steps">
-          <template v-if="step.kind === 'initial'">
-            <h2>Initial step</h2>
-            <pre>{{ jsonStringify(step.messages, {maxLength: 120}) }}</pre>
+      <div>
+        <div>
+          <h1>Raw conversation with the LLM</h1>
+          <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
+          <template v-for="(step, stepIndex) in adaptation.steps">
+            <template v-if="step.kind === 'initial'">
+              <h2>Initial step</h2>
+              <pre>{{ jsonStringify(step.messages, { maxLength: 120 }) }}</pre>
+            </template>
+            <template v-else-if="step.kind === 'adjustment'">
+              <h2>Adjustment step {{ stepIndex }}</h2>
+              <pre>{{ jsonStringify(step.messages, { maxLength: 120 }) }}</pre>
+            </template>
+            <template v-else>{{ ((step: never) => step)(step) }}</template>
           </template>
-          <template v-else-if="step.kind === 'adjustment'">
-            <h2>Adjustment step {{ stepIndex }}</h2>
-            <pre>{{ jsonStringify(step.messages, {maxLength: 120}) }}</pre>
-          </template>
-          <template v-else>{{ ((step: never) => step)(step) }}</template>
-        </template>
-      </div></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
