@@ -2,7 +2,9 @@
 import { useElementBounding, useWindowSize } from '@vueuse/core'
 import { computed, useTemplateRef, type StyleValue } from 'vue'
 
-const fullScreen = defineModel<boolean>('fullScreen', { default: false })
+const props = defineProps<{
+  fullScreen: boolean
+}>()
 
 const { width: windowWidth, height: windowHeight } = useWindowSize()
 const aspectRatio = computed(() => windowWidth.value / windowHeight.value)
@@ -19,7 +21,7 @@ const outerContainerStyle = computed<StyleValue>(() => {
 })
 
 const innerContainerStyle = computed<StyleValue>(() => {
-  if (fullScreen.value) {
+  if (props.fullScreen) {
     return {
       position: 'fixed',
       top: 0,
@@ -42,7 +44,6 @@ const innerContainerStyle = computed<StyleValue>(() => {
     <div ref="outerContainer" :style="outerContainerStyle">
       <div class="inner-container" :style="innerContainerStyle">
         <slot></slot>
-        <button v-if="fullScreen" @click="fullScreen = false">Exit full screen</button>
       </div>
     </div>
   </div>
@@ -56,12 +57,5 @@ const innerContainerStyle = computed<StyleValue>(() => {
 .inner-container {
   background-color: white;
   overflow: hidden;
-}
-
-button {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
-  bottom: 2rem;
 }
 </style>
