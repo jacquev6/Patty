@@ -375,7 +375,13 @@ export interface components {
        * @constant
        */
       kind: 'selectableInput'
-      contents: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__']
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence']
+      )[]
       /** Colors */
       colors: string[]
       /** Boxed */

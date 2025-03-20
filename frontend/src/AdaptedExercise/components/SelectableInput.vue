@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { Line } from '@/apiClient'
+import type { Component } from '@/apiClient'
 import SequenceComponent from './SequenceComponent.vue'
 
 const props = defineProps<{
   kind: 'selectableInput'
-  contents: Line
+  contents: Component[]
   colors: string[]
   tricolorable: boolean
 }>()
@@ -19,7 +19,7 @@ function increment() {
 
 const contents = computed(() => ({
   kind: 'sequence' as const,
-  contents: props.contents.contents,
+  contents: props.contents,
   bold: false,
   italic: false,
   highlighted: colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1],

@@ -891,7 +891,24 @@
             "title": "Kind"
           },
           "contents": {
-            "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/PassiveSequence"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
           },
           "colors": {
             "items": {

@@ -112,14 +112,12 @@ describe('SelectableInput', () => {
     cy.mount(SelectableInput, {
       props: {
         kind: 'selectableInput',
-        contents: {
-          contents: [
-            { kind: 'text', text: 'Click' },
-            { kind: 'whitespace' },
-            { kind: 'text', text: 'us' },
-            { kind: 'text', text: '!' },
-          ],
-        },
+        contents: [
+          { kind: 'text', text: 'Click' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'us' },
+          { kind: 'text', text: '!' },
+        ],
         colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
         boxed: false,
         tricolorable: false,

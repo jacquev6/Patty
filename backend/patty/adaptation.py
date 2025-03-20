@@ -78,7 +78,7 @@ class MultipleChoicesInput(pydantic.BaseModel):
 
 class SelectableInput(pydantic.BaseModel):
     kind: Literal["selectableInput"]
-    contents: Line[PassiveComponent]
+    contents: list[PassiveComponent]
     colors: list[str]
     boxed: bool
 
