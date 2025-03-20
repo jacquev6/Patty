@@ -12,6 +12,7 @@ import MarkDown from './MarkDown.vue'
 import BusyBox from './BusyBox.vue'
 import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
 import MiniatureScreen from './MiniatureScreen.vue'
+import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 
 const props = defineProps<{
   id: string
@@ -164,6 +165,8 @@ const fullScreen = ref(false)
       <p>{{ adaptation.llmModel.provider }}: {{ adaptation.llmModel.name }}</p>
       <h1>System prompt</h1>
       <MarkDown :markdown="systemPrompt" />
+      <h1>Response JSON schema</h1>
+      <AdaptedExerciseJsonSchemaDetails />
     </template>
     <template #center>
       <!-- @todo Offer to display the low level messages exchanged with the LLM -->
