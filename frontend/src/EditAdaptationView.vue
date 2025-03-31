@@ -180,7 +180,6 @@ watch(Escape, () => {
         <AdaptedExerciseJsonSchemaDetails />
       </template>
       <template #center>
-        <!-- @todo Offer to display the low level messages exchanged with the LLM -->
         <h1>Input text</h1>
         <MarkDown :markdown="inputText" />
         <h1>Adjustments</h1>
