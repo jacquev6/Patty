@@ -253,6 +253,7 @@ def get_default_system_prompt() -> str:
     )
 
     formatter = compact_json.Formatter()
+    formatter.ensure_ascii = False
     formatter.indent_spaces = 2
     formatter.max_inline_complexity = 1
     formatter.table_dict_minimum_similarity = 101
