@@ -1,5 +1,8 @@
+alembic
 compact-json
 fastapi
 mistralai
 openai
 polyfactory  # @todo Make this a development-only requirement
+psycopg2-binary
+sqlalchemy

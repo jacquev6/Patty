@@ -3,10 +3,12 @@ import os
 import fastapi
 
 from . import adaptation
+from . import database_utils
 from . import llm
+from . import settings
 
 
-app = fastapi.FastAPI()
+app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
 
 
 @app.get("/api/available-llm-models")

@@ -1,0 +1,3 @@
+PATTY_ENVIRONMENT=dev
+
+PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db

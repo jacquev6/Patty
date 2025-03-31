@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Literal, TypeVar
 import fastapi
-import textwrap
 import uuid
 
-import compact_json  # type: ignore
 import pydantic
 
+from . import database_utils
 from . import llm
+from . import orm_models
 
 
 __all__ = ["router"]
@@ -132,164 +132,10 @@ adaptations: dict[str, Adaptation] = {}
 
 
 @router.get("/default-system-prompt")
-def get_default_system_prompt() -> str:
-    # Be very careful to KEEP THESE TWO VERSIONS of the exercise IN SYNC.
-
-    text_exercise = textwrap.dedent(
-        """\
-        2 Complète avec "l'herbe" ou "les chats"
-        a. Les vaches mangent ...
-        b. Les chiens courent après ..."""
-    )
-
-    exercise = AdaptedExercise(
-        format="v1",
-        instructions=Page[PassiveComponent](
-            lines=[
-                Line[PassiveComponent](
-                    contents=[
-                        Text(kind="text", text="Complète"),
-                        Whitespace(kind="whitespace"),
-                        Text(kind="text", text="avec"),
-                        Whitespace(kind="whitespace"),
-                        PassiveSequence(
-                            kind="sequence",
-                            contents=[Text(kind="text", text="l'"), Text(kind="text", text="herbe")],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
-                            vertical=False,
-                        ),
-                        Whitespace(kind="whitespace"),
-                        Text(kind="text", text="ou"),
-                        Whitespace(kind="whitespace"),
-                        PassiveSequence(
-                            kind="sequence",
-                            contents=[
-                                Text(kind="text", text="les"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="chats"),
-                            ],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
-                            vertical=False,
-                        ),
-                    ]
-                )
-            ]
-        ),
-        wording=Pages[AnyComponent](
-            pages=[
-                Page[AnyComponent](
-                    lines=[
-                        Line[AnyComponent](
-                            contents=[
-                                Text(kind="text", text="a"),
-                                Text(kind="text", text="."),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="Les"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="vaches"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="mangent"),
-                                Whitespace(kind="whitespace"),
-                                MultipleChoicesInput(
-                                    kind="multipleChoicesInput",
-                                    choices=[
-                                        Line[PassiveComponent](
-                                            contents=[Text(kind="text", text="l'"), Text(kind="text", text="herbe")]
-                                        ),
-                                        Line[PassiveComponent](
-                                            contents=[
-                                                Text(kind="text", text="les"),
-                                                Whitespace(kind="whitespace"),
-                                                Text(kind="text", text="chats"),
-                                            ]
-                                        ),
-                                    ],
-                                    showChoicesByDefault=False,
-                                ),
-                            ]
-                        ),
-                        Line[AnyComponent](
-                            contents=[
-                                Text(kind="text", text="b"),
-                                Text(kind="text", text="."),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="Les"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="chiens"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="courent"),
-                                Whitespace(kind="whitespace"),
-                                Text(kind="text", text="après"),
-                                Whitespace(kind="whitespace"),
-                                MultipleChoicesInput(
-                                    kind="multipleChoicesInput",
-                                    choices=[
-                                        Line[PassiveComponent](
-                                            contents=[Text(kind="text", text="l'"), Text(kind="text", text="herbe")]
-                                        ),
-                                        Line[PassiveComponent](
-                                            contents=[
-                                                Text(kind="text", text="les"),
-                                                Whitespace(kind="whitespace"),
-                                                Text(kind="text", text="chats"),
-                                            ]
-                                        ),
-                                    ],
-                                    showChoicesByDefault=False,
-                                ),
-                            ]
-                        ),
-                    ]
-                )
-            ]
-        ),
-        references=None,
-    )
-
-    formatter = compact_json.Formatter()
-    formatter.ensure_ascii = False
-    formatter.indent_spaces = 2
-    formatter.max_inline_complexity = 1
-    formatter.table_dict_minimum_similarity = 101
-    json_exercise = "\n".join(line.rstrip() for line in formatter.serialize(exercise.model_dump()).splitlines())
-
-    return textwrap.dedent(
-        f"""\
-            Le premier message de l'utilisateur sera un exercice scolaire.
-            Ta mission est de fournir une "adaptation" de cet exercice.
-            Tu ne dois jamais résoudre les exercices, seulement les adapter.
-
-            Dans ses messages suivants, l'utilisateur te demandera de faire des ajustements à ta réponse.
-            A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
-            en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
-
-            Le format pour tes réponses comporte deux champs: `prose` et `structured`.
-            Tu dois utiliser `prose` pour interagir avec l'utilisateur.
-            Tu dois utiliser `structured` pour renvoyer l'adaptation de l'exercice initial, après les ajustements demandés par l'utilisateur.
-            Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation.
-
-            Dans le champs `structured`, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
-            Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
-
-            Voici un exemple. Si l'exercice initial est :
-
-            ```
-            {textwrap.indent(text_exercise, "            ").lstrip()}
-            ```
-
-            Alors une adaptation possible est :
-
-            ```
-            {textwrap.indent(json_exercise, "            ").lstrip()}
-            ```
-            """
-    )
+def get_default_system_prompt(session: database_utils.SessionDependable) -> str:
+    strategy = session.query(orm_models.AdaptationStrategy).first()
+    assert strategy is not None
+    return strategy.system_prompt
 
 
 class PostAdaptationRequest(pydantic.BaseModel):
