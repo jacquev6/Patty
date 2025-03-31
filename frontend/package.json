@@ -17,6 +17,7 @@
     "@floating-ui/vue": "^1.1.6",
     "@vueuse/core": "^13.0.0",
     "ajv": "^8.17.1",
+    "autosize": "^6.0.1",
     "json-stringify-pretty-compact": "^4.0.0",
     "marked": "^15.0.7",
     "modern-normalize": "^3.0.1",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
+    "@types/autosize": "^4.0.3",
     "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^10.2.0",
