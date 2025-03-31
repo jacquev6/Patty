@@ -23,6 +23,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
+./patch-last-migration.sh
 ./shell.sh -c "black . --line-length 120 --skip-magic-trailing-comma"
 ./shell.sh -c "mypy . --strict"
 ../docker-compose.sh exec $env_options backend-shell bash -c "python -m unittest discover --pattern '*.py'"

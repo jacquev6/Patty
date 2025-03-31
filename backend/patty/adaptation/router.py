@@ -1,14 +1,13 @@
-from __future__ import annotations
-
-from typing import Literal, TypeVar
+from typing import Literal
 import fastapi
 import uuid
 
 import pydantic
 
-from . import database_utils
-from . import llm
-from . import orm_models
+from .. import database_utils
+from .. import llm
+from ..adapted import Exercise
+from .strategy import Strategy
 
 
 __all__ = ["router"]
@@ -16,89 +15,7 @@ __all__ = ["router"]
 router = fastapi.APIRouter()
 
 
-class AdaptedExercise(pydantic.BaseModel):
-    format: Literal["v1"]
-    instructions: Page[PassiveComponent]
-    wording: Pages[AnyComponent]
-    references: Line[PassiveComponent] | None
-
-
-Component = TypeVar("Component")
-
-
-class Pages[Component](pydantic.BaseModel):
-    pages: list[Page[Component]]
-
-
-class Page[Component](pydantic.BaseModel):
-    lines: list[Line[Component]]
-
-
-class Line[Component](pydantic.BaseModel):
-    contents: list[Component]
-
-
-class Text(pydantic.BaseModel):
-    kind: Literal["text"]
-    text: str
-
-
-class Whitespace(pydantic.BaseModel):
-    kind: Literal["whitespace"]
-
-
-class Arrow(pydantic.BaseModel):
-    kind: Literal["arrow"]
-
-
-# @todo Find a way to define a generic Sequence[Component] type. Currently this breaks the polyfactory used in llm.dummy.
-# In the mean time, keep PassiveSequence and AnySequence consistent.
-class PassiveSequence(pydantic.BaseModel):
-    kind: Literal["sequence"]
-    contents: list[PassiveComponent]
-    bold: bool
-    italic: bool
-    highlighted: str | None
-    boxed: bool
-    vertical: bool
-
-
-PassiveAtomicComponent = Text | Whitespace | Arrow
-PassiveComponent = PassiveAtomicComponent | PassiveSequence
-
-
-class FreeTextInput(pydantic.BaseModel):
-    kind: Literal["freeTextInput"]
-
-
-class MultipleChoicesInput(pydantic.BaseModel):
-    kind: Literal["multipleChoicesInput"]
-    choices: list[Line[PassiveComponent]]
-    showChoicesByDefault: bool
-
-
-class SelectableInput(pydantic.BaseModel):
-    kind: Literal["selectableInput"]
-    contents: list[PassiveComponent]
-    colors: list[str]
-    boxed: bool
-
-
-# Keep AnySequence and PassiveSequence consistent.
-class AnySequence(pydantic.BaseModel):
-    kind: Literal["sequence"]
-    contents: list[AnyComponent]
-    bold: bool
-    italic: bool
-    highlighted: str | None
-    boxed: bool
-    vertical: bool
-
-
-AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence
-
-
-LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[AdaptedExercise]
+LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
 
 
 class InitialStep(pydantic.BaseModel):
@@ -107,7 +24,7 @@ class InitialStep(pydantic.BaseModel):
     inputText: str
     messages: list[LlmMessage]
     assistantProse: str
-    adaptedExercise: AdaptedExercise | None
+    adaptedExercise: Exercise | None
 
 
 class AdjustmentStep(pydantic.BaseModel):
@@ -115,7 +32,7 @@ class AdjustmentStep(pydantic.BaseModel):
     userPrompt: str
     messages: list[LlmMessage]
     assistantProse: str
-    adaptedExercise: AdaptedExercise | None
+    adaptedExercise: Exercise | None
 
 
 Step = InitialStep | AdjustmentStep
@@ -131,14 +48,21 @@ class Adaptation(pydantic.BaseModel):
 adaptations: dict[str, Adaptation] = {}
 
 
-@router.get("/default-system-prompt")
-def get_default_system_prompt(session: database_utils.SessionDependable) -> str:
-    strategy = session.query(orm_models.AdaptationStrategy).first()
+class ApiStrategy(pydantic.BaseModel):
+    id: int
+    model: llm.ConcreteModel
+    system_prompt: str
+
+
+@router.get("/latest-strategy", response_model=ApiStrategy)
+def get_latest_strategy(session: database_utils.SessionDependable) -> Strategy:
+    strategy = session.query(Strategy).order_by(-Strategy.id).first()
     assert strategy is not None
-    return strategy.system_prompt
+    return strategy
 
 
 class PostAdaptationRequest(pydantic.BaseModel):
+    strategyId: int
     llmModel: llm.ConcreteModel
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
@@ -148,12 +72,18 @@ class PostAdaptationRequest(pydantic.BaseModel):
 
 
 @router.post("")
-async def post_adaptation(req: PostAdaptationRequest) -> Adaptation:
+async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> Adaptation:
+    strategy = session.get(Strategy, req.strategyId)
+    assert strategy is not None
+    if strategy.system_prompt != req.systemPrompt or strategy.model != req.llmModel:
+        strategy = Strategy(parent_id=strategy.id, model=req.llmModel, system_prompt=req.systemPrompt)
+        session.add(strategy)
+
     adaptation_id = str(uuid.uuid4())
 
     messages: list[LlmMessage] = [llm.SystemMessage(message=req.systemPrompt), llm.UserMessage(message=req.inputText)]
 
-    response = await req.llmModel.complete(messages, AdaptedExercise)
+    response = await req.llmModel.complete(messages, Exercise)
     messages.append(response)
 
     adaptation = Adaptation(
@@ -193,7 +123,7 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
         previous_messages.extend(step.messages)
     step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
-    response = await adaptation.llmModel.complete(previous_messages + step_messages, AdaptedExercise)
+    response = await adaptation.llmModel.complete(previous_messages + step_messages, Exercise)
     step_messages.append(response)
 
     adaptation.steps.append(

@@ -37,18 +37,17 @@
         }
       }
     },
-    "/api/adaptation/default-system-prompt": {
+    "/api/adaptation/latest-strategy": {
       "get": {
-        "summary": "Get Default System Prompt",
-        "operationId": "get_default_system_prompt_api_adaptation_default_system_prompt_get",
+        "summary": "Get Latest Strategy",
+        "operationId": "get_latest_strategy_api_adaptation_latest_strategy_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "title": "Response Get Default System Prompt Api Adaptation Default System Prompt Get"
+                  "$ref": "#/components/schemas/ApiStrategy"
                 }
               }
             }
@@ -267,39 +266,6 @@
         ],
         "title": "Adaptation"
       },
-      "AdaptedExercise": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "const": "v1",
-            "title": "Format"
-          },
-          "instructions": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
-          },
-          "wording": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
-          },
-          "references": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "format",
-          "instructions",
-          "wording",
-          "references"
-        ],
-        "title": "AdaptedExercise"
-      },
       "AdjustmentStep": {
         "properties": {
           "kind": {
@@ -321,7 +287,7 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
                 }
               ]
             },
@@ -335,7 +301,7 @@
           "adaptedExercise": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AdaptedExercise"
+                "$ref": "#/components/schemas/Exercise"
               },
               {
                 "type": "null"
@@ -429,6 +395,39 @@
         ],
         "title": "AnySequence"
       },
+      "ApiStrategy": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "system_prompt"
+        ],
+        "title": "ApiStrategy"
+      },
       "Arrow": {
         "properties": {
           "kind": {
@@ -443,7 +442,7 @@
         ],
         "title": "Arrow"
       },
-      "AssistantMessage_AdaptedExercise_": {
+      "AssistantMessage_Exercise_": {
         "properties": {
           "role": {
             "type": "string",
@@ -458,7 +457,7 @@
           "structured": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AdaptedExercise"
+                "$ref": "#/components/schemas/Exercise"
               },
               {
                 "type": "null"
@@ -471,7 +470,7 @@
           "prose",
           "structured"
         ],
-        "title": "AssistantMessage[AdaptedExercise]"
+        "title": "AssistantMessage[Exercise]"
       },
       "DummyModel": {
         "properties": {
@@ -496,6 +495,39 @@
           "name"
         ],
         "title": "DummyModel"
+      },
+      "Exercise": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
+          },
+          "wording": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instructions",
+          "wording",
+          "references"
+        ],
+        "title": "Exercise"
       },
       "FreeTextInput": {
         "properties": {
@@ -549,7 +581,7 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_AdaptedExercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
                 }
               ]
             },
@@ -563,7 +595,7 @@
           "adaptedExercise": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AdaptedExercise"
+                "$ref": "#/components/schemas/Exercise"
               },
               {
                 "type": "null"
@@ -852,6 +884,10 @@
       },
       "PostAdaptationRequest": {
         "properties": {
+          "strategyId": {
+            "type": "integer",
+            "title": "Strategyid"
+          },
           "llmModel": {
             "anyOf": [
               {
@@ -877,6 +913,7 @@
         },
         "type": "object",
         "required": [
+          "strategyId",
           "llmModel",
           "systemPrompt",
           "inputText"

@@ -17,3 +17,5 @@ fi
 
 ../docker-compose.sh exec --workdir /app/backend/patty backend-shell alembic revision --autogenerate $rev_id_arg -m dev
 ../docker-compose.sh exec --workdir /app/backend/patty backend-shell alembic upgrade head
+
+./shell.sh -c 'python -m patty load-fixtures dummy-adaptation-strategy'

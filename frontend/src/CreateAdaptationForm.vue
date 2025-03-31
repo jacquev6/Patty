@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type LlmModel, client } from './apiClient'
+import { type AdaptationStrategy, type LlmModel, client } from './apiClient'
 import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
@@ -11,7 +11,7 @@ import ResizableColumns from './ResizableColumns.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
-  defaultSystemPrompt: string
+  defaultStrategy: AdaptationStrategy
   defaultInputText: string
 }>()
 
@@ -20,11 +20,13 @@ const router = useRouter()
 const availableLlmModels = computed(() => props.availableLlmModels)
 
 assert(availableLlmModels.value.length !== 0)
-const llmModel = ref<LlmModel>(availableLlmModels.value[0])
-watch(availableLlmModels, (availableLlmModels) => {
-  assert(availableLlmModels.length !== 0)
-  llmModel.value = availableLlmModels[0]
-})
+const llmModel = ref(props.defaultStrategy.model)
+watch(
+  () => props.defaultStrategy.model,
+  (defaultLlmModel) => {
+    llmModel.value = defaultLlmModel
+  },
+)
 
 const llmProviders = computed(() => {
   return [...new Set(availableLlmModels.value.map((model) => model.provider))]
@@ -58,9 +60,9 @@ const llmName = computed({
   },
 })
 
-const systemPrompt = ref(props.defaultSystemPrompt)
+const systemPrompt = ref(props.defaultStrategy.system_prompt)
 watch(
-  () => props.defaultSystemPrompt,
+  () => props.defaultStrategy.system_prompt,
   (defaultSystemPrompt) => {
     systemPrompt.value = defaultSystemPrompt
   },
@@ -83,6 +85,7 @@ async function submit() {
 
   const responsePromise = client.POST('/api/adaptation', {
     body: {
+      strategyId: props.defaultStrategy.id,
       llmModel: llmModel.value,
       systemPrompt: systemPrompt.value,
       inputText: inputText.value,

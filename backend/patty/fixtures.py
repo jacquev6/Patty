@@ -3,10 +3,10 @@ import textwrap
 
 import compact_json  # type: ignore
 
+from . import adaptation
+from . import adapted
 from . import database_utils
 from . import llm
-from . import orm_models
-from . import adaptation
 
 
 def make_default_system_prompt() -> str:
@@ -19,37 +19,34 @@ def make_default_system_prompt() -> str:
         b. Les chiens courent après ..."""
     )
 
-    exercise = adaptation.AdaptedExercise(
+    exercise = adapted.Exercise(
         format="v1",
-        instructions=adaptation.Page[adaptation.PassiveComponent](
+        instructions=adapted.Page[adapted.PassiveComponent](
             lines=[
-                adaptation.Line[adaptation.PassiveComponent](
+                adapted.Line[adapted.PassiveComponent](
                     contents=[
-                        adaptation.Text(kind="text", text="Complète"),
-                        adaptation.Whitespace(kind="whitespace"),
-                        adaptation.Text(kind="text", text="avec"),
-                        adaptation.Whitespace(kind="whitespace"),
-                        adaptation.PassiveSequence(
+                        adapted.Text(kind="text", text="Complète"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="avec"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.PassiveSequence(
                             kind="sequence",
-                            contents=[
-                                adaptation.Text(kind="text", text="l'"),
-                                adaptation.Text(kind="text", text="herbe"),
-                            ],
+                            contents=[adapted.Text(kind="text", text="l'"), adapted.Text(kind="text", text="herbe")],
                             bold=False,
                             italic=False,
                             highlighted=None,
                             boxed=True,
                             vertical=False,
                         ),
-                        adaptation.Whitespace(kind="whitespace"),
-                        adaptation.Text(kind="text", text="ou"),
-                        adaptation.Whitespace(kind="whitespace"),
-                        adaptation.PassiveSequence(
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="ou"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.PassiveSequence(
                             kind="sequence",
                             contents=[
-                                adaptation.Text(kind="text", text="les"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="chats"),
+                                adapted.Text(kind="text", text="les"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="chats"),
                             ],
                             bold=False,
                             italic=False,
@@ -61,35 +58,35 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
-        wording=adaptation.Pages[adaptation.AnyComponent](
+        wording=adapted.Pages[adapted.AnyComponent](
             pages=[
-                adaptation.Page[adaptation.AnyComponent](
+                adapted.Page[adapted.AnyComponent](
                     lines=[
-                        adaptation.Line[adaptation.AnyComponent](
+                        adapted.Line[adapted.AnyComponent](
                             contents=[
-                                adaptation.Text(kind="text", text="a"),
-                                adaptation.Text(kind="text", text="."),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="Les"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="vaches"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="mangent"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.MultipleChoicesInput(
+                                adapted.Text(kind="text", text="a"),
+                                adapted.Text(kind="text", text="."),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="Les"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="vaches"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="mangent"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adaptation.Line[adaptation.PassiveComponent](
+                                        adapted.Line[adapted.PassiveComponent](
                                             contents=[
-                                                adaptation.Text(kind="text", text="l'"),
-                                                adaptation.Text(kind="text", text="herbe"),
+                                                adapted.Text(kind="text", text="l'"),
+                                                adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adaptation.Line[adaptation.PassiveComponent](
+                                        adapted.Line[adapted.PassiveComponent](
                                             contents=[
-                                                adaptation.Text(kind="text", text="les"),
-                                                adaptation.Whitespace(kind="whitespace"),
-                                                adaptation.Text(kind="text", text="chats"),
+                                                adapted.Text(kind="text", text="les"),
+                                                adapted.Whitespace(kind="whitespace"),
+                                                adapted.Text(kind="text", text="chats"),
                                             ]
                                         ),
                                     ],
@@ -97,33 +94,33 @@ def make_default_system_prompt() -> str:
                                 ),
                             ]
                         ),
-                        adaptation.Line[adaptation.AnyComponent](
+                        adapted.Line[adapted.AnyComponent](
                             contents=[
-                                adaptation.Text(kind="text", text="b"),
-                                adaptation.Text(kind="text", text="."),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="Les"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="chiens"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="courent"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.Text(kind="text", text="après"),
-                                adaptation.Whitespace(kind="whitespace"),
-                                adaptation.MultipleChoicesInput(
+                                adapted.Text(kind="text", text="b"),
+                                adapted.Text(kind="text", text="."),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="Les"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="chiens"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="courent"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="après"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adaptation.Line[adaptation.PassiveComponent](
+                                        adapted.Line[adapted.PassiveComponent](
                                             contents=[
-                                                adaptation.Text(kind="text", text="l'"),
-                                                adaptation.Text(kind="text", text="herbe"),
+                                                adapted.Text(kind="text", text="l'"),
+                                                adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adaptation.Line[adaptation.PassiveComponent](
+                                        adapted.Line[adapted.PassiveComponent](
                                             contents=[
-                                                adaptation.Text(kind="text", text="les"),
-                                                adaptation.Whitespace(kind="whitespace"),
-                                                adaptation.Text(kind="text", text="chats"),
+                                                adapted.Text(kind="text", text="les"),
+                                                adapted.Whitespace(kind="whitespace"),
+                                                adapted.Text(kind="text", text="chats"),
                                             ]
                                         ),
                                     ],
@@ -178,18 +175,24 @@ def make_default_system_prompt() -> str:
     )
 
 
-def create_default_adaptation_strategy(session: database_utils.Session) -> None:
-    session.add(
-        orm_models.AdaptationStrategy(
-            model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), system_prompt=make_default_system_prompt()
-        )
+def create_default_adaptation_strategy(session: database_utils.Session) -> Iterable[object]:
+    yield adaptation.Strategy(
+        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), system_prompt=make_default_system_prompt()
     )
 
 
-available_fixtures = {"default-adaptation-strategy": create_default_adaptation_strategy}
+def create_dummy_adaptation_strategy(session: database_utils.Session) -> Iterable[object]:
+    yield adaptation.Strategy(model=llm.DummyModel(name="dummy-1"), system_prompt="Blah blah blah.")
+
+
+available_fixtures = {
+    "default-adaptation-strategy": create_default_adaptation_strategy,
+    "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
+}
 
 
 def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     database_utils.truncate_all_tables(session)
     for fixture in fixtures:
-        available_fixtures[fixture](session)
+        for instance in available_fixtures[fixture](session):
+            session.add(instance)

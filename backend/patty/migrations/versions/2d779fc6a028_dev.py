@@ -15,8 +15,14 @@ def upgrade() -> None:
     op.create_table(
         "adaptation_strategies",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("system_prompt", sa.String(), nullable=False),
+        sa.Column("parent_id", sa.Integer(), nullable=True),
         sa.Column("model", sa.JSON(), nullable=False),
+        sa.Column("system_prompt", sa.String(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["parent_id"],
+            ["adaptation_strategies.id"],
+            name=op.f("fk_adaptation_strategies_parent_id_adaptation_strategies"),
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_strategies")),
     )
     # ### end Alembic commands ###

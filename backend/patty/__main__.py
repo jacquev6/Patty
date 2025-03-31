@@ -4,7 +4,7 @@ import json
 
 import click
 
-from . import adaptation
+from . import adapted
 from . import asgi
 from . import database_utils
 from . import fixtures
@@ -26,7 +26,7 @@ def openapi(output: io.StringIO) -> None:
 @main.command()
 @click.argument("output", type=click.File("w"))
 def adapted_exercise_schema(output: io.StringIO) -> None:
-    json.dump(adaptation.AdaptedExercise.model_json_schema(), output, indent=2)
+    json.dump(adapted.Exercise.model_json_schema(), output, indent=2)
     output.write("\n")
 
 

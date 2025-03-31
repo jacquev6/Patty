@@ -21,15 +21,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/default-system-prompt': {
+  '/api/adaptation/latest-strategy': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Get Default System Prompt */
-    get: operations['get_default_system_prompt_api_adaptation_default_system_prompt_get']
+    /** Get Latest Strategy */
+    get: operations['get_latest_strategy_api_adaptation_latest_strategy_get']
     put?: never
     post?: never
     delete?: never
@@ -122,17 +122,6 @@ export interface components {
       /** Steps */
       steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
     }
-    /** AdaptedExercise */
-    AdaptedExercise: {
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v1'
-      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
-      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
-      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
-    }
     /** AdjustmentStep */
     AdjustmentStep: {
       /**
@@ -146,11 +135,11 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_AdaptedExercise_']
+        | components['schemas']['AssistantMessage_Exercise_']
       )[]
       /** Assistantprose */
       assistantProse: string
-      adaptedExercise: components['schemas']['AdaptedExercise'] | null
+      adaptedExercise: components['schemas']['Exercise'] | null
     }
     /** AnySequence */
     AnySequence: {
@@ -180,6 +169,18 @@ export interface components {
       /** Vertical */
       vertical: boolean
     }
+    /** ApiStrategy */
+    ApiStrategy: {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** System Prompt */
+      system_prompt: string
+    }
     /** Arrow */
     Arrow: {
       /**
@@ -188,8 +189,8 @@ export interface components {
        */
       kind: 'arrow'
     }
-    /** AssistantMessage[AdaptedExercise] */
-    AssistantMessage_AdaptedExercise_: {
+    /** AssistantMessage[Exercise] */
+    AssistantMessage_Exercise_: {
       /**
        * Role
        * @default assistant
@@ -198,7 +199,7 @@ export interface components {
       role: 'assistant'
       /** Prose */
       prose: string
-      structured: components['schemas']['AdaptedExercise'] | null
+      structured: components['schemas']['Exercise'] | null
     }
     /** DummyModel */
     DummyModel: {
@@ -213,6 +214,17 @@ export interface components {
        * @enum {string}
        */
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
+    }
+    /** Exercise */
+    Exercise: {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
+      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
+      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
     }
     /** FreeTextInput */
     FreeTextInput: {
@@ -242,11 +254,11 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_AdaptedExercise_']
+        | components['schemas']['AssistantMessage_Exercise_']
       )[]
       /** Assistantprose */
       assistantProse: string
-      adaptedExercise: components['schemas']['AdaptedExercise'] | null
+      adaptedExercise: components['schemas']['Exercise'] | null
     }
     /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
     Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
@@ -358,6 +370,8 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
+      /** Strategyid */
+      strategyId: number
       /** Llmmodel */
       llmModel:
         | components['schemas']['DummyModel']
@@ -469,7 +483,7 @@ export interface operations {
       }
     }
   }
-  get_default_system_prompt_api_adaptation_default_system_prompt_get: {
+  get_latest_strategy_api_adaptation_latest_strategy_get: {
     parameters: {
       query?: never
       header?: never
@@ -484,7 +498,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': string
+          'application/json': components['schemas']['ApiStrategy']
         }
       }
     }

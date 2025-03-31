@@ -79,11 +79,11 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @costs_money
     async def test_adaptation_schema(self) -> None:
-        from ..adaptation import AdaptedExercise
+        from ..adapted import Exercise
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
         response = await model.complete(
-            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], AdaptedExercise
+            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], Exercise
         )
-        self.assertIsInstance(response.structured, AdaptedExercise)
+        self.assertIsInstance(response.structured, Exercise)
