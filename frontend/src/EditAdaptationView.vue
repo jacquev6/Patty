@@ -5,7 +5,7 @@ import Ajv, { type ErrorObject } from 'ajv'
 
 import { client, type Adaptation } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
-import ThreeColumns from './ThreeColumns.vue'
+import ResizableColumns from './ResizableColumns.vue'
 import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
@@ -170,8 +170,8 @@ watch(Escape, () => {
 
 <template>
   <div v-if="adaptation !== null" class="container">
-    <ThreeColumns>
-      <template #left>
+    <ResizableColumns :columns="3">
+      <template #col-1>
         <h1>LLM model</h1>
         <p>{{ adaptation.llmModel.provider }}: {{ adaptation.llmModel.name }}</p>
         <h1>System prompt</h1>
@@ -179,7 +179,7 @@ watch(Escape, () => {
         <h1>Response JSON schema</h1>
         <AdaptedExerciseJsonSchemaDetails />
       </template>
-      <template #center>
+      <template #col-2>
         <h1>Input text</h1>
         <MarkDown :markdown="inputText" />
         <h1>Adjustments</h1>
@@ -206,7 +206,7 @@ watch(Escape, () => {
           </div>
         </BusyBox>
       </template>
-      <template #right>
+      <template #col-3>
         <h1>Adapted exercise</h1>
         <template v-if="adaptedExercise !== null">
           <MiniatureScreen :fullScreen>
@@ -253,7 +253,7 @@ watch(Escape, () => {
           <!-- @todo Save the manual changes to the API -->
         </p>
       </template>
-    </ThreeColumns>
+    </ResizableColumns>
     <div v-if="showRaw" class="overlay">
       <div>
         <div>

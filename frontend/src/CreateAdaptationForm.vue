@@ -7,6 +7,7 @@ import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
+import ResizableColumns from './ResizableColumns.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -104,20 +105,26 @@ const disabled = computed(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <BusyBox :busy>
-      <h1>LLM model</h1>
-      <select v-model="llmProvider">
-        <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
-      </select>
-      <select v-model="llmName">
-        <option v-for="name in llmNames">{{ name }}</option>
-      </select>
-      <h1>System prompt</h1>
-      <TextArea v-model="systemPrompt"></TextArea>
-      <h1>Response JSON schema</h1>
-      <AdaptedExerciseJsonSchemaDetails />
-      <h1>Input text</h1>
-      <TextArea v-model="inputText"></TextArea>
-      <p><button @click="submit" :disabled>Submit</button></p>
+      <ResizableColumns :columns="2">
+        <template #col-1>
+          <h1>LLM model</h1>
+          <select v-model="llmProvider">
+            <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
+          </select>
+          <select v-model="llmName">
+            <option v-for="name in llmNames">{{ name }}</option>
+          </select>
+          <h1>System prompt</h1>
+          <TextArea v-model="systemPrompt"></TextArea>
+          <h1>Response JSON schema</h1>
+          <AdaptedExerciseJsonSchemaDetails />
+        </template>
+        <template #col-2>
+          <h1>Input text</h1>
+          <TextArea v-model="inputText"></TextArea>
+          <p><button @click="submit" :disabled>Submit</button></p>
+        </template>
+      </ResizableColumns>
     </BusyBox>
   </div>
 </template>
