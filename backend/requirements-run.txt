@@ -2,4 +2,5 @@ compact-json
 fastapi
 mistralai
 openai
-polyfactory  # @todo Make this a development-only requirement
+polyfactory  # @todo Move this dependency to requirements-dev.txt
+pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests

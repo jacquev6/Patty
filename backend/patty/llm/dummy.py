@@ -33,3 +33,13 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
         model = DummyModel(name="dummy-1")
         response = await model.complete(messages=[], structured_type=DummyModelTestCase.Structured)
         self.assertIsInstance(response.structured, DummyModelTestCase.Structured)
+
+    async def test_adaptation_schema(self) -> None:
+        from ..adaptation import AdaptedExercise
+
+        model = DummyModel(name="dummy-1")
+
+        response = await model.complete(
+            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], AdaptedExercise
+        )
+        self.assertIsInstance(response.structured, AdaptedExercise)
