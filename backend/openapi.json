@@ -306,7 +306,7 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_ProseAndExercise_"
                 }
               ]
             },
@@ -429,7 +429,7 @@
         ],
         "title": "Arrow"
       },
-      "AssistantMessage_Exercise_": {
+      "AssistantMessage_ProseAndExercise_": {
         "properties": {
           "role": {
             "type": "string",
@@ -437,27 +437,15 @@
             "title": "Role",
             "default": "assistant"
           },
-          "prose": {
-            "type": "string",
-            "title": "Prose"
-          },
-          "structured": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "message": {
+            "$ref": "#/components/schemas/ProseAndExercise"
           }
         },
         "type": "object",
         "required": [
-          "prose",
-          "structured"
+          "message"
         ],
-        "title": "AssistantMessage[Exercise]"
+        "title": "AssistantMessage[ProseAndExercise]"
       },
       "DummyModel": {
         "properties": {
@@ -568,7 +556,7 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_ProseAndExercise_"
                 }
               ]
             },
@@ -933,6 +921,23 @@
           "inputText"
         ],
         "title": "PostAdaptationRequest"
+      },
+      "ProseAndExercise": {
+        "properties": {
+          "prose": {
+            "type": "string",
+            "title": "Prose"
+          },
+          "structured": {
+            "$ref": "#/components/schemas/Exercise"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prose",
+          "structured"
+        ],
+        "title": "ProseAndExercise"
       },
       "SelectableInput": {
         "properties": {

@@ -2,6 +2,8 @@ from typing import Literal
 import fastapi
 import uuid
 
+import pydantic
+
 from ..api_utils import ApiModel
 from .. import database_utils
 from .. import llm
@@ -15,7 +17,12 @@ __all__ = ["router"]
 router = fastapi.APIRouter()
 
 
-LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
+class ProseAndExercise(pydantic.BaseModel):
+    prose: str
+    structured: Exercise
+
+
+LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[ProseAndExercise]
 
 
 class InitialStep(ApiModel):
@@ -102,7 +109,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
 
     messages: list[LlmMessage] = [llm.SystemMessage(message=req.system_prompt), llm.UserMessage(message=req.input_text)]
 
-    response = await req.llm_model.complete(messages, Exercise)
+    response = await req.llm_model.complete(messages, ProseAndExercise)
     messages.append(response)
 
     adaptation = Adaptation(
@@ -114,8 +121,8 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
                 system_prompt=req.system_prompt,
                 input_text=req.input_text,
                 messages=messages,
-                assistant_prose=response.prose,
-                adapted_exercise=response.structured,
+                assistant_prose=response.message.prose,
+                adapted_exercise=response.message.structured,
             )
         ],
     )
@@ -142,7 +149,7 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
         previous_messages.extend(step.messages)
     step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
-    response = await adaptation.llm_model.complete(previous_messages + step_messages, Exercise)
+    response = await adaptation.llm_model.complete(previous_messages + step_messages, ProseAndExercise)
     step_messages.append(response)
 
     adaptation.steps.append(
@@ -150,8 +157,8 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
             kind="adjustment",
             userPrompt=req.adjustment,
             messages=step_messages,
-            assistant_prose=response.prose,
-            adapted_exercise=response.structured,
+            assistant_prose=response.message.prose,
+            adapted_exercise=response.message.structured,
         )
     )
 

@@ -1,9 +1,10 @@
-from typing import Literal, Type
+from typing import Literal, Type, TypeVar
 import abc
 
 import pydantic
 
-from .utils import T
+
+T = TypeVar("T", bound=pydantic.BaseModel)
 
 
 class SystemMessage(pydantic.BaseModel):
@@ -16,10 +17,9 @@ class UserMessage(pydantic.BaseModel):
     message: str
 
 
-class AssistantMessage[E](pydantic.BaseModel):
+class AssistantMessage[T](pydantic.BaseModel):
     role: Literal["assistant"] = "assistant"
-    prose: str
-    structured: E | None
+    message: T
 
 
 class Model(abc.ABC, pydantic.BaseModel):

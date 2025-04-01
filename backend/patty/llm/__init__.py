@@ -2,7 +2,6 @@ from .base import Model as AbstractModel, SystemMessage, UserMessage, AssistantM
 from .dummy import DummyModel
 from .mistralai import MistralAiModel
 from .openai import OpenAiModel
-from .utils import T
 
 
 __all__ = [

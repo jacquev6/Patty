@@ -152,7 +152,7 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_Exercise_']
+        | components['schemas']['AssistantMessage_ProseAndExercise_']
       )[]
       /** Assistantprose */
       assistantProse: string
@@ -194,17 +194,15 @@ export interface components {
        */
       kind: 'arrow'
     }
-    /** AssistantMessage[Exercise] */
-    AssistantMessage_Exercise_: {
+    /** AssistantMessage[ProseAndExercise] */
+    AssistantMessage_ProseAndExercise_: {
       /**
        * Role
        * @default assistant
        * @constant
        */
       role: 'assistant'
-      /** Prose */
-      prose: string
-      structured: components['schemas']['Exercise'] | null
+      message: components['schemas']['ProseAndExercise']
     }
     /** DummyModel */
     DummyModel: {
@@ -259,7 +257,7 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_Exercise_']
+        | components['schemas']['AssistantMessage_ProseAndExercise_']
       )[]
       /** Assistantprose */
       assistantProse: string
@@ -395,6 +393,12 @@ export interface components {
       inputId: number
       /** Inputtext */
       inputText: string
+    }
+    /** ProseAndExercise */
+    ProseAndExercise: {
+      /** Prose */
+      prose: string
+      structured: components['schemas']['Exercise']
     }
     /** SelectableInput */
     SelectableInput: {
