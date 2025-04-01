@@ -241,7 +241,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('moves next lines down', () => {
-    cy.viewport(500, 545)
+    cy.viewport(600, 550)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -287,7 +287,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('does not render choices over the page navigation controls', () => {
-    cy.viewport(500, 545)
+    cy.viewport(543, 550)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -305,7 +305,7 @@ describe('MultipleChoicesInput', () => {
                   },
                   {
                     contents: [
-                      { kind: 'text', text: 'Blaaaaaaaaaaaaaaah' },
+                      { kind: 'text', text: 'Blaaaaaaaaaaaaaaaaaah' },
                       { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
                     ],
                   },
