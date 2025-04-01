@@ -1,6 +1,22 @@
 name: patty-dev
 
 services:
+  db:
+    image: postgres:15
+    tmpfs:
+      # Avoid creating an anonymous Docker volume on each run (We don't persist data in the dev env)
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    healthcheck:
+      test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
+      interval: 0.5s
+
+  adminer:
+    image: adminer:4
+
   backend-shell:
     image: patty-dev_backend
     build:
@@ -14,6 +30,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     init: true
     command: ["sleep", "infinity"]
@@ -25,6 +42,36 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     command: ["pip", "install", "--user", "-r", "requirements-dev.txt", "-r", "requirements-run.txt"]
+  migrator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend/patty
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      pip-installer:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+  data-loader:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["python", "-m", "patty", "load-fixtures", "dummy-adaptation-strategy", "default-adaptation-input"]
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
   backend:
     image: patty-dev_backend
     pull_policy: never
@@ -33,10 +80,11 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
-      pip-installer:
+      data-loader:
         condition: service_completed_successfully
   generated-files-cleaner:
     image: patty-dev_backend
@@ -46,6 +94,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app
     env_file:
+      - backend/env
       - backend/secrets.env
     command: ["rm", "-f", "backend/openapi.json", "backend/adapted-exercise-schema.json", "frontend/src/openapi.ts"]
     depends_on:
@@ -59,6 +108,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     command: ["bash", "-c", 'echo "Generating backend/openapi.json for the first time" && python -m patty openapi openapi.json']
     depends_on:
@@ -72,6 +122,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     init: true
     command: [
@@ -93,6 +144,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     command: ["bash", "-c", 'echo "Generating backend/adapted-exercise-schema.json for the first time" && python -m patty adapted-exercise-schema adapted-exercise-schema.json']
     depends_on:
@@ -106,6 +158,7 @@ services:
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
+      - backend/env
       - backend/secrets.env
     init: true
     command: [
