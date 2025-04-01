@@ -276,6 +276,7 @@
             "title": "Steps"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
@@ -327,6 +328,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -588,6 +590,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -610,6 +613,7 @@
             "title": "Text"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
@@ -879,6 +883,7 @@
             "title": "Adjustment"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "adjustment"
@@ -918,6 +923,7 @@
             "title": "Inputtext"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "strategyId",
@@ -996,16 +1002,17 @@
             ],
             "title": "Model"
           },
-          "system_prompt": {
+          "systemPrompt": {
             "type": "string",
-            "title": "System Prompt"
+            "title": "Systemprompt"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
           "model",
-          "system_prompt"
+          "systemPrompt"
         ],
         "title": "Strategy"
       },

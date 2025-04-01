@@ -2,8 +2,7 @@ from typing import Literal
 import fastapi
 import uuid
 
-import pydantic
-
+from ..api_utils import ApiModel
 from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
@@ -19,37 +18,37 @@ router = fastapi.APIRouter()
 LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
 
 
-class InitialStep(pydantic.BaseModel):
+class InitialStep(ApiModel):
     kind: Literal["initial"]
-    systemPrompt: str
-    inputText: str
+    system_prompt: str
+    input_text: str
     messages: list[LlmMessage]
-    assistantProse: str
-    adaptedExercise: Exercise | None
+    assistant_prose: str
+    adapted_exercise: Exercise | None
 
 
-class AdjustmentStep(pydantic.BaseModel):
+class AdjustmentStep(ApiModel):
     kind: Literal["adjustment"]
     userPrompt: str
     messages: list[LlmMessage]
-    assistantProse: str
-    adaptedExercise: Exercise | None
+    assistant_prose: str
+    adapted_exercise: Exercise | None
 
 
 Step = InitialStep | AdjustmentStep
 
 
-class Adaptation(pydantic.BaseModel):
+class Adaptation(ApiModel):
     id: str
     # Abstract type `llm.AbstractModel` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
-    llmModel: llm.ConcreteModel
+    llm_model: llm.ConcreteModel
     steps: list[Step]
 
 
 adaptations: dict[str, Adaptation] = {}
 
 
-class Strategy(pydantic.BaseModel):
+class Strategy(ApiModel):
     id: int
     model: llm.ConcreteModel
     system_prompt: str
@@ -62,7 +61,7 @@ def get_latest_strategy(session: database_utils.SessionDependable) -> DbStrategy
     return strategy
 
 
-class Input(pydantic.BaseModel):
+class Input(ApiModel):
     id: int
     text: str
 
@@ -74,49 +73,49 @@ def get_latest_input(session: database_utils.SessionDependable) -> DbInput:
     return input
 
 
-class PostAdaptationRequest(pydantic.BaseModel):
-    strategyId: int
-    llmModel: llm.ConcreteModel
+class PostAdaptationRequest(ApiModel):
+    strategy_id: int
+    llm_model: llm.ConcreteModel
     # @todo Let experimenter set temperature
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed
-    systemPrompt: str
-    inputId: int
-    inputText: str
+    system_prompt: str
+    input_id: int
+    input_text: str
 
 
 @router.post("")
 async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> Adaptation:
-    strategy = session.get(DbStrategy, req.strategyId)
+    strategy = session.get(DbStrategy, req.strategy_id)
     assert strategy is not None
-    if strategy.system_prompt != req.systemPrompt or strategy.model != req.llmModel:
-        strategy = DbStrategy(parent_id=strategy.id, model=req.llmModel, system_prompt=req.systemPrompt)
+    if strategy.system_prompt != req.system_prompt or strategy.model != req.llm_model:
+        strategy = DbStrategy(parent_id=strategy.id, model=req.llm_model, system_prompt=req.system_prompt)
         session.add(strategy)
 
-    input = session.get(DbInput, req.inputId)
+    input = session.get(DbInput, req.input_id)
     assert input is not None
-    if input.text != req.inputText:
-        input = DbInput(text=req.inputText)
+    if input.text != req.input_text:
+        input = DbInput(text=req.input_text)
         session.add(input)
 
     adaptation_id = str(uuid.uuid4())
 
-    messages: list[LlmMessage] = [llm.SystemMessage(message=req.systemPrompt), llm.UserMessage(message=req.inputText)]
+    messages: list[LlmMessage] = [llm.SystemMessage(message=req.system_prompt), llm.UserMessage(message=req.input_text)]
 
-    response = await req.llmModel.complete(messages, Exercise)
+    response = await req.llm_model.complete(messages, Exercise)
     messages.append(response)
 
     adaptation = Adaptation(
         id=adaptation_id,
-        llmModel=req.llmModel,
+        llm_model=req.llm_model,
         steps=[
             InitialStep(
                 kind="initial",
-                systemPrompt=req.systemPrompt,
-                inputText=req.inputText,
+                system_prompt=req.system_prompt,
+                input_text=req.input_text,
                 messages=messages,
-                assistantProse=response.prose,
-                adaptedExercise=response.structured,
+                assistant_prose=response.prose,
+                adapted_exercise=response.structured,
             )
         ],
     )
@@ -130,7 +129,7 @@ async def get_adaptation(id: str) -> Adaptation:
     return adaptations[id]
 
 
-class PostAdaptationAdjustmentRequest(pydantic.BaseModel):
+class PostAdaptationAdjustmentRequest(ApiModel):
     adjustment: str
 
 
@@ -143,7 +142,7 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
         previous_messages.extend(step.messages)
     step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
-    response = await adaptation.llmModel.complete(previous_messages + step_messages, Exercise)
+    response = await adaptation.llm_model.complete(previous_messages + step_messages, Exercise)
     step_messages.append(response)
 
     adaptation.steps.append(
@@ -151,8 +150,8 @@ async def post_adaptation_adjustment(id: str, req: PostAdaptationAdjustmentReque
             kind="adjustment",
             userPrompt=req.adjustment,
             messages=step_messages,
-            assistantProse=response.prose,
-            adaptedExercise=response.structured,
+            assistant_prose=response.prose,
+            adapted_exercise=response.structured,
         )
     )
 

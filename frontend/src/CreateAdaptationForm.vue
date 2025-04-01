@@ -60,9 +60,9 @@ const llmName = computed({
   },
 })
 
-const systemPrompt = ref(props.defaultStrategy.system_prompt)
+const systemPrompt = ref(props.defaultStrategy.systemPrompt)
 watch(
-  () => props.defaultStrategy.system_prompt,
+  () => props.defaultStrategy.systemPrompt,
   (defaultSystemPrompt) => {
     systemPrompt.value = defaultSystemPrompt
   },

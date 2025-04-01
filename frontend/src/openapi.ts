@@ -424,8 +424,8 @@ export interface components {
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
-      /** System Prompt */
-      system_prompt: string
+      /** Systemprompt */
+      systemPrompt: string
     }
     /** SystemMessage */
     SystemMessage: {
