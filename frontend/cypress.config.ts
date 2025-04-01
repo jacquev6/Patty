@@ -9,6 +9,9 @@ export default defineConfig({
       bundler: 'vite',
     },
     setupNodeEvents(on, config) {
+      // Used by 'getCompareSnapshotsPlugin' below to set the window size, hence the max screenshot size
+      config.viewportWidth = 1600
+      config.viewportHeight = 1200
       return getCompareSnapshotsPlugin(on, config)
     },
   },
