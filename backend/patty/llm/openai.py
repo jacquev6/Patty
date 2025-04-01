@@ -76,7 +76,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @costs_money
     async def test_adaptation_schema(self) -> None:
-        from ..adaptation.router import ProseAndExercise
+        from ..adapted import ProseAndExercise
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 

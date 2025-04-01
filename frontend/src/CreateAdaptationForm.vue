@@ -85,11 +85,8 @@ async function submit() {
 
   const responsePromise = client.POST('/api/adaptation', {
     body: {
-      strategyId: props.defaultStrategy.id,
-      llmModel: llmModel.value,
-      systemPrompt: systemPrompt.value,
-      inputId: props.defaultInput.id,
-      inputText: inputText.value,
+      strategy: { id: props.defaultStrategy.id, model: llmModel.value, systemPrompt: systemPrompt.value },
+      input: { id: props.defaultInput.id, text: inputText.value },
     },
   })
 

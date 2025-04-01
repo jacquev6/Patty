@@ -34,7 +34,7 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(response.message, DummyModelTestCase.Message)
 
     async def test_adaptation_schema(self) -> None:
-        from ..adaptation.router import ProseAndExercise
+        from ..adapted import ProseAndExercise
 
         model = DummyModel(name="dummy-1")
 

@@ -237,6 +237,92 @@
           }
         }
       }
+    },
+    "/api/adaptation/{id}/manual-edit": {
+      "put": {
+        "summary": "Put Adaptation Manual Edit",
+        "operationId": "put_adaptation_manual_edit_api_adaptation__id__manual_edit_put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exercise-Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adaptation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Adaptation Manual Edit",
+        "operationId": "delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adaptation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -244,7 +330,7 @@
       "Adaptation": {
         "properties": {
           "id": {
-            "type": "string",
+            "type": "integer",
             "title": "Id"
           },
           "llmModel": {
@@ -274,6 +360,16 @@
             },
             "type": "array",
             "title": "Steps"
+          },
+          "manualEdit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exercise-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -281,7 +377,8 @@
         "required": [
           "id",
           "llmModel",
-          "steps"
+          "steps",
+          "manualEdit"
         ],
         "title": "Adaptation"
       },
@@ -320,7 +417,7 @@
           "adaptedExercise": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise"
+                "$ref": "#/components/schemas/Exercise-Output"
               },
               {
                 "type": "null"
@@ -339,7 +436,7 @@
         ],
         "title": "AdjustmentStep"
       },
-      "AnySequence": {
+      "AnySequence-Input": {
         "properties": {
           "kind": {
             "type": "string",
@@ -362,13 +459,89 @@
                   "$ref": "#/components/schemas/FreeTextInput"
                 },
                 {
-                  "$ref": "#/components/schemas/MultipleChoicesInput"
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/SelectableInput"
+                  "$ref": "#/components/schemas/SelectableInput-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/AnySequence"
+                  "$ref": "#/components/schemas/AnySequence-Input"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          },
+          "bold": {
+            "type": "boolean",
+            "title": "Bold"
+          },
+          "italic": {
+            "type": "boolean",
+            "title": "Italic"
+          },
+          "highlighted": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highlighted"
+          },
+          "boxed": {
+            "type": "boolean",
+            "title": "Boxed"
+          },
+          "vertical": {
+            "type": "boolean",
+            "title": "Vertical"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents",
+          "bold",
+          "italic",
+          "highlighted",
+          "boxed",
+          "vertical"
+        ],
+        "title": "AnySequence"
+      },
+      "AnySequence-Output": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "sequence",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/AnySequence-Output"
                 }
               ]
             },
@@ -471,7 +644,7 @@
         ],
         "title": "DummyModel"
       },
-      "Exercise": {
+      "Exercise-Input": {
         "properties": {
           "format": {
             "type": "string",
@@ -479,15 +652,48 @@
             "title": "Format"
           },
           "instructions": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input"
           },
           "wording": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input"
           },
           "references": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instructions",
+          "wording",
+          "references"
+        ],
+        "title": "Exercise"
+      },
+      "Exercise-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instructions": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output"
+          },
+          "wording": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output"
               },
               {
                 "type": "null"
@@ -570,7 +776,7 @@
           "adaptedExercise": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise"
+                "$ref": "#/components/schemas/Exercise-Output"
               },
               {
                 "type": "null"
@@ -609,7 +815,7 @@
         ],
         "title": "Input"
       },
-      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -627,13 +833,13 @@
                   "$ref": "#/components/schemas/FreeTextInput"
                 },
                 {
-                  "$ref": "#/components/schemas/MultipleChoicesInput"
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/SelectableInput"
+                  "$ref": "#/components/schemas/SelectableInput-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/AnySequence"
+                  "$ref": "#/components/schemas/AnySequence-Input"
                 }
               ]
             },
@@ -647,7 +853,7 @@
         ],
         "title": "Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
       },
-      "Line_Union_Text__Whitespace__Arrow__PassiveSequence__": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -662,7 +868,74 @@
                   "$ref": "#/components/schemas/Arrow"
                 },
                 {
-                  "$ref": "#/components/schemas/PassiveSequence"
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/AnySequence-Output"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ],
+        "title": "Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+      },
+      "Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/PassiveSequence-Input"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ],
+        "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence]]"
+      },
+      "Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/PassiveSequence-Output"
                 }
               ]
             },
@@ -699,7 +972,7 @@
         ],
         "title": "MistralAiModel"
       },
-      "MultipleChoicesInput": {
+      "MultipleChoicesInput-Input": {
         "properties": {
           "kind": {
             "type": "string",
@@ -708,7 +981,34 @@
           },
           "choices": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input"
+            },
+            "type": "array",
+            "title": "Choices"
+          },
+          "showChoicesByDefault": {
+            "type": "boolean",
+            "title": "Showchoicesbydefault"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "choices",
+          "showChoicesByDefault"
+        ],
+        "title": "MultipleChoicesInput"
+      },
+      "MultipleChoicesInput-Output": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "multipleChoicesInput",
+            "title": "Kind"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output"
             },
             "type": "array",
             "title": "Choices"
@@ -749,11 +1049,11 @@
         ],
         "title": "OpenAiModel"
       },
-      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -765,11 +1065,27 @@
         ],
         "title": "Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
       },
-      "Page_Union_Text__Whitespace__Arrow__PassiveSequence__": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "title": "Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+      },
+      "Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -781,11 +1097,27 @@
         ],
         "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence]]"
       },
-      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+      "Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ],
+        "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence]]"
+      },
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -797,7 +1129,23 @@
         ],
         "title": "Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
       },
-      "PassiveSequence": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output": {
+        "properties": {
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output"
+            },
+            "type": "array",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pages"
+        ],
+        "title": "Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]"
+      },
+      "PassiveSequence-Input": {
         "properties": {
           "kind": {
             "type": "string",
@@ -817,7 +1165,74 @@
                   "$ref": "#/components/schemas/Arrow"
                 },
                 {
-                  "$ref": "#/components/schemas/PassiveSequence"
+                  "$ref": "#/components/schemas/PassiveSequence-Input"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          },
+          "bold": {
+            "type": "boolean",
+            "title": "Bold"
+          },
+          "italic": {
+            "type": "boolean",
+            "title": "Italic"
+          },
+          "highlighted": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highlighted"
+          },
+          "boxed": {
+            "type": "boolean",
+            "title": "Boxed"
+          },
+          "vertical": {
+            "type": "boolean",
+            "title": "Vertical"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents",
+          "bold",
+          "italic",
+          "highlighted",
+          "boxed",
+          "vertical"
+        ],
+        "title": "PassiveSequence"
+      },
+      "PassiveSequence-Output": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "sequence",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/PassiveSequence-Output"
                 }
               ]
             },
@@ -880,45 +1295,18 @@
       },
       "PostAdaptationRequest": {
         "properties": {
-          "strategyId": {
-            "type": "integer",
-            "title": "Strategyid"
+          "strategy": {
+            "$ref": "#/components/schemas/Strategy"
           },
-          "llmModel": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Llmmodel"
-          },
-          "systemPrompt": {
-            "type": "string",
-            "title": "Systemprompt"
-          },
-          "inputId": {
-            "type": "integer",
-            "title": "Inputid"
-          },
-          "inputText": {
-            "type": "string",
-            "title": "Inputtext"
+          "input": {
+            "$ref": "#/components/schemas/Input"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "strategyId",
-          "llmModel",
-          "systemPrompt",
-          "inputId",
-          "inputText"
+          "strategy",
+          "input"
         ],
         "title": "PostAdaptationRequest"
       },
@@ -929,7 +1317,7 @@
             "title": "Prose"
           },
           "structured": {
-            "$ref": "#/components/schemas/Exercise"
+            "$ref": "#/components/schemas/Exercise-Output"
           }
         },
         "type": "object",
@@ -939,7 +1327,7 @@
         ],
         "title": "ProseAndExercise"
       },
-      "SelectableInput": {
+      "SelectableInput-Input": {
         "properties": {
           "kind": {
             "type": "string",
@@ -959,7 +1347,55 @@
                   "$ref": "#/components/schemas/Arrow"
                 },
                 {
-                  "$ref": "#/components/schemas/PassiveSequence"
+                  "$ref": "#/components/schemas/PassiveSequence-Input"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          },
+          "colors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Colors"
+          },
+          "boxed": {
+            "type": "boolean",
+            "title": "Boxed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents",
+          "colors",
+          "boxed"
+        ],
+        "title": "SelectableInput"
+      },
+      "SelectableInput-Output": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "selectableInput",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/PassiveSequence-Output"
                 }
               ]
             },

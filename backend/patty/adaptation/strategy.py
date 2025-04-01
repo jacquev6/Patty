@@ -1,5 +1,7 @@
-import pydantic
+import typing
+
 from sqlalchemy import orm
+import pydantic
 import sqlalchemy as sql
 
 from ..database_utils import OrmBase
@@ -13,14 +15,14 @@ class Strategy(OrmBase):
 
     parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_strategies.id"))
 
-    _model = orm.mapped_column(sql.JSON, name="model", nullable=False)
+    _model: orm.Mapped[dict[str, typing.Any]] = orm.mapped_column("model", sql.JSON)
 
     class _ModelContainer(pydantic.BaseModel):
         model: ConcreteModel
 
     @property
     def model(self) -> ConcreteModel:
-        return self._ModelContainer(model=self._model).model
+        return self._ModelContainer(model=self._model).model  # type: ignore[arg-type]
 
     @model.setter
     def model(self, value: ConcreteModel) -> None:

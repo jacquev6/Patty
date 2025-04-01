@@ -123,6 +123,24 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/{id}/manual-edit': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Adaptation Manual Edit */
+    put: operations['put_adaptation_manual_edit_api_adaptation__id__manual_edit_put']
+    post?: never
+    /** Delete Adaptation Manual Edit */
+    delete: operations['delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -130,7 +148,7 @@ export interface components {
     /** Adaptation */
     Adaptation: {
       /** Id */
-      id: string
+      id: number
       /** Llmmodel */
       llmModel:
         | components['schemas']['DummyModel']
@@ -138,6 +156,7 @@ export interface components {
         | components['schemas']['OpenAiModel']
       /** Steps */
       steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
+      manualEdit: components['schemas']['Exercise-Output'] | null
     }
     /** AdjustmentStep */
     AdjustmentStep: {
@@ -156,10 +175,10 @@ export interface components {
       )[]
       /** Assistantprose */
       assistantProse: string
-      adaptedExercise: components['schemas']['Exercise'] | null
+      adaptedExercise: components['schemas']['Exercise-Output'] | null
     }
     /** AnySequence */
-    AnySequence: {
+    'AnySequence-Input': {
       /**
        * Kind
        * @constant
@@ -171,9 +190,37 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['FreeTextInput']
-        | components['schemas']['MultipleChoicesInput']
-        | components['schemas']['SelectableInput']
-        | components['schemas']['AnySequence']
+        | components['schemas']['MultipleChoicesInput-Input']
+        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['AnySequence-Input']
+      )[]
+      /** Bold */
+      bold: boolean
+      /** Italic */
+      italic: boolean
+      /** Highlighted */
+      highlighted: string | null
+      /** Boxed */
+      boxed: boolean
+      /** Vertical */
+      vertical: boolean
+    }
+    /** AnySequence */
+    'AnySequence-Output': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'sequence'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Output']
+        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['AnySequence-Output']
       )[]
       /** Bold */
       bold: boolean
@@ -219,15 +266,26 @@ export interface components {
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
     }
     /** Exercise */
-    Exercise: {
+    'Exercise-Input': {
       /**
        * Format
        * @constant
        */
       format: 'v1'
-      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__']
-      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__']
-      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'] | null
+      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input']
+      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input']
+      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input'] | null
+    }
+    /** Exercise */
+    'Exercise-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output']
+      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output']
+      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output'] | null
     }
     /** FreeTextInput */
     FreeTextInput: {
@@ -261,7 +319,7 @@ export interface components {
       )[]
       /** Assistantprose */
       assistantProse: string
-      adaptedExercise: components['schemas']['Exercise'] | null
+      adaptedExercise: components['schemas']['Exercise-Output'] | null
     }
     /** Input */
     Input: {
@@ -271,26 +329,49 @@ export interface components {
       text: string
     }
     /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+    'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['FreeTextInput']
-        | components['schemas']['MultipleChoicesInput']
-        | components['schemas']['SelectableInput']
-        | components['schemas']['AnySequence']
+        | components['schemas']['MultipleChoicesInput-Input']
+        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['AnySequence-Input']
       )[]
     }
-    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence]] */
-    Line_Union_Text__Whitespace__Arrow__PassiveSequence__: {
+    /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['PassiveSequence']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Output']
+        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['AnySequence-Output']
+      )[]
+    }
+    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence]] */
+    'Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence-Input']
+      )[]
+    }
+    /** Line[Union[Text, Whitespace, Arrow, PassiveSequence]] */
+    'Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence-Output']
       )[]
     }
     /** MistralAiModel */
@@ -308,14 +389,26 @@ export interface components {
       name: 'mistral-large-2411' | 'mistral-small-2501'
     }
     /** MultipleChoicesInput */
-    MultipleChoicesInput: {
+    'MultipleChoicesInput-Input': {
       /**
        * Kind
        * @constant
        */
       kind: 'multipleChoicesInput'
       /** Choices */
-      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'][]
+      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input'][]
+      /** Showchoicesbydefault */
+      showChoicesByDefault: boolean
+    }
+    /** MultipleChoicesInput */
+    'MultipleChoicesInput-Output': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'multipleChoicesInput'
+      /** Choices */
+      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output'][]
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -334,22 +427,37 @@ export interface components {
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
     /** Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+    'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input'][]
+    }
+    /** Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output'][]
     }
     /** Page[Union[Text, Whitespace, Arrow, PassiveSequence]] */
-    Page_Union_Text__Whitespace__Arrow__PassiveSequence__: {
+    'Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input'][]
+    }
+    /** Page[Union[Text, Whitespace, Arrow, PassiveSequence]] */
+    'Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output'][]
     }
     /** Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
-    Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
+    'Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input'][]
+    }
+    /** Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
+    'Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output': {
+      /** Pages */
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output'][]
     }
     /** PassiveSequence */
-    PassiveSequence: {
+    'PassiveSequence-Input': {
       /**
        * Kind
        * @constant
@@ -360,7 +468,32 @@ export interface components {
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['PassiveSequence']
+        | components['schemas']['PassiveSequence-Input']
+      )[]
+      /** Bold */
+      bold: boolean
+      /** Italic */
+      italic: boolean
+      /** Highlighted */
+      highlighted: string | null
+      /** Boxed */
+      boxed: boolean
+      /** Vertical */
+      vertical: boolean
+    }
+    /** PassiveSequence */
+    'PassiveSequence-Output': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'sequence'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence-Output']
       )[]
       /** Bold */
       bold: boolean
@@ -380,28 +513,17 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
-      /** Strategyid */
-      strategyId: number
-      /** Llmmodel */
-      llmModel:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Systemprompt */
-      systemPrompt: string
-      /** Inputid */
-      inputId: number
-      /** Inputtext */
-      inputText: string
+      strategy: components['schemas']['Strategy']
+      input: components['schemas']['Input']
     }
     /** ProseAndExercise */
     ProseAndExercise: {
       /** Prose */
       prose: string
-      structured: components['schemas']['Exercise']
+      structured: components['schemas']['Exercise-Output']
     }
     /** SelectableInput */
-    SelectableInput: {
+    'SelectableInput-Input': {
       /**
        * Kind
        * @constant
@@ -412,7 +534,26 @@ export interface components {
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['PassiveSequence']
+        | components['schemas']['PassiveSequence-Input']
+      )[]
+      /** Colors */
+      colors: string[]
+      /** Boxed */
+      boxed: boolean
+    }
+    /** SelectableInput */
+    'SelectableInput-Output': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'selectableInput'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['PassiveSequence-Output']
       )[]
       /** Colors */
       colors: string[]
@@ -653,6 +794,72 @@ export interface operations {
     }
   }
   delete_adaptation_last_step_api_adaptation__id__last_step_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_adaptation_manual_edit_api_adaptation__id__manual_edit_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Exercise-Input']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Adaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete: {
     parameters: {
       query?: never
       header?: never

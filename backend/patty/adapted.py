@@ -5,6 +5,11 @@ from typing import Literal, TypeVar
 import pydantic
 
 
+class ProseAndExercise(pydantic.BaseModel):
+    prose: str
+    structured: Exercise
+
+
 class Exercise(pydantic.BaseModel):
     format: Literal["v1"]
     instructions: Page[PassiveComponent]

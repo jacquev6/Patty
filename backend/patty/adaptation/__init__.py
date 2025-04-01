@@ -1,6 +1,7 @@
+from .adaptation import Adaptation
+from .input import Input
 from .router import router
 from .strategy import Strategy
-from .input import Input
 
 
-__all__ = ["router", "Strategy", "Input"]
+__all__ = ["router", "Strategy", "Input", "Adaptation"]

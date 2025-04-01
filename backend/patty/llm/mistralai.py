@@ -78,7 +78,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @costs_money
     async def test_adaptation_schema(self) -> None:
-        from ..adaptation.router import ProseAndExercise
+        from ..adapted import ProseAndExercise
 
         model = MistralAiModel(name="mistral-small-2501")
 
