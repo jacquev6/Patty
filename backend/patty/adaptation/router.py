@@ -7,7 +7,8 @@ import pydantic
 from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
-from .strategy import Strategy
+from .input import Input as DbInput
+from .strategy import Strategy as DbStrategy
 
 
 __all__ = ["router"]
@@ -48,17 +49,29 @@ class Adaptation(pydantic.BaseModel):
 adaptations: dict[str, Adaptation] = {}
 
 
-class ApiStrategy(pydantic.BaseModel):
+class Strategy(pydantic.BaseModel):
     id: int
     model: llm.ConcreteModel
     system_prompt: str
 
 
-@router.get("/latest-strategy", response_model=ApiStrategy)
-def get_latest_strategy(session: database_utils.SessionDependable) -> Strategy:
-    strategy = session.query(Strategy).order_by(-Strategy.id).first()
+@router.get("/latest-strategy", response_model=Strategy)
+def get_latest_strategy(session: database_utils.SessionDependable) -> DbStrategy:
+    strategy = session.query(DbStrategy).order_by(-DbStrategy.id).first()
     assert strategy is not None
     return strategy
+
+
+class Input(pydantic.BaseModel):
+    id: int
+    text: str
+
+
+@router.get("/latest-input", response_model=Input)
+def get_latest_input(session: database_utils.SessionDependable) -> DbInput:
+    input = session.query(DbInput).order_by(-DbInput.id).first()
+    assert input is not None
+    return input
 
 
 class PostAdaptationRequest(pydantic.BaseModel):
@@ -68,16 +81,23 @@ class PostAdaptationRequest(pydantic.BaseModel):
     # @todo Let experimenter set top_p
     # @todo Let experimenter set random_seed
     systemPrompt: str
+    inputId: int
     inputText: str
 
 
 @router.post("")
 async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> Adaptation:
-    strategy = session.get(Strategy, req.strategyId)
+    strategy = session.get(DbStrategy, req.strategyId)
     assert strategy is not None
     if strategy.system_prompt != req.systemPrompt or strategy.model != req.llmModel:
-        strategy = Strategy(parent_id=strategy.id, model=req.llmModel, system_prompt=req.systemPrompt)
+        strategy = DbStrategy(parent_id=strategy.id, model=req.llmModel, system_prompt=req.systemPrompt)
         session.add(strategy)
+
+    input = session.get(DbInput, req.inputId)
+    assert input is not None
+    if input.text != req.inputText:
+        input = DbInput(text=req.inputText)
+        session.add(input)
 
     adaptation_id = str(uuid.uuid4())
 

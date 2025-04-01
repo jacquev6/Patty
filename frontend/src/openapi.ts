@@ -38,6 +38,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/latest-input': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Latest Input */
+    get: operations['get_latest_input_api_adaptation_latest_input_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation': {
     parameters: {
       query?: never
@@ -169,18 +186,6 @@ export interface components {
       /** Vertical */
       vertical: boolean
     }
-    /** ApiStrategy */
-    ApiStrategy: {
-      /** Id */
-      id: number
-      /** Model */
-      model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** System Prompt */
-      system_prompt: string
-    }
     /** Arrow */
     Arrow: {
       /**
@@ -259,6 +264,13 @@ export interface components {
       /** Assistantprose */
       assistantProse: string
       adaptedExercise: components['schemas']['Exercise'] | null
+    }
+    /** Input */
+    Input: {
+      /** Id */
+      id: number
+      /** Text */
+      text: string
     }
     /** Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]] */
     Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__: {
@@ -379,6 +391,8 @@ export interface components {
         | components['schemas']['OpenAiModel']
       /** Systemprompt */
       systemPrompt: string
+      /** Inputid */
+      inputId: number
       /** Inputtext */
       inputText: string
     }
@@ -400,6 +414,18 @@ export interface components {
       colors: string[]
       /** Boxed */
       boxed: boolean
+    }
+    /** Strategy */
+    Strategy: {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** System Prompt */
+      system_prompt: string
     }
     /** SystemMessage */
     SystemMessage: {
@@ -498,7 +524,27 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiStrategy']
+          'application/json': components['schemas']['Strategy']
+        }
+      }
+    }
+  }
+  get_latest_input_api_adaptation_latest_input_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Input']
         }
       }
     }

@@ -68,7 +68,7 @@ services:
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["python", "-m", "patty", "load-fixtures", "dummy-adaptation-strategy"]
+    command: ["python", "-m", "patty", "load-fixtures", "dummy-adaptation-strategy", "default-adaptation-input"]
     depends_on:
       migrator:
         condition: service_completed_successfully

@@ -10,6 +10,9 @@ export type LlmModel =
 export type AdaptationStrategy =
   paths['/api/adaptation/latest-strategy']['get']['responses']['200']['content']['application/json']
 
+export type AdaptationInput =
+  paths['/api/adaptation/latest-input']['get']['responses']['200']['content']['application/json']
+
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = Exclude<Adaptation['steps'][number]['adaptedExercise'], null>
 export type Line = AdaptedExercise['wording']['pages'][number]['lines'][number]

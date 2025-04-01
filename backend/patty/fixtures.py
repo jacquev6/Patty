@@ -144,34 +144,34 @@ def make_default_system_prompt() -> str:
 
     return textwrap.dedent(
         f"""\
-            Le premier message de l'utilisateur sera un exercice scolaire.
-            Ta mission est de fournir une "adaptation" de cet exercice.
-            Tu ne dois jamais résoudre les exercices, seulement les adapter.
+        Le premier message de l'utilisateur sera un exercice scolaire.
+        Ta mission est de fournir une "adaptation" de cet exercice.
+        Tu ne dois jamais résoudre les exercices, seulement les adapter.
 
-            Dans ses messages suivants, l'utilisateur te demandera de faire des ajustements à ta réponse.
-            A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
-            en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
+        Dans ses messages suivants, l'utilisateur te demandera de faire des ajustements à ta réponse.
+        A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
+        en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
-            Le format pour tes réponses comporte deux champs: `prose` et `structured`.
-            Tu dois utiliser `prose` pour interagir avec l'utilisateur.
-            Tu dois utiliser `structured` pour renvoyer l'adaptation de l'exercice initial, après les ajustements demandés par l'utilisateur.
-            Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation.
+        Le format pour tes réponses comporte deux champs: `prose` et `structured`.
+        Tu dois utiliser `prose` pour interagir avec l'utilisateur.
+        Tu dois utiliser `structured` pour renvoyer l'adaptation de l'exercice initial, après les ajustements demandés par l'utilisateur.
+        Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation.
 
-            Dans le champs `structured`, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
-            Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
+        Dans le champs `structured`, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
+        Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
 
-            Voici un exemple. Si l'exercice initial est :
+        Voici un exemple. Si l'exercice initial est :
 
-            ```
-            {textwrap.indent(text_exercise, "            ").lstrip()}
-            ```
+        ```
+        {textwrap.indent(text_exercise, "        ").lstrip()}
+        ```
 
-            Alors une adaptation possible est :
+        Alors une adaptation possible est :
 
-            ```
-            {textwrap.indent(json_exercise, "            ").lstrip()}
-            ```
-            """
+        ```
+        {textwrap.indent(json_exercise, "        ").lstrip()}
+        ```
+        """
     )
 
 
@@ -185,9 +185,22 @@ def create_dummy_adaptation_strategy(session: database_utils.Session) -> Iterabl
     yield adaptation.Strategy(model=llm.DummyModel(name="dummy-1"), system_prompt="Blah blah blah.")
 
 
+def create_default_adaptation_input(session: database_utils.Session) -> Iterable[object]:
+    yield adaptation.Input(
+        text=textwrap.dedent(
+            """\
+            5 Complète avec "le vent" ou "la pluie"
+            a. Les feuilles sont chahutées par ...
+            b. Les vitres sont mouillées par ...
+            """
+        )
+    )
+
+
 available_fixtures = {
     "default-adaptation-strategy": create_default_adaptation_strategy,
     "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
+    "default-adaptation-input": create_default_adaptation_input,
 }
 
 

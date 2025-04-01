@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type AdaptationStrategy, type LlmModel, client } from './apiClient'
+import { type AdaptationInput, type AdaptationStrategy, type LlmModel, client } from './apiClient'
 import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
@@ -12,7 +12,7 @@ import ResizableColumns from './ResizableColumns.vue'
 const props = defineProps<{
   availableLlmModels: LlmModel[]
   defaultStrategy: AdaptationStrategy
-  defaultInputText: string
+  defaultInput: AdaptationInput
 }>()
 
 const router = useRouter()
@@ -68,9 +68,9 @@ watch(
   },
 )
 
-const inputText = ref(props.defaultInputText)
+const inputText = ref(props.defaultInput.text)
 watch(
-  () => props.defaultInputText,
+  () => props.defaultInput.text,
   (defaultInputText) => {
     inputText.value = defaultInputText
   },
@@ -88,6 +88,7 @@ async function submit() {
       strategyId: props.defaultStrategy.id,
       llmModel: llmModel.value,
       systemPrompt: systemPrompt.value,
+      inputId: props.defaultInput.id,
       inputText: inputText.value,
     },
   })
