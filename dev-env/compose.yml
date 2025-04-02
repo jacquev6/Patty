@@ -15,6 +15,43 @@ services:
     image: adminer:4
     # @todo Set default DB type, host and user (see https://github.com/TimWolla/docker-adminer/issues/39#issuecomment-408568987)
 
+  generated-files-cleaner:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: [
+      "rm", "-f",
+      "backend/openapi.json",
+      "backend/adapted-exercise-schema.json",
+      "frontend/src/openapi.ts",
+      "backend/patty/adaptation/templates/adaptation-export/index.html",
+    ]
+
+  adaptation-export-template-continuous-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: adaptation-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/adaptation-export", "--emptyOutDir"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      npm-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
+      interval: 0.5s
+
   backend-shell:
     image: patty-dev_backend
     build:
@@ -82,23 +119,11 @@ services:
       - backend/secrets.env
     command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
+      adaptation-export-template-continuous-generator:
+        condition: service_healthy
       data-loader:
         condition: service_completed_successfully
-  generated-files-cleaner:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app
-    env_file:
-      - backend/env
-      - backend/secrets.env
-    command: ["rm", "-f", "backend/openapi.json", "backend/adapted-exercise-schema.json", "frontend/src/openapi.ts"]
-    depends_on:
-      pip-installer:
-        condition: service_completed_successfully
-  openapi-json-generator:
+  openapi-json-first-time-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -112,7 +137,9 @@ services:
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
-  openapi-json-regenerator:
+      pip-installer:
+        condition: service_completed_successfully
+  openapi-json-continuous-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -132,9 +159,9 @@ services:
       "patty"
     ]
     depends_on:
-      openapi-json-generator:
+      openapi-json-first-time-generator:
         condition: service_completed_successfully
-  adapted-exercise-json-schema-generator:
+  adapted-exercise-json-schema-first-time-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -148,7 +175,9 @@ services:
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
-  adapted-exercise-json-schema-regenerator:
+      pip-installer:
+        condition: service_completed_successfully
+  adapted-exercise-json-schema-continuous-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -168,7 +197,7 @@ services:
       "patty"
     ]
     depends_on:
-      adapted-exercise-json-schema-generator:
+      adapted-exercise-json-schema-first-time-generator:
         condition: service_completed_successfully
 
   frontend-shell:
@@ -184,6 +213,8 @@ services:
       - ./frontend/cache:/home/patty/.cache
       - /tmp/.X11-unix:/tmp/.X11-unix  # Allow running GUI apps in container, displaying on host
     working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: frontend
     init: true
     command: ["sleep", "infinity"]
     ports:
@@ -207,7 +238,7 @@ services:
     depends_on:
       npm-installer:
         condition: service_completed_successfully
-  openapi-ts-regenerator:
+  openapi-ts-continuous-generator:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
@@ -220,8 +251,8 @@ services:
     depends_on:
       npm-installer:
         condition: service_completed_successfully
-      openapi-json-generator:
-        condition: service_completed_successfully
+      openapi-json-continuous-generator:
+        condition: service_started
   frontend:
     image: patty-dev_frontend
     pull_policy: never
@@ -229,10 +260,14 @@ services:
       - ..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: frontend
     command: ["npx", "vite", "--host", "0.0.0.0", "--port", "80", "--strictPort"]
     depends_on:
-      npm-installer:
-        condition: service_completed_successfully
+      openapi-ts-continuous-generator:
+        condition: service_started
+      adapted-exercise-json-schema-continuous-generator:
+        condition: service_started
 
   fanout:
     image: nginx:latest
@@ -241,5 +276,6 @@ services:
     volumes:
       - ./fanout/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      - adminer
       - backend
       - frontend

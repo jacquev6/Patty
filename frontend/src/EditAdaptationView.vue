@@ -12,6 +12,7 @@ import MarkDown from './MarkDown.vue'
 import BusyBox from './BusyBox.vue'
 import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
 import MiniatureScreen from './MiniatureScreen.vue'
+import WhiteSpace from './WhiteSpace.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import { useMagicKeys } from '@vueuse/core'
 
@@ -238,7 +239,11 @@ watch(Escape, () => {
             <AdaptedExerciseRenderer :adaptedExercise />
             <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
           </MiniatureScreen>
-          <button @click="fullScreen = true">Full screen</button>
+          <p>
+            <button @click="fullScreen = true">Full screen</button>
+            <WhiteSpace />
+            <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+          </p>
         </template>
         <template v-else-if="manualAdaptedExercise !== null">
           <template v-if="manualAdaptedExercise.syntaxError !== null">

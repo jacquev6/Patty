@@ -1,3 +1,5 @@
+import json
+import os
 from typing import Literal
 import fastapi
 
@@ -206,3 +208,36 @@ def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
         ],
         manual_edit=db_adaptation.manual_edit,
     )
+
+
+export_adaptation_template_file_path = os.path.join(
+    os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
+)
+
+
+@router.get("/export/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_adaptation(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    db_adaptation = session.get(DbAdaptation, id)
+    assert db_adaptation is not None
+    assert db_adaptation.initial_response is not None
+    assert db_adaptation.initial_response.structured is not None
+
+    if db_adaptation.manual_edit is None:
+        exercise = db_adaptation.initial_response.structured
+        for adjustment in db_adaptation.adjustments:
+            if adjustment.assistant_response.structured is not None:
+                exercise = adjustment.assistant_response.structured
+    else:
+        exercise = db_adaptation.manual_edit
+
+    data = exercise.model_dump_json().replace("\\", "\\\\").replace('"', '\\"')
+    with open(export_adaptation_template_file_path) as f:
+        template = f.read()
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=template.replace("{{ data }}", data), headers=headers)
