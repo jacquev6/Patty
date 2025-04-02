@@ -7,7 +7,7 @@ import pydantic
 
 class ProseAndExercise(pydantic.BaseModel):
     prose: str
-    structured: Exercise
+    structured: Exercise | None
 
 
 class Exercise(pydantic.BaseModel):

@@ -537,7 +537,7 @@ export interface components {
     ProseAndExercise: {
       /** Prose */
       prose: string
-      structured: components['schemas']['Exercise-Output']
+      structured: components['schemas']['Exercise-Output'] | null
     }
     /** SelectableInput */
     'SelectableInput-Input': {

@@ -1366,7 +1366,14 @@
             "title": "Prose"
           },
           "structured": {
-            "$ref": "#/components/schemas/Exercise-Output"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exercise-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
