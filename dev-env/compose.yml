@@ -51,6 +51,7 @@ services:
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
       interval: 0.5s
+      retries: 12
 
   backend-shell:
     image: patty-dev_backend
