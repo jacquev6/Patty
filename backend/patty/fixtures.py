@@ -175,17 +175,17 @@ def make_default_system_prompt() -> str:
     )
 
 
-def create_default_adaptation_strategy(session: database_utils.Session) -> Iterable[object]:
+def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
         model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), system_prompt=make_default_system_prompt()
     )
 
 
-def create_dummy_adaptation_strategy(session: database_utils.Session) -> Iterable[object]:
+def create_dummy_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(model=llm.DummyModel(name="dummy-1"), system_prompt="Blah blah blah.")
 
 
-def create_default_adaptation_input(session: database_utils.Session) -> Iterable[object]:
+def create_default_adaptation_input() -> Iterable[object]:
     yield adaptation.Input(
         text=textwrap.dedent(
             """\
@@ -207,5 +207,5 @@ available_fixtures = {
 def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     database_utils.truncate_all_tables(session)
     for fixture in fixtures:
-        for instance in available_fixtures[fixture](session):
+        for instance in available_fixtures[fixture]():
             session.add(instance)
