@@ -197,10 +197,162 @@ def create_default_adaptation_input() -> Iterable[object]:
     )
 
 
+def create_actual_openai_adaptation() -> Iterable[object]:
+    [strategy] = create_default_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    yield adaptation.Adaptation(
+        strategy=strategy,
+        input=input,
+        _initial_response={
+            "prose": "Je vais te proposer une version adapt\u00e9e de ton exercice initial.",
+            "structured": {
+                "format": "v1",
+                "instructions": {
+                    "lines": [
+                        {
+                            "contents": [
+                                {"kind": "text", "text": "Compl\u00e8te"},
+                                {"kind": "whitespace"},
+                                {"kind": "text", "text": "avec"},
+                                {"kind": "whitespace"},
+                                {
+                                    "kind": "sequence",
+                                    "contents": [
+                                        {"kind": "text", "text": "le"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "vent"},
+                                    ],
+                                    "bold": False,
+                                    "italic": False,
+                                    "highlighted": None,
+                                    "boxed": True,
+                                    "vertical": False,
+                                },
+                                {"kind": "whitespace"},
+                                {"kind": "text", "text": "ou"},
+                                {"kind": "whitespace"},
+                                {
+                                    "kind": "sequence",
+                                    "contents": [
+                                        {"kind": "text", "text": "la"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "pluie"},
+                                    ],
+                                    "bold": False,
+                                    "italic": False,
+                                    "highlighted": None,
+                                    "boxed": True,
+                                    "vertical": False,
+                                },
+                            ]
+                        }
+                    ]
+                },
+                "wording": {
+                    "pages": [
+                        {
+                            "lines": [
+                                {
+                                    "contents": [
+                                        {"kind": "text", "text": "a"},
+                                        {"kind": "text", "text": "."},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "Les"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "feuilles"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "sont"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "chahut\u00e9es"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "par"},
+                                        {"kind": "whitespace"},
+                                        {
+                                            "kind": "multipleChoicesInput",
+                                            "choices": [
+                                                {
+                                                    "contents": [
+                                                        {"kind": "text", "text": "le"},
+                                                        {"kind": "whitespace"},
+                                                        {"kind": "text", "text": "vent"},
+                                                    ]
+                                                },
+                                                {
+                                                    "contents": [
+                                                        {"kind": "text", "text": "la"},
+                                                        {"kind": "whitespace"},
+                                                        {"kind": "text", "text": "pluie"},
+                                                    ]
+                                                },
+                                            ],
+                                            "showChoicesByDefault": False,
+                                        },
+                                    ]
+                                },
+                                {
+                                    "contents": [
+                                        {"kind": "text", "text": "b"},
+                                        {"kind": "text", "text": "."},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "Les"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "vitres"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "sont"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "mouill\u00e9es"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "par"},
+                                        {"kind": "whitespace"},
+                                        {
+                                            "kind": "multipleChoicesInput",
+                                            "choices": [
+                                                {
+                                                    "contents": [
+                                                        {"kind": "text", "text": "le"},
+                                                        {"kind": "whitespace"},
+                                                        {"kind": "text", "text": "vent"},
+                                                    ]
+                                                },
+                                                {
+                                                    "contents": [
+                                                        {"kind": "text", "text": "la"},
+                                                        {"kind": "whitespace"},
+                                                        {"kind": "text", "text": "pluie"},
+                                                    ]
+                                                },
+                                            ],
+                                            "showChoicesByDefault": False,
+                                        },
+                                    ]
+                                },
+                            ]
+                        }
+                    ]
+                },
+                "references": None,
+            },
+        },
+        _adjustments=[
+            {
+                "user_prompt": "Merci!",
+                "assistant_response": {
+                    "prose": "Avec plaisir! N'h\u00e9site pas si tu as besoin d'autres adaptations ou ajustements.",
+                    "structured": None,
+                },
+            }
+        ],
+        manual_edit=None,
+    )
+
+
 available_fixtures = {
     "default-adaptation-strategy": create_default_adaptation_strategy,
     "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
     "default-adaptation-input": create_default_adaptation_input,
+    "actual-openai-adaptation": create_actual_openai_adaptation,
 }
 
 
