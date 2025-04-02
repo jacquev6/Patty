@@ -274,6 +274,7 @@ watch(Escape, () => {
           >
             Reset
           </button>
+          <WhiteSpace />
           <button
             @click="reformatManualAdaptedExercise"
             :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
