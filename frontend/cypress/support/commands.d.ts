@@ -4,6 +4,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       mount: typeof mount
+      vue<C>(): Chainable<VueWrapper<C>>
     }
   }
 }

@@ -3,12 +3,28 @@ name: patty-prod-preview
 services:
   # Actual prod services
   ######################
+  db:
+    image: postgres:15
+    tmpfs:
+      - /var/lib/postgresql/data
+    env_file:
+      - db/env
+    healthcheck:
+      test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin"]
+      interval: 0.5s
+
+  adminer:
+    image: adminer:4
 
   backend:
     image: jacquev6/patty:preview-backend
     pull_policy: never
     env_file:
-      - secrets.env
+      - backend/env
+      - backend/secrets.env
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     image: jacquev6/patty:preview-frontend
@@ -16,6 +32,28 @@ services:
 
   # Preview-only services
   #######################
+
+  migrator:
+    image: jacquev6/patty:preview-backend
+    pull_policy: never
+    working_dir: /app/patty
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+  data-loader:
+    image: jacquev6/patty:preview-backend
+    pull_policy: never
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["python", "-m", "patty", "load-fixtures", "default-adaptation-strategy", "default-adaptation-input"]
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
 
   fanout:
     image: nginx:latest
@@ -26,3 +64,4 @@ services:
     depends_on:
       - frontend
       - backend
+      - adminer

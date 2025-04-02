@@ -2,16 +2,17 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type LlmModel, client } from './apiClient'
+import { type AdaptationInput, type AdaptationStrategy, type LlmModel, client } from './apiClient'
 import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
+import ResizableColumns from './ResizableColumns.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
-  defaultSystemPrompt: string
-  defaultInputText: string
+  defaultStrategy: AdaptationStrategy
+  defaultInput: AdaptationInput
 }>()
 
 const router = useRouter()
@@ -19,11 +20,13 @@ const router = useRouter()
 const availableLlmModels = computed(() => props.availableLlmModels)
 
 assert(availableLlmModels.value.length !== 0)
-const llmModel = ref<LlmModel>(availableLlmModels.value[0])
-watch(availableLlmModels, (availableLlmModels) => {
-  assert(availableLlmModels.length !== 0)
-  llmModel.value = availableLlmModels[0]
-})
+const llmModel = ref(props.defaultStrategy.model)
+watch(
+  () => props.defaultStrategy.model,
+  (defaultLlmModel) => {
+    llmModel.value = defaultLlmModel
+  },
+)
 
 const llmProviders = computed(() => {
   return [...new Set(availableLlmModels.value.map((model) => model.provider))]
@@ -57,17 +60,17 @@ const llmName = computed({
   },
 })
 
-const systemPrompt = ref(props.defaultSystemPrompt)
+const systemPrompt = ref(props.defaultStrategy.systemPrompt)
 watch(
-  () => props.defaultSystemPrompt,
+  () => props.defaultStrategy.systemPrompt,
   (defaultSystemPrompt) => {
     systemPrompt.value = defaultSystemPrompt
   },
 )
 
-const inputText = ref(props.defaultInputText)
+const inputText = ref(props.defaultInput.text)
 watch(
-  () => props.defaultInputText,
+  () => props.defaultInput.text,
   (defaultInputText) => {
     inputText.value = defaultInputText
   },
@@ -82,9 +85,8 @@ async function submit() {
 
   const responsePromise = client.POST('/api/adaptation', {
     body: {
-      llmModel: llmModel.value,
-      systemPrompt: systemPrompt.value,
-      inputText: inputText.value,
+      strategy: { id: props.defaultStrategy.id, model: llmModel.value, systemPrompt: systemPrompt.value },
+      input: { id: props.defaultInput.id, text: inputText.value },
     },
   })
 
@@ -104,20 +106,26 @@ const disabled = computed(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <BusyBox :busy>
-      <h1>LLM model</h1>
-      <select v-model="llmProvider">
-        <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
-      </select>
-      <select v-model="llmName">
-        <option v-for="name in llmNames">{{ name }}</option>
-      </select>
-      <h1>System prompt</h1>
-      <TextArea v-model="systemPrompt"></TextArea>
-      <h1>Response JSON schema</h1>
-      <AdaptedExerciseJsonSchemaDetails />
-      <h1>Input text</h1>
-      <TextArea v-model="inputText"></TextArea>
-      <p><button @click="submit" :disabled>Submit</button></p>
+      <ResizableColumns :columns="2">
+        <template #col-1>
+          <h1>LLM model</h1>
+          <select v-model="llmProvider">
+            <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
+          </select>
+          <select v-model="llmName">
+            <option v-for="name in llmNames">{{ name }}</option>
+          </select>
+          <h1>System prompt</h1>
+          <TextArea v-model="systemPrompt"></TextArea>
+          <h1>Response JSON schema</h1>
+          <AdaptedExerciseJsonSchemaDetails />
+        </template>
+        <template #col-2>
+          <h1>Input text</h1>
+          <TextArea v-model="inputText"></TextArea>
+          <p><button @click="submit" :disabled>Submit</button></p>
+        </template>
+      </ResizableColumns>
     </BusyBox>
   </div>
 </template>

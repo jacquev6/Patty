@@ -6,11 +6,12 @@ set -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 
+do_migration=true
 env_options=""
 while [ $# -gt 0 ]; do
   case $1 in
-    --long)
-      env_options="$env_options --env PATTY_RUN_LONG_TESTS=true"
+    --skip-migration)
+      do_migration=false
       ;;
     --cost-money)
       env_options="$env_options --env PATTY_RUN_TESTS_COSTING_MONEY=true"
@@ -22,6 +23,11 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+if $do_migration
+then
+  ./patch-last-migration.sh
+fi
 
 ./shell.sh -c "black . --line-length 120 --skip-magic-trailing-comma"
 ./shell.sh -c "mypy . --strict"

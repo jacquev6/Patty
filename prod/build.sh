@@ -12,6 +12,8 @@ test -n "$patty_version"
 action=$2
 test "$action" == "push" -o "$action" == "load"
 
+../dev-env/clean.sh -f
+
 for part in $(grep 'AS final-' docker/Dockerfile | sed 's/.*AS final-//')
 do
   echo $part

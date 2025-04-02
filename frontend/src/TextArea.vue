@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { nextTick, useTemplateRef, watch } from 'vue'
-import { useElementSize } from '@vueuse/core'
+import { nextTick, onMounted, useTemplateRef, watch } from 'vue'
+import autosize from 'autosize'
 
 import assert from './assert'
 
@@ -8,18 +8,16 @@ const model = defineModel<string>({ required: true })
 
 const textareaRef = useTemplateRef('textarea')
 
-const { width } = useElementSize(textareaRef)
+onMounted(() => {
+  assert(textareaRef.value !== null)
+  autosize(textareaRef.value)
+})
 
-watch(
-  [model, width],
-  async () => {
-    await nextTick()
-    assert(textareaRef.value !== null)
-    textareaRef.value.style.height = 'auto' // Reduce size when user deletes lines
-    textareaRef.value.style.height = `calc(${textareaRef.value.scrollHeight + 4 + 'px'} + 1.5em)` // Give room to avoid flickering when user adds lines
-  },
-  { immediate: true },
-)
+watch(model, async () => {
+  assert(textareaRef.value !== null)
+  await nextTick()
+  autosize.update(textareaRef.value)
+})
 </script>
 
 <template>

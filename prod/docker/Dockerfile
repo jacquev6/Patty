@@ -14,6 +14,17 @@ RUN mkdir /backend
 ADD backend/adapted-exercise-schema.json /backend
 ADD frontend .
 
+ENV PATTY_ENTRY_POINT_NAME=frontend
+RUN npx vite build
+
+
+FROM frontend-dependencies AS adaptation-export-template-builder
+
+RUN mkdir /backend
+ADD backend/adapted-exercise-schema.json /backend
+ADD frontend .
+
+ENV PATTY_ENTRY_POINT_NAME=adaptation-export
 RUN npx vite build
 
 
@@ -36,5 +47,7 @@ COPY --from=frontend-builder /app/dist /usr/share/nginx/html/frontend
 FROM backend-dependencies AS final-backend
 
 ADD backend .
+
+COPY --from=adaptation-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/adaptation-export/index.html
 
 CMD ["uvicorn", "patty.asgi:app", "--host", "0.0.0.0", "--port", "80"]

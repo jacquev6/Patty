@@ -8,14 +8,14 @@ import TriColorLines from './TriColorLines.vue'
 const screenshotsCounts: Record<string, number> = {}
 
 function screenshot() {
-  const baseName = Cypress.currentTest.titlePath.join(' -- ')
+  const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
   screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
-  const name = `${baseName} -- ${screenshotsCounts[baseName]}`
-  cy.screenshot(name)
+  const name = `${baseName}-${screenshotsCounts[baseName]}-${Cypress.browser.name}`
+  cy.compareSnapshot(name)
 }
 
 describe('SequenceComponent', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('renders plain text and whitespace', () => {
     cy.viewport(200, 70)
@@ -104,7 +104,7 @@ describe('SequenceComponent', () => {
 })
 
 describe('SelectableInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('changes color on click', () => {
     cy.viewport(130, 70)
@@ -141,7 +141,7 @@ describe('SelectableInput', () => {
 })
 
 describe('FreeTextInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('accepts text input', () => {
     cy.viewport(170, 70)
@@ -171,7 +171,7 @@ describe('FreeTextInput', () => {
 })
 
 describe('MultipleChoicesInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   const choices = [
     {
@@ -305,7 +305,7 @@ describe('MultipleChoicesInput', () => {
                   },
                   {
                     contents: [
-                      { kind: 'text', text: 'Blaaaaaaaaaaaaaaaaaah' },
+                      { kind: 'text', text: 'Blaaaaaaaaaaaaaaaaah' },
                       { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true },
                     ],
                   },
@@ -323,7 +323,7 @@ describe('MultipleChoicesInput', () => {
 })
 
 describe('TriColorLines', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('renders lines in alternating colors', () => {
     cy.viewport(180, 340)
