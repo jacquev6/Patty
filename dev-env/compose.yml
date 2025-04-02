@@ -4,18 +4,16 @@ services:
   db:
     image: postgres:15
     tmpfs:
-      # Avoid creating an anonymous Docker volume on each run (We don't persist data in the dev env)
       - /var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
+    env_file:
+      - db/env
     healthcheck:
       test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
       interval: 0.5s
 
   adminer:
     image: adminer:4
+    # @todo Set default DB type, host and user (see https://github.com/TimWolla/docker-adminer/issues/39#issuecomment-408568987)
 
   backend-shell:
     image: patty-dev_backend
