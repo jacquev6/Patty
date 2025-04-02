@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from 'vue'
+import { nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import autosize from 'autosize'
 
 import assert from './assert'
@@ -11,6 +11,12 @@ const textareaRef = useTemplateRef('textarea')
 onMounted(() => {
   assert(textareaRef.value !== null)
   autosize(textareaRef.value)
+})
+
+watch(model, async () => {
+  assert(textareaRef.value !== null)
+  await nextTick()
+  autosize.update(textareaRef.value)
 })
 </script>
 

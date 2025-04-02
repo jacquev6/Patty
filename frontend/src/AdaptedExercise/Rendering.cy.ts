@@ -15,7 +15,7 @@ function screenshot() {
 }
 
 describe('SequenceComponent', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('renders plain text and whitespace', () => {
     cy.viewport(200, 70)
@@ -104,7 +104,7 @@ describe('SequenceComponent', () => {
 })
 
 describe('SelectableInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('changes color on click', () => {
     cy.viewport(130, 70)
@@ -141,7 +141,7 @@ describe('SelectableInput', () => {
 })
 
 describe('FreeTextInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('accepts text input', () => {
     cy.viewport(170, 70)
@@ -171,7 +171,7 @@ describe('FreeTextInput', () => {
 })
 
 describe('MultipleChoicesInput', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   const choices = [
     {
@@ -323,7 +323,7 @@ describe('MultipleChoicesInput', () => {
 })
 
 describe('TriColorLines', () => {
-  beforeEach(console.clear)
+  before(console.clear)
 
   it('renders lines in alternating colors', () => {
     cy.viewport(180, 340)
