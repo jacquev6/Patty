@@ -68,7 +68,7 @@ watch(
 
 <style scoped>
 div {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   font-size: 32px;
 }
 

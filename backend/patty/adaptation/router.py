@@ -93,6 +93,8 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         input = DbInput(text=req.input.text)
         session.add(input)
 
+    session.flush()
+
     messages: list[LlmMessage] = [
         llm.SystemMessage(message=strategy.system_prompt),
         llm.UserMessage(message=input.text),

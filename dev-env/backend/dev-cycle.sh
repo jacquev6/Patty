@@ -7,14 +7,14 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 
 do_migration=true
-env_options=""
+cost_money=""
 while [ $# -gt 0 ]; do
   case $1 in
     --skip-migration)
       do_migration=false
       ;;
     --cost-money)
-      env_options="$env_options --env PATTY_RUN_TESTS_COSTING_MONEY=true"
+      cost_money="--env PATTY_RUN_TESTS_COSTING_MONEY=true"
       ;;
     *)
       echo "Unknown argument: $1"
@@ -31,4 +31,4 @@ fi
 
 ./shell.sh -c "black . --line-length 120 --skip-magic-trailing-comma"
 ./shell.sh -c "mypy . --strict"
-../docker-compose.sh exec $env_options backend-shell bash -c "python -m unittest discover --pattern '*.py'"
+../docker-compose.sh exec $cost_money backend-shell bash -c "python -m unittest discover --pattern '*.py'"
