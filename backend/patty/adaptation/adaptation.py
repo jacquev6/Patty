@@ -4,7 +4,7 @@ from sqlalchemy import orm
 import pydantic
 import sqlalchemy as sql
 
-from ..adapted import ProseAndExercise, Exercise
+from ..adapted import Exercise
 from ..database_utils import OrmBase
 from .input import Input
 from .strategy import Strategy
@@ -12,7 +12,7 @@ from .strategy import Strategy
 
 class Adjustment(pydantic.BaseModel):
     user_prompt: str
-    assistant_response: ProseAndExercise
+    assistant_response: Exercise
 
 
 class Adaptation(OrmBase):
@@ -28,14 +28,16 @@ class Adaptation(OrmBase):
     _initial_response: orm.Mapped[dict[str, typing.Any] | None] = orm.mapped_column("initial_response", sql.JSON)
 
     @property
-    def initial_response(self) -> ProseAndExercise | None:
+    def initial_response(self) -> Exercise | None:
         if self._initial_response is None:
             return None
+        elif "structured" in self._initial_response:
+            return Exercise(**self._initial_response["structured"])
         else:
-            return ProseAndExercise(**self._initial_response)
+            return Exercise(**self._initial_response)
 
     @initial_response.setter
-    def initial_response(self, value: ProseAndExercise | None) -> None:
+    def initial_response(self, value: Exercise | None) -> None:
         if value is None:
             self._initial_response = None
         else:

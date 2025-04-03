@@ -78,11 +78,11 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @costs_money
     async def test_adaptation_schema(self) -> None:
-        from ..adapted import ProseAndExercise
+        from ..adapted import Exercise
 
         model = MistralAiModel(name="mistral-small-2501")
 
         response = await model.complete(
-            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], ProseAndExercise
+            [UserMessage(message="Donne-moi une réponse respectant le schema JSON fourni.")], Exercise
         )
-        self.assertIsInstance(response.message, ProseAndExercise)
+        self.assertIsInstance(response.message, Exercise)

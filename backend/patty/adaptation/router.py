@@ -5,7 +5,7 @@ import fastapi
 
 from .. import database_utils
 from .. import llm
-from ..adapted import ProseAndExercise, Exercise
+from ..adapted import Exercise
 from ..api_utils import ApiModel
 from ..api_utils import ApiModel
 from .adaptation import Adaptation as DbAdaptation, Adjustment
@@ -18,7 +18,7 @@ __all__ = ["router"]
 router = fastapi.APIRouter()
 
 
-LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[ProseAndExercise]
+LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
 
 
 class InitialStep(ApiModel):
@@ -26,7 +26,6 @@ class InitialStep(ApiModel):
     system_prompt: str
     input_text: str
     messages: list[LlmMessage]
-    assistant_prose: str
     adapted_exercise: Exercise | None
 
 
@@ -34,7 +33,6 @@ class AdjustmentStep(ApiModel):
     kind: Literal["adjustment"]
     userPrompt: str
     messages: list[LlmMessage]
-    assistant_prose: str
     adapted_exercise: Exercise | None
 
 
@@ -100,7 +98,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         llm.UserMessage(message=input.text),
     ]
 
-    response = await strategy.model.complete(messages, ProseAndExercise)
+    response = await strategy.model.complete(messages, Exercise)
     messages.append(response)
 
     db_adaptation = DbAdaptation(
@@ -134,14 +132,14 @@ async def post_adaptation_adjustment(
     previous_messages: list[LlmMessage] = [
         llm.SystemMessage(message=db_adaptation.strategy.system_prompt),
         llm.UserMessage(message=db_adaptation.input.text),
-        llm.AssistantMessage[ProseAndExercise](message=db_adaptation.initial_response),
+        llm.AssistantMessage[Exercise](message=db_adaptation.initial_response),
     ]
     for adjustment in db_adaptation.adjustments:
         previous_messages.append(llm.UserMessage(message=adjustment.user_prompt))
-        previous_messages.append(llm.AssistantMessage[ProseAndExercise](message=adjustment.assistant_response))
+        previous_messages.append(llm.AssistantMessage[Exercise](message=adjustment.assistant_response))
     step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
 
-    response = await db_adaptation.strategy.model.complete(previous_messages + step_messages, ProseAndExercise)
+    response = await db_adaptation.strategy.model.complete(previous_messages + step_messages, Exercise)
 
     adjustments = list(db_adaptation.adjustments)
     adjustments.append(Adjustment(user_prompt=req.adjustment, assistant_response=response.message))
@@ -189,10 +187,9 @@ def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
                 messages=[
                     llm.SystemMessage(message=db_adaptation.strategy.system_prompt),
                     llm.UserMessage(message=db_adaptation.input.text),
-                    llm.AssistantMessage[ProseAndExercise](message=db_adaptation.initial_response),
+                    llm.AssistantMessage[Exercise](message=db_adaptation.initial_response),
                 ],
-                assistant_prose=db_adaptation.initial_response.prose,
-                adapted_exercise=db_adaptation.initial_response.structured,
+                adapted_exercise=db_adaptation.initial_response,
             )
         ]
         + [
@@ -201,10 +198,9 @@ def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
                 userPrompt=adjustment.user_prompt,
                 messages=[
                     llm.UserMessage(message=adjustment.user_prompt),
-                    llm.AssistantMessage[ProseAndExercise](message=adjustment.assistant_response),
+                    llm.AssistantMessage[Exercise](message=adjustment.assistant_response),
                 ],
-                assistant_prose=adjustment.assistant_response.prose,
-                adapted_exercise=adjustment.assistant_response.structured,
+                adapted_exercise=adjustment.assistant_response,
             )
             for adjustment in db_adaptation.adjustments
         ],
@@ -224,13 +220,12 @@ def export_adaptation(
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     assert db_adaptation.initial_response is not None
-    assert db_adaptation.initial_response.structured is not None
 
     if db_adaptation.manual_edit is None:
-        exercise = db_adaptation.initial_response.structured
+        exercise = db_adaptation.initial_response
         for adjustment in db_adaptation.adjustments:
-            if adjustment.assistant_response.structured is not None:
-                exercise = adjustment.assistant_response.structured
+            if adjustment.assistant_response is not None:
+                exercise = adjustment.assistant_response
     else:
         exercise = db_adaptation.manual_edit
 

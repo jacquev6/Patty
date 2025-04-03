@@ -25,5 +25,5 @@ class AssistantMessage[T](pydantic.BaseModel):
 class Model(abc.ABC, pydantic.BaseModel):
     @abc.abstractmethod
     async def complete(
-        self, messages: list[SystemMessage | UserMessage | AssistantMessage[T]], structured_type: Type[T]
+        self, messages: list[SystemMessage | UserMessage | AssistantMessage[T]], response_type: Type[T]
     ) -> AssistantMessage[T]: ...

@@ -188,10 +188,8 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_ProseAndExercise_']
+        | components['schemas']['AssistantMessage_Exercise_']
       )[]
-      /** Assistantprose */
-      assistantProse: string
       adaptedExercise: components['schemas']['Exercise-Output'] | null
     }
     /** AnySequence */
@@ -258,15 +256,15 @@ export interface components {
        */
       kind: 'arrow'
     }
-    /** AssistantMessage[ProseAndExercise] */
-    AssistantMessage_ProseAndExercise_: {
+    /** AssistantMessage[Exercise] */
+    AssistantMessage_Exercise_: {
       /**
        * Role
        * @default assistant
        * @constant
        */
       role: 'assistant'
-      message: components['schemas']['ProseAndExercise']
+      message: components['schemas']['Exercise-Output']
     }
     /** DummyModel */
     DummyModel: {
@@ -332,10 +330,8 @@ export interface components {
       messages: (
         | components['schemas']['UserMessage']
         | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_ProseAndExercise_']
+        | components['schemas']['AssistantMessage_Exercise_']
       )[]
-      /** Assistantprose */
-      assistantProse: string
       adaptedExercise: components['schemas']['Exercise-Output'] | null
     }
     /** Input */
@@ -532,12 +528,6 @@ export interface components {
     PostAdaptationRequest: {
       strategy: components['schemas']['Strategy']
       input: components['schemas']['Input']
-    }
-    /** ProseAndExercise */
-    ProseAndExercise: {
-      /** Prose */
-      prose: string
-      structured: components['schemas']['Exercise-Output'] | null
     }
     /** SelectableInput */
     'SelectableInput-Input': {

@@ -452,16 +452,12 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_ProseAndExercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
                 }
               ]
             },
             "type": "array",
             "title": "Messages"
-          },
-          "assistantProse": {
-            "type": "string",
-            "title": "Assistantprose"
           },
           "adaptedExercise": {
             "anyOf": [
@@ -480,7 +476,6 @@
           "kind",
           "userPrompt",
           "messages",
-          "assistantProse",
           "adaptedExercise"
         ],
         "title": "AdjustmentStep"
@@ -651,7 +646,7 @@
         ],
         "title": "Arrow"
       },
-      "AssistantMessage_ProseAndExercise_": {
+      "AssistantMessage_Exercise_": {
         "properties": {
           "role": {
             "type": "string",
@@ -660,14 +655,14 @@
             "default": "assistant"
           },
           "message": {
-            "$ref": "#/components/schemas/ProseAndExercise"
+            "$ref": "#/components/schemas/Exercise-Output"
           }
         },
         "type": "object",
         "required": [
           "message"
         ],
-        "title": "AssistantMessage[ProseAndExercise]"
+        "title": "AssistantMessage[Exercise]"
       },
       "DummyModel": {
         "properties": {
@@ -811,16 +806,12 @@
                   "$ref": "#/components/schemas/SystemMessage"
                 },
                 {
-                  "$ref": "#/components/schemas/AssistantMessage_ProseAndExercise_"
+                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
                 }
               ]
             },
             "type": "array",
             "title": "Messages"
-          },
-          "assistantProse": {
-            "type": "string",
-            "title": "Assistantprose"
           },
           "adaptedExercise": {
             "anyOf": [
@@ -840,7 +831,6 @@
           "systemPrompt",
           "inputText",
           "messages",
-          "assistantProse",
           "adaptedExercise"
         ],
         "title": "InitialStep"
@@ -1358,30 +1348,6 @@
           "input"
         ],
         "title": "PostAdaptationRequest"
-      },
-      "ProseAndExercise": {
-        "properties": {
-          "prose": {
-            "type": "string",
-            "title": "Prose"
-          },
-          "structured": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "prose",
-          "structured"
-        ],
-        "title": "ProseAndExercise"
       },
       "SelectableInput-Input": {
         "properties": {

@@ -224,7 +224,6 @@ watch(Escape, () => {
                 ❌
               </div>
             </div>
-            <MarkDown class="assistant-prose" :markdown="step.assistantProse" />
           </template>
           <div v-if="manualAdaptedExercise === null" class="user-prompt">
             <TextArea v-model="adjustment"></TextArea>
@@ -335,16 +334,7 @@ watch(Escape, () => {
 }
 
 .user-prompt {
-  margin-left: 10%;
   background-color: lightblue;
-  border-radius: 5px;
-  padding: 5px;
-  margin-bottom: 5px;
-}
-
-.assistant-prose {
-  margin-right: 10%;
-  background-color: lightgrey;
   border-radius: 5px;
   padding: 5px;
   margin-bottom: 5px;
