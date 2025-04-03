@@ -226,8 +226,8 @@ watch(Escape, () => {
             </div>
           </template>
           <div v-if="manualAdaptedExercise === null" class="user-prompt">
-            <TextArea v-model="adjustment"></TextArea>
-            <p><button @click="submitAdjustment" :disabled>Submit</button></p>
+            <TextArea data-cy="user-prompt" v-model="adjustment"></TextArea>
+            <p><button data-cy="submit-adjustment" @click="submitAdjustment" :disabled>Submit</button></p>
           </div>
         </BusyBox>
       </template>
@@ -261,12 +261,14 @@ watch(Escape, () => {
         </template>
         <h1>Manual edition</h1>
         <TextArea
+          data-cy="manual-edition"
           v-model="manualAdaptedExerciseProxy"
           style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
         ></TextArea>
         <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
         <p>
           <button
+            data-cy="reset-manual-edition"
             @click="resetManualEdit"
             :disabled="manualAdaptedExercise === null"
             title="Forget all manual changes; go back to the last version from the LLM"
@@ -275,6 +277,7 @@ watch(Escape, () => {
           </button>
           <WhiteSpace />
           <button
+            data-cy="reformat-manual-edition"
             @click="reformatManualAdaptedExercise"
             :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
           >
