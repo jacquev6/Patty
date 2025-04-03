@@ -15,4 +15,12 @@ export default defineConfig({
       return getCompareSnapshotsPlugin(on, config)
     },
   },
+
+  e2e: {
+    baseUrl: 'http://fanout:8080/',
+    specPattern: 'e2e-tests/**/*.cy.ts',  // @todo Move to ../e2e-tests
+    setupNodeEvents(on, config) {
+      return getCompareSnapshotsPlugin(on, config)
+    },
+  },
 })

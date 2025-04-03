@@ -2,11 +2,13 @@ from typing import Iterable
 import textwrap
 
 import compact_json  # type: ignore
+import fastapi
 
 from . import adaptation
 from . import adapted
 from . import database_utils
 from . import llm
+from . import settings
 
 
 def make_default_system_prompt() -> str:
@@ -361,3 +363,11 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     for fixture in fixtures:
         for instance in available_fixtures[fixture]():
             session.add(instance)
+
+
+app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
+
+
+@app.post("/load")
+def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
+    load(session, fixtures.split(","))

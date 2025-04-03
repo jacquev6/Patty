@@ -200,6 +200,20 @@ services:
     depends_on:
       adapted-exercise-json-schema-first-time-generator:
         condition: service_completed_successfully
+  fixtures-loader:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
+    depends_on:
+      data-loader:
+        condition: service_completed_successfully
 
   frontend-shell:
     image: patty-dev_frontend

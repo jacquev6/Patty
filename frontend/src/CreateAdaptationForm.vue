@@ -116,13 +116,13 @@ const disabled = computed(() => {
             <option v-for="name in llmNames">{{ name }}</option>
           </select>
           <h1>System prompt</h1>
-          <TextArea v-model="systemPrompt"></TextArea>
+          <TextArea data-cy="system-prompt" v-model="systemPrompt"></TextArea>
           <h1>Response JSON schema</h1>
           <AdaptedExerciseJsonSchemaDetails />
         </template>
         <template #col-2>
           <h1>Input text</h1>
-          <TextArea v-model="inputText"></TextArea>
+          <TextArea data-cy="input-text" v-model="inputText"></TextArea>
           <p><button @click="submit" :disabled>Submit</button></p>
         </template>
       </ResizableColumns>
