@@ -23,12 +23,18 @@ const props = defineProps<{
 const ajv = new Ajv()
 const validateAdaptedExercise = ajv.compile(adaptedExerciseSchema)
 
+const found = ref<boolean | null>(null)
 const adaptation = ref<Adaptation | null>(null)
 
 onMounted(async () => {
   const response = await client.GET(`/api/adaptation/{id}`, { params: { path: { id: props.id } } })
 
-  if (response.data !== undefined) {
+  if (response.response.status === 404) {
+    found.value = false
+    adaptation.value = null
+  } else {
+    found.value = true
+    assert(response.data !== undefined)
     adaptation.value = response.data
   }
 })
@@ -195,7 +201,7 @@ watch(Escape, () => {
 </script>
 
 <template>
-  <div v-if="adaptation !== null" class="container">
+  <div v-if="adaptation !== null">
     <ResizableColumns :columns="3">
       <template #col-1>
         <h1>LLM model</h1>
@@ -306,6 +312,9 @@ watch(Escape, () => {
         </div>
       </div>
     </div>
+  </div>
+  <div v-else-if="found === false">
+    <h1>Not found</h1>
   </div>
 </template>
 

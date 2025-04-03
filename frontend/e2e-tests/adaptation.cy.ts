@@ -62,15 +62,23 @@ describe('The adaptation edition page', () => {
         return true
       }
     })
-
-    cy.visit('/adaptation-1')
   })
 
   it('looks like this', () => {
+    cy.visit('/adaptation-1')
+
     cy.compareSnapshot(`adaptation-edition-page.${Cypress.browser.name}`)
   })
 
+  it('displays "Not found" when the adaptation does not exist', () => {
+    cy.visit('/adaptation-42')
+
+    cy.get('h1:contains("Not found")').should('exist')
+  })
+
   it('enables the "submit adjustment" button', () => {
+    cy.visit('/adaptation-1')
+
     cy.get('[data-cy="user-prompt"]').as('user-prompt')
     cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
 
@@ -85,6 +93,8 @@ describe('The adaptation edition page', () => {
   })
 
   it('submits and rewinds adjustments', () => {
+    cy.visit('/adaptation-1')
+
     cy.get('[data-cy="user-prompt"]').as('user-prompt')
     cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
 
@@ -110,6 +120,8 @@ describe('The adaptation edition page', () => {
   const formattedJson = '{\n  "format": "v1",\n  "instructions": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "wording": {"pages": []},\n  "references": null\n}'
 
   it('reformats manual edits', () => {
+    cy.visit('/adaptation-1')
+
     cy.get('[data-cy="manual-edition"]').as('manual-edition')
 
     cy.get('@manual-edition').type('{selectAll}').type(unformattedJson, {delay: 0, parseSpecialCharSequences: false})
@@ -119,6 +131,8 @@ describe('The adaptation edition page', () => {
   })
 
   it('saves manual edits', () => {
+    cy.visit('/adaptation-1')
+
     cy.get('[data-cy="manual-edition"]').as('manual-edition')
 
     cy.get('@manual-edition').type('{selectAll}').type(unformattedJson, {delay: 0, parseSpecialCharSequences: false})
@@ -129,6 +143,8 @@ describe('The adaptation edition page', () => {
   })
 
   it('forbids adjustments on manual edits', () => {
+    cy.visit('/adaptation-1')
+
     cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
     cy.get('[data-cy="manual-edition"]').as('manual-edition')
 

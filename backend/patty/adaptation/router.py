@@ -113,8 +113,10 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
 @router.get("/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> Adaptation:
     db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
-    return make_output_adaptation(db_adaptation)
+    if db_adaptation is None:
+        raise fastapi.HTTPException(status_code=404, detail="Adaptation not found")
+    else:
+        return make_output_adaptation(db_adaptation)
 
 
 class PostAdaptationAdjustmentRequest(ApiModel):
