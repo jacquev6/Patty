@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
+import { useMagicKeys } from '@vueuse/core'
 
 import { client, type Adaptation, type AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
@@ -13,8 +14,7 @@ import BusyBox from './BusyBox.vue'
 import adaptedExerciseSchema from '../../backend/generated/adapted-exercise-schema.json'
 import MiniatureScreen from './MiniatureScreen.vue'
 import WhiteSpace from './WhiteSpace.vue'
-import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
-import { useMagicKeys } from '@vueuse/core'
+import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 
 const props = defineProps<{
   id: string
@@ -36,16 +36,6 @@ onMounted(async () => {
     found.value = true
     assert(response.data !== undefined)
     adaptation.value = response.data
-  }
-})
-
-const systemPrompt = computed(() => {
-  if (adaptation.value === null) {
-    return ''
-  } else {
-    assert(adaptation.value.steps.length > 0)
-    assert(adaptation.value.steps[0].kind === 'initial')
-    return adaptation.value.steps[0].systemPrompt
   }
 })
 
@@ -204,104 +194,7 @@ watch(Escape, () => {
   <div v-if="adaptation !== null">
     <ResizableColumns :columns="3">
       <template #col-1>
-        <h1>LLM model</h1>
-        <p>{{ adaptation.strategy.model.provider }}: {{ adaptation.strategy.model.name }}</p>
-        <h1>Allowed components in LLM's response</h1>
-        <div style="display: grid; grid-template-columns: 1fr 11px 2fr 11px 1fr">
-          <div>
-            <h2>In instruction</h2>
-            <p>
-              <label><input type="checkbox" checked disabled /> text</label>
-            </p>
-            <p>
-              <label><input type="checkbox" checked disabled /> whitespace</label>
-            </p>
-            <p>
-              <label
-                ><input
-                  data-cy="allow-choice-in-instruction"
-                  type="checkbox"
-                  :checked="adaptation.strategy.allowChoiceInInstruction"
-                  disabled
-                />
-                choice</label
-              >
-            </p>
-          </div>
-          <div class="gutter"></div>
-          <div>
-            <h2>In statement</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr">
-              <div>
-                <p>
-                  <label><input type="checkbox" checked disabled /> text</label>
-                </p>
-                <p>
-                  <label><input type="checkbox" checked disabled /> whitespace</label>
-                </p>
-                <p>
-                  <label
-                    ><input
-                      data-cy="allow-arrow-in-statement"
-                      type="checkbox"
-                      :checked="adaptation.strategy.allowArrowInStatement"
-                      disabled
-                    />
-                    arrow</label
-                  >
-                </p>
-              </div>
-              <div>
-                <p>
-                  <label
-                    ><input
-                      data-cy="allow-free-text-input-in-statement"
-                      type="checkbox"
-                      :checked="adaptation.strategy.allowFreeTextInputInStatement"
-                      disabled
-                    />
-                    free text input</label
-                  >
-                </p>
-                <p>
-                  <label
-                    ><input
-                      data-cy="allow-multiple-choices-input-in-statement"
-                      type="checkbox"
-                      :checked="adaptation.strategy.allowMultipleChoicesInputInStatement"
-                      disabled
-                    />
-                    multiple choices input</label
-                  >
-                </p>
-                <p>
-                  <label
-                    ><input
-                      data-cy="allow-selectable-input-in-statement"
-                      type="checkbox"
-                      :checked="adaptation.strategy.allowSelectableInputInStatement"
-                      disabled
-                    />
-                    selectable input</label
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="gutter"></div>
-          <div>
-            <h2>In references</h2>
-            <p>
-              <label><input type="checkbox" checked disabled /> text</label>
-            </p>
-            <p>
-              <label><input type="checkbox" checked disabled /> whitespace</label>
-            </p>
-          </div>
-        </div>
-        <AdaptedExerciseJsonSchemaDetails :schema="adaptation.strategy.llmResponseSchema" />
-        <h1>System prompt</h1>
-        <MarkDown :markdown="systemPrompt" />
+        <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="adaptation.strategy" />
       </template>
       <template #col-2>
         <h1>Input text</h1>
@@ -449,14 +342,5 @@ button.exitFullScreen {
   left: 50%;
   transform: translate(-50%, 0);
   bottom: 2rem;
-}
-
-.gutter {
-  background-color: black;
-  margin: 0 5px;
-}
-
-h2 {
-  margin: 0;
 }
 </style>

@@ -1,3 +1,4 @@
+from typing import Any
 import typing
 
 from sqlalchemy import orm
@@ -7,6 +8,7 @@ import sqlalchemy as sql
 from ..database_utils import OrmBase
 from ..llm import ConcreteModel
 from .. import adapted
+from .. import llm
 
 
 class Strategy(OrmBase):
@@ -37,7 +39,7 @@ class Strategy(OrmBase):
     allow_multiple_choices_input_in_statement: orm.Mapped[bool]
     allow_selectable_input_in_statement: orm.Mapped[bool]
 
-    def make_exercise_type(self) -> type[adapted.Exercise]:
+    def make_llm_response_type(self) -> type[adapted.Exercise]:
         return adapted.make_exercise_type(
             adapted.InstructionComponents(text=True, whitespace=True, choice=self.allow_choice_in_instruction),
             adapted.StatementComponents(
@@ -50,3 +52,6 @@ class Strategy(OrmBase):
             ),
             adapted.ReferenceComponents(text=True, whitespace=True),
         )
+
+    def make_llm_response_schema(self) -> dict[str, Any]:
+        return llm.make_schema(self.make_llm_response_type())

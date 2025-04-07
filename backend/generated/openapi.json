@@ -47,7 +47,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputStrategy"
+                  "$ref": "#/components/schemas/InputStrategy"
                 }
               }
             }
@@ -169,7 +169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -208,7 +208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -257,7 +257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -296,7 +296,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -345,7 +345,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -382,7 +382,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Adaptation"
+                  "$ref": "#/components/schemas/OutputAdaptation"
                 }
               }
             }
@@ -452,50 +452,6 @@
   },
   "components": {
     "schemas": {
-      "Adaptation": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/OutputStrategy"
-          },
-          "steps": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/InitialStep"
-                },
-                {
-                  "$ref": "#/components/schemas/AdjustmentStep"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Steps"
-          },
-          "manualEdit": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "strategy",
-          "steps",
-          "manualEdit"
-        ],
-        "title": "Adaptation"
-      },
       "AdjustmentStep": {
         "properties": {
           "kind": {
@@ -1099,6 +1055,50 @@
           "name"
         ],
         "title": "OpenAiModel"
+      },
+      "OutputAdaptation": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/OutputStrategy"
+          },
+          "steps": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InitialStep"
+                },
+                {
+                  "$ref": "#/components/schemas/AdjustmentStep"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "manualEdit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exercise-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "steps",
+          "manualEdit"
+        ],
+        "title": "OutputAdaptation"
       },
       "OutputStrategy": {
         "properties": {

@@ -56,18 +56,21 @@ class OutputStrategy(InputStrategy):
     llm_response_schema: dict[str, Any]
 
 
-class Adaptation(ApiModel):
+class OutputAdaptation(ApiModel):
     id: int
     strategy: OutputStrategy
     steps: list[Step]
     manual_edit: Exercise | None
 
 
-@router.get("/latest-strategy")
-def get_latest_strategy(session: database_utils.SessionDependable) -> OutputStrategy:
+@router.get(
+    "/latest-strategy",
+    response_model=InputStrategy,  # Not 'OutputStrategy' because it will be used as the input for 'post_adaptation'
+)
+def get_latest_strategy(session: database_utils.SessionDependable) -> DbStrategy:
     strategy = session.query(DbStrategy).order_by(-DbStrategy.id).first()
     assert strategy is not None
-    return make_output_strategy(strategy)
+    return strategy
 
 
 @router.get("/llm-response-schema")
@@ -78,20 +81,13 @@ def get_llm_response_schema(
     allow_multiple_choices_input_in_statement: bool,
     allow_selectable_input_in_statement: bool,
 ) -> dict[str, Any]:
-    return llm.make_schema(
-        adapted.make_exercise_type(
-            adapted.InstructionComponents(text=True, whitespace=True, choice=allow_choice_in_instruction),
-            adapted.StatementComponents(
-                text=True,
-                whitespace=True,
-                arrow=allow_arrow_in_statement,
-                free_text_input=allow_free_text_input_in_statement,
-                multiple_choices_input=allow_multiple_choices_input_in_statement,
-                selectable_input=allow_selectable_input_in_statement,
-            ),
-            adapted.ReferenceComponents(text=True, whitespace=True),
-        )
-    )
+    return DbStrategy(
+        allow_choice_in_instruction=allow_choice_in_instruction,
+        allow_arrow_in_statement=allow_arrow_in_statement,
+        allow_free_text_input_in_statement=allow_free_text_input_in_statement,
+        allow_multiple_choices_input_in_statement=allow_multiple_choices_input_in_statement,
+        allow_selectable_input_in_statement=allow_selectable_input_in_statement,
+    ).make_llm_response_schema()
 
 
 class Input(ApiModel):
@@ -112,7 +108,7 @@ class PostAdaptationRequest(ApiModel):
 
 
 @router.post("")
-async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> Adaptation:
+async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> OutputAdaptation:
     strategy = session.get(DbStrategy, req.strategy.id)
     assert strategy is not None
     if (
@@ -149,7 +145,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         llm.UserMessage(message=input.text),
     ]
 
-    response = await strategy.model.complete(messages, strategy.make_exercise_type())
+    response = await strategy.model.complete(messages, strategy.make_llm_response_type())
     messages.append(response)
 
     db_adaptation = DbAdaptation(
@@ -162,7 +158,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
 
 
 @router.get("/{id}")
-async def get_adaptation(id: str, session: database_utils.SessionDependable) -> Adaptation:
+async def get_adaptation(id: str, session: database_utils.SessionDependable) -> OutputAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     if db_adaptation is None:
         raise fastapi.HTTPException(status_code=404, detail="Adaptation not found")
@@ -177,7 +173,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 @router.post("/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
-) -> Adaptation:
+) -> OutputAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     assert db_adaptation.initial_response is not None
@@ -192,7 +188,7 @@ async def post_adaptation_adjustment(
         messages.append(llm.AssistantMessage[Exercise](message=adjustment.assistant_response))
     messages.append(llm.UserMessage(message=req.adjustment))
 
-    response = await db_adaptation.strategy.model.complete(messages, db_adaptation.strategy.make_exercise_type())
+    response = await db_adaptation.strategy.model.complete(messages, db_adaptation.strategy.make_llm_response_type())
 
     adjustments = list(db_adaptation.adjustments)
     adjustments.append(
@@ -204,7 +200,7 @@ async def post_adaptation_adjustment(
 
 
 @router.delete("/{id}/last-step")
-def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> Adaptation:
+def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> OutputAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     adjustments = list(db_adaptation.adjustments)
@@ -214,7 +210,7 @@ def delete_adaptation_last_step(id: str, session: database_utils.SessionDependab
 
 
 @router.put("/{id}/manual-edit")
-def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> Adaptation:
+def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> OutputAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     db_adaptation.manual_edit = req
@@ -222,29 +218,29 @@ def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.S
 
 
 @router.delete("/{id}/manual-edit")
-def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> Adaptation:
+def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> OutputAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     db_adaptation.manual_edit = None
     return make_output_adaptation(db_adaptation)
 
 
-def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
-    assert db_adaptation.initial_response is not None
-    return Adaptation(
-        id=db_adaptation.id,
-        strategy=make_output_strategy(db_adaptation.strategy),
+def make_output_adaptation(adaptation: DbAdaptation) -> OutputAdaptation:
+    assert adaptation.initial_response is not None
+    return OutputAdaptation(
+        id=adaptation.id,
+        strategy=make_output_strategy(adaptation.strategy),
         steps=[
             InitialStep(
                 kind="initial",
-                system_prompt=db_adaptation.strategy.system_prompt,
-                input_text=db_adaptation.input.text,
+                system_prompt=adaptation.strategy.system_prompt,
+                input_text=adaptation.input.text,
                 messages=[
-                    llm.SystemMessage(message=db_adaptation.strategy.system_prompt),
-                    llm.UserMessage(message=db_adaptation.input.text),
-                    llm.AssistantMessage[Exercise](message=db_adaptation.initial_response),
+                    llm.SystemMessage(message=adaptation.strategy.system_prompt),
+                    llm.UserMessage(message=adaptation.input.text),
+                    llm.AssistantMessage[Exercise](message=adaptation.initial_response),
                 ],
-                adapted_exercise=db_adaptation.initial_response,
+                adapted_exercise=adaptation.initial_response,
             )
         ]
         + [
@@ -257,9 +253,9 @@ def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
                 ],
                 adapted_exercise=adjustment.assistant_response,
             )
-            for adjustment in db_adaptation.adjustments
+            for adjustment in adaptation.adjustments
         ],
-        manual_edit=db_adaptation.manual_edit,
+        manual_edit=adaptation.manual_edit,
     )
 
 
@@ -273,7 +269,7 @@ def make_output_strategy(strategy: DbStrategy) -> OutputStrategy:
         allow_free_text_input_in_statement=strategy.allow_free_text_input_in_statement,
         allow_multiple_choices_input_in_statement=strategy.allow_multiple_choices_input_in_statement,
         allow_selectable_input_in_statement=strategy.allow_selectable_input_in_statement,
-        llm_response_schema=llm.make_schema(strategy.make_exercise_type()),
+        llm_response_schema=strategy.make_llm_response_schema(),
     )
 
 

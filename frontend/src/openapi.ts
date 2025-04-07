@@ -179,15 +179,6 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** Adaptation */
-    Adaptation: {
-      /** Id */
-      id: number
-      strategy: components['schemas']['OutputStrategy']
-      /** Steps */
-      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
-      manualEdit: components['schemas']['Exercise-Output'] | null
-    }
     /** AdjustmentStep */
     AdjustmentStep: {
       /**
@@ -417,6 +408,15 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
+    /** OutputAdaptation */
+    OutputAdaptation: {
+      /** Id */
+      id: number
+      strategy: components['schemas']['OutputStrategy']
+      /** Steps */
+      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
+      manualEdit: components['schemas']['Exercise-Output'] | null
+    }
     /** OutputStrategy */
     OutputStrategy: {
       /** Id */
@@ -587,7 +587,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputStrategy']
+          'application/json': components['schemas']['InputStrategy']
         }
       }
     }
@@ -666,7 +666,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
@@ -697,7 +697,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
@@ -732,7 +732,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
@@ -763,7 +763,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
@@ -798,7 +798,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
@@ -829,7 +829,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Adaptation']
+          'application/json': components['schemas']['OutputAdaptation']
         }
       }
       /** @description Validation Error */
