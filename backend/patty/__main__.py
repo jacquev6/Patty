@@ -17,17 +17,18 @@ def main() -> None:
 
 
 @main.command()
-@click.argument("output", type=click.File("w"))
-def openapi(output: io.StringIO) -> None:
-    json.dump(asgi.app.openapi(), output, indent=2)
-    output.write("\n")
+def openapi() -> None:
+    print(json.dumps(asgi.app.openapi(), indent=2))
 
 
 @main.command()
-@click.argument("output", type=click.File("w"))
-def adapted_exercise_schema(output: io.StringIO) -> None:
-    json.dump(adapted.Exercise.model_json_schema(), output, indent=2)
-    output.write("\n")
+def adapted_exercise_schema() -> None:
+    print(json.dumps(adapted.Exercise.model_json_schema(), indent=2))
+
+
+@main.command()
+def default_system_prompt() -> None:
+    print(fixtures.make_default_system_prompt())
 
 
 @main.command()

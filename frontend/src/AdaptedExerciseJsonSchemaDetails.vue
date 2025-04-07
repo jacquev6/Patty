@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import jsonStringify from 'json-stringify-pretty-compact'
 
-import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
+import adaptedExerciseSchema from '../../backend/generated/adapted-exercise-schema.json'
 </script>
 
 <template>
