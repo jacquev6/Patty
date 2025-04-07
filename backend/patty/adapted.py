@@ -11,9 +11,9 @@ class BaseModel(pydantic.BaseModel):
 
 class Exercise(BaseModel):
     format: Literal["v1"]
-    instruction: Page[PassiveComponent]
-    statement: Pages[AnyComponent]
-    references: Line[PassiveComponent] | None
+    instruction: InstructionPage
+    statement: StatementPages
+    references: ReferenceLine | None
 
 
 class Pages[Component](BaseModel):
@@ -43,28 +43,42 @@ class Arrow(BaseModel):
 
 class Choice(BaseModel):
     kind: Literal["choice"]
-    contents: list[Text | Whitespace]
+    contents: list[PureText]
 
 
-PassiveAtomicComponent = Text | Whitespace | Arrow | Choice
-PassiveComponent = PassiveAtomicComponent
+PureText = Text | Whitespace
 
 
 class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
+PureTextContainer = Line[PureText]
+
+
 class MultipleChoicesInput(BaseModel):
     kind: Literal["multipleChoicesInput"]
-    choices: list[Line[Text | Whitespace]]
+    choices: list[PureTextContainer]
     showChoicesByDefault: bool
 
 
 class SelectableInput(BaseModel):
     kind: Literal["selectableInput"]
-    contents: list[Text | Whitespace]
+    contents: list[PureText]
     colors: list[str]
     boxed: bool
 
 
-AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput
+InstructionComponent = PureText | Arrow | Choice
+StatementComponent = PureText | Arrow | Choice | FreeTextInput | MultipleChoicesInput | SelectableInput
+ReferenceComponent = PureText | Arrow | Choice
+
+
+InstructionLine = Line[InstructionComponent]
+StatementLine = Line[StatementComponent]
+ReferenceLine = Line[ReferenceComponent]
+
+InstructionPage = Page[InstructionComponent]
+StatementPage = Page[StatementComponent]
+
+StatementPages = Pages[StatementComponent]

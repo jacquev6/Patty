@@ -23,9 +23,9 @@ def make_default_system_prompt() -> str:
 
     exercise = adapted.Exercise(
         format="v1",
-        instruction=adapted.Page[adapted.PassiveComponent](
+        instruction=adapted.InstructionPage(
             lines=[
-                adapted.Line[adapted.PassiveComponent](
+                adapted.InstructionLine(
                     contents=[
                         adapted.Text(kind="text", text="Complète"),
                         adapted.Whitespace(kind="whitespace"),
@@ -50,11 +50,11 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
-        statement=adapted.Pages[adapted.AnyComponent](
+        statement=adapted.StatementPages(
             pages=[
-                adapted.Page[adapted.AnyComponent](
+                adapted.StatementPage(
                     lines=[
-                        adapted.Line[adapted.AnyComponent](
+                        adapted.StatementLine(
                             contents=[
                                 adapted.Text(kind="text", text="a"),
                                 adapted.Text(kind="text", text="."),
@@ -68,13 +68,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.Text | adapted.Whitespace](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.Text | adapted.Whitespace](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -86,7 +86,7 @@ def make_default_system_prompt() -> str:
                                 ),
                             ]
                         ),
-                        adapted.Line[adapted.AnyComponent](
+                        adapted.StatementLine(
                             contents=[
                                 adapted.Text(kind="text", text="b"),
                                 adapted.Text(kind="text", text="."),
@@ -102,13 +102,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.Text | adapted.Whitespace](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.Text | adapted.Whitespace](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
