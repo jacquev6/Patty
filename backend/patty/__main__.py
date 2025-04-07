@@ -1,5 +1,4 @@
 from typing import Iterable
-import io
 import json
 
 import click

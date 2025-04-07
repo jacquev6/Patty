@@ -5,7 +5,6 @@ import os
 import unittest
 
 import mistralai
-import mistralai.extra
 import pydantic
 
 from .base import T, Model, SystemMessage, UserMessage, AssistantMessage
