@@ -57,65 +57,7 @@
       ],
       "type": "object"
     },
-    "Line_Union_Text__Whitespace__": {
-      "additionalProperties": false,
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "type": "object"
-    },
-    "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
-      "additionalProperties": false,
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/FreeTextInput"
-              },
-              {
-                "$ref": "#/$defs/MultipleChoicesInput"
-              },
-              {
-                "$ref": "#/$defs/SelectableInput"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "type": "object"
-    },
-    "Line_Union_Text__Whitespace__Choice__": {
+    "InstructionLine": {
       "additionalProperties": false,
       "properties": {
         "contents": {
@@ -138,6 +80,22 @@
       },
       "required": [
         "contents"
+      ],
+      "type": "object"
+    },
+    "InstructionPage": {
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/InstructionLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
       ],
       "type": "object"
     },
@@ -168,55 +126,30 @@
       ],
       "type": "object"
     },
-    "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
-      "additionalProperties": false,
-      "properties": {
-        "lines": {
-          "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__"
-          },
-          "title": "Lines",
-          "type": "array"
-        }
-      },
-      "required": [
-        "lines"
-      ],
-      "type": "object"
-    },
-    "Page_Union_Text__Whitespace__Choice__": {
-      "additionalProperties": false,
-      "properties": {
-        "lines": {
-          "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Choice__"
-          },
-          "title": "Lines",
-          "type": "array"
-        }
-      },
-      "required": [
-        "lines"
-      ],
-      "type": "object"
-    },
-    "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
-      "additionalProperties": false,
-      "properties": {
-        "pages": {
-          "items": {
-            "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__"
-          },
-          "title": "Pages",
-          "type": "array"
-        }
-      },
-      "required": [
-        "pages"
-      ],
-      "type": "object"
-    },
     "PureTextContainer": {
+      "additionalProperties": false,
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object"
+    },
+    "ReferenceLine": {
       "additionalProperties": false,
       "properties": {
         "contents": {
@@ -281,6 +214,73 @@
       ],
       "type": "object"
     },
+    "StatementLine": {
+      "additionalProperties": false,
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              },
+              {
+                "$ref": "#/$defs/MultipleChoicesInput"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object"
+    },
+    "StatementPage": {
+      "additionalProperties": false,
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/StatementLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object"
+    },
+    "StatementPages": {
+      "additionalProperties": false,
+      "properties": {
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/StatementPage"
+          },
+          "title": "Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pages"
+      ],
+      "type": "object"
+    },
     "Text": {
       "additionalProperties": false,
       "properties": {
@@ -323,15 +323,15 @@
       "type": "string"
     },
     "instruction": {
-      "$ref": "#/$defs/Page_Union_Text__Whitespace__Choice__"
+      "$ref": "#/$defs/InstructionPage"
     },
     "statement": {
-      "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__"
+      "$ref": "#/$defs/StatementPages"
     },
     "references": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Line_Union_Text__Whitespace__"
+          "$ref": "#/$defs/ReferenceLine"
         },
         {
           "type": "null"

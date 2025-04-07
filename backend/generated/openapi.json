@@ -47,7 +47,83 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Strategy"
+                  "$ref": "#/components/schemas/OutputStrategy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/llm-response-schema": {
+      "get": {
+        "summary": "Get Llm Response Schema",
+        "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_get",
+        "parameters": [
+          {
+            "name": "allow_choice_in_instruction",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Allow Choice In Instruction"
+            }
+          },
+          {
+            "name": "allow_arrow_in_statement",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Allow Arrow In Statement"
+            }
+          },
+          {
+            "name": "allow_free_text_input_in_statement",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Allow Free Text Input In Statement"
+            }
+          },
+          {
+            "name": "allow_multiple_choices_input_in_statement",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Allow Multiple Choices Input In Statement"
+            }
+          },
+          {
+            "name": "allow_selectable_input_in_statement",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Allow Selectable Input In Statement"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -382,19 +458,8 @@
             "type": "integer",
             "title": "Id"
           },
-          "llmModel": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Llmmodel"
+          "strategy": {
+            "$ref": "#/components/schemas/OutputStrategy"
           },
           "steps": {
             "items": {
@@ -425,7 +490,7 @@
         "type": "object",
         "required": [
           "id",
-          "llmModel",
+          "strategy",
           "steps",
           "manualEdit"
         ],
@@ -731,6 +796,65 @@
         ],
         "title": "Input"
       },
+      "InputStrategy": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "allowChoiceInInstruction": {
+            "type": "boolean",
+            "title": "Allowchoiceininstruction"
+          },
+          "allowArrowInStatement": {
+            "type": "boolean",
+            "title": "Allowarrowinstatement"
+          },
+          "allowFreeTextInputInStatement": {
+            "type": "boolean",
+            "title": "Allowfreetextinputinstatement"
+          },
+          "allowMultipleChoicesInputInStatement": {
+            "type": "boolean",
+            "title": "Allowmultiplechoicesinputinstatement"
+          },
+          "allowSelectableInputInStatement": {
+            "type": "boolean",
+            "title": "Allowselectableinputinstatement"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "systemPrompt",
+          "allowChoiceInInstruction",
+          "allowArrowInStatement",
+          "allowFreeTextInputInStatement",
+          "allowMultipleChoicesInputInStatement",
+          "allowSelectableInputInStatement"
+        ],
+        "title": "InputStrategy"
+      },
       "Line_Union_Text__Whitespace__": {
         "properties": {
           "contents": {
@@ -976,6 +1100,70 @@
         ],
         "title": "OpenAiModel"
       },
+      "OutputStrategy": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "allowChoiceInInstruction": {
+            "type": "boolean",
+            "title": "Allowchoiceininstruction"
+          },
+          "allowArrowInStatement": {
+            "type": "boolean",
+            "title": "Allowarrowinstatement"
+          },
+          "allowFreeTextInputInStatement": {
+            "type": "boolean",
+            "title": "Allowfreetextinputinstatement"
+          },
+          "allowMultipleChoicesInputInStatement": {
+            "type": "boolean",
+            "title": "Allowmultiplechoicesinputinstatement"
+          },
+          "allowSelectableInputInStatement": {
+            "type": "boolean",
+            "title": "Allowselectableinputinstatement"
+          },
+          "llmResponseSchema": {
+            "type": "object",
+            "title": "Llmresponseschema"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "systemPrompt",
+          "allowChoiceInInstruction",
+          "allowArrowInStatement",
+          "allowFreeTextInputInStatement",
+          "allowMultipleChoicesInputInStatement",
+          "allowSelectableInputInStatement",
+          "llmResponseSchema"
+        ],
+        "title": "OutputStrategy"
+      },
       "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "lines": {
@@ -1089,7 +1277,7 @@
       "PostAdaptationRequest": {
         "properties": {
           "strategy": {
-            "$ref": "#/components/schemas/Strategy"
+            "$ref": "#/components/schemas/InputStrategy"
           },
           "input": {
             "$ref": "#/components/schemas/Input"
@@ -1167,40 +1355,6 @@
           "colors",
           "boxed"
         ]
-      },
-      "Strategy": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "systemPrompt": {
-            "type": "string",
-            "title": "Systemprompt"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "model",
-          "systemPrompt"
-        ],
-        "title": "Strategy"
       },
       "SystemMessage": {
         "properties": {

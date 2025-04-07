@@ -1,6 +1,6 @@
 describe('The adaptation creation page', () => {
   beforeEach(() => {
-    cy.viewport(800, 500)
+    cy.viewport(1600, 800)
 
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation-strategy,default-adaptation-input')
 
@@ -21,7 +21,19 @@ describe('The adaptation creation page', () => {
     cy.compareSnapshot(`adaptation-creation-page.${Cypress.browser.name}`)
   })
 
-  it('remembers the last strategy used', () => {
+  it('remembers the last LLM model used', () => {
+    cy.get('[data-cy="llm-name"]').as('llm-name')
+
+    cy.get('@llm-name').should('have.value', 'dummy-1')
+    cy.get('@llm-name').select('dummy-2')
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@llm-name').should('have.value', 'dummy-2')
+  })
+
+  it('remembers the last system prompt used', () => {
     cy.get('[data-cy="system-prompt"]').as('system-prompt')
 
     cy.get('@system-prompt').type(' Blih blih.', {delay: 0})
@@ -31,6 +43,66 @@ describe('The adaptation creation page', () => {
 
     cy.visit('/new-adaptation')
     cy.get('@system-prompt').should('have.value', 'Blah blah blah. Blih blih.')
+  })
+
+  it('remembers the last "allow choice in instruction" used', () => {
+    cy.get('[data-cy="allow-choice-in-instruction"]').as('allow-choice-in-instruction')
+
+    cy.get('@allow-choice-in-instruction').should('be.checked').uncheck()
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@allow-choice-in-instruction').should('not.be.checked')
+  })
+
+  it('remembers the last "allow arrow in statement" used', () => {
+    cy.get('[data-cy="allow-arrow-in-statement"]').as('allow-arrow-in-statement')
+
+    cy.get('@allow-arrow-in-statement').should('be.checked').uncheck()
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@allow-arrow-in-statement').should('not.be.checked')
+  })
+
+  it('remembers the last "allow free text input in statement" used', () => {
+    cy.get('[data-cy="allow-free-text-input-in-statement"]').as('allow-free-text-input-in-statement')
+
+    cy.get('@allow-free-text-input-in-statement').should('be.checked').uncheck()
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@allow-free-text-input-in-statement').should('not.be.checked')
+  })
+
+  it('remembers the last "allow multiple choices input in statement" used', () => {
+    cy.get('[data-cy="allow-multiple-choices-input-in-statement"]').as('allow-multiple-choices-input-in-statement')
+
+    cy.get('@allow-multiple-choices-input-in-statement').should('be.checked').uncheck()
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@allow-multiple-choices-input-in-statement').should('not.be.checked')
+  })
+
+  it('remembers the last "allow selectable input in statement" used', () => {
+    cy.get('[data-cy="allow-selectable-input-in-statement"]').as('allow-selectable-input-in-statement')
+
+    cy.get('@allow-selectable-input-in-statement').should('be.checked').uncheck()
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@allow-selectable-input-in-statement').should('not.be.checked')
   })
 
   it('remembers the last input used', () => {
@@ -49,7 +121,7 @@ describe('The adaptation creation page', () => {
 
 describe('The adaptation edition page', () => {
   beforeEach(() => {
-    cy.viewport(1280, 1024)
+    cy.viewport(1600, 800)
 
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
 
@@ -67,6 +139,7 @@ describe('The adaptation edition page', () => {
   it('looks like this', () => {
     cy.visit('/adaptation-1')
 
+    cy.get('h1:contains("Adapted exercise")').should('exist')
     cy.compareSnapshot(`adaptation-edition-page.${Cypress.browser.name}`)
   })
 

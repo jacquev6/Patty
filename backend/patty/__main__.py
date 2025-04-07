@@ -23,7 +23,19 @@ def openapi() -> None:
 
 @main.command()
 def adapted_exercise_schema() -> None:
-    print(json.dumps(llm.make_schema(adapted.Exercise), indent=2))
+    exercise_type = adapted.make_exercise_type(
+        adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+        adapted.StatementComponents(
+            text=True,
+            whitespace=True,
+            arrow=True,
+            free_text_input=True,
+            multiple_choices_input=True,
+            selectable_input=True,
+        ),
+        adapted.ReferenceComponents(text=True, whitespace=True),
+    )
+    print(json.dumps(llm.make_schema(exercise_type), indent=2))
 
 
 @main.command()

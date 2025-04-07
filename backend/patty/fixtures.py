@@ -164,12 +164,26 @@ def make_default_system_prompt() -> str:
 
 def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
-        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), system_prompt=make_default_system_prompt()
+        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+        system_prompt=make_default_system_prompt(),
+        allow_choice_in_instruction=True,
+        allow_arrow_in_statement=True,
+        allow_free_text_input_in_statement=False,
+        allow_multiple_choices_input_in_statement=True,
+        allow_selectable_input_in_statement=False,
     )
 
 
 def create_dummy_adaptation_strategy() -> Iterable[object]:
-    yield adaptation.Strategy(model=llm.DummyModel(name="dummy-1"), system_prompt="Blah blah blah.")
+    yield adaptation.Strategy(
+        model=llm.DummyModel(name="dummy-1"),
+        system_prompt="Blah blah blah.",
+        allow_choice_in_instruction=True,
+        allow_arrow_in_statement=True,
+        allow_free_text_input_in_statement=True,
+        allow_multiple_choices_input_in_statement=True,
+        allow_selectable_input_in_statement=True,
+    )
 
 
 def create_default_adaptation_input() -> Iterable[object]:

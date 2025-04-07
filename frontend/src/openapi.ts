@@ -38,6 +38,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/llm-response-schema': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Llm Response Schema */
+    get: operations['get_llm_response_schema_api_adaptation_llm_response_schema_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation/latest-input': {
     parameters: {
       query?: never
@@ -166,11 +183,7 @@ export interface components {
     Adaptation: {
       /** Id */
       id: number
-      /** Llmmodel */
-      llmModel:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
+      strategy: components['schemas']['OutputStrategy']
       /** Steps */
       steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
       manualEdit: components['schemas']['Exercise-Output'] | null
@@ -290,6 +303,28 @@ export interface components {
       /** Text */
       text: string
     }
+    /** InputStrategy */
+    InputStrategy: {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Systemprompt */
+      systemPrompt: string
+      /** Allowchoiceininstruction */
+      allowChoiceInInstruction: boolean
+      /** Allowarrowinstatement */
+      allowArrowInStatement: boolean
+      /** Allowfreetextinputinstatement */
+      allowFreeTextInputInStatement: boolean
+      /** Allowmultiplechoicesinputinstatement */
+      allowMultipleChoicesInputInStatement: boolean
+      /** Allowselectableinputinstatement */
+      allowSelectableInputInStatement: boolean
+    }
     Line_Union_Text__Whitespace__: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
@@ -382,6 +417,30 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
+    /** OutputStrategy */
+    OutputStrategy: {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Systemprompt */
+      systemPrompt: string
+      /** Allowchoiceininstruction */
+      allowChoiceInInstruction: boolean
+      /** Allowarrowinstatement */
+      allowArrowInStatement: boolean
+      /** Allowfreetextinputinstatement */
+      allowFreeTextInputInStatement: boolean
+      /** Allowmultiplechoicesinputinstatement */
+      allowMultipleChoicesInputInStatement: boolean
+      /** Allowselectableinputinstatement */
+      allowSelectableInputInStatement: boolean
+      /** Llmresponseschema */
+      llmResponseSchema: Record<string, never>
+    }
     'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
@@ -413,7 +472,7 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
-      strategy: components['schemas']['Strategy']
+      strategy: components['schemas']['InputStrategy']
       input: components['schemas']['Input']
     }
     PureTextContainer: {
@@ -432,18 +491,6 @@ export interface components {
       colors: string[]
       /** Boxed */
       boxed: boolean
-    }
-    /** Strategy */
-    Strategy: {
-      /** Id */
-      id: number
-      /** Model */
-      model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Systemprompt */
-      systemPrompt: string
     }
     /** SystemMessage */
     SystemMessage: {
@@ -540,7 +587,42 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Strategy']
+          'application/json': components['schemas']['OutputStrategy']
+        }
+      }
+    }
+  }
+  get_llm_response_schema_api_adaptation_llm_response_schema_get: {
+    parameters: {
+      query: {
+        allow_choice_in_instruction: boolean
+        allow_arrow_in_statement: boolean
+        allow_free_text_input_in_statement: boolean
+        allow_multiple_choices_input_in_statement: boolean
+        allow_selectable_input_in_statement: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': Record<string, never>
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

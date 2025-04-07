@@ -8,6 +8,7 @@ import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import ResizableColumns from './ResizableColumns.vue'
+import { computedAsync } from '@vueuse/core'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -60,6 +61,63 @@ const llmName = computed({
   },
 })
 
+const allowChoiceInInstruction = ref(true)
+watch(
+  () => props.defaultStrategy.allowChoiceInInstruction,
+  (defaultAllowChoiceInInstruction) => {
+    allowChoiceInInstruction.value = defaultAllowChoiceInInstruction
+  },
+  { immediate: true },
+)
+
+const allowArrowInStatement = ref(true)
+watch(
+  () => props.defaultStrategy.allowArrowInStatement,
+  (defaultAllowArrowInStatement) => {
+    allowArrowInStatement.value = defaultAllowArrowInStatement
+  },
+  { immediate: true },
+)
+const allowFreeTextInputInStatement = ref(true)
+watch(
+  () => props.defaultStrategy.allowFreeTextInputInStatement,
+  (defaultAllowFreeTextInputInStatement) => {
+    allowFreeTextInputInStatement.value = defaultAllowFreeTextInputInStatement
+  },
+  { immediate: true },
+)
+const allowMultipleChoicesInputInStatement = ref(true)
+watch(
+  () => props.defaultStrategy.allowMultipleChoicesInputInStatement,
+  (defaultAllowMultipleChoicesInputInStatement) => {
+    allowMultipleChoicesInputInStatement.value = defaultAllowMultipleChoicesInputInStatement
+  },
+  { immediate: true },
+)
+const allowSelectableInputInStatement = ref(true)
+watch(
+  () => props.defaultStrategy.allowSelectableInputInStatement,
+  (defaultAllowSelectableInputInStatement) => {
+    allowSelectableInputInStatement.value = defaultAllowSelectableInputInStatement
+  },
+  { immediate: true },
+)
+
+const schema = computedAsync(async () => {
+  const response = await client.GET('/api/adaptation/llm-response-schema', {
+    params: {
+      query: {
+        allow_choice_in_instruction: allowChoiceInInstruction.value,
+        allow_arrow_in_statement: allowArrowInStatement.value,
+        allow_free_text_input_in_statement: allowFreeTextInputInStatement.value,
+        allow_multiple_choices_input_in_statement: allowMultipleChoicesInputInStatement.value,
+        allow_selectable_input_in_statement: allowSelectableInputInStatement.value,
+      },
+    },
+  })
+  return response.data ?? {}
+}, {})
+
 const systemPrompt = ref(props.defaultStrategy.systemPrompt)
 watch(
   () => props.defaultStrategy.systemPrompt,
@@ -85,7 +143,16 @@ async function submit() {
 
   const responsePromise = client.POST('/api/adaptation', {
     body: {
-      strategy: { id: props.defaultStrategy.id, model: llmModel.value, systemPrompt: systemPrompt.value },
+      strategy: {
+        id: props.defaultStrategy.id,
+        model: llmModel.value,
+        systemPrompt: systemPrompt.value,
+        allowChoiceInInstruction: allowChoiceInInstruction.value,
+        allowArrowInStatement: allowArrowInStatement.value,
+        allowFreeTextInputInStatement: allowFreeTextInputInStatement.value,
+        allowMultipleChoicesInputInStatement: allowMultipleChoicesInputInStatement.value,
+        allowSelectableInputInStatement: allowSelectableInputInStatement.value,
+      },
       input: { id: props.defaultInput.id, text: inputText.value },
     },
   })
@@ -109,16 +176,95 @@ const disabled = computed(() => {
       <ResizableColumns :columns="2">
         <template #col-1>
           <h1>LLM model</h1>
-          <select v-model="llmProvider">
+          <select data-cy="llm-provider" v-model="llmProvider">
             <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
           </select>
-          <select v-model="llmName">
+          <select data-cy="llm-name" v-model="llmName">
             <option v-for="name in llmNames">{{ name }}</option>
           </select>
+          <h1>Allowed components in LLM's response</h1>
+          <div style="display: grid; grid-template-columns: 1fr 11px 2fr 11px 1fr">
+            <div>
+              <h2>In instruction</h2>
+              <p>
+                <label><input type="checkbox" checked disabled /> text</label>
+              </p>
+              <p>
+                <label><input type="checkbox" checked disabled /> whitespace</label>
+              </p>
+              <p>
+                <label
+                  ><input data-cy="allow-choice-in-instruction" type="checkbox" v-model="allowChoiceInInstruction" />
+                  choice</label
+                >
+              </p>
+            </div>
+            <div class="gutter"></div>
+            <div>
+              <h2>In statement</h2>
+              <div style="display: grid; grid-template-columns: 1fr 1fr">
+                <div>
+                  <p>
+                    <label><input type="checkbox" checked disabled /> text</label>
+                  </p>
+                  <p>
+                    <label><input type="checkbox" checked disabled /> whitespace</label>
+                  </p>
+                  <p>
+                    <label
+                      ><input data-cy="allow-arrow-in-statement" type="checkbox" v-model="allowArrowInStatement" />
+                      arrow</label
+                    >
+                  </p>
+                </div>
+                <div>
+                  <p>
+                    <label
+                      ><input
+                        data-cy="allow-free-text-input-in-statement"
+                        type="checkbox"
+                        v-model="allowFreeTextInputInStatement"
+                      />
+                      free text input</label
+                    >
+                  </p>
+                  <p>
+                    <label
+                      ><input
+                        data-cy="allow-multiple-choices-input-in-statement"
+                        type="checkbox"
+                        v-model="allowMultipleChoicesInputInStatement"
+                      />
+                      multiple choices input</label
+                    >
+                  </p>
+                  <p>
+                    <label
+                      ><input
+                        data-cy="allow-selectable-input-in-statement"
+                        type="checkbox"
+                        v-model="allowSelectableInputInStatement"
+                      />
+                      selectable input</label
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="gutter"></div>
+            <div>
+              <h2>In references</h2>
+              <p>
+                <label><input type="checkbox" checked disabled /> text</label>
+              </p>
+              <p>
+                <label><input type="checkbox" checked disabled /> whitespace</label>
+              </p>
+            </div>
+          </div>
+          <AdaptedExerciseJsonSchemaDetails :schema />
           <h1>System prompt</h1>
           <TextArea data-cy="system-prompt" v-model="systemPrompt"></TextArea>
-          <h1>Response JSON schema</h1>
-          <AdaptedExerciseJsonSchemaDetails />
         </template>
         <template #col-2>
           <h1>Input text</h1>
@@ -129,3 +275,14 @@ const disabled = computed(() => {
     </BusyBox>
   </div>
 </template>
+
+<style scoped>
+.gutter {
+  background-color: black;
+  margin: 0 5px;
+}
+
+h2 {
+  margin: 0;
+}
+</style>
