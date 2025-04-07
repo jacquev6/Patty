@@ -12,7 +12,8 @@
         "kind"
       ],
       "title": "Arrow",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Choice": {
       "properties": {
@@ -41,7 +42,8 @@
         "contents"
       ],
       "title": "Choice",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "FreeTextInput": {
       "properties": {
@@ -55,7 +57,8 @@
         "kind"
       ],
       "title": "FreeTextInput",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Line_Union_Text__Whitespace__": {
       "properties": {
@@ -78,7 +81,8 @@
         "contents"
       ],
       "title": "Line[Union[Text, Whitespace]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Line_Union_Text__Whitespace__Arrow__Choice__": {
       "properties": {
@@ -107,7 +111,8 @@
         "contents"
       ],
       "title": "Line[Union[Text, Whitespace, Arrow, Choice]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
       "properties": {
@@ -145,7 +150,8 @@
         "contents"
       ],
       "title": "Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "MultipleChoicesInput": {
       "properties": {
@@ -172,7 +178,8 @@
         "showChoicesByDefault"
       ],
       "title": "MultipleChoicesInput",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Page_Union_Text__Whitespace__Arrow__Choice__": {
       "properties": {
@@ -188,7 +195,8 @@
         "lines"
       ],
       "title": "Page[Union[Text, Whitespace, Arrow, Choice]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
       "properties": {
@@ -204,7 +212,8 @@
         "lines"
       ],
       "title": "Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
       "properties": {
@@ -220,7 +229,8 @@
         "pages"
       ],
       "title": "Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "SelectableInput": {
       "properties": {
@@ -262,7 +272,8 @@
         "boxed"
       ],
       "title": "SelectableInput",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Text": {
       "properties": {
@@ -281,7 +292,8 @@
         "text"
       ],
       "title": "Text",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Whitespace": {
       "properties": {
@@ -295,7 +307,8 @@
         "kind"
       ],
       "title": "Whitespace",
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -328,5 +341,6 @@
     "references"
   ],
   "title": "Exercise",
-  "type": "object"
+  "type": "object",
+  "additionalProperties": false
 }

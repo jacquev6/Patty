@@ -2,6 +2,7 @@ from .base import Model as AbstractModel, SystemMessage, UserMessage, AssistantM
 from .dummy import DummyModel
 from .mistralai import MistralAiModel
 from .openai import OpenAiModel
+from .schema import make_schema
 
 
 __all__ = [
@@ -9,6 +10,7 @@ __all__ = [
     "AssistantMessage",
     "ConcreteModel",
     "DummyModel",
+    "make_schema",
     "MistralAiModel",
     "OpenAiModel",
     "SystemMessage",

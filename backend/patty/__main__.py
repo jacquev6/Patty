@@ -7,6 +7,7 @@ from . import adapted
 from . import asgi
 from . import database_utils
 from . import fixtures
+from . import llm
 from . import settings
 
 
@@ -22,7 +23,7 @@ def openapi() -> None:
 
 @main.command()
 def adapted_exercise_schema() -> None:
-    print(json.dumps(adapted.Exercise.model_json_schema(), indent=2))
+    print(json.dumps(llm.make_schema(adapted.Exercise), indent=2))
 
 
 @main.command()
