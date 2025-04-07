@@ -6,7 +6,7 @@ import pydantic
 
 
 class BaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(json_schema_extra=lambda schema: schema.pop("title"))
+    model_config = pydantic.ConfigDict(extra="forbid", json_schema_extra=lambda schema: schema.pop("title"))
 
 
 class Exercise(BaseModel):

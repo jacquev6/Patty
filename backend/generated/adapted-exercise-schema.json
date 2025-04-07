@@ -1,6 +1,7 @@
 {
   "$defs": {
     "Arrow": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "arrow",
@@ -11,10 +12,10 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Choice": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "choice",
@@ -40,10 +41,10 @@
         "kind",
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "FreeTextInput": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "freeTextInput",
@@ -54,10 +55,10 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Line_Union_Text__Whitespace__": {
+      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -77,10 +78,10 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Line_Union_Text__Whitespace__Arrow__Choice__": {
+      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -106,10 +107,10 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
+      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -144,10 +145,10 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "MultipleChoicesInput": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "multipleChoicesInput",
@@ -171,10 +172,10 @@
         "choices",
         "showChoicesByDefault"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Page_Union_Text__Whitespace__Arrow__Choice__": {
+      "additionalProperties": false,
       "properties": {
         "lines": {
           "items": {
@@ -187,10 +188,10 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
+      "additionalProperties": false,
       "properties": {
         "lines": {
           "items": {
@@ -203,10 +204,10 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
+      "additionalProperties": false,
       "properties": {
         "pages": {
           "items": {
@@ -219,10 +220,10 @@
       "required": [
         "pages"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SelectableInput": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "selectableInput",
@@ -261,10 +262,10 @@
         "colors",
         "boxed"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Text": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "text",
@@ -280,10 +281,10 @@
         "kind",
         "text"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Whitespace": {
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "whitespace",
@@ -294,10 +295,10 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     }
   },
+  "additionalProperties": false,
   "properties": {
     "format": {
       "const": "v1",
@@ -327,6 +328,5 @@
     "statement",
     "references"
   ],
-  "type": "object",
-  "additionalProperties": false
+  "type": "object"
 }

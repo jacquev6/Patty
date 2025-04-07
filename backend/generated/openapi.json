@@ -488,6 +488,7 @@
             "title": "Kind"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"
@@ -533,6 +534,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -587,6 +589,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "format",
@@ -619,6 +622,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "format",
@@ -635,6 +639,7 @@
             "title": "Kind"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"
@@ -743,6 +748,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -771,6 +777,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -799,6 +806,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -836,6 +844,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -873,6 +882,7 @@
             "title": "Contents"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -920,6 +930,7 @@
             "title": "Showchoicesbydefault"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -946,6 +957,7 @@
             "title": "Showchoicesbydefault"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -986,6 +998,7 @@
             "title": "Lines"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1001,6 +1014,7 @@
             "title": "Lines"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1016,6 +1030,7 @@
             "title": "Lines"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1031,6 +1046,7 @@
             "title": "Lines"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1046,6 +1062,7 @@
             "title": "Pages"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "pages"
@@ -1061,6 +1078,7 @@
             "title": "Pages"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "pages"
@@ -1130,6 +1148,7 @@
             "title": "Boxed"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -1203,6 +1222,7 @@
             "title": "Text"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -1269,6 +1289,7 @@
             "title": "Kind"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"
