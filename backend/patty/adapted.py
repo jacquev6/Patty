@@ -70,9 +70,9 @@ class SelectableInput(BaseModel):
     boxed: bool
 
 
-InstructionComponent = PureText | Arrow | Choice
-StatementComponent = PureText | Arrow | Choice | FreeTextInput | MultipleChoicesInput | SelectableInput
-ReferenceComponent = PureText | Arrow | Choice
+InstructionComponent = PureText | Choice
+StatementComponent = PureText | Arrow | FreeTextInput | MultipleChoicesInput | SelectableInput
+ReferenceComponent = PureText
 
 
 InstructionLine = Line[InstructionComponent]

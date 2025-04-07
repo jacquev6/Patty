@@ -238,9 +238,9 @@ export interface components {
        * @constant
        */
       format: 'v1'
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__-Input']
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
-      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Input'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Input']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
+      references: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
     'Exercise-Output': {
       /**
@@ -248,9 +248,9 @@ export interface components {
        * @constant
        */
       format: 'v1'
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__-Output']
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
-      references: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Output'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Output']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
+      references: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
     FreeTextInput: {
       /**
@@ -290,46 +290,46 @@ export interface components {
       /** Text */
       text: string
     }
-    'Line_Union_Text__Whitespace__Arrow__Choice__-Input': {
+    Line_Union_Text__Whitespace__: {
       /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Choice']
-      )[]
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Choice__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['Choice']
-      )[]
-    }
-    'Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
-      /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Choice']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Input']
         | components['schemas']['SelectableInput']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
-        | components['schemas']['Choice']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Output']
         | components['schemas']['SelectableInput']
+      )[]
+    }
+    'Line_Union_Text__Whitespace__Choice__-Input': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Choice']
+      )[]
+    }
+    'Line_Union_Text__Whitespace__Choice__-Output': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Choice']
       )[]
     }
     /** MistralAiModel */
@@ -382,29 +382,29 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
-    'Page_Union_Text__Whitespace__Arrow__Choice__-Input': {
+    'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Choice__-Output': {
+    'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
+    'Page_Union_Text__Whitespace__Choice__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Choice__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
+    'Page_Union_Text__Whitespace__Choice__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Choice__-Output'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
+    'Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
+    'Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
     }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {

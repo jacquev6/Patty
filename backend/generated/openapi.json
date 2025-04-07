@@ -573,15 +573,15 @@
             "title": "Format"
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Choice__-Input"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Input"
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
           },
           "references": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__-Input"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
               },
               {
                 "type": "null"
@@ -606,15 +606,15 @@
             "title": "Format"
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Choice__-Output"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Output"
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
           },
           "references": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__-Output"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
               },
               {
                 "type": "null"
@@ -731,7 +731,7 @@
         ],
         "title": "Input"
       },
-      "Line_Union_Text__Whitespace__Arrow__Choice__-Input": {
+      "Line_Union_Text__Whitespace__": {
         "properties": {
           "contents": {
             "items": {
@@ -741,12 +741,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Choice"
                 }
               ]
             },
@@ -760,7 +754,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__Choice__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -773,38 +767,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Choice"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "contents"
-        ]
-      },
-      "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Choice"
                 },
                 {
                   "$ref": "#/components/schemas/FreeTextInput"
@@ -827,7 +789,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -842,9 +804,6 @@
                   "$ref": "#/components/schemas/Arrow"
                 },
                 {
-                  "$ref": "#/components/schemas/Choice"
-                },
-                {
                   "$ref": "#/components/schemas/FreeTextInput"
                 },
                 {
@@ -852,6 +811,58 @@
                 },
                 {
                   "$ref": "#/components/schemas/SelectableInput"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "Line_Union_Text__Whitespace__Choice__-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Choice"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "Line_Union_Text__Whitespace__Choice__-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Choice"
                 }
               ]
             },
@@ -965,11 +976,11 @@
         ],
         "title": "OpenAiModel"
       },
-      "Page_Union_Text__Whitespace__Arrow__Choice__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -981,11 +992,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Choice__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -997,11 +1008,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
+      "Page_Union_Text__Whitespace__Choice__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Choice__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -1013,11 +1024,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Page_Union_Text__Whitespace__Choice__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Choice__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -1029,11 +1040,11 @@
           "lines"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -1045,11 +1056,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
             },
             "type": "array",
             "title": "Pages"
