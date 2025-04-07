@@ -287,8 +287,8 @@ export interface components {
        * @constant
        */
       format: 'v1'
-      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input']
-      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input']
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Input'] | null
     }
     /** Exercise */
@@ -298,8 +298,8 @@ export interface components {
        * @constant
        */
       format: 'v1'
-      instructions: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output']
-      wording: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output']
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__PassiveSequence__-Output'] | null
     }
     /** FreeTextInput */

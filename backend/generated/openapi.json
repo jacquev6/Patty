@@ -695,10 +695,10 @@
             "const": "v1",
             "title": "Format"
           },
-          "instructions": {
+          "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Input"
           },
-          "wording": {
+          "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Input"
           },
           "references": {
@@ -715,8 +715,8 @@
         "type": "object",
         "required": [
           "format",
-          "instructions",
-          "wording",
+          "instruction",
+          "statement",
           "references"
         ],
         "title": "Exercise"
@@ -728,10 +728,10 @@
             "const": "v1",
             "title": "Format"
           },
-          "instructions": {
+          "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__PassiveSequence__-Output"
           },
-          "wording": {
+          "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__-Output"
           },
           "references": {
@@ -748,8 +748,8 @@
         "type": "object",
         "required": [
           "format",
-          "instructions",
-          "wording",
+          "instruction",
+          "statement",
           "references"
         ],
         "title": "Exercise"

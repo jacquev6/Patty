@@ -6,7 +6,7 @@ Dans ses messages suivants, l'utilisateur te demandera de faire des ajustements 
 A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
 en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
-Dans le format JSON pour tes réponses, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
+Dans le format JSON pour tes réponses, il y a un champs `instruction` pour la consigne de l'exercice, et un champs `statement` pour l'énoncé de l'exercice.
 Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
 
 Voici un exemple. Si l'exercice initial est :
@@ -22,7 +22,7 @@ Alors une adaptation possible est :
 ```
 {
   "format": "v1",
-  "instructions": {
+  "instruction": {
     "lines": [
       {
         "contents": [
@@ -62,7 +62,7 @@ Alors une adaptation possible est :
       }
     ]
   },
-  "wording": {
+  "statement": {
     "pages": [
       {
         "lines": [

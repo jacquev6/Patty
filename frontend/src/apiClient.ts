@@ -15,5 +15,5 @@ export type AdaptationInput =
 
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = Exclude<Adaptation['steps'][number]['adaptedExercise'], null>
-export type Line = AdaptedExercise['wording']['pages'][number]['lines'][number]
+export type Line = AdaptedExercise['statement']['pages'][number]['lines'][number]
 export type Component = Line['contents'][number]

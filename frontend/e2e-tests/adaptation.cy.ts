@@ -116,8 +116,8 @@ describe('The adaptation edition page', () => {
     cy.get('div.user-prompt:contains("Blah.")').should('not.exist')
   })
 
-  const unformattedJson = '{"format":"v1","instructions":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"wording":{"pages":[]},"references":null}'
-  const formattedJson = '{\n  "format": "v1",\n  "instructions": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "wording": {"pages": []},\n  "references": null\n}'
+  const unformattedJson = '{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"statement":{"pages":[]},"references":null}'
+  const formattedJson = '{\n  "format": "v1",\n  "instruction": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "statement": {"pages": []},\n  "references": null\n}'
 
   it('reformats manual edits', () => {
     cy.visit('/adaptation-1')

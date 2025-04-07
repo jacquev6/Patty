@@ -401,10 +401,10 @@
       "title": "Format",
       "type": "string"
     },
-    "instructions": {
+    "instruction": {
       "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
     },
-    "wording": {
+    "statement": {
       "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
     },
     "references": {
@@ -420,8 +420,8 @@
   },
   "required": [
     "format",
-    "instructions",
-    "wording",
+    "instruction",
+    "statement",
     "references"
   ],
   "title": "Exercise",

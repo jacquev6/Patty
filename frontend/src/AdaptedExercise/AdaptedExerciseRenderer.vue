@@ -13,7 +13,7 @@ const props = defineProps<{
 
 provide('adaptedExerciseTeleportBackdropTo', useTemplateRef('container'))
 
-const pagesCount = computed(() => props.adaptedExercise.wording.pages.length)
+const pagesCount = computed(() => props.adaptedExercise.statement.pages.length)
 const page = ref(0)
 
 const model = reactive<Record<number, Record<number, Record<number, string | number>>>>({})
@@ -23,9 +23,9 @@ watch(
     for (const key of Object.keys(model)) {
       delete model[key as unknown as number]
     }
-    for (let pageIndex = 0; pageIndex < adaptedExercise.wording.pages.length; pageIndex++) {
+    for (let pageIndex = 0; pageIndex < adaptedExercise.statement.pages.length; pageIndex++) {
       model[pageIndex] = {}
-      for (let lineIndex = 0; lineIndex < adaptedExercise.wording.pages[pageIndex].lines.length; lineIndex++) {
+      for (let lineIndex = 0; lineIndex < adaptedExercise.statement.pages[pageIndex].lines.length; lineIndex++) {
         model[pageIndex][lineIndex] = {}
       }
     }
@@ -48,15 +48,15 @@ watch(
 <template>
   <PageNavigationControls :pagesCount v-model="page">
     <div ref="container" class="container">
-      <div class="instructions">
-        <p v-for="{ contents } in adaptedExercise.instructions.lines">
+      <div class="instruction">
+        <p v-for="{ contents } in adaptedExercise.instruction.lines">
           <LineComponent :contents :tricolorable="false" />
         </p>
       </div>
-      <div class="wording">
+      <div class="statement">
         <TriColorLines ref="tricolor">
           <template v-if="page < pagesCount">
-            <p v-for="({ contents }, lineIndex) in adaptedExercise.wording.pages[page].lines">
+            <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[page].lines">
               <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
             </p>
           </template>
@@ -79,19 +79,19 @@ div {
   height: 100%;
 }
 
-.instructions {
+.instruction {
   text-align: center;
 }
 
-.instructions :deep(p:first-child) {
+.instruction :deep(p:first-child) {
   margin-top: 11px;
 }
 
-.wording {
+.statement {
   padding: 27px 6px;
 }
 
-.wording :deep(*:first-child) {
+.statement :deep(*:first-child) {
   margin-top: 0;
 }
 </style>

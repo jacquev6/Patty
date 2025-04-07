@@ -247,10 +247,10 @@ describe('MultipleChoicesInput', () => {
       props: {
         adaptedExercise: {
           format: 'v1',
-          instructions: {
+          instruction: {
             lines: [],
           },
-          wording: {
+          statement: {
             pages: [
               {
                 lines: [
@@ -293,10 +293,10 @@ describe('MultipleChoicesInput', () => {
       props: {
         adaptedExercise: {
           format: 'v1',
-          instructions: {
+          instruction: {
             lines: [],
           },
-          wording: {
+          statement: {
             pages: [
               {
                 lines: [

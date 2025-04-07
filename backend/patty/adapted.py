@@ -7,8 +7,8 @@ import pydantic
 
 class Exercise(pydantic.BaseModel):
     format: Literal["v1"]
-    instructions: Page[PassiveComponent]
-    wording: Pages[AnyComponent]
+    instruction: Page[PassiveComponent]
+    statement: Pages[AnyComponent]
     references: Line[PassiveComponent] | None
 
 

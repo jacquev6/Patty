@@ -23,7 +23,7 @@ def make_default_system_prompt() -> str:
 
     exercise = adapted.Exercise(
         format="v1",
-        instructions=adapted.Page[adapted.PassiveComponent](
+        instruction=adapted.Page[adapted.PassiveComponent](
             lines=[
                 adapted.Line[adapted.PassiveComponent](
                     contents=[
@@ -60,7 +60,7 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
-        wording=adapted.Pages[adapted.AnyComponent](
+        statement=adapted.Pages[adapted.AnyComponent](
             pages=[
                 adapted.Page[adapted.AnyComponent](
                     lines=[
@@ -154,7 +154,7 @@ def make_default_system_prompt() -> str:
         A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
         en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
-        Dans le format JSON pour tes réponses, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
+        Dans le format JSON pour tes réponses, il y a un champs `instruction` pour la consigne de l'exercice, et un champs `statement` pour l'énoncé de l'exercice.
         Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
 
         Voici un exemple. Si l'exercice initial est :
@@ -204,7 +204,7 @@ def create_dummy_adaptation() -> Iterable[object]:
         input=input,
         _initial_response={
             "format": "v1",
-            "instructions": {
+            "instruction": {
                 "lines": [
                     {
                         "contents": [
@@ -245,7 +245,7 @@ def create_dummy_adaptation() -> Iterable[object]:
                     }
                 ]
             },
-            "wording": {
+            "statement": {
                 "pages": [
                     {
                         "lines": [
