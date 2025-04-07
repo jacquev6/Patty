@@ -192,7 +192,6 @@ export interface components {
       )[]
       adaptedExercise: components['schemas']['Exercise-Output'] | null
     }
-    /** Arrow */
     Arrow: {
       /**
        * Kind
@@ -210,7 +209,6 @@ export interface components {
       role: 'assistant'
       message: components['schemas']['Exercise-Output']
     }
-    /** Choice */
     Choice: {
       /**
        * Kind
@@ -234,7 +232,6 @@ export interface components {
        */
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
     }
-    /** Exercise */
     'Exercise-Input': {
       /**
        * Format
@@ -245,7 +242,6 @@ export interface components {
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Input'] | null
     }
-    /** Exercise */
     'Exercise-Output': {
       /**
        * Format
@@ -256,7 +252,6 @@ export interface components {
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
       references: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Output'] | null
     }
-    /** FreeTextInput */
     FreeTextInput: {
       /**
        * Kind
@@ -295,12 +290,10 @@ export interface components {
       /** Text */
       text: string
     }
-    /** Line[Union[Text, Whitespace]] */
     Line_Union_Text__Whitespace__: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
     }
-    /** Line[Union[Text, Whitespace, Arrow, Choice]] */
     'Line_Union_Text__Whitespace__Arrow__Choice__-Input': {
       /** Contents */
       contents: (
@@ -310,7 +303,6 @@ export interface components {
         | components['schemas']['Choice']
       )[]
     }
-    /** Line[Union[Text, Whitespace, Arrow, Choice]] */
     'Line_Union_Text__Whitespace__Arrow__Choice__-Output': {
       /** Contents */
       contents: (
@@ -320,7 +312,6 @@ export interface components {
         | components['schemas']['Choice']
       )[]
     }
-    /** Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Contents */
       contents: (
@@ -333,7 +324,6 @@ export interface components {
         | components['schemas']['SelectableInput']
       )[]
     }
-    /** Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Contents */
       contents: (
@@ -360,7 +350,6 @@ export interface components {
        */
       name: 'mistral-large-2411' | 'mistral-small-2501'
     }
-    /** MultipleChoicesInput */
     'MultipleChoicesInput-Input': {
       /**
        * Kind
@@ -372,7 +361,6 @@ export interface components {
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
-    /** MultipleChoicesInput */
     'MultipleChoicesInput-Output': {
       /**
        * Kind
@@ -398,32 +386,26 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
-    /** Page[Union[Text, Whitespace, Arrow, Choice]] */
     'Page_Union_Text__Whitespace__Arrow__Choice__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Input'][]
     }
-    /** Page[Union[Text, Whitespace, Arrow, Choice]] */
     'Page_Union_Text__Whitespace__Arrow__Choice__-Output': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Output'][]
     }
-    /** Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
     }
-    /** Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
     }
-    /** Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Pages */
       pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
     }
-    /** Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
     'Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output': {
       /** Pages */
       pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output'][]
@@ -438,7 +420,6 @@ export interface components {
       strategy: components['schemas']['Strategy']
       input: components['schemas']['Input']
     }
-    /** SelectableInput */
     SelectableInput: {
       /**
        * Kind
@@ -475,7 +456,6 @@ export interface components {
       /** Message */
       message: string
     }
-    /** Text */
     Text: {
       /**
        * Kind
@@ -505,7 +485,6 @@ export interface components {
       /** Error Type */
       type: string
     }
-    /** Whitespace */
     Whitespace: {
       /**
        * Kind

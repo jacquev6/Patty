@@ -491,8 +491,7 @@
         "type": "object",
         "required": [
           "kind"
-        ],
-        "title": "Arrow"
+        ]
       },
       "AssistantMessage_Exercise_": {
         "properties": {
@@ -538,8 +537,7 @@
         "required": [
           "kind",
           "contents"
-        ],
-        "title": "Choice"
+        ]
       },
       "DummyModel": {
         "properties": {
@@ -595,8 +593,7 @@
           "instruction",
           "statement",
           "references"
-        ],
-        "title": "Exercise"
+        ]
       },
       "Exercise-Output": {
         "properties": {
@@ -628,8 +625,7 @@
           "instruction",
           "statement",
           "references"
-        ],
-        "title": "Exercise"
+        ]
       },
       "FreeTextInput": {
         "properties": {
@@ -642,8 +638,7 @@
         "type": "object",
         "required": [
           "kind"
-        ],
-        "title": "FreeTextInput"
+        ]
       },
       "HTTPValidationError": {
         "properties": {
@@ -751,8 +746,7 @@
         "type": "object",
         "required": [
           "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace]]"
+        ]
       },
       "Line_Union_Text__Whitespace__Arrow__Choice__-Input": {
         "properties": {
@@ -780,8 +774,7 @@
         "type": "object",
         "required": [
           "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace, Arrow, Choice]]"
+        ]
       },
       "Line_Union_Text__Whitespace__Arrow__Choice__-Output": {
         "properties": {
@@ -809,8 +802,7 @@
         "type": "object",
         "required": [
           "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace, Arrow, Choice]]"
+        ]
       },
       "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
@@ -847,8 +839,7 @@
         "type": "object",
         "required": [
           "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
@@ -885,8 +876,7 @@
         "type": "object",
         "required": [
           "contents"
-        ],
-        "title": "Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "MistralAiModel": {
         "properties": {
@@ -935,8 +925,7 @@
           "kind",
           "choices",
           "showChoicesByDefault"
-        ],
-        "title": "MultipleChoicesInput"
+        ]
       },
       "MultipleChoicesInput-Output": {
         "properties": {
@@ -962,8 +951,7 @@
           "kind",
           "choices",
           "showChoicesByDefault"
-        ],
-        "title": "MultipleChoicesInput"
+        ]
       },
       "OpenAiModel": {
         "properties": {
@@ -1001,8 +989,7 @@
         "type": "object",
         "required": [
           "lines"
-        ],
-        "title": "Page[Union[Text, Whitespace, Arrow, Choice]]"
+        ]
       },
       "Page_Union_Text__Whitespace__Arrow__Choice__-Output": {
         "properties": {
@@ -1017,8 +1004,7 @@
         "type": "object",
         "required": [
           "lines"
-        ],
-        "title": "Page[Union[Text, Whitespace, Arrow, Choice]]"
+        ]
       },
       "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
@@ -1033,8 +1019,7 @@
         "type": "object",
         "required": [
           "lines"
-        ],
-        "title": "Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
@@ -1049,8 +1034,7 @@
         "type": "object",
         "required": [
           "lines"
-        ],
-        "title": "Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
@@ -1065,8 +1049,7 @@
         "type": "object",
         "required": [
           "pages"
-        ],
-        "title": "Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
         "properties": {
@@ -1081,8 +1064,7 @@
         "type": "object",
         "required": [
           "pages"
-        ],
-        "title": "Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]"
+        ]
       },
       "PostAdaptationAdjustmentRequest": {
         "properties": {
@@ -1154,8 +1136,7 @@
           "contents",
           "colors",
           "boxed"
-        ],
-        "title": "SelectableInput"
+        ]
       },
       "Strategy": {
         "properties": {
@@ -1226,8 +1207,7 @@
         "required": [
           "kind",
           "text"
-        ],
-        "title": "Text"
+        ]
       },
       "UserMessage": {
         "properties": {
@@ -1292,8 +1272,7 @@
         "type": "object",
         "required": [
           "kind"
-        ],
-        "title": "Whitespace"
+        ]
       }
     }
   }

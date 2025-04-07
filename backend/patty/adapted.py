@@ -1,46 +1,47 @@
 from __future__ import annotations
 
-from typing import Literal, TypeVar
+from typing import Literal
 
 import pydantic
 
 
-class Exercise(pydantic.BaseModel):
+class BaseModel(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(json_schema_extra=lambda schema: schema.pop("title"))
+
+
+class Exercise(BaseModel):
     format: Literal["v1"]
     instruction: Page[PassiveComponent]
     statement: Pages[AnyComponent]
     references: Line[PassiveComponent] | None
 
 
-Component = TypeVar("Component")
-
-
-class Pages[Component](pydantic.BaseModel):
+class Pages[Component](BaseModel):
     pages: list[Page[Component]]
 
 
-class Page[Component](pydantic.BaseModel):
+class Page[Component](BaseModel):
     lines: list[Line[Component]]
 
 
-class Line[Component](pydantic.BaseModel):
+class Line[Component](BaseModel):
     contents: list[Component]
 
 
-class Text(pydantic.BaseModel):
+class Text(BaseModel):
     kind: Literal["text"]
     text: str
 
 
-class Whitespace(pydantic.BaseModel):
+class Whitespace(BaseModel):
     kind: Literal["whitespace"]
 
 
-class Arrow(pydantic.BaseModel):
+class Arrow(BaseModel):
     kind: Literal["arrow"]
 
 
-class Choice(pydantic.BaseModel):
+class Choice(BaseModel):
     kind: Literal["choice"]
     contents: list[Text | Whitespace]
 
@@ -49,17 +50,17 @@ PassiveAtomicComponent = Text | Whitespace | Arrow | Choice
 PassiveComponent = PassiveAtomicComponent
 
 
-class FreeTextInput(pydantic.BaseModel):
+class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
-class MultipleChoicesInput(pydantic.BaseModel):
+class MultipleChoicesInput(BaseModel):
     kind: Literal["multipleChoicesInput"]
     choices: list[Line[Text | Whitespace]]
     showChoicesByDefault: bool
 
 
-class SelectableInput(pydantic.BaseModel):
+class SelectableInput(BaseModel):
     kind: Literal["selectableInput"]
     contents: list[Text | Whitespace]
     colors: list[str]

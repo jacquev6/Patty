@@ -11,7 +11,6 @@
       "required": [
         "kind"
       ],
-      "title": "Arrow",
       "type": "object",
       "additionalProperties": false
     },
@@ -41,7 +40,6 @@
         "kind",
         "contents"
       ],
-      "title": "Choice",
       "type": "object",
       "additionalProperties": false
     },
@@ -56,7 +54,6 @@
       "required": [
         "kind"
       ],
-      "title": "FreeTextInput",
       "type": "object",
       "additionalProperties": false
     },
@@ -80,7 +77,6 @@
       "required": [
         "contents"
       ],
-      "title": "Line[Union[Text, Whitespace]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -110,7 +106,6 @@
       "required": [
         "contents"
       ],
-      "title": "Line[Union[Text, Whitespace, Arrow, Choice]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -149,7 +144,6 @@
       "required": [
         "contents"
       ],
-      "title": "Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -177,7 +171,6 @@
         "choices",
         "showChoicesByDefault"
       ],
-      "title": "MultipleChoicesInput",
       "type": "object",
       "additionalProperties": false
     },
@@ -194,7 +187,6 @@
       "required": [
         "lines"
       ],
-      "title": "Page[Union[Text, Whitespace, Arrow, Choice]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -211,7 +203,6 @@
       "required": [
         "lines"
       ],
-      "title": "Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -228,7 +219,6 @@
       "required": [
         "pages"
       ],
-      "title": "Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object",
       "additionalProperties": false
     },
@@ -271,7 +261,6 @@
         "colors",
         "boxed"
       ],
-      "title": "SelectableInput",
       "type": "object",
       "additionalProperties": false
     },
@@ -291,7 +280,6 @@
         "kind",
         "text"
       ],
-      "title": "Text",
       "type": "object",
       "additionalProperties": false
     },
@@ -306,7 +294,6 @@
       "required": [
         "kind"
       ],
-      "title": "Whitespace",
       "type": "object",
       "additionalProperties": false
     }
@@ -340,7 +327,6 @@
     "statement",
     "references"
   ],
-  "title": "Exercise",
   "type": "object",
   "additionalProperties": false
 }
