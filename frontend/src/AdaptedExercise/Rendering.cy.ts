@@ -35,7 +35,6 @@ describe('SequenceComponent', () => {
         italic: false,
         highlighted: null,
         boxed: false,
-        vertical: false,
         tricolorable: false,
       },
     })
@@ -57,7 +56,6 @@ describe('SequenceComponent', () => {
             italic: false,
             highlighted: null,
             boxed: false,
-            vertical: false,
           },
           { kind: 'whitespace' },
           {
@@ -67,7 +65,6 @@ describe('SequenceComponent', () => {
             italic: true,
             highlighted: null,
             boxed: false,
-            vertical: false,
           },
           { kind: 'whitespace' },
           {
@@ -77,7 +74,6 @@ describe('SequenceComponent', () => {
             italic: false,
             highlighted: 'yellow',
             boxed: false,
-            vertical: false,
           },
           { kind: 'whitespace' },
           {
@@ -87,14 +83,12 @@ describe('SequenceComponent', () => {
             italic: false,
             highlighted: null,
             boxed: true,
-            vertical: false,
           },
         ],
         bold: false,
         italic: false,
         highlighted: null,
         boxed: false,
-        vertical: false,
         tricolorable: false,
       },
     })

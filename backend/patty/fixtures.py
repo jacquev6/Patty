@@ -38,7 +38,6 @@ def make_default_system_prompt() -> str:
                             italic=False,
                             highlighted=None,
                             boxed=True,
-                            vertical=False,
                         ),
                         adapted.Whitespace(kind="whitespace"),
                         adapted.Text(kind="text", text="ou"),
@@ -54,7 +53,6 @@ def make_default_system_prompt() -> str:
                             italic=False,
                             highlighted=None,
                             boxed=True,
-                            vertical=False,
                         ),
                     ]
                 )
@@ -223,7 +221,6 @@ def create_dummy_adaptation() -> Iterable[object]:
                                 "italic": False,
                                 "highlighted": None,
                                 "boxed": True,
-                                "vertical": False,
                             },
                             {"kind": "whitespace"},
                             {"kind": "text", "text": "ou"},
@@ -239,7 +236,6 @@ def create_dummy_adaptation() -> Iterable[object]:
                                 "italic": False,
                                 "highlighted": None,
                                 "boxed": True,
-                                "vertical": False,
                             },
                         ]
                     }

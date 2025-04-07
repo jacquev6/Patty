@@ -11,7 +11,6 @@ const props = defineProps<{
   italic: boolean
   highlighted: string | null
   boxed: boolean
-  vertical: boolean
   tricolorable: boolean
 }>()
 

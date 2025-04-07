@@ -24,7 +24,6 @@ const contents = computed(() => ({
   italic: false,
   highlighted: colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1],
   boxed: false,
-  vertical: false,
 }))
 </script>
 

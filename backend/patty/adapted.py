@@ -49,7 +49,6 @@ class PassiveSequence(pydantic.BaseModel):
     italic: bool
     highlighted: str | None
     boxed: bool
-    vertical: bool
 
 
 PassiveAtomicComponent = Text | Whitespace | Arrow
@@ -81,7 +80,6 @@ class AnySequence(pydantic.BaseModel):
     italic: bool
     highlighted: str | None
     boxed: bool
-    vertical: bool
 
 
 AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence

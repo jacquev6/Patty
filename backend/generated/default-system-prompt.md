@@ -39,8 +39,7 @@ Alors une adaptation possible est :
             "bold": false,
             "italic": false,
             "highlighted": null,
-            "boxed": true,
-            "vertical": false
+            "boxed": true
           },
           {"kind": "whitespace"},
           {"kind": "text", "text": "ou"},
@@ -55,8 +54,7 @@ Alors une adaptation possible est :
             "bold": false,
             "italic": false,
             "highlighted": null,
-            "boxed": true,
-            "vertical": false
+            "boxed": true
           }
         ]
       }

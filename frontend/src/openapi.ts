@@ -217,8 +217,6 @@ export interface components {
       highlighted: string | null
       /** Boxed */
       boxed: boolean
-      /** Vertical */
-      vertical: boolean
     }
     /** AnySequence */
     'AnySequence-Output': {
@@ -245,8 +243,6 @@ export interface components {
       highlighted: string | null
       /** Boxed */
       boxed: boolean
-      /** Vertical */
-      vertical: boolean
     }
     /** Arrow */
     Arrow: {
@@ -491,8 +487,6 @@ export interface components {
       highlighted: string | null
       /** Boxed */
       boxed: boolean
-      /** Vertical */
-      vertical: boolean
     }
     /** PassiveSequence */
     'PassiveSequence-Output': {
@@ -516,8 +510,6 @@ export interface components {
       highlighted: string | null
       /** Boxed */
       boxed: boolean
-      /** Vertical */
-      vertical: boolean
     }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {

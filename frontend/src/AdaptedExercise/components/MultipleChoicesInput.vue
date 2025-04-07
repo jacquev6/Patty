@@ -28,7 +28,6 @@ const currentChoice = computed(() => {
       italic: false,
       highlighted: null,
       boxed: false,
-      vertical: false,
     }
   } else {
     return props.choices[model.value]

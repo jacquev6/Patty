@@ -538,10 +538,6 @@
           "boxed": {
             "type": "boolean",
             "title": "Boxed"
-          },
-          "vertical": {
-            "type": "boolean",
-            "title": "Vertical"
           }
         },
         "type": "object",
@@ -551,8 +547,7 @@
           "bold",
           "italic",
           "highlighted",
-          "boxed",
-          "vertical"
+          "boxed"
         ],
         "title": "AnySequence"
       },
@@ -614,10 +609,6 @@
           "boxed": {
             "type": "boolean",
             "title": "Boxed"
-          },
-          "vertical": {
-            "type": "boolean",
-            "title": "Vertical"
           }
         },
         "type": "object",
@@ -627,8 +618,7 @@
           "bold",
           "italic",
           "highlighted",
-          "boxed",
-          "vertical"
+          "boxed"
         ],
         "title": "AnySequence"
       },
@@ -1233,10 +1223,6 @@
           "boxed": {
             "type": "boolean",
             "title": "Boxed"
-          },
-          "vertical": {
-            "type": "boolean",
-            "title": "Vertical"
           }
         },
         "type": "object",
@@ -1246,8 +1232,7 @@
           "bold",
           "italic",
           "highlighted",
-          "boxed",
-          "vertical"
+          "boxed"
         ],
         "title": "PassiveSequence"
       },
@@ -1300,10 +1285,6 @@
           "boxed": {
             "type": "boolean",
             "title": "Boxed"
-          },
-          "vertical": {
-            "type": "boolean",
-            "title": "Vertical"
           }
         },
         "type": "object",
@@ -1313,8 +1294,7 @@
           "bold",
           "italic",
           "highlighted",
-          "boxed",
-          "vertical"
+          "boxed"
         ],
         "title": "PassiveSequence"
       },
