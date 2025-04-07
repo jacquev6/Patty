@@ -55,13 +55,13 @@ class FreeTextInput(pydantic.BaseModel):
 
 class MultipleChoicesInput(pydantic.BaseModel):
     kind: Literal["multipleChoicesInput"]
-    choices: list[Line[PassiveComponent]]
+    choices: list[Line[Text | Whitespace]]
     showChoicesByDefault: bool
 
 
 class SelectableInput(pydantic.BaseModel):
     kind: Literal["selectableInput"]
-    contents: list[PassiveComponent]
+    contents: list[Text | Whitespace]
     colors: list[str]
     boxed: bool
 

@@ -295,6 +295,11 @@ export interface components {
       /** Text */
       text: string
     }
+    /** Line[Union[Text, Whitespace]] */
+    Line_Union_Text__Whitespace__: {
+      /** Contents */
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+    }
     /** Line[Union[Text, Whitespace, Arrow, Choice]] */
     'Line_Union_Text__Whitespace__Arrow__Choice__-Input': {
       /** Contents */
@@ -325,7 +330,7 @@ export interface components {
         | components['schemas']['Choice']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Input']
-        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['SelectableInput']
       )[]
     }
     /** Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]] */
@@ -338,7 +343,7 @@ export interface components {
         | components['schemas']['Choice']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Output']
-        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['SelectableInput']
       )[]
     }
     /** MistralAiModel */
@@ -363,7 +368,7 @@ export interface components {
        */
       kind: 'multipleChoicesInput'
       /** Choices */
-      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Input'][]
+      choices: components['schemas']['Line_Union_Text__Whitespace__'][]
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -375,7 +380,7 @@ export interface components {
        */
       kind: 'multipleChoicesInput'
       /** Choices */
-      choices: components['schemas']['Line_Union_Text__Whitespace__Arrow__Choice__-Output'][]
+      choices: components['schemas']['Line_Union_Text__Whitespace__'][]
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -434,38 +439,14 @@ export interface components {
       input: components['schemas']['Input']
     }
     /** SelectableInput */
-    'SelectableInput-Input': {
+    SelectableInput: {
       /**
        * Kind
        * @constant
        */
       kind: 'selectableInput'
       /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Choice']
-      )[]
-      /** Colors */
-      colors: string[]
-      /** Boxed */
-      boxed: boolean
-    }
-    /** SelectableInput */
-    'SelectableInput-Output': {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'selectableInput'
-      /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Choice']
-      )[]
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
       /** Colors */
       colors: string[]
       /** Boxed */

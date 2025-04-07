@@ -57,6 +57,29 @@
       "title": "FreeTextInput",
       "type": "object"
     },
+    "Line_Union_Text__Whitespace__": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "title": "Line[Union[Text, Whitespace]]",
+      "type": "object"
+    },
     "Line_Union_Text__Whitespace__Arrow__Choice__": {
       "properties": {
         "contents": {
@@ -133,7 +156,7 @@
         },
         "choices": {
           "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__Choice__"
+            "$ref": "#/$defs/Line_Union_Text__Whitespace__"
           },
           "title": "Choices",
           "type": "array"
@@ -214,12 +237,6 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/Choice"
               }
             ]
           },

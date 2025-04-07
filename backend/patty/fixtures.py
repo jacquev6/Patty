@@ -68,13 +68,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.Line[adapted.Text | adapted.Whitespace](
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.Line[adapted.Text | adapted.Whitespace](
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -102,13 +102,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.Line[adapted.Text | adapted.Whitespace](
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.Line[adapted.Text | adapted.Whitespace](
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
