@@ -731,29 +731,6 @@
         ],
         "title": "Input"
       },
-      "Line_Union_Text__Whitespace__": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "contents"
-        ]
-      },
       "Line_Union_Text__Whitespace__Arrow__Choice__-Input": {
         "properties": {
           "contents": {
@@ -920,7 +897,7 @@
           },
           "choices": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+              "$ref": "#/components/schemas/PureTextContainer"
             },
             "type": "array",
             "title": "Choices"
@@ -947,7 +924,7 @@
           },
           "choices": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+              "$ref": "#/components/schemas/PureTextContainer"
             },
             "type": "array",
             "title": "Choices"
@@ -1114,6 +1091,29 @@
           "input"
         ],
         "title": "PostAdaptationRequest"
+      },
+      "PureTextContainer": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "contents"
+        ]
       },
       "SelectableInput": {
         "properties": {

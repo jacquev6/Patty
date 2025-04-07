@@ -57,29 +57,6 @@
       ],
       "type": "object"
     },
-    "Line_Union_Text__Whitespace__": {
-      "additionalProperties": false,
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "type": "object"
-    },
     "Line_Union_Text__Whitespace__Arrow__Choice__": {
       "additionalProperties": false,
       "properties": {
@@ -157,7 +134,7 @@
         },
         "choices": {
           "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__"
+            "$ref": "#/$defs/PureTextContainer"
           },
           "title": "Choices",
           "type": "array"
@@ -219,6 +196,29 @@
       },
       "required": [
         "pages"
+      ],
+      "type": "object"
+    },
+    "PureTextContainer": {
+      "additionalProperties": false,
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
       ],
       "type": "object"
     },

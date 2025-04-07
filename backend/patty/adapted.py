@@ -53,7 +53,8 @@ class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
-PureTextContainer = Line[PureText]
+class PureTextContainer(BaseModel):
+    contents: list[PureText]
 
 
 class MultipleChoicesInput(BaseModel):

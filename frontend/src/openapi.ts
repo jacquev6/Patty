@@ -290,10 +290,6 @@ export interface components {
       /** Text */
       text: string
     }
-    Line_Union_Text__Whitespace__: {
-      /** Contents */
-      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
-    }
     'Line_Union_Text__Whitespace__Arrow__Choice__-Input': {
       /** Contents */
       contents: (
@@ -357,7 +353,7 @@ export interface components {
        */
       kind: 'multipleChoicesInput'
       /** Choices */
-      choices: components['schemas']['Line_Union_Text__Whitespace__'][]
+      choices: components['schemas']['PureTextContainer'][]
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -368,7 +364,7 @@ export interface components {
        */
       kind: 'multipleChoicesInput'
       /** Choices */
-      choices: components['schemas']['Line_Union_Text__Whitespace__'][]
+      choices: components['schemas']['PureTextContainer'][]
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -419,6 +415,10 @@ export interface components {
     PostAdaptationRequest: {
       strategy: components['schemas']['Strategy']
       input: components['schemas']['Input']
+    }
+    PureTextContainer: {
+      /** Contents */
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
     }
     SelectableInput: {
       /**
