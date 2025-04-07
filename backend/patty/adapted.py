@@ -40,19 +40,13 @@ class Arrow(pydantic.BaseModel):
     kind: Literal["arrow"]
 
 
-# @todo Find a way to define a generic Sequence[Component] type. Currently this breaks the polyfactory used in llm.dummy.
-# In the mean time, keep PassiveSequence and AnySequence consistent.
-class PassiveSequence(pydantic.BaseModel):
-    kind: Literal["sequence"]
-    contents: list[PassiveComponent]
-    bold: bool
-    italic: bool
-    highlighted: str | None
-    boxed: bool
+class Choice(pydantic.BaseModel):
+    kind: Literal["choice"]
+    contents: list[Text | Whitespace]
 
 
-PassiveAtomicComponent = Text | Whitespace | Arrow
-PassiveComponent = PassiveAtomicComponent | PassiveSequence
+PassiveAtomicComponent = Text | Whitespace | Arrow | Choice
+PassiveComponent = PassiveAtomicComponent
 
 
 class FreeTextInput(pydantic.BaseModel):
@@ -72,14 +66,4 @@ class SelectableInput(pydantic.BaseModel):
     boxed: bool
 
 
-# Keep AnySequence and PassiveSequence consistent.
-class AnySequence(pydantic.BaseModel):
-    kind: Literal["sequence"]
-    contents: list[AnyComponent]
-    bold: bool
-    italic: bool
-    highlighted: str | None
-    boxed: bool
-
-
-AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput | AnySequence
+AnyComponent = PassiveAtomicComponent | FreeTextInput | MultipleChoicesInput | SelectableInput

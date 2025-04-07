@@ -31,30 +31,22 @@ Alors une adaptation possible est :
           {"kind": "text", "text": "avec"},
           {"kind": "whitespace"},
           {
-            "kind": "sequence",
+            "kind": "choice",
             "contents": [
               {"kind": "text", "text": "l'"},
               {"kind": "text", "text": "herbe"}
-            ],
-            "bold": false,
-            "italic": false,
-            "highlighted": null,
-            "boxed": true
+            ]
           },
           {"kind": "whitespace"},
           {"kind": "text", "text": "ou"},
           {"kind": "whitespace"},
           {
-            "kind": "sequence",
+            "kind": "choice",
             "contents": [
               {"kind": "text", "text": "les"},
               {"kind": "whitespace"},
               {"kind": "text", "text": "chats"}
-            ],
-            "bold": false,
-            "italic": false,
-            "highlighted": null,
-            "boxed": true
+            ]
           }
         ]
       }

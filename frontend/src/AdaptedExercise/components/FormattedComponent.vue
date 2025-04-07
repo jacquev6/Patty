@@ -5,7 +5,7 @@ import type { Component } from '@/apiClient'
 import LineComponent from './LineComponent.vue'
 
 const props = defineProps<{
-  kind: 'sequence'
+  kind: 'formatted'
   contents: Component[]
   bold: boolean
   italic: boolean

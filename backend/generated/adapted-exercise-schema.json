@@ -1,76 +1,5 @@
 {
   "$defs": {
-    "AnySequence": {
-      "properties": {
-        "kind": {
-          "const": "sequence",
-          "title": "Kind",
-          "type": "string"
-        },
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/FreeTextInput"
-              },
-              {
-                "$ref": "#/$defs/MultipleChoicesInput"
-              },
-              {
-                "$ref": "#/$defs/SelectableInput"
-              },
-              {
-                "$ref": "#/$defs/AnySequence"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        },
-        "bold": {
-          "title": "Bold",
-          "type": "boolean"
-        },
-        "italic": {
-          "title": "Italic",
-          "type": "boolean"
-        },
-        "highlighted": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Highlighted"
-        },
-        "boxed": {
-          "title": "Boxed",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "kind",
-        "contents",
-        "bold",
-        "italic",
-        "highlighted",
-        "boxed"
-      ],
-      "title": "AnySequence",
-      "type": "object"
-    },
     "Arrow": {
       "properties": {
         "kind": {
@@ -83,6 +12,35 @@
         "kind"
       ],
       "title": "Arrow",
+      "type": "object"
+    },
+    "Choice": {
+      "properties": {
+        "kind": {
+          "const": "choice",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "contents"
+      ],
+      "title": "Choice",
       "type": "object"
     },
     "FreeTextInput": {
@@ -99,7 +57,7 @@
       "title": "FreeTextInput",
       "type": "object"
     },
-    "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+    "Line_Union_Text__Whitespace__Arrow__Choice__": {
       "properties": {
         "contents": {
           "items": {
@@ -112,6 +70,38 @@
               },
               {
                 "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Choice"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "title": "Line[Union[Text, Whitespace, Arrow, Choice]]",
+      "type": "object"
+    },
+    "Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Choice"
               },
               {
                 "$ref": "#/$defs/FreeTextInput"
@@ -121,9 +111,6 @@
               },
               {
                 "$ref": "#/$defs/SelectableInput"
-              },
-              {
-                "$ref": "#/$defs/AnySequence"
               }
             ]
           },
@@ -134,36 +121,7 @@
       "required": [
         "contents"
       ],
-      "title": "Line[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
-      "type": "object"
-    },
-    "Line_Union_Text__Whitespace__Arrow__PassiveSequence__": {
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/PassiveSequence"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "title": "Line[Union[Text, Whitespace, Arrow, PassiveSequence]]",
+      "title": "Line[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object"
     },
     "MultipleChoicesInput": {
@@ -175,7 +133,7 @@
         },
         "choices": {
           "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__Choice__"
           },
           "title": "Choices",
           "type": "array"
@@ -193,11 +151,11 @@
       "title": "MultipleChoicesInput",
       "type": "object"
     },
-    "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+    "Page_Union_Text__Whitespace__Arrow__Choice__": {
       "properties": {
         "lines": {
           "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__Choice__"
           },
           "title": "Lines",
           "type": "array"
@@ -206,14 +164,14 @@
       "required": [
         "lines"
       ],
-      "title": "Page[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
+      "title": "Page[Union[Text, Whitespace, Arrow, Choice]]",
       "type": "object"
     },
-    "Page_Union_Text__Whitespace__Arrow__PassiveSequence__": {
+    "Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
       "properties": {
         "lines": {
           "items": {
-            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+            "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__"
           },
           "title": "Lines",
           "type": "array"
@@ -222,14 +180,14 @@
       "required": [
         "lines"
       ],
-      "title": "Page[Union[Text, Whitespace, Arrow, PassiveSequence]]",
+      "title": "Page[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object"
     },
-    "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__": {
+    "Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__": {
       "properties": {
         "pages": {
           "items": {
-            "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+            "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__"
           },
           "title": "Pages",
           "type": "array"
@@ -238,69 +196,7 @@
       "required": [
         "pages"
       ],
-      "title": "Pages[Union[Text, Whitespace, Arrow, FreeTextInput, MultipleChoicesInput, SelectableInput, AnySequence]]",
-      "type": "object"
-    },
-    "PassiveSequence": {
-      "properties": {
-        "kind": {
-          "const": "sequence",
-          "title": "Kind",
-          "type": "string"
-        },
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/PassiveSequence"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        },
-        "bold": {
-          "title": "Bold",
-          "type": "boolean"
-        },
-        "italic": {
-          "title": "Italic",
-          "type": "boolean"
-        },
-        "highlighted": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Highlighted"
-        },
-        "boxed": {
-          "title": "Boxed",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "kind",
-        "contents",
-        "bold",
-        "italic",
-        "highlighted",
-        "boxed"
-      ],
-      "title": "PassiveSequence",
+      "title": "Pages[Union[Text, Whitespace, Arrow, Choice, FreeTextInput, MultipleChoicesInput, SelectableInput]]",
       "type": "object"
     },
     "SelectableInput": {
@@ -323,7 +219,7 @@
                 "$ref": "#/$defs/Arrow"
               },
               {
-                "$ref": "#/$defs/PassiveSequence"
+                "$ref": "#/$defs/Choice"
               }
             ]
           },
@@ -392,15 +288,15 @@
       "type": "string"
     },
     "instruction": {
-      "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__PassiveSequence__"
+      "$ref": "#/$defs/Page_Union_Text__Whitespace__Arrow__Choice__"
     },
     "statement": {
-      "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__AnySequence__"
+      "$ref": "#/$defs/Pages_Union_Text__Whitespace__Arrow__Choice__FreeTextInput__MultipleChoicesInput__SelectableInput__"
     },
     "references": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__PassiveSequence__"
+          "$ref": "#/$defs/Line_Union_Text__Whitespace__Arrow__Choice__"
         },
         {
           "type": "null"

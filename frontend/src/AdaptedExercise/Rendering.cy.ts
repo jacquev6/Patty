@@ -1,8 +1,8 @@
-import SequenceComponent from './components/SequenceComponent.vue'
+import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
+import FormattedComponent from './components/FormattedComponent.vue'
+import FreeTextInput from './components/FreeTextInput.vue'
 import MultipleChoicesInput from './components/MultipleChoicesInput.vue'
 import SelectableInput from './components/SelectableInput.vue'
-import FreeTextInput from './components/FreeTextInput.vue'
-import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
 import TriColorLines from './TriColorLines.vue'
 
 const screenshotsCounts: Record<string, number> = {}
@@ -14,15 +14,15 @@ function screenshot() {
   cy.compareSnapshot(name)
 }
 
-describe('SequenceComponent', () => {
+describe('FormattedComponent', () => {
   before(console.clear)
 
   it('renders plain text and whitespace', () => {
     cy.viewport(200, 70)
 
-    cy.mount(SequenceComponent, {
+    cy.mount(FormattedComponent, {
       props: {
-        kind: 'sequence',
+        kind: 'formatted',
         contents: [
           { kind: 'text', text: 'Some' },
           { kind: 'whitespace' },
@@ -42,57 +42,87 @@ describe('SequenceComponent', () => {
     screenshot()
   })
 
-  it('renders formatting', () => {
-    cy.viewport(290, 70)
-
-    cy.mount(SequenceComponent, {
+  it('renders bold', () => {
+    cy.viewport(200, 70)
+    cy.mount(FormattedComponent, {
       props: {
-        kind: 'sequence',
+        kind: 'formatted',
         contents: [
-          {
-            kind: 'sequence',
-            contents: [{ kind: 'text', text: 'bold' }],
-            bold: true,
-            italic: false,
-            highlighted: null,
-            boxed: false,
-          },
+          { kind: 'text', text: 'Bold' },
           { kind: 'whitespace' },
-          {
-            kind: 'sequence',
-            contents: [{ kind: 'text', text: 'italic' }],
-            bold: false,
-            italic: true,
-            highlighted: null,
-            boxed: false,
-          },
-          { kind: 'whitespace' },
-          {
-            kind: 'sequence',
-            contents: [{ kind: 'text', text: 'highlighted' }],
-            bold: false,
-            italic: false,
-            highlighted: 'yellow',
-            boxed: false,
-          },
-          { kind: 'whitespace' },
-          {
-            kind: 'sequence',
-            contents: [{ kind: 'text', text: 'boxed' }],
-            bold: false,
-            italic: false,
-            highlighted: null,
-            boxed: true,
-          },
+          { kind: 'text', text: 'text' },
+          { kind: 'text', text: '.' },
         ],
-        bold: false,
+        bold: true,
         italic: false,
         highlighted: null,
         boxed: false,
         tricolorable: false,
       },
     })
+    screenshot()
+  })
 
+  it('renders italic', () => {
+    cy.viewport(200, 70)
+    cy.mount(FormattedComponent, {
+      props: {
+        kind: 'formatted',
+        contents: [
+          { kind: 'text', text: 'Italic' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'text' },
+          { kind: 'text', text: '.' },
+        ],
+        bold: false,
+        italic: true,
+        highlighted: null,
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    screenshot()
+  })
+
+  it('renders highlighted', () => {
+    cy.viewport(200, 70)
+    cy.mount(FormattedComponent, {
+      props: {
+        kind: 'formatted',
+        contents: [
+          { kind: 'text', text: 'Highlighted' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'text' },
+          { kind: 'text', text: '.' },
+        ],
+        bold: false,
+        italic: false,
+        highlighted: 'yellow',
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    screenshot()
+  })
+
+  it('renders boxed', () => {
+    cy.viewport(200, 70)
+    cy.mount(FormattedComponent, {
+      props: {
+        kind: 'formatted',
+        contents: [
+          { kind: 'text', text: 'Boxed' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'text' },
+          { kind: 'text', text: '.' },
+        ],
+        bold: false,
+        italic: false,
+        highlighted: null,
+        boxed: true,
+        tricolorable: false,
+      },
+    })
     screenshot()
   })
 })

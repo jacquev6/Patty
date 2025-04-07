@@ -22,12 +22,7 @@ const model = defineModel<number | null>({ default: null })
 const currentChoice = computed(() => {
   if (model.value === null) {
     return {
-      kind: 'sequence' as const,
       contents: [{ kind: 'text' as const, text: '....' }],
-      bold: false,
-      italic: false,
-      highlighted: null,
-      boxed: false,
     }
   } else {
     return props.choices[model.value]

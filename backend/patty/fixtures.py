@@ -31,28 +31,20 @@ def make_default_system_prompt() -> str:
                         adapted.Whitespace(kind="whitespace"),
                         adapted.Text(kind="text", text="avec"),
                         adapted.Whitespace(kind="whitespace"),
-                        adapted.PassiveSequence(
-                            kind="sequence",
+                        adapted.Choice(
+                            kind="choice",
                             contents=[adapted.Text(kind="text", text="l'"), adapted.Text(kind="text", text="herbe")],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
                         ),
                         adapted.Whitespace(kind="whitespace"),
                         adapted.Text(kind="text", text="ou"),
                         adapted.Whitespace(kind="whitespace"),
-                        adapted.PassiveSequence(
-                            kind="sequence",
+                        adapted.Choice(
+                            kind="choice",
                             contents=[
                                 adapted.Text(kind="text", text="les"),
                                 adapted.Whitespace(kind="whitespace"),
                                 adapted.Text(kind="text", text="chats"),
                             ],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
                         ),
                     ]
                 )
@@ -211,31 +203,23 @@ def create_dummy_adaptation() -> Iterable[object]:
                             {"kind": "text", "text": "avec"},
                             {"kind": "whitespace"},
                             {
-                                "kind": "sequence",
+                                "kind": "choice",
                                 "contents": [
                                     {"kind": "text", "text": "le"},
                                     {"kind": "whitespace"},
                                     {"kind": "text", "text": "vent"},
                                 ],
-                                "bold": False,
-                                "italic": False,
-                                "highlighted": None,
-                                "boxed": True,
                             },
                             {"kind": "whitespace"},
                             {"kind": "text", "text": "ou"},
                             {"kind": "whitespace"},
                             {
-                                "kind": "sequence",
+                                "kind": "choice",
                                 "contents": [
                                     {"kind": "text", "text": "la"},
                                     {"kind": "whitespace"},
                                     {"kind": "text", "text": "pluie"},
                                 ],
-                                "bold": False,
-                                "italic": False,
-                                "highlighted": None,
-                                "boxed": True,
                             },
                         ]
                     }
