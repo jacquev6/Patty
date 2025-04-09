@@ -7,23 +7,17 @@ ADD frontend/package-lock.json .
 
 RUN npm install
 
-
-FROM frontend-dependencies AS frontend-builder
-
-RUN mkdir /backend
-ADD backend/adapted-exercise-schema.json /backend
+RUN mkdir -p /backend/generated
+ADD backend/generated/adapted-exercise-schema.json /backend/generated
 ADD frontend .
 
+
+FROM frontend-dependencies AS frontend-builder
 ENV PATTY_ENTRY_POINT_NAME=frontend
 RUN npx vite build
 
 
 FROM frontend-dependencies AS adaptation-export-template-builder
-
-RUN mkdir /backend
-ADD backend/adapted-exercise-schema.json /backend
-ADD frontend .
-
 ENV PATTY_ENTRY_POINT_NAME=adaptation-export
 RUN npx vite build
 
