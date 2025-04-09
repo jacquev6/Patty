@@ -374,3 +374,59 @@ describe('TriColorLines', () => {
     screenshot()
   })
 })
+
+describe('AdaptedExerciseRenderer', () => {
+  before(console.clear)
+
+  it('supports exercise with zero pages in statement', () => {
+    cy.viewport(600, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
+          },
+          statement: {
+            pages: [],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+  })
+
+  it('renders the reference', () => {
+    cy.viewport(600, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
+          },
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [{ kind: 'text', text: 'World' }],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: { contents: [{ kind: 'text', text: 'Reference' }] },
+        },
+      },
+    })
+
+    cy.get('div.control').last().click()
+
+    screenshot()
+  })
+})
