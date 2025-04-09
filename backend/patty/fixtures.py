@@ -124,7 +124,7 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
-        references=None,
+        reference=None,
     )
 
     formatter = compact_json.Formatter()
@@ -145,7 +145,7 @@ def make_default_system_prompt() -> str:
         en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
         Dans le format JSON pour tes réponses, il y a un champs `instruction` pour la consigne de l'exercice, et un champs `statement` pour l'énoncé de l'exercice.
-        Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
+        Il y a aussi un champs `reference` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
 
         Voici un exemple. Si l'exercice initial est :
 
@@ -166,11 +166,20 @@ def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
         model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
         system_prompt=make_default_system_prompt(),
-        allow_choice_in_instruction=True,
-        allow_arrow_in_statement=True,
-        allow_free_text_input_in_statement=False,
-        allow_multiple_choices_input_in_statement=True,
-        allow_selectable_input_in_statement=False,
+        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            format="json",
+            formalism="json-schema",
+            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            statement_components=adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                free_text_input=False,
+                multiple_choices_input=True,
+                selectable_input=False,
+            ),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+        ),
     )
 
 
@@ -178,11 +187,20 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
         model=llm.DummyModel(name="dummy-1"),
         system_prompt="Blah blah blah.",
-        allow_choice_in_instruction=True,
-        allow_arrow_in_statement=True,
-        allow_free_text_input_in_statement=True,
-        allow_multiple_choices_input_in_statement=True,
-        allow_selectable_input_in_statement=True,
+        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            format="json",
+            formalism="json-schema",
+            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            statement_components=adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                free_text_input=True,
+                multiple_choices_input=True,
+                selectable_input=True,
+            ),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+        ),
     )
 
 
@@ -206,7 +224,9 @@ def create_dummy_adaptation() -> Iterable[object]:
     yield adaptation.Adaptation(
         strategy=strategy,
         input=input,
-        _initial_response={
+        raw_llm_conversations=[{"initial": "conversation"}],
+        initial_assistant_error=None,
+        _initial_assistant_response={
             "format": "v1",
             "instruction": {
                 "lines": [
@@ -321,7 +341,7 @@ def create_dummy_adaptation() -> Iterable[object]:
                     }
                 ]
             },
-            "references": None,
+            "reference": None,
         },
         _adjustments=[],
         manual_edit=None,

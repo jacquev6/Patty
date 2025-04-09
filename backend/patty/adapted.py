@@ -5,9 +5,11 @@ import typing
 
 import pydantic
 
+from .api_utils import ApiModel
+
 
 class BaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="forbid", json_schema_extra=lambda schema: schema.pop("title"))
+    model_config = pydantic.ConfigDict(extra="ignore", json_schema_extra=lambda schema: schema.pop("title"))
 
 
 class Exercise(BaseModel):
@@ -15,7 +17,7 @@ class Exercise(BaseModel):
     format: Literal["v1"]
     instruction: InstructionPage
     statement: StatementPages
-    references: ReferenceLine | None
+    reference: ReferenceLine | None
 
 
 class Pages[Component](BaseModel):
@@ -55,7 +57,7 @@ class Choice(BaseModel):
 PureText = Text | Whitespace
 
 
-class PureTextComponents(BaseModel):
+class PureTextComponents(ApiModel):
     text: Literal[True]
     whitespace: Literal[True]
 
@@ -162,7 +164,7 @@ def make_exercise_type(
 
     instruction_page_type = make_page_type("Instruction", typing.Union[tuple(instruction_components.gather())])
     statement_pages_type = make_pages_type("Statement", typing.Union[tuple(statement_components.gather())])
-    references_line_type = make_line_type("Reference", typing.Union[tuple(reference_components.gather())])
+    reference_line_type = make_line_type("Reference", typing.Union[tuple(reference_components.gather())])
 
     return typing.cast(
         type[Exercise],
@@ -172,6 +174,6 @@ def make_exercise_type(
             format=(Literal["v1"], pydantic.Field()),
             instruction=(instruction_page_type, pydantic.Field()),
             statement=(statement_pages_type, pydantic.Field()),
-            references=(references_line_type | None, pydantic.Field()),
+            reference=(reference_line_type | None, pydantic.Field()),
         ),
     )

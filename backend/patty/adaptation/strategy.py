@@ -1,14 +1,56 @@
-from typing import Any
+from typing import Literal
 import typing
 
 from sqlalchemy import orm
 import pydantic
 import sqlalchemy as sql
 
-from ..database_utils import OrmBase
-from ..llm import ConcreteModel
 from .. import adapted
 from .. import llm
+from ..any_json import JsonDict
+from ..database_utils import OrmBase
+from ..api_utils import ApiModel
+
+
+class JsonLlmResponseSpecification(ApiModel):
+    format: Literal["json"]
+
+
+class JsonFromTextLlmResponseSpecification(JsonLlmResponseSpecification):
+    formalism: Literal["text"]
+
+    def make_response_format(self) -> llm.JsonFromTextResponseFormat[adapted.Exercise]:
+        return llm.JsonFromTextResponseFormat(response_type=adapted.Exercise)
+
+
+class JsonObjectLlmResponseSpecification(JsonLlmResponseSpecification):
+    formalism: Literal["json-object"]
+
+    def make_response_format(self) -> llm.JsonObjectResponseFormat[adapted.Exercise]:
+        return llm.JsonObjectResponseFormat(response_type=adapted.Exercise)
+
+
+class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
+    formalism: Literal["json-schema"]
+    instruction_components: adapted.InstructionComponents
+    statement_components: adapted.StatementComponents
+    reference_components: adapted.ReferenceComponents
+
+    def make_response_format(self) -> llm.JsonSchemaResponseFormat[adapted.Exercise]:
+        return llm.JsonSchemaResponseFormat(response_type=self.make_response_type())
+
+    def make_response_type(self) -> type[adapted.Exercise]:
+        return adapted.make_exercise_type(
+            self.instruction_components, self.statement_components, self.reference_components
+        )
+
+    def make_response_schema(self) -> JsonDict:
+        return llm.make_schema(self.make_response_type())
+
+
+ConcreteLlmResponseSpecification = (
+    JsonFromTextLlmResponseSpecification | JsonObjectLlmResponseSpecification | JsonSchemaLlmResponseSpecification
+)
 
 
 class Strategy(OrmBase):
@@ -18,40 +60,30 @@ class Strategy(OrmBase):
 
     parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_strategies.id"))
 
-    _model: orm.Mapped[dict[str, typing.Any]] = orm.mapped_column("model", sql.JSON)
+    _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
 
     class _ModelContainer(pydantic.BaseModel):
-        model: ConcreteModel
+        model: llm.ConcreteModel
 
     @property
-    def model(self) -> ConcreteModel:
+    def model(self) -> llm.ConcreteModel:
         return self._ModelContainer(model=self._model).model  # type: ignore[arg-type]
 
     @model.setter
-    def model(self, value: ConcreteModel) -> None:
+    def model(self, value: llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
     system_prompt: orm.Mapped[str]
 
-    allow_choice_in_instruction: orm.Mapped[bool]
-    allow_arrow_in_statement: orm.Mapped[bool]
-    allow_free_text_input_in_statement: orm.Mapped[bool]
-    allow_multiple_choices_input_in_statement: orm.Mapped[bool]
-    allow_selectable_input_in_statement: orm.Mapped[bool]
+    _response_specification: orm.Mapped[JsonDict] = orm.mapped_column("response_specification", sql.JSON)
 
-    def make_llm_response_type(self) -> type[adapted.Exercise]:
-        return adapted.make_exercise_type(
-            adapted.InstructionComponents(text=True, whitespace=True, choice=self.allow_choice_in_instruction),
-            adapted.StatementComponents(
-                text=True,
-                whitespace=True,
-                arrow=self.allow_arrow_in_statement,
-                free_text_input=self.allow_free_text_input_in_statement,
-                multiple_choices_input=self.allow_multiple_choices_input_in_statement,
-                selectable_input=self.allow_selectable_input_in_statement,
-            ),
-            adapted.ReferenceComponents(text=True, whitespace=True),
-        )
+    class _LlmResponseSpecificationContainer(pydantic.BaseModel):
+        specification: ConcreteLlmResponseSpecification
 
-    def make_llm_response_schema(self) -> dict[str, Any]:
-        return llm.make_schema(self.make_llm_response_type())
+    @property
+    def response_specification(self) -> ConcreteLlmResponseSpecification:
+        return self._LlmResponseSpecificationContainer(specification=self._response_specification).specification  # type: ignore[arg-type]
+
+    @response_specification.setter
+    def response_specification(self, value: ConcreteLlmResponseSpecification) -> None:
+        self._response_specification = value.model_dump()

@@ -302,7 +302,7 @@ describe('MultipleChoicesInput', () => {
               },
             ],
           },
-          references: null,
+          reference: null,
         },
       },
     })
@@ -337,7 +337,7 @@ describe('MultipleChoicesInput', () => {
               },
             ],
           },
-          references: null,
+          reference: null,
         },
       },
     })

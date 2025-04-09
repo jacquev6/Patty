@@ -1,14 +1,16 @@
-from typing import Any, Type, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel
 import mistralai.extra
 import openai.lib._parsing._completions
 
+from ..any_json import JsonDict
+
 
 CustomPydanticModel = TypeVar("CustomPydanticModel", bound=BaseModel)
 
 
-def make_schema(model: Type[CustomPydanticModel]) -> dict[str, Any]:
+def make_schema(model: type[CustomPydanticModel]) -> JsonDict:
     mistralai_response_format = mistralai.extra.response_format_from_pydantic_model(model)
     assert isinstance(mistralai_response_format.json_schema, mistralai.models.JSONSchema)
     schema = mistralai_response_format.json_schema.schema_definition

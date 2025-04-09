@@ -47,7 +47,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InputStrategy"
+                  "$ref": "#/components/schemas/ApiStrategy-Output"
                 }
               }
             }
@@ -56,56 +56,19 @@
       }
     },
     "/api/adaptation/llm-response-schema": {
-      "get": {
+      "post": {
         "summary": "Get Llm Response Schema",
-        "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_get",
-        "parameters": [
-          {
-            "name": "allow_choice_in_instruction",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Allow Choice In Instruction"
+        "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonSchemaLlmResponseSpecification"
+              }
             }
           },
-          {
-            "name": "allow_arrow_in_statement",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Allow Arrow In Statement"
-            }
-          },
-          {
-            "name": "allow_free_text_input_in_statement",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Allow Free Text Input In Statement"
-            }
-          },
-          {
-            "name": "allow_multiple_choices_input_in_statement",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Allow Multiple Choices Input In Statement"
-            }
-          },
-          {
-            "name": "allow_selectable_input_in_statement",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Allow Selectable Input In Statement"
-            }
-          }
-        ],
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -113,7 +76,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Get"
+                  "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Post"
                 }
               }
             }
@@ -141,7 +104,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Input"
+                  "$ref": "#/components/schemas/ApiInput"
                 }
               }
             }
@@ -169,7 +132,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -208,7 +171,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -257,7 +220,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -296,7 +259,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -345,7 +308,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -382,7 +345,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputAdaptation"
+                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -452,35 +415,24 @@
   },
   "components": {
     "schemas": {
-      "AdjustmentStep": {
+      "Adjustment": {
         "properties": {
-          "kind": {
-            "type": "string",
-            "const": "adjustment",
-            "title": "Kind"
-          },
           "userPrompt": {
             "type": "string",
             "title": "Userprompt"
           },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
+          "assistantError": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistanterror"
           },
-          "adaptedExercise": {
+          "assistantResponse": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Exercise-Output"
@@ -494,12 +446,198 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "kind",
           "userPrompt",
-          "messages",
-          "adaptedExercise"
+          "assistantError",
+          "assistantResponse"
         ],
-        "title": "AdjustmentStep"
+        "title": "Adjustment"
+      },
+      "ApiAdaptation": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ApiInput"
+          },
+          "rawLlmConversations": {
+            "items": {},
+            "type": "array",
+            "title": "Rawllmconversations"
+          },
+          "initialAssistantError": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initialassistanterror"
+          },
+          "initialAssistantResponse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exercise-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "adjustments": {
+            "items": {
+              "$ref": "#/components/schemas/Adjustment"
+            },
+            "type": "array",
+            "title": "Adjustments"
+          },
+          "manualEdit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exercise-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "input",
+          "rawLlmConversations",
+          "initialAssistantError",
+          "initialAssistantResponse",
+          "adjustments",
+          "manualEdit"
+        ],
+        "title": "ApiAdaptation"
+      },
+      "ApiInput": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "title": "ApiInput"
+      },
+      "ApiStrategy-Input": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "responseSpecification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JsonFromTextLlmResponseSpecification"
+              },
+              {
+                "$ref": "#/components/schemas/JsonObjectLlmResponseSpecification"
+              },
+              {
+                "$ref": "#/components/schemas/JsonSchemaLlmResponseSpecification"
+              }
+            ],
+            "title": "Responsespecification"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "systemPrompt",
+          "responseSpecification"
+        ],
+        "title": "ApiStrategy"
+      },
+      "ApiStrategy-Output": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "responseSpecification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JsonFromTextLlmResponseSpecification"
+              },
+              {
+                "$ref": "#/components/schemas/JsonObjectLlmResponseSpecification"
+              },
+              {
+                "$ref": "#/components/schemas/JsonSchemaLlmResponseSpecification"
+              }
+            ],
+            "title": "Responsespecification"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "systemPrompt",
+          "responseSpecification"
+        ],
+        "title": "ApiStrategy"
       },
       "Arrow": {
         "properties": {
@@ -509,29 +647,10 @@
             "title": "Kind"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"
         ]
-      },
-      "AssistantMessage_Exercise_": {
-        "properties": {
-          "role": {
-            "type": "string",
-            "const": "assistant",
-            "title": "Role",
-            "default": "assistant"
-          },
-          "message": {
-            "$ref": "#/components/schemas/Exercise-Output"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "AssistantMessage[Exercise]"
       },
       "Choice": {
         "properties": {
@@ -555,7 +674,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -599,7 +717,7 @@
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
           },
-          "references": {
+          "reference": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
@@ -610,13 +728,12 @@
             ]
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "format",
           "instruction",
           "statement",
-          "references"
+          "reference"
         ]
       },
       "Exercise-Output": {
@@ -632,7 +749,7 @@
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
           },
-          "references": {
+          "reference": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
@@ -643,13 +760,12 @@
             ]
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "format",
           "instruction",
           "statement",
-          "references"
+          "reference"
         ]
       },
       "FreeTextInput": {
@@ -660,7 +776,6 @@
             "title": "Kind"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"
@@ -679,137 +794,106 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "InitialStep": {
+      "InstructionComponents": {
         "properties": {
-          "kind": {
-            "type": "string",
-            "const": "initial",
-            "title": "Kind"
-          },
-          "systemPrompt": {
-            "type": "string",
-            "title": "Systemprompt"
-          },
-          "inputText": {
-            "type": "string",
-            "title": "Inputtext"
-          },
-          "messages": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/UserMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/SystemMessage"
-                },
-                {
-                  "$ref": "#/components/schemas/AssistantMessage_Exercise_"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Messages"
-          },
-          "adaptedExercise": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "systemPrompt",
-          "inputText",
-          "messages",
-          "adaptedExercise"
-        ],
-        "title": "InitialStep"
-      },
-      "Input": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
           "text": {
-            "type": "string",
+            "type": "boolean",
+            "const": true,
             "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          },
+          "choice": {
+            "type": "boolean",
+            "title": "Choice"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "text"
+          "text",
+          "whitespace",
+          "choice"
         ],
-        "title": "Input"
+        "title": "InstructionComponents"
       },
-      "InputStrategy": {
+      "JsonFromTextLlmResponseSpecification": {
         "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "systemPrompt": {
+          "format": {
             "type": "string",
-            "title": "Systemprompt"
+            "const": "json",
+            "title": "Format"
           },
-          "allowChoiceInInstruction": {
-            "type": "boolean",
-            "title": "Allowchoiceininstruction"
-          },
-          "allowArrowInStatement": {
-            "type": "boolean",
-            "title": "Allowarrowinstatement"
-          },
-          "allowFreeTextInputInStatement": {
-            "type": "boolean",
-            "title": "Allowfreetextinputinstatement"
-          },
-          "allowMultipleChoicesInputInStatement": {
-            "type": "boolean",
-            "title": "Allowmultiplechoicesinputinstatement"
-          },
-          "allowSelectableInputInStatement": {
-            "type": "boolean",
-            "title": "Allowselectableinputinstatement"
+          "formalism": {
+            "type": "string",
+            "const": "text",
+            "title": "Formalism"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "model",
-          "systemPrompt",
-          "allowChoiceInInstruction",
-          "allowArrowInStatement",
-          "allowFreeTextInputInStatement",
-          "allowMultipleChoicesInputInStatement",
-          "allowSelectableInputInStatement"
+          "format",
+          "formalism"
         ],
-        "title": "InputStrategy"
+        "title": "JsonFromTextLlmResponseSpecification"
+      },
+      "JsonObjectLlmResponseSpecification": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "json",
+            "title": "Format"
+          },
+          "formalism": {
+            "type": "string",
+            "const": "json-object",
+            "title": "Formalism"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "format",
+          "formalism"
+        ],
+        "title": "JsonObjectLlmResponseSpecification"
+      },
+      "JsonSchemaLlmResponseSpecification": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "json",
+            "title": "Format"
+          },
+          "formalism": {
+            "type": "string",
+            "const": "json-schema",
+            "title": "Formalism"
+          },
+          "instructionComponents": {
+            "$ref": "#/components/schemas/InstructionComponents"
+          },
+          "statementComponents": {
+            "$ref": "#/components/schemas/StatementComponents"
+          },
+          "referenceComponents": {
+            "$ref": "#/components/schemas/ReferenceComponents"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "format",
+          "formalism",
+          "instructionComponents",
+          "statementComponents",
+          "referenceComponents"
+        ],
+        "title": "JsonSchemaLlmResponseSpecification"
       },
       "Line_Union_Text__Whitespace__": {
         "properties": {
@@ -828,7 +912,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -863,7 +946,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -898,7 +980,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -924,7 +1005,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -950,7 +1030,6 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
@@ -998,7 +1077,6 @@
             "title": "Showchoicesbydefault"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -1025,7 +1103,6 @@
             "title": "Showchoicesbydefault"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -1056,114 +1133,6 @@
         ],
         "title": "OpenAiModel"
       },
-      "OutputAdaptation": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/OutputStrategy"
-          },
-          "steps": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/InitialStep"
-                },
-                {
-                  "$ref": "#/components/schemas/AdjustmentStep"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Steps"
-          },
-          "manualEdit": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "strategy",
-          "steps",
-          "manualEdit"
-        ],
-        "title": "OutputAdaptation"
-      },
-      "OutputStrategy": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "systemPrompt": {
-            "type": "string",
-            "title": "Systemprompt"
-          },
-          "allowChoiceInInstruction": {
-            "type": "boolean",
-            "title": "Allowchoiceininstruction"
-          },
-          "allowArrowInStatement": {
-            "type": "boolean",
-            "title": "Allowarrowinstatement"
-          },
-          "allowFreeTextInputInStatement": {
-            "type": "boolean",
-            "title": "Allowfreetextinputinstatement"
-          },
-          "allowMultipleChoicesInputInStatement": {
-            "type": "boolean",
-            "title": "Allowmultiplechoicesinputinstatement"
-          },
-          "allowSelectableInputInStatement": {
-            "type": "boolean",
-            "title": "Allowselectableinputinstatement"
-          },
-          "llmResponseSchema": {
-            "type": "object",
-            "title": "Llmresponseschema"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "model",
-          "systemPrompt",
-          "allowChoiceInInstruction",
-          "allowArrowInStatement",
-          "allowFreeTextInputInStatement",
-          "allowMultipleChoicesInputInStatement",
-          "allowSelectableInputInStatement",
-          "llmResponseSchema"
-        ],
-        "title": "OutputStrategy"
-      },
       "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "lines": {
@@ -1174,7 +1143,6 @@
             "title": "Lines"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1190,7 +1158,6 @@
             "title": "Lines"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1206,7 +1173,6 @@
             "title": "Lines"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1222,7 +1188,6 @@
             "title": "Lines"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "lines"
@@ -1238,7 +1203,6 @@
             "title": "Pages"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "pages"
@@ -1254,7 +1218,6 @@
             "title": "Pages"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "pages"
@@ -1277,10 +1240,10 @@
       "PostAdaptationRequest": {
         "properties": {
           "strategy": {
-            "$ref": "#/components/schemas/InputStrategy"
+            "$ref": "#/components/schemas/ApiStrategy-Input"
           },
           "input": {
-            "$ref": "#/components/schemas/Input"
+            "$ref": "#/components/schemas/ApiInput"
           }
         },
         "additionalProperties": false,
@@ -1308,11 +1271,31 @@
             "title": "Contents"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "contents"
         ]
+      },
+      "ReferenceComponents": {
+        "properties": {
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "whitespace"
+        ],
+        "title": "ReferenceComponents"
       },
       "SelectableInput": {
         "properties": {
@@ -1347,7 +1330,6 @@
             "title": "Boxed"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
@@ -1356,24 +1338,46 @@
           "boxed"
         ]
       },
-      "SystemMessage": {
+      "StatementComponents": {
         "properties": {
-          "role": {
-            "type": "string",
-            "const": "system",
-            "title": "Role",
-            "default": "system"
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
           },
-          "message": {
-            "type": "string",
-            "title": "Message"
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          },
+          "arrow": {
+            "type": "boolean",
+            "title": "Arrow"
+          },
+          "freeTextInput": {
+            "type": "boolean",
+            "title": "Freetextinput"
+          },
+          "multipleChoicesInput": {
+            "type": "boolean",
+            "title": "Multiplechoicesinput"
+          },
+          "selectableInput": {
+            "type": "boolean",
+            "title": "Selectableinput"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "message"
+          "text",
+          "whitespace",
+          "arrow",
+          "freeTextInput",
+          "multipleChoicesInput",
+          "selectableInput"
         ],
-        "title": "SystemMessage"
+        "title": "StatementComponents"
       },
       "Text": {
         "properties": {
@@ -1387,31 +1391,11 @@
             "title": "Text"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind",
           "text"
         ]
-      },
-      "UserMessage": {
-        "properties": {
-          "role": {
-            "type": "string",
-            "const": "user",
-            "title": "Role",
-            "default": "user"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "UserMessage"
       },
       "ValidationError": {
         "properties": {
@@ -1454,7 +1438,6 @@
             "title": "Kind"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "kind"

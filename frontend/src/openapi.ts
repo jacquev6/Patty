@@ -45,10 +45,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get Llm Response Schema */
-    get: operations['get_llm_response_schema_api_adaptation_llm_response_schema_get']
+    get?: never
     put?: never
-    post?: never
+    /** Get Llm Response Schema */
+    post: operations['get_llm_response_schema_api_adaptation_llm_response_schema_post']
     delete?: never
     options?: never
     head?: never
@@ -179,22 +179,69 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** AdjustmentStep */
-    AdjustmentStep: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adjustment'
+    /** Adjustment */
+    Adjustment: {
       /** Userprompt */
       userPrompt: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_Exercise_']
-      )[]
-      adaptedExercise: components['schemas']['Exercise-Output'] | null
+      /** Assistanterror */
+      assistantError: string | null
+      assistantResponse: components['schemas']['Exercise-Output'] | null
+    }
+    /** ApiAdaptation */
+    ApiAdaptation: {
+      /** Id */
+      id: number
+      strategy: components['schemas']['ApiStrategy-Output']
+      input: components['schemas']['ApiInput']
+      /** Rawllmconversations */
+      rawLlmConversations: unknown[]
+      /** Initialassistanterror */
+      initialAssistantError: string | null
+      initialAssistantResponse: components['schemas']['Exercise-Output'] | null
+      /** Adjustments */
+      adjustments: components['schemas']['Adjustment'][]
+      manualEdit: components['schemas']['Exercise-Output'] | null
+    }
+    /** ApiInput */
+    ApiInput: {
+      /** Id */
+      id: number
+      /** Text */
+      text: string
+    }
+    /** ApiStrategy */
+    'ApiStrategy-Input': {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Systemprompt */
+      systemPrompt: string
+      /** Responsespecification */
+      responseSpecification:
+        | components['schemas']['JsonFromTextLlmResponseSpecification']
+        | components['schemas']['JsonObjectLlmResponseSpecification']
+        | components['schemas']['JsonSchemaLlmResponseSpecification']
+    }
+    /** ApiStrategy */
+    'ApiStrategy-Output': {
+      /** Id */
+      id: number
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Systemprompt */
+      systemPrompt: string
+      /** Responsespecification */
+      responseSpecification:
+        | components['schemas']['JsonFromTextLlmResponseSpecification']
+        | components['schemas']['JsonObjectLlmResponseSpecification']
+        | components['schemas']['JsonSchemaLlmResponseSpecification']
     }
     Arrow: {
       /**
@@ -202,16 +249,6 @@ export interface components {
        * @constant
        */
       kind: 'arrow'
-    }
-    /** AssistantMessage[Exercise] */
-    AssistantMessage_Exercise_: {
-      /**
-       * Role
-       * @default assistant
-       * @constant
-       */
-      role: 'assistant'
-      message: components['schemas']['Exercise-Output']
     }
     Choice: {
       /**
@@ -244,7 +281,7 @@ export interface components {
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Input']
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
-      references: components['schemas']['Line_Union_Text__Whitespace__'] | null
+      reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
     'Exercise-Output': {
       /**
@@ -254,7 +291,7 @@ export interface components {
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Output']
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
-      references: components['schemas']['Line_Union_Text__Whitespace__'] | null
+      reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
     FreeTextInput: {
       /**
@@ -268,53 +305,62 @@ export interface components {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
     }
-    /** InitialStep */
-    InitialStep: {
+    /** InstructionComponents */
+    InstructionComponents: {
       /**
-       * Kind
+       * Text
        * @constant
        */
-      kind: 'initial'
-      /** Systemprompt */
-      systemPrompt: string
-      /** Inputtext */
-      inputText: string
-      /** Messages */
-      messages: (
-        | components['schemas']['UserMessage']
-        | components['schemas']['SystemMessage']
-        | components['schemas']['AssistantMessage_Exercise_']
-      )[]
-      adaptedExercise: components['schemas']['Exercise-Output'] | null
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
+      /** Choice */
+      choice: boolean
     }
-    /** Input */
-    Input: {
-      /** Id */
-      id: number
-      /** Text */
-      text: string
+    /** JsonFromTextLlmResponseSpecification */
+    JsonFromTextLlmResponseSpecification: {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'json'
+      /**
+       * Formalism
+       * @constant
+       */
+      formalism: 'text'
     }
-    /** InputStrategy */
-    InputStrategy: {
-      /** Id */
-      id: number
-      /** Model */
-      model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Systemprompt */
-      systemPrompt: string
-      /** Allowchoiceininstruction */
-      allowChoiceInInstruction: boolean
-      /** Allowarrowinstatement */
-      allowArrowInStatement: boolean
-      /** Allowfreetextinputinstatement */
-      allowFreeTextInputInStatement: boolean
-      /** Allowmultiplechoicesinputinstatement */
-      allowMultipleChoicesInputInStatement: boolean
-      /** Allowselectableinputinstatement */
-      allowSelectableInputInStatement: boolean
+    /** JsonObjectLlmResponseSpecification */
+    JsonObjectLlmResponseSpecification: {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'json'
+      /**
+       * Formalism
+       * @constant
+       */
+      formalism: 'json-object'
+    }
+    /** JsonSchemaLlmResponseSpecification */
+    JsonSchemaLlmResponseSpecification: {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'json'
+      /**
+       * Formalism
+       * @constant
+       */
+      formalism: 'json-schema'
+      instructionComponents: components['schemas']['InstructionComponents']
+      statementComponents: components['schemas']['StatementComponents']
+      referenceComponents: components['schemas']['ReferenceComponents']
     }
     Line_Union_Text__Whitespace__: {
       /** Contents */
@@ -408,39 +454,6 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
-    /** OutputAdaptation */
-    OutputAdaptation: {
-      /** Id */
-      id: number
-      strategy: components['schemas']['OutputStrategy']
-      /** Steps */
-      steps: (components['schemas']['InitialStep'] | components['schemas']['AdjustmentStep'])[]
-      manualEdit: components['schemas']['Exercise-Output'] | null
-    }
-    /** OutputStrategy */
-    OutputStrategy: {
-      /** Id */
-      id: number
-      /** Model */
-      model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Systemprompt */
-      systemPrompt: string
-      /** Allowchoiceininstruction */
-      allowChoiceInInstruction: boolean
-      /** Allowarrowinstatement */
-      allowArrowInStatement: boolean
-      /** Allowfreetextinputinstatement */
-      allowFreeTextInputInStatement: boolean
-      /** Allowmultiplechoicesinputinstatement */
-      allowMultipleChoicesInputInStatement: boolean
-      /** Allowselectableinputinstatement */
-      allowSelectableInputInStatement: boolean
-      /** Llmresponseschema */
-      llmResponseSchema: Record<string, never>
-    }
     'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
@@ -472,12 +485,25 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
-      strategy: components['schemas']['InputStrategy']
-      input: components['schemas']['Input']
+      strategy: components['schemas']['ApiStrategy-Input']
+      input: components['schemas']['ApiInput']
     }
     PureTextContainer: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+    }
+    /** ReferenceComponents */
+    ReferenceComponents: {
+      /**
+       * Text
+       * @constant
+       */
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
     }
     SelectableInput: {
       /**
@@ -492,16 +518,26 @@ export interface components {
       /** Boxed */
       boxed: boolean
     }
-    /** SystemMessage */
-    SystemMessage: {
+    /** StatementComponents */
+    StatementComponents: {
       /**
-       * Role
-       * @default system
+       * Text
        * @constant
        */
-      role: 'system'
-      /** Message */
-      message: string
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
+      /** Arrow */
+      arrow: boolean
+      /** Freetextinput */
+      freeTextInput: boolean
+      /** Multiplechoicesinput */
+      multipleChoicesInput: boolean
+      /** Selectableinput */
+      selectableInput: boolean
     }
     Text: {
       /**
@@ -511,17 +547,6 @@ export interface components {
       kind: 'text'
       /** Text */
       text: string
-    }
-    /** UserMessage */
-    UserMessage: {
-      /**
-       * Role
-       * @default user
-       * @constant
-       */
-      role: 'user'
-      /** Message */
-      message: string
     }
     /** ValidationError */
     ValidationError: {
@@ -587,25 +612,23 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['InputStrategy']
+          'application/json': components['schemas']['ApiStrategy-Output']
         }
       }
     }
   }
-  get_llm_response_schema_api_adaptation_llm_response_schema_get: {
+  get_llm_response_schema_api_adaptation_llm_response_schema_post: {
     parameters: {
-      query: {
-        allow_choice_in_instruction: boolean
-        allow_arrow_in_statement: boolean
-        allow_free_text_input_in_statement: boolean
-        allow_multiple_choices_input_in_statement: boolean
-        allow_selectable_input_in_statement: boolean
-      }
+      query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    requestBody?: never
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['JsonSchemaLlmResponseSpecification']
+      }
+    }
     responses: {
       /** @description Successful Response */
       200: {
@@ -642,7 +665,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['Input']
+          'application/json': components['schemas']['ApiInput']
         }
       }
     }
@@ -666,7 +689,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */
@@ -697,7 +720,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */
@@ -732,7 +755,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */
@@ -763,7 +786,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */
@@ -798,7 +821,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */
@@ -829,7 +852,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['OutputAdaptation']
+          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */

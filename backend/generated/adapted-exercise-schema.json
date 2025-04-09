@@ -1,7 +1,6 @@
 {
   "$defs": {
     "Arrow": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "arrow",
@@ -12,10 +11,10 @@
       "required": [
         "kind"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Choice": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "choice",
@@ -41,10 +40,10 @@
         "kind",
         "contents"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "FreeTextInput": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "freeTextInput",
@@ -55,10 +54,10 @@
       "required": [
         "kind"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "InstructionLine": {
-      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -81,10 +80,10 @@
       "required": [
         "contents"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "InstructionPage": {
-      "additionalProperties": false,
       "properties": {
         "lines": {
           "items": {
@@ -97,10 +96,10 @@
       "required": [
         "lines"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "MultipleChoicesInput": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "multipleChoicesInput",
@@ -124,10 +123,10 @@
         "choices",
         "showChoicesByDefault"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "PureTextContainer": {
-      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -147,10 +146,10 @@
       "required": [
         "contents"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "ReferenceLine": {
-      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -170,10 +169,10 @@
       "required": [
         "contents"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "SelectableInput": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "selectableInput",
@@ -212,10 +211,10 @@
         "colors",
         "boxed"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "StatementLine": {
-      "additionalProperties": false,
       "properties": {
         "contents": {
           "items": {
@@ -247,10 +246,10 @@
       "required": [
         "contents"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "StatementPage": {
-      "additionalProperties": false,
       "properties": {
         "lines": {
           "items": {
@@ -263,10 +262,10 @@
       "required": [
         "lines"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "StatementPages": {
-      "additionalProperties": false,
       "properties": {
         "pages": {
           "items": {
@@ -279,10 +278,10 @@
       "required": [
         "pages"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Text": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "text",
@@ -298,10 +297,10 @@
         "kind",
         "text"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "Whitespace": {
-      "additionalProperties": false,
       "properties": {
         "kind": {
           "const": "whitespace",
@@ -312,10 +311,10 @@
       "required": [
         "kind"
       ],
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     }
   },
-  "additionalProperties": false,
   "properties": {
     "format": {
       "const": "v1",
@@ -328,7 +327,7 @@
     "statement": {
       "$ref": "#/$defs/StatementPages"
     },
-    "references": {
+    "reference": {
       "anyOf": [
         {
           "$ref": "#/$defs/ReferenceLine"
@@ -343,7 +342,8 @@
     "format",
     "instruction",
     "statement",
-    "references"
+    "reference"
   ],
-  "type": "object"
+  "type": "object",
+  "additionalProperties": false
 }

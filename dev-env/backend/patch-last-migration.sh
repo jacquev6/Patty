@@ -7,6 +7,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 set -x
 
+./shell.sh -c 'python -m patty load-fixtures'
+
 rev_id_arg=
 if [ -e ../../backend/patty/migrations/versions/*_dev.py ]
 then

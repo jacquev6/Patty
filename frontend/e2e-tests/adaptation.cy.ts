@@ -116,6 +116,26 @@ describe('The adaptation creation page', () => {
     cy.visit('/new-adaptation')
     cy.get('@input-text').should('have.value', '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\nBlih blih.')
   })
+
+  it('handles non-JSON response from the LLM', () => {
+    cy.get('[data-cy="input-text"]').type('{selectAll}Not JSON', {delay: 0})
+
+    cy.get('button:contains("Submit")').click()
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("Failed to parse JSON response")').should('exist')
+    cy.get('h1:contains("Adapted exercise")').should('not.exist')
+  })
+
+  it('handles invalid JSON response from the LLM', () => {
+    cy.get('[data-cy="input-text"]').type('{selectAll}Invalid JSON', {delay: 0})
+
+    cy.get('button:contains("Submit")').click()
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("Failed to validate JSON response")').should('exist')
+    cy.get('h1:contains("Adapted exercise")').should('not.exist')
+  })
 })
 
 
@@ -189,8 +209,8 @@ describe('The adaptation edition page', () => {
     cy.get('div.user-prompt:contains("Blah.")').should('not.exist')
   })
 
-  const unformattedJson = '{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"statement":{"pages":[]},"references":null}'
-  const formattedJson = '{\n  "format": "v1",\n  "instruction": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "statement": {"pages": []},\n  "references": null\n}'
+  const unformattedJson = '{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"statement":{"pages":[]},"reference":null}'
+  const formattedJson = '{\n  "format": "v1",\n  "instruction": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "statement": {"pages": []},\n  "reference": null\n}'
 
   it('reformats manual edits', () => {
     cy.visit('/adaptation-1')
@@ -226,5 +246,39 @@ describe('The adaptation edition page', () => {
     cy.get('@submit-adjustment').should('not.exist')
     cy.get('[data-cy="reset-manual-edition"]').click()
     cy.get('@submit-adjustment').should('exist')
+  })
+
+  it('handles non-JSON response from the LLM and rewinds it', () => {
+    cy.visit('/adaptation-1')
+
+    cy.get('[data-cy="user-prompt"]').type('{selectAll}Not JSON', {delay: 0})
+
+    cy.get('[data-cy="submit-adjustment"]').click()
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("Failed to parse JSON response")').should('exist')
+    cy.get('h1:contains("Adapted exercise")').should('not.exist')
+
+    cy.get('div:contains("❌")').last().click()
+
+    cy.get('h1:contains("Error with the LLM")').should('not.exist')
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+  })
+
+  it('handles invalid JSON response from the LLM', () => {
+    cy.visit('/adaptation-1')
+
+    cy.get('[data-cy="user-prompt"]').type('{selectAll}Invalid JSON', {delay: 0})
+
+    cy.get('[data-cy="submit-adjustment"]').click()
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("Failed to validate JSON response")').should('exist')
+    cy.get('h1:contains("Adapted exercise")').should('not.exist')
+
+    cy.get('div:contains("❌")').last().click()
+
+    cy.get('h1:contains("Error with the LLM")').should('not.exist')
+    cy.get('h1:contains("Adapted exercise")').should('exist')
   })
 })
