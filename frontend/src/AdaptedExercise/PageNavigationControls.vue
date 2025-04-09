@@ -1,7 +1,11 @@
 <script setup lang="ts">
-defineProps<{
+import assert from '@/assert'
+
+const props = defineProps<{
   pagesCount: number
 }>()
+
+assert(props.pagesCount > 0)
 
 const model = defineModel<number>({ required: true })
 </script>

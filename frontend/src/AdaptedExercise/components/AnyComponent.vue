@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { Component } from '@/apiClient'
 import ArrowComponent from './ArrowComponent.vue'
+import FormattedComponent from './FormattedComponent.vue'
 import FreeTextInput from './FreeTextInput.vue'
 import MultipleChoicesInput from './MultipleChoicesInput.vue'
 import SelectableInput from './SelectableInput.vue'
-import SequenceComponent from './SequenceComponent.vue'
 import TextComponent from './TextComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
 import { type ModelRef } from 'vue'
@@ -39,7 +39,16 @@ const modelAsNumber = model as ModelRef<number>
     v-model="modelAsNumber"
     :tricolorable
   />
-  <SequenceComponent v-else-if="component.kind === 'sequence'" v-bind="component" :tricolorable />
+  <FormattedComponent
+    v-else-if="component.kind === 'choice'"
+    kind="formatted"
+    :bold="false"
+    :boxed="true"
+    :contents="component.contents"
+    :highlighted="null"
+    :italic="false"
+    :tricolorable
+  />
   <TextComponent v-else-if="component.kind === 'text'" v-bind="component" :tricolorable />
   <WhitespaceComponent v-else-if="component.kind === 'whitespace'" v-bind="component" />
   <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>

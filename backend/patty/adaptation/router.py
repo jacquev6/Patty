@@ -1,16 +1,16 @@
-import json
 import os
 from typing import Literal
 import fastapi
 
 from .. import database_utils
 from .. import llm
-from ..adapted import ProseAndExercise, Exercise
+from ..adapted import Exercise
+from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
 from ..api_utils import ApiModel
 from .adaptation import Adaptation as DbAdaptation, Adjustment
 from .input import Input as DbInput
-from .strategy import Strategy as DbStrategy
+from .strategy import Strategy as DbStrategy, ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 
 
 __all__ = ["router"]
@@ -18,56 +18,45 @@ __all__ = ["router"]
 router = fastapi.APIRouter()
 
 
-LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[ProseAndExercise]
+LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
 
 
-class InitialStep(ApiModel):
-    kind: Literal["initial"]
-    system_prompt: str
-    input_text: str
-    messages: list[LlmMessage]
-    assistant_prose: str
-    adapted_exercise: Exercise | None
-
-
-class AdjustmentStep(ApiModel):
-    kind: Literal["adjustment"]
-    userPrompt: str
-    messages: list[LlmMessage]
-    assistant_prose: str
-    adapted_exercise: Exercise | None
-
-
-Step = InitialStep | AdjustmentStep
-
-
-class Adaptation(ApiModel):
-    id: int
-    # Abstract type `llm.AbstractModel` would be fine for backend functionality, but this type appears in the API, so it must be concrete.
-    llm_model: llm.ConcreteModel
-    steps: list[Step]
-    manual_edit: Exercise | None
-
-
-class Strategy(ApiModel):
+class ApiStrategy(ApiModel):
     id: int
     model: llm.ConcreteModel
     system_prompt: str
+    response_specification: ConcreteLlmResponseSpecification
 
 
-@router.get("/latest-strategy", response_model=Strategy)
+class ApiInput(ApiModel):
+    id: int
+    text: str
+
+
+class ApiAdaptation(ApiModel):
+    id: int
+    strategy: ApiStrategy
+    input: ApiInput
+    raw_llm_conversations: JsonList
+    initial_assistant_error: str | None
+    initial_assistant_response: Exercise | None
+    adjustments: list[Adjustment]
+    manual_edit: Exercise | None
+
+
+@router.get("/latest-strategy", response_model=ApiStrategy)
 def get_latest_strategy(session: database_utils.SessionDependable) -> DbStrategy:
     strategy = session.query(DbStrategy).order_by(-DbStrategy.id).first()
     assert strategy is not None
     return strategy
 
 
-class Input(ApiModel):
-    id: int
-    text: str
+@router.post("/llm-response-schema")
+def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
+    return response_specification.make_response_schema()
 
 
-@router.get("/latest-input", response_model=Input)
+@router.get("/latest-input", response_model=ApiInput)
 def get_latest_input(session: database_utils.SessionDependable) -> DbInput:
     input = session.query(DbInput).order_by(-DbInput.id).first()
     assert input is not None
@@ -75,16 +64,25 @@ def get_latest_input(session: database_utils.SessionDependable) -> DbInput:
 
 
 class PostAdaptationRequest(ApiModel):
-    strategy: Strategy
-    input: Input
+    strategy: ApiStrategy
+    input: ApiInput
 
 
 @router.post("")
-async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> Adaptation:
+async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> ApiAdaptation:
     strategy = session.get(DbStrategy, req.strategy.id)
     assert strategy is not None
-    if strategy.system_prompt != req.strategy.system_prompt or strategy.model != req.strategy.model:
-        strategy = DbStrategy(parent_id=strategy.id, model=req.strategy.model, system_prompt=req.strategy.system_prompt)
+    if (
+        strategy.system_prompt != req.strategy.system_prompt
+        or strategy.model != req.strategy.model
+        or strategy.response_specification != req.strategy.response_specification
+    ):
+        strategy = DbStrategy(
+            parent_id=strategy.id,
+            model=req.strategy.model,
+            system_prompt=req.strategy.system_prompt,
+            response_specification=req.strategy.response_specification,
+        )
         session.add(strategy)
 
     input = session.get(DbInput, req.input.id)
@@ -96,27 +94,44 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
     session.flush()
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(message=strategy.system_prompt),
-        llm.UserMessage(message=input.text),
+        llm.SystemMessage(content=strategy.system_prompt),
+        llm.UserMessage(content=input.text),
     ]
 
-    response = await strategy.model.complete(messages, ProseAndExercise)
-    messages.append(response)
+    try:
+        response = await strategy.model.complete(messages, strategy.response_specification.make_response_format())
+    except llm.LlmException as error:
+        db_adaptation = DbAdaptation(
+            strategy_id=strategy.id,
+            input_id=input.id,
+            raw_llm_conversations=[error.raw_conversation],
+            initial_assistant_error=error.args[0],
+            initial_assistant_response=None,
+            adjustments=[],
+        )
+    else:
+        db_adaptation = DbAdaptation(
+            strategy_id=strategy.id,
+            input_id=input.id,
+            raw_llm_conversations=[response.raw_conversation],
+            initial_assistant_error=None,
+            initial_assistant_response=response.message.content,
+            adjustments=[],
+        )
 
-    db_adaptation = DbAdaptation(
-        strategy_id=strategy.id, input_id=input.id, initial_response=response.message, adjustments=[]
-    )
     session.add(db_adaptation)
     session.flush()
 
-    return make_output_adaptation(db_adaptation)
+    return make_api_adaptation(db_adaptation)
 
 
 @router.get("/{id}")
-async def get_adaptation(id: str, session: database_utils.SessionDependable) -> Adaptation:
+async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
-    return make_output_adaptation(db_adaptation)
+    if db_adaptation is None:
+        raise fastapi.HTTPException(status_code=404, detail="Adaptation not found")
+    else:
+        return make_api_adaptation(db_adaptation)
 
 
 class PostAdaptationAdjustmentRequest(ApiModel):
@@ -126,90 +141,106 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 @router.post("/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
-) -> Adaptation:
+) -> ApiAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
-    assert db_adaptation.initial_response is not None
+    assert db_adaptation.initial_assistant_error is None
+    assert db_adaptation.initial_assistant_response is not None
 
-    previous_messages: list[LlmMessage] = [
-        llm.SystemMessage(message=db_adaptation.strategy.system_prompt),
-        llm.UserMessage(message=db_adaptation.input.text),
-        llm.AssistantMessage[ProseAndExercise](message=db_adaptation.initial_response),
+    messages: list[LlmMessage] = [
+        llm.SystemMessage(content=db_adaptation.strategy.system_prompt),
+        llm.UserMessage(content=db_adaptation.input.text),
+        llm.AssistantMessage[Exercise](content=db_adaptation.initial_assistant_response),
     ]
     for adjustment in db_adaptation.adjustments:
-        previous_messages.append(llm.UserMessage(message=adjustment.user_prompt))
-        previous_messages.append(llm.AssistantMessage[ProseAndExercise](message=adjustment.assistant_response))
-    step_messages: list[LlmMessage] = [llm.UserMessage(message=req.adjustment)]
+        assert adjustment.assistant_error is None
+        assert adjustment.assistant_response is not None
+        messages.append(llm.UserMessage(content=adjustment.user_prompt))
+        messages.append(llm.AssistantMessage[Exercise](content=adjustment.assistant_response))
+    messages.append(llm.UserMessage(content=req.adjustment))
 
-    response = await db_adaptation.strategy.model.complete(previous_messages + step_messages, ProseAndExercise)
+    try:
+        response = await db_adaptation.strategy.model.complete(
+            messages, db_adaptation.strategy.response_specification.make_response_format()
+        )
+    except llm.LlmException as error:
+        raw_conversation = error.raw_conversation
+        adjustment = Adjustment(user_prompt=req.adjustment, assistant_error=error.args[0], assistant_response=None)
+    else:
+        raw_conversation = response.raw_conversation
+        adjustment = Adjustment(
+            user_prompt=req.adjustment,
+            assistant_error=None,
+            assistant_response=response.message.content.model_dump(),  # type: ignore[arg-type]
+        )
+
+    raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
+    raw_llm_conversations.append(raw_conversation)
+    db_adaptation.raw_llm_conversations = raw_llm_conversations
 
     adjustments = list(db_adaptation.adjustments)
-    adjustments.append(Adjustment(user_prompt=req.adjustment, assistant_response=response.message))
+    adjustments.append(adjustment)
     db_adaptation.adjustments = adjustments
 
-    return make_output_adaptation(db_adaptation)
+    return make_api_adaptation(db_adaptation)
 
 
 @router.delete("/{id}/last-step")
-def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> Adaptation:
+def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
+
+    raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
+    raw_llm_conversations.pop()
+    db_adaptation.raw_llm_conversations = raw_llm_conversations
+
     adjustments = list(db_adaptation.adjustments)
     adjustments.pop()
     db_adaptation.adjustments = adjustments
-    return make_output_adaptation(db_adaptation)
+
+    return make_api_adaptation(db_adaptation)
 
 
 @router.put("/{id}/manual-edit")
-def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> Adaptation:
+def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     db_adaptation.manual_edit = req
-    return make_output_adaptation(db_adaptation)
+    return make_api_adaptation(db_adaptation)
 
 
 @router.delete("/{id}/manual-edit")
-def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> Adaptation:
+def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
     db_adaptation.manual_edit = None
-    return make_output_adaptation(db_adaptation)
+    return make_api_adaptation(db_adaptation)
 
 
-def make_output_adaptation(db_adaptation: DbAdaptation) -> Adaptation:
-    assert db_adaptation.initial_response is not None
-    return Adaptation(
-        id=db_adaptation.id,
-        llm_model=db_adaptation.strategy.model,
-        steps=[
-            InitialStep(
-                kind="initial",
-                system_prompt=db_adaptation.strategy.system_prompt,
-                input_text=db_adaptation.input.text,
-                messages=[
-                    llm.SystemMessage(message=db_adaptation.strategy.system_prompt),
-                    llm.UserMessage(message=db_adaptation.input.text),
-                    llm.AssistantMessage[ProseAndExercise](message=db_adaptation.initial_response),
-                ],
-                assistant_prose=db_adaptation.initial_response.prose,
-                adapted_exercise=db_adaptation.initial_response.structured,
-            )
-        ]
-        + [
-            AdjustmentStep(
-                kind="adjustment",
-                userPrompt=adjustment.user_prompt,
-                messages=[
-                    llm.UserMessage(message=adjustment.user_prompt),
-                    llm.AssistantMessage[ProseAndExercise](message=adjustment.assistant_response),
-                ],
-                assistant_prose=adjustment.assistant_response.prose,
-                adapted_exercise=adjustment.assistant_response.structured,
-            )
-            for adjustment in db_adaptation.adjustments
-        ],
-        manual_edit=db_adaptation.manual_edit,
+def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
+    return ApiAdaptation(
+        id=adaptation.id,
+        strategy=make_api_strategy(adaptation.strategy),
+        input=make_api_input(adaptation.input),
+        raw_llm_conversations=adaptation.raw_llm_conversations,
+        initial_assistant_error=adaptation.initial_assistant_error,
+        initial_assistant_response=adaptation.initial_assistant_response,
+        adjustments=adaptation.adjustments,
+        manual_edit=adaptation.manual_edit,
     )
+
+
+def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
+    return ApiStrategy(
+        id=strategy.id,
+        model=strategy.model,
+        system_prompt=strategy.system_prompt,
+        response_specification=strategy.response_specification,
+    )
+
+
+def make_api_input(input: DbInput) -> ApiInput:
+    return ApiInput(id=input.id, text=input.text)
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -223,14 +254,17 @@ def export_adaptation(
 ) -> fastapi.responses.HTMLResponse:
     db_adaptation = session.get(DbAdaptation, id)
     assert db_adaptation is not None
-    assert db_adaptation.initial_response is not None
-    assert db_adaptation.initial_response.structured is not None
+    assert db_adaptation.initial_assistant_error is None
+    assert db_adaptation.initial_assistant_response is not None
 
     if db_adaptation.manual_edit is None:
-        exercise = db_adaptation.initial_response.structured
-        for adjustment in db_adaptation.adjustments:
-            if adjustment.assistant_response.structured is not None:
-                exercise = adjustment.assistant_response.structured
+        if len(db_adaptation.adjustments) == 0:
+            exercise = db_adaptation.initial_assistant_response
+        else:
+            last_adjustment = db_adaptation.adjustments[-1]
+            assert last_adjustment.assistant_error is None
+            assert last_adjustment.assistant_response is not None
+            exercise = last_adjustment.assistant_response
     else:
         exercise = db_adaptation.manual_edit
 

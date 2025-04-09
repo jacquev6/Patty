@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
+import { useMagicKeys } from '@vueuse/core'
 
 import { client, type Adaptation, type AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
@@ -10,11 +11,10 @@ import TextArea from './TextArea.vue'
 import assert from './assert'
 import MarkDown from './MarkDown.vue'
 import BusyBox from './BusyBox.vue'
-import adaptedExerciseSchema from '../../backend/adapted-exercise-schema.json'
+import adaptedExerciseSchema from '../../backend/generated/adapted-exercise-schema.json'
 import MiniatureScreen from './MiniatureScreen.vue'
 import WhiteSpace from './WhiteSpace.vue'
-import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
-import { useMagicKeys } from '@vueuse/core'
+import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 
 const props = defineProps<{
   id: string
@@ -23,23 +23,19 @@ const props = defineProps<{
 const ajv = new Ajv()
 const validateAdaptedExercise = ajv.compile(adaptedExerciseSchema)
 
+const found = ref<boolean | null>(null)
 const adaptation = ref<Adaptation | null>(null)
 
 onMounted(async () => {
   const response = await client.GET(`/api/adaptation/{id}`, { params: { path: { id: props.id } } })
 
-  if (response.data !== undefined) {
-    adaptation.value = response.data
-  }
-})
-
-const systemPrompt = computed(() => {
-  if (adaptation.value === null) {
-    return ''
+  if (response.response.status === 404) {
+    found.value = false
+    adaptation.value = null
   } else {
-    assert(adaptation.value.steps.length > 0)
-    assert(adaptation.value.steps[0].kind === 'initial')
-    return adaptation.value.steps[0].systemPrompt
+    found.value = true
+    assert(response.data !== undefined)
+    adaptation.value = response.data
   }
 })
 
@@ -47,9 +43,20 @@ const inputText = computed(() => {
   if (adaptation.value === null) {
     return ''
   } else {
-    assert(adaptation.value.steps.length > 0)
-    assert(adaptation.value.steps[0].kind === 'initial')
-    return adaptation.value.steps[0].inputText
+    return adaptation.value.input.text
+  }
+})
+
+const llmError = computed(() => {
+  if (adaptation.value === null) {
+    return null
+  } else {
+    if (adaptation.value.adjustments.length === 0) {
+      return adaptation.value.initialAssistantError
+    } else {
+      const lastAdjustment = adaptation.value.adjustments[adaptation.value.adjustments.length - 1]
+      return lastAdjustment.assistantError
+    }
   }
 })
 
@@ -57,8 +64,16 @@ const llmAdaptedExercise = computed(() => {
   if (adaptation.value === null) {
     return null
   } else {
-    assert(adaptation.value.steps.length > 0)
-    return adaptation.value.steps.map((step) => step.adaptedExercise).reduce((old, now) => now ?? old) ?? null
+    if (adaptation.value.manualEdit === null) {
+      if (adaptation.value.adjustments.length === 0) {
+        return adaptation.value.initialAssistantResponse
+      } else {
+        const lastAdjustment = adaptation.value.adjustments[adaptation.value.adjustments.length - 1]
+        return lastAdjustment.assistantResponse
+      }
+    } else {
+      return adaptation.value.manualEdit
+    }
   }
 })
 
@@ -195,15 +210,10 @@ watch(Escape, () => {
 </script>
 
 <template>
-  <div v-if="adaptation !== null" class="container">
+  <div v-if="adaptation !== null">
     <ResizableColumns :columns="3">
       <template #col-1>
-        <h1>LLM model</h1>
-        <p>{{ adaptation.llmModel.provider }}: {{ adaptation.llmModel.name }}</p>
-        <h1>System prompt</h1>
-        <MarkDown :markdown="systemPrompt" />
-        <h1>Response JSON schema</h1>
-        <AdaptedExerciseJsonSchemaDetails />
+        <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="adaptation.strategy" />
       </template>
       <template #col-2>
         <h1>Input text</h1>
@@ -211,12 +221,12 @@ watch(Escape, () => {
         <h1>Adjustments</h1>
         <p><button @click="showRaw = true">View the raw conversation with the LLM</button></p>
         <BusyBox :busy>
-          <template v-for="(step, stepIndex) in adaptation.steps">
-            <div v-if="step.kind === 'adjustment'" style="display: flex" class="user-prompt">
+          <template v-for="(step, stepIndex) in adaptation.adjustments">
+            <div style="display: flex" class="user-prompt">
               <MarkDown :markdown="step.userPrompt" style="flex-grow: 1" />
               <!-- @todo Add a button letting the user display the adaptation returned during that step (only if an adaptation was returned) -->
               <div
-                v-if="stepIndex === adaptation.steps.length - 1"
+                v-if="stepIndex === adaptation.adjustments.length - 1"
                 title="Rewind the chat: delete this prompt and its effects"
                 style="cursor: pointer"
                 @click="rewindLastStep"
@@ -224,65 +234,77 @@ watch(Escape, () => {
                 ❌
               </div>
             </div>
-            <MarkDown class="assistant-prose" :markdown="step.assistantProse" />
           </template>
-          <div v-if="manualAdaptedExercise === null" class="user-prompt">
-            <TextArea v-model="adjustment"></TextArea>
-            <p><button @click="submitAdjustment" :disabled>Submit</button></p>
+          <div v-if="llmError === null && manualAdaptedExercise === null" class="user-prompt">
+            <TextArea data-cy="user-prompt" v-model="adjustment"></TextArea>
+            <p><button data-cy="submit-adjustment" @click="submitAdjustment" :disabled>Submit</button></p>
           </div>
         </BusyBox>
       </template>
       <template #col-3>
-        <h1>Adapted exercise</h1>
-        <template v-if="adaptedExercise !== null">
-          <MiniatureScreen :fullScreen>
-            <AdaptedExerciseRenderer :adaptedExercise />
-            <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
-          </MiniatureScreen>
+        <template v-if="llmError !== null">
+          <h1>Error with the LLM</h1>
           <p>
-            <button @click="fullScreen = true">Full screen</button>
-            <WhiteSpace />
-            <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+            {{ llmError }}. See the raw conversation to investigate (and/or give the URL of this page to Vincent
+            Jacques).
           </p>
         </template>
-        <template v-else-if="manualAdaptedExercise !== null">
-          <template v-if="manualAdaptedExercise.syntaxError !== null">
-            <h2>Syntax error</h2>
-            {{ manualAdaptedExercise?.syntaxError.message }}
+        <template v-if="llmAdaptedExercise !== null">
+          <h1>Adapted exercise</h1>
+          <template v-if="adaptedExercise !== null">
+            <MiniatureScreen :fullScreen>
+              <AdaptedExerciseRenderer :adaptedExercise />
+              <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
+                Exit full screen (Esc)
+              </button>
+            </MiniatureScreen>
+            <p>
+              <button @click="fullScreen = true">Full screen</button>
+              <WhiteSpace />
+              <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+            </p>
           </template>
-          <template v-else>
-            <h2>Validation errors</h2>
-            <ul>
-              <li v-for="error in manualAdaptedExercise.validationErrors">
-                {{ error.instancePath }}: {{ error.message }}
-                {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
-              </li>
-            </ul>
+          <template v-else-if="manualAdaptedExercise !== null">
+            <template v-if="manualAdaptedExercise.syntaxError !== null">
+              <h2>Syntax error</h2>
+              {{ manualAdaptedExercise?.syntaxError.message }}
+            </template>
+            <template v-else>
+              <h2>Validation errors</h2>
+              <ul>
+                <li v-for="error in manualAdaptedExercise.validationErrors">
+                  {{ error.instancePath }}: {{ error.message }}
+                  {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
+                </li>
+              </ul>
+            </template>
           </template>
+          <h1>Manual edition</h1>
+          <TextArea
+            data-cy="manual-edition"
+            v-model="manualAdaptedExerciseProxy"
+            style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
+          ></TextArea>
+          <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
+          <p>
+            <button
+              data-cy="reset-manual-edition"
+              @click="resetManualEdit"
+              :disabled="manualAdaptedExercise === null"
+              title="Forget all manual changes; go back to the last version from the LLM"
+            >
+              Reset
+            </button>
+            <WhiteSpace />
+            <button
+              data-cy="reformat-manual-edition"
+              @click="reformatManualAdaptedExercise"
+              :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
+            >
+              Reformat
+            </button>
+          </p>
         </template>
-        <h1>Manual edition</h1>
-        <TextArea
-          v-model="manualAdaptedExerciseProxy"
-          style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
-        ></TextArea>
-        <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
-        <p>
-          <button
-            @click="resetManualEdit"
-            :disabled="manualAdaptedExercise === null"
-            title="Forget all manual changes; go back to the last version from the LLM"
-          >
-            Reset
-          </button>
-          <WhiteSpace />
-          <button
-            @click="reformatManualAdaptedExercise"
-            :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
-          >
-            Reformat
-          </button>
-          <!-- @todo Save the manual changes to the API -->
-        </p>
       </template>
     </ResizableColumns>
     <div v-if="showRaw" class="overlay">
@@ -290,20 +312,13 @@ watch(Escape, () => {
         <div>
           <h1>Raw conversation with the LLM</h1>
           <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
-          <template v-for="(step, stepIndex) in adaptation.steps">
-            <template v-if="step.kind === 'initial'">
-              <h2>Initial step</h2>
-              <pre>{{ jsonStringify(step.messages, { maxLength: 120 }) }}</pre>
-            </template>
-            <template v-else-if="step.kind === 'adjustment'">
-              <h2>Adjustment step {{ stepIndex }}</h2>
-              <pre>{{ jsonStringify(step.messages, { maxLength: 120 }) }}</pre>
-            </template>
-            <template v-else>{{ ((step: never) => step)(step) }}</template>
-          </template>
+          <pre>{{ jsonStringify(adaptation.rawLlmConversations, { maxLength: 120 }) }}</pre>
         </div>
       </div>
     </div>
+  </div>
+  <div v-else-if="found === false">
+    <h1>Not found</h1>
   </div>
 </template>
 
@@ -335,16 +350,7 @@ watch(Escape, () => {
 }
 
 .user-prompt {
-  margin-left: 10%;
   background-color: lightblue;
-  border-radius: 5px;
-  padding: 5px;
-  margin-bottom: 5px;
-}
-
-.assistant-prose {
-  margin-right: 10%;
-  background-color: lightgrey;
   border-radius: 5px;
   padding: 5px;
   margin-bottom: 5px;

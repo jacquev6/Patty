@@ -4,7 +4,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "2d779fc6a028"
+revision: str = "194496f6cfd3"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column("parent_id", sa.Integer(), nullable=True),
         sa.Column("model", sa.JSON(), nullable=False),
         sa.Column("system_prompt", sa.String(), nullable=False),
+        sa.Column("response_specification", sa.JSON(), nullable=False),
         sa.ForeignKeyConstraint(
             ["parent_id"],
             ["adaptation_strategies.id"],
@@ -36,8 +37,10 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
         sa.Column("input_id", sa.Integer(), nullable=False),
-        sa.Column("initial_response", sa.JSON(), nullable=True),
-        sa.Column("adjustments", sa.JSON(), server_default="[]", nullable=False),
+        sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),
+        sa.Column("initial_assistant_error", sa.String(), nullable=True),
+        sa.Column("initial_assistant_response", sa.JSON(), nullable=True),
+        sa.Column("adjustments", sa.JSON(), nullable=False),
         sa.Column("manual_edit", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["input_id"], ["adaptation_input.id"], name=op.f("fk_adaptation_adaptations_input_id_adaptation_input")

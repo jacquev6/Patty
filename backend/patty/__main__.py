@@ -1,5 +1,4 @@
 from typing import Iterable
-import io
 import json
 
 import click
@@ -8,6 +7,7 @@ from . import adapted
 from . import asgi
 from . import database_utils
 from . import fixtures
+from . import llm
 from . import settings
 
 
@@ -17,17 +17,30 @@ def main() -> None:
 
 
 @main.command()
-@click.argument("output", type=click.File("w"))
-def openapi(output: io.StringIO) -> None:
-    json.dump(asgi.app.openapi(), output, indent=2)
-    output.write("\n")
+def openapi() -> None:
+    print(json.dumps(asgi.app.openapi(), indent=2))
 
 
 @main.command()
-@click.argument("output", type=click.File("w"))
-def adapted_exercise_schema(output: io.StringIO) -> None:
-    json.dump(adapted.Exercise.model_json_schema(), output, indent=2)
-    output.write("\n")
+def adapted_exercise_schema() -> None:
+    exercise_type = adapted.make_exercise_type(
+        adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+        adapted.StatementComponents(
+            text=True,
+            whitespace=True,
+            arrow=True,
+            free_text_input=True,
+            multiple_choices_input=True,
+            selectable_input=True,
+        ),
+        adapted.ReferenceComponents(text=True, whitespace=True),
+    )
+    print(json.dumps(llm.make_schema(exercise_type), indent=2))
+
+
+@main.command()
+def default_system_prompt() -> None:
+    print(fixtures.make_default_system_prompt())
 
 
 @main.command()

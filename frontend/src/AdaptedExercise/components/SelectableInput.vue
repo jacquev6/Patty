@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 import type { Component } from '@/apiClient'
-import SequenceComponent from './SequenceComponent.vue'
+import FormattedComponent from './FormattedComponent.vue'
 
 const props = defineProps<{
   kind: 'selectableInput'
@@ -18,18 +18,17 @@ function increment() {
 }
 
 const contents = computed(() => ({
-  kind: 'sequence' as const,
+  kind: 'formatted' as const,
   contents: props.contents,
   bold: false,
   italic: false,
   highlighted: colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1],
   boxed: false,
-  vertical: false,
 }))
 </script>
 
 <template>
-  <SequenceComponent class="main" v-bind="contents" :tricolorable data-cy="selectableInput" @click="increment()" />
+  <FormattedComponent class="main" v-bind="contents" :tricolorable data-cy="selectableInput" @click="increment()" />
 </template>
 
 <style scoped>

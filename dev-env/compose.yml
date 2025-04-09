@@ -27,13 +27,14 @@ services:
       - backend/secrets.env
     command: [
       "rm", "-f",
-      "backend/openapi.json",
-      "backend/adapted-exercise-schema.json",
+      "backend/generated/default-system-prompt.md",
+      "backend/generated/openapi.json",
+      "backend/generated/adapted-exercise-schema.json",
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
     ]
 
-  adaptation-export-template-continuous-generator:
+  adaptation-export-template-generator:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
@@ -120,27 +121,11 @@ services:
       - backend/secrets.env
     command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
-      adaptation-export-template-continuous-generator:
+      adaptation-export-template-generator:
         condition: service_healthy
       data-loader:
         condition: service_completed_successfully
-  openapi-json-first-time-generator:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env
-      - backend/secrets.env
-    command: ["bash", "-c", 'echo "Generating backend/openapi.json for the first time" && python -m patty openapi openapi.json']
-    depends_on:
-      generated-files-cleaner:
-        condition: service_completed_successfully
-      pip-installer:
-        condition: service_completed_successfully
-  openapi-json-continuous-generator:
+  default-system-prompt-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -151,34 +136,13 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: [
-      "watchmedo", "shell-command",
-      "--command", 'test $${watch_event_type} = closed && echo "Updating backend/openapi.json because $${watch_src_path} changed" && python -m patty openapi openapi.json',
-      "--recursive",
-      "--ignore-directories",
-      "--ignore-patterns", "*/__pycache__/*",
-      "patty"
-    ]
-    depends_on:
-      openapi-json-first-time-generator:
-        condition: service_completed_successfully
-  adapted-exercise-json-schema-first-time-generator:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env
-      - backend/secrets.env
-    command: ["bash", "-c", 'echo "Generating backend/adapted-exercise-schema.json for the first time" && python -m patty adapted-exercise-schema adapted-exercise-schema.json']
+    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "default-system-prompt.md", "python -m patty default-system-prompt"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       pip-installer:
         condition: service_completed_successfully
-  adapted-exercise-json-schema-continuous-generator:
+  openapi-json-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -189,16 +153,42 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: [
-      "watchmedo", "shell-command",
-      "--command", 'test $${watch_event_type} = closed && echo "Updating backend/adapted-exercise-schema.json because $${watch_src_path} changed" && python -m patty adapted-exercise-schema adapted-exercise-schema.json',
-      "--recursive",
-      "--ignore-directories",
-      "--ignore-patterns", "*/__pycache__/*",
-      "patty"
-    ]
+    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "openapi.json", "python -m patty openapi"]
     depends_on:
-      adapted-exercise-json-schema-first-time-generator:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  adapted-exercise-json-schema-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema.json", "python -m patty adapted-exercise-schema"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  fixtures-loader:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
+    depends_on:
+      data-loader:
         condition: service_completed_successfully
 
   frontend-shell:
@@ -239,7 +229,7 @@ services:
     depends_on:
       npm-installer:
         condition: service_completed_successfully
-  openapi-ts-continuous-generator:
+  openapi-ts-generator:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
@@ -248,11 +238,11 @@ services:
     working_dir: /app/frontend
     environment:
       SHELL: bash
-    command: ["npx", "chokidar", "../backend/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/openapi.ts because backend/openapi.json changed' && npx openapi-typescript ../backend/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
+    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully
-      openapi-json-continuous-generator:
+      openapi-json-generator:
         condition: service_started
   frontend:
     image: patty-dev_frontend
@@ -265,9 +255,9 @@ services:
       PATTY_ENTRY_POINT_NAME: frontend
     command: ["npx", "vite", "--host", "0.0.0.0", "--port", "80", "--strictPort"]
     depends_on:
-      openapi-ts-continuous-generator:
+      openapi-ts-generator:
         condition: service_started
-      adapted-exercise-json-schema-continuous-generator:
+      adapted-exercise-json-schema-generator:
         condition: service_started
 
   fanout:

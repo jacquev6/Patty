@@ -1,18 +1,20 @@
 import typing
 
 from sqlalchemy import orm
-import pydantic
 import sqlalchemy as sql
 
-from ..adapted import ProseAndExercise, Exercise
+from ..adapted import Exercise
 from ..database_utils import OrmBase
 from .input import Input
 from .strategy import Strategy
+from ..any_json import JsonDict, JsonList
+from ..api_utils import ApiModel
 
 
-class Adjustment(pydantic.BaseModel):
+class Adjustment(ApiModel):
     user_prompt: str
-    assistant_response: ProseAndExercise
+    assistant_error: str | None
+    assistant_response: Exercise | None
 
 
 class Adaptation(OrmBase):
@@ -25,25 +27,27 @@ class Adaptation(OrmBase):
     input_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Input.id))
     input: orm.Mapped[Input] = orm.relationship(Input)
 
-    _initial_response: orm.Mapped[dict[str, typing.Any] | None] = orm.mapped_column("initial_response", sql.JSON)
+    # Kept only to help investigating future issues
+    raw_llm_conversations: orm.Mapped[JsonList] = orm.mapped_column(sql.JSON)
+
+    initial_assistant_error: orm.Mapped[str | None]
+    _initial_assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("initial_assistant_response", sql.JSON)
 
     @property
-    def initial_response(self) -> ProseAndExercise | None:
-        if self._initial_response is None:
+    def initial_assistant_response(self) -> Exercise | None:
+        if self._initial_assistant_response is None:
             return None
         else:
-            return ProseAndExercise(**self._initial_response)
+            return Exercise(**self._initial_assistant_response)
 
-    @initial_response.setter
-    def initial_response(self, value: ProseAndExercise | None) -> None:
+    @initial_assistant_response.setter
+    def initial_assistant_response(self, value: Exercise | None) -> None:
         if value is None:
-            self._initial_response = None
+            self._initial_assistant_response = None
         else:
-            self._initial_response = value.model_dump()
+            self._initial_assistant_response = value.model_dump()
 
-    _adjustments: orm.Mapped[list[dict[str, typing.Any]]] = orm.mapped_column(
-        "adjustments", sql.JSON, default=[], server_default="[]"
-    )
+    _adjustments: orm.Mapped[JsonList] = orm.mapped_column("adjustments", sql.JSON)
 
     @property
     def adjustments(self) -> list[Adjustment]:
@@ -53,7 +57,7 @@ class Adaptation(OrmBase):
     def adjustments(self, value: list[Adjustment]) -> None:
         self._adjustments = [adjustment.model_dump() for adjustment in value]
 
-    _manual_edit: orm.Mapped[dict[str, typing.Any] | None] = orm.mapped_column("manual_edit", sql.JSON)
+    _manual_edit: orm.Mapped[JsonDict | None] = orm.mapped_column("manual_edit", sql.JSON)
 
     @property
     def manual_edit(self) -> Exercise | None:

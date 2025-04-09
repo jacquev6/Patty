@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { type AdaptationInput, type AdaptationStrategy, type LlmModel, client } from './apiClient'
-import assert from './assert'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
-import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import ResizableColumns from './ResizableColumns.vue'
+import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -17,76 +16,19 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const availableLlmModels = computed(() => props.availableLlmModels)
+const strategy = reactive(props.defaultStrategy) // WARNING: this does not react to changes in props.defaultStrategy
 
-assert(availableLlmModels.value.length !== 0)
-const llmModel = ref(props.defaultStrategy.model)
-watch(
-  () => props.defaultStrategy.model,
-  (defaultLlmModel) => {
-    llmModel.value = defaultLlmModel
-  },
-)
-
-const llmProviders = computed(() => {
-  return [...new Set(availableLlmModels.value.map((model) => model.provider))]
-})
-
-const llmProvider = computed({
-  get: () => {
-    return llmModel.value?.provider ?? ''
-  },
-  set: (value: string) => {
-    const model = availableLlmModels.value.find((model) => model.provider === value)
-    assert(model !== undefined)
-    llmModel.value = model
-  },
-})
-
-const llmNames = computed(() => {
-  return availableLlmModels.value.filter((model) => model.provider === llmProvider.value).map((model) => model.name)
-})
-
-const llmName = computed({
-  get: () => {
-    return llmModel.value?.name ?? ''
-  },
-  set: (value: string) => {
-    const model = availableLlmModels.value.find(
-      (model) => model.provider === llmModel.value?.provider && model.name === value,
-    )
-    assert(model !== undefined)
-    llmModel.value = model
-  },
-})
-
-const systemPrompt = ref(props.defaultStrategy.systemPrompt)
-watch(
-  () => props.defaultStrategy.systemPrompt,
-  (defaultSystemPrompt) => {
-    systemPrompt.value = defaultSystemPrompt
-  },
-)
-
-const inputText = ref(props.defaultInput.text)
-watch(
-  () => props.defaultInput.text,
-  (defaultInputText) => {
-    inputText.value = defaultInputText
-  },
-)
+const input = reactive(props.defaultInput) // WARNING: this does not react to changes in props.defaultInput
 
 const busy = ref(false)
 
 async function submit() {
   busy.value = true
 
-  assert(llmModel.value !== null)
-
   const responsePromise = client.POST('/api/adaptation', {
     body: {
-      strategy: { id: props.defaultStrategy.id, model: llmModel.value, systemPrompt: systemPrompt.value },
-      input: { id: props.defaultInput.id, text: inputText.value },
+      strategy,
+      input,
     },
   })
 
@@ -99,7 +41,7 @@ async function submit() {
 }
 
 const disabled = computed(() => {
-  return systemPrompt.value.trim() === '' || inputText.value.trim() === ''
+  return strategy.systemPrompt.trim() === '' || input.text.trim() === ''
 })
 </script>
 
@@ -108,21 +50,11 @@ const disabled = computed(() => {
     <BusyBox :busy>
       <ResizableColumns :columns="2">
         <template #col-1>
-          <h1>LLM model</h1>
-          <select v-model="llmProvider">
-            <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option>
-          </select>
-          <select v-model="llmName">
-            <option v-for="name in llmNames">{{ name }}</option>
-          </select>
-          <h1>System prompt</h1>
-          <TextArea v-model="systemPrompt"></TextArea>
-          <h1>Response JSON schema</h1>
-          <AdaptedExerciseJsonSchemaDetails />
+          <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />
         </template>
         <template #col-2>
           <h1>Input text</h1>
-          <TextArea v-model="inputText"></TextArea>
+          <TextArea data-cy="input-text" v-model="input.text"></TextArea>
           <p><button @click="submit" :disabled>Submit</button></p>
         </template>
       </ResizableColumns>

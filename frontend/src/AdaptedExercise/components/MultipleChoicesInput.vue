@@ -2,7 +2,7 @@
 import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type { Line } from '@/apiClient'
+import type { PureTextContainer } from '@/apiClient'
 import LineComponent from './LineComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
 
@@ -12,7 +12,7 @@ defineOptions({
 
 const props = defineProps<{
   kind: 'multipleChoicesInput'
-  choices: Line[]
+  choices: PureTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
 }>()
@@ -22,13 +22,7 @@ const model = defineModel<number | null>({ default: null })
 const currentChoice = computed(() => {
   if (model.value === null) {
     return {
-      kind: 'sequence' as const,
       contents: [{ kind: 'text' as const, text: '....' }],
-      bold: false,
-      italic: false,
-      highlighted: null,
-      boxed: false,
-      vertical: false,
     }
   } else {
     return props.choices[model.value]
@@ -63,7 +57,7 @@ function set(choice: number) {
 }
 
 const choicesLines = computed(() => {
-  const lines: { index: number; colorIndex: number; content: Line }[][] = [[], []]
+  const lines: { index: number; colorIndex: number; content: PureTextContainer }[][] = [[], []]
   for (let i = 0; i < props.choices.length; ++i) {
     lines[i % 2].push({ index: i, colorIndex: i % 3, content: props.choices[i] })
   }

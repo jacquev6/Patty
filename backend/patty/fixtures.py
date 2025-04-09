@@ -2,11 +2,13 @@ from typing import Iterable
 import textwrap
 
 import compact_json  # type: ignore
+import fastapi
 
 from . import adaptation
 from . import adapted
 from . import database_utils
 from . import llm
+from . import settings
 
 
 def make_default_system_prompt() -> str:
@@ -21,48 +23,38 @@ def make_default_system_prompt() -> str:
 
     exercise = adapted.Exercise(
         format="v1",
-        instructions=adapted.Page[adapted.PassiveComponent](
+        instruction=adapted.InstructionPage(
             lines=[
-                adapted.Line[adapted.PassiveComponent](
+                adapted.InstructionLine(
                     contents=[
                         adapted.Text(kind="text", text="Complète"),
                         adapted.Whitespace(kind="whitespace"),
                         adapted.Text(kind="text", text="avec"),
                         adapted.Whitespace(kind="whitespace"),
-                        adapted.PassiveSequence(
-                            kind="sequence",
+                        adapted.Choice(
+                            kind="choice",
                             contents=[adapted.Text(kind="text", text="l'"), adapted.Text(kind="text", text="herbe")],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
-                            vertical=False,
                         ),
                         adapted.Whitespace(kind="whitespace"),
                         adapted.Text(kind="text", text="ou"),
                         adapted.Whitespace(kind="whitespace"),
-                        adapted.PassiveSequence(
-                            kind="sequence",
+                        adapted.Choice(
+                            kind="choice",
                             contents=[
                                 adapted.Text(kind="text", text="les"),
                                 adapted.Whitespace(kind="whitespace"),
                                 adapted.Text(kind="text", text="chats"),
                             ],
-                            bold=False,
-                            italic=False,
-                            highlighted=None,
-                            boxed=True,
-                            vertical=False,
                         ),
                     ]
                 )
             ]
         ),
-        wording=adapted.Pages[adapted.AnyComponent](
+        statement=adapted.StatementPages(
             pages=[
-                adapted.Page[adapted.AnyComponent](
+                adapted.StatementPage(
                     lines=[
-                        adapted.Line[adapted.AnyComponent](
+                        adapted.StatementLine(
                             contents=[
                                 adapted.Text(kind="text", text="a"),
                                 adapted.Text(kind="text", text="."),
@@ -76,13 +68,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -94,7 +86,7 @@ def make_default_system_prompt() -> str:
                                 ),
                             ]
                         ),
-                        adapted.Line[adapted.AnyComponent](
+                        adapted.StatementLine(
                             contents=[
                                 adapted.Text(kind="text", text="b"),
                                 adapted.Text(kind="text", text="."),
@@ -110,13 +102,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.Line[adapted.PassiveComponent](
+                                        adapted.PureTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -132,7 +124,7 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
-        references=None,
+        reference=None,
     )
 
     formatter = compact_json.Formatter()
@@ -152,13 +144,8 @@ def make_default_system_prompt() -> str:
         A chaque ajustement, tu dois répondre avec la nouvelle adaptation de l'exercice initial,
         en respectant les consignes de ce messages système et les ajustements demandés par l'utilisateur.
 
-        Le format pour tes réponses comporte deux champs: `prose` et `structured`.
-        Tu dois utiliser `prose` pour interagir avec l'utilisateur.
-        Tu dois utiliser `structured` pour renvoyer l'adaptation de l'exercice initial, après les ajustements demandés par l'utilisateur.
-        Tu peux laisser le champ `structured` null si le message de l'utilisateur ne demande pas de changement à l'adaptation.
-
-        Dans le champs `structured`, il y a un champs `instructions` pour la consigne de l'exercice, et un champs `wording` pour l'énoncé de l'exercice.
-        Il y a aussi un champs `references` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
+        Dans le format JSON pour tes réponses, il y a un champs `instruction` pour la consigne de l'exercice, et un champs `statement` pour l'énoncé de l'exercice.
+        Il y a aussi un champs `reference` pour les références de l'exercice, qui peut être null si l'exercice n'a pas de références.
 
         Voici un exemple. Si l'exercice initial est :
 
@@ -177,12 +164,44 @@ def make_default_system_prompt() -> str:
 
 def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
-        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), system_prompt=make_default_system_prompt()
+        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+        system_prompt=make_default_system_prompt(),
+        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            format="json",
+            formalism="json-schema",
+            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            statement_components=adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                free_text_input=False,
+                multiple_choices_input=True,
+                selectable_input=False,
+            ),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+        ),
     )
 
 
 def create_dummy_adaptation_strategy() -> Iterable[object]:
-    yield adaptation.Strategy(model=llm.DummyModel(name="dummy-1"), system_prompt="Blah blah blah.")
+    yield adaptation.Strategy(
+        model=llm.DummyModel(name="dummy-1"),
+        system_prompt="Blah blah blah.",
+        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            format="json",
+            formalism="json-schema",
+            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            statement_components=adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                free_text_input=True,
+                multiple_choices_input=True,
+                selectable_input=True,
+            ),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+        ),
+    )
 
 
 def create_default_adaptation_input() -> Iterable[object]:
@@ -197,153 +216,134 @@ def create_default_adaptation_input() -> Iterable[object]:
     )
 
 
-def create_actual_openai_adaptation() -> Iterable[object]:
-    [strategy] = create_default_adaptation_strategy()
+def create_dummy_adaptation() -> Iterable[object]:
+    [strategy] = create_dummy_adaptation_strategy()
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
     yield adaptation.Adaptation(
         strategy=strategy,
         input=input,
-        _initial_response={
-            "prose": "Je vais te proposer une version adapt\u00e9e de ton exercice initial.",
-            "structured": {
-                "format": "v1",
-                "instructions": {
-                    "lines": [
-                        {
-                            "contents": [
-                                {"kind": "text", "text": "Compl\u00e8te"},
-                                {"kind": "whitespace"},
-                                {"kind": "text", "text": "avec"},
-                                {"kind": "whitespace"},
-                                {
-                                    "kind": "sequence",
-                                    "contents": [
-                                        {"kind": "text", "text": "le"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "vent"},
-                                    ],
-                                    "bold": False,
-                                    "italic": False,
-                                    "highlighted": None,
-                                    "boxed": True,
-                                    "vertical": False,
-                                },
-                                {"kind": "whitespace"},
-                                {"kind": "text", "text": "ou"},
-                                {"kind": "whitespace"},
-                                {
-                                    "kind": "sequence",
-                                    "contents": [
-                                        {"kind": "text", "text": "la"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "pluie"},
-                                    ],
-                                    "bold": False,
-                                    "italic": False,
-                                    "highlighted": None,
-                                    "boxed": True,
-                                    "vertical": False,
-                                },
-                            ]
-                        }
-                    ]
-                },
-                "wording": {
-                    "pages": [
-                        {
-                            "lines": [
-                                {
-                                    "contents": [
-                                        {"kind": "text", "text": "a"},
-                                        {"kind": "text", "text": "."},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "Les"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "feuilles"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "sont"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "chahut\u00e9es"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "par"},
-                                        {"kind": "whitespace"},
-                                        {
-                                            "kind": "multipleChoicesInput",
-                                            "choices": [
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "le"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "vent"},
-                                                    ]
-                                                },
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "la"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "pluie"},
-                                                    ]
-                                                },
-                                            ],
-                                            "showChoicesByDefault": False,
-                                        },
-                                    ]
-                                },
-                                {
-                                    "contents": [
-                                        {"kind": "text", "text": "b"},
-                                        {"kind": "text", "text": "."},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "Les"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "vitres"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "sont"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "mouill\u00e9es"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "par"},
-                                        {"kind": "whitespace"},
-                                        {
-                                            "kind": "multipleChoicesInput",
-                                            "choices": [
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "le"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "vent"},
-                                                    ]
-                                                },
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "la"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "pluie"},
-                                                    ]
-                                                },
-                                            ],
-                                            "showChoicesByDefault": False,
-                                        },
-                                    ]
-                                },
-                            ]
-                        }
-                    ]
-                },
-                "references": None,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        initial_assistant_error=None,
+        _initial_assistant_response={
+            "format": "v1",
+            "instruction": {
+                "lines": [
+                    {
+                        "contents": [
+                            {"kind": "text", "text": "Complète"},
+                            {"kind": "whitespace"},
+                            {"kind": "text", "text": "avec"},
+                            {"kind": "whitespace"},
+                            {
+                                "kind": "choice",
+                                "contents": [
+                                    {"kind": "text", "text": "le"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "vent"},
+                                ],
+                            },
+                            {"kind": "whitespace"},
+                            {"kind": "text", "text": "ou"},
+                            {"kind": "whitespace"},
+                            {
+                                "kind": "choice",
+                                "contents": [
+                                    {"kind": "text", "text": "la"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "pluie"},
+                                ],
+                            },
+                        ]
+                    }
+                ]
             },
+            "statement": {
+                "pages": [
+                    {
+                        "lines": [
+                            {
+                                "contents": [
+                                    {"kind": "text", "text": "a"},
+                                    {"kind": "text", "text": "."},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "Les"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "feuilles"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "sont"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "chahutées"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "par"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "multipleChoicesInput",
+                                        "choices": [
+                                            {
+                                                "contents": [
+                                                    {"kind": "text", "text": "le"},
+                                                    {"kind": "whitespace"},
+                                                    {"kind": "text", "text": "vent"},
+                                                ]
+                                            },
+                                            {
+                                                "contents": [
+                                                    {"kind": "text", "text": "la"},
+                                                    {"kind": "whitespace"},
+                                                    {"kind": "text", "text": "pluie"},
+                                                ]
+                                            },
+                                        ],
+                                        "showChoicesByDefault": False,
+                                    },
+                                ]
+                            },
+                            {
+                                "contents": [
+                                    {"kind": "text", "text": "b"},
+                                    {"kind": "text", "text": "."},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "Les"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "vitres"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "sont"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "mouillées"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "par"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "multipleChoicesInput",
+                                        "choices": [
+                                            {
+                                                "contents": [
+                                                    {"kind": "text", "text": "le"},
+                                                    {"kind": "whitespace"},
+                                                    {"kind": "text", "text": "vent"},
+                                                ]
+                                            },
+                                            {
+                                                "contents": [
+                                                    {"kind": "text", "text": "la"},
+                                                    {"kind": "whitespace"},
+                                                    {"kind": "text", "text": "pluie"},
+                                                ]
+                                            },
+                                        ],
+                                        "showChoicesByDefault": False,
+                                    },
+                                ]
+                            },
+                        ]
+                    }
+                ]
+            },
+            "reference": None,
         },
-        _adjustments=[
-            {
-                "user_prompt": "Merci!",
-                "assistant_response": {
-                    "prose": "Avec plaisir! N'h\u00e9site pas si tu as besoin d'autres adaptations ou ajustements.",
-                    "structured": None,
-                },
-            }
-        ],
+        _adjustments=[],
         manual_edit=None,
     )
 
@@ -352,7 +352,7 @@ available_fixtures = {
     "default-adaptation-strategy": create_default_adaptation_strategy,
     "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
     "default-adaptation-input": create_default_adaptation_input,
-    "actual-openai-adaptation": create_actual_openai_adaptation,
+    "dummy-adaptation": create_dummy_adaptation,
 }
 
 
@@ -361,3 +361,11 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     for fixture in fixtures:
         for instance in available_fixtures[fixture]():
             session.add(instance)
+
+
+app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
+
+
+@app.post("/load")
+def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
+    load(session, fixtures.split(","))

@@ -14,6 +14,9 @@ export type AdaptationInput =
   paths['/api/adaptation/latest-input']['get']['responses']['200']['content']['application/json']
 
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
-export type AdaptedExercise = Exclude<Adaptation['steps'][number]['adaptedExercise'], null>
-export type Line = AdaptedExercise['wording']['pages'][number]['lines'][number]
-export type Component = Line['contents'][number]
+export type AdaptedExercise = Exclude<Adaptation['initialAssistantResponse'], null>
+type InstructionComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number]
+type StatementComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
+export type Component = InstructionComponent | StatementComponent
+
+export type PureTextContainer = (StatementComponent & { kind: 'multipleChoicesInput' })['choices'][number]

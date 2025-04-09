@@ -41,6 +41,9 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
 
   return {
     plugins,
+    server: {
+      allowedHosts: true,
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
