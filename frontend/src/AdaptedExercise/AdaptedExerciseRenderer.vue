@@ -63,6 +63,16 @@ watch(
           <p v-for="{ contents } in adaptedExercise.instruction.lines">
             <LineComponent :contents :tricolorable="false" />
           </p>
+          <template v-if="adaptedExercise.example !== null">
+            <p v-for="{ contents } in adaptedExercise.example.lines">
+              <LineComponent :contents :tricolorable="false" />
+            </p>
+          </template>
+          <template v-if="adaptedExercise.hint !== null">
+            <p v-for="{ contents } in adaptedExercise.hint.lines">
+              <LineComponent :contents :tricolorable="false" />
+            </p>
+          </template>
         </div>
         <div class="statement" v-if="page < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">

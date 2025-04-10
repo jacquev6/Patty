@@ -70,6 +70,15 @@ const llmResponseSpecificationFormalism = computed({
           whitespace: true,
           choice: true,
         },
+        exampleComponents: {
+          text: true,
+          whitespace: true,
+          arrow: true,
+        },
+        hintComponents: {
+          text: true,
+          whitespace: true,
+        },
         statementComponents: {
           text: true,
           whitespace: true,
@@ -153,7 +162,7 @@ const schema = computedAsync(async () => {
       >).
     </p>
     <h2>Allowed components</h2>
-    <div style="display: grid; grid-template-columns: 1fr 11px 2fr 11px 1fr">
+    <div style="display: grid; grid-template-columns: 1fr 11px 1fr 11px 1fr 11px 2fr 11px 1fr">
       <div>
         <h3>In instruction</h3>
         <p>
@@ -172,6 +181,37 @@ const schema = computedAsync(async () => {
             />
             choice</label
           >
+        </p>
+      </div>
+      <div class="gutter"></div>
+      <div>
+        <h3>In example</h3>
+        <p>
+          <label><input type="checkbox" checked disabled /> text</label>
+        </p>
+        <p>
+          <label><input type="checkbox" checked disabled /> whitespace</label>
+        </p>
+        <p>
+          <label
+            ><input
+              data-cy="allow-arrow-in-example"
+              type="checkbox"
+              v-model="strategy.responseSpecification.exampleComponents.arrow"
+              :disabled
+            />
+            arrow</label
+          >
+        </p>
+      </div>
+      <div class="gutter"></div>
+      <div>
+        <h3>In hint</h3>
+        <p>
+          <label><input type="checkbox" checked disabled /> text</label>
+        </p>
+        <p>
+          <label><input type="checkbox" checked disabled /> whitespace</label>
         </p>
       </div>
       <div class="gutter"></div>

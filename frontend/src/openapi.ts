@@ -273,6 +273,21 @@ export interface components {
        */
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
     }
+    /** ExampleComponents */
+    ExampleComponents: {
+      /**
+       * Text
+       * @constant
+       */
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
+      /** Arrow */
+      arrow: boolean
+    }
     'Exercise-Input': {
       /**
        * Format
@@ -280,6 +295,8 @@ export interface components {
        */
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__-Input'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
@@ -290,6 +307,8 @@ export interface components {
        */
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__-Output'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
       reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
@@ -304,6 +323,19 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /** HintComponents */
+    HintComponents: {
+      /**
+       * Text
+       * @constant
+       */
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
     }
     /** InstructionComponents */
     InstructionComponents: {
@@ -359,12 +391,18 @@ export interface components {
        */
       formalism: 'json-schema'
       instructionComponents: components['schemas']['InstructionComponents']
+      exampleComponents: components['schemas']['ExampleComponents']
+      hintComponents: components['schemas']['HintComponents']
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
     }
     Line_Union_Text__Whitespace__: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+    }
+    Line_Union_Text__Whitespace__Arrow__: {
+      /** Contents */
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'] | components['schemas']['Arrow'])[]
     }
     'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Contents */
@@ -453,6 +491,22 @@ export interface components {
        * @enum {string}
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+    }
+    'Page_Union_Text__Whitespace__-Input': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__'][]
+    }
+    'Page_Union_Text__Whitespace__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__'][]
+    }
+    'Page_Union_Text__Whitespace__Arrow__-Input': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__'][]
+    }
+    'Page_Union_Text__Whitespace__Arrow__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__'][]
     }
     'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */

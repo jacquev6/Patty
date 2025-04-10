@@ -274,6 +274,8 @@ describe('MultipleChoicesInput', () => {
           instruction: {
             lines: [],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {
@@ -320,6 +322,8 @@ describe('MultipleChoicesInput', () => {
           instruction: {
             lines: [],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {
@@ -388,8 +392,45 @@ describe('AdaptedExerciseRenderer', () => {
           instruction: {
             lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+  })
+
+  it('renders the example and hint', () => {
+    cy.viewport(600, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
+          },
+          example: {
+            lines: [{ contents: [{ kind: 'text', text: 'Example' }] }],
+          },
+          hint: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hint' }] }],
+          },
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [{ kind: 'text', text: 'World' }],
+                  },
+                ],
+              },
+            ],
           },
           reference: null,
         },
@@ -409,6 +450,8 @@ describe('AdaptedExerciseRenderer', () => {
           instruction: {
             lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {

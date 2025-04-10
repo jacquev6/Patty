@@ -704,6 +704,32 @@
         ],
         "title": "DummyModel"
       },
+      "ExampleComponents": {
+        "properties": {
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          },
+          "arrow": {
+            "type": "boolean",
+            "title": "Arrow"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "whitespace",
+          "arrow"
+        ],
+        "title": "ExampleComponents"
+      },
       "Exercise-Input": {
         "properties": {
           "format": {
@@ -713,6 +739,26 @@
           },
           "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Input"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
@@ -732,6 +778,8 @@
         "required": [
           "format",
           "instruction",
+          "example",
+          "hint",
           "statement",
           "reference"
         ]
@@ -745,6 +793,26 @@
           },
           "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
@@ -764,6 +832,8 @@
         "required": [
           "format",
           "instruction",
+          "example",
+          "hint",
           "statement",
           "reference"
         ]
@@ -793,6 +863,27 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HintComponents": {
+        "properties": {
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "whitespace"
+        ],
+        "title": "HintComponents"
       },
       "InstructionComponents": {
         "properties": {
@@ -877,6 +968,12 @@
           "instructionComponents": {
             "$ref": "#/components/schemas/InstructionComponents"
           },
+          "exampleComponents": {
+            "$ref": "#/components/schemas/ExampleComponents"
+          },
+          "hintComponents": {
+            "$ref": "#/components/schemas/HintComponents"
+          },
           "statementComponents": {
             "$ref": "#/components/schemas/StatementComponents"
           },
@@ -890,6 +987,8 @@
           "format",
           "formalism",
           "instructionComponents",
+          "exampleComponents",
+          "hintComponents",
           "statementComponents",
           "referenceComponents"
         ],
@@ -905,6 +1004,31 @@
                 },
                 {
                   "$ref": "#/components/schemas/Whitespace"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "Line_Union_Text__Whitespace__Arrow__": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
                 }
               ]
             },
@@ -1132,6 +1256,66 @@
           "name"
         ],
         "title": "OpenAiModel"
+      },
+      "Page_Union_Text__Whitespace__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__Arrow__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__Arrow__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
       },
       "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {

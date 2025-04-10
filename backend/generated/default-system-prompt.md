@@ -52,6 +52,8 @@ Alors une adaptation possible est :
       }
     ]
   },
+  "example": null,
+  "hint": null,
   "statement": {
     "pages": [
       {

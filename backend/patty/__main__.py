@@ -25,6 +25,8 @@ def openapi() -> None:
 def adapted_exercise_schema() -> None:
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+        adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
+        adapted.HintComponents(text=True, whitespace=True),
         adapted.StatementComponents(
             text=True,
             whitespace=True,

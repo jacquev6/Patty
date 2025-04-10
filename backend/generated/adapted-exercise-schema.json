@@ -43,6 +43,48 @@
       "type": "object",
       "additionalProperties": false
     },
+    "ExampleLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExamplePage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/ExampleLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "FreeTextInput": {
       "properties": {
         "kind": {
@@ -53,6 +95,45 @@
       },
       "required": [
         "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "HintLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "HintPage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/HintLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
       ],
       "type": "object",
       "additionalProperties": false
@@ -324,6 +405,26 @@
     "instruction": {
       "$ref": "#/$defs/InstructionPage"
     },
+    "example": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExamplePage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "hint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HintPage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "statement": {
       "$ref": "#/$defs/StatementPages"
     },
@@ -341,6 +442,8 @@
   "required": [
     "format",
     "instruction",
+    "example",
+    "hint",
     "statement",
     "reference"
   ],

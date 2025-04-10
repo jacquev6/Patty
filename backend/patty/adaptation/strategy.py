@@ -33,6 +33,8 @@ class JsonObjectLlmResponseSpecification(JsonLlmResponseSpecification):
 class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["json-schema"]
     instruction_components: adapted.InstructionComponents
+    example_components: adapted.ExampleComponents
+    hint_components: adapted.HintComponents
     statement_components: adapted.StatementComponents
     reference_components: adapted.ReferenceComponents
 
@@ -41,7 +43,11 @@ class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
 
     def make_response_type(self) -> type[adapted.Exercise]:
         return adapted.make_exercise_type(
-            self.instruction_components, self.statement_components, self.reference_components
+            self.instruction_components,
+            self.example_components,
+            self.hint_components,
+            self.statement_components,
+            self.reference_components,
         )
 
     def make_response_schema(self) -> JsonDict:
