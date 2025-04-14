@@ -230,8 +230,11 @@ def create_dummy_adaptation() -> Iterable[object]:
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
+    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    yield batch
     yield adaptation.Adaptation(
         created_by="Patty",
+        batch=batch,
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],

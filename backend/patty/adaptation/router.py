@@ -9,6 +9,7 @@ from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
 from ..api_utils import ApiModel
 from .adaptation import Adaptation as DbAdaptation, Adjustment
+from .batch import Batch
 from .input import Input as DbInput
 from .strategy import Strategy as DbStrategy, ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 
@@ -103,7 +104,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         input = DbInput(created_by=req.creator, text=req.input.text)
         session.add(input)
 
-    session.flush()
+    batch = Batch(created_by=req.creator, strategy=strategy)
 
     messages: list[LlmMessage] = [
         llm.SystemMessage(content=strategy.system_prompt),
@@ -115,8 +116,9 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
     except llm.LlmException as error:
         db_adaptation = DbAdaptation(
             created_by=req.creator,
-            strategy_id=strategy.id,
-            input_id=input.id,
+            batch=batch,
+            strategy=strategy,
+            input=input,
             raw_llm_conversations=[error.raw_conversation],
             initial_assistant_error=error.args[0],
             initial_assistant_response=None,
@@ -125,8 +127,9 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
     else:
         db_adaptation = DbAdaptation(
             created_by=req.creator,
-            strategy_id=strategy.id,
-            input_id=input.id,
+            batch=batch,
+            strategy=strategy,
+            input=input,
             raw_llm_conversations=[response.raw_conversation],
             initial_assistant_error=None,
             initial_assistant_response=response.message.content,

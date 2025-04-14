@@ -1,8 +1,12 @@
-from typing import Annotated, Iterable, cast
+from typing import Annotated, Any, Iterable, TypeVar, cast
+import datetime
+import unittest
 
 from fastapi import Depends, Request
-import sqlalchemy.orm
 import sqlalchemy.exc
+import sqlalchemy.orm
+
+from . import settings
 
 
 Engine = sqlalchemy.Engine
@@ -62,3 +66,45 @@ def _session_dependable(request: Request) -> Iterable[Session]:
 
 
 SessionDependable = Annotated[Session, Depends(_session_dependable)]
+
+
+class TestCaseWithDatabase(unittest.TestCase):
+    Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
+
+    __database_url: str
+    __database_engine: Engine
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        import sqlalchemy_utils.functions
+        from . import orm_models  # To populate the metadata
+
+        super().setUpClass()
+        cls.__database_url = (
+            f"{settings.DATABASE_URL}-{cls.__name__}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        )
+        sqlalchemy_utils.functions.create_database(cls.__database_url)
+        cls.__database_engine = create_engine(cls.__database_url)
+        OrmBase.metadata.create_all(cls.__database_engine)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        import sqlalchemy_utils.functions
+
+        cls.__database_engine.dispose()
+        sqlalchemy_utils.functions.drop_database(cls.__database_url)
+        super().tearDownClass()
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.session = make_session(self.__database_engine)
+
+    def tearDown(self) -> None:
+        self.session.close()
+        super().tearDown()
+
+    def create_model(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = __model(**kwargs)
+        self.session.add(instance)
+        self.session.flush()
+        return instance

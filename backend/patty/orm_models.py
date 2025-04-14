@@ -1,3 +1,3 @@
-from .adaptation import Strategy, Input, Adaptation
+from .adaptation import Strategy, Input, Adaptation, Batch
 
-__all__ = ["Strategy", "Input", "Adaptation"]
+__all__ = ["Strategy", "Input", "Adaptation", "Batch"]
