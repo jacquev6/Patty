@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import deepCopy from 'deep-copy'
 
 import { type AdaptationInput, type AdaptationStrategy, type LlmModel, client } from './apiClient'
 import TextArea from './TextArea.vue'
@@ -8,7 +9,6 @@ import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
-import assert from './assert'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
@@ -21,21 +21,19 @@ const router = useRouter()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const strategy = reactive(props.defaultStrategy)
+const strategy = reactive(deepCopy(props.defaultStrategy))
 watch(
   () => props.defaultStrategy,
   (newValue) => {
-    assert(newValue !== undefined)
-    Object.assign(strategy, newValue)
+    Object.assign(strategy, deepCopy(newValue))
   },
 )
 
-const input = reactive(props.defaultInput)
+const input = reactive(deepCopy(props.defaultInput))
 watch(
   () => props.defaultInput,
   (newValue) => {
-    assert(newValue !== undefined)
-    Object.assign(input, newValue)
+    Object.assign(input, deepCopy(newValue))
   },
 )
 
