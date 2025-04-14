@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref, watch } from 'vue'
 
 import CreateAdaptationForm from './CreateAdaptationForm.vue'
 import { type LlmModel, type AdaptationStrategy, client, type AdaptationInput } from './apiClient'
+import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const availableLlmModels = ref<LlmModel[]>([])
+
+const identifiedUser = useIdentifiedUserStore()
 
 const defaultStrategy = ref<AdaptationStrategy | null>(null)
 
 const defaultInput = ref<AdaptationInput | null>(null)
 
-onMounted(async () => {
+async function refresh() {
   const llmModelsPromise = client.GET('/api/available-llm-models')
-  const latestStrategyPromise = client.GET('/api/adaptation/latest-strategy')
-  const latestInputPromise = client.GET('/api/adaptation/latest-input')
+  const latestStrategyPromise = client.GET('/api/adaptation/latest-strategy', {
+    params: { query: { user: identifiedUser.identifier } },
+  })
+  const latestInputPromise = client.GET('/api/adaptation/latest-input', {
+    params: { query: { user: identifiedUser.identifier } },
+  })
 
   const llmModelsResponse = await llmModelsPromise
   if (llmModelsResponse.data !== undefined) {
@@ -29,7 +36,9 @@ onMounted(async () => {
   if (latestInputResponse.data !== undefined) {
     defaultInput.value = latestInputResponse.data
   }
-})
+}
+
+watch(() => identifiedUser.identifier, refresh, { immediate: true })
 </script>
 
 <template>

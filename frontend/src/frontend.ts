@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
+import { createPinia } from 'pinia'
 
 import './main.css'
 import IndexView from './IndexView.vue'
@@ -32,5 +33,6 @@ const router = createRouter({
 const app = createApp(RouterView)
 
 app.use(router)
+app.use(createPinia())
 
 app.mount('#app')

@@ -191,6 +191,8 @@ export interface components {
     ApiAdaptation: {
       /** Id */
       id: number
+      /** Createdby */
+      createdBy: string
       strategy: components['schemas']['ApiStrategy-Output']
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */
@@ -206,6 +208,8 @@ export interface components {
     ApiInput: {
       /** Id */
       id: number
+      /** Createdby */
+      createdBy: string
       /** Text */
       text: string
     }
@@ -213,6 +217,8 @@ export interface components {
     'ApiStrategy-Input': {
       /** Id */
       id: number
+      /** Createdby */
+      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']
@@ -230,6 +236,8 @@ export interface components {
     'ApiStrategy-Output': {
       /** Id */
       id: number
+      /** Createdby */
+      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']
@@ -539,6 +547,8 @@ export interface components {
     }
     /** PostAdaptationRequest */
     PostAdaptationRequest: {
+      /** Creator */
+      creator: string
       strategy: components['schemas']['ApiStrategy-Input']
       input: components['schemas']['ApiInput']
     }
@@ -653,7 +663,9 @@ export interface operations {
   }
   get_latest_strategy_api_adaptation_latest_strategy_get: {
     parameters: {
-      query?: never
+      query: {
+        user: string
+      }
       header?: never
       path?: never
       cookie?: never
@@ -667,6 +679,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiStrategy-Output']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -706,7 +727,9 @@ export interface operations {
   }
   get_latest_input_api_adaptation_latest_input_get: {
     parameters: {
-      query?: never
+      query: {
+        user: string
+      }
       header?: never
       path?: never
       cookie?: never
@@ -720,6 +743,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiInput']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

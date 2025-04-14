@@ -22,6 +22,8 @@ class Adaptation(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
+    created_by: orm.Mapped[str]
+
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
     input_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Input.id))

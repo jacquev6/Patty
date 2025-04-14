@@ -41,6 +41,17 @@
       "get": {
         "summary": "Get Latest Strategy",
         "operationId": "get_latest_strategy_api_adaptation_latest_strategy_get",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -48,6 +59,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiStrategy-Output"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -98,6 +119,17 @@
       "get": {
         "summary": "Get Latest Input",
         "operationId": "get_latest_input_api_adaptation_latest_input_get",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -105,6 +137,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiInput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -458,6 +500,10 @@
             "type": "integer",
             "title": "Id"
           },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           },
@@ -512,6 +558,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "strategy",
           "input",
           "rawLlmConversations",
@@ -528,6 +575,10 @@
             "type": "integer",
             "title": "Id"
           },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
           "text": {
             "type": "string",
             "title": "Text"
@@ -537,6 +588,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "text"
         ],
         "title": "ApiInput"
@@ -546,6 +598,10 @@
           "id": {
             "type": "integer",
             "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
           },
           "model": {
             "anyOf": [
@@ -584,6 +640,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"
@@ -596,6 +653,10 @@
             "type": "integer",
             "title": "Id"
           },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
           "model": {
             "anyOf": [
               {
@@ -633,6 +694,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"
@@ -1423,6 +1485,10 @@
       },
       "PostAdaptationRequest": {
         "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Input"
           },
@@ -1433,6 +1499,7 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "creator",
           "strategy",
           "input"
         ],

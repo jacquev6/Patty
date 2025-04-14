@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { type AdaptationInput, type AdaptationStrategy, type LlmModel, client } from './apiClient'
@@ -7,6 +7,9 @@ import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
+import IdentifiedUser from './IdentifiedUser.vue'
+import assert from './assert'
+import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -16,9 +19,25 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const strategy = reactive(props.defaultStrategy) // WARNING: this does not react to changes in props.defaultStrategy
+const identifiedUser = useIdentifiedUserStore()
 
-const input = reactive(props.defaultInput) // WARNING: this does not react to changes in props.defaultInput
+const strategy = reactive(props.defaultStrategy)
+watch(
+  () => props.defaultStrategy,
+  (newValue) => {
+    assert(newValue !== undefined)
+    Object.assign(strategy, newValue)
+  },
+)
+
+const input = reactive(props.defaultInput)
+watch(
+  () => props.defaultInput,
+  (newValue) => {
+    assert(newValue !== undefined)
+    Object.assign(input, newValue)
+  },
+)
 
 const busy = ref(false)
 
@@ -27,6 +46,7 @@ async function submit() {
 
   const responsePromise = client.POST('/api/adaptation', {
     body: {
+      creator: identifiedUser.identifier,
       strategy,
       input,
     },
@@ -50,6 +70,7 @@ const disabled = computed(() => {
     <BusyBox :busy>
       <ResizableColumns :columns="2">
         <template #col-1>
+          <p>Created by: <IdentifiedUser /></p>
           <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />
         </template>
         <template #col-2>

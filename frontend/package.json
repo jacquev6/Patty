@@ -21,6 +21,7 @@
     "marked": "^15.0.7",
     "modern-normalize": "^3.0.1",
     "openapi-fetch": "^0.13.5",
+    "pinia": "^3.0.2",
     "split-grid": "^1.0.11",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"

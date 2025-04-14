@@ -15,12 +15,14 @@ def upgrade() -> None:
     op.create_table(
         "adaptation_input",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
         sa.Column("text", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_input")),
     )
     op.create_table(
         "adaptation_strategies",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
         sa.Column("parent_id", sa.Integer(), nullable=True),
         sa.Column("model", sa.JSON(), nullable=False),
         sa.Column("system_prompt", sa.String(), nullable=False),
@@ -35,6 +37,7 @@ def upgrade() -> None:
     op.create_table(
         "adaptation_adaptations",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
         sa.Column("input_id", sa.Integer(), nullable=False),
         sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),

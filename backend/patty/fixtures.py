@@ -166,6 +166,7 @@ def make_default_system_prompt() -> str:
 
 def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
+        created_by="Patty",
         model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
         system_prompt=make_default_system_prompt(),
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
@@ -189,6 +190,7 @@ def create_default_adaptation_strategy() -> Iterable[object]:
 
 def create_dummy_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
+        created_by="Patty",
         model=llm.DummyModel(name="dummy-1"),
         system_prompt="Blah blah blah.",
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
@@ -212,13 +214,14 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
 
 def create_default_adaptation_input() -> Iterable[object]:
     yield adaptation.Input(
+        created_by="Patty",
         text=textwrap.dedent(
             """\
             5 Complète avec "le vent" ou "la pluie"
             a. Les feuilles sont chahutées par ...
             b. Les vitres sont mouillées par ...
             """
-        )
+        ),
     )
 
 
@@ -228,6 +231,7 @@ def create_dummy_adaptation() -> Iterable[object]:
     [input] = create_default_adaptation_input()
     yield input
     yield adaptation.Adaptation(
+        created_by="Patty",
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],

@@ -64,6 +64,8 @@ class Strategy(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
+    created_by: orm.Mapped[str]
+
     parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_strategies.id"))
 
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)

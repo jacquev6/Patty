@@ -15,6 +15,9 @@ describe('The adaptation creation page', () => {
     })
 
     cy.visit('/new-adaptation')
+
+    cy.get('[data-cy="identified-user"]').type('Alice', {delay: 0})
+    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('looks like this', () => {
@@ -115,6 +118,42 @@ describe('The adaptation creation page', () => {
 
     cy.visit('/new-adaptation')
     cy.get('@input-text').should('have.value', '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\nBlih blih.')
+  })
+
+  it('remembers separately the last strategy and input used by each user', () => {
+    cy.get('[data-cy="system-prompt"]').as('system-prompt')
+    cy.get('[data-cy="input-text"]').as('input-text')
+
+    cy.get('@system-prompt').should('have.value', 'Blah blah blah.')
+    cy.get('@input-text').should('have.value', '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n')
+    cy.get('@system-prompt').type('{selectAll}Alice\'s prompt.', {delay: 0})
+    cy.get('@input-text').type('{selectAll}Alice\'s input.', {delay: 0})
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+    cy.get('p:contains("Created by: Alice")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@system-prompt').should('have.value', 'Alice\'s prompt.')
+    cy.get('@input-text').should('have.value', 'Alice\'s input.')
+    cy.get('[data-cy="edit-identified-user"]').click()
+    cy.get('[data-cy="identified-user"]').type('{selectAll}Bob', {delay: 0})
+    cy.get('[data-cy="identified-user-ok"]').click()
+    cy.get('@system-prompt').should('have.value', 'Blah blah blah.')
+    cy.get('@input-text').should('have.value', '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n')
+    cy.get('@system-prompt').type('{selectAll}Bob\'s prompt.', {delay: 0})
+    cy.get('@input-text').type('{selectAll}Bob\'s input.', {delay: 0})
+    cy.get('button:contains("Submit")').click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
+    cy.get('p:contains("Created by: Bob")').should('exist')
+
+    cy.visit('/new-adaptation')
+    cy.get('@system-prompt').should('have.value', 'Bob\'s prompt.')
+    cy.get('@input-text').should('have.value', 'Bob\'s input.')
+    cy.get('[data-cy="edit-identified-user"]').click()
+    cy.get('[data-cy="identified-user"]').type('{selectAll}Alice', {delay: 0})
+    cy.get('[data-cy="identified-user-ok"]').click()
+    cy.get('@system-prompt').should('have.value', 'Alice\'s prompt.')
+    cy.get('@input-text').should('have.value', 'Alice\'s input.')
   })
 
   it('handles non-JSON response from the LLM', () => {

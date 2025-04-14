@@ -23,6 +23,7 @@ LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise
 
 class ApiStrategy(ApiModel):
     id: int
+    created_by: str
     model: llm.ConcreteModel
     system_prompt: str
     response_specification: ConcreteLlmResponseSpecification
@@ -30,11 +31,13 @@ class ApiStrategy(ApiModel):
 
 class ApiInput(ApiModel):
     id: int
+    created_by: str
     text: str
 
 
 class ApiAdaptation(ApiModel):
     id: int
+    created_by: str
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -45,8 +48,13 @@ class ApiAdaptation(ApiModel):
 
 
 @router.get("/latest-strategy", response_model=ApiStrategy)
-def get_latest_strategy(session: database_utils.SessionDependable) -> DbStrategy:
-    strategy = session.query(DbStrategy).order_by(-DbStrategy.id).first()
+def get_latest_strategy(user: str, session: database_utils.SessionDependable) -> DbStrategy:
+    for created_by in [user, "Patty"]:
+        strategy = (
+            session.query(DbStrategy).filter(DbStrategy.created_by == created_by).order_by(-DbStrategy.id).first()
+        )
+        if strategy is not None:
+            break
     assert strategy is not None
     return strategy
 
@@ -57,13 +65,17 @@ def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecifi
 
 
 @router.get("/latest-input", response_model=ApiInput)
-def get_latest_input(session: database_utils.SessionDependable) -> DbInput:
-    input = session.query(DbInput).order_by(-DbInput.id).first()
+def get_latest_input(user: str, session: database_utils.SessionDependable) -> DbInput:
+    for created_by in [user, "Patty"]:
+        input = session.query(DbInput).filter(DbInput.created_by == created_by).order_by(-DbInput.id).first()
+        if input is not None:
+            break
     assert input is not None
     return input
 
 
 class PostAdaptationRequest(ApiModel):
+    creator: str
     strategy: ApiStrategy
     input: ApiInput
 
@@ -78,6 +90,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         or strategy.response_specification != req.strategy.response_specification
     ):
         strategy = DbStrategy(
+            created_by=req.creator,
             parent_id=strategy.id,
             model=req.strategy.model,
             system_prompt=req.strategy.system_prompt,
@@ -88,7 +101,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
     input = session.get(DbInput, req.input.id)
     assert input is not None
     if input.text != req.input.text:
-        input = DbInput(text=req.input.text)
+        input = DbInput(created_by=req.creator, text=req.input.text)
         session.add(input)
 
     session.flush()
@@ -102,6 +115,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         response = await strategy.model.complete(messages, strategy.response_specification.make_response_format())
     except llm.LlmException as error:
         db_adaptation = DbAdaptation(
+            created_by=req.creator,
             strategy_id=strategy.id,
             input_id=input.id,
             raw_llm_conversations=[error.raw_conversation],
@@ -111,6 +125,7 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
         )
     else:
         db_adaptation = DbAdaptation(
+            created_by=req.creator,
             strategy_id=strategy.id,
             input_id=input.id,
             raw_llm_conversations=[response.raw_conversation],
@@ -220,6 +235,7 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
 def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=adaptation.id,
+        created_by=adaptation.created_by,
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.input),
         raw_llm_conversations=adaptation.raw_llm_conversations,
@@ -233,6 +249,7 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
 def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
     return ApiStrategy(
         id=strategy.id,
+        created_by=strategy.created_by,
         model=strategy.model,
         system_prompt=strategy.system_prompt,
         response_specification=strategy.response_specification,
@@ -240,7 +257,7 @@ def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
 
 
 def make_api_input(input: DbInput) -> ApiInput:
-    return ApiInput(id=input.id, text=input.text)
+    return ApiInput(id=input.id, created_by=input.created_by, text=input.text)
 
 
 export_adaptation_template_file_path = os.path.join(
