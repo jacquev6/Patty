@@ -91,7 +91,6 @@ async def post_adaptation(req: PostAdaptationRequest, session: database_utils.Se
     ):
         strategy = DbStrategy(
             created_by=req.creator,
-            parent_id=strategy.id,
             model=req.strategy.model,
             system_prompt=req.strategy.system_prompt,
             response_specification=req.strategy.response_specification,

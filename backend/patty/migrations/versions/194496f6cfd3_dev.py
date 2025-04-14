@@ -23,15 +23,9 @@ def upgrade() -> None:
         "adaptation_strategies",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_by", sa.String(), nullable=False),
-        sa.Column("parent_id", sa.Integer(), nullable=True),
         sa.Column("model", sa.JSON(), nullable=False),
         sa.Column("system_prompt", sa.String(), nullable=False),
         sa.Column("response_specification", sa.JSON(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["parent_id"],
-            ["adaptation_strategies.id"],
-            name=op.f("fk_adaptation_strategies_parent_id_adaptation_strategies"),
-        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_strategies")),
     )
     op.create_table(

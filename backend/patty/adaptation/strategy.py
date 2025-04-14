@@ -66,8 +66,6 @@ class Strategy(OrmBase):
 
     created_by: orm.Mapped[str]
 
-    parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_strategies.id"))
-
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
 
     class _ModelContainer(pydantic.BaseModel):
