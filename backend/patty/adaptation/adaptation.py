@@ -1,14 +1,12 @@
-import typing
-
 from sqlalchemy import orm
 import sqlalchemy as sql
 
 from ..adapted import Exercise
+from ..any_json import JsonDict, JsonList
+from ..api_utils import ApiModel
 from ..database_utils import OrmBase
 from .input import Input
 from .strategy import Strategy
-from ..any_json import JsonDict, JsonList
-from ..api_utils import ApiModel
 
 
 class Adjustment(ApiModel):
