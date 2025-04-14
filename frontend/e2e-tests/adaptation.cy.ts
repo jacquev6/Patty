@@ -1,3 +1,56 @@
+describe('The batch creation page', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+
+    Cypress.on('uncaught:exception', error => {
+      if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
+        // @todo Deep dive into this issue: avoid the error instead of ignoring it.
+        // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
+        return false
+      } else {
+        return true
+      }
+    })
+
+    cy.visit('/new-batch')
+
+    cy.get('[data-cy="identified-user"]').type('Alice', {delay: 0})
+    cy.get('[data-cy="identified-user-ok"]').click()
+  })
+
+  it('looks like this', () => {
+    cy.compareSnapshot(`batch-creation-page.${Cypress.browser.name}`)
+  })
+
+  it('lets user add and remove input exercises', () => {
+    cy.get('[data-cy="input-text"]').as('input-text')
+
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('@input-text').should('have.length', 2)
+    cy.get('@input-text').eq(0).should('have.value', '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n')
+    cy.get('@input-text').eq(1).should('have.value', '').type('Blah blah blah.', {delay: 0})
+    cy.get('@input-text').should('have.length', 3)
+    cy.get('@input-text').eq(2).should('have.value', '').type('Bleh bleh bleh.', {delay: 0})
+    cy.get('@input-text').should('have.length', 4)
+    cy.get('@input-text').eq(3).should('have.value', '').type('Blih blih blih.', {delay: 0})
+    cy.get('@input-text').should('have.length', 5)
+    cy.get('@input-text').eq(3).type('{selectAll}{del}')
+    cy.get('@input-text').should('have.length', 4)
+    cy.get('@input-text').eq(3).should('have.focus')
+    cy.get('@input-text').eq(1).type('{selectAll}{del}')
+    cy.get('@input-text').should('have.length', 4)
+    cy.get('@input-text').eq(1).should('have.focus')
+    cy.get('@input-text').eq(2).type('{selectAll}{del}')
+    cy.get('@input-text').should('have.length', 2)
+    cy.get('@input-text').eq(1).should('have.focus')
+    cy.get('@input-text').eq(0).type('{selectAll}{del}')
+    cy.get('@input-text').should('have.length', 1)
+    cy.get('button:contains("Submit")').should('be.disabled')
+  })
+})
+
 describe('The adaptation creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import autosize from 'autosize'
 
 import assert from './assert'
@@ -17,6 +17,13 @@ watch(model, async () => {
   assert(textareaRef.value !== null)
   await nextTick()
   autosize.update(textareaRef.value)
+})
+
+defineExpose({
+  wrapped: computed(() => {
+    assert(textareaRef.value !== null)
+    return textareaRef.value
+  }),
 })
 </script>
 

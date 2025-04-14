@@ -75,6 +75,28 @@ def get_latest_input(user: str, session: database_utils.SessionDependable) -> Db
     return input
 
 
+class LatestBatch(ApiModel):
+    id: int
+    created_by: str
+    strategy: ApiStrategy
+    inputs: list[ApiInput]
+
+
+@router.get("/latest-batch", response_model=LatestBatch)
+def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
+    for created_by in [user, "Patty"]:
+        batch = session.query(Batch).filter(Batch.created_by == created_by).order_by(-Batch.id).first()
+        if batch is not None:
+            break
+    assert batch is not None
+    return LatestBatch(
+        id=batch.id,
+        created_by=batch.created_by,
+        strategy=make_api_strategy(batch.strategy),
+        inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
+    )
+
+
 class PostAdaptationRequest(ApiModel):
     creator: str
     strategy: ApiStrategy

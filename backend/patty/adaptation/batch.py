@@ -3,6 +3,7 @@ import sqlalchemy as sql
 
 from ..database_utils import OrmBase
 from .strategy import Strategy
+from . import adaptation
 
 
 class Batch(OrmBase):
@@ -19,3 +20,7 @@ class Batch(OrmBase):
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
+
+    adaptations: orm.Mapped[list["adaptation.Adaptation"]] = orm.relationship(
+        back_populates="batch", foreign_keys="Adaptation.batch_id"
+    )

@@ -7,6 +7,9 @@ export const client = createClient<paths>()
 export type LlmModel =
   paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
 
+export type LatestBatch =
+  paths['/api/adaptation/latest-batch']['get']['responses']['200']['content']['application/json']
+
 export type AdaptationStrategy =
   paths['/api/adaptation/latest-strategy']['get']['responses']['200']['content']['application/json']
 

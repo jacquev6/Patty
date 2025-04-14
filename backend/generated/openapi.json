@@ -154,6 +154,45 @@
         }
       }
     },
+    "/api/adaptation/latest-batch": {
+      "get": {
+        "summary": "Get Latest Batch",
+        "operationId": "get_latest_batch_api_adaptation_latest_batch_get",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LatestBatch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/adaptation": {
       "post": {
         "summary": "Post Adaptation",
@@ -1055,6 +1094,37 @@
           "referenceComponents"
         ],
         "title": "JsonSchemaLlmResponseSpecification"
+      },
+      "LatestBatch": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "strategy",
+          "inputs"
+        ],
+        "title": "LatestBatch"
       },
       "Line_Union_Text__Whitespace__": {
         "properties": {

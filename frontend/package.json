@@ -17,6 +17,7 @@
     "@vueuse/core": "^13.0.0",
     "ajv": "^8.17.1",
     "autosize": "^6.0.1",
+    "deep-copy": "^1.4.2",
     "json-stringify-pretty-compact": "^4.0.0",
     "marked": "^15.0.7",
     "modern-normalize": "^3.0.1",

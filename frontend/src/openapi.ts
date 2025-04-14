@@ -72,6 +72,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/latest-batch': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Latest Batch */
+    get: operations['get_latest_batch_api_adaptation_latest_batch_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation': {
     parameters: {
       query?: never
@@ -403,6 +420,16 @@ export interface components {
       hintComponents: components['schemas']['HintComponents']
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
+    }
+    /** LatestBatch */
+    LatestBatch: {
+      /** Id */
+      id: number
+      /** Createdby */
+      createdBy: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
     }
     Line_Union_Text__Whitespace__: {
       /** Contents */
@@ -743,6 +770,37 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiInput']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_latest_batch_api_adaptation_latest_batch_get: {
+    parameters: {
+      query: {
+        user: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LatestBatch']
         }
       }
       /** @description Validation Error */

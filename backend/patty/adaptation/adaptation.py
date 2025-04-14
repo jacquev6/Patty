@@ -33,7 +33,7 @@ class Adaptation(OrmBase):
     created_by: orm.Mapped[str]
 
     batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Batch.id))
-    batch: orm.Mapped[Batch] = orm.relationship(Batch, foreign_keys=[batch_id])
+    batch: orm.Mapped[Batch] = orm.relationship(Batch, foreign_keys=[batch_id], back_populates="adaptations")
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
