@@ -2,6 +2,7 @@ from typing import Annotated, Iterable, cast
 
 from fastapi import Depends, Request
 import sqlalchemy.orm
+import sqlalchemy.exc
 
 
 Engine = sqlalchemy.Engine
@@ -31,8 +32,14 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
 
 def truncate_all_tables(session: Session) -> None:
     for table in reversed(OrmBase.metadata.sorted_tables):
-        session.execute(table.delete())
-        session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+        try:
+            session.execute(table.delete())
+            session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+        except sqlalchemy.exc.ProgrammingError:
+            # E.g. when the table does not exist yet
+            session.rollback()
+        else:
+            session.commit()
 
 
 class SessionMaker:
