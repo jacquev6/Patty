@@ -7,6 +7,7 @@ import { type AdaptationStrategy, type LlmModel, client } from './apiClient'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
+import FixedColumns from './FixedColumns.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -162,8 +163,8 @@ const schema = computedAsync(async () => {
       >).
     </p>
     <h2>Allowed components</h2>
-    <div style="display: grid; grid-template-columns: 1fr 11px 1fr 11px 1fr 11px 2fr 11px 1fr">
-      <div>
+    <FixedColumns :columns="[1, 1, 1, 2, 1]">
+      <template #col-1>
         <h3>In instruction</h3>
         <p>
           <label><input type="checkbox" checked disabled /> text</label>
@@ -182,9 +183,8 @@ const schema = computedAsync(async () => {
             choice</label
           >
         </p>
-      </div>
-      <div class="gutter"></div>
-      <div>
+      </template>
+      <template #col-2>
         <h3>In example</h3>
         <p>
           <label><input type="checkbox" checked disabled /> text</label>
@@ -203,9 +203,8 @@ const schema = computedAsync(async () => {
             arrow</label
           >
         </p>
-      </div>
-      <div class="gutter"></div>
-      <div>
+      </template>
+      <template #col-3>
         <h3>In hint</h3>
         <p>
           <label><input type="checkbox" checked disabled /> text</label>
@@ -213,12 +212,11 @@ const schema = computedAsync(async () => {
         <p>
           <label><input type="checkbox" checked disabled /> whitespace</label>
         </p>
-      </div>
-      <div class="gutter"></div>
-      <div>
+      </template>
+      <template #col-4>
         <h3>In statement</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr">
-          <div>
+        <FixedColumns :columns="[1, 1]" :gutters="false">
+          <template #col-1>
             <p>
               <label><input type="checkbox" checked disabled /> text</label>
             </p>
@@ -236,8 +234,8 @@ const schema = computedAsync(async () => {
                 arrow</label
               >
             </p>
-          </div>
-          <div>
+          </template>
+          <template #col-2>
             <p>
               <label
                 ><input
@@ -271,11 +269,10 @@ const schema = computedAsync(async () => {
                 selectable input</label
               >
             </p>
-          </div>
-        </div>
-      </div>
-      <div class="gutter"></div>
-      <div>
+          </template>
+        </FixedColumns>
+      </template>
+      <template #col-5>
         <h3>In reference</h3>
         <p>
           <label><input type="checkbox" checked disabled /> text</label>
@@ -283,8 +280,8 @@ const schema = computedAsync(async () => {
         <p>
           <label><input type="checkbox" checked disabled /> whitespace</label>
         </p>
-      </div>
-    </div>
+      </template>
+    </FixedColumns>
     <AdaptedExerciseJsonSchemaDetails v-if="schema !== null" :schema />
   </template>
   <template v-else>
@@ -296,11 +293,6 @@ const schema = computedAsync(async () => {
 </template>
 
 <style scoped>
-.gutter {
-  background-color: black;
-  margin: 0 5px;
-}
-
 h3 {
   margin: 0;
 }
