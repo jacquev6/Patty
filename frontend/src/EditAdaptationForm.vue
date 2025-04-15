@@ -177,7 +177,12 @@ watch(Escape, () => {
     </template>
     <template #col-2>
       <h1>Input text</h1>
-      <MarkDown :markdown="adaptation.input.join('\n')" />
+      <p>
+        <template v-for="(line, index) in adaptation.input">
+          <br v-if="index !== 0" />
+          {{ line }}
+        </template>
+      </p>
       <h1>Adjustments</h1>
       <p><button @click="showRaw = true">View the raw conversation with the LLM</button></p>
       <BusyBox :busy>
@@ -194,7 +199,7 @@ watch(Escape, () => {
             </div>
           </div>
         </template>
-        <div v-if="!isAdjustmentPromptDisabled" class="user-prompt">
+        <div class="user-prompt">
           <TextArea data-cy="user-prompt" v-model="adjustmentPrompt" :disabled="isAdjustmentPromptDisabled"></TextArea>
           <p>
             <button data-cy="submit-adjustment" @click="submitAdjustment" :disabled="isSubmitAdjustmentDisabled">

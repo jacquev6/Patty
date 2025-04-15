@@ -372,14 +372,18 @@ describe('The adaptation edition page', () => {
   it('forbids adjustments on manual edits', () => {
     cy.visit('/adaptation-1')
 
+    cy.get('[data-cy="user-prompt"]').as('user-prompt')
     cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
     cy.get('[data-cy="manual-edition"]').as('manual-edition')
 
-    cy.get('@submit-adjustment').should('exist')
+    cy.get('@user-prompt').should('be.enabled').type('Adjust!')
+    cy.get('@submit-adjustment').should('be.enabled')
     cy.get('@manual-edition').type('Blih blih.', {delay: 0})
-    cy.get('@submit-adjustment').should('not.exist')
+    cy.get('@user-prompt').should('be.disabled')
+    cy.get('@submit-adjustment').should('be.disabled')
     cy.get('[data-cy="reset-manual-edition"]').click()
-    cy.get('@submit-adjustment').should('exist')
+    cy.get('@user-prompt').should('be.enabled')
+    cy.get('@submit-adjustment').should('be.enabled')
   })
 
   it('handles non-JSON response from the LLM and rewinds it', () => {
