@@ -52,6 +52,7 @@ const innerContainerStyle = computed<StyleValue>(() => {
 <style scoped>
 .bordered {
   border: 1px solid black;
+  overflow: hidden;
 }
 
 .inner-container {
