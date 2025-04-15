@@ -250,6 +250,18 @@ describe('The batch edition page', () => {
 
     cy.compareSnapshot(`batch-edition-page.2.${Cypress.browser.name}`)
   })
+
+  it('does not remember answers', () => {
+    cy.visit('/batch-1')
+
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
+    cy.get('[data-cy="choice0"]').click()
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+    
+    cy.visit('/batch-1')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+  })
 })
 
 
@@ -418,5 +430,17 @@ describe('The adaptation edition page', () => {
 
     cy.get('h1:contains("Error with the LLM")').should('not.exist')
     cy.get('h1:contains("Adapted exercise")').should('exist')
+  })
+
+  it('does not remember answers', () => {
+    cy.visit('/adaptation-1')
+
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
+    cy.get('[data-cy="choice0"]').click()
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+    
+    cy.visit('/adaptation-1')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
   })
 })

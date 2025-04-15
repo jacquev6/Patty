@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, provide, ref, useTemplateRef, watch } from 'vue'
+import { useStorage } from '@vueuse/core'
 
 import type { AdaptedExercise } from '@/apiClient'
 import LineComponent from './components/LineComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
 
-const props = defineProps<{
-  adaptedExercise: AdaptedExercise
-}>()
+const props = withDefaults(
+  defineProps<{
+    exerciseId?: string | null
+    adaptedExercise: AdaptedExercise
+  }>(),
+  { exerciseId: null },
+)
 
 provide('adaptedExerciseTeleportBackdropTo', useTemplateRef('container'))
 
@@ -25,22 +30,25 @@ const totalPagesCount = computed(() => {
 })
 const page = ref(0)
 
-const model = reactive<Record<number, Record<number, Record<number, string | number>>>>({})
-watch(
-  () => props.adaptedExercise,
-  (adaptedExercise) => {
-    for (const key of Object.keys(model)) {
-      delete model[key as unknown as number]
+const defaultModel = computed(() => {
+  const model: Record<number, Record<number, Record<number, string | number>>> = {}
+  for (let pageIndex = 0; pageIndex < props.adaptedExercise.statement.pages.length; pageIndex++) {
+    model[pageIndex] = {}
+    for (let lineIndex = 0; lineIndex < props.adaptedExercise.statement.pages[pageIndex].lines.length; lineIndex++) {
+      model[pageIndex][lineIndex] = {}
     }
-    for (let pageIndex = 0; pageIndex < adaptedExercise.statement.pages.length; pageIndex++) {
-      model[pageIndex] = {}
-      for (let lineIndex = 0; lineIndex < adaptedExercise.statement.pages[pageIndex].lines.length; lineIndex++) {
-        model[pageIndex][lineIndex] = {}
-      }
-    }
-  },
-  { immediate: true },
-)
+  }
+  return model
+})
+
+const model =
+  props.exerciseId === null
+    ? ref(defaultModel.value)
+    : useStorage(`patty/student-answers/v1/exercise-${props.exerciseId}`, defaultModel.value)
+
+watch(defaultModel, (m) => {
+  model.value = m
+})
 
 const triColorLines = useTemplateRef('tricolor')
 watch(

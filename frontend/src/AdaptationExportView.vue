@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import type { AdaptedExercise } from '@/apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 
-const data = JSON.parse('{{ data }}')
+type Data = {
+  exerciseId: string
+  adaptedExercise: AdaptedExercise
+}
+
+const data = JSON.parse('{{ data }}') as Data
 </script>
 
 <template>
-  <AdaptedExerciseRenderer :adaptedExercise="data" style="height: 100vh" />
+  <AdaptedExerciseRenderer v-bind="data" style="height: 100vh" />
 </template>

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from typing import TypeVar
 
@@ -347,7 +348,8 @@ def export_adaptation(
     else:
         exercise = db_adaptation.manual_edit
 
-    data = exercise.model_dump_json().replace("\\", "\\\\").replace('"', '\\"')
+    data = {"exerciseId": id, "adaptedExercise": exercise.model_dump()}
+
     with open(export_adaptation_template_file_path) as f:
         template = f.read()
 
@@ -355,4 +357,7 @@ def export_adaptation(
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{id}.html"'
 
-    return fastapi.responses.HTMLResponse(content=template.replace("{{ data }}", data), headers=headers)
+    return fastapi.responses.HTMLResponse(
+        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        headers=headers,
+    )
