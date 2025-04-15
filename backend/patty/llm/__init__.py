@@ -3,6 +3,7 @@ from .base import (
     SystemMessage,
     UserMessage,
     AssistantMessage,
+    CompletionResponse,
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
@@ -17,6 +18,7 @@ from .schema import make_schema
 __all__ = [
     "AbstractModel",
     "AssistantMessage",
+    "CompletionResponse",
     "ConcreteModel",
     "DummyModel",
     "JsonFromTextResponseFormat",

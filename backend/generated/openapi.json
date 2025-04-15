@@ -193,6 +193,83 @@
         }
       }
     },
+    "/api/adaptation/batch": {
+      "post": {
+        "summary": "Post Batch",
+        "operationId": "post_batch_api_adaptation_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/batch/{id}": {
+      "get": {
+        "summary": "Get Batch",
+        "operationId": "get_batch_api_adaptation_batch__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/adaptation": {
       "post": {
         "summary": "Post Adaptation",
@@ -952,6 +1029,37 @@
           "kind"
         ]
       },
+      "GetBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "adaptations": {
+            "items": {
+              "$ref": "#/components/schemas/ApiAdaptation"
+            },
+            "type": "array",
+            "title": "Adaptations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "strategy",
+          "adaptations"
+        ],
+        "title": "GetBatchResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1574,6 +1682,46 @@
           "input"
         ],
         "title": "PostAdaptationRequest"
+      },
+      "PostBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Input"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "strategy",
+          "inputs"
+        ],
+        "title": "PostBatchRequest"
+      },
+      "PostBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostBatchResponse"
       },
       "PureTextContainer": {
         "properties": {

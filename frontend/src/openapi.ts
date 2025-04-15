@@ -89,6 +89,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/batch': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Batch */
+    post: operations['post_batch_api_adaptation_batch_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/batch/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Batch */
+    get: operations['get_batch_api_adaptation_batch__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation': {
     parameters: {
       query?: never
@@ -344,6 +378,16 @@ export interface components {
        */
       kind: 'freeTextInput'
     }
+    /** GetBatchResponse */
+    GetBatchResponse: {
+      /** Id */
+      id: number
+      /** Createdby */
+      createdBy: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Adaptations */
+      adaptations: components['schemas']['ApiAdaptation'][]
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -579,6 +623,19 @@ export interface components {
       strategy: components['schemas']['ApiStrategy-Input']
       input: components['schemas']['ApiInput']
     }
+    /** PostBatchRequest */
+    PostBatchRequest: {
+      /** Creator */
+      creator: string
+      strategy: components['schemas']['ApiStrategy-Input']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
+    }
+    /** PostBatchResponse */
+    PostBatchResponse: {
+      /** Id */
+      id: number
+    }
     PureTextContainer: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
@@ -801,6 +858,70 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['LatestBatch']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_batch_api_adaptation_batch_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostBatchRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_batch_api_adaptation_batch__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetBatchResponse']
         }
       }
       /** @description Validation Error */

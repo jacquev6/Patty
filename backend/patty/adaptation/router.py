@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 import fastapi
@@ -95,6 +96,121 @@ def get_latest_batch(user: str, session: database_utils.SessionDependable) -> La
         strategy=make_api_strategy(batch.strategy),
         inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
     )
+
+
+class PostBatchRequest(ApiModel):
+    creator: str
+    strategy: ApiStrategy
+    inputs: list[ApiInput]
+
+
+class PostBatchResponse(ApiModel):
+    id: int
+
+
+@router.post("/batch")
+async def post_batch(
+    req: PostBatchRequest,
+    engine: database_utils.EngineDependable,
+    session: database_utils.SessionDependable,
+    background_tasks: fastapi.BackgroundTasks,
+) -> PostBatchResponse:
+    strategy = session.get(DbStrategy, req.strategy.id)
+    assert strategy is not None
+    if (
+        strategy.system_prompt != req.strategy.system_prompt
+        or strategy.model != req.strategy.model
+        or strategy.response_specification != req.strategy.response_specification
+    ):
+        strategy = DbStrategy(
+            created_by=req.creator,
+            model=req.strategy.model,
+            system_prompt=req.strategy.system_prompt,
+            response_specification=req.strategy.response_specification,
+        )
+        session.add(strategy)
+
+    batch = Batch(created_by=req.creator, strategy=strategy)
+    session.add(batch)
+
+    for req_input in req.inputs:
+        input = session.get(DbInput, req_input.id)
+        assert input is not None
+        if input.text != req_input.text:
+            input = DbInput(created_by=req.creator, text=req_input.text)
+            session.add(input)
+
+        adaptation = DbAdaptation(
+            created_by=req.creator,
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[],
+            initial_assistant_error=None,
+            initial_assistant_response=None,
+            adjustments=[],
+        )
+        session.add(adaptation)
+
+    session.flush()
+
+    background_tasks.add_task(submit_batch, engine, batch.id)
+
+    return PostBatchResponse(id=batch.id)
+
+
+async def submit_batch(engine: database_utils.Engine, id: int) -> None:
+    with database_utils.Session(engine) as session:
+        batch = session.get(Batch, id)
+        assert batch is not None
+
+        print(f"Submitting batch {batch.id}", flush=True)
+        response_format = batch.strategy.response_specification.make_response_format()
+
+        async def submit_adaptation(adaptation: DbAdaptation) -> None:
+            assert adaptation.strategy is batch.strategy
+
+            messages: list[LlmMessage] = [
+                llm.SystemMessage(content=batch.strategy.system_prompt),
+                llm.UserMessage(content=adaptation.input.text),
+            ]
+
+            try:
+                print(f"Submitting adaptation {adaptation.id}", flush=True)
+                response = await batch.strategy.model.complete(messages, response_format)
+            except llm.LlmException as error:
+                print(f"Error on adaptation {adaptation.id}", flush=True)
+                adaptation.raw_llm_conversations = [error.raw_conversation]
+                adaptation.initial_assistant_error = error.args[0]
+            else:
+                print(f"Success on adaptation {adaptation.id}", flush=True)
+                adaptation.raw_llm_conversations = [response.raw_conversation]
+                adaptation.initial_assistant_response = response.message.content
+
+            session.commit()
+
+        await asyncio.gather(*(submit_adaptation(adaptation) for adaptation in batch.adaptations))
+
+
+class GetBatchResponse(ApiModel):
+    id: int
+    created_by: str
+    strategy: ApiStrategy
+    adaptations: list[ApiAdaptation]
+
+
+@router.get("/batch/{id}")
+async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
+    batch = session.get(Batch, id)
+    if batch is None:
+        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
+    else:
+        return GetBatchResponse(
+            id=batch.id,
+            created_by=batch.created_by,
+            strategy=make_api_strategy(batch.strategy),
+            adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
+        )
 
 
 class PostAdaptationRequest(ApiModel):

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, useTemplateRef, watch } from 'vue'
 import deepCopy from 'deep-copy'
+import { useRouter } from 'vue-router'
 
-import { type LatestBatch, type LlmModel } from './apiClient'
+import { type LatestBatch, type LlmModel, client } from './apiClient'
 import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
@@ -16,6 +17,8 @@ const props = defineProps<{
   availableLlmModels: LlmModel[]
   latestBatch: LatestBatch
 }>()
+
+const router = useRouter()
 
 const identifiedUser = useIdentifiedUserStore()
 
@@ -65,16 +68,23 @@ const inputProxies = computed(() => [
 
 const busy = ref(false)
 
-async function submit() {}
+async function submit() {
+  busy.value = true
 
-const cleanedUpInputs = computed(() =>
-  inputs
-    .map((input) => ({
-      ...input,
-      text: input.text.trim(),
-    }))
-    .filter((input) => input.text !== ''),
-)
+  const response = await client.POST('/api/adaptation/batch', {
+    body: {
+      creator: identifiedUser.identifier,
+      strategy,
+      inputs: cleanedUpInputs.value,
+    },
+  })
+  busy.value = false
+  if (response.data !== undefined) {
+    router.push({ name: 'batch', params: { id: response.data.id } })
+  }
+}
+
+const cleanedUpInputs = computed(() => inputs.filter((input) => input.text.trim() !== ''))
 
 const disabled = computed(() => {
   return strategy.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0

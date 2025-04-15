@@ -16,6 +16,8 @@ export type AdaptationStrategy =
 export type AdaptationInput =
   paths['/api/adaptation/latest-input']['get']['responses']['200']['content']['application/json']
 
+export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200']['content']['application/json']
+
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = Exclude<Adaptation['initialAssistantResponse'], null>
 type InstructionComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number]

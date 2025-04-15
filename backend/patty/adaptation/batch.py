@@ -22,5 +22,5 @@ class Batch(OrmBase):
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
 
     adaptations: orm.Mapped[list["adaptation.Adaptation"]] = orm.relationship(
-        back_populates="batch", foreign_keys="Adaptation.batch_id"
+        back_populates="batch", foreign_keys="Adaptation.batch_id", order_by="Adaptation.id"
     )

@@ -225,14 +225,8 @@ def create_default_adaptation_input() -> Iterable[object]:
     )
 
 
-def create_dummy_adaptation() -> Iterable[object]:
-    [strategy] = create_dummy_adaptation_strategy()
-    yield strategy
-    [input] = create_default_adaptation_input()
-    yield input
-    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
-    yield batch
-    yield adaptation.Adaptation(
+def make_successful_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
         created_by="Patty",
         batch=batch,
         strategy=strategy,
@@ -365,11 +359,90 @@ def create_dummy_adaptation() -> Iterable[object]:
     )
 
 
+def make_in_progress_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        initial_assistant_error=None,
+        _initial_assistant_response=None,
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def make_invalid_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        initial_assistant_error="Failed to validate JSON response",
+        _initial_assistant_response=None,
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def make_not_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        initial_assistant_error="Failed to parse JSON response",
+        _initial_assistant_response=None,
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def create_seed_data() -> Iterable[object]:
+    [strategy] = create_default_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
+
+
+def create_dummy_adaptation() -> Iterable[object]:
+    [strategy] = create_dummy_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
+
+
+def create_mixed_dummy_batch() -> Iterable[object]:
+    [strategy] = create_dummy_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
+
+
 available_fixtures = {
-    "default-adaptation-strategy": create_default_adaptation_strategy,
-    "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
-    "default-adaptation-input": create_default_adaptation_input,
-    "dummy-adaptation": create_dummy_adaptation,
+    "-".join(f.__name__.split("_")[1:]): f
+    for f in (
+        create_default_adaptation_input,
+        create_default_adaptation_strategy,
+        create_dummy_adaptation_strategy,
+        create_dummy_adaptation,
+        create_mixed_dummy_batch,
+        create_seed_data,
+    )
 }
 
 
@@ -385,4 +458,5 @@ app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATA
 
 @app.post("/load")
 def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
+    print(available_fixtures)
     load(session, fixtures.split(","))

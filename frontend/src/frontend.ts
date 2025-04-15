@@ -8,6 +8,7 @@ import IndexView from './IndexView.vue'
 import CreateAdaptationView from './CreateAdaptationView.vue'
 import CreateBatchView from './CreateBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
+import EditBatchView from './EditBatchView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,6 +22,12 @@ const router = createRouter({
       path: '/new-batch',
       name: 'create-batch',
       component: CreateBatchView,
+    },
+    {
+      path: '/batch-:id',
+      name: 'batch',
+      component: EditBatchView,
+      props: true,
     },
     {
       path: '/new-adaptation',
