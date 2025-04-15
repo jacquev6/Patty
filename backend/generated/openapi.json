@@ -504,6 +504,10 @@
             "type": "string",
             "title": "Createdby"
           },
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           },
@@ -559,6 +563,7 @@
         "required": [
           "id",
           "createdBy",
+          "batchId",
           "strategy",
           "input",
           "rawLlmConversations",

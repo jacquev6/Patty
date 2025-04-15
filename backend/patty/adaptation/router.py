@@ -41,6 +41,7 @@ class ApiInput(ApiModel):
 class ApiAdaptation(ApiModel):
     id: str
     created_by: str
+    batch_id: str
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -297,6 +298,7 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         created_by=adaptation.created_by,
+        batch_id=str(adaptation.batch_id),
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.input),
         raw_llm_conversations=adaptation.raw_llm_conversations,

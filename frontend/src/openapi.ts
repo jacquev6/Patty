@@ -193,6 +193,8 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string
+      /** Batchid */
+      batchId: string
       strategy: components['schemas']['ApiStrategy-Output']
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */

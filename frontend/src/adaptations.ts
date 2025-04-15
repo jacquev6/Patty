@@ -4,6 +4,7 @@ import assert from './assert'
 export type PreprocessedAdaptation = {
   id: string
   createdBy: string
+  batchId: string
   strategy: ApiAdaptation['strategy']
   input: string[]
   adjustmentPrompts: string[]
@@ -67,6 +68,7 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
   return {
     id: adaptation.id,
     createdBy: adaptation.createdBy,
+    batchId: adaptation.batchId,
     strategy: adaptation.strategy,
     input: adaptation.input.text.split('\n'),
     adjustmentPrompts: adaptation.adjustments.map((adjustment) => adjustment.userPrompt),

@@ -172,7 +172,10 @@ watch(Escape, () => {
 <template>
   <ResizableColumns :columns="[1, 1, 1]">
     <template #col-1>
-      <p>Created by: {{ adaptation.createdBy }}</p>
+      <p>
+        Created by: {{ adaptation.createdBy }}, part of
+        <RouterLink :to="{ name: 'batch', params: { id: adaptation.batchId } }">this batch</RouterLink>.
+      </p>
       <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>
