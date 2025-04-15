@@ -257,7 +257,7 @@ describe('The adaptation edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
 
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
 
     Cypress.on('uncaught:exception', error => {
       if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
@@ -270,11 +270,25 @@ describe('The adaptation edition page', () => {
     })
   })
 
-  it('looks like this', () => {
+  it('looks like this in case of success', () => {
     cy.visit('/adaptation-1')
 
     cy.get('h1:contains("Adapted exercise")').should('exist')
-    cy.compareSnapshot(`adaptation-edition-page.${Cypress.browser.name}`)
+    cy.compareSnapshot(`adaptation-edition-page.success.${Cypress.browser.name}`)
+  })
+
+  it('looks like this in case of invalid json', () => {
+    cy.visit('/adaptation-3')
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.compareSnapshot(`adaptation-edition-page.invalid-json.${Cypress.browser.name}`)
+  })
+
+  it('looks like this in case of not json', () => {
+    cy.visit('/adaptation-4')
+
+    cy.get('h1:contains("Error with the LLM")').should('exist')
+    cy.compareSnapshot(`adaptation-edition-page.not-json.${Cypress.browser.name}`)
   })
 
   it('displays "Not found" when the adaptation does not exist', () => {

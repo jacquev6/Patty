@@ -29,9 +29,10 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
     vue(),
   ]
   
-  if (process.env.PATTY_UNIT_TESTING !== 'true') {
-    plugins.push(vueDevTools())
-  }
+  // @todo Find a way to re-enable Vue DevTools for interactive development but not for end-to-end testing: they pollute visual tests.
+  // if (process.env.PATTY_UNIT_TESTING !== 'true') {
+  //   plugins.push(vueDevTools())
+  // }
 
   if (command === 'build' && entryPointName !== 'index') {
     // Generate a standalone HTML file that can be downloaded and opened offline

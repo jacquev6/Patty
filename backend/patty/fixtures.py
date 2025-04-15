@@ -431,6 +431,7 @@ def create_mixed_dummy_batch() -> Iterable[object]:
     yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
     yield make_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
     yield make_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_not_json_adaptation(batch=batch, strategy=strategy, input=input)
 
 
 available_fixtures = {
