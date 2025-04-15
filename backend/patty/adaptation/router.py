@@ -1,5 +1,6 @@
 import asyncio
 import os
+from typing import TypeVar
 
 import fastapi
 
@@ -179,16 +180,13 @@ class GetBatchResponse(ApiModel):
 
 @router.get("/batch/{id}")
 async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
-    batch = session.get(Batch, id)
-    if batch is None:
-        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
-    else:
-        return GetBatchResponse(
-            id=batch.id,
-            created_by=batch.created_by,
-            strategy=make_api_strategy(batch.strategy),
-            adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
-        )
+    batch = get_by_id(session, Batch, id)
+    return GetBatchResponse(
+        id=batch.id,
+        created_by=batch.created_by,
+        strategy=make_api_strategy(batch.strategy),
+        adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
+    )
 
 
 class PostAdaptationRequest(ApiModel):
@@ -199,11 +197,7 @@ class PostAdaptationRequest(ApiModel):
 
 @router.get("/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = session.get(DbAdaptation, id)
-    if db_adaptation is None:
-        raise fastapi.HTTPException(status_code=404, detail="Adaptation not found")
-    else:
-        return make_api_adaptation(db_adaptation)
+    return make_api_adaptation(get_by_id(session, DbAdaptation, id))
 
 
 class PostAdaptationAdjustmentRequest(ApiModel):
@@ -214,8 +208,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
-    db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
+    db_adaptation = get_by_id(session, DbAdaptation, id)
     assert db_adaptation.initial_assistant_error is None
     assert db_adaptation.initial_assistant_response is not None
 
@@ -259,8 +252,7 @@ async def post_adaptation_adjustment(
 
 @router.delete("/{id}/last-step")
 def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
+    db_adaptation = get_by_id(session, DbAdaptation, id)
 
     raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
     raw_llm_conversations.pop()
@@ -275,18 +267,30 @@ def delete_adaptation_last_step(id: str, session: database_utils.SessionDependab
 
 @router.put("/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
+    db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = req
     return make_api_adaptation(db_adaptation)
 
 
 @router.delete("/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
+    db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = None
     return make_api_adaptation(db_adaptation)
+
+
+Model = TypeVar("Model", bound=database_utils.OrmBase)
+
+
+def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> Model:
+    try:
+        numerical_id = int(id)
+    except ValueError:
+        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
+    db_adaptation = session.get(model, numerical_id)
+    if db_adaptation is None:
+        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
+    return db_adaptation
 
 
 def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
@@ -326,8 +330,7 @@ export_adaptation_template_file_path = os.path.join(
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    db_adaptation = session.get(DbAdaptation, id)
-    assert db_adaptation is not None
+    db_adaptation = get_by_id(session, DbAdaptation, id)
     assert db_adaptation.initial_assistant_error is None
     assert db_adaptation.initial_assistant_response is not None
 

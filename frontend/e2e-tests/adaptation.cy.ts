@@ -235,6 +235,12 @@ describe('The batch edition page', () => {
     cy.get('h1:contains("Not found")').should('exist')
   })
 
+  it('displays "Not found" when the batch id is not an integer', () => {
+    cy.visit('/batch-nope')
+
+    cy.get('h1:contains("Not found")').should('exist')
+  })
+
   it('looks like this', () => {
     cy.visit('/batch-1')
 
@@ -273,6 +279,12 @@ describe('The adaptation edition page', () => {
 
   it('displays "Not found" when the adaptation does not exist', () => {
     cy.visit('/adaptation-42')
+
+    cy.get('h1:contains("Not found")').should('exist')
+  })
+
+  it('displays "Not found" when the adaptation id is not an integer', () => {
+    cy.visit('/adaptation-nope')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
