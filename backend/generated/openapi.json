@@ -37,45 +37,6 @@
         }
       }
     },
-    "/api/adaptation/latest-strategy": {
-      "get": {
-        "summary": "Get Latest Strategy",
-        "operationId": "get_latest_strategy_api_adaptation_latest_strategy_get",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "User"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiStrategy-Output"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/adaptation/llm-response-schema": {
       "post": {
         "summary": "Get Llm Response Schema",
@@ -98,45 +59,6 @@
                 "schema": {
                   "type": "object",
                   "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/adaptation/latest-input": {
-      "get": {
-        "summary": "Get Latest Input",
-        "operationId": "get_latest_input_api_adaptation_latest_input_get",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "User"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiInput"
                 }
               }
             }
@@ -253,44 +175,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetBatchResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/adaptation": {
-      "post": {
-        "summary": "Post Adaptation",
-        "operationId": "post_adaptation_api_adaptation_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostAdaptationRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
                 }
               }
             }
@@ -1660,28 +1544,6 @@
           "adjustment"
         ],
         "title": "PostAdaptationAdjustmentRequest"
-      },
-      "PostAdaptationRequest": {
-        "properties": {
-          "creator": {
-            "type": "string",
-            "title": "Creator"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/ApiStrategy-Input"
-          },
-          "input": {
-            "$ref": "#/components/schemas/ApiInput"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "creator",
-          "strategy",
-          "input"
-        ],
-        "title": "PostAdaptationRequest"
       },
       "PostBatchRequest": {
         "properties": {

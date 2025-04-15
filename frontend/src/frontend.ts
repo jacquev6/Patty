@@ -5,7 +5,6 @@ import { createPinia } from 'pinia'
 
 import './main.css'
 import IndexView from './IndexView.vue'
-import CreateAdaptationView from './CreateAdaptationView.vue'
 import CreateBatchView from './CreateBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
 import EditBatchView from './EditBatchView.vue'
@@ -28,11 +27,6 @@ const router = createRouter({
       name: 'batch',
       component: EditBatchView,
       props: true,
-    },
-    {
-      path: '/new-adaptation',
-      name: 'create-adaptation',
-      component: CreateAdaptationView,
     },
     {
       path: '/adaptation-:id',

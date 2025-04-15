@@ -49,31 +49,9 @@ class ApiAdaptation(ApiModel):
     manual_edit: Exercise | None
 
 
-@router.get("/latest-strategy", response_model=ApiStrategy)
-def get_latest_strategy(user: str, session: database_utils.SessionDependable) -> DbStrategy:
-    for created_by in [user, "Patty"]:
-        strategy = (
-            session.query(DbStrategy).filter(DbStrategy.created_by == created_by).order_by(-DbStrategy.id).first()
-        )
-        if strategy is not None:
-            break
-    assert strategy is not None
-    return strategy
-
-
 @router.post("/llm-response-schema")
 def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
-
-
-@router.get("/latest-input", response_model=ApiInput)
-def get_latest_input(user: str, session: database_utils.SessionDependable) -> DbInput:
-    for created_by in [user, "Patty"]:
-        input = session.query(DbInput).filter(DbInput.created_by == created_by).order_by(-DbInput.id).first()
-        if input is not None:
-            break
-    assert input is not None
-    return input
 
 
 class LatestBatch(ApiModel):
@@ -217,67 +195,6 @@ class PostAdaptationRequest(ApiModel):
     creator: str
     strategy: ApiStrategy
     input: ApiInput
-
-
-@router.post("")
-async def post_adaptation(req: PostAdaptationRequest, session: database_utils.SessionDependable) -> ApiAdaptation:
-    strategy = session.get(DbStrategy, req.strategy.id)
-    assert strategy is not None
-    if (
-        strategy.system_prompt != req.strategy.system_prompt
-        or strategy.model != req.strategy.model
-        or strategy.response_specification != req.strategy.response_specification
-    ):
-        strategy = DbStrategy(
-            created_by=req.creator,
-            model=req.strategy.model,
-            system_prompt=req.strategy.system_prompt,
-            response_specification=req.strategy.response_specification,
-        )
-        session.add(strategy)
-
-    input = session.get(DbInput, req.input.id)
-    assert input is not None
-    if input.text != req.input.text:
-        input = DbInput(created_by=req.creator, text=req.input.text)
-        session.add(input)
-
-    batch = Batch(created_by=req.creator, strategy=strategy)
-
-    messages: list[LlmMessage] = [
-        llm.SystemMessage(content=strategy.system_prompt),
-        llm.UserMessage(content=input.text),
-    ]
-
-    try:
-        response = await strategy.model.complete(messages, strategy.response_specification.make_response_format())
-    except llm.LlmException as error:
-        db_adaptation = DbAdaptation(
-            created_by=req.creator,
-            batch=batch,
-            strategy=strategy,
-            input=input,
-            raw_llm_conversations=[error.raw_conversation],
-            initial_assistant_error=error.args[0],
-            initial_assistant_response=None,
-            adjustments=[],
-        )
-    else:
-        db_adaptation = DbAdaptation(
-            created_by=req.creator,
-            batch=batch,
-            strategy=strategy,
-            input=input,
-            raw_llm_conversations=[response.raw_conversation],
-            initial_assistant_error=None,
-            initial_assistant_response=response.message.content,
-            adjustments=[],
-        )
-
-    session.add(db_adaptation)
-    session.flush()
-
-    return make_api_adaptation(db_adaptation)
 
 
 @router.get("/{id}")

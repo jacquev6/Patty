@@ -21,23 +21,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/latest-strategy': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Latest Strategy */
-    get: operations['get_latest_strategy_api_adaptation_latest_strategy_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/api/adaptation/llm-response-schema': {
     parameters: {
       query?: never
@@ -49,23 +32,6 @@ export interface paths {
     put?: never
     /** Get Llm Response Schema */
     post: operations['get_llm_response_schema_api_adaptation_llm_response_schema_post']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/latest-input': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Latest Input */
-    get: operations['get_latest_input_api_adaptation_latest_input_get']
-    put?: never
-    post?: never
     delete?: never
     options?: never
     head?: never
@@ -117,23 +83,6 @@ export interface paths {
     get: operations['get_batch_api_adaptation_batch__id__get']
     put?: never
     post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Post Adaptation */
-    post: operations['post_adaptation_api_adaptation_post']
     delete?: never
     options?: never
     head?: never
@@ -616,13 +565,6 @@ export interface components {
       /** Adjustment */
       adjustment: string
     }
-    /** PostAdaptationRequest */
-    PostAdaptationRequest: {
-      /** Creator */
-      creator: string
-      strategy: components['schemas']['ApiStrategy-Input']
-      input: components['schemas']['ApiInput']
-    }
     /** PostBatchRequest */
     PostBatchRequest: {
       /** Creator */
@@ -745,37 +687,6 @@ export interface operations {
       }
     }
   }
-  get_latest_strategy_api_adaptation_latest_strategy_get: {
-    parameters: {
-      query: {
-        user: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ApiStrategy-Output']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
   get_llm_response_schema_api_adaptation_llm_response_schema_post: {
     parameters: {
       query?: never
@@ -796,37 +707,6 @@ export interface operations {
         }
         content: {
           'application/json': Record<string, never>
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  get_latest_input_api_adaptation_latest_input_get: {
-    parameters: {
-      query: {
-        user: string
-      }
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ApiInput']
         }
       }
       /** @description Validation Error */
@@ -922,39 +802,6 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetBatchResponse']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  post_adaptation_api_adaptation_post: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PostAdaptationRequest']
-      }
-    }
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ApiAdaptation']
         }
       }
       /** @description Validation Error */

@@ -10,11 +10,7 @@ export type LlmModel =
 export type LatestBatch =
   paths['/api/adaptation/latest-batch']['get']['responses']['200']['content']['application/json']
 
-export type AdaptationStrategy =
-  paths['/api/adaptation/latest-strategy']['get']['responses']['200']['content']['application/json']
-
-export type AdaptationInput =
-  paths['/api/adaptation/latest-input']['get']['responses']['200']['content']['application/json']
+export type AdaptationStrategy = LatestBatch['strategy']
 
 export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200']['content']['application/json']
 

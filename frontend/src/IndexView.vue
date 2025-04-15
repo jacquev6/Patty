@@ -1,3 +1,3 @@
 <template>
-  <p><RouterLink :to="{ name: 'create-adaptation' }">New adaptation</RouterLink></p>
+  <p><RouterLink :to="{ name: 'create-batch' }">New adaptation batch</RouterLink></p>
 </template>
