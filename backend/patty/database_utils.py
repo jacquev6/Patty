@@ -46,16 +46,18 @@ def truncate_all_tables(session: Session) -> None:
             session.commit()
 
 
-class SessionMaker:
-    def __init__(self, engine: Engine) -> None:
-        self.__engine = engine
+def _db_engine_dependable(request: Request) -> Engine:
+    engine = request.app.extra["database_engine"]
+    if not isinstance(engine, Engine):
+        raise TypeError(f"Expected an instance of sqlalchemy.Engine, got {type(engine)}")
+    return engine
 
-    def __call__(self) -> Session:
-        return make_session(self.__engine)
+
+EngineDependable = Annotated[Engine, Depends(_db_engine_dependable)]
 
 
-def _session_dependable(request: Request) -> Iterable[Session]:
-    with cast(SessionMaker, request.app.extra["make_session"])() as session:
+def _session_dependable(engine: EngineDependable) -> Iterable[Session]:
+    with Session(engine) as session:
         try:
             yield session
         except:

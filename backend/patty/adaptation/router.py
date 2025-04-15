@@ -1,5 +1,5 @@
 import os
-from typing import Literal
+
 import fastapi
 
 from .. import database_utils
@@ -82,7 +82,7 @@ class LatestBatch(ApiModel):
     inputs: list[ApiInput]
 
 
-@router.get("/latest-batch", response_model=LatestBatch)
+@router.get("/latest-batch")
 def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
     for created_by in [user, "Patty"]:
         batch = session.query(Batch).filter(Batch.created_by == created_by).order_by(-Batch.id).first()

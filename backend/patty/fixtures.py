@@ -380,7 +380,7 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             session.add(instance)
 
 
-app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
+app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))
 
 
 @app.post("/load")
