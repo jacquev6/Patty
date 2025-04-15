@@ -66,7 +66,7 @@ const disabled = computed(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <BusyBox :busy>
-      <ResizableColumns :columns="2">
+      <ResizableColumns :columns="[1, 1]">
         <template #col-1>
           <p>Created by: <IdentifiedUser /></p>
           <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />

@@ -211,7 +211,7 @@ watch(Escape, () => {
 
 <template>
   <div v-if="adaptation !== null">
-    <ResizableColumns :columns="3">
+    <ResizableColumns :columns="[1, 1, 1]">
       <template #col-1>
         <p>Created by: {{ adaptation.createdBy }}</p>
         <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="adaptation.strategy" />
