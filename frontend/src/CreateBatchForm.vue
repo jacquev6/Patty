@@ -39,7 +39,8 @@ const emptyInputProxy = computed({
     return ''
   },
   set(text) {
-    inputs.push({ id: 1, createdBy: identifiedUser.identifier, text })
+    // @todo Avoid hard-coding a known id here. We should send the input without an id at all.
+    inputs.push({ id: '1', createdBy: identifiedUser.identifier, text })
   },
 })
 

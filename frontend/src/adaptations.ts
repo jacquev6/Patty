@@ -1,7 +1,7 @@
 import type { Adaptation as ApiAdaptation } from './apiClient'
 
 export type PreprocessedAdaptation = {
-  id: number
+  id: string
   input: string[]
   status:
     | {

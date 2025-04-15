@@ -25,7 +25,7 @@ LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise
 
 
 class ApiStrategy(ApiModel):
-    id: int
+    id: str
     created_by: str
     model: llm.ConcreteModel
     system_prompt: str
@@ -33,13 +33,13 @@ class ApiStrategy(ApiModel):
 
 
 class ApiInput(ApiModel):
-    id: int
+    id: str
     created_by: str
     text: str
 
 
 class ApiAdaptation(ApiModel):
-    id: int
+    id: str
     created_by: str
     strategy: ApiStrategy
     input: ApiInput
@@ -56,7 +56,7 @@ def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecifi
 
 
 class LatestBatch(ApiModel):
-    id: int
+    id: str
     created_by: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
@@ -70,7 +70,7 @@ def get_latest_batch(user: str, session: database_utils.SessionDependable) -> La
             break
     assert batch is not None
     return LatestBatch(
-        id=batch.id,
+        id=str(batch.id),
         created_by=batch.created_by,
         strategy=make_api_strategy(batch.strategy),
         inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
@@ -84,7 +84,7 @@ class PostBatchRequest(ApiModel):
 
 
 class PostBatchResponse(ApiModel):
-    id: int
+    id: str
 
 
 @router.post("/batch")
@@ -135,7 +135,7 @@ async def post_batch(
 
     background_tasks.add_task(submit_batch, engine, batch.id)
 
-    return PostBatchResponse(id=batch.id)
+    return PostBatchResponse(id=str(batch.id))
 
 
 async def submit_batch(engine: database_utils.Engine, id: int) -> None:
@@ -172,7 +172,7 @@ async def submit_batch(engine: database_utils.Engine, id: int) -> None:
 
 
 class GetBatchResponse(ApiModel):
-    id: int
+    id: str
     created_by: str
     strategy: ApiStrategy
     adaptations: list[ApiAdaptation]
@@ -182,7 +182,7 @@ class GetBatchResponse(ApiModel):
 async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
     batch = get_by_id(session, Batch, id)
     return GetBatchResponse(
-        id=batch.id,
+        id=str(batch.id),
         created_by=batch.created_by,
         strategy=make_api_strategy(batch.strategy),
         adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
@@ -295,7 +295,7 @@ def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> M
 
 def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
     return ApiAdaptation(
-        id=adaptation.id,
+        id=str(adaptation.id),
         created_by=adaptation.created_by,
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.input),
@@ -309,7 +309,7 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
 
 def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
     return ApiStrategy(
-        id=strategy.id,
+        id=str(strategy.id),
         created_by=strategy.created_by,
         model=strategy.model,
         system_prompt=strategy.system_prompt,
@@ -318,7 +318,7 @@ def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
 
 
 def make_api_input(input: DbInput) -> ApiInput:
-    return ApiInput(id=input.id, created_by=input.created_by, text=input.text)
+    return ApiInput(id=str(input.id), created_by=input.created_by, text=input.text)
 
 
 export_adaptation_template_file_path = os.path.join(

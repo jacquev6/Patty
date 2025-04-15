@@ -190,7 +190,7 @@ export interface components {
     /** ApiAdaptation */
     ApiAdaptation: {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       strategy: components['schemas']['ApiStrategy-Output']
@@ -207,7 +207,7 @@ export interface components {
     /** ApiInput */
     ApiInput: {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       /** Text */
@@ -216,7 +216,7 @@ export interface components {
     /** ApiStrategy */
     'ApiStrategy-Input': {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       /** Model */
@@ -235,7 +235,7 @@ export interface components {
     /** ApiStrategy */
     'ApiStrategy-Output': {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       /** Model */
@@ -330,7 +330,7 @@ export interface components {
     /** GetBatchResponse */
     GetBatchResponse: {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       strategy: components['schemas']['ApiStrategy-Output']
@@ -417,7 +417,7 @@ export interface components {
     /** LatestBatch */
     LatestBatch: {
       /** Id */
-      id: number
+      id: string
       /** Createdby */
       createdBy: string
       strategy: components['schemas']['ApiStrategy-Output']
@@ -576,7 +576,7 @@ export interface components {
     /** PostBatchResponse */
     PostBatchResponse: {
       /** Id */
-      id: number
+      id: string
     }
     PureTextContainer: {
       /** Contents */

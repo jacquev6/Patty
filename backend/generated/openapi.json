@@ -497,7 +497,7 @@
       "ApiAdaptation": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -572,7 +572,7 @@
       "ApiInput": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -596,7 +596,7 @@
       "ApiStrategy-Input": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -650,7 +650,7 @@
       "ApiStrategy-Output": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -916,7 +916,7 @@
       "GetBatchResponse": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -1090,7 +1090,7 @@
       "LatestBatch": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           },
           "createdBy": {
@@ -1574,7 +1574,7 @@
       "PostBatchResponse": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
           }
         },
