@@ -25,7 +25,7 @@ while [ $# -gt 0 ]; do
 done
 
 
-if (cd ..; grep -n --color '\.only' -R frontend/e2e-tests)
+if (cd ..; grep -n --color -e '\.only' -e '\.skip' -R frontend/e2e-tests)
 then
   false
 fi
