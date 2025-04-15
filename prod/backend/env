@@ -1,1 +1,2 @@
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
+PATTY_DATABASE_BACKUPS_URL=s3://jacquev6/patty/preview/backups

@@ -24,6 +24,12 @@ RUN npx vite build
 
 FROM python:3.13-slim AS backend-dependencies
 
+RUN set -x \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
+    postgresql-client \
+ && true
+
 WORKDIR /app
 
 ADD backend/requirements-run.txt .

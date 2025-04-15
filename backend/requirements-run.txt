@@ -1,4 +1,5 @@
 alembic
+boto3
 compact-json
 fastapi
 mistralai
@@ -7,3 +8,4 @@ polyfactory  # @todo Move this dependency to requirements-dev.txt
 psycopg2-binary
 pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests
 sqlalchemy
+sqlalchemy-utils

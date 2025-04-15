@@ -190,6 +190,23 @@ services:
     depends_on:
       data-loader:
         condition: service_completed_successfully
+  db-backup:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["bash", "-c", "while true; do python -m patty backup-database; find /app/dev-env/db/backups -name 'patty-backup-*.tar.gz' -mmin +10 -delete; sleep 30; done"]
+    depends_on:
+      pip-installer:
+        condition: service_completed_successfully
+      data-loader:
+        condition: service_completed_successfully
 
   frontend-shell:
     image: patty-dev_frontend
