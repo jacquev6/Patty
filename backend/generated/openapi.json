@@ -280,10 +280,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/last-step": {
+    "/api/adaptation/{id}/last-adjustment": {
       "delete": {
-        "summary": "Delete Adaptation Last Step",
-        "operationId": "delete_adaptation_last_step_api_adaptation__id__last_step_delete",
+        "summary": "Delete Adaptation Last Adjustment",
+        "operationId": "delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete",
         "parameters": [
           {
             "name": "id",

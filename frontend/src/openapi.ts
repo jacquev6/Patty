@@ -123,7 +123,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}/last-step': {
+  '/api/adaptation/{id}/last-adjustment': {
     parameters: {
       query?: never
       header?: never
@@ -133,8 +133,8 @@ export interface paths {
     get?: never
     put?: never
     post?: never
-    /** Delete Adaptation Last Step */
-    delete: operations['delete_adaptation_last_step_api_adaptation__id__last_step_delete']
+    /** Delete Adaptation Last Adjustment */
+    delete: operations['delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete']
     options?: never
     head?: never
     patch?: never
@@ -881,7 +881,7 @@ export interface operations {
       }
     }
   }
-  delete_adaptation_last_step_api_adaptation__id__last_step_delete: {
+  delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete: {
     parameters: {
       query?: never
       header?: never

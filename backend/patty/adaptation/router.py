@@ -250,8 +250,8 @@ async def post_adaptation_adjustment(
     return make_api_adaptation(db_adaptation)
 
 
-@router.delete("/{id}/last-step")
-def delete_adaptation_last_step(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
+@router.delete("/{id}/last-adjustment")
+def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
 
     raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
