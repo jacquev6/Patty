@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 
 import { type Batch } from './apiClient'
 import ResizableColumns from './ResizableColumns.vue'
@@ -11,14 +11,6 @@ const props = defineProps<{
   batch: Batch
 }>()
 
-const strategy = ref(props.batch.strategy)
-watch(
-  () => props.batch.strategy,
-  (newValue) => {
-    strategy.value = newValue
-  },
-)
-
 const adaptations = computed(() => props.batch.adaptations.map(preprocessAdaptation))
 </script>
 
@@ -26,7 +18,7 @@ const adaptations = computed(() => props.batch.adaptations.map(preprocessAdaptat
   <ResizableColumns :columns="[1, 2]">
     <template #col-1>
       <p>Created by: {{ batch.createdBy }}</p>
-      <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="strategy" />
+      <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="batch.strategy" />
     </template>
     <template #col-2>
       <h1>Inputs</h1>
