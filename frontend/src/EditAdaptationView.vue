@@ -210,116 +210,118 @@ watch(Escape, () => {
 </script>
 
 <template>
-  <div v-if="adaptation !== null">
-    <ResizableColumns :columns="[1, 1, 1]">
-      <template #col-1>
-        <p>Created by: {{ adaptation.createdBy }}</p>
-        <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="adaptation.strategy" />
-      </template>
-      <template #col-2>
-        <h1>Input text</h1>
-        <MarkDown :markdown="inputText" />
-        <h1>Adjustments</h1>
-        <p><button @click="showRaw = true">View the raw conversation with the LLM</button></p>
-        <BusyBox :busy>
-          <template v-for="(step, stepIndex) in adaptation.adjustments">
-            <div style="display: flex" class="user-prompt">
-              <MarkDown :markdown="step.userPrompt" style="flex-grow: 1" />
-              <!-- @todo Add a button letting the user display the adaptation returned during that step (only if an adaptation was returned) -->
-              <div
-                v-if="stepIndex === adaptation.adjustments.length - 1"
-                title="Rewind the chat: delete this prompt and its effects"
-                style="cursor: pointer"
-                @click="rewindLastStep"
-              >
-                ❌
-              </div>
-            </div>
-          </template>
-          <div v-if="llmError === null && manualAdaptedExercise === null" class="user-prompt">
-            <TextArea data-cy="user-prompt" v-model="adjustment"></TextArea>
-            <p><button data-cy="submit-adjustment" @click="submitAdjustment" :disabled>Submit</button></p>
-          </div>
-        </BusyBox>
-      </template>
-      <template #col-3>
-        <template v-if="llmError !== null">
-          <h1>Error with the LLM</h1>
-          <p>
-            {{ llmError }}. See the raw conversation to investigate (and/or give the URL of this page to Vincent
-            Jacques).
-          </p>
+  <div style="padding-left: 5px; padding-right: 5px">
+    <template v-if="adaptation !== null">
+      <ResizableColumns :columns="[1, 1, 1]">
+        <template #col-1>
+          <p>Created by: {{ adaptation.createdBy }}</p>
+          <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" v-model="adaptation.strategy" />
         </template>
-        <template v-if="llmAdaptedExercise !== null">
-          <h1>Adapted exercise</h1>
-          <template v-if="adaptedExercise !== null">
-            <MiniatureScreen :fullScreen>
-              <AdaptedExerciseRenderer :adaptedExercise />
-              <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
-                Exit full screen (Esc)
-              </button>
-            </MiniatureScreen>
+        <template #col-2>
+          <h1>Input text</h1>
+          <MarkDown :markdown="inputText" />
+          <h1>Adjustments</h1>
+          <p><button @click="showRaw = true">View the raw conversation with the LLM</button></p>
+          <BusyBox :busy>
+            <template v-for="(step, stepIndex) in adaptation.adjustments">
+              <div style="display: flex" class="user-prompt">
+                <MarkDown :markdown="step.userPrompt" style="flex-grow: 1" />
+                <!-- @todo Add a button letting the user display the adaptation returned during that step (only if an adaptation was returned) -->
+                <div
+                  v-if="stepIndex === adaptation.adjustments.length - 1"
+                  title="Rewind the chat: delete this prompt and its effects"
+                  style="cursor: pointer"
+                  @click="rewindLastStep"
+                >
+                  ❌
+                </div>
+              </div>
+            </template>
+            <div v-if="llmError === null && manualAdaptedExercise === null" class="user-prompt">
+              <TextArea data-cy="user-prompt" v-model="adjustment"></TextArea>
+              <p><button data-cy="submit-adjustment" @click="submitAdjustment" :disabled>Submit</button></p>
+            </div>
+          </BusyBox>
+        </template>
+        <template #col-3>
+          <template v-if="llmError !== null">
+            <h1>Error with the LLM</h1>
             <p>
-              <button @click="fullScreen = true">Full screen</button>
-              <WhiteSpace />
-              <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+              {{ llmError }}. See the raw conversation to investigate (and/or give the URL of this page to Vincent
+              Jacques).
             </p>
           </template>
-          <template v-else-if="manualAdaptedExercise !== null">
-            <template v-if="manualAdaptedExercise.syntaxError !== null">
-              <h2>Syntax error</h2>
-              {{ manualAdaptedExercise?.syntaxError.message }}
+          <template v-if="llmAdaptedExercise !== null">
+            <h1>Adapted exercise</h1>
+            <template v-if="adaptedExercise !== null">
+              <MiniatureScreen :fullScreen>
+                <AdaptedExerciseRenderer :adaptedExercise />
+                <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
+                  Exit full screen (Esc)
+                </button>
+              </MiniatureScreen>
+              <p>
+                <button @click="fullScreen = true">Full screen</button>
+                <WhiteSpace />
+                <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+              </p>
             </template>
-            <template v-else>
-              <h2>Validation errors</h2>
-              <ul>
-                <li v-for="error in manualAdaptedExercise.validationErrors">
-                  {{ error.instancePath }}: {{ error.message }}
-                  {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
-                </li>
-              </ul>
+            <template v-else-if="manualAdaptedExercise !== null">
+              <template v-if="manualAdaptedExercise.syntaxError !== null">
+                <h2>Syntax error</h2>
+                {{ manualAdaptedExercise?.syntaxError.message }}
+              </template>
+              <template v-else>
+                <h2>Validation errors</h2>
+                <ul>
+                  <li v-for="error in manualAdaptedExercise.validationErrors">
+                    {{ error.instancePath }}: {{ error.message }}
+                    {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
+                  </li>
+                </ul>
+              </template>
             </template>
+            <h1>Manual edition</h1>
+            <TextArea
+              data-cy="manual-edition"
+              v-model="manualAdaptedExerciseProxy"
+              style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
+            ></TextArea>
+            <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
+            <p>
+              <button
+                data-cy="reset-manual-edition"
+                @click="resetManualEdit"
+                :disabled="manualAdaptedExercise === null"
+                title="Forget all manual changes; go back to the last version from the LLM"
+              >
+                Reset
+              </button>
+              <WhiteSpace />
+              <button
+                data-cy="reformat-manual-edition"
+                @click="reformatManualAdaptedExercise"
+                :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
+              >
+                Reformat
+              </button>
+            </p>
           </template>
-          <h1>Manual edition</h1>
-          <TextArea
-            data-cy="manual-edition"
-            v-model="manualAdaptedExerciseProxy"
-            style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
-          ></TextArea>
-          <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
-          <p>
-            <button
-              data-cy="reset-manual-edition"
-              @click="resetManualEdit"
-              :disabled="manualAdaptedExercise === null"
-              title="Forget all manual changes; go back to the last version from the LLM"
-            >
-              Reset
-            </button>
-            <WhiteSpace />
-            <button
-              data-cy="reformat-manual-edition"
-              @click="reformatManualAdaptedExercise"
-              :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
-            >
-              Reformat
-            </button>
-          </p>
         </template>
-      </template>
-    </ResizableColumns>
-    <div v-if="showRaw" class="overlay">
-      <div>
+      </ResizableColumns>
+      <div v-if="showRaw" class="overlay">
         <div>
-          <h1>Raw conversation with the LLM</h1>
-          <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
-          <pre>{{ jsonStringify(adaptation.rawLlmConversations, { maxLength: 120 }) }}</pre>
+          <div>
+            <h1>Raw conversation with the LLM</h1>
+            <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
+            <pre>{{ jsonStringify(adaptation.rawLlmConversations, { maxLength: 120 }) }}</pre>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div v-else-if="found === false">
-    <h1>Not found</h1>
+    </template>
+    <template v-else-if="found === false">
+      <h1>Not found</h1>
+    </template>
   </div>
 </template>
 

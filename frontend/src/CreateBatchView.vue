@@ -32,5 +32,7 @@ watch(() => identifiedUser.identifier, refresh, { immediate: true })
 </script>
 
 <template>
-  <CreateBatchForm v-if="availableLlmModels.length !== 0 && latestBatch !== null" :availableLlmModels :latestBatch />
+  <div style="padding-left: 5px; padding-right: 5px">
+    <CreateBatchForm v-if="availableLlmModels.length !== 0 && latestBatch !== null" :availableLlmModels :latestBatch />
+  </div>
 </template>

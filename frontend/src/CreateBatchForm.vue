@@ -82,34 +82,32 @@ const disabled = computed(() => {
 </script>
 
 <template>
-  <div style="padding-left: 5px; padding-right: 5px">
-    <BusyBox :busy>
-      <ResizableColumns :columns="[1, 1]">
-        <template #col-1>
-          <p>Created by: <IdentifiedUser /></p>
-          <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />
+  <BusyBox :busy>
+    <ResizableColumns :columns="[1, 1]">
+      <template #col-1>
+        <p>Created by: <IdentifiedUser /></p>
+        <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />
+      </template>
+      <template #col-2>
+        <h1>Inputs</h1>
+        <p><button @click="submit" :disabled>Submit</button></p>
+        <template v-for="index in inputs.length + 1">
+          <h2>
+            Input {{ index
+            }}<template v-if="inputProxies[index - 1].value.trim() === ''"
+              ><WhiteSpace /><span class="ignored">(empty, ignored)</span></template
+            >
+          </h2>
+          <TextArea
+            ref="textAreas"
+            id="input-text"
+            data-cy="input-text"
+            v-model="inputProxies[index - 1].value"
+          ></TextArea>
         </template>
-        <template #col-2>
-          <h1>Inputs</h1>
-          <p><button @click="submit" :disabled>Submit</button></p>
-          <template v-for="index in inputs.length + 1">
-            <h2>
-              Input {{ index
-              }}<template v-if="inputProxies[index - 1].value.trim() === ''"
-                ><WhiteSpace /><span class="ignored">(empty, ignored)</span></template
-              >
-            </h2>
-            <TextArea
-              ref="textAreas"
-              id="input-text"
-              data-cy="input-text"
-              v-model="inputProxies[index - 1].value"
-            ></TextArea>
-          </template>
-        </template>
-      </ResizableColumns>
-    </BusyBox>
-  </div>
+      </template>
+    </ResizableColumns>
+  </BusyBox>
 </template>
 
 <style scoped>
