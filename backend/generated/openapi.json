@@ -505,33 +505,25 @@
             "type": "string",
             "title": "Userprompt"
           },
-          "assistantError": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assistanterror"
-          },
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise-Output"
+                "$ref": "#/components/schemas/AssistantSuccess"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
               }
-            ]
+            ],
+            "title": "Assistantresponse"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "userPrompt",
-          "assistantError",
           "assistantResponse"
         ],
         "title": "Adjustment"
@@ -561,26 +553,22 @@
             "type": "array",
             "title": "Rawllmconversations"
           },
-          "initialAssistantError": {
+          "initialAssistantResponse": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/AssistantSuccess"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Initialassistanterror"
-          },
-          "initialAssistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Initialassistantresponse"
           },
           "adjustments": {
             "items": {
@@ -609,7 +597,6 @@
           "strategy",
           "input",
           "rawLlmConversations",
-          "initialAssistantError",
           "initialAssistantResponse",
           "adjustments",
           "manualEdit"
@@ -760,6 +747,76 @@
         "required": [
           "kind"
         ]
+      },
+      "AssistantInvalidJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "invalid-json",
+            "title": "Error"
+          },
+          "parsed": {
+            "title": "Parsed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "parsed"
+        ],
+        "title": "AssistantInvalidJsonError"
+      },
+      "AssistantNotJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "not-json",
+            "title": "Error"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "text"
+        ],
+        "title": "AssistantNotJsonError"
+      },
+      "AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "AssistantSuccess"
       },
       "Choice": {
         "properties": {

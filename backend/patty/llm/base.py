@@ -48,6 +48,18 @@ class LlmException(RuntimeError):
         self.raw_conversation = raw_conversation
 
 
+class InvalidJsonLlmException(LlmException):
+    def __init__(self, parsed: Any, raw_conversation: JsonDict) -> None:
+        super().__init__("Failed to validate JSON response", raw_conversation=raw_conversation)
+        self.parsed = parsed
+
+
+class NotJsonLlmException(LlmException):
+    def __init__(self, text: str, raw_conversation: JsonDict) -> None:
+        super().__init__("Failed to parse JSON response", raw_conversation=raw_conversation)
+        self.text = text
+
+
 def try_hard_to_json_loads(s: str) -> Any:
     preprocessed = s
     if preprocessed.startswith("```json") and preprocessed.endswith("```"):
@@ -70,12 +82,12 @@ class Model(abc.ABC, pydantic.BaseModel):
         try:
             parsed_content = try_hard_to_json_loads(response)
         except json.JSONDecodeError:
-            raise LlmException("Failed to parse JSON response", raw_conversation=raw_conversation)
+            raise NotJsonLlmException(response, raw_conversation)
 
         try:
             validated_content = response_format.response_type(**parsed_content)
         except pydantic.ValidationError:
-            raise LlmException("Failed to validate JSON response", raw_conversation=raw_conversation)
+            raise InvalidJsonLlmException(parsed_content, raw_conversation)
 
         return CompletionResponse(
             raw_conversation=raw_conversation, message=AssistantMessage(content=validated_content)

@@ -201,9 +201,11 @@ export interface components {
     Adjustment: {
       /** Userprompt */
       userPrompt: string
-      /** Assistanterror */
-      assistantError: string | null
-      assistantResponse: components['schemas']['Exercise-Output'] | null
+      /** Assistantresponse */
+      assistantResponse:
+        | components['schemas']['AssistantSuccess']
+        | components['schemas']['AssistantInvalidJsonError']
+        | components['schemas']['AssistantNotJsonError']
     }
     /** ApiAdaptation */
     ApiAdaptation: {
@@ -217,9 +219,12 @@ export interface components {
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
-      /** Initialassistanterror */
-      initialAssistantError: string | null
-      initialAssistantResponse: components['schemas']['Exercise-Output'] | null
+      /** Initialassistantresponse */
+      initialAssistantResponse:
+        | components['schemas']['AssistantSuccess']
+        | components['schemas']['AssistantInvalidJsonError']
+        | components['schemas']['AssistantNotJsonError']
+        | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
       manualEdit: components['schemas']['Exercise-Output'] | null
@@ -277,6 +282,45 @@ export interface components {
        * @constant
        */
       kind: 'arrow'
+    }
+    /** AssistantInvalidJsonError */
+    AssistantInvalidJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /** Parsed */
+      parsed: unknown
+    }
+    /** AssistantNotJsonError */
+    AssistantNotJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /** Text */
+      text: string
+    }
+    /** AssistantSuccess */
+    AssistantSuccess: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      exercise: components['schemas']['Exercise-Output']
     }
     Choice: {
       /**

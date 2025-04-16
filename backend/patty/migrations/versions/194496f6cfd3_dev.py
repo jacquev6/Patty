@@ -49,7 +49,6 @@ def upgrade() -> None:
         sa.Column("strategy_id", sa.Integer(), nullable=False),
         sa.Column("input_id", sa.Integer(), nullable=False),
         sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),
-        sa.Column("initial_assistant_error", sa.String(), nullable=True),
         sa.Column("initial_assistant_response", sa.JSON(), nullable=True),
         sa.Column("adjustments", sa.JSON(), nullable=False),
         sa.Column("manual_edit", sa.JSON(), nullable=True),

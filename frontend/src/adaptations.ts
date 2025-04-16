@@ -1,5 +1,4 @@
-import type { Adaptation as ApiAdaptation } from './apiClient'
-import assert from './assert'
+import type { Adaptation as ApiAdaptation, AdaptedExercise } from './apiClient'
 
 export type PreprocessedAdaptation = {
   id: string
@@ -19,7 +18,7 @@ export type PreprocessedAdaptation = {
       }
     | {
         kind: 'success'
-        adaptedExercise: Exclude<ApiAdaptation['initialAssistantResponse'], null>
+        adaptedExercise: AdaptedExercise
       }
   status:
     | {
@@ -32,24 +31,32 @@ export type PreprocessedAdaptation = {
     | {
         kind: 'success'
         success: 'llm' | 'manual'
-        adaptedExercise: Exclude<ApiAdaptation['initialAssistantResponse'], null>
+        adaptedExercise: AdaptedExercise
       }
 }
 
 export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
+  function makeLlmStatus(
+    response: ApiAdaptation['adjustments'][number]['assistantResponse'],
+  ): PreprocessedAdaptation['llmStatus'] {
+    // @todo Consider using https://github.com/gvergnaud/ts-pattern everywhere exhaustive matching is expected (git grep never)
+    if (response.kind === 'success') {
+      return { kind: 'success', adaptedExercise: response.exercise }
+    } else if (response.kind === 'error' && response.error === 'invalid-json') {
+      return { kind: 'error', error: 'Failed to validate JSON response' }
+    } else if (response.kind === 'error' && response.error === 'not-json') {
+      return { kind: 'error', error: 'Failed to parse JSON response' }
+    } else {
+      return ((r: never) => r)(response)
+    }
+  }
+
   const llmStatus = ((): PreprocessedAdaptation['llmStatus'] => {
     if (adaptation.adjustments.length > 0) {
       const lastAdjustment = adaptation.adjustments[adaptation.adjustments.length - 1]
-      if (lastAdjustment.assistantResponse !== null) {
-        return { kind: 'success', adaptedExercise: lastAdjustment.assistantResponse }
-      } else {
-        assert(lastAdjustment.assistantError !== null)
-        return { kind: 'error', error: lastAdjustment.assistantError }
-      }
+      return makeLlmStatus(lastAdjustment.assistantResponse)
     } else if (adaptation.initialAssistantResponse !== null) {
-      return { kind: 'success', adaptedExercise: adaptation.initialAssistantResponse }
-    } else if (adaptation.initialAssistantError !== null) {
-      return { kind: 'error', error: adaptation.initialAssistantError }
+      return makeLlmStatus(adaptation.initialAssistantResponse)
     } else {
       return { kind: 'inProgress' }
     }

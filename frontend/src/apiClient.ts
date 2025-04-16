@@ -15,7 +15,7 @@ export type AdaptationStrategy = LatestBatch['strategy']
 export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200']['content']['application/json']
 
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
-export type AdaptedExercise = Exclude<Adaptation['initialAssistantResponse'], null>
+export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
 type InstructionComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number]
 type StatementComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
 export type Component = InstructionComponent | StatementComponent

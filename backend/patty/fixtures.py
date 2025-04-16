@@ -232,127 +232,129 @@ def make_successful_adaptation(*, batch: object, strategy: object, input: object
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
-        initial_assistant_error=None,
-        _initial_assistant_response=adapted.Exercise(
-            **{  # type: ignore[arg-type]
-                "format": "v1",
-                "instruction": {
-                    "lines": [
-                        {
-                            "contents": [
-                                {"kind": "text", "text": "Complète"},
-                                {"kind": "whitespace"},
-                                {"kind": "text", "text": "avec"},
-                                {"kind": "whitespace"},
-                                {
-                                    "kind": "choice",
-                                    "contents": [
-                                        {"kind": "text", "text": "le"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "vent"},
-                                    ],
-                                },
-                                {"kind": "whitespace"},
-                                {"kind": "text", "text": "ou"},
-                                {"kind": "whitespace"},
-                                {
-                                    "kind": "choice",
-                                    "contents": [
-                                        {"kind": "text", "text": "la"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "pluie"},
-                                    ],
-                                },
-                            ]
-                        }
-                    ]
-                },
-                "example": None,
-                "hint": None,
-                "statement": {
-                    "pages": [
-                        {
-                            "lines": [
-                                {
-                                    "contents": [
-                                        {"kind": "text", "text": "a"},
-                                        {"kind": "text", "text": "."},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "Les"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "feuilles"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "sont"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "chahutées"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "par"},
-                                        {"kind": "whitespace"},
-                                        {
-                                            "kind": "multipleChoicesInput",
-                                            "choices": [
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "le"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "vent"},
-                                                    ]
-                                                },
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "la"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "pluie"},
-                                                    ]
-                                                },
-                                            ],
-                                            "showChoicesByDefault": False,
-                                        },
-                                    ]
-                                },
-                                {
-                                    "contents": [
-                                        {"kind": "text", "text": "b"},
-                                        {"kind": "text", "text": "."},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "Les"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "vitres"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "sont"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "mouillées"},
-                                        {"kind": "whitespace"},
-                                        {"kind": "text", "text": "par"},
-                                        {"kind": "whitespace"},
-                                        {
-                                            "kind": "multipleChoicesInput",
-                                            "choices": [
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "le"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "vent"},
-                                                    ]
-                                                },
-                                                {
-                                                    "contents": [
-                                                        {"kind": "text", "text": "la"},
-                                                        {"kind": "whitespace"},
-                                                        {"kind": "text", "text": "pluie"},
-                                                    ]
-                                                },
-                                            ],
-                                            "showChoicesByDefault": False,
-                                        },
-                                    ]
-                                },
-                            ]
-                        }
-                    ]
-                },
-                "reference": None,
-            }
+        _initial_assistant_response=adaptation.AssistantSuccess(
+            kind="success",
+            exercise=adapted.Exercise(
+                **{  # type: ignore[arg-type]
+                    "format": "v1",
+                    "instruction": {
+                        "lines": [
+                            {
+                                "contents": [
+                                    {"kind": "text", "text": "Complète"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "avec"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "choice",
+                                        "contents": [
+                                            {"kind": "text", "text": "le"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "vent"},
+                                        ],
+                                    },
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "ou"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "choice",
+                                        "contents": [
+                                            {"kind": "text", "text": "la"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "pluie"},
+                                        ],
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    "example": None,
+                    "hint": None,
+                    "statement": {
+                        "pages": [
+                            {
+                                "lines": [
+                                    {
+                                        "contents": [
+                                            {"kind": "text", "text": "a"},
+                                            {"kind": "text", "text": "."},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "Les"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "feuilles"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "sont"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "chahutées"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "par"},
+                                            {"kind": "whitespace"},
+                                            {
+                                                "kind": "multipleChoicesInput",
+                                                "choices": [
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "le"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "vent"},
+                                                        ]
+                                                    },
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "la"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "pluie"},
+                                                        ]
+                                                    },
+                                                ],
+                                                "showChoicesByDefault": False,
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        "contents": [
+                                            {"kind": "text", "text": "b"},
+                                            {"kind": "text", "text": "."},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "Les"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "vitres"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "sont"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "mouillées"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "par"},
+                                            {"kind": "whitespace"},
+                                            {
+                                                "kind": "multipleChoicesInput",
+                                                "choices": [
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "le"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "vent"},
+                                                        ]
+                                                    },
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "la"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "pluie"},
+                                                        ]
+                                                    },
+                                                ],
+                                                "showChoicesByDefault": False,
+                                            },
+                                        ]
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    "reference": None,
+                }
+            ),
         ).model_dump(),
         _adjustments=[],
         manual_edit=None,
@@ -366,7 +368,6 @@ def make_in_progress_adaptation(*, batch: object, strategy: object, input: objec
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
-        initial_assistant_error=None,
         _initial_assistant_response=None,
         _adjustments=[],
         manual_edit=None,
@@ -380,8 +381,9 @@ def make_invalid_json_adaptation(*, batch: object, strategy: object, input: obje
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
-        initial_assistant_error="Failed to validate JSON response",
-        _initial_assistant_response=None,
+        _initial_assistant_response=adaptation.AssistantInvalidJsonError(
+            kind="error", error="invalid-json", parsed={"blah": "blah"}
+        ).model_dump(),
         _adjustments=[],
         manual_edit=None,
     )
@@ -394,8 +396,9 @@ def make_not_json_adaptation(*, batch: object, strategy: object, input: object) 
         strategy=strategy,
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
-        initial_assistant_error="Failed to parse JSON response",
-        _initial_assistant_response=None,
+        _initial_assistant_response=adaptation.AssistantNotJsonError(
+            kind="error", error="not-json", text="blah blah"
+        ).model_dump(),
         _adjustments=[],
         manual_edit=None,
     )

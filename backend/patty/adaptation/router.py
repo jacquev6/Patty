@@ -11,7 +11,14 @@ from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
 from ..api_utils import ApiModel
-from .adaptation import Adaptation as DbAdaptation, Adjustment
+from .adaptation import (
+    Adaptation as DbAdaptation,
+    Adjustment,
+    AssistantInvalidJsonError,
+    AssistantNotJsonError,
+    AssistantResponse,
+    AssistantSuccess,
+)
 from .batch import Batch
 from .input import Input as DbInput
 from .strategy import Strategy as DbStrategy, ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
@@ -46,8 +53,7 @@ class ApiAdaptation(ApiModel):
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
-    initial_assistant_error: str | None
-    initial_assistant_response: Exercise | None
+    initial_assistant_response: AssistantResponse | None
     adjustments: list[Adjustment]
     manual_edit: Exercise | None
 
@@ -127,7 +133,6 @@ async def post_batch(
             strategy=strategy,
             input=input,
             raw_llm_conversations=[],
-            initial_assistant_error=None,
             initial_assistant_response=None,
             adjustments=[],
         )
@@ -159,14 +164,24 @@ async def submit_batch(engine: database_utils.Engine, id: int) -> None:
             try:
                 print(f"Submitting adaptation {adaptation.id}", flush=True)
                 response = await batch.strategy.model.complete(messages, response_format)
-            except llm.LlmException as error:
-                print(f"Error on adaptation {adaptation.id}", flush=True)
+            except llm.InvalidJsonLlmException as error:
+                print(f"Error 'invalid JSON' on adaptation {adaptation.id}", flush=True)
                 adaptation.raw_llm_conversations = [error.raw_conversation]
-                adaptation.initial_assistant_error = error.args[0]
+                adaptation.initial_assistant_response = AssistantInvalidJsonError(
+                    kind="error", error="invalid-json", parsed=error.parsed
+                )
+            except llm.NotJsonLlmException as error:
+                print(f"Error 'not JSON' on adaptation {adaptation.id}", flush=True)
+                adaptation.raw_llm_conversations = [error.raw_conversation]
+                adaptation.initial_assistant_response = AssistantNotJsonError(
+                    kind="error", error="not-json", text=error.text
+                )
             else:
                 print(f"Success on adaptation {adaptation.id}", flush=True)
                 adaptation.raw_llm_conversations = [response.raw_conversation]
-                adaptation.initial_assistant_response = response.message.content
+                adaptation.initial_assistant_response = AssistantSuccess(
+                    kind="success", exercise=Exercise(**response.message.content.model_dump())
+                )
 
             session.commit()
 
@@ -211,34 +226,35 @@ async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
-    assert db_adaptation.initial_assistant_error is None
-    assert db_adaptation.initial_assistant_response is not None
+    assert isinstance(db_adaptation.initial_assistant_response, AssistantSuccess)
 
     messages: list[LlmMessage] = [
         llm.SystemMessage(content=db_adaptation.strategy.system_prompt),
         llm.UserMessage(content=db_adaptation.input.text),
-        llm.AssistantMessage[Exercise](content=db_adaptation.initial_assistant_response),
+        llm.AssistantMessage[Exercise](content=db_adaptation.initial_assistant_response.exercise),
     ]
     for adjustment in db_adaptation.adjustments:
-        assert adjustment.assistant_error is None
-        assert adjustment.assistant_response is not None
+        assert isinstance(adjustment.assistant_response, AssistantSuccess)
         messages.append(llm.UserMessage(content=adjustment.user_prompt))
-        messages.append(llm.AssistantMessage[Exercise](content=adjustment.assistant_response))
+        messages.append(llm.AssistantMessage[Exercise](content=adjustment.assistant_response.exercise))
     messages.append(llm.UserMessage(content=req.adjustment))
 
     try:
         response = await db_adaptation.strategy.model.complete(
             messages, db_adaptation.strategy.response_specification.make_response_format()
         )
-    except llm.LlmException as error:
+    except llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
-        adjustment = Adjustment(user_prompt=req.adjustment, assistant_error=error.args[0], assistant_response=None)
+        assistant_response: AssistantResponse = AssistantInvalidJsonError(
+            kind="error", error="invalid-json", parsed=error.parsed
+        )
+    except llm.NotJsonLlmException as error:
+        raw_conversation = error.raw_conversation
+        assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
     else:
         raw_conversation = response.raw_conversation
-        adjustment = Adjustment(
-            user_prompt=req.adjustment,
-            assistant_error=None,
-            assistant_response=response.message.content.model_dump(),  # type: ignore[arg-type]
+        assistant_response = AssistantSuccess(
+            kind="success", exercise=Exercise(**response.message.content.model_dump())
         )
 
     raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
@@ -246,7 +262,7 @@ async def post_adaptation_adjustment(
     db_adaptation.raw_llm_conversations = raw_llm_conversations
 
     adjustments = list(db_adaptation.adjustments)
-    adjustments.append(adjustment)
+    adjustments.append(Adjustment(user_prompt=req.adjustment, assistant_response=assistant_response))
     db_adaptation.adjustments = adjustments
 
     return make_api_adaptation(db_adaptation)
@@ -303,7 +319,6 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.input),
         raw_llm_conversations=adaptation.raw_llm_conversations,
-        initial_assistant_error=adaptation.initial_assistant_error,
         initial_assistant_response=adaptation.initial_assistant_response,
         adjustments=adaptation.adjustments,
         manual_edit=adaptation.manual_edit,
@@ -334,17 +349,14 @@ def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     db_adaptation = get_by_id(session, DbAdaptation, id)
-    assert db_adaptation.initial_assistant_error is None
-    assert db_adaptation.initial_assistant_response is not None
-
     if db_adaptation.manual_edit is None:
         if len(db_adaptation.adjustments) == 0:
-            exercise = db_adaptation.initial_assistant_response
+            assert isinstance(db_adaptation.initial_assistant_response, AssistantSuccess)
+            exercise = db_adaptation.initial_assistant_response.exercise
         else:
             last_adjustment = db_adaptation.adjustments[-1]
-            assert last_adjustment.assistant_error is None
-            assert last_adjustment.assistant_response is not None
-            exercise = last_adjustment.assistant_response
+            assert isinstance(last_adjustment.assistant_response, AssistantSuccess)
+            exercise = last_adjustment.assistant_response.exercise
     else:
         exercise = db_adaptation.manual_edit
 

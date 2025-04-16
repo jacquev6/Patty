@@ -1,5 +1,7 @@
 from sqlalchemy import orm
+from typing import Any, Literal
 import psycopg2.errors
+import pydantic
 import sqlalchemy as sql
 import sqlalchemy.exc
 
@@ -13,10 +15,29 @@ from .input import Input
 from .strategy import Strategy, JsonFromTextLlmResponseSpecification
 
 
+class AssistantSuccess(ApiModel):
+    kind: Literal["success"]
+    exercise: Exercise
+
+
+class AssistantInvalidJsonError(ApiModel):
+    kind: Literal["error"]
+    error: Literal["invalid-json"]
+    parsed: Any
+
+
+class AssistantNotJsonError(ApiModel):
+    kind: Literal["error"]
+    error: Literal["not-json"]
+    text: str
+
+
+AssistantResponse = AssistantSuccess | AssistantInvalidJsonError | AssistantNotJsonError
+
+
 class Adjustment(ApiModel):
     user_prompt: str
-    assistant_error: str | None
-    assistant_response: Exercise | None
+    assistant_response: AssistantResponse
 
 
 class Adaptation(OrmBase):
@@ -44,18 +65,20 @@ class Adaptation(OrmBase):
     # Kept only to help investigating future issues
     raw_llm_conversations: orm.Mapped[JsonList] = orm.mapped_column(sql.JSON)
 
-    initial_assistant_error: orm.Mapped[str | None]
     _initial_assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("initial_assistant_response", sql.JSON)
 
+    class _AssistantResponseContainer(pydantic.BaseModel):
+        response: AssistantResponse
+
     @property
-    def initial_assistant_response(self) -> Exercise | None:
+    def initial_assistant_response(self) -> AssistantResponse | None:
         if self._initial_assistant_response is None:
             return None
         else:
-            return Exercise(**self._initial_assistant_response)
+            return self._AssistantResponseContainer(response=self._initial_assistant_response).response  # type: ignore[arg-type]
 
     @initial_assistant_response.setter
-    def initial_assistant_response(self, value: Exercise | None) -> None:
+    def initial_assistant_response(self, value: AssistantResponse | None) -> None:
         if value is None:
             self._initial_assistant_response = None
         else:
@@ -109,7 +132,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
             strategy=strategy,
             input=input,
             raw_llm_conversations=[],
-            initial_assistant_error=None,
             initial_assistant_response=None,
             adjustments=[],
             manual_edit=None,
@@ -144,7 +166,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
                 strategy=strategy_2,  # Inconsistent strategy
                 input=input,
                 raw_llm_conversations=[],
-                initial_assistant_error=None,
                 initial_assistant_response=None,
                 adjustments=[],
                 manual_edit=None,
@@ -184,7 +205,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
                     strategy_id=strategy_2.id,  # Inconsistent strategy
                     input_id=input.id,
                     raw_llm_conversations=[],
-                    initial_assistant_error=None,
                     _initial_assistant_response=None,
                     _adjustments=[],
                     _manual_edit=None,
