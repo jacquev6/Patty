@@ -1,5 +1,6 @@
 black
 mypy
+types-boto3
 types-psycopg2
 types-sqlalchemy-utils
 uvicorn

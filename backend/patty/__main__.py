@@ -64,18 +64,27 @@ def load_fixtures(fixture: Iterable[str]) -> None:
         fixtures.load(session, fixture)
         session.commit()
 
+
 parsed_database_url = urlparse(settings.DATABASE_URL)
 assert parsed_database_url.scheme == "postgresql+psycopg2"
 
 parsed_database_backups_url = urlparse(settings.DATABASE_BACKUPS_URL)
 
+
 @main.command()
-def backup_database():
+def backup_database() -> None:
     now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_name = f"patty-backup-{now}"
     archive_name = f"{backup_name}.tar.gz"
 
-    print(f"Backing up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr)
+    print(
+        f"Backing up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}",
+        file=sys.stderr,
+    )
+
+    assert parsed_database_url.hostname is not None
+    assert parsed_database_url.username is not None
+    assert parsed_database_url.password is not None
 
     pg_dump = subprocess.run(
         [
@@ -94,7 +103,7 @@ def backup_database():
         capture_output=True,
     )
 
-    def populate_tarball(tarball):
+    def populate_tarball(tarball: tarfile.TarFile) -> None:
         info = tarfile.TarInfo(f"{backup_name}/pg_dump.sql")
         info.size = len(pg_dump.stdout)
         tarball.addfile(info, io.BytesIO(pg_dump.stdout))
@@ -110,23 +119,29 @@ def backup_database():
         with tarfile.open(fileobj=buffer, mode="w:gz") as tarball:
             populate_tarball(tarball)
         buffer.seek(0)
-        s3.upload_fileobj(buffer, parsed_database_backups_url.netloc, f"{parsed_database_backups_url.path[1:]}/{archive_name}")
+        s3.upload_fileobj(
+            buffer, parsed_database_backups_url.netloc, f"{parsed_database_backups_url.path[1:]}/{archive_name}"
+        )
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
-    print(f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr)
+    print(
+        f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr
+    )
 
 
 @main.command()
 @click.argument("backup_url")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
-def restore_database(backup_url, yes, patch_according_to_settings):
+def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
     parsed_backup_url = urlparse(backup_url)
 
     if parsed_backup_url.scheme == "file":
         with tarfile.open(parsed_backup_url.path, "r:gz") as tarball:
-            pg_dump = tarball.extractfile(tarball.getnames()[0]).read()
+            pg_dump_file = tarball.extractfile(tarball.getnames()[0])
+            assert pg_dump_file is not None
+            pg_dump = pg_dump_file.read()
     elif parsed_backup_url.scheme == "s3":
         assert "AWS_ACCESS_KEY_ID" in os.environ
         assert "AWS_SECRET_ACCESS_KEY" in os.environ
@@ -135,13 +150,19 @@ def restore_database(backup_url, yes, patch_according_to_settings):
         s3.download_fileobj(parsed_backup_url.netloc, f"{parsed_backup_url.path[1:]}", buffer)
         buffer.seek(0)
         with tarfile.open(fileobj=buffer, mode="r:gz") as tarball:
-            pg_dump = tarball.extractfile(tarball.getnames()[0]).read()
+            pg_dump_file = tarball.extractfile(tarball.getnames()[0])
+            assert pg_dump_file is not None
+            pg_dump = pg_dump_file.read()
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
     print(f"Restoring database {settings.DATABASE_URL} from {backup_url} ({len(pg_dump)} bytes)", file=sys.stderr)
     if not yes:
-        print("This will overwrite the current database. Are you sure you want to continue? [y/N]", file=sys.stderr, end=" ")
+        print(
+            "This will overwrite the current database. Are you sure you want to continue? [y/N]",
+            file=sys.stderr,
+            end=" ",
+        )
         if input().strip().lower() != "y":
             print("Aborting.", file=sys.stderr)
             return
@@ -150,6 +171,9 @@ def restore_database(backup_url, yes, patch_according_to_settings):
     if not sqlalchemy_utils.functions.database_exists(placeholder_database_url):
         sqlalchemy_utils.functions.create_database(placeholder_database_url)
     parsed_placeholder_database_url = urlparse(placeholder_database_url)
+    assert parsed_placeholder_database_url.hostname is not None
+    assert parsed_placeholder_database_url.username is not None
+    assert parsed_placeholder_database_url.password is not None
 
     if sqlalchemy_utils.functions.database_exists(settings.DATABASE_URL):
         sqlalchemy_utils.functions.drop_database(settings.DATABASE_URL)
