@@ -1,7 +1,7 @@
+from typing import TypeVar
 import asyncio
 import json
 import os
-from typing import TypeVar
 
 import fastapi
 
@@ -71,7 +71,6 @@ def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecifi
 
 class LatestBatch(ApiModel):
     id: str
-    created_by: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
 
@@ -85,7 +84,6 @@ def get_latest_batch(user: str, session: database_utils.SessionDependable) -> La
     assert batch is not None
     return LatestBatch(
         id=str(batch.id),
-        created_by=batch.created_by,
         strategy=make_api_strategy(batch.strategy),
         inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
     )

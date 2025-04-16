@@ -482,8 +482,6 @@ export interface components {
     LatestBatch: {
       /** Id */
       id: string
-      /** Createdby */
-      createdBy: string
       strategy: components['schemas']['ApiStrategy-Output']
       /** Inputs */
       inputs: components['schemas']['ApiInput'][]
