@@ -1,27 +1,34 @@
+function ignoreResizeObserverLoopError() {
+  Cypress.on('uncaught:exception', (error) => {
+    if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
+      // @todo Deep dive into this issue: avoid the error instead of ignoring it.
+      // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
+      return false
+    } else {
+      return true
+    }
+  })
+}
+
+function screenshot(name: string) {
+  cy.compareSnapshot({
+    name: `${name}.${Cypress.browser.name}`,
+    cypressScreenshotOptions: { disableTimersAndAnimations: true },
+  })
+}
+
 describe('The batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
-
-    Cypress.on('uncaught:exception', (error) => {
-      if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
-        // @todo Deep dive into this issue: avoid the error instead of ignoring it.
-        // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
-        return false
-      } else {
-        return true
-      }
-    })
-
+    ignoreResizeObserverLoopError()
     cy.visit('/new-batch')
-
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('looks like this', () => {
-    cy.compareSnapshot(`batch-creation-page.${Cypress.browser.name}`)
+    screenshot('batch-creation-page')
   })
 
   it('lets user add and remove input exercises', () => {
@@ -229,18 +236,8 @@ describe('The batch creation page', () => {
 describe('The batch edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-
     cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
-
-    Cypress.on('uncaught:exception', (error) => {
-      if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
-        // @todo Deep dive into this issue: avoid the error instead of ignoring it.
-        // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
-        return false
-      } else {
-        return true
-      }
-    })
+    ignoreResizeObserverLoopError()
   })
 
   it('displays "Not found" when the batch does not exist', () => {
@@ -258,14 +255,11 @@ describe('The batch edition page', () => {
   it('looks like this', () => {
     cy.visit('/batch-1')
 
-    cy.compareSnapshot({
-      name: `batch-edition-page.1.${Cypress.browser.name}`,
-      cypressScreenshotOptions: { disableTimersAndAnimations: true },
-    })
+    screenshot('batch-edition-page.1')
 
     cy.get('button:contains("Full screen")').eq(0).click()
 
-    cy.compareSnapshot(`batch-edition-page.2.${Cypress.browser.name}`)
+    screenshot('batch-edition-page.2')
   })
 
   it('does not remember answers', () => {
@@ -284,39 +278,29 @@ describe('The batch edition page', () => {
 describe('The adaptation edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-
     cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
-
-    Cypress.on('uncaught:exception', (error) => {
-      if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
-        // @todo Deep dive into this issue: avoid the error instead of ignoring it.
-        // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
-        return false
-      } else {
-        return true
-      }
-    })
+    ignoreResizeObserverLoopError()
   })
 
   it('looks like this in case of success', () => {
     cy.visit('/adaptation-1')
 
     cy.get('h1:contains("Adapted exercise")').should('exist')
-    cy.compareSnapshot(`adaptation-edition-page.success.${Cypress.browser.name}`)
+    screenshot('adaptation-edition-page.success')
   })
 
   it('looks like this in case of invalid json', () => {
     cy.visit('/adaptation-3')
 
     cy.get('h1:contains("Error with the LLM")').should('exist')
-    cy.compareSnapshot(`adaptation-edition-page.invalid-json.${Cypress.browser.name}`)
+    screenshot('adaptation-edition-page.invalid-json')
   })
 
   it('looks like this in case of not json', () => {
     cy.visit('/adaptation-4')
 
     cy.get('h1:contains("Error with the LLM")').should('exist')
-    cy.compareSnapshot(`adaptation-edition-page.not-json.${Cypress.browser.name}`)
+    screenshot('adaptation-edition-page.not-json')
   })
 
   it('displays "Not found" when the adaptation does not exist', () => {
