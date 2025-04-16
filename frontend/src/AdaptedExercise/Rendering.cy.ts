@@ -15,8 +15,6 @@ function screenshot() {
 }
 
 describe('FormattedComponent', () => {
-  before(console.clear)
-
   it('renders plain text and whitespace', () => {
     cy.viewport(200, 70)
 
@@ -128,8 +126,6 @@ describe('FormattedComponent', () => {
 })
 
 describe('SelectableInput', () => {
-  before(console.clear)
-
   it('changes color on click', () => {
     cy.viewport(130, 70)
 
@@ -242,8 +238,6 @@ describe('SelectableInput', () => {
 })
 
 describe('FreeTextInput', () => {
-  before(console.clear)
-
   it('accepts text input', () => {
     cy.viewport(170, 70)
 
@@ -272,8 +266,6 @@ describe('FreeTextInput', () => {
 })
 
 describe('MultipleChoicesInput', () => {
-  before(console.clear)
-
   const choices = [
     {
       contents: [{ kind: 'text' as const, text: 'Alpha' }],
@@ -428,8 +420,6 @@ describe('MultipleChoicesInput', () => {
 })
 
 describe('TriColorLines', () => {
-  before(console.clear)
-
   it('renders lines in alternating colors', () => {
     cy.viewport(180, 340)
 
@@ -457,8 +447,6 @@ describe('TriColorLines', () => {
 })
 
 describe('AdaptedExerciseRenderer', () => {
-  before(console.clear)
-
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)
 
