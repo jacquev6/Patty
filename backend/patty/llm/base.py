@@ -25,6 +25,16 @@ class AssistantMessage[T](pydantic.BaseModel):
     content: T
 
 
+class InvalidJsonAssistantMessage(pydantic.BaseModel):
+    role: Literal["assistant"] = "assistant"
+    content: Any
+
+
+class NotJsonAssistantMessage(pydantic.BaseModel):
+    role: Literal["assistant"] = "assistant"
+    content: str
+
+
 class CompletionResponse[T](pydantic.BaseModel):
     raw_conversation: JsonDict
     message: AssistantMessage[T]
@@ -74,7 +84,9 @@ class Model(abc.ABC, pydantic.BaseModel):
     async def complete(
         self,
         /,
-        messages: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> CompletionResponse[T]:
         (raw_conversation, response) = await self.do_complete(messages, response_format)
@@ -96,6 +108,8 @@ class Model(abc.ABC, pydantic.BaseModel):
     @abc.abstractmethod
     async def do_complete(
         self,
-        messages: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]: ...

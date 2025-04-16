@@ -382,7 +382,7 @@ def make_invalid_json_adaptation(*, batch: object, strategy: object, input: obje
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
         _initial_assistant_response=adaptation.AssistantInvalidJsonError(
-            kind="error", error="invalid-json", parsed={"blah": "blah"}
+            kind="error", error="invalid-json", parsed={}
         ).model_dump(),
         _adjustments=[],
         manual_edit=None,
@@ -397,7 +397,7 @@ def make_not_json_adaptation(*, batch: object, strategy: object, input: object) 
         input=input,
         raw_llm_conversations=[{"initial": "conversation"}],
         _initial_assistant_response=adaptation.AssistantNotJsonError(
-            kind="error", error="not-json", text="blah blah"
+            kind="error", error="not-json", text="This is not JSON."
         ).model_dump(),
         _adjustments=[],
         manual_edit=None,

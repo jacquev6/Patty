@@ -29,7 +29,13 @@ __all__ = ["router"]
 router = fastapi.APIRouter()
 
 
-LlmMessage = llm.UserMessage | llm.SystemMessage | llm.AssistantMessage[Exercise]
+LlmMessage = (
+    llm.UserMessage
+    | llm.SystemMessage
+    | llm.AssistantMessage[Exercise]
+    | llm.InvalidJsonAssistantMessage
+    | llm.NotJsonAssistantMessage
+)
 
 
 class ApiStrategy(ApiModel):
@@ -226,17 +232,27 @@ async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
-    assert isinstance(db_adaptation.initial_assistant_response, AssistantSuccess)
+    assert db_adaptation.initial_assistant_response is not None
+
+    def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
+        if isinstance(assistant_response, AssistantSuccess):
+            return llm.AssistantMessage[Exercise](content=assistant_response.exercise)
+        elif isinstance(assistant_response, AssistantInvalidJsonError):
+            return llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
+        elif isinstance(assistant_response, AssistantNotJsonError):
+            return llm.NotJsonAssistantMessage(content=assistant_response.text)
+        else:
+            raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
         llm.SystemMessage(content=db_adaptation.strategy.system_prompt),
         llm.UserMessage(content=db_adaptation.input.text),
-        llm.AssistantMessage[Exercise](content=db_adaptation.initial_assistant_response.exercise),
+        make_assistant_message(db_adaptation.initial_assistant_response),
     ]
     for adjustment in db_adaptation.adjustments:
         assert isinstance(adjustment.assistant_response, AssistantSuccess)
         messages.append(llm.UserMessage(content=adjustment.user_prompt))
-        messages.append(llm.AssistantMessage[Exercise](content=adjustment.assistant_response.exercise))
+        make_assistant_message(adjustment.assistant_response)
     messages.append(llm.UserMessage(content=req.adjustment))
 
     try:

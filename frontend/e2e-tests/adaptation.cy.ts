@@ -220,7 +220,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
 
     cy.get('h2:contains("Error with the LLM")').should('exist')
-    cy.get('p:contains("Failed to parse JSON response")').should('exist')
+    cy.get('p:contains("The LLM returned a response that is not correct JSON.")').should('exist')
   })
 
   it('handles invalid JSON response from the LLM', () => {
@@ -229,7 +229,9 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
 
     cy.get('h2:contains("Error with the LLM")').should('exist')
-    cy.get('p:contains("Failed to validate JSON response")').should('exist')
+    cy.get(
+      'p:contains("The LLM returned a JSON response that does not validate against the adapted exercise schema.")',
+    ).should('exist')
   })
 })
 
@@ -282,27 +284,6 @@ describe('The adaptation edition page', () => {
     ignoreResizeObserverLoopError()
   })
 
-  it('looks like this in case of success', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('h1:contains("Adapted exercise")').should('exist')
-    screenshot('adaptation-edition-page.success')
-  })
-
-  it('looks like this in case of invalid json', () => {
-    cy.visit('/adaptation-3')
-
-    cy.get('h1:contains("Error with the LLM")').should('exist')
-    screenshot('adaptation-edition-page.invalid-json')
-  })
-
-  it('looks like this in case of not json', () => {
-    cy.visit('/adaptation-4')
-
-    cy.get('h1:contains("Error with the LLM")').should('exist')
-    screenshot('adaptation-edition-page.not-json')
-  })
-
   it('displays "Not found" when the adaptation does not exist', () => {
     cy.visit('/adaptation-42')
 
@@ -314,13 +295,138 @@ describe('The adaptation edition page', () => {
 
     cy.get('h1:contains("Not found")').should('exist')
   })
+})
+
+function setUpAliases() {
+  cy.get('[data-cy="user-prompt"]').as('user-prompt')
+  cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
+
+  cy.get('[data-cy="manual-edition"]').as('manual-edition')
+  cy.get('button[data-cy="reset-manual-edition"]').as('reset-manual-edition')
+  cy.get('button[data-cy="reformat-manual-edition"]').as('reformat-manual-edition')
+}
+
+function submitAdjustment(prompt: string) {
+  cy.get('@user-prompt').type('{selectAll}' + prompt, { delay: 0 })
+  cy.get('@submit-adjustment').click()
+  cy.get('@user-prompt').should('have.value', '')
+  cy.get(`div.user-prompt:contains("${prompt}")`).should('exist')
+  cy.get(`div.user-prompt:contains("${prompt}")`).find('div:contains("❌")').should('exist')
+}
+
+function rewindAdjustment() {
+  cy.get('div:contains("❌")').last().click()
+}
+
+const validExercise = {
+  unformattedJson:
+    '{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"example":null,"hint":null,"statement":{"pages":[]},"reference":null}',
+  formattedJson:
+    '{\n  "format": "v1",\n  "instruction": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "example": null,\n  "hint": null,\n  "statement": {"pages": []},\n  "reference": null\n}',
+}
+
+function fixJsonManually() {
+  cy.get('@manual-edition')
+    .type('{selectAll}')
+    .type(validExercise.unformattedJson, { delay: 0, parseSpecialCharSequences: false })
+}
+
+function invalidateJsonManually() {
+  cy.get('@manual-edition').type('{selectAll}').type('{}', { delay: 0, parseSpecialCharSequences: false })
+}
+
+function breakJsonManually() {
+  cy.get('@manual-edition').type('{selectAll}Not JSON.', { delay: 0 })
+}
+
+function shouldBeSuccess() {
+  cy.get('h1:contains("Error with the LLM")').should('not.exist')
+  cy.get('h1:contains("Error in manually edited")').should('not.exist')
+  cy.get('h1:contains("Adapted exercise")').should('exist')
+}
+
+function shouldBeLlmInvalidJson() {
+  cy.get('h1:contains("Error with the LLM")').should('exist')
+  cy.get(
+    'p:contains("The LLM returned a JSON response that does not validate against the adapted exercise schema.")',
+  ).should('exist')
+  cy.get('h1:contains("Error in manually edited")').should('not.exist')
+  cy.get('h1:contains("Adapted exercise")').should('not.exist')
+  cy.get('@manual-edition').should('have.value', '{}')
+}
+
+function shouldBeManualInvalidJson() {
+  cy.get('h1:contains("Error with the LLM")').should('not.exist')
+  cy.get('h1:contains("Error in manually edited")').should('exist')
+  cy.get('h2:contains("Validation errors")').should('exist')
+  cy.get('h1:contains("Adapted exercise")').should('not.exist')
+}
+
+function shouldBeLlmNotJson() {
+  cy.get('h1:contains("Error with the LLM")').should('exist')
+  cy.get('p:contains("The LLM returned a response that is not correct JSON.")').should('exist')
+  cy.get('h1:contains("Error in manually edited")').should('not.exist')
+  cy.get('h1:contains("Adapted exercise")').should('not.exist')
+  cy.get('@manual-edition').should('have.value', 'This is not JSON.')
+}
+
+function shouldBeManualNotJson() {
+  cy.get('h1:contains("Error with the LLM")').should('not.exist')
+  cy.get('h1:contains("Error in manually edited")').should('exist')
+  cy.get('h2:contains("Syntax error")').should('exist')
+  cy.get('h1:contains("Adapted exercise")').should('not.exist')
+}
+
+function shouldAllowAdjustment() {
+  cy.get('@user-prompt').should('be.enabled')
+}
+
+function shouldForbidAdjustment() {
+  cy.get('@user-prompt').should('be.disabled')
+  cy.get('@submit-adjustment').should('be.disabled')
+}
+
+describe('The edition page for an initially successful adaptation', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    ignoreResizeObserverLoopError()
+    cy.visit('/adaptation-1')
+    setUpAliases()
+    shouldBeSuccess()
+    shouldAllowAdjustment()
+  })
+
+  it('looks like this', () => {
+    screenshot('adaptation-edition-page.success')
+  })
+
+  it('reformats, saves and resets manual edits', () => {
+    fixJsonManually()
+    cy.get('@manual-edition').should('have.value', validExercise.unformattedJson)
+    cy.get('@reformat-manual-edition').click()
+    cy.get('@manual-edition').should('have.value', validExercise.formattedJson)
+    shouldBeSuccess()
+    shouldForbidAdjustment()
+
+    cy.visit('/adaptation-1')
+    cy.get('@manual-edition').should('have.value', validExercise.formattedJson)
+    cy.get('@reset-manual-edition').click()
+    shouldBeSuccess()
+    shouldAllowAdjustment()
+  })
+
+  it('does not remember answers', () => {
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
+    cy.get('[data-cy="choice0"]').click()
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+
+    cy.visit('/adaptation-1')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+  })
 
   it('enables the "submit adjustment" button', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="user-prompt"]').as('user-prompt')
-    cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
-
     cy.get('@user-prompt').should('have.value', '')
     cy.get('@submit-adjustment').should('be.disabled')
     cy.get('@user-prompt').type('Blah.', { delay: 0 })
@@ -331,118 +437,168 @@ describe('The adaptation edition page', () => {
     cy.get('@submit-adjustment').should('be.disabled')
   })
 
-  it('submits and rewinds adjustments', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="user-prompt"]').as('user-prompt')
-    cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
-
+  it('submits and rewinds successful adjustments', () => {
     cy.get('@user-prompt').type('Blah.', { delay: 0 })
     cy.get('@submit-adjustment').click()
     cy.get('@user-prompt').should('have.value', '')
     cy.get('div.user-prompt:contains("Blah.")').should('exist')
     cy.get('div.user-prompt:contains("Blah.")').find('div:contains("❌")').should('exist')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
     cy.get('@user-prompt').type('Bleh.', { delay: 0 })
     cy.get('@submit-adjustment').click()
     cy.get('@user-prompt').should('have.value', '')
     cy.get('div.user-prompt:contains("Blah.")').should('exist')
     cy.get('div.user-prompt:contains("Blah.")').find('div:contains("❌")').should('not.exist')
     cy.get('div.user-prompt:contains("Bleh.")').should('exist')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
     cy.get('div.user-prompt:contains("Bleh.")').find('div:contains("❌")').should('exist').click()
     cy.get('div.user-prompt:contains("Bleh.")').should('not.exist')
     cy.get('div.user-prompt:contains("Blah.")').should('exist')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
     cy.get('div.user-prompt:contains("Blah.")').find('div:contains("❌")').should('exist').click()
     cy.get('div.user-prompt:contains("Blah.")').should('not.exist')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
   })
 
-  const unformattedJson =
-    '{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"example":null,"hint":null,"statement":{"pages":[]},"reference":null}'
-  const formattedJson =
-    '{\n  "format": "v1",\n  "instruction": {"lines": [{"contents": [{"kind": "text", "text": "Blah"}]}]},\n  "example": null,\n  "hint": null,\n  "statement": {"pages": []},\n  "reference": null\n}'
-
-  it('reformats manual edits', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="manual-edition"]').as('manual-edition')
-
-    cy.get('@manual-edition').type('{selectAll}').type(unformattedJson, { delay: 0, parseSpecialCharSequences: false })
-    cy.get('@manual-edition').should('have.value', unformattedJson)
-    cy.get('button[data-cy="reformat-manual-edition"]').click()
-    cy.get('@manual-edition').should('have.value', formattedJson)
+  it('submit and rewinds non-JSON adjustment', () => {
+    submitAdjustment('Not JSON')
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeSuccess()
+    shouldAllowAdjustment()
   })
 
-  it('saves manual edits', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="manual-edition"]').as('manual-edition')
-
-    cy.get('@manual-edition').type('{selectAll}').type(unformattedJson, { delay: 0, parseSpecialCharSequences: false })
-
-    cy.visit('/adaptation-1')
-
-    cy.get('@manual-edition').should('have.value', formattedJson)
+  it('submit and rewinds invalid-JSON adjustment', () => {
+    submitAdjustment('Invalid JSON')
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeSuccess()
+    shouldAllowAdjustment()
   })
 
-  it('forbids adjustments on manual edits', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="user-prompt"]').as('user-prompt')
-    cy.get('[data-cy="submit-adjustment"]').as('submit-adjustment')
-    cy.get('[data-cy="manual-edition"]').as('manual-edition')
-
-    cy.get('@user-prompt').should('be.enabled').type('Adjust!')
-    cy.get('@submit-adjustment').should('be.enabled')
-    cy.get('@manual-edition').type('Blih blih.', { delay: 0 })
-    cy.get('@user-prompt').should('be.disabled')
-    cy.get('@submit-adjustment').should('be.disabled')
-    cy.get('[data-cy="reset-manual-edition"]').click()
-    cy.get('@user-prompt').should('be.enabled')
-    cy.get('@submit-adjustment').should('be.enabled')
+  it('invalidate the JSON manually', () => {
+    invalidateJsonManually()
+    shouldBeManualInvalidJson()
+    screenshot('adaptation-edition-page.manual-invalid')
   })
 
-  it('handles non-JSON response from the LLM and rewinds it', () => {
-    cy.visit('/adaptation-1')
+  it('breaks the JSON manually', () => {
+    breakJsonManually()
+    shouldBeManualNotJson()
+    screenshot('adaptation-edition-page.manual-not-json')
+  })
+})
 
-    cy.get('[data-cy="user-prompt"]').type('{selectAll}Not JSON', { delay: 0 })
-
-    cy.get('[data-cy="submit-adjustment"]').click()
-
-    cy.get('h1:contains("Error with the LLM")').should('exist')
-    cy.get('p:contains("Failed to parse JSON response")').should('exist')
-    cy.get('h1:contains("Adapted exercise")').should('not.exist')
-
-    cy.get('div:contains("❌")').last().click()
-
-    cy.get('h1:contains("Error with the LLM")').should('not.exist')
-    cy.get('h1:contains("Adapted exercise")').should('exist')
+describe('The edition page for an initially invalid-json adaptation', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    ignoreResizeObserverLoopError()
+    cy.visit('/adaptation-3')
+    setUpAliases()
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
   })
 
-  it('handles invalid JSON response from the LLM', () => {
-    cy.visit('/adaptation-1')
-
-    cy.get('[data-cy="user-prompt"]').type('{selectAll}Invalid JSON', { delay: 0 })
-
-    cy.get('[data-cy="submit-adjustment"]').click()
-
-    cy.get('h1:contains("Error with the LLM")').should('exist')
-    cy.get('p:contains("Failed to validate JSON response")').should('exist')
-    cy.get('h1:contains("Adapted exercise")').should('not.exist')
-
-    cy.get('div:contains("❌")').last().click()
-
-    cy.get('h1:contains("Error with the LLM")').should('not.exist')
-    cy.get('h1:contains("Adapted exercise")').should('exist')
+  it('looks like this', () => {
+    screenshot('adaptation-edition-page.invalid-json')
   })
 
-  it('does not remember answers', () => {
-    cy.visit('/adaptation-1')
+  it('submit and rewinds successful adjustment', () => {
+    submitAdjustment('Blah')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+  })
 
-    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
-    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
-    cy.get('[data-cy="choice0"]').click()
-    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+  it('submit and rewinds non-JSON adjustment', () => {
+    submitAdjustment('Not JSON')
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+  })
 
-    cy.visit('/adaptation-1')
-    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+  it('submit and rewinds invalid-JSON adjustment', () => {
+    submitAdjustment('Invalid JSON')
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+  })
+
+  it('fixes the JSON manually', () => {
+    fixJsonManually()
+    shouldBeSuccess()
+    shouldForbidAdjustment()
+  })
+
+  it('invalidate the JSON manually', () => {
+    invalidateJsonManually()
+    shouldBeManualInvalidJson()
+  })
+
+  it('breaks the JSON manually', () => {
+    breakJsonManually()
+    shouldBeManualNotJson()
+  })
+})
+
+describe('The edition page for an initially not-json adaptation', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    ignoreResizeObserverLoopError()
+    cy.visit('/adaptation-4')
+    setUpAliases()
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+  })
+
+  it('looks like this', () => {
+    screenshot('adaptation-edition-page.not-json')
+  })
+
+  it('submit and rewinds successful adjustment', () => {
+    submitAdjustment('Blah')
+    shouldBeSuccess()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+  })
+
+  it('submit and rewinds non-JSON adjustment', () => {
+    submitAdjustment('Not JSON')
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+  })
+
+  it('submit and rewinds invalid-JSON adjustment', () => {
+    submitAdjustment('Invalid JSON')
+    shouldBeLlmInvalidJson()
+    shouldAllowAdjustment()
+    rewindAdjustment()
+    shouldBeLlmNotJson()
+    shouldAllowAdjustment()
+  })
+
+  it('fixes the JSON manually', () => {
+    fixJsonManually()
+    shouldBeSuccess()
+    shouldForbidAdjustment()
   })
 })

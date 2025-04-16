@@ -14,7 +14,13 @@ export type PreprocessedAdaptation = {
       }
     | {
         kind: 'error'
-        error: string
+        error: 'invalid-json'
+        parsed: unknown
+      }
+    | {
+        kind: 'error'
+        error: 'not-json'
+        text: string
       }
     | {
         kind: 'success'
@@ -26,7 +32,13 @@ export type PreprocessedAdaptation = {
       }
     | {
         kind: 'error'
-        error: string
+        error: 'invalid-json'
+        parsed: unknown
+      }
+    | {
+        kind: 'error'
+        error: 'not-json'
+        text: string
       }
     | {
         kind: 'success'
@@ -43,9 +55,9 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
     if (response.kind === 'success') {
       return { kind: 'success', adaptedExercise: response.exercise }
     } else if (response.kind === 'error' && response.error === 'invalid-json') {
-      return { kind: 'error', error: 'Failed to validate JSON response' }
+      return { kind: 'error', error: 'invalid-json', parsed: response.parsed }
     } else if (response.kind === 'error' && response.error === 'not-json') {
-      return { kind: 'error', error: 'Failed to parse JSON response' }
+      return { kind: 'error', error: 'not-json', text: response.text }
     } else {
       return ((r: never) => r)(response)
     }

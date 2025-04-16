@@ -65,12 +65,18 @@ const adaptedExercise = computed(() => {
 
 const manualAdaptedExerciseProxy = computed({
   get() {
-    if (manualAdaptedExercise.value === null) {
-      return jsonStringify(
-        props.adaptation.llmStatus.kind === 'success' ? props.adaptation.llmStatus.adaptedExercise : null,
-      )
-    } else {
+    if (manualAdaptedExercise.value !== null) {
       return manualAdaptedExercise.value.raw
+    } else if (props.adaptation.llmStatus.kind === 'inProgress') {
+      return ''
+    } else if (props.adaptation.llmStatus.kind === 'success') {
+      return jsonStringify(props.adaptation.llmStatus.adaptedExercise)
+    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'not-json') {
+      return props.adaptation.llmStatus.text
+    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'invalid-json') {
+      return jsonStringify(props.adaptation.llmStatus.parsed)
+    } else {
+      return ((status: never) => status)(props.adaptation.llmStatus)
     }
   },
   set(raw: string) {
@@ -105,6 +111,38 @@ const manualAdaptedExerciseProxy = computed({
   },
 })
 
+const syntaxErrorProxy = computed(() => {
+  if (manualAdaptedExercise.value !== null) {
+    return manualAdaptedExercise.value.syntaxError
+  } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'not-json') {
+    try {
+      JSON.parse(props.adaptation.llmStatus.text)
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return error
+      } else {
+        throw error
+      }
+    }
+    return null
+  } else {
+    return null
+  }
+})
+
+const validationErrorsProxy = computed(() => {
+  if (manualAdaptedExercise.value !== null) {
+    return manualAdaptedExercise.value.validationErrors
+  } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'invalid-json') {
+    assert(!validateAdaptedExercise(props.adaptation.llmStatus.parsed))
+    assert(validateAdaptedExercise.errors !== undefined)
+    assert(validateAdaptedExercise.errors !== null)
+    return validateAdaptedExercise.errors
+  } else {
+    return []
+  }
+})
+
 function reformatManualAdaptedExercise() {
   assert(manualAdaptedExercise.value !== null)
   assert(manualAdaptedExercise.value.parsed !== null)
@@ -113,9 +151,7 @@ function reformatManualAdaptedExercise() {
 }
 
 const adjustmentPrompt = ref('')
-const isAdjustmentPromptDisabled = computed(
-  () => props.adaptation.llmStatus.kind !== 'success' || manualAdaptedExercise.value !== null,
-)
+const isAdjustmentPromptDisabled = computed(() => manualAdaptedExercise.value !== null)
 const isSubmitAdjustmentDisabled = computed(
   () => isAdjustmentPromptDisabled.value || adjustmentPrompt.value.trim() === '',
 )
@@ -213,67 +249,94 @@ watch(Escape, () => {
       </BusyBox>
     </template>
     <template #col-3>
-      <template v-if="adaptation.status.kind === 'error'">
-        <h1>Error with the LLM</h1>
-        <p>
-          {{ adaptation.status.error }}. See the raw conversation to investigate (and/or give the URL of this page to
-          Vincent Jacques).
-        </p>
-      </template>
-      <template v-if="adaptation.llmStatus.kind === 'success'">
-        <h1>Adapted exercise</h1>
-        <template v-if="adaptedExercise !== null">
-          <MiniatureScreen :fullScreen>
-            <AdaptedExerciseRenderer :adaptedExercise />
-            <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
-          </MiniatureScreen>
-          <p>
-            <button @click="fullScreen = true">Full screen</button>
-            <WhiteSpace />
-            <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
-          </p>
-        </template>
-        <template v-else-if="manualAdaptedExercise !== null">
-          <template v-if="manualAdaptedExercise.syntaxError !== null">
-            <h2>Syntax error</h2>
-            {{ manualAdaptedExercise?.syntaxError.message }}
-          </template>
-          <template v-else>
-            <h2>Validation errors</h2>
+      <template v-if="adaptedExercise === null">
+        <template v-if="manualAdaptedExercise === null">
+          <template v-if="/*assert*/ adaptation.llmStatus.kind === 'error'">
+            <h1>Error with the LLM</h1>
+            <p>
+              <template v-if="adaptation.llmStatus.error === 'invalid-json'">
+                The LLM returned a JSON response that does not validate against the adapted exercise schema.
+              </template>
+              <template v-else-if="adaptation.llmStatus.error === 'not-json'">
+                The LLM returned a response that is not correct JSON.
+              </template>
+              <template v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</template>
+              You can:
+            </p>
             <ul>
-              <li v-for="error in manualAdaptedExercise.validationErrors">
-                {{ error.instancePath }}: {{ error.message }}
-                {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
+              <li>ask the LLM for an adjustment</li>
+              <li v-if="adaptation.llmStatus.error === 'invalid-json'">
+                edit the JSON manually to make it conform to the schema
               </li>
+              <li v-else-if="adaptation.llmStatus.error === 'not-json'">
+                edit the response manually to make it correct JSON that conforms to the schema
+              </li>
+              <li v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</li>
             </ul>
           </template>
         </template>
-        <h1>Manual edition</h1>
-        <TextArea
-          data-cy="manual-edition"
-          v-model="manualAdaptedExerciseProxy"
-          style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
-        ></TextArea>
-        <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
+        <template v-else>
+          <h1>Error in manually edited exercise</h1>
+          <p>
+            <template v-if="manualAdaptedExercise.syntaxError !== null">
+              The manually edited exercise is not correct JSON.
+            </template>
+            <template v-else-if="manualAdaptedExercise.validationErrors.length !== 0">
+              The manually edited exercise does not validate against the adapted exercise schema.
+            </template>
+          </p>
+        </template>
+        <template v-if="syntaxErrorProxy !== null">
+          <h2>Syntax error</h2>
+          {{ syntaxErrorProxy.message }}
+        </template>
+        <template v-else-if="validationErrorsProxy.length !== 0">
+          <h2>Validation errors</h2>
+          <ul>
+            <li v-for="error in validationErrorsProxy">
+              {{ error.instancePath }}: {{ error.message }}
+              {{ Object.keys(error.params).length !== 0 ? JSON.stringify(error.params) : '' }}
+            </li>
+          </ul>
+        </template>
+      </template>
+      <template v-else>
+        <h1>Adapted exercise</h1>
+        <MiniatureScreen :fullScreen>
+          <AdaptedExerciseRenderer :adaptedExercise />
+          <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
+        </MiniatureScreen>
         <p>
-          <button
-            data-cy="reset-manual-edition"
-            @click="resetManualEdit"
-            :disabled="manualAdaptedExercise === null"
-            title="Forget all manual changes; go back to the last version from the LLM"
-          >
-            Reset
-          </button>
+          <button @click="fullScreen = true">Full screen</button>
           <WhiteSpace />
-          <button
-            data-cy="reformat-manual-edition"
-            @click="reformatManualAdaptedExercise"
-            :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
-          >
-            Reformat
-          </button>
+          <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
         </p>
       </template>
+      <h1>Manual edition</h1>
+      <TextArea
+        data-cy="manual-edition"
+        v-model="manualAdaptedExerciseProxy"
+        style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
+      ></TextArea>
+      <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
+      <p>
+        <button
+          data-cy="reset-manual-edition"
+          @click="resetManualEdit"
+          :disabled="manualAdaptedExercise === null"
+          title="Forget all manual changes; go back to the last version from the LLM"
+        >
+          Reset
+        </button>
+        <WhiteSpace />
+        <button
+          data-cy="reformat-manual-edition"
+          @click="reformatManualAdaptedExercise"
+          :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
+        >
+          Reformat
+        </button>
+      </p>
     </template>
   </ResizableColumns>
   <div v-if="showRaw" class="overlay">

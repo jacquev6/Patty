@@ -9,10 +9,12 @@ import pydantic
 from ..any_json import JsonDict
 from .base import (
     AssistantMessage,
+    InvalidJsonAssistantMessage,
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
     Model,
+    NotJsonAssistantMessage,
     SystemMessage,
     T,
     UserMessage,
@@ -25,7 +27,9 @@ class DummyModel(Model):
 
     async def do_complete(
         self,
-        messages: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         class MessageTypeFactory(ModelFactory[T]):

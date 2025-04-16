@@ -11,11 +11,13 @@ import pydantic
 from ..any_json import JsonDict
 from .base import (
     AssistantMessage,
+    InvalidJsonAssistantMessage,
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
     LlmException,
     Model,
+    NotJsonAssistantMessage,
     SystemMessage,
     T,
     try_hard_to_json_loads,
@@ -35,7 +37,9 @@ class OpenAiModel(Model):
 
     async def do_complete(
         self,
-        messages_: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages_: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         messages = list(self.__make_messages(messages_))
@@ -88,7 +92,10 @@ class OpenAiModel(Model):
         return (raw_conversation, response.choices[0].message.content)
 
     def __make_messages(
-        self, messages: Iterable[SystemMessage | UserMessage | AssistantMessage[T]]
+        self,
+        messages: Iterable[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
     ) -> Iterable[openai.types.chat.ChatCompletionMessageParam]:
         for message in messages:
             if isinstance(message, SystemMessage):
@@ -99,6 +106,12 @@ class OpenAiModel(Model):
                 yield openai.types.chat.ChatCompletionAssistantMessageParam(
                     role="assistant", content=message.content.model_dump_json()
                 )
+            elif isinstance(message, InvalidJsonAssistantMessage):
+                yield openai.types.chat.ChatCompletionAssistantMessageParam(
+                    role="assistant", content=json.dumps(message.content)
+                )
+            elif isinstance(message, NotJsonAssistantMessage):
+                yield openai.types.chat.ChatCompletionAssistantMessageParam(role="assistant", content=message.content)
             else:
                 raise ValueError(f"Unknown message type: {message}")
 
@@ -135,7 +148,13 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
             SystemMessage(
                 content="Utilise le champ `prose` pour tes commentaires, et le champs `structured` pour le contenu de ta réponse. Dans ce champs, donne des réponses aussi concises que possible."
             ),
@@ -240,9 +259,13 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
-            UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")
-        ]
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")]
         response = await model.complete(messages, JsonObjectResponseFormat(response_type=Response))
         self.assertEqual(response.raw_conversation["method"], "openai.AsyncOpenAI.chat.completions.create")
         self.assertEqual(
@@ -266,7 +289,13 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
             UserMessage(
                 content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers. Donne-moi uniquement cet objet, sans aucun commentaire."
             )
@@ -296,7 +325,13 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [UserMessage(content="Bonjour!")]
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Bonjour!")]
 
         with self.assertRaises(LlmException) as cm:
             await model.complete(messages, JsonFromTextResponseFormat(response_type=Response))

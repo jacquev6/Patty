@@ -51,7 +51,15 @@ watch(Escape, () => {
         </template>
         <template v-else-if="adaptation.status.kind === 'error'">
           <h2>Error with the LLM</h2>
-          <p>{{ adaptation.status.error }}.</p>
+          <p>
+            <template v-if="adaptation.status.error === 'invalid-json'">
+              The LLM returned a JSON response that does not validate against the adapted exercise schema.
+            </template>
+            <template v-else-if="adaptation.status.error === 'not-json'">
+              The LLM returned a response that is not correct JSON.
+            </template>
+            <template v-else>BUG: {{ ((status: never) => status)(adaptation.status) }}</template>
+          </p>
         </template>
         <template v-else-if="adaptation.status.kind === 'success'">
           <MiniatureScreen :fullScreen>
