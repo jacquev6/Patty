@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 import { type Batch, client } from './apiClient'
 import assert from './assert'
@@ -13,6 +13,8 @@ const props = defineProps<{
 const found = ref<boolean | null>(null)
 const batch = ref<Batch | null>(null)
 let refreshes = 0
+
+let refreshTimeoutId : number | null = null
 
 async function refresh() {
   const response = await client.GET(`/api/adaptation/batch/{id}`, { params: { path: { id: props.id } } })
@@ -33,13 +35,24 @@ async function refresh() {
       }
     }
     if (needsRefresh) {
-      setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
+      refreshTimeoutId = setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
       refreshes++
+    } else {
+      refreshTimeoutId = null
+      refreshes = 0
     }
   }
 }
 
 onMounted(refresh)
+
+onUnmounted(() => {
+  if (refreshTimeoutId !== null) {
+    clearTimeout(refreshTimeoutId)
+    refreshTimeoutId = null
+  }
+  refreshes = 0
+})
 </script>
 
 <template>
