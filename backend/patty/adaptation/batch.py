@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import orm
 import sqlalchemy as sql
 
@@ -17,6 +19,7 @@ class Batch(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
     created_by: orm.Mapped[str]
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)

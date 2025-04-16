@@ -107,6 +107,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/batches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Batches */
+    get: operations['get_batches_api_adaptation_batches_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation/{id}': {
     parameters: {
       query?: never
@@ -322,6 +339,18 @@ export interface components {
       kind: 'success'
       exercise: components['schemas']['Exercise-Output']
     }
+    /** Batch */
+    Batch: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+    }
     Choice: {
       /**
        * Kind
@@ -400,6 +429,11 @@ export interface components {
       strategy: components['schemas']['ApiStrategy-Output']
       /** Adaptations */
       adaptations: components['schemas']['ApiAdaptation'][]
+    }
+    /** GetBatchesResponse */
+    GetBatchesResponse: {
+      /** Batches */
+      batches: components['schemas']['Batch'][]
     }
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -917,6 +951,26 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_batches_api_adaptation_batches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetBatchesResponse']
         }
       }
     }

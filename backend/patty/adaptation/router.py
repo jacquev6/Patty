@@ -1,5 +1,6 @@
 from typing import TypeVar
 import asyncio
+import datetime
 import json
 import os
 
@@ -121,7 +122,7 @@ async def post_batch(
         )
         session.add(strategy)
 
-    batch = Batch(created_by=req.creator, strategy=strategy)
+    batch = Batch(created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc), strategy=strategy)
     session.add(batch)
 
     for req_input in req.inputs:
@@ -207,6 +208,26 @@ async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBa
         created_by=batch.created_by,
         strategy=make_api_strategy(batch.strategy),
         adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
+    )
+
+
+class GetBatchesResponse(ApiModel):
+    class Batch(ApiModel):
+        id: str
+        created_by: str
+        created_at: datetime.datetime
+
+    batches: list[Batch]
+
+
+@router.get("/batches")
+async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
+    batches = session.query(Batch).order_by(-Batch.id).all()
+    return GetBatchesResponse(
+        batches=[
+            GetBatchesResponse.Batch(id=str(batch.id), created_by=batch.created_by, created_at=batch.created_at)
+            for batch in batches
+        ]
     )
 
 

@@ -32,6 +32,7 @@ def upgrade() -> None:
         "adaptation_batches",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_by", sa.String(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["strategy_id"],

@@ -1,5 +1,6 @@
 from sqlalchemy import orm
 from typing import Any, Literal
+import datetime
 import psycopg2.errors
 import pydantic
 import sqlalchemy as sql
@@ -123,7 +124,12 @@ class AdaptationTestCase(TestCaseWithDatabase):
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        batch = self.create_model(Batch, created_by="UnitTests", strategy=strategy)
+        batch = self.create_model(
+            Batch,
+            created_by="UnitTests",
+            created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+            strategy=strategy,
+        )
 
         self.create_model(
             Adaptation,
@@ -156,7 +162,12 @@ class AdaptationTestCase(TestCaseWithDatabase):
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        batch = self.create_model(Batch, created_by="UnitTests", strategy=strategy_1)
+        batch = self.create_model(
+            Batch,
+            created_by="UnitTests",
+            created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+            strategy=strategy_1,
+        )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
             self.create_model(
@@ -195,7 +206,12 @@ class AdaptationTestCase(TestCaseWithDatabase):
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        batch = self.create_model(Batch, created_by="UnitTests", strategy=strategy_1)
+        batch = self.create_model(
+            Batch,
+            created_by="UnitTests",
+            created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+            strategy=strategy_1,
+        )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
             self.session.execute(

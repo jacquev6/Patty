@@ -1,4 +1,5 @@
 from typing import Iterable
+import datetime
 import textwrap
 
 import compact_json  # type: ignore
@@ -409,7 +410,11 @@ def create_seed_data() -> Iterable[object]:
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
-    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+        strategy=strategy,
+    )
     yield batch
     yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
 
@@ -419,7 +424,11 @@ def create_dummy_adaptation() -> Iterable[object]:
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
-    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+        strategy=strategy,
+    )
     yield batch
     yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
 
@@ -429,7 +438,11 @@ def create_mixed_dummy_batch() -> Iterable[object]:
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
-    batch = adaptation.Batch(created_by="Patty", strategy=strategy)
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+        strategy=strategy,
+    )
     yield batch
     yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
     yield make_in_progress_adaptation(batch=batch, strategy=strategy, input=input)

@@ -234,6 +234,24 @@
         }
       }
     },
+    "/api/adaptation/batches": {
+      "get": {
+        "summary": "Get Batches",
+        "operationId": "get_batches_api_adaptation_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBatchesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/adaptation/{id}": {
       "get": {
         "summary": "Get Adaptation",
@@ -818,6 +836,31 @@
         ],
         "title": "AssistantSuccess"
       },
+      "Batch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "Batch"
+      },
       "Choice": {
         "properties": {
           "kind": {
@@ -1047,6 +1090,23 @@
           "adaptations"
         ],
         "title": "GetBatchResponse"
+      },
+      "GetBatchesResponse": {
+        "properties": {
+          "batches": {
+            "items": {
+              "$ref": "#/components/schemas/Batch"
+            },
+            "type": "array",
+            "title": "Batches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "batches"
+        ],
+        "title": "GetBatchesResponse"
       },
       "HTTPValidationError": {
         "properties": {
