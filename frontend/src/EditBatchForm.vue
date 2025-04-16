@@ -21,6 +21,7 @@ const adaptations = computed(() => props.batch.adaptations.map(preprocessAdaptat
       <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="batch.strategy" />
     </template>
     <template #col-2>
+      <p><a :href="`/api/adaptation/export/batch-${batch.id}.html`">Download standalone HTML</a></p>
       <h1>Inputs</h1>
       <AdaptationPreview v-for="(adaptation, index) in adaptations" :index :adaptation />
     </template>

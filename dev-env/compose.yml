@@ -32,6 +32,7 @@ services:
       "backend/generated/adapted-exercise-schema.json",
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
+      "backend/patty/adaptation/templates/batch-export/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -51,6 +52,26 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
+      interval: 0.5s
+      retries: 12
+
+  batch-export-template-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: batch-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/batch-export", "--emptyOutDir"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      npm-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/batch-export/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -122,6 +143,8 @@ services:
     command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
       adaptation-export-template-generator:
+        condition: service_healthy
+      batch-export-template-generator:
         condition: service_healthy
       data-loader:
         condition: service_completed_successfully

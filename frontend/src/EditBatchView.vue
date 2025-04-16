@@ -14,7 +14,7 @@ const found = ref<boolean | null>(null)
 const batch = ref<Batch | null>(null)
 let refreshes = 0
 
-let refreshTimeoutId : number | null = null
+let refreshTimeoutId: number | null = null
 
 async function refresh() {
   const response = await client.GET(`/api/adaptation/batch/{id}`, { params: { path: { id: props.id } } })

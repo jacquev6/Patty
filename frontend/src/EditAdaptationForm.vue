@@ -309,7 +309,7 @@ watch(Escape, () => {
         <p>
           <button @click="fullScreen = true">Full screen</button>
           <WhiteSpace />
-          <a :href="`/api/adaptation/export/${adaptation.id}.html`">Download standalone HTML</a>
+          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html`">Download standalone HTML</a>
         </p>
       </template>
       <h1>Manual edition</h1>

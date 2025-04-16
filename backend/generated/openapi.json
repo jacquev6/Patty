@@ -465,10 +465,59 @@
         }
       }
     },
-    "/api/adaptation/export/{id}.html": {
+    "/api/adaptation/export/adaptation-{id}.html": {
       "get": {
         "summary": "Export Adaptation",
-        "operationId": "export_adaptation_api_adaptation_export__id__html_get",
+        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/export/batch-{id}.html": {
+      "get": {
+        "summary": "Export Batch",
+        "operationId": "export_batch_api_adaptation_export_batch__id__html_get",
         "parameters": [
           {
             "name": "id",

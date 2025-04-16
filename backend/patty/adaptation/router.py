@@ -379,7 +379,7 @@ export_adaptation_template_file_path = os.path.join(
 )
 
 
-@router.get("/export/{id}.html", response_class=fastapi.responses.HTMLResponse)
+@router.get("/export/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -402,7 +402,45 @@ def export_adaptation(
 
     headers = {}
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="{id}.html"'
+        headers["Content-Disposition"] = f'attachment; filename="adaptation-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(
+        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        headers=headers,
+    )
+
+
+export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templates", "batch-export", "index.html")
+
+
+@router.get("/export/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_batch(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    batch = get_by_id(session, Batch, id)
+
+    data = []
+    for db_adaptation in batch.adaptations:
+        if db_adaptation.manual_edit is None:
+            if len(db_adaptation.adjustments) == 0:
+                if not isinstance(db_adaptation.initial_assistant_response, AssistantSuccess):
+                    continue
+                exercise = db_adaptation.initial_assistant_response.exercise
+            else:
+                last_adjustment = db_adaptation.adjustments[-1]
+                if not isinstance(last_adjustment.assistant_response, AssistantSuccess):
+                    continue
+                exercise = last_adjustment.assistant_response.exercise
+        else:
+            exercise = db_adaptation.manual_edit
+        data.append({"exerciseId": str(db_adaptation.id), "adaptedExercise": exercise.model_dump()})
+
+    with open(export_batch_template_file_path) as f:
+        template = f.read()
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(
         content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),

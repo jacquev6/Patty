@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AdaptedExercise } from '@/apiClient'
+import type { AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 
 type Data = {

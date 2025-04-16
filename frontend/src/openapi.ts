@@ -193,7 +193,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/export/{id}.html': {
+  '/api/adaptation/export/adaptation-{id}.html': {
     parameters: {
       query?: never
       header?: never
@@ -201,7 +201,24 @@ export interface paths {
       cookie?: never
     }
     /** Export Adaptation */
-    get: operations['export_adaptation_api_adaptation_export__id__html_get']
+    get: operations['export_adaptation_api_adaptation_export_adaptation__id__html_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/export/batch-{id}.html': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Export Batch */
+    get: operations['export_batch_api_adaptation_export_batch__id__html_get']
     put?: never
     post?: never
     delete?: never
@@ -1138,7 +1155,40 @@ export interface operations {
       }
     }
   }
-  export_adaptation_api_adaptation_export__id__html_get: {
+  export_adaptation_api_adaptation_export_adaptation__id__html_get: {
+    parameters: {
+      query?: {
+        download?: boolean
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  export_batch_api_adaptation_export_batch__id__html_get: {
     parameters: {
       query?: {
         download?: boolean

@@ -22,6 +22,11 @@ ENV PATTY_ENTRY_POINT_NAME=adaptation-export
 RUN npx vite build
 
 
+FROM frontend-dependencies AS batch-export-template-builder
+ENV PATTY_ENTRY_POINT_NAME=batch-export
+RUN npx vite build
+
+
 FROM python:3.13-slim AS backend-dependencies
 
 RUN set -x \
@@ -49,5 +54,6 @@ FROM backend-dependencies AS final-backend
 ADD backend .
 
 COPY --from=adaptation-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/adaptation-export/index.html
+COPY --from=batch-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/batch-export/index.html
 
 CMD ["uvicorn", "patty.asgi:app", "--host", "0.0.0.0", "--port", "80"]
