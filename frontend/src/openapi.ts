@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+  '/api/health': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Health */
+    get: operations['get_health_api_health_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    /** Get Health */
+    head: operations['get_health_api_health_head']
+    patch?: never
+    trace?: never
+  }
   '/api/available-llm-models': {
     parameters: {
       query?: never
@@ -665,6 +683,50 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  get_health_api_health_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            [key: string]: string
+          }
+        }
+      }
+    }
+  }
+  get_health_api_health_head: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            [key: string]: string
+          }
+        }
+      }
+    }
+  }
   get_available_llm_models_api_available_llm_models_get: {
     parameters: {
       query?: never

@@ -5,6 +5,48 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Get Health",
+        "operationId": "get_health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Get Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "summary": "Get Health",
+        "operationId": "get_health_api_health_head",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Get Health Api Health Head"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/available-llm-models": {
       "get": {
         "summary": "Get Available Llm Models",
