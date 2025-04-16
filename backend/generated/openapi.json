@@ -5,6 +5,48 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Get Health",
+        "operationId": "get_health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Get Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "head": {
+        "summary": "Get Health",
+        "operationId": "get_health_api_health_head",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Get Health Api Health Head"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/available-llm-models": {
       "get": {
         "summary": "Get Available Llm Models",
@@ -30,24 +72,6 @@
                   },
                   "type": "array",
                   "title": "Response Get Available Llm Models Api Available Llm Models Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/adaptation/latest-strategy": {
-      "get": {
-        "summary": "Get Latest Strategy",
-        "operationId": "get_latest_strategy_api_adaptation_latest_strategy_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiStrategy-Output"
                 }
               }
             }
@@ -94,17 +118,38 @@
         }
       }
     },
-    "/api/adaptation/latest-input": {
+    "/api/adaptation/latest-batch": {
       "get": {
-        "summary": "Get Latest Input",
-        "operationId": "get_latest_input_api_adaptation_latest_input_get",
+        "summary": "Get Latest Batch",
+        "operationId": "get_latest_batch_api_adaptation_latest_batch_get",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiInput"
+                  "$ref": "#/components/schemas/LatestBatch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -112,15 +157,15 @@
         }
       }
     },
-    "/api/adaptation": {
+    "/api/adaptation/batch": {
       "post": {
-        "summary": "Post Adaptation",
-        "operationId": "post_adaptation_api_adaptation_post",
+        "summary": "Post Batch",
+        "operationId": "post_batch_api_adaptation_batch_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostAdaptationRequest"
+                "$ref": "#/components/schemas/PostBatchRequest"
               }
             }
           },
@@ -132,7 +177,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
+                  "$ref": "#/components/schemas/PostBatchResponse"
                 }
               }
             }
@@ -143,6 +188,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/batch/{id}": {
+      "get": {
+        "summary": "Get Batch",
+        "operationId": "get_batch_api_adaptation_batch__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/batches": {
+      "get": {
+        "summary": "Get Batches",
+        "operationId": "get_batches_api_adaptation_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBatchesResponse"
                 }
               }
             }
@@ -238,10 +340,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/last-step": {
+    "/api/adaptation/{id}/last-adjustment": {
       "delete": {
-        "summary": "Delete Adaptation Last Step",
-        "operationId": "delete_adaptation_last_step_api_adaptation__id__last_step_delete",
+        "summary": "Delete Adaptation Last Adjustment",
+        "operationId": "delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete",
         "parameters": [
           {
             "name": "id",
@@ -363,10 +465,59 @@
         }
       }
     },
-    "/api/adaptation/export/{id}.html": {
+    "/api/adaptation/export/adaptation-{id}.html": {
       "get": {
         "summary": "Export Adaptation",
-        "operationId": "export_adaptation_api_adaptation_export__id__html_get",
+        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/export/batch-{id}.html": {
+      "get": {
+        "summary": "Export Batch",
+        "operationId": "export_batch_api_adaptation_export_batch__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -421,33 +572,25 @@
             "type": "string",
             "title": "Userprompt"
           },
-          "assistantError": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assistanterror"
-          },
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise-Output"
+                "$ref": "#/components/schemas/AssistantSuccess"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
               }
-            ]
+            ],
+            "title": "Assistantresponse"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "userPrompt",
-          "assistantError",
           "assistantResponse"
         ],
         "title": "Adjustment"
@@ -455,8 +598,16 @@
       "ApiAdaptation": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
           },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
@@ -469,26 +620,22 @@
             "type": "array",
             "title": "Rawllmconversations"
           },
-          "initialAssistantError": {
+          "initialAssistantResponse": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/AssistantSuccess"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Initialassistanterror"
-          },
-          "initialAssistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Exercise-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Initialassistantresponse"
           },
           "adjustments": {
             "items": {
@@ -512,10 +659,11 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
+          "batchId",
           "strategy",
           "input",
           "rawLlmConversations",
-          "initialAssistantError",
           "initialAssistantResponse",
           "adjustments",
           "manualEdit"
@@ -525,8 +673,12 @@
       "ApiInput": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
           },
           "text": {
             "type": "string",
@@ -537,6 +689,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "text"
         ],
         "title": "ApiInput"
@@ -544,8 +697,12 @@
       "ApiStrategy-Input": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
           },
           "model": {
             "anyOf": [
@@ -584,6 +741,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"
@@ -593,8 +751,12 @@
       "ApiStrategy-Output": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
           },
           "model": {
             "anyOf": [
@@ -633,6 +795,7 @@
         "type": "object",
         "required": [
           "id",
+          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"
@@ -651,6 +814,101 @@
         "required": [
           "kind"
         ]
+      },
+      "AssistantInvalidJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "invalid-json",
+            "title": "Error"
+          },
+          "parsed": {
+            "title": "Parsed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "parsed"
+        ],
+        "title": "AssistantInvalidJsonError"
+      },
+      "AssistantNotJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "not-json",
+            "title": "Error"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "text"
+        ],
+        "title": "AssistantNotJsonError"
+      },
+      "AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "AssistantSuccess"
+      },
+      "Batch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "Batch"
       },
       "Choice": {
         "properties": {
@@ -704,6 +962,32 @@
         ],
         "title": "DummyModel"
       },
+      "ExampleComponents": {
+        "properties": {
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          },
+          "arrow": {
+            "type": "boolean",
+            "title": "Arrow"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "whitespace",
+          "arrow"
+        ],
+        "title": "ExampleComponents"
+      },
       "Exercise-Input": {
         "properties": {
           "format": {
@@ -713,6 +997,26 @@
           },
           "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Input"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
@@ -732,6 +1036,8 @@
         "required": [
           "format",
           "instruction",
+          "example",
+          "hint",
           "statement",
           "reference"
         ]
@@ -745,6 +1051,26 @@
           },
           "instruction": {
             "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "statement": {
             "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
@@ -764,6 +1090,8 @@
         "required": [
           "format",
           "instruction",
+          "example",
+          "hint",
           "statement",
           "reference"
         ]
@@ -781,6 +1109,54 @@
           "kind"
         ]
       },
+      "GetBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "adaptations": {
+            "items": {
+              "$ref": "#/components/schemas/ApiAdaptation"
+            },
+            "type": "array",
+            "title": "Adaptations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "strategy",
+          "adaptations"
+        ],
+        "title": "GetBatchResponse"
+      },
+      "GetBatchesResponse": {
+        "properties": {
+          "batches": {
+            "items": {
+              "$ref": "#/components/schemas/Batch"
+            },
+            "type": "array",
+            "title": "Batches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "batches"
+        ],
+        "title": "GetBatchesResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -793,6 +1169,27 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HintComponents": {
+        "properties": {
+          "text": {
+            "type": "boolean",
+            "const": true,
+            "title": "Text"
+          },
+          "whitespace": {
+            "type": "boolean",
+            "const": true,
+            "title": "Whitespace"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "whitespace"
+        ],
+        "title": "HintComponents"
       },
       "InstructionComponents": {
         "properties": {
@@ -877,6 +1274,12 @@
           "instructionComponents": {
             "$ref": "#/components/schemas/InstructionComponents"
           },
+          "exampleComponents": {
+            "$ref": "#/components/schemas/ExampleComponents"
+          },
+          "hintComponents": {
+            "$ref": "#/components/schemas/HintComponents"
+          },
           "statementComponents": {
             "$ref": "#/components/schemas/StatementComponents"
           },
@@ -890,10 +1293,38 @@
           "format",
           "formalism",
           "instructionComponents",
+          "exampleComponents",
+          "hintComponents",
           "statementComponents",
           "referenceComponents"
         ],
         "title": "JsonSchemaLlmResponseSpecification"
+      },
+      "LatestBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "inputs"
+        ],
+        "title": "LatestBatch"
       },
       "Line_Union_Text__Whitespace__": {
         "properties": {
@@ -905,6 +1336,31 @@
                 },
                 {
                   "$ref": "#/components/schemas/Whitespace"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "Line_Union_Text__Whitespace__Arrow__": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
                 }
               ]
             },
@@ -1133,6 +1589,66 @@
         ],
         "title": "OpenAiModel"
       },
+      "Page_Union_Text__Whitespace__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__Arrow__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__Arrow__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
       "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
         "properties": {
           "lines": {
@@ -1237,22 +1753,45 @@
         ],
         "title": "PostAdaptationAdjustmentRequest"
       },
-      "PostAdaptationRequest": {
+      "PostBatchRequest": {
         "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Input"
           },
-          "input": {
-            "$ref": "#/components/schemas/ApiInput"
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "creator",
           "strategy",
-          "input"
+          "inputs"
         ],
-        "title": "PostAdaptationRequest"
+        "title": "PostBatchRequest"
+      },
+      "PostBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostBatchResponse"
       },
       "PureTextContainer": {
         "properties": {

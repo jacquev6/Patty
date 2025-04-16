@@ -1,4 +1,5 @@
 from typing import Literal
+import asyncio
 import unittest
 
 from polyfactory.factories.pydantic_factory import ModelFactory
@@ -8,10 +9,12 @@ import pydantic
 from ..any_json import JsonDict
 from .base import (
     AssistantMessage,
+    InvalidJsonAssistantMessage,
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
     Model,
+    NotJsonAssistantMessage,
     SystemMessage,
     T,
     UserMessage,
@@ -24,24 +27,30 @@ class DummyModel(Model):
 
     async def do_complete(
         self,
-        messages: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]:
-        response = None
+        class MessageTypeFactory(ModelFactory[T]):
+            __model__ = response_format.response_type
+            __randomize_collection_length__ = True
+            __min_collection_length__ = 2
+            __max_collection_length__ = 5
 
-        if len(messages) != 0:
-            assert messages[-1].role == "user"
-            response = {"Not JSON": "This is not JSON.", "Invalid JSON": "{}"}.get(messages[-1].content)
+        assert len(messages) != 0
+        assert messages[-1].role == "user"
+        content = messages[-1].content
 
-        if response is None:
+        response = {"Not JSON": "This is not JSON.", "Invalid JSON": "{}"}.get(
+            content, MessageTypeFactory.build().model_dump_json()
+        )
 
-            class MessageTypeFactory(ModelFactory[T]):
-                __model__ = response_format.response_type
-                __randomize_collection_length__ = True
-                __min_collection_length__ = 2
-                __max_collection_length__ = 5
+        duration = 0.1
+        if content.startswith("Sleep "):
+            duration = float(content[6:])
 
-            response = MessageTypeFactory.build().model_dump_json()
+        await asyncio.sleep(duration)
 
         return ({"dummy": "conversation"}, response)
 
@@ -52,7 +61,9 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
             cheese: str
 
         model = DummyModel(name="dummy-1")
-        response = await model.complete([], JsonSchemaResponseFormat(response_type=Response))
+        response = await model.complete(
+            [UserMessage(content="Blah.")], JsonSchemaResponseFormat(response_type=Response)
+        )
         self.assertIsInstance(response.message.content, Response)
 
     async def test_adaptation_schema(self) -> None:

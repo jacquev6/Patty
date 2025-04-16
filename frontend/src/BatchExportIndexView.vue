@@ -1,0 +1,18 @@
+<script setup lang="ts">
+import type { AdaptedExercise } from './apiClient'
+
+type Data = {
+  exerciseId: string
+  adaptedExercise: AdaptedExercise
+}[]
+
+const data = JSON.parse('{{ data }}') as Data // @todo Factorize with BatchExportExerciseView.vue
+</script>
+
+<template>
+  <p v-for="exercise in data">
+    <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }">
+      Exercise {{ exercise.exerciseId }}
+    </RouterLink>
+  </p>
+</template>

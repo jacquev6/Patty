@@ -8,4 +8,6 @@ class Input(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
 
+    created_by: orm.Mapped[str]
+
     text: orm.Mapped[str]

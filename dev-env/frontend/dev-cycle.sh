@@ -10,7 +10,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 ./shell.sh -c "npm run lint"
 ./shell.sh -c "npm run type-check"
 
-if (cd ../..; grep -n --color '\.only' -R frontend/src)
+if (cd ../..; grep -n --color -e '\.only' -e '\.skip' -R frontend/src)
 then
   false
 fi

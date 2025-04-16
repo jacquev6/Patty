@@ -13,6 +13,9 @@ services:
       test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin"]
       interval: 0.5s
 
+  # Add a line like this in your crontab to replace the 'db-backup' service below:
+  # 10 *   * * *   user  (cd /path/to/compose/env && docker compose exec backend python -m patty backup-database)
+
   adminer:
     image: adminer:4
 
@@ -50,9 +53,20 @@ services:
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["python", "-m", "patty", "load-fixtures", "default-adaptation-strategy", "default-adaptation-input"]
+    command: ["python", "-m", "patty", "load-fixtures", "seed-data"]
     depends_on:
       migrator:
+        condition: service_completed_successfully
+  db-backup:
+    image: jacquev6/patty:preview-backend
+    pull_policy: never
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["bash", "-c", "while true; do python -m patty backup-database; sleep 300; done"]
+    depends_on:
+      data-loader:
         condition: service_completed_successfully
 
   fanout:

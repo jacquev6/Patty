@@ -9,11 +9,13 @@ import pydantic
 from ..any_json import JsonDict
 from .base import (
     AssistantMessage,
+    InvalidJsonAssistantMessage,
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
     LlmException,
     Model,
+    NotJsonAssistantMessage,
     SystemMessage,
     T,
     try_hard_to_json_loads,
@@ -33,7 +35,9 @@ class MistralAiModel(Model):
 
     async def do_complete(
         self,
-        messages_: list[SystemMessage | UserMessage | AssistantMessage[T]],
+        messages_: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
         response_format_: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         messages = list(self.__make_messages(messages_))
@@ -52,7 +56,10 @@ class MistralAiModel(Model):
         return (raw_conversation, response.choices[0].message.content)
 
     def __make_messages(
-        self, messages: Iterable[SystemMessage | UserMessage | AssistantMessage[T]]
+        self,
+        messages: Iterable[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
     ) -> Iterable[mistralai.models.Messages]:
         for message in messages:
             if isinstance(message, SystemMessage):
@@ -61,6 +68,10 @@ class MistralAiModel(Model):
                 yield mistralai.models.UserMessage(content=message.content)
             elif isinstance(message, AssistantMessage):
                 yield mistralai.models.AssistantMessage(content=message.content.model_dump_json())
+            elif isinstance(message, InvalidJsonAssistantMessage):
+                yield mistralai.models.AssistantMessage(content=json.dumps(message.content))
+            elif isinstance(message, NotJsonAssistantMessage):
+                yield mistralai.models.AssistantMessage(content=message.content)
             else:
                 raise ValueError(f"Unknown message type: {message}")
 
@@ -104,7 +115,13 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = MistralAiModel(name="mistral-small-2501")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
             SystemMessage(
                 content="Utilise le champ `prose` pour tes commentaires, et le champs `structured` pour le contenu de ta réponse. Dans ce champs, donne des réponses aussi concises que possible."
             ),
@@ -212,9 +229,13 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = MistralAiModel(name="mistral-small-2501")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
-            UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")
-        ]
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")]
         response = await model.complete(messages, JsonObjectResponseFormat(response_type=Response))
         self.assertEqual(response.raw_conversation["method"], "mistralai.Mistral.chat.complete_async")
         self.assertEqual(
@@ -238,9 +259,13 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = MistralAiModel(name="mistral-small-2501")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
-            UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")
-        ]
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")]
         with self.assertRaises(LlmException) as cm:
             await model.complete(messages, JsonObjectResponseFormat(response_type=Response))
         self.assertEqual(cm.exception.args[0], "Failed to validate JSON response")
@@ -264,7 +289,13 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = MistralAiModel(name="mistral-small-2501")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
             UserMessage(
                 content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers. Donne-moi uniquement cet objet, sans aucun commentaire."
             )
@@ -294,7 +325,13 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
         model = MistralAiModel(name="mistral-small-2501")
 
-        messages: list[SystemMessage | UserMessage | AssistantMessage[Response]] = [UserMessage(content="Bonjour!")]
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Bonjour!")]
 
         with self.assertRaises(LlmException) as cm:
             await model.complete(messages, JsonFromTextResponseFormat(response_type=Response))

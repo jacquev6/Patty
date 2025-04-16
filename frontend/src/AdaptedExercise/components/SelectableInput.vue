@@ -25,10 +25,34 @@ const contents = computed(() => ({
   highlighted: colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1],
   boxed: false,
 }))
+
+const style = computed(() => {
+  if (props.contents.length === 1 && props.contents[0].kind === 'text' && props.contents[0].text.length === 1) {
+    const c = props.contents[0].text[0]
+    if ('.!?,;:'.includes(c)) {
+      return {
+        padding: '16px 3.2px',
+      }
+    } else {
+      return {
+        padding: '2px 2px',
+      }
+    }
+  } else {
+    return {}
+  }
+})
 </script>
 
 <template>
-  <FormattedComponent class="main" v-bind="contents" :tricolorable data-cy="selectableInput" @click="increment()" />
+  <FormattedComponent
+    class="main"
+    v-bind="contents"
+    :style
+    :tricolorable
+    data-cy="selectableInput"
+    @click="increment()"
+  />
 </template>
 
 <style scoped>

@@ -16,6 +16,8 @@ class Exercise(BaseModel):
     # WARNING: keep 'make_exercise_type' below consistent with this class
     format: Literal["v1"]
     instruction: InstructionPage
+    example: ExamplePage | None
+    hint: HintPage | None
     statement: StatementPages
     reference: ReferenceLine | None
 
@@ -87,7 +89,7 @@ class SelectableInput(BaseModel):
     boxed: bool
 
 
-# WANRING: keep 'InstructionComponent' and 'InstructionComponents' consistent
+# WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent
 InstructionComponent = PureText | Choice
 
 
@@ -98,6 +100,27 @@ class InstructionComponents(PureTextComponents):
         yield from super().gather()
         if self.choice:
             yield Choice
+
+
+# WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
+ExampleComponent = PureText | Arrow
+
+
+class ExampleComponents(PureTextComponents):
+    arrow: bool
+
+    def gather(self) -> Iterable[type]:
+        yield from super().gather()
+        if self.arrow:
+            yield Arrow
+
+
+# WARNING: keep 'HintComponent' and 'HintComponents' consistent
+HintComponent = PureText
+
+
+class HintComponents(PureTextComponents):
+    pass
 
 
 # WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
@@ -131,10 +154,14 @@ class ReferenceComponents(PureTextComponents):
 
 
 InstructionLine = Line[InstructionComponent]
+ExampleLine = Line[ExampleComponent]
+HintLine = Line[HintComponent]
 StatementLine = Line[StatementComponent]
 ReferenceLine = Line[ReferenceComponent]
 
 InstructionPage = Page[InstructionComponent]
+ExamplePage = Page[ExampleComponent]
+HintPage = Page[HintComponent]
 StatementPage = Page[StatementComponent]
 
 StatementPages = Pages[StatementComponent]
@@ -142,6 +169,8 @@ StatementPages = Pages[StatementComponent]
 
 def make_exercise_type(
     instruction_components: InstructionComponents,
+    example_components: ExampleComponents,
+    hint_components: HintComponents,
     statement_components: StatementComponents,
     reference_components: ReferenceComponents,
 ) -> type[Exercise]:
@@ -163,6 +192,8 @@ def make_exercise_type(
         return pydantic.create_model(f"{name}Pages", __base__=BaseModel, pages=pages)
 
     instruction_page_type = make_page_type("Instruction", typing.Union[tuple(instruction_components.gather())])
+    example_page_type = make_page_type("Example", typing.Union[tuple(example_components.gather())])
+    hint_page_type = make_page_type("Hint", typing.Union[tuple(hint_components.gather())])
     statement_pages_type = make_pages_type("Statement", typing.Union[tuple(statement_components.gather())])
     reference_line_type = make_line_type("Reference", typing.Union[tuple(reference_components.gather())])
 
@@ -173,6 +204,8 @@ def make_exercise_type(
             __base__=BaseModel,
             format=(Literal["v1"], pydantic.Field()),
             instruction=(instruction_page_type, pydantic.Field()),
+            example=(example_page_type | None, pydantic.Field()),
+            hint=(hint_page_type | None, pydantic.Field()),
             statement=(statement_pages_type, pydantic.Field()),
             reference=(reference_line_type | None, pydantic.Field()),
         ),

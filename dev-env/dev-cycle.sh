@@ -25,13 +25,13 @@ while [ $# -gt 0 ]; do
 done
 
 
-backend/dev-cycle.sh $skip_migration $cost_money
-frontend/dev-cycle.sh
-
-if (cd ..; grep -n --color '\.only' -R frontend/e2e-tests)
+if (cd ..; grep -n --color -e '\.only' -e '\.skip' -R frontend/e2e-tests)
 then
   false
 fi
+
+backend/dev-cycle.sh $skip_migration $cost_money
+frontend/dev-cycle.sh
 
 ./docker-compose.sh exec frontend-shell npx cypress run --e2e --browser electron
 ./docker-compose.sh exec frontend-shell npx cypress run --e2e --browser chromium

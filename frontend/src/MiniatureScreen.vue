@@ -28,6 +28,7 @@ const innerContainerStyle = computed<StyleValue>(() => {
       left: 0,
       width: '100vw',
       height: '100vh',
+      zIndex: 1,
     }
   } else {
     return {
@@ -52,6 +53,7 @@ const innerContainerStyle = computed<StyleValue>(() => {
 <style scoped>
 .bordered {
   border: 1px solid black;
+  overflow: hidden;
 }
 
 .inner-container {

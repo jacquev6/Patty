@@ -1,6 +1,7 @@
 import os
 
 import fastapi
+import sqlalchemy as sql
 
 from . import adaptation
 from . import database_utils
@@ -8,7 +9,17 @@ from . import llm
 from . import settings
 
 
-app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
+app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))
+
+
+@app.get("/api/health")
+@app.head("/api/health")
+def get_health(session: database_utils.SessionDependable) -> dict[str, str]:
+    alambic_version = session.execute(
+        sql.select(sql.text("version_num")).select_from(sql.text("alembic_version"))
+    ).scalar()
+    assert alambic_version is not None
+    return {"alambic_version": alambic_version, "status": "ok"}
 
 
 @app.get("/api/available-llm-models")

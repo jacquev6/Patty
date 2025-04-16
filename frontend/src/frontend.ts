@@ -1,11 +1,13 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
+import { createPinia } from 'pinia'
 
 import './main.css'
 import IndexView from './IndexView.vue'
-import CreateAdaptationView from './CreateAdaptationView.vue'
+import CreateBatchView from './CreateBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
+import EditBatchView from './EditBatchView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,9 +18,15 @@ const router = createRouter({
       component: IndexView,
     },
     {
-      path: '/new-adaptation',
-      name: 'create-adaptation',
-      component: CreateAdaptationView,
+      path: '/new-batch',
+      name: 'create-batch',
+      component: CreateBatchView,
+    },
+    {
+      path: '/batch-:id',
+      name: 'batch',
+      component: EditBatchView,
+      props: true,
     },
     {
       path: '/adaptation-:id',
@@ -32,5 +40,6 @@ const router = createRouter({
 const app = createApp(RouterView)
 
 app.use(router)
+app.use(createPinia())
 
 app.mount('#app')

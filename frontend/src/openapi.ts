@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+  '/api/health': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Health */
+    get: operations['get_health_api_health_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    /** Get Health */
+    head: operations['get_health_api_health_head']
+    patch?: never
+    trace?: never
+  }
   '/api/available-llm-models': {
     parameters: {
       query?: never
@@ -13,23 +31,6 @@ export interface paths {
     }
     /** Get Available Llm Models */
     get: operations['get_available_llm_models_api_available_llm_models_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/latest-strategy': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Latest Strategy */
-    get: operations['get_latest_strategy_api_adaptation_latest_strategy_get']
     put?: never
     post?: never
     delete?: never
@@ -55,15 +56,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/latest-input': {
+  '/api/adaptation/latest-batch': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Get Latest Input */
-    get: operations['get_latest_input_api_adaptation_latest_input_get']
+    /** Get Latest Batch */
+    get: operations['get_latest_batch_api_adaptation_latest_batch_get']
     put?: never
     post?: never
     delete?: never
@@ -72,7 +73,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation': {
+  '/api/adaptation/batch': {
     parameters: {
       query?: never
       header?: never
@@ -81,8 +82,42 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** Post Adaptation */
-    post: operations['post_adaptation_api_adaptation_post']
+    /** Post Batch */
+    post: operations['post_batch_api_adaptation_batch_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/batch/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Batch */
+    get: operations['get_batch_api_adaptation_batch__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/batches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Batches */
+    get: operations['get_batches_api_adaptation_batches_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -123,7 +158,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}/last-step': {
+  '/api/adaptation/{id}/last-adjustment': {
     parameters: {
       query?: never
       header?: never
@@ -133,8 +168,8 @@ export interface paths {
     get?: never
     put?: never
     post?: never
-    /** Delete Adaptation Last Step */
-    delete: operations['delete_adaptation_last_step_api_adaptation__id__last_step_delete']
+    /** Delete Adaptation Last Adjustment */
+    delete: operations['delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete']
     options?: never
     head?: never
     patch?: never
@@ -158,7 +193,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/export/{id}.html': {
+  '/api/adaptation/export/adaptation-{id}.html': {
     parameters: {
       query?: never
       header?: never
@@ -166,7 +201,24 @@ export interface paths {
       cookie?: never
     }
     /** Export Adaptation */
-    get: operations['export_adaptation_api_adaptation_export__id__html_get']
+    get: operations['export_adaptation_api_adaptation_export_adaptation__id__html_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/export/batch-{id}.html': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Export Batch */
+    get: operations['export_batch_api_adaptation_export_batch__id__html_get']
     put?: never
     post?: never
     delete?: never
@@ -183,21 +235,30 @@ export interface components {
     Adjustment: {
       /** Userprompt */
       userPrompt: string
-      /** Assistanterror */
-      assistantError: string | null
-      assistantResponse: components['schemas']['Exercise-Output'] | null
+      /** Assistantresponse */
+      assistantResponse:
+        | components['schemas']['AssistantSuccess']
+        | components['schemas']['AssistantInvalidJsonError']
+        | components['schemas']['AssistantNotJsonError']
     }
     /** ApiAdaptation */
     ApiAdaptation: {
       /** Id */
-      id: number
+      id: string
+      /** Createdby */
+      createdBy: string
+      /** Batchid */
+      batchId: string
       strategy: components['schemas']['ApiStrategy-Output']
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
-      /** Initialassistanterror */
-      initialAssistantError: string | null
-      initialAssistantResponse: components['schemas']['Exercise-Output'] | null
+      /** Initialassistantresponse */
+      initialAssistantResponse:
+        | components['schemas']['AssistantSuccess']
+        | components['schemas']['AssistantInvalidJsonError']
+        | components['schemas']['AssistantNotJsonError']
+        | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
       manualEdit: components['schemas']['Exercise-Output'] | null
@@ -205,14 +266,18 @@ export interface components {
     /** ApiInput */
     ApiInput: {
       /** Id */
-      id: number
+      id: string
+      /** Createdby */
+      createdBy: string
       /** Text */
       text: string
     }
     /** ApiStrategy */
     'ApiStrategy-Input': {
       /** Id */
-      id: number
+      id: string
+      /** Createdby */
+      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']
@@ -229,7 +294,9 @@ export interface components {
     /** ApiStrategy */
     'ApiStrategy-Output': {
       /** Id */
-      id: number
+      id: string
+      /** Createdby */
+      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']
@@ -249,6 +316,57 @@ export interface components {
        * @constant
        */
       kind: 'arrow'
+    }
+    /** AssistantInvalidJsonError */
+    AssistantInvalidJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /** Parsed */
+      parsed: unknown
+    }
+    /** AssistantNotJsonError */
+    AssistantNotJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /** Text */
+      text: string
+    }
+    /** AssistantSuccess */
+    AssistantSuccess: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      exercise: components['schemas']['Exercise-Output']
+    }
+    /** Batch */
+    Batch: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
     }
     Choice: {
       /**
@@ -273,6 +391,21 @@ export interface components {
        */
       name: 'dummy-1' | 'dummy-2' | 'dummy-3'
     }
+    /** ExampleComponents */
+    ExampleComponents: {
+      /**
+       * Text
+       * @constant
+       */
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
+      /** Arrow */
+      arrow: boolean
+    }
     'Exercise-Input': {
       /**
        * Format
@@ -280,6 +413,8 @@ export interface components {
        */
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__-Input'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
@@ -290,6 +425,8 @@ export interface components {
        */
       format: 'v1'
       instruction: components['schemas']['Page_Union_Text__Whitespace__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__-Output'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output']
       reference: components['schemas']['Line_Union_Text__Whitespace__'] | null
     }
@@ -300,10 +437,38 @@ export interface components {
        */
       kind: 'freeTextInput'
     }
+    /** GetBatchResponse */
+    GetBatchResponse: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Adaptations */
+      adaptations: components['schemas']['ApiAdaptation'][]
+    }
+    /** GetBatchesResponse */
+    GetBatchesResponse: {
+      /** Batches */
+      batches: components['schemas']['Batch'][]
+    }
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components['schemas']['ValidationError'][]
+    }
+    /** HintComponents */
+    HintComponents: {
+      /**
+       * Text
+       * @constant
+       */
+      text: true
+      /**
+       * Whitespace
+       * @constant
+       */
+      whitespace: true
     }
     /** InstructionComponents */
     InstructionComponents: {
@@ -359,12 +524,26 @@ export interface components {
        */
       formalism: 'json-schema'
       instructionComponents: components['schemas']['InstructionComponents']
+      exampleComponents: components['schemas']['ExampleComponents']
+      hintComponents: components['schemas']['HintComponents']
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
+    }
+    /** LatestBatch */
+    LatestBatch: {
+      /** Id */
+      id: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
     }
     Line_Union_Text__Whitespace__: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+    }
+    Line_Union_Text__Whitespace__Arrow__: {
+      /** Contents */
+      contents: (components['schemas']['Text'] | components['schemas']['Whitespace'] | components['schemas']['Arrow'])[]
     }
     'Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Contents */
@@ -454,6 +633,22 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
+    'Page_Union_Text__Whitespace__-Input': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__'][]
+    }
+    'Page_Union_Text__Whitespace__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__'][]
+    }
+    'Page_Union_Text__Whitespace__Arrow__-Input': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__'][]
+    }
+    'Page_Union_Text__Whitespace__Arrow__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__'][]
+    }
     'Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input'][]
@@ -483,10 +678,18 @@ export interface components {
       /** Adjustment */
       adjustment: string
     }
-    /** PostAdaptationRequest */
-    PostAdaptationRequest: {
+    /** PostBatchRequest */
+    PostBatchRequest: {
+      /** Creator */
+      creator: string
       strategy: components['schemas']['ApiStrategy-Input']
-      input: components['schemas']['ApiInput']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
+    }
+    /** PostBatchResponse */
+    PostBatchResponse: {
+      /** Id */
+      id: string
     }
     PureTextContainer: {
       /** Contents */
@@ -573,6 +776,50 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  get_health_api_health_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            [key: string]: string
+          }
+        }
+      }
+    }
+  }
+  get_health_api_health_head: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            [key: string]: string
+          }
+        }
+      }
+    }
+  }
   get_available_llm_models_api_available_llm_models_get: {
     parameters: {
       query?: never
@@ -593,26 +840,6 @@ export interface operations {
             | components['schemas']['MistralAiModel']
             | components['schemas']['OpenAiModel']
           )[]
-        }
-      }
-    }
-  }
-  get_latest_strategy_api_adaptation_latest_strategy_get: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ApiStrategy-Output']
         }
       }
     }
@@ -650,7 +877,102 @@ export interface operations {
       }
     }
   }
-  get_latest_input_api_adaptation_latest_input_get: {
+  get_latest_batch_api_adaptation_latest_batch_get: {
+    parameters: {
+      query: {
+        user: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LatestBatch']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_batch_api_adaptation_batch_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostBatchRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_batch_api_adaptation_batch__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_batches_api_adaptation_batches_get: {
     parameters: {
       query?: never
       header?: never
@@ -665,40 +987,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiInput']
-        }
-      }
-    }
-  }
-  post_adaptation_api_adaptation_post: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['PostAdaptationRequest']
-      }
-    }
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['ApiAdaptation']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
+          'application/json': components['schemas']['GetBatchesResponse']
         }
       }
     }
@@ -769,7 +1058,7 @@ export interface operations {
       }
     }
   }
-  delete_adaptation_last_step_api_adaptation__id__last_step_delete: {
+  delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete: {
     parameters: {
       query?: never
       header?: never
@@ -866,7 +1155,40 @@ export interface operations {
       }
     }
   }
-  export_adaptation_api_adaptation_export__id__html_get: {
+  export_adaptation_api_adaptation_export_adaptation__id__html_get: {
+    parameters: {
+      query?: {
+        download?: boolean
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  export_batch_api_adaptation_export_batch__id__html_get: {
     parameters: {
       query?: {
         download?: boolean

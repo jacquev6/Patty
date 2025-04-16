@@ -32,6 +32,7 @@ services:
       "backend/generated/adapted-exercise-schema.json",
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
+      "backend/patty/adaptation/templates/batch-export/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -51,6 +52,26 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
+      interval: 0.5s
+      retries: 12
+
+  batch-export-template-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: batch-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/batch-export", "--emptyOutDir"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      npm-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/batch-export/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -123,6 +144,8 @@ services:
     depends_on:
       adaptation-export-template-generator:
         condition: service_healthy
+      batch-export-template-generator:
+        condition: service_healthy
       data-loader:
         condition: service_completed_successfully
   default-system-prompt-generator:
@@ -188,6 +211,23 @@ services:
       - backend/secrets.env
     command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
+      data-loader:
+        condition: service_completed_successfully
+  db-backup:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["bash", "-c", "while true; do python -m patty backup-database; find /app/dev-env/db/backups -name 'patty-backup-*.tar.gz' -mmin +10 -delete; sleep 30; done"]
+    depends_on:
+      pip-installer:
+        condition: service_completed_successfully
       data-loader:
         condition: service_completed_successfully
 

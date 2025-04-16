@@ -1,8 +1,6 @@
 import TextArea from './TextArea.vue'
 
 describe('TextArea', () => {
-  before(console.clear)
-
   it('gets its size from its initial model', () => {
     cy.viewport(500, 500)
     cy.mount(TextArea, { props: { modelValue: 'Blah\nBlah\nBlah\n' } })

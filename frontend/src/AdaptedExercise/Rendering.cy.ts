@@ -15,8 +15,6 @@ function screenshot() {
 }
 
 describe('FormattedComponent', () => {
-  before(console.clear)
-
   it('renders plain text and whitespace', () => {
     cy.viewport(200, 70)
 
@@ -128,8 +126,6 @@ describe('FormattedComponent', () => {
 })
 
 describe('SelectableInput', () => {
-  before(console.clear)
-
   it('changes color on click', () => {
     cy.viewport(130, 70)
 
@@ -162,11 +158,86 @@ describe('SelectableInput', () => {
     screenshot()
     cy.get('@input').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
   })
+
+  it('adds padding to single letters and punctuation', () => {
+    cy.viewport(130, 70)
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'Word' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'Word' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'X' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'X' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: '.' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: '.' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+  })
 })
 
 describe('FreeTextInput', () => {
-  before(console.clear)
-
   it('accepts text input', () => {
     cy.viewport(170, 70)
 
@@ -195,8 +266,6 @@ describe('FreeTextInput', () => {
 })
 
 describe('MultipleChoicesInput', () => {
-  before(console.clear)
-
   const choices = [
     {
       contents: [{ kind: 'text' as const, text: 'Alpha' }],
@@ -274,6 +343,8 @@ describe('MultipleChoicesInput', () => {
           instruction: {
             lines: [],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {
@@ -320,6 +391,8 @@ describe('MultipleChoicesInput', () => {
           instruction: {
             lines: [],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {
@@ -347,8 +420,6 @@ describe('MultipleChoicesInput', () => {
 })
 
 describe('TriColorLines', () => {
-  before(console.clear)
-
   it('renders lines in alternating colors', () => {
     cy.viewport(180, 340)
 
@@ -376,8 +447,6 @@ describe('TriColorLines', () => {
 })
 
 describe('AdaptedExerciseRenderer', () => {
-  before(console.clear)
-
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)
 
@@ -388,8 +457,45 @@ describe('AdaptedExerciseRenderer', () => {
           instruction: {
             lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+  })
+
+  it('renders the example and hint', () => {
+    cy.viewport(600, 550)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
+          },
+          example: {
+            lines: [{ contents: [{ kind: 'text', text: 'Example' }] }],
+          },
+          hint: {
+            lines: [{ contents: [{ kind: 'text', text: 'Hint' }] }],
+          },
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [{ kind: 'text', text: 'World' }],
+                  },
+                ],
+              },
+            ],
           },
           reference: null,
         },
@@ -409,6 +515,8 @@ describe('AdaptedExerciseRenderer', () => {
           instruction: {
             lines: [{ contents: [{ kind: 'text', text: 'Hello' }] }],
           },
+          example: null,
+          hint: null,
           statement: {
             pages: [
               {

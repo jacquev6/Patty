@@ -1,4 +1,5 @@
 from typing import Iterable
+import datetime
 import textwrap
 
 import compact_json  # type: ignore
@@ -50,6 +51,8 @@ def make_default_system_prompt() -> str:
                 )
             ]
         ),
+        example=None,
+        hint=None,
         statement=adapted.StatementPages(
             pages=[
                 adapted.StatementPage(
@@ -164,12 +167,15 @@ def make_default_system_prompt() -> str:
 
 def create_default_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
+        created_by="Patty",
         model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
         system_prompt=make_default_system_prompt(),
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
             formalism="json-schema",
             instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
+            hint_components=adapted.HintComponents(text=True, whitespace=True),
             statement_components=adapted.StatementComponents(
                 text=True,
                 whitespace=True,
@@ -185,12 +191,15 @@ def create_default_adaptation_strategy() -> Iterable[object]:
 
 def create_dummy_adaptation_strategy() -> Iterable[object]:
     yield adaptation.Strategy(
+        created_by="Patty",
         model=llm.DummyModel(name="dummy-1"),
         system_prompt="Blah blah blah.",
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
             formalism="json-schema",
             instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
+            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
+            hint_components=adapted.HintComponents(text=True, whitespace=True),
             statement_components=adapted.StatementComponents(
                 text=True,
                 whitespace=True,
@@ -206,14 +215,208 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
 
 def create_default_adaptation_input() -> Iterable[object]:
     yield adaptation.Input(
+        created_by="Patty",
         text=textwrap.dedent(
             """\
             5 Complète avec "le vent" ou "la pluie"
             a. Les feuilles sont chahutées par ...
             b. Les vitres sont mouillées par ...
             """
-        )
+        ),
     )
+
+
+def make_successful_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        _initial_assistant_response=adaptation.AssistantSuccess(
+            kind="success",
+            exercise=adapted.Exercise(
+                **{  # type: ignore[arg-type]
+                    "format": "v1",
+                    "instruction": {
+                        "lines": [
+                            {
+                                "contents": [
+                                    {"kind": "text", "text": "Complète"},
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "avec"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "choice",
+                                        "contents": [
+                                            {"kind": "text", "text": "le"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "vent"},
+                                        ],
+                                    },
+                                    {"kind": "whitespace"},
+                                    {"kind": "text", "text": "ou"},
+                                    {"kind": "whitespace"},
+                                    {
+                                        "kind": "choice",
+                                        "contents": [
+                                            {"kind": "text", "text": "la"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "pluie"},
+                                        ],
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    "example": None,
+                    "hint": None,
+                    "statement": {
+                        "pages": [
+                            {
+                                "lines": [
+                                    {
+                                        "contents": [
+                                            {"kind": "text", "text": "a"},
+                                            {"kind": "text", "text": "."},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "Les"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "feuilles"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "sont"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "chahutées"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "par"},
+                                            {"kind": "whitespace"},
+                                            {
+                                                "kind": "multipleChoicesInput",
+                                                "choices": [
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "le"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "vent"},
+                                                        ]
+                                                    },
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "la"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "pluie"},
+                                                        ]
+                                                    },
+                                                ],
+                                                "showChoicesByDefault": False,
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        "contents": [
+                                            {"kind": "text", "text": "b"},
+                                            {"kind": "text", "text": "."},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "Les"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "vitres"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "sont"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "mouillées"},
+                                            {"kind": "whitespace"},
+                                            {"kind": "text", "text": "par"},
+                                            {"kind": "whitespace"},
+                                            {
+                                                "kind": "multipleChoicesInput",
+                                                "choices": [
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "le"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "vent"},
+                                                        ]
+                                                    },
+                                                    {
+                                                        "contents": [
+                                                            {"kind": "text", "text": "la"},
+                                                            {"kind": "whitespace"},
+                                                            {"kind": "text", "text": "pluie"},
+                                                        ]
+                                                    },
+                                                ],
+                                                "showChoicesByDefault": False,
+                                            },
+                                        ]
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    "reference": None,
+                }
+            ),
+        ).model_dump(),
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def make_in_progress_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        _initial_assistant_response=None,
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def make_invalid_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        _initial_assistant_response=adaptation.AssistantInvalidJsonError(
+            kind="error", error="invalid-json", parsed={}
+        ).model_dump(),
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def make_not_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
+    return adaptation.Adaptation(
+        created_by="Patty",
+        batch=batch,
+        strategy=strategy,
+        input=input,
+        raw_llm_conversations=[{"initial": "conversation"}],
+        _initial_assistant_response=adaptation.AssistantNotJsonError(
+            kind="error", error="not-json", text="This is not JSON."
+        ).model_dump(),
+        _adjustments=[],
+        manual_edit=None,
+    )
+
+
+def create_seed_data() -> Iterable[object]:
+    [strategy] = create_default_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+        strategy=strategy,
+    )
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
 
 
 def create_dummy_adaptation() -> Iterable[object]:
@@ -221,138 +424,42 @@ def create_dummy_adaptation() -> Iterable[object]:
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
-    yield adaptation.Adaptation(
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
         strategy=strategy,
-        input=input,
-        raw_llm_conversations=[{"initial": "conversation"}],
-        initial_assistant_error=None,
-        _initial_assistant_response={
-            "format": "v1",
-            "instruction": {
-                "lines": [
-                    {
-                        "contents": [
-                            {"kind": "text", "text": "Complète"},
-                            {"kind": "whitespace"},
-                            {"kind": "text", "text": "avec"},
-                            {"kind": "whitespace"},
-                            {
-                                "kind": "choice",
-                                "contents": [
-                                    {"kind": "text", "text": "le"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "vent"},
-                                ],
-                            },
-                            {"kind": "whitespace"},
-                            {"kind": "text", "text": "ou"},
-                            {"kind": "whitespace"},
-                            {
-                                "kind": "choice",
-                                "contents": [
-                                    {"kind": "text", "text": "la"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "pluie"},
-                                ],
-                            },
-                        ]
-                    }
-                ]
-            },
-            "statement": {
-                "pages": [
-                    {
-                        "lines": [
-                            {
-                                "contents": [
-                                    {"kind": "text", "text": "a"},
-                                    {"kind": "text", "text": "."},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "Les"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "feuilles"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "sont"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "chahutées"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "par"},
-                                    {"kind": "whitespace"},
-                                    {
-                                        "kind": "multipleChoicesInput",
-                                        "choices": [
-                                            {
-                                                "contents": [
-                                                    {"kind": "text", "text": "le"},
-                                                    {"kind": "whitespace"},
-                                                    {"kind": "text", "text": "vent"},
-                                                ]
-                                            },
-                                            {
-                                                "contents": [
-                                                    {"kind": "text", "text": "la"},
-                                                    {"kind": "whitespace"},
-                                                    {"kind": "text", "text": "pluie"},
-                                                ]
-                                            },
-                                        ],
-                                        "showChoicesByDefault": False,
-                                    },
-                                ]
-                            },
-                            {
-                                "contents": [
-                                    {"kind": "text", "text": "b"},
-                                    {"kind": "text", "text": "."},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "Les"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "vitres"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "sont"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "mouillées"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "par"},
-                                    {"kind": "whitespace"},
-                                    {
-                                        "kind": "multipleChoicesInput",
-                                        "choices": [
-                                            {
-                                                "contents": [
-                                                    {"kind": "text", "text": "le"},
-                                                    {"kind": "whitespace"},
-                                                    {"kind": "text", "text": "vent"},
-                                                ]
-                                            },
-                                            {
-                                                "contents": [
-                                                    {"kind": "text", "text": "la"},
-                                                    {"kind": "whitespace"},
-                                                    {"kind": "text", "text": "pluie"},
-                                                ]
-                                            },
-                                        ],
-                                        "showChoicesByDefault": False,
-                                    },
-                                ]
-                            },
-                        ]
-                    }
-                ]
-            },
-            "reference": None,
-        },
-        _adjustments=[],
-        manual_edit=None,
     )
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
+
+
+def create_mixed_dummy_batch() -> Iterable[object]:
+    [strategy] = create_dummy_adaptation_strategy()
+    yield strategy
+    [input] = create_default_adaptation_input()
+    yield input
+    batch = adaptation.Batch(
+        created_by="Patty",
+        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
+        strategy=strategy,
+    )
+    yield batch
+    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
+    yield make_not_json_adaptation(batch=batch, strategy=strategy, input=input)
 
 
 available_fixtures = {
-    "default-adaptation-strategy": create_default_adaptation_strategy,
-    "dummy-adaptation-strategy": create_dummy_adaptation_strategy,
-    "default-adaptation-input": create_default_adaptation_input,
-    "dummy-adaptation": create_dummy_adaptation,
+    "-".join(f.__name__.split("_")[1:]): f
+    for f in (
+        create_default_adaptation_input,
+        create_default_adaptation_strategy,
+        create_dummy_adaptation_strategy,
+        create_dummy_adaptation,
+        create_mixed_dummy_batch,
+        create_seed_data,
+    )
 }
 
 
@@ -363,9 +470,10 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             session.add(instance)
 
 
-app = fastapi.FastAPI(make_session=database_utils.SessionMaker(database_utils.create_engine(settings.DATABASE_URL)))
+app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))
 
 
 @app.post("/load")
 def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
+    print(available_fixtures)
     load(session, fixtures.split(","))
