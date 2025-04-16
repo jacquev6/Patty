@@ -162,6 +162,83 @@ describe('SelectableInput', () => {
     screenshot()
     cy.get('@input').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
   })
+
+  it('adds padding to single letters and punctuation', () => {
+    cy.viewport(130, 70)
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'Word' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'Word' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'X' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: 'X' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: '.' }],
+        colors: ['grey'],
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+
+    cy.mount(SelectableInput, {
+      props: {
+        kind: 'selectableInput',
+        contents: [{ kind: 'text', text: '.' }],
+        colors: ['grey'],
+        boxed: true,
+        tricolorable: false,
+      },
+    })
+    cy.get('@input').click()
+    screenshot()
+  })
 })
 
 describe('FreeTextInput', () => {
