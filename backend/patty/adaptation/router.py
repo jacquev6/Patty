@@ -405,7 +405,7 @@ def export_adaptation(
         headers["Content-Disposition"] = f'attachment; filename="adaptation-{id}.html"'
 
     return fastapi.responses.HTMLResponse(
-        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        content=template.replace("##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
         headers=headers,
     )
 
@@ -443,6 +443,6 @@ def export_batch(
         headers["Content-Disposition"] = f'attachment; filename="batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(
-        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        content=template.replace("##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
         headers=headers,
     )
