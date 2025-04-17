@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory, RouterView } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
 import { createPinia } from 'pinia'
 
@@ -8,6 +8,7 @@ import IndexView from './IndexView.vue'
 import CreateBatchView from './CreateBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
 import EditBatchView from './EditBatchView.vue'
+import FrontendRootView from './FrontendRootView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -37,7 +38,7 @@ const router = createRouter({
   ],
 })
 
-const app = createApp(RouterView)
+const app = createApp(FrontendRootView)
 
 app.use(router)
 app.use(createPinia())

@@ -32,6 +32,7 @@ services:
   frontend:
     image: jacquev6/patty:preview-frontend
     pull_policy: never
+    # environment: [ PATTY_UNAVAILABLE_UNTIL=2025-12-31T23:59:59.999Z ]
 
   # Preview-only services
   #######################
