@@ -3,6 +3,7 @@ import { computed, reactive, ref, useTemplateRef, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
 import _ from 'lodash'
+import * as zip from '@zip.js/zip.js'
 
 import { type LatestBatch, type LlmModel, client } from './apiClient'
 import BusyBox from './BusyBox.vue'
@@ -49,26 +50,45 @@ async function openFiles(event: Event) {
   const files = (event.target as HTMLInputElement).files
   assert(files !== null)
 
+  function parseFileName(fileName: string) {
+    const match = fileName.match(/P(\d+)Ex(\d+)\.txt/)
+    if (match === null) {
+      return { pageNumber: null, exerciseNumber: null }
+    }
+    const pageNumber = parseInt(match[1])
+    const exerciseNumber = match[2]
+    return { pageNumber, exerciseNumber }
+  }
+
   const fileInputs: InputWithFile[] = []
   for (let index = 0; index < files.length; index++) {
     const file = files.item(index)
     assert(file !== null)
-    const { pageNumber, exerciseNumber } = (() => {
-      const match = file.name.match(/P(\d+)Ex(\d+)\.txt/)
-      if (match === null) {
-        return { pageNumber: null, exerciseNumber: null }
+    if (file.name.endsWith('.txt')) {
+      const { pageNumber, exerciseNumber } = parseFileName(file.name)
+      const text = await readFile(file)
+      fileInputs.push({
+        inputFile: file.name,
+        pageNumber,
+        exerciseNumber,
+        text,
+      })
+    } else if (file.name.endsWith('.zip')) {
+      const zipReader = new zip.ZipReader(new zip.BlobReader(file))
+      for (const entry of await zipReader.getEntries()) {
+        assert(entry.getData !== undefined)
+        if (entry.filename.endsWith('.txt')) {
+          const { pageNumber, exerciseNumber } = parseFileName(entry.filename)
+          const text = await entry.getData(new zip.TextWriter())
+          fileInputs.push({
+            inputFile: `${entry.filename} in ${file.name}`,
+            pageNumber,
+            exerciseNumber,
+            text,
+          })
+        }
       }
-      const pageNumber = parseInt(match[1])
-      const exerciseNumber = match[2]
-      return { pageNumber, exerciseNumber }
-    })()
-    const text = await readFile(file)
-    fileInputs.push({
-      inputFile: file.name,
-      pageNumber,
-      exerciseNumber,
-      text,
-    })
+    }
   }
 
   const sortedInputs = _.sortBy(fileInputs, [
@@ -152,7 +172,7 @@ const disabled = computed(() => {
       <template #col-2>
         <h1>Inputs</h1>
         <p><button @click="submit" :disabled>Submit</button></p>
-        <p><input data-cy="input-files" type="file" multiple="true" @change="openFiles" /></p>
+        <p><input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" /></p>
         <template v-for="index in inputs.length">
           <CreateBatchFormInputEditor ref="editors" :index v-model="inputs[index - 1]" />
         </template>
