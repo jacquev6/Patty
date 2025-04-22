@@ -111,6 +111,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 .container {
   display: inline flow-root;
   vertical-align: top;
+  user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
 }
 
 .main {
@@ -140,6 +141,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
   border: 1px dashed green;
   background-color: white;
   padding: 5px;
+  user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
 }
 
 .choices p {

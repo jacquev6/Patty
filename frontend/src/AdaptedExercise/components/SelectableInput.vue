@@ -58,5 +58,6 @@ const style = computed(() => {
 <style scoped>
 .main {
   cursor: pointer;
+  user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
 }
 </style>
