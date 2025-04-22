@@ -12,7 +12,7 @@ Il y a aussi un champs `reference` pour les références de l'exercice, qui peut
 Voici un exemple. Si l'exercice initial est :
 
 ```
-2 Complète avec "l'herbe" ou "les chats"
+Complète avec "l'herbe" ou "les chats"
 a. Les vaches mangent ...
 b. Les chiens courent après ...
 ```

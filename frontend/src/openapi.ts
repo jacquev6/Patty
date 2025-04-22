@@ -265,19 +265,15 @@ export interface components {
     }
     /** ApiInput */
     ApiInput: {
-      /** Id */
-      id: string
-      /** Createdby */
-      createdBy: string
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Exercisenumber */
+      exerciseNumber: string | null
       /** Text */
       text: string
     }
     /** ApiStrategy */
     'ApiStrategy-Input': {
-      /** Id */
-      id: string
-      /** Createdby */
-      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']
@@ -293,10 +289,6 @@ export interface components {
     }
     /** ApiStrategy */
     'ApiStrategy-Output': {
-      /** Id */
-      id: string
-      /** Createdby */
-      createdBy: string
       /** Model */
       model:
         | components['schemas']['DummyModel']

@@ -672,13 +672,27 @@
       },
       "ApiInput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
           },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
           },
           "text": {
             "type": "string",
@@ -688,22 +702,14 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "createdBy",
+          "pageNumber",
+          "exerciseNumber",
           "text"
         ],
         "title": "ApiInput"
       },
       "ApiStrategy-Input": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
-          },
           "model": {
             "anyOf": [
               {
@@ -740,8 +746,6 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"
@@ -750,14 +754,6 @@
       },
       "ApiStrategy-Output": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
-          },
           "model": {
             "anyOf": [
               {
@@ -794,8 +790,6 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "createdBy",
           "model",
           "systemPrompt",
           "responseSpecification"

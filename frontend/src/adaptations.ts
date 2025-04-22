@@ -5,7 +5,7 @@ export type PreprocessedAdaptation = {
   createdBy: string
   batchId: string
   strategy: ApiAdaptation['strategy']
-  input: string[]
+  input: { pageNumber: number | null; exerciseNumber: string | null; text: string[] }
   adjustmentPrompts: string[]
   rawLlmConversations: ApiAdaptation['rawLlmConversations']
   llmStatus:
@@ -89,7 +89,11 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
     createdBy: adaptation.createdBy,
     batchId: adaptation.batchId,
     strategy: adaptation.strategy,
-    input: adaptation.input.text.split('\n'),
+    input: {
+      pageNumber: adaptation.input.pageNumber,
+      exerciseNumber: adaptation.input.exerciseNumber,
+      text: adaptation.input.text.split('\n'),
+    },
     adjustmentPrompts: adaptation.adjustments.map((adjustment) => adjustment.userPrompt),
     rawLlmConversations: adaptation.rawLlmConversations,
     llmStatus,

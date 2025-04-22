@@ -40,7 +40,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@input-text').eq(1).should('have.value', '').type('Blah blah blah.', { delay: 0 })
     cy.get('@input-text').should('have.length', 3)
@@ -170,7 +170,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@system-prompt').type("{selectAll}Alice's prompt.", { delay: 0 })
     cy.get('@input-text').eq(0).type("{selectAll}Alice's input.", { delay: 0 })
@@ -188,7 +188,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@system-prompt').type("{selectAll}Bob's prompt.", { delay: 0 })
     cy.get('@input-text').eq(0).type("{selectAll}Bob's input.", { delay: 0 })

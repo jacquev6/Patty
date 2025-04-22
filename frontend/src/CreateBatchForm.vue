@@ -12,6 +12,8 @@ import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import WhiteSpace from './WhiteSpace.vue'
 import assert from './assert'
+import InputForNumberOrNull from './InputForNumberOrNull.vue'
+import InputForNonEmptyStringOrNull from './InputForNonEmptyStringOrNull.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -34,38 +36,25 @@ watch(
 
 const textAreas = useTemplateRef<InstanceType<typeof TextArea>[]>('textAreas')
 
-const emptyInputProxy = computed({
-  get() {
-    return ''
-  },
-  set(text) {
-    // @todo Avoid hard-coding a known id here. We should send the input without an id at all.
-    inputs.push({ id: '1', createdBy: identifiedUser.identifier, text })
-  },
-})
+watch(
+  inputs,
+  () => {
+    if (inputs.length === 0 || inputs[inputs.length - 1].text !== '') {
+      inputs.push({ pageNumber: null, exerciseNumber: null, text: '' })
+    }
+    assert(inputs[inputs.length - 1].text === '')
 
-const inputProxies = computed(() => [
-  ...inputs.map((input) =>
-    computed({
-      get() {
-        return input.text
-      },
-      set(value) {
-        input.text = value
-        let popped = false
-        while (inputs.length > 0 && inputs[inputs.length - 1].text === '') {
-          inputs.pop()
-          popped = true
-        }
-        if (popped) {
-          assert(textAreas.value !== null)
-          textAreas.value[inputs.length].wrapped.focus()
-        }
-      },
-    }),
-  ),
-  emptyInputProxy,
-])
+    let popped = false
+    while (inputs.length > 1 && inputs[inputs.length - 2].text === '') {
+      inputs.pop()
+      popped = true
+    }
+    if (popped && textAreas.value !== null) {
+      textAreas.value[inputs.length - 1].wrapped.focus()
+    }
+  },
+  { deep: true, immediate: true },
+)
 
 const busy = ref(false)
 
@@ -102,19 +91,19 @@ const disabled = computed(() => {
       <template #col-2>
         <h1>Inputs</h1>
         <p><button @click="submit" :disabled>Submit</button></p>
-        <template v-for="index in inputs.length + 1">
+        <template v-for="index in inputs.length">
           <h2>
-            Input {{ index
-            }}<template v-if="inputProxies[index - 1].value.trim() === ''"
-              ><WhiteSpace /><span class="ignored">(empty, ignored)</span></template
-            >
+            Input {{ index }}
+            <template v-if="inputs[index - 1].text.trim() === ''">
+              <WhiteSpace />
+              <span class="ignored">(empty, ignored)</span>
+            </template>
           </h2>
-          <TextArea
-            ref="textAreas"
-            id="input-text"
-            data-cy="input-text"
-            v-model="inputProxies[index - 1].value"
-          ></TextArea>
+          <p>
+            Page: <InputForNumberOrNull v-model="inputs[index - 1].pageNumber" />, exercise:
+            <InputForNonEmptyStringOrNull v-model="inputs[index - 1].exerciseNumber" />
+          </p>
+          <TextArea ref="textAreas" id="input-text" data-cy="input-text" v-model="inputs[index - 1].text"></TextArea>
         </template>
       </template>
     </ResizableColumns>
