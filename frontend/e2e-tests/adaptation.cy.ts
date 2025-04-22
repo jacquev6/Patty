@@ -233,6 +233,59 @@ describe('The batch creation page', () => {
       'p:contains("The LLM returned a JSON response that does not validate against the adapted exercise schema.")',
     ).should('exist')
   })
+
+  it('opens several text files as inputs', () => {
+    cy.get('[data-cy="input-text"]').as('input-text')
+    cy.get('[data-cy="input-page-number"]').as('input-page-number')
+    cy.get('[data-cy="input-exercise-number"]').as('input-exercise-number')
+
+    cy.get("input[data-cy='input-files']").selectFile([
+      // Lexicographical order is inappropriate because files have numbers in their names.
+      'e2e-tests/inputs/P16Ex4.txt',
+      'e2e-tests/inputs/P6Ex14.txt',
+      'e2e-tests/inputs/P6Ex8.txt',
+    ])
+    cy.get('@input-text').should('have.length', 4)
+    // Inputs are sorted by page and exercise number.
+    cy.get('h2:contains("Input 1") > span.discreet:contains("P6Ex8.txt")').should('exist')
+    cy.get('@input-page-number').eq(0).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(0).should('have.value', '8')
+    cy.get('@input-text')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('h2:contains("Input 2") > span.discreet:contains("P6Ex14.txt")').should('exist')
+    cy.get('@input-page-number').eq(1).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(1).should('have.value', '14')
+    cy.get('@input-text')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+    cy.get('h2:contains("Input 3") > span.discreet:contains("P16Ex4.txt")').should('exist')
+    cy.get('@input-page-number').eq(2).should('have.value', 16)
+    cy.get('@input-exercise-number').eq(2).should('have.value', '4')
+    cy.get('@input-text')
+      .eq(2)
+      .should(
+        'have.value',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+      )
+    cy.get('h2:contains("Input 4") > span.discreet:contains("empty")').should('exist')
+    cy.get('@input-page-number').eq(3).should('have.value', '')
+    cy.get('@input-exercise-number').eq(3).should('have.value', '')
+    cy.get('@input-text').eq(3).should('have.value', '')
+
+    cy.get('h2:contains("Input 2")').find('span.discreet:contains("P6Ex14.txt")').should('exist')
+    cy.get('@input-text').eq(1).type('{backspace}')
+    cy.get('h2:contains("Input 2")').find('span.discreet:contains("P6Ex14.txt")').should('not.exist')
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("Created by: Alice")').should('exist')
+  })
 })
 
 describe('The batch edition page', () => {

@@ -2,18 +2,17 @@
 import { computed, reactive, ref, useTemplateRef, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
+import _ from 'lodash'
 
 import { type LatestBatch, type LlmModel, client } from './apiClient'
-import TextArea from './TextArea.vue'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
-import WhiteSpace from './WhiteSpace.vue'
 import assert from './assert'
-import InputForNumberOrNull from './InputForNumberOrNull.vue'
-import InputForNonEmptyStringOrNull from './InputForNonEmptyStringOrNull.vue'
+import { type InputWithFile } from './CreateBatchFormInputEditor.vue'
+import CreateBatchFormInputEditor from './CreateBatchFormInputEditor.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
@@ -25,7 +24,7 @@ const router = useRouter()
 const identifiedUser = useIdentifiedUserStore()
 
 const strategy = reactive(deepCopy(props.latestBatch.strategy))
-const inputs = reactive(deepCopy(props.latestBatch.inputs))
+const inputs = reactive<InputWithFile[]>(deepCopy(props.latestBatch.inputs))
 watch(
   () => props.latestBatch,
   (newValue) => {
@@ -34,7 +33,65 @@ watch(
   },
 )
 
-const textAreas = useTemplateRef<InstanceType<typeof TextArea>[]>('textAreas')
+function readFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      assert(typeof reader.result === 'string')
+      resolve(reader.result)
+    }
+    reader.onerror = reject
+    reader.readAsText(file)
+  })
+}
+
+async function openFiles(event: Event) {
+  const files = (event.target as HTMLInputElement).files
+  assert(files !== null)
+
+  const fileInputs: InputWithFile[] = []
+  for (let index = 0; index < files.length; index++) {
+    const file = files.item(index)
+    assert(file !== null)
+    const { pageNumber, exerciseNumber } = (() => {
+      const match = file.name.match(/P(\d+)Ex(\d+)\.txt/)
+      if (match === null) {
+        return { pageNumber: null, exerciseNumber: null }
+      }
+      const pageNumber = parseInt(match[1])
+      const exerciseNumber = match[2]
+      return { pageNumber, exerciseNumber }
+    })()
+    const text = await readFile(file)
+    fileInputs.push({
+      inputFile: file.name,
+      pageNumber,
+      exerciseNumber,
+      text,
+    })
+  }
+
+  const sortedInputs = _.sortBy(fileInputs, [
+    'pageNumber',
+    ({ exerciseNumber }) => {
+      if (exerciseNumber === null) {
+        return 0
+      } else {
+        const asNumber = parseInt(exerciseNumber)
+        if (isNaN(asNumber)) {
+          return 0
+        } else {
+          return asNumber
+        }
+      }
+    },
+    'exerciseNumber',
+  ])
+
+  inputs.splice(0, inputs.length, ...sortedInputs)
+}
+
+const editors = useTemplateRef<InstanceType<typeof CreateBatchFormInputEditor>[]>('editors')
 
 watch(
   inputs,
@@ -49,8 +106,8 @@ watch(
       inputs.pop()
       popped = true
     }
-    if (popped && textAreas.value !== null) {
-      textAreas.value[inputs.length - 1].wrapped.focus()
+    if (popped && editors.value !== null) {
+      editors.value[inputs.length - 1].focus()
     }
   },
   { deep: true, immediate: true },
@@ -74,7 +131,11 @@ async function submit() {
   }
 }
 
-const cleanedUpInputs = computed(() => inputs.filter((input) => input.text.trim() !== ''))
+const cleanedUpInputs = computed(() =>
+  inputs
+    .filter((input) => input.text.trim() !== '')
+    .map(({ pageNumber, exerciseNumber, text }) => ({ pageNumber, exerciseNumber, text })),
+)
 
 const disabled = computed(() => {
   return strategy.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
@@ -91,28 +152,11 @@ const disabled = computed(() => {
       <template #col-2>
         <h1>Inputs</h1>
         <p><button @click="submit" :disabled>Submit</button></p>
+        <p><input data-cy="input-files" type="file" multiple="true" @change="openFiles" /></p>
         <template v-for="index in inputs.length">
-          <h2>
-            Input {{ index }}
-            <template v-if="inputs[index - 1].text.trim() === ''">
-              <WhiteSpace />
-              <span class="ignored">(empty, ignored)</span>
-            </template>
-          </h2>
-          <p>
-            Page: <InputForNumberOrNull v-model="inputs[index - 1].pageNumber" />, exercise:
-            <InputForNonEmptyStringOrNull v-model="inputs[index - 1].exerciseNumber" />
-          </p>
-          <TextArea ref="textAreas" id="input-text" data-cy="input-text" v-model="inputs[index - 1].text"></TextArea>
+          <CreateBatchFormInputEditor ref="editors" :index v-model="inputs[index - 1]" />
         </template>
       </template>
     </ResizableColumns>
   </BusyBox>
 </template>
-
-<style scoped>
-.ignored {
-  font-size: 70%;
-  color: grey;
-}
-</style>
