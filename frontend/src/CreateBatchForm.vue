@@ -172,7 +172,10 @@ const disabled = computed(() => {
       <template #col-2>
         <h1>Inputs</h1>
         <p><button @click="submit" :disabled>Submit</button></p>
-        <p><input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" /></p>
+        <p>
+          Open one or several text or zip files:
+          <input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" />
+        </p>
         <template v-for="index in inputs.length">
           <CreateBatchFormInputEditor ref="editors" :index v-model="inputs[index - 1]" />
         </template>
