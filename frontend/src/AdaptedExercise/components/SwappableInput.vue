@@ -99,7 +99,14 @@ function handleClick() {
 </script>
 
 <template>
-  <FormattedComponent class="main" v-bind="formatted" :tricolorable data-cy="swappableInput" @click="handleClick" />
+  <FormattedComponent
+    class="main"
+    :class="{ empty: actualContents.length === 0 }"
+    v-bind="formatted"
+    :tricolorable
+    data-cy="swappableInput"
+    @click="handleClick"
+  />
 </template>
 
 <style scoped>
@@ -107,6 +114,10 @@ function handleClick() {
   cursor: pointer;
   user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
   border: 2px solid #aaf;
-  padding: 0.2em 0.5em;
+  padding: 9px 3.2px;
+}
+
+.main.empty {
+  padding: 9px 32px;
 }
 </style>

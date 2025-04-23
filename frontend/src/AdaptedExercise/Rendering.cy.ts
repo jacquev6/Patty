@@ -500,6 +500,11 @@ describe('SwappableInput', () => {
                     contents: [
                       {
                         kind: 'swappableInput',
+                        contents: [],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'swappableInput',
                         contents: [{ kind: 'text', text: 'and' }, { kind: 'whitespace' }, { kind: 'text', text: 'me' }],
                       },
                     ],
