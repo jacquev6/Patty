@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AnyComponent } from '@/apiClient'
 import AnySingleComponent from './AnySingleComponent.vue'
-import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
+import { type InProgressExercise, type StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
   pageIndex: number
@@ -11,6 +11,8 @@ const props = defineProps<{
 }>()
 
 const model = defineModel<StudentAnswers>({ required: true })
+
+const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
 </script>
 
 <template>
@@ -22,5 +24,6 @@ const model = defineModel<StudentAnswers>({ required: true })
     :component
     :tricolorable
     v-model="model"
+    v-model:inProgress="inProgress"
   />
 </template>

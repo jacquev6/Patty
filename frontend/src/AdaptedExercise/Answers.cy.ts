@@ -438,6 +438,86 @@ describe('Adapted exercise answers', () => {
     },
   }
 
+  const exerciseWithSwappableInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'a' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'b' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'c' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'd' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'e' }] },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'f' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'g' }] },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForSwappableInputs: StudentAnswers = {
+    pages: {
+      '0': {
+        lines: {
+          '0': {
+            components: {
+              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
+            },
+          },
+          '1': {
+            components: {
+              '4': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
+            },
+          },
+          '2': {
+            components: {
+              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
+              '6': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
+            },
+          },
+        },
+      },
+    },
+  }
+
   function getAnswers(): Cypress.Chainable<StudentAnswers> {
     return cy.getAllLocalStorage().then(Object.values).its(0).its(answersKey).then(JSON.parse)
   }
@@ -609,5 +689,52 @@ describe('Adapted exercise answers', () => {
     for (let i = 1; i < 8; i += 2) {
       cy.get('[data-cy="multipleChoicesInput"]').eq(i).should('have.text', '....')
     }
+  })
+
+  it('are saved for swappable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        exerciseId,
+        adaptedExercise: exerciseWithSwappableInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+    cy.get('[data-cy="swappableInput"]').eq(5).click()
+    cy.get('[data-cy="swappableInput"]').eq(6).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.text', 'd')
+    cy.get('[data-cy="swappableInput"]').eq(1).should('have.text', 'b')
+    cy.get('[data-cy="swappableInput"]').eq(2).should('have.text', 'c')
+    cy.get('[data-cy="swappableInput"]').eq(3).should('have.text', 'g')
+    cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'e')
+    cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'a')
+    cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'f')
+
+    getAnswers().should('deep.equal', answersForSwappableInputs)
+  })
+
+  it('are loaded for swappable inputs', () => {
+    setAnswers(answersForSwappableInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        exerciseId,
+        adaptedExercise: exerciseWithSwappableInputs,
+      },
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.text', 'd')
+    cy.get('[data-cy="swappableInput"]').eq(1).should('have.text', 'b')
+    cy.get('[data-cy="swappableInput"]').eq(2).should('have.text', 'c')
+    cy.get('[data-cy="swappableInput"]').eq(3).should('have.text', 'g')
+    cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'e')
+    cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'a')
+    cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'f')
   })
 })

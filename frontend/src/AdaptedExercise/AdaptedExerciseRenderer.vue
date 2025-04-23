@@ -1,4 +1,20 @@
 <script lang="ts">
+import type { AdaptedExercise } from '@/apiClient'
+
+export type InProgressExercise = {
+  exercise: AdaptedExercise
+  selectedSwappable: {
+    pageIndex: number
+    lineIndex: number
+    componentIndex: number
+    contentsFrom: {
+      pageIndex: number
+      lineIndex: number
+      componentIndex: number
+    }
+  } | null
+}
+
 export type ComponentAnswer =
   | {
       kind: 'multipleChoicesInput'
@@ -14,7 +30,11 @@ export type ComponentAnswer =
     }
   | {
       kind: 'swappableInput'
-      selected: boolean
+      contentsFrom: {
+        pageIndex: number
+        lineIndex: number
+        componentIndex: number
+      }
     }
 
 type LineAnswers = {
@@ -31,15 +51,13 @@ export type StudentAnswers = {
 </script>
 
 <script setup lang="ts">
-import { computed, nextTick, provide, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 
-import type { AdaptedExercise } from '@/apiClient'
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
-import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -63,6 +81,21 @@ const totalPagesCount = computed(() => {
   }
 })
 const pageIndex = ref(0)
+
+const inProgress = reactive<InProgressExercise>({
+  exercise: props.adaptedExercise,
+  selectedSwappable: null,
+})
+watch(
+  () => props.adaptedExercise,
+  (exercise) => {
+    inProgress.exercise = exercise
+    inProgress.selectedSwappable = null
+  },
+)
+watch(pageIndex, () => {
+  inProgress.selectedSwappable = null
+})
 
 const defaultStudentAnswers = { pages: {} }
 
@@ -106,7 +139,14 @@ watch(
         <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
             <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[pageIndex].lines">
-              <AnySequenceComponent :pageIndex :lineIndex :contents :tricolorable="true" v-model="studentAnswers" />
+              <AnySequenceComponent
+                :pageIndex
+                :lineIndex
+                :contents
+                :tricolorable="true"
+                v-model="studentAnswers"
+                v-model:inProgress="inProgress"
+              />
             </p>
           </TriColorLines>
         </div>

@@ -8,7 +8,7 @@ import FreeTextInput from '../components/FreeTextInput.vue'
 import MultipleChoicesInput from '../components/MultipleChoicesInput.vue'
 import SelectableInput from '../components/SelectableInput.vue'
 import SwappableInput from '../components/SwappableInput.vue'
-import type { StudentAnswers, ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
+import type { StudentAnswers, ComponentAnswer, InProgressExercise } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
   pageIndex: number
@@ -19,6 +19,8 @@ const props = defineProps<{
 }>()
 
 const studentAnswers = defineModel<StudentAnswers>({ required: true })
+
+const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
 
 function getComponentAnswer() {
   return studentAnswers.value.pages[props.pageIndex]?.lines[props.lineIndex]?.components[props.componentIndex]
@@ -74,21 +76,6 @@ const answerForSelectableInput = computed<number, number>({
     setComponentAnswer({ kind: 'selectableInput', color })
   },
 })
-
-const answerForSwappableInput = computed<boolean, boolean>({
-  get() {
-    const answer = getComponentAnswer()
-    if (answer === undefined) {
-      return false
-    } else {
-      assert(answer.kind === 'swappableInput')
-      return answer.selected
-    }
-  },
-  set: (selected: boolean) => {
-    setComponentAnswer({ kind: 'swappableInput', selected })
-  },
-})
 </script>
 
 <template>
@@ -113,8 +100,12 @@ const answerForSwappableInput = computed<boolean, boolean>({
   />
   <SwappableInput
     v-else-if="component.kind === 'swappableInput'"
+    :pageIndex
+    :lineIndex
+    :componentIndex
     v-bind="component"
-    v-model="answerForSwappableInput"
+    v-model="studentAnswers"
+    v-model:inProgress="inProgress"
     :tricolorable
   />
   <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>

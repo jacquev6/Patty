@@ -515,7 +515,134 @@ describe('SwappableInput', () => {
 
     screenshot()
     cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgb(255, 253, 212)')
     screenshot()
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
+  it('swaps', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }] },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'C' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'D' }] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).as('a')
+    cy.get('[data-cy="swappableInput"]').eq(1).as('b')
+    cy.get('[data-cy="swappableInput"]').eq(2).as('c')
+    cy.get('[data-cy="swappableInput"]').eq(3).as('d')
+
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'B')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'B')
+    cy.get('@b').should('have.text', 'A')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'B')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@c').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'C')
+    cy.get('@c').should('have.text', 'B')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@d').click()
+    cy.get('@a').should('have.text', 'D')
+    cy.get('@b').should('have.text', 'C')
+    cy.get('@c').should('have.text', 'B')
+    cy.get('@d').should('have.text', 'A')
+  })
+
+  it('resets selected swappable when page is changed', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }] },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'C' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'D' }] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgb(255, 253, 212)')
+
+    cy.get('.control').eq(1).click()
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+
+    cy.get('.control').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
   })
 })
 
