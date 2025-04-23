@@ -446,6 +446,54 @@ describe('TriColorLines', () => {
   })
 })
 
+describe('SwappableInput', () => {
+  it('renders', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [
+                          { kind: 'text', text: 'Swap' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [{ kind: 'text', text: 'and' }, { kind: 'whitespace' }, { kind: 'text', text: 'me' }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    screenshot()
+  })
+})
+
 describe('AdaptedExerciseRenderer', () => {
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)

@@ -5,6 +5,7 @@ import FormattedComponent from './FormattedComponent.vue'
 import FreeTextInput from './FreeTextInput.vue'
 import MultipleChoicesInput from './MultipleChoicesInput.vue'
 import SelectableInput from './SelectableInput.vue'
+import SwappableInput from './SwappableInput.vue'
 import TextComponent from './TextComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
 import { type ModelRef } from 'vue'
@@ -14,9 +15,10 @@ defineProps<{
   tricolorable: boolean
 }>()
 
-const model = defineModel<string | number>()
+const model = defineModel<string | number | boolean>()
 const modelAsString = model as ModelRef<string>
 const modelAsNumber = model as ModelRef<number>
+const modelAsBoolean = model as ModelRef<boolean>
 </script>
 
 <template>
@@ -37,6 +39,12 @@ const modelAsNumber = model as ModelRef<number>
     v-else-if="component.kind === 'selectableInput'"
     v-bind="component"
     v-model="modelAsNumber"
+    :tricolorable
+  />
+  <SwappableInput
+    v-else-if="component.kind === 'swappableInput'"
+    v-bind="component"
+    v-model="modelAsBoolean"
     :tricolorable
   />
   <FormattedComponent

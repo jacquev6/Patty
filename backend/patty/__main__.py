@@ -45,6 +45,7 @@ def adapted_exercise_schema() -> None:
             free_text_input=True,
             multiple_choices_input=True,
             selectable_input=True,
+            swappable_input=True,
         ),
         adapted.ReferenceComponents(text=True, whitespace=True),
     )

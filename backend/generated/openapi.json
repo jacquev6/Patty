@@ -1013,7 +1013,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
           },
           "reference": {
             "anyOf": [
@@ -1067,7 +1067,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
           },
           "reference": {
             "anyOf": [
@@ -1367,7 +1367,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -1389,6 +1389,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/SelectableInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput"
                 }
               ]
             },
@@ -1401,7 +1404,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -1423,6 +1426,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/SelectableInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput"
                 }
               ]
             },
@@ -1643,11 +1649,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -1658,11 +1664,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -1703,11 +1709,11 @@
           "lines"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -1718,11 +1724,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
             },
             "type": "array",
             "title": "Pages"
@@ -1898,6 +1904,10 @@
           "selectableInput": {
             "type": "boolean",
             "title": "Selectableinput"
+          },
+          "swappableInput": {
+            "type": "boolean",
+            "title": "Swappableinput"
           }
         },
         "additionalProperties": false,
@@ -1908,9 +1918,38 @@
           "arrow",
           "freeTextInput",
           "multipleChoicesInput",
-          "selectableInput"
+          "selectableInput",
+          "swappableInput"
         ],
         "title": "StatementComponents"
+      },
+      "SwappableInput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "swappableInput",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents"
+        ]
       },
       "Text": {
         "properties": {
