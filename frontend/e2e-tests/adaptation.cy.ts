@@ -576,15 +576,17 @@ describe('The edition page for an initially successful adaptation', () => {
     shouldAllowAdjustment()
   })
 
-  it('invalidate the JSON manually', () => {
+  it('invalidates the JSON manually', () => {
     invalidateJsonManually()
     shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
     screenshot('adaptation-edition-page.manual-invalid')
   })
 
   it('breaks the JSON manually', () => {
     breakJsonManually()
     shouldBeManualNotJson()
+    shouldForbidAdjustment()
     screenshot('adaptation-edition-page.manual-not-json')
   })
 })
@@ -637,14 +639,16 @@ describe('The edition page for an initially invalid-json adaptation', () => {
     shouldForbidAdjustment()
   })
 
-  it('invalidate the JSON manually', () => {
+  it('invalidates the JSON manually', () => {
     invalidateJsonManually()
     shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
   })
 
   it('breaks the JSON manually', () => {
     breakJsonManually()
     shouldBeManualNotJson()
+    shouldForbidAdjustment()
   })
 })
 
@@ -693,6 +697,18 @@ describe('The edition page for an initially not-json adaptation', () => {
   it('fixes the JSON manually', () => {
     fixJsonManually()
     shouldBeSuccess()
+    shouldForbidAdjustment()
+  })
+
+  it('invalidates the JSON manually', () => {
+    invalidateJsonManually()
+    shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
+  })
+
+  it('breaks the JSON manually', () => {
+    breakJsonManually()
+    shouldBeManualNotJson()
     shouldForbidAdjustment()
   })
 })
