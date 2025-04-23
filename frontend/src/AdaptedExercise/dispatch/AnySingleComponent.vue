@@ -8,67 +8,85 @@ import FreeTextInput from '../components/FreeTextInput.vue'
 import MultipleChoicesInput from '../components/MultipleChoicesInput.vue'
 import SelectableInput from '../components/SelectableInput.vue'
 import SwappableInput from '../components/SwappableInput.vue'
+import type { StudentAnswers, ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
 
-defineProps<{
+const props = defineProps<{
+  pageIndex: number
+  lineIndex: number
+  componentIndex: number
   component: AnyComponent
   tricolorable: boolean
 }>()
 
-const model = defineModel<undefined | string | number | null | boolean>({ required: true })
+const studentAnswers = defineModel<StudentAnswers>({ required: true })
 
-const modelForFreeTextInput = computed<string>({
+function getComponentAnswer() {
+  return studentAnswers.value.pages[props.pageIndex]?.lines[props.lineIndex]?.components[props.componentIndex]
+}
+
+function setComponentAnswer(answer: ComponentAnswer) {
+  studentAnswers.value.pages[props.pageIndex] ??= { lines: {} }
+  studentAnswers.value.pages[props.pageIndex]!.lines[props.lineIndex] ??= { components: {} }
+  studentAnswers.value.pages[props.pageIndex]!.lines[props.lineIndex]!.components[props.componentIndex] = answer
+}
+
+const answerForFreeTextInput = computed<string>({
   get() {
-    if (model.value === undefined) {
+    const answer = getComponentAnswer()
+    if (answer === undefined) {
       return ''
     } else {
-      assert(typeof model.value === 'string')
-      return model.value
+      assert(answer.kind === 'freeTextInput')
+      return answer.text
     }
   },
-  set: (value: string) => {
-    model.value = value
+  set: (text: string) => {
+    setComponentAnswer({ kind: 'freeTextInput', text })
   },
 })
 
-const modelForMultipleChoicesInput = computed<number | null, number | null>({
+const answerForMultipleChoicesInput = computed<number | null, number | null>({
   get() {
-    if (model.value === undefined) {
+    const answer = getComponentAnswer()
+    if (answer === undefined) {
       return null
     } else {
-      assert(model.value === null || typeof model.value === 'number')
-      return model.value
+      assert(answer.kind === 'multipleChoicesInput')
+      return answer.choice
     }
   },
-  set: (value: number | null) => {
-    model.value = value
+  set: (choice: number | null) => {
+    setComponentAnswer({ kind: 'multipleChoicesInput', choice })
   },
 })
 
-const modelForSelectableInput = computed<number, number>({
+const answerForSelectableInput = computed<number, number>({
   get() {
-    if (model.value === undefined) {
+    const answer = getComponentAnswer()
+    if (answer === undefined) {
       return 0
     } else {
-      assert(typeof model.value === 'number')
-      return model.value
+      assert(answer.kind === 'selectableInput')
+      return answer.color
     }
   },
-  set: (value: number) => {
-    model.value = value
+  set: (color: number) => {
+    setComponentAnswer({ kind: 'selectableInput', color })
   },
 })
 
-const modelForSwappableInput = computed<boolean, boolean>({
+const answerForSwappableInput = computed<boolean, boolean>({
   get() {
-    if (model.value === undefined) {
+    const answer = getComponentAnswer()
+    if (answer === undefined) {
       return false
     } else {
-      assert(typeof model.value === 'boolean')
-      return model.value
+      assert(answer.kind === 'swappableInput')
+      return answer.selected
     }
   },
-  set: (value: boolean) => {
-    model.value = value
+  set: (selected: boolean) => {
+    setComponentAnswer({ kind: 'swappableInput', selected })
   },
 })
 </script>
@@ -78,25 +96,25 @@ const modelForSwappableInput = computed<boolean, boolean>({
   <FreeTextInput
     v-else-if="component.kind === 'freeTextInput'"
     v-bind="component"
-    v-model="modelForFreeTextInput"
+    v-model="answerForFreeTextInput"
     :tricolorable
   />
   <MultipleChoicesInput
     v-else-if="component.kind === 'multipleChoicesInput'"
     v-bind="component"
-    v-model="modelForMultipleChoicesInput"
+    v-model="answerForMultipleChoicesInput"
     :tricolorable
   />
   <SelectableInput
     v-else-if="component.kind === 'selectableInput'"
     v-bind="component"
-    v-model="modelForSelectableInput"
+    v-model="answerForSelectableInput"
     :tricolorable
   />
   <SwappableInput
     v-else-if="component.kind === 'swappableInput'"
     v-bind="component"
-    v-model="modelForSwappableInput"
+    v-model="answerForSwappableInput"
     :tricolorable
   />
   <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>

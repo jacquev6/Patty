@@ -1,3 +1,35 @@
+<script lang="ts">
+export type ComponentAnswer =
+  | {
+      kind: 'multipleChoicesInput'
+      choice: number | null
+    }
+  | {
+      kind: 'freeTextInput'
+      text: string
+    }
+  | {
+      kind: 'selectableInput'
+      color: number
+    }
+  | {
+      kind: 'swappableInput'
+      selected: boolean
+    }
+
+type LineAnswers = {
+  components: Partial<Record<number, ComponentAnswer>>
+}
+
+type PageAnswers = {
+  lines: Partial<Record<number, LineAnswers>>
+}
+
+export type StudentAnswers = {
+  pages: Partial<Record<number, PageAnswers>>
+}
+</script>
+
 <script setup lang="ts">
 import { computed, nextTick, provide, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
@@ -7,6 +39,7 @@ import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
+import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -31,29 +64,16 @@ const totalPagesCount = computed(() => {
 })
 const pageIndex = ref(0)
 
-const defaultModel = computed(() => {
-  const model: Record<number, Record<number, Record<number, undefined | string | number | null | boolean>>> = {}
-  for (let pageIndex = 0; pageIndex < props.adaptedExercise.statement.pages.length; pageIndex++) {
-    model[pageIndex] = {}
-    for (let lineIndex = 0; lineIndex < props.adaptedExercise.statement.pages[pageIndex].lines.length; lineIndex++) {
-      model[pageIndex][lineIndex] = {}
-    }
-  }
-  return model
-})
+const defaultStudentAnswers = { pages: {} }
 
-const model =
+const studentAnswers =
   props.exerciseId === null
-    ? ref(defaultModel.value)
-    : useStorage(`patty/student-answers/v1/exercise-${props.exerciseId}`, defaultModel.value)
-
-watch(defaultModel, (m) => {
-  model.value = m
-})
+    ? ref(defaultStudentAnswers)
+    : useStorage(`patty/student-answers/v2/exercise-${props.exerciseId}`, defaultStudentAnswers)
 
 const triColorLines = useTemplateRef('tricolor')
 watch(
-  model,
+  studentAnswers,
   async () => {
     await nextTick()
     if (triColorLines.value !== null) {
@@ -86,7 +106,7 @@ watch(
         <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
             <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[pageIndex].lines">
-              <AnySequenceComponent :contents :tricolorable="true" v-model="model[pageIndex][lineIndex]" />
+              <AnySequenceComponent :pageIndex :lineIndex :contents :tricolorable="true" v-model="studentAnswers" />
             </p>
           </TriColorLines>
         </div>
