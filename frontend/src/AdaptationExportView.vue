@@ -7,7 +7,7 @@ type Data = {
   adaptedExercise: AdaptedExercise
 }
 
-const data = JSON.parse('{{ data }}') as Data
+const data = JSON.parse('##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##') as Data
 </script>
 
 <template>

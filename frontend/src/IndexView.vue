@@ -23,7 +23,7 @@ onMounted(async () => {
   <ul>
     <li v-for="batch in batches">
       <RouterLink :to="{ name: 'batch', params: { id: batch.id } }">
-        Batch {{ batch.id }}, created by {{ batch.createdBy }} on {{ batch.createdAt }}
+        Batch {{ batch.id }}, created by {{ batch.createdBy }} on {{ new Date(batch.createdAt) }}
       </RouterLink>
     </li>
   </ul>

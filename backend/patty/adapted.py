@@ -89,6 +89,11 @@ class SelectableInput(BaseModel):
     boxed: bool
 
 
+class SwappableInput(BaseModel):
+    kind: Literal["swappableInput"]
+    contents: list[PureText]
+
+
 # WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent
 InstructionComponent = PureText | Choice
 
@@ -124,7 +129,7 @@ class HintComponents(PureTextComponents):
 
 
 # WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
-StatementComponent = PureText | Arrow | FreeTextInput | MultipleChoicesInput | SelectableInput
+StatementComponent = PureText | Arrow | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput
 
 
 class StatementComponents(PureTextComponents):
@@ -132,6 +137,7 @@ class StatementComponents(PureTextComponents):
     free_text_input: bool
     multiple_choices_input: bool
     selectable_input: bool
+    swappable_input: bool
 
     def gather(self) -> Iterable[type]:
         yield from super().gather()
@@ -143,6 +149,8 @@ class StatementComponents(PureTextComponents):
             yield MultipleChoicesInput
         if self.selectable_input:
             yield SelectableInput
+        if self.swappable_input:
+            yield SwappableInput
 
 
 # WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent

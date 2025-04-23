@@ -7,17 +7,26 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 set -x
 
-./shell.sh -c 'python -m patty load-fixtures'
+backup_to_load=s3://jacquev6/patty/prod/backups/patty-backup-20250423-132405.tar.gz
 
-rev_id_arg=
+./shell.sh -c "python -m patty restore-database --yes --patch-according-to-settings $backup_to_load"
+./alembic.sh upgrade 429d2fb463dd  # To be removed: only here because we have two migrations for next release. (Won't hurt until removed: will be no-op)
+
+rev_id=
 if [ -e ../../backend/patty/migrations/versions/*_dev.py ]
 then
-    ../docker-compose.sh exec --workdir /app/backend/patty backend-shell alembic downgrade head-1
-  rev_id_arg="--rev-id $(find ../../backend/patty/migrations/versions/*_dev.py | sed -E 's#../../backend/patty/migrations/versions/(.*)_dev\.py#\1#')"
+  rev_id="--rev-id $(find ../../backend/patty/migrations/versions/*_dev.py | sed -E 's#../../backend/patty/migrations/versions/(.*)_dev\.py#\1#')"
   rm -f ../../backend/patty/migrations/versions/*_dev.py
 fi
 
-../docker-compose.sh exec --workdir /app/backend/patty backend-shell alembic revision --autogenerate $rev_id_arg -m dev
-../docker-compose.sh exec --workdir /app/backend/patty backend-shell alembic upgrade head
+current=$(./alembic.sh current | cut -d " " -f 1)
+expected=$(./alembic.sh show head | grep "Rev:" | cut -d " " -f 2)
 
-./shell.sh -c 'python -m patty load-fixtures dummy-adaptation-strategy default-adaptation-input'
+if [ "$current" != "$expected" ]
+then
+  echo "Current migration $current does not match expected migration $expected. Maybe you need to load a more recent backup?"
+  exit 1
+fi
+
+./alembic.sh revision --autogenerate $rev_id -m dev
+./alembic.sh upgrade head

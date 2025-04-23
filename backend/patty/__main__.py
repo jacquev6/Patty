@@ -1,3 +1,4 @@
+import copy
 import re
 import sys
 from typing import Iterable
@@ -14,6 +15,7 @@ import sqlalchemy_utils
 import boto3
 import click
 
+from . import adaptation
 from . import adapted
 from . import asgi
 from . import database_utils
@@ -45,6 +47,7 @@ def adapted_exercise_schema() -> None:
             free_text_input=True,
             multiple_choices_input=True,
             selectable_input=True,
+            swappable_input=True,
         ),
         adapted.ReferenceComponents(text=True, whitespace=True),
     )
@@ -206,6 +209,18 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
     )
 
     sqlalchemy_utils.functions.drop_database(placeholder_database_url)
+
+
+@main.command()
+def migrate_data() -> None:
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        for strategy in session.query(adaptation.Strategy).all():
+            spec = copy.deepcopy(strategy._response_specification)
+            if spec["format"] == "json" and spec["formalism"] == "json-schema":
+                spec["statement_components"].setdefault("swappable_input", False)
+            strategy._response_specification = spec
+        session.commit()
 
 
 if __name__ == "__main__":

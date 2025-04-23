@@ -46,7 +46,8 @@ FROM nginx:alpine AS final-frontend
 
 RUN rm /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*.html
 ADD prod/docker/frontend.conf /etc/nginx/conf.d/frontend.conf
-COPY --from=frontend-builder /app/dist /usr/share/nginx/html/frontend
+ADD --chmod=777 prod/docker/40-substitute.sh /docker-entrypoint.d/40-substitute.sh
+COPY --from=frontend-builder /app/dist /usr/share/nginx/templates/frontend
 
 
 FROM backend-dependencies AS final-backend

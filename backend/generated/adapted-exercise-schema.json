@@ -317,6 +317,9 @@
               },
               {
                 "$ref": "#/$defs/SelectableInput"
+              },
+              {
+                "$ref": "#/$defs/SwappableInput"
               }
             ]
           },
@@ -358,6 +361,35 @@
       },
       "required": [
         "pages"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SwappableInput": {
+      "properties": {
+        "kind": {
+          "const": "swappableInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "contents"
       ],
       "type": "object",
       "additionalProperties": false

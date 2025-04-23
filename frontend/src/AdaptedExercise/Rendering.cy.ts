@@ -141,6 +141,7 @@ describe('SelectableInput', () => {
         colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
 
@@ -169,6 +170,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('[data-cy="selectableInput"]').as('input')
@@ -182,6 +184,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -194,6 +197,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -206,6 +210,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -218,6 +223,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -230,6 +236,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -241,7 +248,7 @@ describe('FreeTextInput', () => {
   it('accepts text input', () => {
     cy.viewport(170, 70)
 
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -256,7 +263,7 @@ describe('FreeTextInput', () => {
   })
 
   it('refuses new lines', () => {
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
@@ -282,7 +289,13 @@ describe('MultipleChoicesInput', () => {
     cy.viewport(250, 190)
 
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: false,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     screenshot()
@@ -308,7 +321,13 @@ describe('MultipleChoicesInput', () => {
 
   it('closes choices on click on backdrop', () => {
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: false,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -322,7 +341,13 @@ describe('MultipleChoicesInput', () => {
 
   it('closes choices on click on main span', () => {
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: true,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -443,6 +468,186 @@ describe('TriColorLines', () => {
     })
 
     screenshot()
+  })
+})
+
+describe('SwappableInput', () => {
+  it('renders', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [
+                          { kind: 'text', text: 'Swap' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'swappableInput',
+                        contents: [{ kind: 'text', text: 'and' }, { kind: 'whitespace' }, { kind: 'text', text: 'me' }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgb(255, 253, 212)')
+    screenshot()
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
+  it('swaps', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }] },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'C' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'D' }] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).as('a')
+    cy.get('[data-cy="swappableInput"]').eq(1).as('b')
+    cy.get('[data-cy="swappableInput"]').eq(2).as('c')
+    cy.get('[data-cy="swappableInput"]').eq(3).as('d')
+
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'B')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'B')
+    cy.get('@b').should('have.text', 'A')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'B')
+    cy.get('@c').should('have.text', 'C')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@c').click()
+    cy.get('@b').click()
+    cy.get('@a').should('have.text', 'A')
+    cy.get('@b').should('have.text', 'C')
+    cy.get('@c').should('have.text', 'B')
+    cy.get('@d').should('have.text', 'D')
+
+    cy.get('@a').click()
+    cy.get('@d').click()
+    cy.get('@a').should('have.text', 'D')
+    cy.get('@b').should('have.text', 'C')
+    cy.get('@c').should('have.text', 'B')
+    cy.get('@d').should('have.text', 'A')
+  })
+
+  it('resets selected swappable when page is changed', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }] },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'C' }] },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'D' }] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.css', 'background-color', 'rgb(255, 253, 212)')
+
+    cy.get('.control').eq(1).click()
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+
+    cy.get('.control').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
   })
 })
 

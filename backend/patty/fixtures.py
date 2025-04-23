@@ -17,7 +17,7 @@ def make_default_system_prompt() -> str:
 
     text_exercise = textwrap.dedent(
         """\
-        2 Complète avec "l'herbe" ou "les chats"
+        Complète avec "l'herbe" ou "les chats"
         a. Les vaches mangent ...
         b. Les chiens courent après ..."""
     )
@@ -183,6 +183,7 @@ def create_default_adaptation_strategy() -> Iterable[object]:
                 free_text_input=False,
                 multiple_choices_input=True,
                 selectable_input=False,
+                swappable_input=False,
             ),
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
         ),
@@ -207,6 +208,7 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
                 free_text_input=True,
                 multiple_choices_input=True,
                 selectable_input=True,
+                swappable_input=True,
             ),
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
         ),
@@ -216,9 +218,11 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
 def create_default_adaptation_input() -> Iterable[object]:
     yield adaptation.Input(
         created_by="Patty",
+        page_number=42,
+        exercise_number="5",
         text=textwrap.dedent(
             """\
-            5 Complète avec "le vent" ou "la pluie"
+            Complète avec "le vent" ou "la pluie"
             a. Les feuilles sont chahutées par ...
             b. Les vitres sont mouillées par ...
             """

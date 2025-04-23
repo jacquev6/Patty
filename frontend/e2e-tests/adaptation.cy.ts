@@ -40,7 +40,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@input-text').eq(1).should('have.value', '').type('Blah blah blah.', { delay: 0 })
     cy.get('@input-text').should('have.length', 3)
@@ -170,7 +170,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@system-prompt').type("{selectAll}Alice's prompt.", { delay: 0 })
     cy.get('@input-text').eq(0).type("{selectAll}Alice's input.", { delay: 0 })
@@ -188,7 +188,7 @@ describe('The batch creation page', () => {
       .eq(0)
       .should(
         'have.value',
-        '5 Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
       )
     cy.get('@system-prompt').type("{selectAll}Bob's prompt.", { delay: 0 })
     cy.get('@input-text').eq(0).type("{selectAll}Bob's input.", { delay: 0 })
@@ -232,6 +232,100 @@ describe('The batch creation page', () => {
     cy.get(
       'p:contains("The LLM returned a JSON response that does not validate against the adapted exercise schema.")',
     ).should('exist')
+  })
+
+  it('opens several text files as inputs', () => {
+    cy.get('[data-cy="input-text"]').as('input-text')
+    cy.get('[data-cy="input-page-number"]').as('input-page-number')
+    cy.get('[data-cy="input-exercise-number"]').as('input-exercise-number')
+
+    cy.get("input[data-cy='input-files']").selectFile([
+      // Lexicographical order is inappropriate because files have numbers in their names.
+      'e2e-tests/inputs/P16Ex4.txt',
+      'e2e-tests/inputs/P6Ex14.txt',
+      'e2e-tests/inputs/P6Ex8.txt',
+    ])
+    cy.get('@input-text').should('have.length', 4)
+    // Inputs are sorted by page and exercise number.
+    cy.get('h2:contains("Input 1") > span.discreet:contains("P6Ex8.txt")').should('exist')
+    cy.get('@input-page-number').eq(0).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(0).should('have.value', '8')
+    cy.get('@input-text')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('h2:contains("Input 2") > span.discreet:contains("P6Ex14.txt")').should('exist')
+    cy.get('@input-page-number').eq(1).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(1).should('have.value', '14')
+    cy.get('@input-text')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+    cy.get('h2:contains("Input 3") > span.discreet:contains("P16Ex4.txt")').should('exist')
+    cy.get('@input-page-number').eq(2).should('have.value', 16)
+    cy.get('@input-exercise-number').eq(2).should('have.value', '4')
+    cy.get('@input-text')
+      .eq(2)
+      .should(
+        'have.value',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+      )
+    cy.get('h2:contains("Input 4") > span.discreet:contains("empty")').should('exist')
+    cy.get('@input-page-number').eq(3).should('have.value', '')
+    cy.get('@input-exercise-number').eq(3).should('have.value', '')
+    cy.get('@input-text').eq(3).should('have.value', '')
+
+    cy.get('h2:contains("Input 2")').find('span.discreet:contains("P6Ex14.txt")').should('exist')
+    cy.get('@input-text').eq(1).type('{backspace}')
+    cy.get('h2:contains("Input 2")').find('span.discreet:contains("P6Ex14.txt")').should('not.exist')
+
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("Created by: Alice")').should('exist')
+  })
+
+  it('opens several text files as inputs', () => {
+    cy.get('[data-cy="input-text"]').as('input-text')
+    cy.get('[data-cy="input-page-number"]').as('input-page-number')
+    cy.get('[data-cy="input-exercise-number"]').as('input-exercise-number')
+
+    cy.get("input[data-cy='input-files']").selectFile('e2e-tests/inputs/test.zip')
+    cy.get('@input-text').should('have.length', 4)
+    // Inputs are sorted by page and exercise number.
+    cy.get('h2:contains("Input 1") > span.discreet:contains("P6Ex8.txt in test.zip")').should('exist')
+    cy.get('@input-page-number').eq(0).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(0).should('have.value', '8')
+    cy.get('@input-text')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('h2:contains("Input 2") > span.discreet:contains("P6Ex14.txt in test.zip")').should('exist')
+    cy.get('@input-page-number').eq(1).should('have.value', 6)
+    cy.get('@input-exercise-number').eq(1).should('have.value', '14')
+    cy.get('@input-text')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+    cy.get('h2:contains("Input 3") > span.discreet:contains("P16Ex4.txt in test.zip")').should('exist')
+    cy.get('@input-page-number').eq(2).should('have.value', 16)
+    cy.get('@input-exercise-number').eq(2).should('have.value', '4')
+    cy.get('@input-text')
+      .eq(2)
+      .should(
+        'have.value',
+        'Complète avec "le vent" ou "la pluie"\na. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...\n',
+      )
+    cy.get('h2:contains("Input 4") > span.discreet:contains("empty")').should('exist')
+    cy.get('@input-page-number').eq(3).should('have.value', '')
+    cy.get('@input-exercise-number').eq(3).should('have.value', '')
+    cy.get('@input-text').eq(3).should('have.value', '')
   })
 })
 
@@ -482,15 +576,17 @@ describe('The edition page for an initially successful adaptation', () => {
     shouldAllowAdjustment()
   })
 
-  it('invalidate the JSON manually', () => {
+  it('invalidates the JSON manually', () => {
     invalidateJsonManually()
     shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
     screenshot('adaptation-edition-page.manual-invalid')
   })
 
   it('breaks the JSON manually', () => {
     breakJsonManually()
     shouldBeManualNotJson()
+    shouldForbidAdjustment()
     screenshot('adaptation-edition-page.manual-not-json')
   })
 })
@@ -543,14 +639,16 @@ describe('The edition page for an initially invalid-json adaptation', () => {
     shouldForbidAdjustment()
   })
 
-  it('invalidate the JSON manually', () => {
+  it('invalidates the JSON manually', () => {
     invalidateJsonManually()
     shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
   })
 
   it('breaks the JSON manually', () => {
     breakJsonManually()
     shouldBeManualNotJson()
+    shouldForbidAdjustment()
   })
 })
 
@@ -599,6 +697,18 @@ describe('The edition page for an initially not-json adaptation', () => {
   it('fixes the JSON manually', () => {
     fixJsonManually()
     shouldBeSuccess()
+    shouldForbidAdjustment()
+  })
+
+  it('invalidates the JSON manually', () => {
+    invalidateJsonManually()
+    shouldBeManualInvalidJson()
+    shouldForbidAdjustment()
+  })
+
+  it('breaks the JSON manually', () => {
+    breakJsonManually()
+    shouldBeManualNotJson()
     shouldForbidAdjustment()
   })
 })

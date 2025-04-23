@@ -40,16 +40,14 @@ LlmMessage = (
 
 
 class ApiStrategy(ApiModel):
-    id: str
-    created_by: str
     model: llm.ConcreteModel
     system_prompt: str
     response_specification: ConcreteLlmResponseSpecification
 
 
 class ApiInput(ApiModel):
-    id: str
-    created_by: str
+    page_number: int | None
+    exercise_number: str | None
     text: str
 
 
@@ -107,30 +105,25 @@ async def post_batch(
     session: database_utils.SessionDependable,
     background_tasks: fastapi.BackgroundTasks,
 ) -> PostBatchResponse:
-    strategy = session.get(DbStrategy, req.strategy.id)
-    assert strategy is not None
-    if (
-        strategy.system_prompt != req.strategy.system_prompt
-        or strategy.model != req.strategy.model
-        or strategy.response_specification != req.strategy.response_specification
-    ):
-        strategy = DbStrategy(
-            created_by=req.creator,
-            model=req.strategy.model,
-            system_prompt=req.strategy.system_prompt,
-            response_specification=req.strategy.response_specification,
-        )
-        session.add(strategy)
+    strategy = DbStrategy(
+        created_by=req.creator,
+        model=req.strategy.model,
+        system_prompt=req.strategy.system_prompt,
+        response_specification=req.strategy.response_specification,
+    )
+    session.add(strategy)
 
     batch = Batch(created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc), strategy=strategy)
     session.add(batch)
 
     for req_input in req.inputs:
-        input = session.get(DbInput, req_input.id)
-        assert input is not None
-        if input.text != req_input.text:
-            input = DbInput(created_by=req.creator, text=req_input.text)
-            session.add(input)
+        input = DbInput(
+            created_by=req.creator,
+            page_number=req_input.page_number,
+            exercise_number=req_input.exercise_number,
+            text=req_input.text,
+        )
+        session.add(input)
 
         adaptation = DbAdaptation(
             created_by=req.creator,
@@ -362,8 +355,6 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
 
 def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
     return ApiStrategy(
-        id=str(strategy.id),
-        created_by=strategy.created_by,
         model=strategy.model,
         system_prompt=strategy.system_prompt,
         response_specification=strategy.response_specification,
@@ -371,7 +362,7 @@ def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
 
 
 def make_api_input(input: DbInput) -> ApiInput:
-    return ApiInput(id=str(input.id), created_by=input.created_by, text=input.text)
+    return ApiInput(page_number=input.page_number, exercise_number=input.exercise_number, text=input.text)
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -405,7 +396,9 @@ def export_adaptation(
         headers["Content-Disposition"] = f'attachment; filename="adaptation-{id}.html"'
 
     return fastapi.responses.HTMLResponse(
-        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        content=template.replace(
+            "##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')
+        ),
         headers=headers,
     )
 
@@ -443,6 +436,8 @@ def export_batch(
         headers["Content-Disposition"] = f'attachment; filename="batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(
-        content=template.replace("{{ data }}", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')),
+        content=template.replace(
+            "##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')
+        ),
         headers=headers,
     )

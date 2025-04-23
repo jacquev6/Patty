@@ -39,7 +39,7 @@ patty_version=$(date +%Y%m%d-%H%M%S)
 
 migrations=backend/patty/migrations/versions
 find $migrations -name '*_dev.py' \
-| sed "s#$migrations/\(.*\)_dev\.py#\mv $migrations/\1_dev.py $migrations/\1_$patty_version.py#" \
+| sed "s#$migrations/\(.*\)_dev\.py#\mv $migrations/\1_dev.py $migrations/\1_version-$patty_version.py#" \
 | sh
 
 git add .

@@ -215,9 +215,10 @@ watch(Escape, () => {
       <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>
-      <h1>Input text</h1>
+      <h1>Input</h1>
+      <p>Page: {{ adaptation.input.pageNumber ?? 'N/A' }}, exercise: {{ adaptation.input.exerciseNumber ?? 'N/A' }}</p>
       <p>
-        <template v-for="(line, index) in adaptation.input">
+        <template v-for="(line, index) in adaptation.input.text">
           <br v-if="index !== 0" />
           {{ line }}
         </template>

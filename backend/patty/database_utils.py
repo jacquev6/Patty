@@ -1,17 +1,26 @@
-from typing import Annotated, Any, Iterable, TypeVar, cast
+from typing import Annotated, Any, Iterable, TypeVar
 import datetime
+import os
 import unittest
 
 from fastapi import Depends, Request
+import alembic.command
+import alembic.config
+import sqlalchemy as sql
 import sqlalchemy.exc
 import sqlalchemy.orm
 
 from . import settings
 
-
 Engine = sqlalchemy.Engine
 
 Session = sqlalchemy.orm.Session
+
+# Custom collation: https://dba.stackexchange.com/a/285230
+create_exercise_number_collation = sql.text(
+    "CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"
+)
+drop_exercise_number_collation = sql.text("DROP COLLATION exercise_number")
 
 
 def create_engine(url: str) -> Engine:
@@ -79,7 +88,6 @@ class TestCaseWithDatabase(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         import sqlalchemy_utils.functions
-        from . import orm_models  # To populate the metadata
 
         super().setUpClass()
         cls.__database_url = (
@@ -87,7 +95,26 @@ class TestCaseWithDatabase(unittest.TestCase):
         )
         sqlalchemy_utils.functions.create_database(cls.__database_url)
         cls.__database_engine = create_engine(cls.__database_url)
-        OrmBase.metadata.create_all(cls.__database_engine)
+
+        # Creating the DB using Alembic is very important:
+        # It lets us test that the migrations produce the DB we expect.
+        # The alternative, using 'OrmBase.metadata.create_all', always produces exactly the DB described
+        # by the ORM models, but migrations could diverge from that.
+        # One concrete example is the 'CheckConstraint' on the 'Input' model: it was not picked up by the migration.
+        # (Documented: https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
+        # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
+        # but would have failed in production.
+
+        # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
+        previous_dir = os.getcwd()
+        previous_database_url = settings.DATABASE_URL
+        try:
+            os.chdir(os.path.dirname(__file__))
+            settings.DATABASE_URL = cls.__database_url
+            alembic.command.upgrade(alembic.config.Config(file_="alembic.ini"), "head")
+        finally:
+            settings.DATABASE_URL = previous_database_url
+            os.chdir(previous_dir)
 
     @classmethod
     def tearDownClass(cls) -> None:

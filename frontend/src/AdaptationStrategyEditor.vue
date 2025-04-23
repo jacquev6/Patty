@@ -87,6 +87,7 @@ const llmResponseSpecificationFormalism = computed({
           freeTextInput: true,
           multipleChoicesInput: true,
           selectableInput: true,
+          swappableInput: true,
         },
         referenceComponents: {
           text: true,
@@ -234,8 +235,6 @@ const schema = computedAsync(async () => {
                 arrow</label
               >
             </p>
-          </template>
-          <template #col-2>
             <p>
               <label
                 ><input
@@ -247,6 +246,8 @@ const schema = computedAsync(async () => {
                 free text input</label
               >
             </p>
+          </template>
+          <template #col-2>
             <p>
               <label
                 ><input
@@ -267,6 +268,17 @@ const schema = computedAsync(async () => {
                   :disabled
                 />
                 selectable input</label
+              >
+            </p>
+            <p>
+              <label
+                ><input
+                  data-cy="allow-swappable-input-in-statement"
+                  type="checkbox"
+                  v-model="strategy.responseSpecification.statementComponents.swappableInput"
+                  :disabled
+                />
+                swappable input</label
               >
             </p>
           </template>

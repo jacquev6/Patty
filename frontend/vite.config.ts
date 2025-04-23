@@ -34,7 +34,7 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
   //   plugins.push(vueDevTools())
   // }
 
-  if (command === 'build' && entryPointName !== 'index') {
+  if (command === 'build' && entryPointName !== 'frontend') {
     // Generate a standalone HTML file that can be downloaded and opened offline
     // (actually used as a template in the FastAPI app first)
     plugins.push(viteSingleFile() as Plugin)

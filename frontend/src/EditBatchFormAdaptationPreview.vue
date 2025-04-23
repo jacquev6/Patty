@@ -33,7 +33,10 @@ watch(Escape, () => {
           </span>
         </h2>
         <p>
-          <template v-for="(line, index) in adaptation.input">
+          Page: {{ adaptation.input.pageNumber ?? 'N/A' }}, exercise: {{ adaptation.input.exerciseNumber ?? 'N/A' }}
+        </p>
+        <p>
+          <template v-for="(line, index) in adaptation.input.text">
             <br v-if="index !== 0" />
             {{ line }}
           </template>
