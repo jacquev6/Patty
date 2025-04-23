@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { Component } from '@/apiClient'
+import type { PassiveComponent } from '@/apiClient'
 import FormattedComponent from './FormattedComponent.vue'
 
 const props = defineProps<{
   kind: 'selectableInput'
-  contents: Component[]
+  contents: PassiveComponent[]
   colors: string[]
   tricolorable: boolean
 }>()
 
-const colorIndex = defineModel<number>({ default: 0 })
+const colorIndex = defineModel<number>({ required: true })
 
 function increment() {
   colorIndex.value = (colorIndex.value + 1) % (props.colors.length + 1)

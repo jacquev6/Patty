@@ -141,6 +141,7 @@ describe('SelectableInput', () => {
         colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
 
@@ -169,6 +170,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('[data-cy="selectableInput"]').as('input')
@@ -182,6 +184,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -194,6 +197,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -206,6 +210,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -218,6 +223,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: false,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -230,6 +236,7 @@ describe('SelectableInput', () => {
         colors: ['grey'],
         boxed: true,
         tricolorable: false,
+        modelValue: 0,
       },
     })
     cy.get('@input').click()
@@ -241,7 +248,7 @@ describe('FreeTextInput', () => {
   it('accepts text input', () => {
     cy.viewport(170, 70)
 
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -256,7 +263,7 @@ describe('FreeTextInput', () => {
   })
 
   it('refuses new lines', () => {
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false } })
+    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
@@ -282,7 +289,13 @@ describe('MultipleChoicesInput', () => {
     cy.viewport(250, 190)
 
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: false,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     screenshot()
@@ -308,7 +321,13 @@ describe('MultipleChoicesInput', () => {
 
   it('closes choices on click on backdrop', () => {
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: false,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -322,7 +341,13 @@ describe('MultipleChoicesInput', () => {
 
   it('closes choices on click on main span', () => {
     cy.mount(MultipleChoicesInput, {
-      props: { kind: 'multipleChoicesInput', choices, showChoicesByDefault: true, tricolorable: false },
+      props: {
+        kind: 'multipleChoicesInput',
+        choices,
+        showChoicesByDefault: true,
+        tricolorable: false,
+        modelValue: null,
+      },
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')

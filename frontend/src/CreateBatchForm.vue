@@ -12,8 +12,7 @@ import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import assert from './assert'
-import { type InputWithFile } from './CreateBatchFormInputEditor.vue'
-import CreateBatchFormInputEditor from './CreateBatchFormInputEditor.vue'
+import CreateBatchFormInputEditor, { type InputWithFile } from './CreateBatchFormInputEditor.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { Component } from '@/apiClient'
+import type { PassiveComponent } from '@/apiClient'
 import FormattedComponent from './FormattedComponent.vue'
 
 const props = defineProps<{
   kind: 'swappableInput'
-  contents: Component[]
+  contents: PassiveComponent[]
   tricolorable: boolean
 }>()
 
-const selected = defineModel<boolean>({ default: false })
+const selected = defineModel<boolean>({ required: true })
 
 const contents = computed(() => ({
   kind: 'formatted' as const,

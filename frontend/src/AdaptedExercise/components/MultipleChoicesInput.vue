@@ -3,7 +3,7 @@ import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
 import type { PureTextContainer } from '@/apiClient'
-import LineComponent from './LineComponent.vue'
+import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
 
 defineOptions({
@@ -17,7 +17,7 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
-const model = defineModel<number | null>({ default: null })
+const model = defineModel<number | null>({ required: true })
 
 const currentChoice = computed(() => {
   if (model.value === null) {
@@ -79,7 +79,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
       :class="{ showChoices }"
       @click="showChoices = !showChoices"
     >
-      <LineComponent :contents="currentChoice.contents" :tricolorable />
+      <PassiveSequenceComponent :contents="currentChoice.contents" :tricolorable />
     </p>
     <!-- Ensure the floating choices does not cover next line -->
     <div class="hidden choices">
@@ -99,7 +99,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
             :class="`color-${choice.colorIndex}`"
             class="choice"
           >
-            <LineComponent :contents="choice.content.contents" :tricolorable="false" />
+            <PassiveSequenceComponent :contents="choice.content.contents" :tricolorable="false" />
           </span>
         </template>
       </p>

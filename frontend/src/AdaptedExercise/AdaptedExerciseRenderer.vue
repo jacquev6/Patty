@@ -3,9 +3,10 @@ import { computed, nextTick, provide, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 
 import type { AdaptedExercise } from '@/apiClient'
-import LineComponent from './components/LineComponent.vue'
+import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
+import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -28,10 +29,10 @@ const totalPagesCount = computed(() => {
     return statementPagesCount.value + 1
   }
 })
-const page = ref(0)
+const pageIndex = ref(0)
 
 const defaultModel = computed(() => {
-  const model: Record<number, Record<number, Record<number, string | number>>> = {}
+  const model: Record<number, Record<number, Record<number, undefined | string | number | null | boolean>>> = {}
   for (let pageIndex = 0; pageIndex < props.adaptedExercise.statement.pages.length; pageIndex++) {
     model[pageIndex] = {}
     for (let lineIndex = 0; lineIndex < props.adaptedExercise.statement.pages[pageIndex].lines.length; lineIndex++) {
@@ -64,34 +65,34 @@ watch(
 </script>
 
 <template>
-  <PageNavigationControls :pagesCount="totalPagesCount" v-model="page">
+  <PageNavigationControls :pagesCount="totalPagesCount" v-model="pageIndex">
     <div ref="container" class="container">
-      <template v-if="page < statementPagesCount">
+      <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">
           <p v-for="{ contents } in adaptedExercise.instruction.lines">
-            <LineComponent :contents :tricolorable="false" />
+            <PassiveSequenceComponent :contents :tricolorable="false" />
           </p>
           <template v-if="adaptedExercise.example !== null">
             <p v-for="{ contents } in adaptedExercise.example.lines">
-              <LineComponent :contents :tricolorable="false" />
+              <PassiveSequenceComponent :contents :tricolorable="false" />
             </p>
           </template>
           <template v-if="adaptedExercise.hint !== null">
             <p v-for="{ contents } in adaptedExercise.hint.lines">
-              <LineComponent :contents :tricolorable="false" />
+              <PassiveSequenceComponent :contents :tricolorable="false" />
             </p>
           </template>
         </div>
-        <div class="statement" v-if="page < props.adaptedExercise.statement.pages.length">
+        <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
-            <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[page].lines">
-              <LineComponent :contents :tricolorable="true" v-model="model[page][lineIndex]" />
+            <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[pageIndex].lines">
+              <AnySequenceComponent :contents :tricolorable="true" v-model="model[pageIndex][lineIndex]" />
             </p>
           </TriColorLines>
         </div>
       </template>
       <template v-else-if="adaptedExercise.reference !== null">
-        <LineComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
+        <PassiveSequenceComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
       </template>
     </div>
   </PageNavigationControls>

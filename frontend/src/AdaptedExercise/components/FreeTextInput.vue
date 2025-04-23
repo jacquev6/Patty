@@ -9,7 +9,7 @@ defineProps<{
   tricolorable: boolean
 }>()
 
-const model = defineModel<string>({ default: '' })
+const model = defineModel<string>({ required: true })
 
 const span = useTemplateRef('span')
 

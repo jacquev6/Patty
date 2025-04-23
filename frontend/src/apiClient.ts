@@ -17,8 +17,18 @@ export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200
 
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
-type InstructionComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number]
-type StatementComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
-export type Component = InstructionComponent | StatementComponent
 
-export type PureTextContainer = (StatementComponent & { kind: 'multipleChoicesInput' })['choices'][number]
+export type AnyComponent =
+  | AdaptedExercise['instruction']['lines'][number]['contents'][number]
+  | Exclude<AdaptedExercise['example'], null>['lines'][number]['contents'][number]
+  | Exclude<AdaptedExercise['hint'], null>['lines'][number]['contents'][number]
+  | AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
+  | Exclude<AdaptedExercise['reference'], null>['contents'][number]
+
+type ActiveComponent = AnyComponent & {
+  kind: 'multipleChoicesInput' | 'freeTextInput' | 'selectableInput' | 'swappableInput'
+}
+
+export type PassiveComponent = Exclude<AnyComponent, ActiveComponent>
+
+export type PureTextContainer = (ActiveComponent & { kind: 'multipleChoicesInput' })['choices'][number]

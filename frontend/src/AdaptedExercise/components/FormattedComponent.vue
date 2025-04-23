@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { Component } from '@/apiClient'
-import LineComponent from './LineComponent.vue'
+import type { PassiveComponent } from '@/apiClient'
+import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 
 const props = defineProps<{
   kind: 'formatted'
-  contents: Component[]
+  contents: PassiveComponent[]
   bold: boolean
   italic: boolean
   highlighted: string | null
@@ -24,5 +24,5 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <span :style><LineComponent :contents :tricolorable /></span>
+  <span :style><PassiveSequenceComponent :contents :tricolorable /></span>
 </template>
