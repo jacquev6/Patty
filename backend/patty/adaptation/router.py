@@ -1,3 +1,4 @@
+import hashlib
 from typing import TypeVar
 import asyncio
 import datetime
@@ -370,6 +371,17 @@ export_adaptation_template_file_path = os.path.join(
 )
 
 
+def make_exercise_data(id: str, exercise: Exercise) -> JsonDict:
+    exercise_dump = exercise.model_dump()
+    return {
+        "exerciseId": id,
+        "studentAnswersStorageKey": hashlib.md5(
+            json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
+        ).hexdigest(),
+        "adaptedExercise": exercise_dump,
+    }
+
+
 @router.get("/export/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
@@ -386,7 +398,7 @@ def export_adaptation(
     else:
         exercise = db_adaptation.manual_edit
 
-    data = {"exerciseId": id, "adaptedExercise": exercise.model_dump()}
+    data = make_exercise_data(id, exercise)
 
     with open(export_adaptation_template_file_path) as f:
         template = f.read()
@@ -426,7 +438,7 @@ def export_batch(
                 exercise = last_adjustment.assistant_response.exercise
         else:
             exercise = db_adaptation.manual_edit
-        data.append({"exerciseId": str(db_adaptation.id), "adaptedExercise": exercise.model_dump()})
+        data.append(make_exercise_data(str(db_adaptation.id), exercise))
 
     with open(export_batch_template_file_path) as f:
         template = f.read()

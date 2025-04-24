@@ -150,7 +150,7 @@ describe('The autonomous HTML for a single adaptation', () => {
     cy.wait(500)
 
     cy.visit('/api/adaptation/export/adaptation-1.html?download=false')
-    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'VENT') // @todo(#31) It should contain '....' instead of 'VENT'
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', '....')
   })
 })
 

@@ -2,8 +2,8 @@ import type { AdaptedExercise } from '@/apiClient'
 import AdaptedExerciseRenderer, { type StudentAnswers } from './AdaptedExerciseRenderer.vue'
 
 describe('Adapted exercise answers', () => {
-  const exerciseId = '1'
-  const answersKey = `patty/student-answers/v2/exercise-${exerciseId}`
+  const studentAnswersStorageKey = '1'
+  const answersKey = `patty/student-answers/v2/exercise-${studentAnswersStorageKey}`
 
   const emptyAnswers: StudentAnswers = {
     pages: {},
@@ -529,7 +529,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for free text inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
     })
@@ -560,7 +560,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
     })
@@ -582,7 +582,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for selectable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
     })
@@ -615,7 +615,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
     })
@@ -639,7 +639,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for multiple choices inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
     })
@@ -670,7 +670,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
     })
@@ -694,7 +694,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for swappable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
     })
@@ -724,7 +724,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
-        exerciseId,
+        studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
     })

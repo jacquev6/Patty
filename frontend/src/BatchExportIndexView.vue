@@ -3,6 +3,7 @@ import type { AdaptedExercise } from './apiClient'
 
 type Data = {
   exerciseId: string
+  studentAnswersStorageKey: string
   adaptedExercise: AdaptedExercise
 }[]
 

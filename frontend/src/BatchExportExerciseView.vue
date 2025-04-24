@@ -6,6 +6,7 @@ import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.v
 
 type Data = {
   exerciseId: string
+  studentAnswersStorageKey: string
   adaptedExercise: AdaptedExercise
 }[]
 
