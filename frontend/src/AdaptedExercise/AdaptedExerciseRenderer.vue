@@ -61,10 +61,10 @@ import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 
 const props = withDefaults(
   defineProps<{
-    exerciseId?: string | null
+    studentAnswersStorageKey?: string | null
     adaptedExercise: AdaptedExercise
   }>(),
-  { exerciseId: null },
+  { studentAnswersStorageKey: null },
 )
 
 provide('adaptedExerciseTeleportBackdropTo', useTemplateRef('container'))
@@ -100,9 +100,9 @@ watch(pageIndex, () => {
 const defaultStudentAnswers = { pages: {} }
 
 const studentAnswers =
-  props.exerciseId === null
+  props.studentAnswersStorageKey === null
     ? ref(defaultStudentAnswers)
-    : useStorage(`patty/student-answers/v2/exercise-${props.exerciseId}`, defaultStudentAnswers)
+    : useStorage(`patty/student-answers/v2/exercise-${props.studentAnswersStorageKey}`, defaultStudentAnswers)
 
 const triColorLines = useTemplateRef('tricolor')
 watch(

@@ -3,7 +3,7 @@ import type { AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 
 type Data = {
-  exerciseId: string
+  studentAnswersStorageKey: string
   adaptedExercise: AdaptedExercise
 }
 
