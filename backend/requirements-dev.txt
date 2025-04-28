@@ -2,6 +2,7 @@ black
 mypy
 types-boto3
 types-psycopg2
+types-requests
 types-sqlalchemy-utils
 uvicorn
 watchdog[watchmedo]
