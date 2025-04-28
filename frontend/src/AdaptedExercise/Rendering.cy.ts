@@ -48,7 +48,7 @@ describe('FormattedComponent', () => {
         },
       },
     })
-    cy.get('p').should('have.text', 'Some  casual  text.')
+    cy.get('p').should('have.text', 'Some casual text.')
     screenshot()
   })
 

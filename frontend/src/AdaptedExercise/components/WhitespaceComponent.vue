@@ -2,8 +2,8 @@
 defineProps<{
   kind: 'whitespace'
 }>()
+
+const space = ' '
 </script>
 
-<template>
-  <span>&nbsp;<wbr />&nbsp;</span>
-</template>
+<template>{{ space }}</template>

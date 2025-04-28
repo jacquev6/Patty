@@ -119,4 +119,8 @@ function handleClick() {
 .main.empty {
   padding: 9px 32px;
 }
+
+.main + .main {
+  margin-left: 0.26em;
+}
 </style>

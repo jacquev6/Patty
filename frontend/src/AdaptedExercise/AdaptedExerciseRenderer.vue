@@ -206,6 +206,8 @@ const statementLines = computed<StatementLine[]>(() => {
 div {
   font-family: Arial, sans-serif;
   font-size: 32px;
+  word-spacing: 0.26em;
+  white-space-collapse: preserve;
 }
 
 .container {
