@@ -723,6 +723,69 @@ describe('SwappableInput', () => {
   })
 })
 
+describe('EditableTextInput', () => {
+  it('renders', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'a' },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'editableTextInput',
+                        contents: [
+                          { kind: 'text', text: 'Edit' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                          { kind: 'text', text: '.' },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'm' },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'editableTextInput',
+                        contents: [
+                          { kind: 'text', text: 'And' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                          { kind: 'text', text: '.' },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="freeTextInput"]').eq(0).as('input')
+    cy.get('@input').focus().type('{end}{leftArrow}')
+    screenshot()
+    cy.get('@input').type('eee')
+    screenshot()
+  })
+})
+
 describe('AdaptedExerciseRenderer', () => {
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)

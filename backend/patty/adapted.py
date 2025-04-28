@@ -48,7 +48,7 @@ class Whitespace(BaseModel):
 
 class Formatted(BaseModel):
     kind: Literal["formatted"]
-    contents: list[PureText]
+    contents: list[FormattedText]
     bold: bool
     italic: bool
     underlined: bool
@@ -62,14 +62,16 @@ class Arrow(BaseModel):
 
 class Choice(BaseModel):
     kind: Literal["choice"]
-    contents: list[PureText]
+    contents: list[FormattedText]
 
 
-# WARNING: keep 'PureText' and 'PureTextComponents' consistent
-PureText = Text | Whitespace | Arrow | Formatted
+PlainText = Text | Whitespace
+
+# WARNING: keep 'FormattedText' and 'FormattedTextComponents' consistent
+FormattedText = PlainText | Arrow | Formatted
 
 
-class PureTextComponents(ApiModel):
+class FormattedTextComponents(ApiModel):
     text: Literal[True]
     whitespace: Literal[True]
     arrow: Literal[True]
@@ -86,33 +88,38 @@ class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
-class PureTextContainer(BaseModel):
-    contents: list[PureText]
+class FormattedTextContainer(BaseModel):
+    contents: list[FormattedText]
 
 
 class MultipleChoicesInput(BaseModel):
     kind: Literal["multipleChoicesInput"]
-    choices: list[PureTextContainer]
+    choices: list[FormattedTextContainer]
     showChoicesByDefault: bool
 
 
 class SelectableInput(BaseModel):
     kind: Literal["selectableInput"]
-    contents: list[PureText]
+    contents: list[FormattedText]
     colors: list[str]
     boxed: bool
 
 
 class SwappableInput(BaseModel):
     kind: Literal["swappableInput"]
-    contents: list[PureText]
+    contents: list[FormattedText]
+
+
+class EditableTextInput(BaseModel):
+    kind: Literal["editableTextInput"]
+    contents: list[PlainText]
 
 
 # WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent
-InstructionComponent = PureText | Choice
+InstructionComponent = FormattedText | Choice
 
 
-class InstructionComponents(PureTextComponents):
+class InstructionComponents(FormattedTextComponents):
     choice: bool
 
     def gather(self) -> Iterable[type]:
@@ -122,30 +129,33 @@ class InstructionComponents(PureTextComponents):
 
 
 # WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
-ExampleComponent = PureText
+ExampleComponent = FormattedText
 
 
-class ExampleComponents(PureTextComponents):
+class ExampleComponents(FormattedTextComponents):
     pass
 
 
 # WARNING: keep 'HintComponent' and 'HintComponents' consistent
-HintComponent = PureText
+HintComponent = FormattedText
 
 
-class HintComponents(PureTextComponents):
+class HintComponents(FormattedTextComponents):
     pass
 
 
 # WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
-StatementComponent = PureText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput
+StatementComponent = (
+    FormattedText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
+)
 
 
-class StatementComponents(PureTextComponents):
+class StatementComponents(FormattedTextComponents):
     free_text_input: bool
     multiple_choices_input: bool
     selectable_input: bool
     swappable_input: bool
+    editable_text_input: bool
 
     def gather(self) -> Iterable[type]:
         yield from super().gather()
@@ -157,13 +167,15 @@ class StatementComponents(PureTextComponents):
             yield SelectableInput
         if self.swappable_input:
             yield SwappableInput
+        if self.editable_text_input:
+            yield EditableTextInput
 
 
 # WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent
-ReferenceComponent = PureText
+ReferenceComponent = FormattedText
 
 
-class ReferenceComponents(PureTextComponents):
+class ReferenceComponents(FormattedTextComponents):
     pass
 
 

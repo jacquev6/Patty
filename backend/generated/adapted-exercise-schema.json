@@ -49,6 +49,35 @@
       "type": "object",
       "additionalProperties": false
     },
+    "EditableTextInput": {
+      "properties": {
+        "kind": {
+          "const": "editableTextInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "ExampleLine": {
       "properties": {
         "contents": {
@@ -157,6 +186,35 @@
         "underlined",
         "highlighted",
         "boxed"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FormattedTextContainer": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
       ],
       "type": "object",
       "additionalProperties": false
@@ -277,7 +335,7 @@
         },
         "choices": {
           "items": {
-            "$ref": "#/$defs/PureTextContainer"
+            "$ref": "#/$defs/FormattedTextContainer"
           },
           "title": "Choices",
           "type": "array"
@@ -291,35 +349,6 @@
         "kind",
         "choices",
         "showChoicesByDefault"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
-    "PureTextContainer": {
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              },
-              {
-                "$ref": "#/$defs/Arrow"
-              },
-              {
-                "$ref": "#/$defs/Formatted"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
       ],
       "type": "object",
       "additionalProperties": false
@@ -429,6 +458,9 @@
               },
               {
                 "$ref": "#/$defs/SwappableInput"
+              },
+              {
+                "$ref": "#/$defs/EditableTextInput"
               }
             ]
           },

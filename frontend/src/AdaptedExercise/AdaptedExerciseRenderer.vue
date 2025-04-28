@@ -1,5 +1,6 @@
 <script lang="ts">
-import type { AdaptedExercise } from '@/apiClient'
+import type { AdaptedExercise, AnyComponent } from '@/apiClient'
+import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 export type InProgressExercise = {
   exercise: AdaptedExercise
@@ -35,6 +36,10 @@ export type ComponentAnswer =
         lineIndex: number
         componentIndex: number
       }
+    }
+  | {
+      kind: 'editableTextInput'
+      text: string
     }
 
 type LineAnswers = {
@@ -115,6 +120,43 @@ watch(
   },
   { deep: true },
 )
+
+type StatementLine = {
+  lineIndex: number
+  contents: AnyComponent[]
+}
+
+const statementLines = computed<StatementLine[]>(() => {
+  const lines: StatementLine[] = []
+
+  for (const [lineIndex, { contents }] of props.adaptedExercise.statement.pages[pageIndex.value].lines.entries()) {
+    lines.push({ lineIndex, contents })
+    for (const component of contents) {
+      if (
+        isPassive(component) ||
+        component.kind === 'swappableInput' ||
+        component.kind === 'selectableInput' ||
+        component.kind === 'multipleChoicesInput' ||
+        component.kind === 'freeTextInput'
+      ) {
+        // Nothing to do
+      } else if (component.kind === 'editableTextInput') {
+        lines.push({
+          lineIndex,
+          contents: [
+            { kind: 'arrow' },
+            { kind: 'whitespace' },
+            { kind: 'activeEditableTextInput', contents: component.contents },
+          ],
+        })
+      } else {
+        ;((component: never) => console.log(`Unexpected component: ${component}`))(component)
+      }
+    }
+  }
+
+  return lines
+})
 </script>
 
 <template>
@@ -138,7 +180,7 @@ watch(
         </div>
         <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
-            <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[pageIndex].lines">
+            <p v-for="{ lineIndex, contents } in statementLines">
               <AnySequenceComponent
                 :pageIndex
                 :lineIndex

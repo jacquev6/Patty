@@ -2,7 +2,7 @@
 import { computed, inject, ref, useTemplateRef, watch } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type { PureTextContainer } from '@/apiClient'
+import type { FormattedText } from '@/apiClient'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
 
@@ -10,9 +10,13 @@ defineOptions({
   inheritAttrs: false,
 })
 
+type FormattedTextContainer = {
+  contents: FormattedText[]
+}
+
 const props = defineProps<{
   kind: 'multipleChoicesInput'
-  choices: PureTextContainer[]
+  choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
 }>()
@@ -57,7 +61,7 @@ function set(choice: number) {
 }
 
 const choicesLines = computed(() => {
-  const lines: { index: number; colorIndex: number; content: PureTextContainer }[][] = [[], []]
+  const lines: { index: number; colorIndex: number; content: FormattedTextContainer }[][] = [[], []]
   for (let i = 0; i < props.choices.length; ++i) {
     lines[i % 2].push({ index: i, colorIndex: i % 3, content: props.choices[i] })
   }

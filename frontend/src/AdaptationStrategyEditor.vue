@@ -94,6 +94,7 @@ const llmResponseSpecificationFormalism = computed({
           multipleChoicesInput: true,
           selectableInput: true,
           swappableInput: true,
+          editableTextInput: false,
         },
         referenceComponents: {
           text: true,
@@ -261,6 +262,17 @@ const schema = computedAsync(async () => {
                   :disabled
                 />
                 swappable input
+              </label>
+            </p>
+            <p>
+              <label>
+                <input
+                  data-cy="allow-editable-text-input-in-statement"
+                  type="checkbox"
+                  v-model="strategy.responseSpecification.statementComponents.editableTextInput"
+                  :disabled
+                />
+                editable text input
               </label>
             </p>
           </template>

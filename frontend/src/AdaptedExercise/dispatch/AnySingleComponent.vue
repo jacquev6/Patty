@@ -9,6 +9,8 @@ import MultipleChoicesInput from '../components/MultipleChoicesInput.vue'
 import SelectableInput from '../components/SelectableInput.vue'
 import SwappableInput from '../components/SwappableInput.vue'
 import type { StudentAnswers, ComponentAnswer, InProgressExercise } from '../AdaptedExerciseRenderer.vue'
+import PassiveSequenceComponent from './PassiveSequenceComponent.vue'
+import EditableTextInput from '../components/EditableTextInput.vue'
 
 const props = defineProps<{
   pageIndex: number
@@ -106,6 +108,20 @@ const answerForSelectableInput = computed<number, number>({
     v-bind="component"
     v-model="studentAnswers"
     v-model:inProgress="inProgress"
+    :tricolorable
+  />
+  <PassiveSequenceComponent
+    v-else-if="component.kind === 'editableTextInput'"
+    :contents="component.contents"
+    :tricolorable
+  />
+  <EditableTextInput
+    v-else-if="component.kind === 'activeEditableTextInput'"
+    :pageIndex
+    :lineIndex
+    :componentIndex
+    v-bind="component"
+    v-model="studentAnswers"
     :tricolorable
   />
   <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>

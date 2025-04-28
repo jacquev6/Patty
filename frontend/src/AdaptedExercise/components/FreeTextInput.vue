@@ -61,7 +61,7 @@ function forbidNewlines(event: KeyboardEvent) {
   padding-right: 1ch;
 }
 
-.main:hover {
+.main:focus {
   background-color: #fffdd4;
 }
 </style>

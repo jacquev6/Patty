@@ -71,13 +71,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.PureTextContainer(
+                                        adapted.FormattedTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.PureTextContainer(
+                                        adapted.FormattedTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -105,13 +105,13 @@ def make_default_system_prompt() -> str:
                                 adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.PureTextContainer(
+                                        adapted.FormattedTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="l'"),
                                                 adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.PureTextContainer(
+                                        adapted.FormattedTextContainer(
                                             contents=[
                                                 adapted.Text(kind="text", text="les"),
                                                 adapted.Whitespace(kind="whitespace"),
@@ -187,6 +187,7 @@ def create_default_adaptation_strategy() -> Iterable[object]:
                 multiple_choices_input=True,
                 selectable_input=False,
                 swappable_input=False,
+                editable_text_input=False,
             ),
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),
@@ -215,6 +216,7 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
                 multiple_choices_input=True,
                 selectable_input=True,
                 swappable_input=True,
+                editable_text_input=True,
             ),
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),

@@ -996,6 +996,34 @@
         ],
         "title": "DummyModel"
       },
+      "EditableTextInput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "editableTextInput",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents"
+        ]
+      },
       "ExampleComponents": {
         "properties": {
           "text": {
@@ -1060,7 +1088,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
           },
           "reference": {
             "anyOf": [
@@ -1114,7 +1142,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
           },
           "reference": {
             "anyOf": [
@@ -1267,6 +1295,62 @@
           "underlined",
           "highlighted",
           "boxed"
+        ]
+      },
+      "FormattedTextContainer-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/Formatted-Input"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "FormattedTextContainer-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/Formatted-Output"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
         ]
       },
       "FreeTextInput": {
@@ -1641,7 +1725,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -1669,6 +1753,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/SwappableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
                 }
               ]
             },
@@ -1681,7 +1768,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -1709,6 +1796,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/SwappableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
                 }
               ]
             },
@@ -1753,7 +1843,7 @@
           },
           "choices": {
             "items": {
-              "$ref": "#/components/schemas/PureTextContainer-Input"
+              "$ref": "#/components/schemas/FormattedTextContainer-Input"
             },
             "type": "array",
             "title": "Choices"
@@ -1779,7 +1869,7 @@
           },
           "choices": {
             "items": {
-              "$ref": "#/components/schemas/PureTextContainer-Output"
+              "$ref": "#/components/schemas/FormattedTextContainer-Output"
             },
             "type": "array",
             "title": "Choices"
@@ -1879,11 +1969,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -1894,11 +1984,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -1909,11 +1999,11 @@
           "lines"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -1924,11 +2014,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
             },
             "type": "array",
             "title": "Pages"
@@ -1992,62 +2082,6 @@
           "id"
         ],
         "title": "PostBatchResponse"
-      },
-      "PureTextContainer-Input": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Formatted-Input"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "type": "object",
-        "required": [
-          "contents"
-        ]
-      },
-      "PureTextContainer-Output": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Formatted-Output"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "type": "object",
-        "required": [
-          "contents"
-        ]
       },
       "ReferenceComponents": {
         "properties": {
@@ -2213,6 +2247,10 @@
           "swappableInput": {
             "type": "boolean",
             "title": "Swappableinput"
+          },
+          "editableTextInput": {
+            "type": "boolean",
+            "title": "Editabletextinput"
           }
         },
         "additionalProperties": false,
@@ -2225,7 +2263,8 @@
           "freeTextInput",
           "multipleChoicesInput",
           "selectableInput",
-          "swappableInput"
+          "swappableInput",
+          "editableTextInput"
         ],
         "title": "StatementComponents"
       },

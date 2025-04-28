@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 import assert from '@/assert'
-import type { PureTextContainer } from '@/apiClient'
+import type { FormattedText } from '@/apiClient'
 import FormattedComponent from './FormattedComponent.vue'
 import type { InProgressExercise, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
@@ -11,7 +11,7 @@ const props = defineProps<{
   pageIndex: number
   lineIndex: number
   componentIndex: number
-  contents: PureTextContainer['contents']
+  contents: FormattedText[]
   tricolorable: boolean
 }>()
 

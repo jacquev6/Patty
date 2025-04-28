@@ -50,6 +50,7 @@ def adapted_exercise_schema() -> None:
             multiple_choices_input=True,
             selectable_input=True,
             swappable_input=True,
+            editable_text_input=True,
         ),
         adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
@@ -233,6 +234,7 @@ def migrate_data() -> None:
                 spec["hint_components"].setdefault("formatted", True)
                 spec["statement_components"].setdefault("swappable_input", False)
                 spec["statement_components"].setdefault("formatted", True)
+                spec["statement_components"].setdefault("editable_text_input", False)
                 spec["reference_components"].setdefault("arrow", True)
                 spec["reference_components"].setdefault("formatted", True)
             strategy._response_specification = spec
