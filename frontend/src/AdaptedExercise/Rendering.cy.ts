@@ -31,6 +31,7 @@ describe('FormattedComponent', () => {
         ],
         bold: false,
         italic: false,
+        underlined: false,
         highlighted: null,
         boxed: false,
         tricolorable: false,
@@ -53,6 +54,7 @@ describe('FormattedComponent', () => {
         ],
         bold: true,
         italic: false,
+        underlined: false,
         highlighted: null,
         boxed: false,
         tricolorable: false,
@@ -74,6 +76,29 @@ describe('FormattedComponent', () => {
         ],
         bold: false,
         italic: true,
+        underlined: false,
+        highlighted: null,
+        boxed: false,
+        tricolorable: false,
+      },
+    })
+    screenshot()
+  })
+
+  it('renders underlined', () => {
+    cy.viewport(200, 70)
+    cy.mount(FormattedComponent, {
+      props: {
+        kind: 'formatted',
+        contents: [
+          { kind: 'text', text: 'Underlined' },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'text' },
+          { kind: 'text', text: '.' },
+        ],
+        bold: false,
+        italic: false,
+        underlined: true,
         highlighted: null,
         boxed: false,
         tricolorable: false,
@@ -95,6 +120,7 @@ describe('FormattedComponent', () => {
         ],
         bold: false,
         italic: false,
+        underlined: false,
         highlighted: 'yellow',
         boxed: false,
         tricolorable: false,
@@ -116,8 +142,54 @@ describe('FormattedComponent', () => {
         ],
         bold: false,
         italic: false,
+        underlined: false,
         highlighted: null,
         boxed: true,
+        tricolorable: false,
+      },
+    })
+    screenshot()
+  })
+
+  it('renders complex nested formatting', () => {
+    cy.viewport(400, 140)
+    cy.mount(FormattedComponent, {
+      props: {
+        kind: 'formatted',
+        contents: [
+          { kind: 'text', text: 'bold' },
+          { kind: 'whitespace' },
+          {
+            kind: 'formatted',
+            contents: [
+              { kind: 'text', text: 'boxed' },
+              { kind: 'whitespace' },
+              {
+                kind: 'formatted',
+                contents: [{ kind: 'text', text: 'italic' }],
+                bold: false,
+                italic: true,
+                underlined: false,
+                highlighted: null,
+                boxed: false,
+              },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'boxed' },
+            ],
+            bold: false,
+            italic: false,
+            underlined: false,
+            highlighted: null,
+            boxed: true,
+          },
+          { kind: 'whitespace' },
+          { kind: 'text', text: 'bold' },
+        ],
+        bold: true,
+        italic: false,
+        underlined: false,
+        highlighted: null,
+        boxed: false,
         tricolorable: false,
       },
     })

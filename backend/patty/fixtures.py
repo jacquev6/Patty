@@ -173,19 +173,22 @@ def create_default_adaptation_strategy() -> Iterable[object]:
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
             formalism="json-schema",
-            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
-            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
-            hint_components=adapted.HintComponents(text=True, whitespace=True),
+            instruction_components=adapted.InstructionComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, choice=True
+            ),
+            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
             statement_components=adapted.StatementComponents(
                 text=True,
                 whitespace=True,
                 arrow=True,
+                formatted=True,
                 free_text_input=False,
                 multiple_choices_input=True,
                 selectable_input=False,
                 swappable_input=False,
             ),
-            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),
     )
 
@@ -198,19 +201,22 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
             formalism="json-schema",
-            instruction_components=adapted.InstructionComponents(text=True, whitespace=True, choice=True),
-            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
-            hint_components=adapted.HintComponents(text=True, whitespace=True),
+            instruction_components=adapted.InstructionComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, choice=True
+            ),
+            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
             statement_components=adapted.StatementComponents(
                 text=True,
                 whitespace=True,
                 arrow=True,
+                formatted=True,
                 free_text_input=True,
                 multiple_choices_input=True,
                 selectable_input=True,
                 swappable_input=True,
             ),
-            reference_components=adapted.ReferenceComponents(text=True, whitespace=True),
+            reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),
     )
 

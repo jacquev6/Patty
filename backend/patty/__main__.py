@@ -38,19 +38,20 @@ def openapi() -> None:
 @main.command()
 def adapted_exercise_schema() -> None:
     exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, choice=True),
-        adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
-        adapted.HintComponents(text=True, whitespace=True),
+        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
+        adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.StatementComponents(
             text=True,
             whitespace=True,
             arrow=True,
+            formatted=True,
             free_text_input=True,
             multiple_choices_input=True,
             selectable_input=True,
             swappable_input=True,
         ),
-        adapted.ReferenceComponents(text=True, whitespace=True),
+        adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
     print(json.dumps(llm.make_schema(exercise_type), indent=2))
 
@@ -225,7 +226,15 @@ def migrate_data() -> None:
         for strategy in session.query(adaptation.Strategy).all():
             spec = copy.deepcopy(strategy._response_specification)
             if spec["format"] == "json" and spec["formalism"] == "json-schema":
+                spec["instruction_components"].setdefault("arrow", True)
+                spec["instruction_components"].setdefault("formatted", True)
+                spec["example_components"].setdefault("formatted", True)
+                spec["hint_components"].setdefault("arrow", True)
+                spec["hint_components"].setdefault("formatted", True)
                 spec["statement_components"].setdefault("swappable_input", False)
+                spec["statement_components"].setdefault("formatted", True)
+                spec["reference_components"].setdefault("arrow", True)
+                spec["reference_components"].setdefault("formatted", True)
             strategy._response_specification = spec
         session.commit()
 

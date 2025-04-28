@@ -17,14 +17,7 @@ function increment() {
   colorIndex.value = (colorIndex.value + 1) % (props.colors.length + 1)
 }
 
-const contents = computed(() => ({
-  kind: 'formatted' as const,
-  contents: props.contents,
-  bold: false,
-  italic: false,
-  highlighted: colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1],
-  boxed: false,
-}))
+const highlighted = computed(() => (colorIndex.value === 0 ? null : props.colors[colorIndex.value - 1]))
 
 const style = computed(() => {
   if (props.contents.length === 1 && props.contents[0].kind === 'text' && props.contents[0].text.length === 1) {
@@ -46,9 +39,15 @@ const style = computed(() => {
 
 <template>
   <FormattedComponent
+    kind="formatted"
     class="main"
-    v-bind="contents"
     :style
+    :contents
+    :bold="false"
+    :italic="false"
+    :underlined="false"
+    :highlighted
+    :boxed="false"
     :tricolorable
     data-cy="selectableInput"
     @click="increment()"

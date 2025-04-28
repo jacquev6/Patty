@@ -46,6 +46,16 @@ class Whitespace(BaseModel):
     kind: Literal["whitespace"]
 
 
+class Formatted(BaseModel):
+    kind: Literal["formatted"]
+    contents: list[PureText]
+    bold: bool
+    italic: bool
+    underlined: bool
+    highlighted: str | None
+    boxed: bool
+
+
 class Arrow(BaseModel):
     kind: Literal["arrow"]
 
@@ -56,16 +66,20 @@ class Choice(BaseModel):
 
 
 # WARNING: keep 'PureText' and 'PureTextComponents' consistent
-PureText = Text | Whitespace
+PureText = Text | Whitespace | Arrow | Formatted
 
 
 class PureTextComponents(ApiModel):
     text: Literal[True]
     whitespace: Literal[True]
+    arrow: Literal[True]
+    formatted: Literal[True]
 
     def gather(self) -> Iterable[type]:
         yield Text
         yield Whitespace
+        yield Arrow
+        yield Formatted
 
 
 class FreeTextInput(BaseModel):
@@ -108,16 +122,11 @@ class InstructionComponents(PureTextComponents):
 
 
 # WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
-ExampleComponent = PureText | Arrow
+ExampleComponent = PureText
 
 
 class ExampleComponents(PureTextComponents):
-    arrow: bool
-
-    def gather(self) -> Iterable[type]:
-        yield from super().gather()
-        if self.arrow:
-            yield Arrow
+    pass
 
 
 # WARNING: keep 'HintComponent' and 'HintComponents' consistent
@@ -129,11 +138,10 @@ class HintComponents(PureTextComponents):
 
 
 # WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
-StatementComponent = PureText | Arrow | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput
+StatementComponent = PureText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput
 
 
 class StatementComponents(PureTextComponents):
-    arrow: bool
     free_text_input: bool
     multiple_choices_input: bool
     selectable_input: bool
@@ -141,8 +149,6 @@ class StatementComponents(PureTextComponents):
 
     def gather(self) -> Iterable[type]:
         yield from super().gather()
-        if self.arrow:
-            yield Arrow
         if self.free_text_input:
             yield FreeTextInput
         if self.multiple_choices_input:

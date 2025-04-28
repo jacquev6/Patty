@@ -44,14 +44,7 @@ const actualContents = computed(() => {
   return component.contents
 })
 
-const formatted = computed(() => ({
-  kind: 'formatted' as const,
-  contents: actualContents.value,
-  bold: false,
-  italic: false,
-  highlighted: selected.value ? '#FFFDD4' : null,
-  boxed: false,
-}))
+const highlighted = computed(() => (selected.value ? '#FFFDD4' : null))
 
 function setAnswer(
   pageIndex: number,
@@ -100,9 +93,15 @@ function handleClick() {
 
 <template>
   <FormattedComponent
+    kind="formatted"
     class="main"
     :class="{ empty: actualContents.length === 0 }"
-    v-bind="formatted"
+    :contents="actualContents"
+    :bold="false"
+    :italic="false"
+    :underlined="false"
+    :highlighted
+    :boxed="false"
     :tricolorable
     data-cy="swappableInput"
     @click="handleClick"
