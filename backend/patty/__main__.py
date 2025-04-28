@@ -129,7 +129,10 @@ def backup_database() -> None:
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
-    requests.post(settings.DATABASE_BACKUP_PULSE_MONITORING_URL, json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"})
+    requests.post(
+        settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
+        json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
+    )
     print(
         f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr
     )
