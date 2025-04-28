@@ -216,6 +216,8 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 @main.command()
 def migrate_data() -> None:
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    # Migrate JSON fields according to evolution of schemas
     with database_utils.make_session(database_engine) as session:
         for strategy in session.query(adaptation.Strategy).all():
             spec = copy.deepcopy(strategy._response_specification)
@@ -223,6 +225,21 @@ def migrate_data() -> None:
                 spec["statement_components"].setdefault("swappable_input", False)
             strategy._response_specification = spec
         session.commit()
+
+    # Check that all JSON fields are valid
+    with database_utils.make_session(database_engine) as session:
+        for adaptation_ in session.query(adaptation.Adaptation).all():
+            # No need to check 'adaptation_.raw_llm_conversations': it has no schema
+            adaptation_.initial_assistant_response
+            adaptation_.adjustments
+            adaptation_.manual_edit
+        for batch in session.query(adaptation.Batch).all():
+            pass
+        for input in session.query(adaptation.Input).all():
+            pass
+        for strategy in session.query(adaptation.Strategy).all():
+            strategy.model
+            strategy.response_specification
 
 
 if __name__ == "__main__":
