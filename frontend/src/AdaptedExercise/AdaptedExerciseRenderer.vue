@@ -194,7 +194,9 @@ const statementLines = computed<StatementLine[]>(() => {
         </div>
       </template>
       <template v-else-if="adaptedExercise.reference !== null">
-        <PassiveSequenceComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
+        <p>
+          <PassiveSequenceComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
+        </p>
       </template>
     </div>
   </PageNavigationControls>
