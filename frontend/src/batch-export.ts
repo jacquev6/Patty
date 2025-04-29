@@ -14,7 +14,7 @@ const router = createRouter({
       component: BatchExportIndexView,
     },
     {
-      path: '/exercise-:id',
+      path: '/:id',
       name: 'exercise',
       component: BatchExportExerciseView,
       props: true,
