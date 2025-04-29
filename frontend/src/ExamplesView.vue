@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
+import { useMagicKeys } from '@vueuse/core'
+
 import type { AdaptedExercise } from '@/apiClient'
 import MiniatureScreen from './MiniatureScreen.vue'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
@@ -123,28 +126,82 @@ const examples: Example[] = [
               },
             ],
           },
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'b' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'editableTextInput',
+                    contents: [
+                      { kind: 'text', text: 'parfois' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'en' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'plein' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'jour' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'j' },
+                      { kind: 'text', text: "'" },
+                      { kind: 'text', text: 'ai' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'peur' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'aussi' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       reference: null,
     },
   },
 ]
+
+const fullScreenIndex = ref<number | null>(null)
+const { Escape } = useMagicKeys()
+
+watch(Escape, () => {
+  fullScreenIndex.value = null
+})
 </script>
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <template v-for="example in examples" :key="example.title">
+    <template v-for="(example, exampleIndex) in examples" :key="example.title">
       <h1>{{ example.title }}</h1>
       <FixedColumns :columns="[1, 1]">
         <template #col-1>
           <pre>{{ jsonStringify(example.exercise) }}</pre>
         </template>
         <template #col-2>
-          <MiniatureScreen :fullScreen="false">
-            <AdaptedExerciseRenderer :adaptedExercise="example.exercise" />
+          <MiniatureScreen :fullScreen="fullScreenIndex === exampleIndex">
+            <AdaptedExerciseRenderer
+              :navigateUsingArrowKeys="fullScreenIndex === exampleIndex"
+              :adaptedExercise="example.exercise"
+            />
+            <button v-if="fullScreenIndex === exampleIndex" class="exitFullScreen" @click="fullScreenIndex = null">
+              Exit full screen (Esc)
+            </button>
           </MiniatureScreen>
+          <button @click="fullScreenIndex = exampleIndex">Full screen</button>
         </template>
       </FixedColumns>
     </template>
   </div>
 </template>
+
+<style scoped>
+button.exitFullScreen {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+  bottom: 2rem;
+}
+</style>

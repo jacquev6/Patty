@@ -66,6 +66,7 @@ import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 
 const props = withDefaults(
   defineProps<{
+    navigateUsingArrowKeys: boolean
     studentAnswersStorageKey?: string | null
     adaptedExercise: AdaptedExercise
   }>(),
@@ -160,7 +161,7 @@ const statementLines = computed<StatementLine[]>(() => {
 </script>
 
 <template>
-  <PageNavigationControls :pagesCount="totalPagesCount" v-model="pageIndex">
+  <PageNavigationControls :navigateUsingArrowKeys :pagesCount="totalPagesCount" v-model="pageIndex">
     <div ref="container" class="container">
       <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">

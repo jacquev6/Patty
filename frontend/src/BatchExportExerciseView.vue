@@ -27,5 +27,5 @@ const exercise = computed(() => {
 </script>
 
 <template>
-  <AdaptedExerciseRenderer v-bind="exercise" style="height: 100vh" />
+  <AdaptedExerciseRenderer :navigateUsingArrowKeys="true" v-bind="exercise" style="height: 100vh" />
 </template>

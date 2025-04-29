@@ -30,8 +30,14 @@ function updateContent() {
 onMounted(updateContent)
 onBeforeUpdate(updateContent) // For re-used components
 
-function forbidNewlines(event: KeyboardEvent) {
-  if (event.key === 'Enter') {
+function filterKeyDown(event: KeyboardEvent) {
+  if (
+    // We don't want new lines in student answers
+    event.key === 'Enter' ||
+    // Arrows are used to change the page (in 'PageNavigationControls')
+    event.key === 'ArrowLeft' ||
+    event.key === 'ArrowRight'
+  ) {
     event.preventDefault()
   }
 }
@@ -43,7 +49,7 @@ function forbidNewlines(event: KeyboardEvent) {
     data-cy="freeTextInput"
     contenteditable
     @input="updateModel"
-    @keypress="forbidNewlines"
+    @keydown="filterKeyDown"
     class="main"
     :class="{ empty: model === '', tricolorable }"
   ></span>

@@ -15,6 +15,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -56,6 +57,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -94,6 +96,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -132,6 +135,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -170,6 +174,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -208,6 +213,7 @@ describe('FormattedComponent', () => {
     cy.viewport(500, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -246,6 +252,7 @@ describe('FormattedComponent', () => {
     cy.viewport(700, 130)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -309,6 +316,7 @@ describe('SelectableInput', () => {
     cy.viewport(500, 180)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -361,6 +369,7 @@ describe('SelectableInput', () => {
     cy.viewport(500, 180)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -394,6 +403,7 @@ describe('SelectableInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -426,6 +436,7 @@ describe('SelectableInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -458,6 +469,7 @@ describe('SelectableInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -490,6 +502,7 @@ describe('SelectableInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -522,6 +535,7 @@ describe('SelectableInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -560,6 +574,7 @@ describe('FreeTextInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -586,6 +601,7 @@ describe('FreeTextInput', () => {
   it('refuses new lines', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -601,6 +617,90 @@ describe('FreeTextInput', () => {
     cy.get('@input').type('Hello{enter}world')
     cy.get('br').should('not.exist')
     cy.get('@input').should('have.text', 'Helloworld')
+  })
+
+  it('allows navigating exercise pages using arrow keys', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '1' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '2' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '3' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    // In Cypress, we have to trigger the two events
+    function pressAndRelease(key: string) {
+      cy.document().trigger('keydown', { key })
+      cy.wait(0)
+      cy.document().trigger('keyup', { key })
+    }
+
+    cy.get('[data-cy="freeTextInput"]').as('input')
+    cy.get('p').should('contain.text', 'Page 1')
+    cy.get('@input').type('One')
+    cy.get('p').should('have.text', 'Page 1 One')
+    cy.get('@input').type('{leftArrow}{leftArrow}ONE') // Arrows are ignored
+    cy.get('p').should('have.text', 'Page 1 OneONE')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 2')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 3')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 3')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 2')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 1')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 1')
   })
 })
 
@@ -621,6 +721,7 @@ describe('MultipleChoicesInput', () => {
     cy.viewport(500, 330)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -675,6 +776,7 @@ describe('MultipleChoicesInput', () => {
     cy.viewport(700, 330)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -716,6 +818,7 @@ describe('MultipleChoicesInput', () => {
   it('closes choices on click on main span', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -758,6 +861,7 @@ describe('MultipleChoicesInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -806,6 +910,7 @@ describe('MultipleChoicesInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -870,6 +975,7 @@ describe('SwappableInput', () => {
   it('renders', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -924,6 +1030,7 @@ describe('SwappableInput', () => {
   it('swaps', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -998,6 +1105,7 @@ describe('SwappableInput', () => {
   it('resets selected swappable when page is changed', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -1050,6 +1158,7 @@ describe('EditableTextInput', () => {
   it('renders', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -1102,9 +1211,9 @@ describe('EditableTextInput', () => {
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').eq(0).as('input')
-    cy.get('@input').focus().type('{end}{leftArrow}')
+    cy.get('@input').focus().type('{end}')
     screenshot()
-    cy.get('@input').type('eee')
+    cy.get('@input').type('{backspace}eee.')
     screenshot()
   })
 })
@@ -1115,6 +1224,7 @@ describe('AdaptedExerciseRenderer', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -1138,6 +1248,7 @@ describe('AdaptedExerciseRenderer', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -1173,6 +1284,7 @@ describe('AdaptedExerciseRenderer', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {

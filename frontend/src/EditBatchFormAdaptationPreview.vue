@@ -66,7 +66,10 @@ watch(Escape, () => {
         </template>
         <template v-else-if="adaptation.status.kind === 'success'">
           <MiniatureScreen :fullScreen>
-            <AdaptedExerciseRenderer :adaptedExercise="adaptation.status.adaptedExercise" />
+            <AdaptedExerciseRenderer
+              :navigateUsingArrowKeys="fullScreen"
+              :adaptedExercise="adaptation.status.adaptedExercise"
+            />
             <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
           </MiniatureScreen>
         </template>

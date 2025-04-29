@@ -529,6 +529,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for free text inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
@@ -560,6 +561,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
@@ -582,6 +584,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for selectable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
@@ -615,6 +618,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
@@ -639,6 +643,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for multiple choices inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
@@ -670,6 +675,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
@@ -694,6 +700,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for swappable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
@@ -724,6 +731,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
@@ -835,6 +843,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for editable text inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
       },
@@ -856,6 +865,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
       },

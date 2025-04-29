@@ -11,5 +11,5 @@ const data = JSON.parse('##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##') as Data
 </script>
 
 <template>
-  <AdaptedExerciseRenderer v-bind="data" style="height: 100vh" />
+  <AdaptedExerciseRenderer :navigateUsingArrowKeys="true" v-bind="data" style="height: 100vh" />
 </template>
