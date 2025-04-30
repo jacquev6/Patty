@@ -393,7 +393,9 @@ export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templ
 def export_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = list(filter(None, (make_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations)))
+    data = list(
+        filter(None, (make_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations))
+    )
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
@@ -412,7 +414,7 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
     )
 
 
-def make_exercise_data(adaptation: DbAdaptation) -> JsonDict:
+def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
     if adaptation.input.page_number is not None and adaptation.input.exercise_number is not None:
         exercise_id = f"P{adaptation.input.page_number}Ex{adaptation.input.exercise_number}"
     else:
