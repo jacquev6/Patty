@@ -104,14 +104,5 @@ class Strategy(OrmBase):
     def model(self, value: llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
-    # @todo(after migration 239538041ab7 is applied) Delete
-    system_prompt_to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("system_prompt")
-
-    # @todo(after migration 239538041ab7 is applied) Delete
-    _response_specification_to_be_deleted: orm.Mapped[JsonDict | None] = orm.mapped_column(
-        "response_specification", sql.JSON
-    )
-
-    # @todo(after migration 239538041ab7 is applied) Make non-nullable
-    settings_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(StrategySettings.id))
+    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(StrategySettings.id))
     settings: orm.Mapped[StrategySettings] = orm.relationship(StrategySettings)
