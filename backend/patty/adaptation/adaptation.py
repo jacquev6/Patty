@@ -13,7 +13,7 @@ from ..api_utils import ApiModel
 from ..database_utils import OrmBase, TestCaseWithDatabase
 from .batch import Batch
 from .input import Input
-from .strategy import Strategy, JsonFromTextLlmResponseSpecification
+from .strategy import Strategy, StrategySettings, JsonFromTextLlmResponseSpecification
 
 
 class AssistantSuccess(ApiModel):
@@ -116,12 +116,16 @@ class AdaptationTestCase(TestCaseWithDatabase):
     def test_create(self) -> None:
         input = self.create_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy = self.create_model(
-            Strategy,
+        strategy_settings = self.create_model(
+            StrategySettings,
             created_by="UnitTests",
-            model=llm.DummyModel(name="dummy-1"),
+            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
+        )
+
+        strategy = self.create_model(
+            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
         batch = self.create_model(
@@ -146,20 +150,20 @@ class AdaptationTestCase(TestCaseWithDatabase):
     def test_create_with_inconsistent_strategy__with_orm(self) -> None:
         input = self.create_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy_1 = self.create_model(
-            Strategy,
+        strategy_settings = self.create_model(
+            StrategySettings,
             created_by="UnitTests",
-            model=llm.DummyModel(name="dummy-1"),
-            system_prompt="System prompt 1",
+            name=None,
+            system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
+        strategy_1 = self.create_model(
+            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
+        )
+
         strategy_2 = self.create_model(
-            Strategy,
-            created_by="UnitTests",
-            model=llm.DummyModel(name="dummy-1"),
-            system_prompt="System prompt 2",
-            response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
+            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
         batch = self.create_model(
@@ -190,20 +194,20 @@ class AdaptationTestCase(TestCaseWithDatabase):
     def test_create_with_inconsistent_strategy__without_orm(self) -> None:
         input = self.create_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy_1 = self.create_model(
-            Strategy,
+        strategy_settings = self.create_model(
+            StrategySettings,
             created_by="UnitTests",
-            model=llm.DummyModel(name="dummy-1"),
-            system_prompt="System prompt 1",
+            name=None,
+            system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
+        strategy_1 = self.create_model(
+            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
+        )
+
         strategy_2 = self.create_model(
-            Strategy,
-            created_by="UnitTests",
-            model=llm.DummyModel(name="dummy-1"),
-            system_prompt="System prompt 2",
-            response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
+            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
         batch = self.create_model(

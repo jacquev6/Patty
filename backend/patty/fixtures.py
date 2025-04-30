@@ -166,9 +166,8 @@ def make_default_system_prompt() -> str:
 
 
 def create_default_adaptation_strategy() -> Iterable[object]:
-    yield adaptation.Strategy(
+    strategy_settings = adaptation.StrategySettings(
         created_by="Patty",
-        model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
         system_prompt=make_default_system_prompt(),
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
@@ -192,12 +191,15 @@ def create_default_adaptation_strategy() -> Iterable[object]:
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),
     )
+    yield strategy_settings
+    yield adaptation.Strategy(
+        created_by="Patty", model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), settings=strategy_settings
+    )
 
 
 def create_dummy_adaptation_strategy() -> Iterable[object]:
-    yield adaptation.Strategy(
+    strategy_settings = adaptation.StrategySettings(
         created_by="Patty",
-        model=llm.DummyModel(name="dummy-1"),
         system_prompt="Blah blah blah.",
         response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
             format="json",
@@ -221,6 +223,8 @@ def create_dummy_adaptation_strategy() -> Iterable[object]:
             reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         ),
     )
+    yield strategy_settings
+    yield adaptation.Strategy(created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings)
 
 
 def create_default_adaptation_input() -> Iterable[object]:
@@ -418,7 +422,8 @@ def make_not_json_adaptation(*, batch: object, strategy: object, input: object) 
 
 
 def create_seed_data() -> Iterable[object]:
-    [strategy] = create_default_adaptation_strategy()
+    [strategy_settings, strategy] = create_default_adaptation_strategy()
+    yield strategy_settings
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
@@ -432,7 +437,8 @@ def create_seed_data() -> Iterable[object]:
 
 
 def create_dummy_adaptation() -> Iterable[object]:
-    [strategy] = create_dummy_adaptation_strategy()
+    [strategy_settings, strategy] = create_dummy_adaptation_strategy()
+    yield strategy_settings
     yield strategy
     [input] = create_default_adaptation_input()
     yield input
@@ -446,7 +452,8 @@ def create_dummy_adaptation() -> Iterable[object]:
 
 
 def create_mixed_dummy_batch() -> Iterable[object]:
-    [strategy] = create_dummy_adaptation_strategy()
+    [strategy_settings, strategy] = create_dummy_adaptation_strategy()
+    yield strategy_settings
     yield strategy
     [input] = create_default_adaptation_input()
     yield input

@@ -225,8 +225,8 @@ def migrate_data() -> None:
     # Migrate JSON fields according to evolution of schemas
     with database_utils.make_session(database_engine) as session:
         for strategy in session.query(adaptation.Strategy).all():
-            spec = copy.deepcopy(strategy._response_specification)
-            if spec["format"] == "json" and spec["formalism"] == "json-schema":
+            spec = copy.deepcopy(strategy._response_specification_to_be_deleted)
+            if spec is not None and spec["format"] == "json" and spec["formalism"] == "json-schema":
                 spec["instruction_components"].setdefault("arrow", True)
                 spec["instruction_components"].setdefault("formatted", True)
                 spec["example_components"].setdefault("formatted", True)
@@ -237,7 +237,18 @@ def migrate_data() -> None:
                 spec["statement_components"].setdefault("editable_text_input", False)
                 spec["reference_components"].setdefault("arrow", True)
                 spec["reference_components"].setdefault("formatted", True)
-            strategy._response_specification = spec
+            strategy._response_specification_to_be_deleted = spec
+
+            if strategy.settings is None:
+                strategy_settings = adaptation.StrategySettings(
+                    name=None,
+                    system_prompt=strategy.system_prompt_to_be_deleted,
+                    _response_specification=strategy._response_specification_to_be_deleted,
+                    created_by=strategy.created_by,
+                )
+                session.add(strategy_settings)
+                strategy.settings = strategy_settings
+
         session.commit()
 
     # Check that all JSON fields are valid
@@ -253,7 +264,8 @@ def migrate_data() -> None:
             pass
         for strategy in session.query(adaptation.Strategy).all():
             strategy.model
-            strategy.response_specification
+        for strategy_settings in session.query(adaptation.StrategySettings).all():
+            strategy_settings.response_specification
 
 
 if __name__ == "__main__":
