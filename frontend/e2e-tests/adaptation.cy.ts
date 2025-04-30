@@ -98,18 +98,6 @@ describe('The batch creation page', () => {
     cy.get('@allow-choice-in-instruction').should('not.be.checked')
   })
 
-  it('remembers the last "allow arrow in statement" used', () => {
-    cy.get('[data-cy="allow-arrow-in-statement"]').as('allow-arrow-in-statement')
-
-    cy.get('@allow-arrow-in-statement').should('be.checked').uncheck()
-
-    cy.get('button:contains("Submit")').click()
-    cy.get('p:contains("Created by: Alice")').should('exist')
-
-    cy.visit('/new-batch')
-    cy.get('@allow-arrow-in-statement').should('not.be.checked')
-  })
-
   it('remembers the last "allow free text input in statement" used', () => {
     cy.get('[data-cy="allow-free-text-input-in-statement"]').as('allow-free-text-input-in-statement')
 

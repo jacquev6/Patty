@@ -9,6 +9,7 @@ import CreateBatchView from './CreateBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
 import EditBatchView from './EditBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
+import ExamplesView from './ExamplesView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,6 +35,11 @@ const router = createRouter({
       name: 'adaptation',
       component: EditAdaptationView,
       props: true,
+    },
+    {
+      path: '/examples',
+      name: 'examples',
+      component: ExamplesView,
     },
   ],
 })

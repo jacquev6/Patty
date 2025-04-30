@@ -9,6 +9,7 @@ const props = defineProps<{
   contents: PassiveComponent[]
   bold: boolean
   italic: boolean
+  underlined: boolean
   highlighted: string | null
   boxed: boolean
   tricolorable: boolean
@@ -20,6 +21,7 @@ const style = computed(() => ({
   fontStyle: props.italic ? 'italic' : undefined,
   border: props.boxed ? '2px solid black' : undefined,
   padding: props.boxed ? '4px' : undefined,
+  textDecorationLine: props.underlined ? 'underline' : undefined,
 }))
 </script>
 

@@ -7,10 +7,9 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 set -x
 
-backup_to_load=s3://jacquev6/patty/prod/backups/patty-backup-20250423-132405.tar.gz
+backup_to_load=s3://jacquev6/patty/prod/backups/patty-backup-20250430-111610.tar.gz
 
 ./shell.sh -c "python -m patty restore-database --yes --patch-according-to-settings $backup_to_load"
-./alembic.sh upgrade 429d2fb463dd  # To be removed: only here because we have two migrations for next release. (Won't hurt until removed: will be no-op)
 
 rev_id=
 if [ -e ../../backend/patty/migrations/versions/*_dev.py ]
@@ -30,3 +29,4 @@ fi
 
 ./alembic.sh revision --autogenerate $rev_id -m dev
 ./alembic.sh upgrade head
+./shell.sh -c "python -m patty migrate-data"

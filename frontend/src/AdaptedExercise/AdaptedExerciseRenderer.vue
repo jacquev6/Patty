@@ -1,5 +1,6 @@
 <script lang="ts">
-import type { AdaptedExercise } from '@/apiClient'
+import type { AdaptedExercise, AnyComponent } from '@/apiClient'
+import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 export type InProgressExercise = {
   exercise: AdaptedExercise
@@ -36,6 +37,10 @@ export type ComponentAnswer =
         componentIndex: number
       }
     }
+  | {
+      kind: 'editableTextInput'
+      text: string
+    }
 
 type LineAnswers = {
   components: Partial<Record<number, ComponentAnswer>>
@@ -61,6 +66,7 @@ import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 
 const props = withDefaults(
   defineProps<{
+    navigateUsingArrowKeys: boolean
     studentAnswersStorageKey?: string | null
     adaptedExercise: AdaptedExercise
   }>(),
@@ -115,10 +121,47 @@ watch(
   },
   { deep: true },
 )
+
+type StatementLine = {
+  lineIndex: number
+  contents: AnyComponent[]
+}
+
+const statementLines = computed<StatementLine[]>(() => {
+  const lines: StatementLine[] = []
+
+  for (const [lineIndex, { contents }] of props.adaptedExercise.statement.pages[pageIndex.value].lines.entries()) {
+    lines.push({ lineIndex, contents })
+    for (const component of contents) {
+      if (
+        isPassive(component) ||
+        component.kind === 'swappableInput' ||
+        component.kind === 'selectableInput' ||
+        component.kind === 'multipleChoicesInput' ||
+        component.kind === 'freeTextInput'
+      ) {
+        // Nothing to do
+      } else if (component.kind === 'editableTextInput') {
+        lines.push({
+          lineIndex,
+          contents: [
+            { kind: 'arrow' },
+            { kind: 'whitespace' },
+            { kind: 'activeEditableTextInput', contents: component.contents },
+          ],
+        })
+      } else {
+        ;((component: never) => console.log(`Unexpected component: ${component}`))(component)
+      }
+    }
+  }
+
+  return lines
+})
 </script>
 
 <template>
-  <PageNavigationControls :pagesCount="totalPagesCount" v-model="pageIndex">
+  <PageNavigationControls :navigateUsingArrowKeys :pagesCount="totalPagesCount" v-model="pageIndex">
     <div ref="container" class="container">
       <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">
@@ -138,7 +181,7 @@ watch(
         </div>
         <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
-            <p v-for="({ contents }, lineIndex) in adaptedExercise.statement.pages[pageIndex].lines">
+            <p v-for="{ lineIndex, contents } in statementLines">
               <AnySequenceComponent
                 :pageIndex
                 :lineIndex
@@ -152,7 +195,9 @@ watch(
         </div>
       </template>
       <template v-else-if="adaptedExercise.reference !== null">
-        <PassiveSequenceComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
+        <p>
+          <PassiveSequenceComponent :contents="adaptedExercise.reference.contents" :tricolorable="false" />
+        </p>
       </template>
     </div>
   </PageNavigationControls>
@@ -162,6 +207,8 @@ watch(
 div {
   font-family: Arial, sans-serif;
   font-size: 32px;
+  word-spacing: 0.26em;
+  white-space-collapse: preserve;
 }
 
 .container {

@@ -1,27 +1,49 @@
 <script setup lang="ts">
+import { useMagicKeys } from '@vueuse/core'
+import { watch } from 'vue'
+
 import assert from '@/assert'
 
 const props = defineProps<{
+  navigateUsingArrowKeys: boolean
   pagesCount: number
 }>()
 
 assert(props.pagesCount > 0)
 
 const model = defineModel<number>({ required: true })
+
+const { ArrowLeft, ArrowRight } = useMagicKeys()
+
+function goLeft() {
+  model.value = Math.max(0, model.value - 1)
+}
+
+function goRight() {
+  model.value = Math.min(props.pagesCount - 1, model.value + 1)
+}
+
+watch(ArrowLeft, (value) => {
+  if (props.navigateUsingArrowKeys && value) {
+    goLeft()
+  }
+})
+
+watch(ArrowRight, (value) => {
+  if (props.navigateUsingArrowKeys && value) {
+    goRight()
+  }
+})
 </script>
 
 <!-- Arrow characters copy-pasted from https://fsymbols.com/signs/arrow/ -->
 <template>
   <div class="root">
-    <div class="control" :class="{ disabled: model === 0 }" @click="model = Math.max(0, model - 1)">
+    <div class="control" :class="{ disabled: model === 0 }" @click="goLeft">
       <div class="arrow arrowLeft"></div>
     </div>
     <div><slot></slot></div>
-    <div
-      class="control"
-      :class="{ disabled: model === pagesCount - 1 }"
-      @click="model = Math.min(pagesCount - 1, model + 1)"
-    >
+    <div class="control" :class="{ disabled: model === pagesCount - 1 }" @click="goRight">
       <div class="arrow"></div>
     </div>
   </div>

@@ -1,8 +1,4 @@
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
-import FormattedComponent from './components/FormattedComponent.vue'
-import FreeTextInput from './components/FreeTextInput.vue'
-import MultipleChoicesInput from './components/MultipleChoicesInput.vue'
-import SelectableInput from './components/SelectableInput.vue'
 import TriColorLines from './TriColorLines.vue'
 
 const screenshotsCounts: Record<string, number> = {}
@@ -16,109 +12,299 @@ function screenshot() {
 
 describe('FormattedComponent', () => {
   it('renders plain text and whitespace', () => {
-    cy.viewport(200, 70)
-
-    cy.mount(FormattedComponent, {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'formatted',
-        contents: [
-          { kind: 'text', text: 'Some' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'casual' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'text' },
-          { kind: 'text', text: '.' },
-        ],
-        bold: false,
-        italic: false,
-        highlighted: null,
-        boxed: false,
-        tricolorable: false,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Some' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'casual' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: false,
+                    italic: false,
+                    underlined: false,
+                    highlighted: null,
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
       },
     })
-
+    cy.get('p').should('have.text', 'Some casual text.')
     screenshot()
   })
 
   it('renders bold', () => {
-    cy.viewport(200, 70)
-    cy.mount(FormattedComponent, {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'formatted',
-        contents: [
-          { kind: 'text', text: 'Bold' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'text' },
-          { kind: 'text', text: '.' },
-        ],
-        bold: true,
-        italic: false,
-        highlighted: null,
-        boxed: false,
-        tricolorable: false,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Bold' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: true,
+                    italic: false,
+                    underlined: false,
+                    highlighted: null,
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
       },
     })
     screenshot()
   })
 
   it('renders italic', () => {
-    cy.viewport(200, 70)
-    cy.mount(FormattedComponent, {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'formatted',
-        contents: [
-          { kind: 'text', text: 'Italic' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'text' },
-          { kind: 'text', text: '.' },
-        ],
-        bold: false,
-        italic: true,
-        highlighted: null,
-        boxed: false,
-        tricolorable: false,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Italic' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: false,
+                    italic: true,
+                    underlined: false,
+                    highlighted: null,
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
+      },
+    })
+    screenshot()
+  })
+
+  it('renders underlined', () => {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Underlined' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: false,
+                    italic: false,
+                    underlined: true,
+                    highlighted: null,
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
       },
     })
     screenshot()
   })
 
   it('renders highlighted', () => {
-    cy.viewport(200, 70)
-    cy.mount(FormattedComponent, {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'formatted',
-        contents: [
-          { kind: 'text', text: 'Highlighted' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'text' },
-          { kind: 'text', text: '.' },
-        ],
-        bold: false,
-        italic: false,
-        highlighted: 'yellow',
-        boxed: false,
-        tricolorable: false,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Highlighted' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: false,
+                    italic: false,
+                    underlined: false,
+                    highlighted: 'yellow',
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
       },
     })
     screenshot()
   })
 
   it('renders boxed', () => {
-    cy.viewport(200, 70)
-    cy.mount(FormattedComponent, {
+    cy.viewport(500, 130)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'formatted',
-        contents: [
-          { kind: 'text', text: 'Boxed' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'text' },
-          { kind: 'text', text: '.' },
-        ],
-        bold: false,
-        italic: false,
-        highlighted: null,
-        boxed: true,
-        tricolorable: false,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'Boxed' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'text' },
+                      { kind: 'text', text: '.' },
+                    ],
+                    bold: false,
+                    italic: false,
+                    underlined: false,
+                    highlighted: null,
+                    boxed: true,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
+      },
+    })
+    screenshot()
+  })
+
+  it('renders complex nested formatting', () => {
+    cy.viewport(700, 130)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'formatted',
+                    contents: [
+                      { kind: 'text', text: 'bold' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'formatted',
+                        contents: [
+                          { kind: 'text', text: 'boxed' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'formatted',
+                            contents: [{ kind: 'text', text: 'italic' }],
+                            bold: false,
+                            italic: true,
+                            underlined: false,
+                            highlighted: null,
+                            boxed: false,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'boxed' },
+                        ],
+                        bold: false,
+                        italic: false,
+                        underlined: false,
+                        highlighted: null,
+                        boxed: true,
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bold' },
+                    ],
+                    bold: true,
+                    italic: false,
+                    underlined: false,
+                    highlighted: null,
+                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
       },
     })
     screenshot()
@@ -127,21 +313,40 @@ describe('FormattedComponent', () => {
 
 describe('SelectableInput', () => {
   it('changes color on click', () => {
-    cy.viewport(130, 70)
-
-    cy.mount(SelectableInput, {
+    cy.viewport(500, 180)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [
-          { kind: 'text', text: 'Click' },
-          { kind: 'whitespace' },
-          { kind: 'text', text: 'us' },
-          { kind: 'text', text: '!' },
-        ],
-        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-        boxed: false,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Click' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'us' },
+                          { kind: 'text', text: '!' },
+                        ],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
 
@@ -161,82 +366,201 @@ describe('SelectableInput', () => {
   })
 
   it('adds padding to single letters and punctuation', () => {
-    cy.viewport(130, 70)
-
-    cy.mount(SelectableInput, {
+    cy.viewport(500, 180)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: 'Word' }],
-        colors: ['grey'],
-        boxed: false,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'Word' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('[data-cy="selectableInput"]').as('input')
     cy.get('@input').click()
     screenshot()
 
-    cy.mount(SelectableInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: 'Word' }],
-        colors: ['grey'],
-        boxed: true,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'Word' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('@input').click()
     screenshot()
 
-    cy.mount(SelectableInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: 'X' }],
-        colors: ['grey'],
-        boxed: false,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('@input').click()
     screenshot()
 
-    cy.mount(SelectableInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: 'X' }],
-        colors: ['grey'],
-        boxed: true,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('@input').click()
     screenshot()
 
-    cy.mount(SelectableInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: '.' }],
-        colors: ['grey'],
-        boxed: false,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: '.' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('@input').click()
     screenshot()
 
-    cy.mount(SelectableInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'selectableInput',
-        contents: [{ kind: 'text', text: '.' }],
-        colors: ['grey'],
-        boxed: true,
-        tricolorable: false,
-        modelValue: 0,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: '.' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
     cy.get('@input').click()
@@ -246,9 +570,21 @@ describe('SelectableInput', () => {
 
 describe('FreeTextInput', () => {
   it('accepts text input', () => {
-    cy.viewport(170, 70)
+    cy.viewport(500, 180)
 
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: { pages: [{ lines: [{ contents: [{ kind: 'freeTextInput' }] }] }] },
+          reference: null,
+        },
+      },
+    })
 
     screenshot()
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -263,12 +599,108 @@ describe('FreeTextInput', () => {
   })
 
   it('refuses new lines', () => {
-    cy.mount(FreeTextInput, { props: { kind: 'freeTextInput', tricolorable: false, modelValue: '' } })
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: { pages: [{ lines: [{ contents: [{ kind: 'freeTextInput' }] }] }] },
+          reference: null,
+        },
+      },
+    })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
     cy.get('br').should('not.exist')
     cy.get('@input').should('have.text', 'Helloworld')
+  })
+
+  it('allows navigating exercise pages using arrow keys', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '1' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '2' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Page' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: '3' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    // In Cypress, we have to trigger the two events
+    function pressAndRelease(key: string) {
+      cy.document().trigger('keydown', { key })
+      cy.wait(0)
+      cy.document().trigger('keyup', { key })
+    }
+
+    cy.get('[data-cy="freeTextInput"]').as('input')
+    cy.get('p').should('contain.text', 'Page 1')
+    cy.get('@input').type('One')
+    cy.get('p').should('have.text', 'Page 1 One')
+    cy.get('@input').type('{leftArrow}{leftArrow}ONE') // Arrows are ignored
+    cy.get('p').should('have.text', 'Page 1 OneONE')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 2')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 3')
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', 'Page 3')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 2')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 1')
+    pressAndRelease('ArrowLeft')
+    cy.get('p').should('contain.text', 'Page 1')
   })
 })
 
@@ -286,15 +718,36 @@ describe('MultipleChoicesInput', () => {
   ]
 
   it('selects choices', () => {
-    cy.viewport(250, 190)
-
-    cy.mount(MultipleChoicesInput, {
+    cy.viewport(500, 330)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'multipleChoicesInput',
-        choices,
-        showChoicesByDefault: false,
-        tricolorable: false,
-        modelValue: null,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices,
+                        showChoicesByDefault: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
 
@@ -320,13 +773,36 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on backdrop', () => {
-    cy.mount(MultipleChoicesInput, {
+    cy.viewport(700, 330)
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'multipleChoicesInput',
-        choices,
-        showChoicesByDefault: false,
-        tricolorable: false,
-        modelValue: null,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices,
+                        showChoicesByDefault: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
 
@@ -340,13 +816,35 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on main span', () => {
-    cy.mount(MultipleChoicesInput, {
+    cy.mount(AdaptedExerciseRenderer, {
       props: {
-        kind: 'multipleChoicesInput',
-        choices,
-        showChoicesByDefault: true,
-        tricolorable: false,
-        modelValue: null,
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices,
+                        showChoicesByDefault: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
       },
     })
 
@@ -363,6 +861,7 @@ describe('MultipleChoicesInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -411,6 +910,7 @@ describe('MultipleChoicesInput', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -475,6 +975,7 @@ describe('SwappableInput', () => {
   it('renders', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -529,6 +1030,7 @@ describe('SwappableInput', () => {
   it('swaps', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -603,6 +1105,7 @@ describe('SwappableInput', () => {
   it('resets selected swappable when page is changed', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: { lines: [] },
@@ -651,12 +1154,77 @@ describe('SwappableInput', () => {
   })
 })
 
+describe('EditableTextInput', () => {
+  it('renders', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'a' },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'editableTextInput',
+                        contents: [
+                          { kind: 'text', text: 'Edit' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                          { kind: 'text', text: '.' },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'm' },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'editableTextInput',
+                        contents: [
+                          { kind: 'text', text: 'And' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                          { kind: 'text', text: '.' },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="freeTextInput"]').eq(0).as('input')
+    cy.get('@input').focus().type('{end}')
+    screenshot()
+    cy.get('@input').type('{backspace}eee.')
+    screenshot()
+  })
+})
+
 describe('AdaptedExerciseRenderer', () => {
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -680,6 +1248,7 @@ describe('AdaptedExerciseRenderer', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {
@@ -715,6 +1284,7 @@ describe('AdaptedExerciseRenderer', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
           instruction: {

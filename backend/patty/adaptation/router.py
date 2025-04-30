@@ -1,7 +1,7 @@
-import hashlib
-from typing import TypeVar
+from typing import Any, TypeVar
 import asyncio
 import datetime
+import hashlib
 import json
 import os
 
@@ -23,7 +23,12 @@ from .adaptation import (
 )
 from .batch import Batch
 from .input import Input as DbInput
-from .strategy import Strategy as DbStrategy, ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
+from .strategy import (
+    Strategy as DbStrategy,
+    StrategySettings,
+    ConcreteLlmResponseSpecification,
+    JsonSchemaLlmResponseSpecification,
+)
 
 
 __all__ = ["router"]
@@ -106,12 +111,13 @@ async def post_batch(
     session: database_utils.SessionDependable,
     background_tasks: fastapi.BackgroundTasks,
 ) -> PostBatchResponse:
-    strategy = DbStrategy(
+    strategy_settings = StrategySettings(
         created_by=req.creator,
-        model=req.strategy.model,
         system_prompt=req.strategy.system_prompt,
         response_specification=req.strategy.response_specification,
     )
+    session.add(strategy_settings)
+    strategy = DbStrategy(created_by=req.creator, model=req.strategy.model, settings=strategy_settings)
     session.add(strategy)
 
     batch = Batch(created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc), strategy=strategy)
@@ -150,13 +156,13 @@ async def submit_batch(engine: database_utils.Engine, id: int) -> None:
         assert batch is not None
 
         print(f"Submitting batch {batch.id}", flush=True)
-        response_format = batch.strategy.response_specification.make_response_format()
+        response_format = batch.strategy.settings.response_specification.make_response_format()
 
         async def submit_adaptation(adaptation: DbAdaptation) -> None:
             assert adaptation.strategy is batch.strategy
 
             messages: list[LlmMessage] = [
-                llm.SystemMessage(content=batch.strategy.system_prompt),
+                llm.SystemMessage(content=batch.strategy.settings.system_prompt),
                 llm.UserMessage(content=adaptation.input.text),
             ]
 
@@ -258,7 +264,7 @@ async def post_adaptation_adjustment(
             raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(content=db_adaptation.strategy.system_prompt),
+        llm.SystemMessage(content=db_adaptation.strategy.settings.system_prompt),
         llm.UserMessage(content=db_adaptation.input.text),
         make_assistant_message(db_adaptation.initial_assistant_response),
     ]
@@ -270,7 +276,7 @@ async def post_adaptation_adjustment(
 
     try:
         response = await db_adaptation.strategy.model.complete(
-            messages, db_adaptation.strategy.response_specification.make_response_format()
+            messages, db_adaptation.strategy.settings.response_specification.make_response_format()
         )
     except llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
@@ -357,8 +363,8 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
 def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
     return ApiStrategy(
         model=strategy.model,
-        system_prompt=strategy.system_prompt,
-        response_specification=strategy.response_specification,
+        system_prompt=strategy.settings.system_prompt,
+        response_specification=strategy.settings.response_specification,
     )
 
 
@@ -371,48 +377,19 @@ export_adaptation_template_file_path = os.path.join(
 )
 
 
-def make_exercise_data(id: str, exercise: Exercise) -> JsonDict:
-    exercise_dump = exercise.model_dump()
-    return {
-        "exerciseId": id,
-        "studentAnswersStorageKey": hashlib.md5(
-            json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
-        ).hexdigest(),
-        "adaptedExercise": exercise_dump,
-    }
-
-
 @router.get("/export/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    db_adaptation = get_by_id(session, DbAdaptation, id)
-    if db_adaptation.manual_edit is None:
-        if len(db_adaptation.adjustments) == 0:
-            assert isinstance(db_adaptation.initial_assistant_response, AssistantSuccess)
-            exercise = db_adaptation.initial_assistant_response.exercise
-        else:
-            last_adjustment = db_adaptation.adjustments[-1]
-            assert isinstance(last_adjustment.assistant_response, AssistantSuccess)
-            exercise = last_adjustment.assistant_response.exercise
-    else:
-        exercise = db_adaptation.manual_edit
-
-    data = make_exercise_data(id, exercise)
-
-    with open(export_adaptation_template_file_path) as f:
-        template = f.read()
+    data = make_exercise_data(get_by_id(session, DbAdaptation, id))
+    assert data is not None
+    content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
     headers = {}
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="adaptation-{id}.html"'
+        headers["Content-Disposition"] = f'attachment; filename="{data['exerciseId']}.html"'
 
-    return fastapi.responses.HTMLResponse(
-        content=template.replace(
-            "##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')
-        ),
-        headers=headers,
-    )
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
 
 
 export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templates", "batch-export", "index.html")
@@ -422,34 +399,51 @@ export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templ
 def export_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    batch = get_by_id(session, Batch, id)
+    data = list(
+        filter(None, (make_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations))
+    )
 
-    data = []
-    for db_adaptation in batch.adaptations:
-        if db_adaptation.manual_edit is None:
-            if len(db_adaptation.adjustments) == 0:
-                if not isinstance(db_adaptation.initial_assistant_response, AssistantSuccess):
-                    continue
-                exercise = db_adaptation.initial_assistant_response.exercise
-            else:
-                last_adjustment = db_adaptation.adjustments[-1]
-                if not isinstance(last_adjustment.assistant_response, AssistantSuccess):
-                    continue
-                exercise = last_adjustment.assistant_response.exercise
-        else:
-            exercise = db_adaptation.manual_edit
-        data.append(make_exercise_data(str(db_adaptation.id), exercise))
-
-    with open(export_batch_template_file_path) as f:
-        template = f.read()
+    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
     headers = {}
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="batch-{id}.html"'
+        headers["Content-Disposition"] = f'attachment; filename="test-batch-{id}.html"'
 
-    return fastapi.responses.HTMLResponse(
-        content=template.replace(
-            "##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')
-        ),
-        headers=headers,
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
+def render_template(template: str, placeholder: str, data: Any) -> str:
+    with open(template) as f:
+        template = f.read()
+    return template.replace(
+        f"##TO_BE_SUBSTITUTED_{placeholder}##", json.dumps(data).replace("\\", "\\\\").replace('"', '\\"')
     )
+
+
+def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
+    if adaptation.input.page_number is not None and adaptation.input.exercise_number is not None:
+        exercise_id = f"P{adaptation.input.page_number}Ex{adaptation.input.exercise_number}"
+    else:
+        exercise_id = f"exercice-{adaptation.id}"
+
+    if adaptation.manual_edit is None:
+        if len(adaptation.adjustments) == 0:
+            if not isinstance(adaptation.initial_assistant_response, AssistantSuccess):
+                return None
+            exercise = adaptation.initial_assistant_response.exercise
+        else:
+            last_adjustment = adaptation.adjustments[-1]
+            if not isinstance(last_adjustment.assistant_response, AssistantSuccess):
+                return None
+            exercise = last_adjustment.assistant_response.exercise
+    else:
+        exercise = adaptation.manual_edit
+
+    exercise_dump = exercise.model_dump()
+    return {
+        "exerciseId": exercise_id,
+        "studentAnswersStorageKey": hashlib.md5(
+            json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
+        ).hexdigest(),
+        "adaptedExercise": exercise_dump,
+    }

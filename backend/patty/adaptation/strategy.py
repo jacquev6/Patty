@@ -1,5 +1,4 @@
 from typing import Literal
-import typing
 
 from sqlalchemy import orm
 import pydantic
@@ -59,6 +58,32 @@ ConcreteLlmResponseSpecification = (
 )
 
 
+class StrategySettings(OrmBase):
+    __tablename__ = "adaptation_strategy_settings"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    # Name is not unique. Latest 'StrategySettings' for each name are used, previous are archived.
+    name: orm.Mapped[str | None]
+
+    created_by: orm.Mapped[str]
+
+    system_prompt: orm.Mapped[str]
+
+    _response_specification: orm.Mapped[JsonDict] = orm.mapped_column("response_specification", sql.JSON)
+
+    class _LlmResponseSpecificationContainer(pydantic.BaseModel):
+        specification: ConcreteLlmResponseSpecification
+
+    @property
+    def response_specification(self) -> ConcreteLlmResponseSpecification:
+        return self._LlmResponseSpecificationContainer(specification=self._response_specification).specification  # type: ignore[arg-type]
+
+    @response_specification.setter
+    def response_specification(self, value: ConcreteLlmResponseSpecification) -> None:
+        self._response_specification = value.model_dump()
+
+
 class Strategy(OrmBase):
     __tablename__ = "adaptation_strategies"
 
@@ -79,17 +104,14 @@ class Strategy(OrmBase):
     def model(self, value: llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
-    system_prompt: orm.Mapped[str]
+    # @todo(after migration 239538041ab7 is applied) Delete
+    system_prompt_to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("system_prompt")
 
-    _response_specification: orm.Mapped[JsonDict] = orm.mapped_column("response_specification", sql.JSON)
+    # @todo(after migration 239538041ab7 is applied) Delete
+    _response_specification_to_be_deleted: orm.Mapped[JsonDict | None] = orm.mapped_column(
+        "response_specification", sql.JSON
+    )
 
-    class _LlmResponseSpecificationContainer(pydantic.BaseModel):
-        specification: ConcreteLlmResponseSpecification
-
-    @property
-    def response_specification(self) -> ConcreteLlmResponseSpecification:
-        return self._LlmResponseSpecificationContainer(specification=self._response_specification).specification  # type: ignore[arg-type]
-
-    @response_specification.setter
-    def response_specification(self, value: ConcreteLlmResponseSpecification) -> None:
-        self._response_specification = value.model_dump()
+    # @todo(after migration 239538041ab7 is applied) Make non-nullable
+    settings_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(StrategySettings.id))
+    settings: orm.Mapped[StrategySettings] = orm.relationship(StrategySettings)

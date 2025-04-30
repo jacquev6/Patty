@@ -69,29 +69,38 @@ const llmResponseSpecificationFormalism = computed({
         instructionComponents: {
           text: true,
           whitespace: true,
+          arrow: true,
+          formatted: true,
           choice: true,
         },
         exampleComponents: {
           text: true,
           whitespace: true,
           arrow: true,
+          formatted: true,
         },
         hintComponents: {
           text: true,
           whitespace: true,
+          arrow: true,
+          formatted: true,
         },
         statementComponents: {
           text: true,
           whitespace: true,
           arrow: true,
+          formatted: true,
           freeTextInput: true,
           multipleChoicesInput: true,
           selectableInput: true,
           swappableInput: true,
+          editableTextInput: false,
         },
         referenceComponents: {
           text: true,
           whitespace: true,
+          arrow: true,
+          formatted: true,
         },
       }
     } else if (value === 'text') {
@@ -168,10 +177,9 @@ const schema = computedAsync(async () => {
       <template #col-1>
         <h3>In instruction</h3>
         <p>
-          <label><input type="checkbox" checked disabled /> text</label>
-        </p>
-        <p>
-          <label><input type="checkbox" checked disabled /> whitespace</label>
+          <label title="text, whitespace, arrow, formatted">
+            <input type="checkbox" checked disabled /> text, <i>etc.</i>
+          </label>
         </p>
         <p>
           <label
@@ -188,98 +196,84 @@ const schema = computedAsync(async () => {
       <template #col-2>
         <h3>In example</h3>
         <p>
-          <label><input type="checkbox" checked disabled /> text</label>
-        </p>
-        <p>
-          <label><input type="checkbox" checked disabled /> whitespace</label>
-        </p>
-        <p>
-          <label
-            ><input
-              data-cy="allow-arrow-in-example"
-              type="checkbox"
-              v-model="strategy.responseSpecification.exampleComponents.arrow"
-              :disabled
-            />
-            arrow</label
-          >
+          <label title="text, whitespace, arrow, formatted">
+            <input type="checkbox" checked disabled /> text, <i>etc.</i>
+          </label>
         </p>
       </template>
       <template #col-3>
         <h3>In hint</h3>
         <p>
-          <label><input type="checkbox" checked disabled /> text</label>
-        </p>
-        <p>
-          <label><input type="checkbox" checked disabled /> whitespace</label>
+          <label title="text, whitespace, arrow, formatted">
+            <input type="checkbox" checked disabled /> text, <i>etc.</i>
+          </label>
         </p>
       </template>
       <template #col-4>
         <h3>In statement</h3>
         <FixedColumns :columns="[1, 1]" :gutters="false">
           <template #col-1>
-            <p>
-              <label><input type="checkbox" checked disabled /> text</label>
+            <p style="margin-bottom: 0">
+              <label title="text, whitespace, arrow, formatted">
+                <input type="checkbox" checked disabled /> text, <i>etc.</i>
+              </label>
             </p>
             <p>
-              <label><input type="checkbox" checked disabled /> whitespace</label>
-            </p>
-            <p>
-              <label
-                ><input
-                  data-cy="allow-arrow-in-statement"
-                  type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.arrow"
-                  :disabled
-                />
-                arrow</label
-              >
-            </p>
-            <p>
-              <label
-                ><input
+              <label>
+                <input
                   data-cy="allow-free-text-input-in-statement"
                   type="checkbox"
                   v-model="strategy.responseSpecification.statementComponents.freeTextInput"
                   :disabled
                 />
-                free text input</label
-              >
+                free text input
+              </label>
             </p>
-          </template>
-          <template #col-2>
             <p>
-              <label
-                ><input
+              <label>
+                <input
                   data-cy="allow-multiple-choices-input-in-statement"
                   type="checkbox"
                   v-model="strategy.responseSpecification.statementComponents.multipleChoicesInput"
                   :disabled
                 />
-                multiple choices input</label
-              >
+                multiple choices input
+              </label>
             </p>
+          </template>
+          <template #col-2>
             <p>
-              <label
-                ><input
+              <label>
+                <input
                   data-cy="allow-selectable-input-in-statement"
                   type="checkbox"
                   v-model="strategy.responseSpecification.statementComponents.selectableInput"
                   :disabled
                 />
-                selectable input</label
-              >
+                selectable input
+              </label>
             </p>
             <p>
-              <label
-                ><input
+              <label>
+                <input
                   data-cy="allow-swappable-input-in-statement"
                   type="checkbox"
                   v-model="strategy.responseSpecification.statementComponents.swappableInput"
                   :disabled
                 />
-                swappable input</label
-              >
+                swappable input
+              </label>
+            </p>
+            <p>
+              <label>
+                <input
+                  data-cy="allow-editable-text-input-in-statement"
+                  type="checkbox"
+                  v-model="strategy.responseSpecification.statementComponents.editableTextInput"
+                  :disabled
+                />
+                editable text input
+              </label>
             </p>
           </template>
         </FixedColumns>
@@ -287,10 +281,9 @@ const schema = computedAsync(async () => {
       <template #col-5>
         <h3>In reference</h3>
         <p>
-          <label><input type="checkbox" checked disabled /> text</label>
-        </p>
-        <p>
-          <label><input type="checkbox" checked disabled /> whitespace</label>
+          <label title="text, whitespace, arrow, formatted">
+            <input type="checkbox" checked disabled /> text, <i>etc.</i>
+          </label>
         </p>
       </template>
     </FixedColumns>

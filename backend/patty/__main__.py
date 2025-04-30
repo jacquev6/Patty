@@ -38,19 +38,21 @@ def openapi() -> None:
 @main.command()
 def adapted_exercise_schema() -> None:
     exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, choice=True),
-        adapted.ExampleComponents(text=True, whitespace=True, arrow=True),
-        adapted.HintComponents(text=True, whitespace=True),
+        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
+        adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.StatementComponents(
             text=True,
             whitespace=True,
             arrow=True,
+            formatted=True,
             free_text_input=True,
             multiple_choices_input=True,
             selectable_input=True,
             swappable_input=True,
+            editable_text_input=True,
         ),
-        adapted.ReferenceComponents(text=True, whitespace=True),
+        adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
     print(json.dumps(llm.make_schema(exercise_type), indent=2))
 
@@ -129,7 +131,10 @@ def backup_database() -> None:
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
-    requests.post(settings.DATABASE_BACKUP_PULSE_MONITORING_URL, json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"})
+    requests.post(
+        settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
+        json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
+    )
     print(
         f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr
     )
@@ -216,13 +221,51 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 @main.command()
 def migrate_data() -> None:
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    # Migrate JSON fields according to evolution of schemas
     with database_utils.make_session(database_engine) as session:
         for strategy in session.query(adaptation.Strategy).all():
-            spec = copy.deepcopy(strategy._response_specification)
-            if spec["format"] == "json" and spec["formalism"] == "json-schema":
+            spec = copy.deepcopy(strategy._response_specification_to_be_deleted)
+            if spec is not None and spec["format"] == "json" and spec["formalism"] == "json-schema":
+                spec["instruction_components"].setdefault("arrow", True)
+                spec["instruction_components"].setdefault("formatted", True)
+                spec["example_components"].setdefault("formatted", True)
+                spec["hint_components"].setdefault("arrow", True)
+                spec["hint_components"].setdefault("formatted", True)
                 spec["statement_components"].setdefault("swappable_input", False)
-            strategy._response_specification = spec
+                spec["statement_components"].setdefault("formatted", True)
+                spec["statement_components"].setdefault("editable_text_input", False)
+                spec["reference_components"].setdefault("arrow", True)
+                spec["reference_components"].setdefault("formatted", True)
+            strategy._response_specification_to_be_deleted = spec
+
+            if strategy.settings is None:
+                strategy_settings = adaptation.StrategySettings(
+                    name=None,
+                    system_prompt=strategy.system_prompt_to_be_deleted,
+                    _response_specification=strategy._response_specification_to_be_deleted,
+                    created_by=strategy.created_by,
+                )
+                session.add(strategy_settings)
+                strategy.settings = strategy_settings
+
         session.commit()
+
+    # Check that all JSON fields are valid
+    with database_utils.make_session(database_engine) as session:
+        for adaptation_ in session.query(adaptation.Adaptation).all():
+            # No need to check 'adaptation_.raw_llm_conversations': it has no schema
+            adaptation_.initial_assistant_response
+            adaptation_.adjustments
+            adaptation_.manual_edit
+        for batch in session.query(adaptation.Batch).all():
+            pass
+        for input in session.query(adaptation.Input).all():
+            pass
+        for strategy in session.query(adaptation.Strategy).all():
+            strategy.model
+        for strategy_settings in session.query(adaptation.StrategySettings).all():
+            strategy_settings.response_specification
 
 
 if __name__ == "__main__":

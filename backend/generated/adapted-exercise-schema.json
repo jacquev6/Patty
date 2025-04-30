@@ -29,6 +29,41 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditableTextInput": {
+      "properties": {
+        "kind": {
+          "const": "editableTextInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
               }
             ]
           },
@@ -56,6 +91,9 @@
               },
               {
                 "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
               }
             ]
           },
@@ -85,6 +123,102 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Formatted": {
+      "properties": {
+        "kind": {
+          "const": "formatted",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "bold": {
+          "title": "Bold",
+          "type": "boolean"
+        },
+        "italic": {
+          "title": "Italic",
+          "type": "boolean"
+        },
+        "underlined": {
+          "title": "Underlined",
+          "type": "boolean"
+        },
+        "highlighted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Highlighted"
+        },
+        "boxed": {
+          "title": "Boxed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "contents",
+        "bold",
+        "italic",
+        "underlined",
+        "highlighted",
+        "boxed"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FormattedTextContainer": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "FreeTextInput": {
       "properties": {
         "kind": {
@@ -109,6 +243,12 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
               }
             ]
           },
@@ -150,6 +290,12 @@
                 "$ref": "#/$defs/Whitespace"
               },
               {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              },
+              {
                 "$ref": "#/$defs/Choice"
               }
             ]
@@ -189,7 +335,7 @@
         },
         "choices": {
           "items": {
-            "$ref": "#/$defs/PureTextContainer"
+            "$ref": "#/$defs/FormattedTextContainer"
           },
           "title": "Choices",
           "type": "array"
@@ -207,29 +353,6 @@
       "type": "object",
       "additionalProperties": false
     },
-    "PureTextContainer": {
-      "properties": {
-        "contents": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "$ref": "#/$defs/Whitespace"
-              }
-            ]
-          },
-          "title": "Contents",
-          "type": "array"
-        }
-      },
-      "required": [
-        "contents"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
     "ReferenceLine": {
       "properties": {
         "contents": {
@@ -240,6 +363,12 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
               }
             ]
           },
@@ -268,6 +397,12 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
               }
             ]
           },
@@ -310,6 +445,9 @@
                 "$ref": "#/$defs/Arrow"
               },
               {
+                "$ref": "#/$defs/Formatted"
+              },
+              {
                 "$ref": "#/$defs/FreeTextInput"
               },
               {
@@ -320,6 +458,9 @@
               },
               {
                 "$ref": "#/$defs/SwappableInput"
+              },
+              {
+                "$ref": "#/$defs/EditableTextInput"
               }
             ]
           },
@@ -380,6 +521,12 @@
               },
               {
                 "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
               }
             ]
           },

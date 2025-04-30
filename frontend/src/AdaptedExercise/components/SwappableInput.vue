@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 import assert from '@/assert'
-import type { PureTextContainer } from '@/apiClient'
+import type { FormattedText } from '@/apiClient'
 import FormattedComponent from './FormattedComponent.vue'
 import type { InProgressExercise, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
@@ -11,7 +11,7 @@ const props = defineProps<{
   pageIndex: number
   lineIndex: number
   componentIndex: number
-  contents: PureTextContainer['contents']
+  contents: FormattedText[]
   tricolorable: boolean
 }>()
 
@@ -44,14 +44,7 @@ const actualContents = computed(() => {
   return component.contents
 })
 
-const formatted = computed(() => ({
-  kind: 'formatted' as const,
-  contents: actualContents.value,
-  bold: false,
-  italic: false,
-  highlighted: selected.value ? '#FFFDD4' : null,
-  boxed: false,
-}))
+const highlighted = computed(() => (selected.value ? '#FFFDD4' : null))
 
 function setAnswer(
   pageIndex: number,
@@ -100,9 +93,15 @@ function handleClick() {
 
 <template>
   <FormattedComponent
+    kind="formatted"
     class="main"
     :class="{ empty: actualContents.length === 0 }"
-    v-bind="formatted"
+    :contents="actualContents"
+    :bold="false"
+    :italic="false"
+    :underlined="false"
+    :highlighted
+    :boxed="false"
     :tricolorable
     data-cy="swappableInput"
     @click="handleClick"
@@ -119,5 +118,9 @@ function handleClick() {
 
 .main.empty {
   padding: 9px 32px;
+}
+
+.main + .main {
+  margin-left: 0.26em;
 }
 </style>

@@ -529,6 +529,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for free text inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
@@ -560,6 +561,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
@@ -582,6 +584,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for selectable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
@@ -615,6 +618,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
@@ -639,6 +643,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for multiple choices inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
@@ -670,6 +675,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
@@ -694,6 +700,7 @@ describe('Adapted exercise answers', () => {
   it('are saved for swappable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
@@ -724,6 +731,7 @@ describe('Adapted exercise answers', () => {
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
+        navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
@@ -736,5 +744,137 @@ describe('Adapted exercise answers', () => {
     cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'e')
     cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'a')
     cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'f')
+  })
+
+  const exerciseWithEditableTextInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'editableTextInput',
+                  contents: [{ kind: 'text', text: 'a0' }, { kind: 'whitespace' }, { kind: 'text', text: 'a1' }],
+                },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'editableTextInput',
+                  contents: [
+                    { kind: 'text', text: 'b0' },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'b1' },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'b2' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'C' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'editableTextInput',
+                  contents: [{ kind: 'text', text: 'c0' }, { kind: 'whitespace' }, { kind: 'text', text: 'c1' }],
+                },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'text', text: 'D' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'editableTextInput',
+                  contents: [{ kind: 'text', text: 'd0' }, { kind: 'whitespace' }, { kind: 'text', text: 'd1' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForEditableTextInputs: StudentAnswers = {
+    pages: {
+      '0': {
+        lines: {
+          '0': {
+            components: {
+              '2': { kind: 'editableTextInput', text: 'AAA AAA' },
+            },
+          },
+          '1': {
+            components: {
+              '2': { kind: 'editableTextInput', text: 'BBB BBB' },
+            },
+          },
+        },
+      },
+      '1': {
+        lines: {
+          '0': {
+            components: {
+              '2': { kind: 'editableTextInput', text: 'CCC CCC' },
+            },
+          },
+        },
+      },
+    },
+  }
+
+  it('are saved for editable text inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithEditableTextInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'a0 a1').type('{selectAll}AAA AAA', { delay: 0 })
+    cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'b0 b1 b2').type('{selectAll}BBB BBB', { delay: 0 })
+    cy.get('.control').eq(1).click()
+    cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'c0 c1').type('{selectAll}CCC CCC', { delay: 0 })
+    cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'd0 d1')
+
+    getAnswers().should('deep.equal', answersForEditableTextInputs)
+  })
+
+  it('are loaded for editable text inputs', () => {
+    setAnswers(answersForEditableTextInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithEditableTextInputs,
+      },
+    })
+
+    cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'AAA AAA')
+    cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'BBB BBB')
+    cy.get('.control').eq(1).click()
+    cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'CCC CCC')
+    cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'd0 d1')
   })
 })

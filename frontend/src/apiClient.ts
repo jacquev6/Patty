@@ -18,17 +18,19 @@ export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200
 export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
 
+export type ActiveEditableTextInput = {
+  kind: 'activeEditableTextInput'
+  contents: PlainText[]
+}
+
 export type AnyComponent =
   | AdaptedExercise['instruction']['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['example'], null>['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['hint'], null>['lines'][number]['contents'][number]
   | AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['reference'], null>['contents'][number]
+  | ActiveEditableTextInput
 
-type ActiveComponent = AnyComponent & {
-  kind: 'multipleChoicesInput' | 'freeTextInput' | 'selectableInput' | 'swappableInput'
-}
-
-export type PassiveComponent = Exclude<AnyComponent, ActiveComponent>
-
-export type PureTextContainer = (ActiveComponent & { kind: 'multipleChoicesInput' })['choices'][number]
+export type PlainText = AnyComponent & { kind: 'text' | 'whitespace' }
+export type FormattedText = AnyComponent & { kind: 'text' | 'whitespace' | 'arrow' | 'formatted' }
+export type PassiveComponent = AnyComponent & { kind: 'text' | 'whitespace' | 'arrow' | 'formatted' | 'choice' }
