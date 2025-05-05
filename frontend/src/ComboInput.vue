@@ -29,10 +29,10 @@ And I have to provide an ad-hoc implementation.
 import { useElementSize, useFocus } from '@vueuse/core'
 import { computed, useTemplateRef } from 'vue'
 import { useFloating } from '@floating-ui/vue'
+import { levenshteinEditDistance } from 'levenshtein-edit-distance'
 
 const props = defineProps<{
   suggestions: string[]
-  maxSuggestionsDisplayCount: number
 }>()
 
 const model = defineModel<string>({ required: false, default: '' })
@@ -42,10 +42,21 @@ const suggestionsElement = useTemplateRef('suggestionsElement')
 
 const { focused } = useFocus(inputElement)
 
-const filteredSuggestions = computed(() => {
-  return props.suggestions.filter((suggestion) => {
-    return suggestion.toLowerCase().includes(model.value.toLowerCase())
-  })
+const sortedSuggestions = computed(() => {
+  const needle = model.value.toLowerCase()
+  if (model.value === '') {
+    return props.suggestions.map((suggestion) => ({ found: 0, index: -1, suggestion }))
+  } else {
+    return props.suggestions
+      .map((suggestion) => ({ distance: levenshteinEditDistance(needle, suggestion.toLowerCase()), suggestion }))
+      .sort((a, b) => a.distance - b.distance)
+      .map(({ suggestion }) => {
+        const index = suggestion.toLowerCase().indexOf(needle)
+        const found = index !== -1 ? 1 : 0
+        return { found, index, suggestion }
+      })
+      .sort((a, b) => b.found - a.found)
+  }
 })
 
 const { floatingStyles } = useFloating(inputElement, suggestionsElement, { placement: 'bottom-start' })
@@ -69,13 +80,16 @@ const style = computed(() => {
     <div ref="suggestionsElement" class="suggestions" :style>
       <p
         data-cy="suggestion"
-        v-for="suggestion in filteredSuggestions.slice(0, maxSuggestionsDisplayCount)"
+        v-for="{ index, suggestion } in sortedSuggestions"
         class="suggestion"
         @mousedown="model = suggestion"
       >
-        {{ suggestion }}
+        <template v-if="index === -1">{{ suggestion }}</template>
+        <template v-else>
+          {{ suggestion.slice(0, index) }}<strong>{{ suggestion.slice(index, index + model.length) }}</strong
+          >{{ suggestion.slice(index + model.length) }}
+        </template>
       </p>
-      <p v-if="filteredSuggestions.length > maxSuggestionsDisplayCount">... (type to filter)</p>
     </div>
   </Teleport>
 </template>

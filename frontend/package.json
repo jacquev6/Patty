@@ -20,6 +20,7 @@
     "autosize": "^6.0.1",
     "deep-copy": "^1.4.2",
     "json-stringify-pretty-compact": "^4.0.0",
+    "levenshtein-edit-distance": "^3.0.1",
     "lodash": "^4.17.21",
     "marked": "^15.0.7",
     "modern-normalize": "^3.0.1",
