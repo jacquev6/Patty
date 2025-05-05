@@ -13,7 +13,3 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.execute(create_exercise_number_collation)
-
-
-def downgrade() -> None:
-    op.execute(drop_exercise_number_collation)
