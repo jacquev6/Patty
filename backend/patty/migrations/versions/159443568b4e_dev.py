@@ -20,14 +20,6 @@ def upgrade() -> None:
         sa.CheckConstraint("name != ''", name=op.f("ck_adaptation_strategy_settings_branches_name_not_empty")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_strategy_settings_branches")),
     )
-    op.create_foreign_key(
-        op.f("fk_adaptation_strategy_settings_branches_head_id_adaptation_strategy_settings"),
-        "adaptation_strategy_settings_branches",
-        "adaptation_strategy_settings",
-        ["head_id"],
-        ["id"],
-        use_alter=True,
-    )
     op.alter_column("adaptation_strategies", "settings_id", existing_type=sa.INTEGER(), nullable=False)
     op.drop_column("adaptation_strategies", "response_specification")
     op.drop_column("adaptation_strategies", "system_prompt")
@@ -55,13 +47,6 @@ def upgrade() -> None:
         "adaptation_strategy_settings",
         "adaptation_strategy_settings_branches",
         ["branch_id"],
-        ["id"],
-    )
-    op.create_foreign_key(
-        op.f("fk_adaptation_strategy_settings_parent_id_adaptation_strategy_settings"),
-        "adaptation_strategy_settings",
-        "adaptation_strategy_settings",
-        ["parent_id"],
         ["id"],
     )
     op.create_check_constraint(

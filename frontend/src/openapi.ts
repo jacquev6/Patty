@@ -371,6 +371,13 @@ export interface components {
        * Format: date-time
        */
       createdAt: string
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Strategysettingsname */
+      strategySettingsName: string | null
     }
     'Choice-Input': {
       /**

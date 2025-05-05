@@ -943,6 +943,31 @@
             "type": "string",
             "format": "date-time",
             "title": "Createdat"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "strategySettingsName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategysettingsname"
           }
         },
         "additionalProperties": false,
@@ -950,7 +975,9 @@
         "required": [
           "id",
           "createdBy",
-          "createdAt"
+          "createdAt",
+          "model",
+          "strategySettingsName"
         ],
         "title": "Batch"
       },

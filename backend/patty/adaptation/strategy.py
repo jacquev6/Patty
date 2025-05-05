@@ -77,10 +77,8 @@ class StrategySettingsBranch(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     # Head is temporarily None on creation, before the first settings are created.
-    head_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey("adaptation_strategy_settings.id", use_alter=True)
-    )
-    head: orm.Mapped[StrategySettings | None] = orm.relationship("StrategySettings", foreign_keys=[head_id])
+    head_id: orm.Mapped[int | None] = orm.mapped_column()
+    head: orm.Mapped[StrategySettings | None] = orm.relationship("StrategySettings", foreign_keys=[head_id, id])
 
     name: orm.Mapped[str]
 
@@ -106,8 +104,10 @@ class StrategySettings(OrmBase):
         StrategySettingsBranch, foreign_keys=[branch_id]
     )
 
-    parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_strategy_settings.id"))
-    parent: orm.Mapped[StrategySettings | None] = orm.relationship("StrategySettings", foreign_keys=[parent_id])
+    parent_id: orm.Mapped[int | None] = orm.mapped_column()
+    parent: orm.Mapped[StrategySettings | None] = orm.relationship(
+        "StrategySettings", foreign_keys=[parent_id, branch_id], remote_side=[id, branch_id], overlaps="branch"
+    )
 
     created_by: orm.Mapped[str]
 
@@ -163,7 +163,7 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_adapta_6797"
+            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_id_ada_7eb5"
         )
 
     def test_create_branch_with_empty_name(self) -> None:
@@ -206,6 +206,38 @@ class StrategyTestCase(TestCaseWithDatabase):
         self.assertEqual(
             cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_id_ada_7eb5"
         )
+
+    def test_create_branch_history(self) -> None:
+        branch = self.create_model(StrategySettingsBranch, name="branch")
+        settings_1 = self.create_model(
+            StrategySettings,
+            branch=branch,
+            created_by="test",
+            system_prompt="prompt a",
+            response_specification=self.response_specification,
+        )
+        settings_2 = self.create_model(
+            StrategySettings,
+            branch=branch,
+            parent=settings_1,
+            created_by="test",
+            system_prompt="prompt b",
+            response_specification=self.response_specification,
+        )
+        settings_3 = self.create_model(
+            StrategySettings,
+            branch=branch,
+            parent=settings_2,
+            created_by="test",
+            system_prompt="prompt c",
+            response_specification=self.response_specification,
+        )
+        branch.head = settings_3
+        self.session.flush()
+        assert branch.head is not None
+        assert branch.head.parent is not None
+        assert branch.head.parent.parent is not None
+        self.assertEqual(branch.head.parent.parent.system_prompt, "prompt a")
 
     def test_create_child_settings_with_inconsistent_branch__with_orm(self) -> None:
         branch_1 = self.create_model(StrategySettingsBranch, name="branch_1")

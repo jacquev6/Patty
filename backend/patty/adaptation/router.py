@@ -265,6 +265,8 @@ class GetBatchesResponse(ApiModel):
         id: str
         created_by: str
         created_at: datetime.datetime
+        model: llm.ConcreteModel
+        strategy_settings_name: str | None
 
     batches: list[Batch]
 
@@ -274,7 +276,13 @@ async def get_batches(session: database_utils.SessionDependable) -> GetBatchesRe
     batches = session.query(Batch).order_by(-Batch.id).all()
     return GetBatchesResponse(
         batches=[
-            GetBatchesResponse.Batch(id=str(batch.id), created_by=batch.created_by, created_at=batch.created_at)
+            GetBatchesResponse.Batch(
+                id=str(batch.id),
+                created_by=batch.created_by,
+                created_at=batch.created_at,
+                model=batch.strategy.model,
+                strategy_settings_name=make_api_strategy_settings_name(batch.strategy.settings),
+            )
             for batch in batches
         ]
     )
@@ -408,17 +416,25 @@ def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
 
 
 def make_api_strategy_settings(settings: StrategySettings) -> ApiStrategySettings:
-    if settings.branch is None:
-        name = None
-    elif settings.branch.head_id == settings.id:
-        name = settings.branch.name
-    else:
-        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
-        name = f"{settings.branch.name} (previous version)"
-
     return ApiStrategySettings(
-        name=name, system_prompt=settings.system_prompt, response_specification=settings.response_specification
+        name=make_api_strategy_settings_name(settings),
+        system_prompt=settings.system_prompt,
+        response_specification=settings.response_specification,
     )
+
+
+def make_api_strategy_settings_name(settings: StrategySettings) -> str | None:
+    if settings.branch is None:
+        return None
+    else:
+        assert settings.branch.head is not None
+        if settings.branch.head.id == settings.id:
+            return settings.branch.name
+        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
+        elif settings.branch.head.parent_id == settings.id:
+            return f"{settings.branch.name} (previous version)"
+        else:
+            return f"{settings.branch.name} (older version)"
 
 
 def make_api_input(input: DbInput) -> ApiInput:
