@@ -25,6 +25,7 @@ from .batch import Batch
 from .input import Input as DbInput
 from .strategy import (
     Strategy as DbStrategy,
+    StrategySettingsBranch,
     StrategySettings,
     ConcreteLlmResponseSpecification,
     JsonSchemaLlmResponseSpecification,
@@ -45,10 +46,15 @@ LlmMessage = (
 )
 
 
-class ApiStrategy(ApiModel):
-    model: llm.ConcreteModel
+class ApiStrategySettings(ApiModel):
+    name: str | None
     system_prompt: str
     response_specification: ConcreteLlmResponseSpecification
+
+
+class ApiStrategy(ApiModel):
+    model: llm.ConcreteModel
+    settings: ApiStrategySettings
 
 
 class ApiInput(ApiModel):
@@ -78,6 +84,7 @@ class LatestBatch(ApiModel):
     id: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
+    available_strategy_settings: list[ApiStrategySettings]
 
 
 @router.get("/latest-batch")
@@ -87,10 +94,17 @@ def get_latest_batch(user: str, session: database_utils.SessionDependable) -> La
         if batch is not None:
             break
     assert batch is not None
+    available_strategy_settings = []
+    for branch in session.query(StrategySettingsBranch).order_by(StrategySettingsBranch.name).all():
+        assert branch.head is not None
+        available_strategy_settings.append(make_api_strategy_settings(branch.head))
+        if branch.head.parent is not None:
+            available_strategy_settings.append(make_api_strategy_settings(branch.head.parent))
     return LatestBatch(
         id=str(batch.id),
         strategy=make_api_strategy(batch.strategy),
         inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
+        available_strategy_settings=available_strategy_settings,
     )
 
 
@@ -111,13 +125,48 @@ async def post_batch(
     session: database_utils.SessionDependable,
     background_tasks: fastapi.BackgroundTasks,
 ) -> PostBatchResponse:
-    strategy_settings = StrategySettings(
-        created_by=req.creator,
-        system_prompt=req.strategy.system_prompt,
-        response_specification=req.strategy.response_specification,
-    )
-    session.add(strategy_settings)
-    strategy = DbStrategy(created_by=req.creator, model=req.strategy.model, settings=strategy_settings)
+    if req.strategy.settings.name is None:
+        base_settings = None
+        branch = None
+    else:
+        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
+        if req.strategy.settings.name.endswith(" (previous version)"):
+            branch_name = req.strategy.settings.name[:-19]
+        else:
+            branch_name = req.strategy.settings.name
+        branch = session.query(StrategySettingsBranch).filter(StrategySettingsBranch.name == branch_name).first()
+        if branch is None:
+            assert branch_name == req.strategy.settings.name
+            base_settings = None
+            branch = StrategySettingsBranch(name=branch_name)
+            session.add(branch)
+            # session.flush()
+        else:
+            assert branch.head is not None
+            if branch_name == req.strategy.settings.name:
+                base_settings = branch.head
+            else:
+                base_settings = branch.head.parent
+
+    if (
+        base_settings is None
+        or base_settings.system_prompt != req.strategy.settings.system_prompt
+        or base_settings.response_specification != req.strategy.settings.response_specification
+    ):
+        settings = StrategySettings(
+            branch=branch,
+            parent=base_settings,
+            created_by=req.creator,
+            system_prompt=req.strategy.settings.system_prompt,
+            response_specification=req.strategy.settings.response_specification,
+        )
+        session.add(settings)
+    else:
+        settings = base_settings
+    if branch is not None:
+        session.flush()
+        branch.head = settings
+    strategy = DbStrategy(created_by=req.creator, model=req.strategy.model, settings=settings)
     session.add(strategy)
 
     batch = Batch(created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc), strategy=strategy)
@@ -229,12 +278,6 @@ async def get_batches(session: database_utils.SessionDependable) -> GetBatchesRe
             for batch in batches
         ]
     )
-
-
-class PostAdaptationRequest(ApiModel):
-    creator: str
-    strategy: ApiStrategy
-    input: ApiInput
 
 
 @router.get("/{id}")
@@ -361,10 +404,20 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
 
 
 def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
-    return ApiStrategy(
-        model=strategy.model,
-        system_prompt=strategy.settings.system_prompt,
-        response_specification=strategy.settings.response_specification,
+    return ApiStrategy(model=strategy.model, settings=make_api_strategy_settings(strategy.settings))
+
+
+def make_api_strategy_settings(settings: StrategySettings) -> ApiStrategySettings:
+    if settings.branch is None:
+        name = None
+    elif settings.branch.head_id == settings.id:
+        name = settings.branch.name
+    else:
+        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
+        name = f"{settings.branch.name} (previous version)"
+
+    return ApiStrategySettings(
+        name=name, system_prompt=settings.system_prompt, response_specification=settings.response_specification
     )
 
 

@@ -212,7 +212,12 @@ watch(Escape, () => {
         Created by: {{ adaptation.createdBy }}, part of
         <RouterLink :to="{ name: 'batch', params: { id: adaptation.batchId } }">this batch</RouterLink>.
       </p>
-      <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="adaptation.strategy" />
+      <AdaptationStrategyEditor
+        :availableLlmModels="[]"
+        :availableStrategySettings="[]"
+        :disabled="true"
+        :modelValue="adaptation.strategy"
+      />
     </template>
     <template #col-2>
       <h1>Input</h1>

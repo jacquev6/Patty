@@ -279,13 +279,7 @@ export interface components {
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
-      /** Systemprompt */
-      systemPrompt: string
-      /** Responsespecification */
-      responseSpecification:
-        | components['schemas']['JsonFromTextLlmResponseSpecification']
-        | components['schemas']['JsonObjectLlmResponseSpecification']
-        | components['schemas']['JsonSchemaLlmResponseSpecification']
+      settings: components['schemas']['ApiStrategySettings-Input']
     }
     /** ApiStrategy */
     'ApiStrategy-Output': {
@@ -294,6 +288,24 @@ export interface components {
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+      settings: components['schemas']['ApiStrategySettings-Output']
+    }
+    /** ApiStrategySettings */
+    'ApiStrategySettings-Input': {
+      /** Name */
+      name: string | null
+      /** Systemprompt */
+      systemPrompt: string
+      /** Responsespecification */
+      responseSpecification:
+        | components['schemas']['JsonFromTextLlmResponseSpecification']
+        | components['schemas']['JsonObjectLlmResponseSpecification']
+        | components['schemas']['JsonSchemaLlmResponseSpecification']
+    }
+    /** ApiStrategySettings */
+    'ApiStrategySettings-Output': {
+      /** Name */
+      name: string | null
       /** Systemprompt */
       systemPrompt: string
       /** Responsespecification */
@@ -650,6 +662,8 @@ export interface components {
       strategy: components['schemas']['ApiStrategy-Output']
       /** Inputs */
       inputs: components['schemas']['ApiInput'][]
+      /** Availablestrategysettings */
+      availableStrategySettings: components['schemas']['ApiStrategySettings-Output'][]
     }
     'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Contents */

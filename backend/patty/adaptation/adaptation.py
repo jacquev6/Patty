@@ -119,7 +119,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
@@ -153,7 +152,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
@@ -197,7 +195,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )

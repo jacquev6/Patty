@@ -68,6 +68,7 @@ const style = computed(() => {
   <Teleport to="body" v-if="focused">
     <div ref="suggestionsElement" class="suggestions" :style>
       <p
+        data-cy="suggestion"
         v-for="suggestion in filteredSuggestions.slice(0, maxSuggestionsDisplayCount)"
         class="suggestion"
         @mousedown="model = suggestion"

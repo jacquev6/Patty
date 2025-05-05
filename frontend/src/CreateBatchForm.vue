@@ -157,8 +157,10 @@ const cleanedUpInputs = computed(() =>
 )
 
 const disabled = computed(() => {
-  return strategy.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
+  return strategy.settings.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
 })
+
+const availableStrategySettings = computed(() => props.latestBatch.availableStrategySettings)
 </script>
 
 <template>
@@ -166,7 +168,7 @@ const disabled = computed(() => {
     <ResizableColumns :columns="[1, 1]">
       <template #col-1>
         <p>Created by: <IdentifiedUser /></p>
-        <AdaptationStrategyEditor :availableLlmModels v-model="strategy" />
+        <AdaptationStrategyEditor :availableLlmModels :availableStrategySettings v-model="strategy" />
       </template>
       <template #col-2>
         <h1>Inputs</h1>

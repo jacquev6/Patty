@@ -18,7 +18,12 @@ const adaptations = computed(() => props.batch.adaptations.map(preprocessAdaptat
   <ResizableColumns :columns="[1, 2]">
     <template #col-1>
       <p>Created by: {{ batch.createdBy }}</p>
-      <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="batch.strategy" />
+      <AdaptationStrategyEditor
+        :availableLlmModels="[]"
+        :availableStrategySettings="[]"
+        :disabled="true"
+        :modelValue="batch.strategy"
+      />
     </template>
     <template #col-2>
       <p><a :href="`/api/adaptation/export/batch-${batch.id}.html`">Download standalone HTML</a></p>
