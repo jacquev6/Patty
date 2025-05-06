@@ -19,6 +19,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(), nullable=False),
         sa.CheckConstraint("name != ''", name=op.f("ck_adaptation_strategy_settings_branches_name_not_empty")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_strategy_settings_branches")),
+        sa.UniqueConstraint("name", name=op.f("uq_adaptation_strategy_settings_branches_name")),
     )
     op.alter_column("adaptation_strategies", "settings_id", existing_type=sa.INTEGER(), nullable=False)
     op.drop_column("adaptation_strategies", "system_prompt")

@@ -80,7 +80,7 @@ class StrategySettingsBranch(OrmBase):
     head_id: orm.Mapped[int | None] = orm.mapped_column()
     head: orm.Mapped[StrategySettings | None] = orm.relationship("StrategySettings", foreign_keys=[head_id, id])
 
-    name: orm.Mapped[str]
+    name: orm.Mapped[str] = orm.mapped_column(unique=True)
 
 
 class StrategySettings(OrmBase):
@@ -153,6 +153,14 @@ class Strategy(OrmBase):
 
 class StrategyTestCase(TestCaseWithDatabase):
     response_specification = JsonFromTextLlmResponseSpecification(format="json", formalism="text")
+
+    def test_create_two_branches_with_same_name(self) -> None:
+        self.create_model(StrategySettingsBranch, name="branch")
+        with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
+            self.create_model(StrategySettingsBranch, name="branch")
+
+        assert isinstance(cm.exception.orig, psycopg2.errors.UniqueViolation)
+        self.assertEqual(str(cm.exception.orig.diag.constraint_name), "uq_adaptation_strategy_settings_branches_name")
 
     def test_create_branch_with_bad_head(self) -> None:
         # This test is required because we're using a foreign key with use_alter=True (to break a cycle)

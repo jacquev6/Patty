@@ -28,5 +28,8 @@ then
 fi
 
 ./alembic.sh revision --autogenerate $rev_id -m dev
+
+read -p "Check (and fix) the generated migration file. Press enter to continue"
+
 ./alembic.sh upgrade head
 ./shell.sh -c "python -m patty migrate-data"
