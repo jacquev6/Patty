@@ -22,8 +22,8 @@ class Batch(OrmBase):
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
-    strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
+    strategy: orm.Mapped[Strategy] = orm.relationship(Strategy, foreign_keys=[strategy_id], remote_side=[Strategy.id])
 
     adaptations: orm.Mapped[list["adaptation.Adaptation"]] = orm.relationship(
-        back_populates="batch", foreign_keys="Adaptation.batch_id", order_by="Adaptation.id"
+        foreign_keys="Adaptation.batch_id", back_populates="batch", order_by="Adaptation.id"
     )

@@ -78,7 +78,11 @@ class StrategySettingsBranch(OrmBase):
 
     # Head is temporarily None on creation, before the first settings are created.
     head_id: orm.Mapped[int | None] = orm.mapped_column()
-    head: orm.Mapped[StrategySettings | None] = orm.relationship("StrategySettings", foreign_keys=[head_id, id])
+    head: orm.Mapped[StrategySettings | None] = orm.relationship(
+        "StrategySettings",
+        foreign_keys=[head_id, id],
+        remote_side=lambda: [StrategySettings.id, StrategySettings.branch_id],
+    )
 
     name: orm.Mapped[str] = orm.mapped_column(unique=True)
 
@@ -101,12 +105,12 @@ class StrategySettings(OrmBase):
 
     branch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(StrategySettingsBranch.id))
     branch: orm.Mapped[StrategySettingsBranch | None] = orm.relationship(
-        StrategySettingsBranch, foreign_keys=[branch_id]
+        StrategySettingsBranch, foreign_keys=[branch_id], remote_side=[StrategySettingsBranch.id]
     )
 
     parent_id: orm.Mapped[int | None] = orm.mapped_column()
     parent: orm.Mapped[StrategySettings | None] = orm.relationship(
-        "StrategySettings", foreign_keys=[parent_id, branch_id], remote_side=[id, branch_id], overlaps="branch"
+        "StrategySettings", foreign_keys=[parent_id], remote_side=[id]
     )
 
     created_by: orm.Mapped[str]
@@ -148,7 +152,9 @@ class Strategy(OrmBase):
         self._model = value.model_dump()
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(StrategySettings.id))
-    settings: orm.Mapped[StrategySettings] = orm.relationship(StrategySettings)
+    settings: orm.Mapped[StrategySettings] = orm.relationship(
+        StrategySettings, foreign_keys=[settings_id], remote_side=[StrategySettings.id]
+    )
 
 
 class StrategyTestCase(TestCaseWithDatabase):

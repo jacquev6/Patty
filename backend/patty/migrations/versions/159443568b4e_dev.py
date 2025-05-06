@@ -43,6 +43,9 @@ def upgrade() -> None:
         ["parent_id", "branch_id"],
         ["id", "branch_id"],
     )
+    op.drop_constraint(
+        "fk_adaptation_adaptations_batch_id_adaptation_batches", "adaptation_adaptations", type_="foreignkey"
+    )
     op.drop_column("adaptation_strategy_settings", "name")
     # ### end Alembic commands ###
     op.create_foreign_key(
