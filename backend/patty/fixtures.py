@@ -494,5 +494,4 @@ app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATA
 
 @app.post("/load")
 def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
-    print(available_fixtures)
-    load(session, fixtures.split(","))
+    load(session, [] if fixtures == "" else fixtures.split(","))
