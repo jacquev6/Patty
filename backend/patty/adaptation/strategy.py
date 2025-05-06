@@ -97,7 +97,7 @@ class StrategySettings(OrmBase):
         sql.CheckConstraint("parent_id IS NULL OR branch_id IS NOT NULL", name="branch_required_if_parent"),
     )
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     branch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(StrategySettingsBranch.id))
     branch: orm.Mapped[StrategySettingsBranch | None] = orm.relationship(
@@ -130,7 +130,7 @@ class StrategySettings(OrmBase):
 class Strategy(OrmBase):
     __tablename__ = "adaptation_strategies"
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_by: orm.Mapped[str]
 

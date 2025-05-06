@@ -50,7 +50,7 @@ class Adaptation(OrmBase):
         ),
     )
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_by: orm.Mapped[str]
 
