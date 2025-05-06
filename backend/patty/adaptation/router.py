@@ -140,7 +140,6 @@ async def post_batch(
             base_settings = None
             branch = StrategySettingsBranch(name=branch_name)
             session.add(branch)
-            # session.flush()
         else:
             assert branch.head is not None
             if branch_name == req.strategy.settings.name:
