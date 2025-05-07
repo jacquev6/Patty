@@ -1,8 +1,7 @@
 from typing import Sequence, Union
 
 from alembic import op
-
-from patty.database_utils import create_exercise_number_collation, drop_exercise_number_collation
+import sqlalchemy as sa
 
 
 revision: str = "429d2fb463dd"
@@ -12,4 +11,5 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(create_exercise_number_collation)
+    # Custom collation: https://dba.stackexchange.com/a/285230
+    op.execute(sa.text("CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"))

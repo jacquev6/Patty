@@ -176,3 +176,21 @@ describe('The autonomous HTML for a batch', () => {
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
   })
 })
+
+describe('The autonomous HTML for a textbook', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-textbook')
+  })
+
+  it('is sorted by page and exercise number', () => {
+    cy.visit('/api/adaptation/export/textbook-1.html?download=false')
+    cy.get('a').should('have.length', 6)
+    cy.get('a').eq(0).should('have.text', 'Exercise P40Ex4')
+    cy.get('a').eq(1).should('have.text', 'Exercise P40Ex6')
+    cy.get('a').eq(2).should('have.text', 'Exercise P40Ex8')
+    cy.get('a').eq(3).should('have.text', 'Exercise P40Ex30')
+    cy.get('a').eq(4).should('have.text', 'Exercise P42Ex5')
+    cy.get('a').eq(5).should('have.text', 'Exercise P42Ex6')
+  })
+})

@@ -33,6 +33,7 @@ services:
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
       "backend/patty/adaptation/templates/batch-export/index.html",
+      "backend/patty/adaptation/templates/textbook-export/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -72,6 +73,26 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/batch-export/index.html"]
+      interval: 0.5s
+      retries: 12
+
+  textbook-export-template-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: textbook-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/textbook-export", "--emptyOutDir"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      npm-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/textbook-export/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -145,6 +166,8 @@ services:
       adaptation-export-template-generator:
         condition: service_healthy
       batch-export-template-generator:
+        condition: service_healthy
+      textbook-export-template-generator:
         condition: service_healthy
       data-loader:
         condition: service_completed_successfully

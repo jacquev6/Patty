@@ -59,6 +59,8 @@ class Adaptation(OrmBase):
         Batch, foreign_keys=[batch_id], remote_side=[Batch.id], back_populates="adaptations"
     )
 
+    removed_from_textbook: orm.Mapped[bool] = orm.mapped_column(default=False, server_default="false")
+
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
     strategy: orm.Mapped[Strategy] = orm.relationship(Strategy, foreign_keys=[strategy_id], remote_side=[Strategy.id])
 

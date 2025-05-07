@@ -28,7 +28,7 @@ const adaptations = computed(() => props.batch.adaptations.map(preprocessAdaptat
     <template #col-2>
       <p><a :href="`/api/adaptation/export/batch-${batch.id}.html`">Download standalone HTML</a></p>
       <h1>Inputs</h1>
-      <AdaptationPreview v-for="(adaptation, index) in adaptations" :index :adaptation />
+      <AdaptationPreview v-for="(adaptation, index) in adaptations" header="h2" :index :adaptation />
     </template>
   </ResizableColumns>
 </template>

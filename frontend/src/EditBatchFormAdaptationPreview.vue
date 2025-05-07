@@ -9,6 +9,7 @@ import type { PreprocessedAdaptation } from './adaptations'
 import BusyBox from './BusyBox.vue'
 
 defineProps<{
+  header: string
   index: number
   adaptation: PreprocessedAdaptation
 }>()
@@ -26,15 +27,17 @@ watch(Escape, () => {
   <div style="margin-top: 5px">
     <FixedColumns :columns="[1, 1]" :gutters="false">
       <template #col-1>
-        <h2>
-          Input {{ index + 1 }}
-          <span v-if="adaptation.status.kind === 'inProgress'" class="inProgress">
-            (in progress, will refresh when done)
-          </span>
-        </h2>
-        <p>
-          Page: {{ adaptation.input.pageNumber ?? 'N/A' }}, exercise: {{ adaptation.input.exerciseNumber ?? 'N/A' }}
-        </p>
+        <slot>
+          <component :is="header" style="margin-top: 0">
+            Input {{ index + 1 }}
+            <span v-if="adaptation.status.kind === 'inProgress'" class="inProgress">
+              (in progress, will refresh when done)
+            </span>
+          </component>
+          <p>
+            Page: {{ adaptation.input.pageNumber ?? 'N/A' }}, exercise: {{ adaptation.input.exerciseNumber ?? 'N/A' }}
+          </p>
+        </slot>
         <p>
           <template v-for="(line, index) in adaptation.input.text">
             <br v-if="index !== 0" />
@@ -53,7 +56,7 @@ watch(Escape, () => {
           <BusyBox :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
         </template>
         <template v-else-if="adaptation.status.kind === 'error'">
-          <h2>Error with the LLM</h2>
+          <component :is="header" style="margin-top: 0">Error with the LLM</component>
           <p>
             <template v-if="adaptation.status.error === 'invalid-json'">
               The LLM returned a JSON response that does not validate against the adapted exercise schema.
@@ -82,10 +85,6 @@ watch(Escape, () => {
 </template>
 
 <style scoped>
-h2 {
-  margin-top: 0;
-}
-
 span.inProgress {
   color: gray;
   font-size: 70%;

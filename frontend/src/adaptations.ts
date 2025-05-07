@@ -8,6 +8,7 @@ export type PreprocessedAdaptation = {
   input: { pageNumber: number | null; exerciseNumber: string | null; text: string[] }
   adjustmentPrompts: string[]
   rawLlmConversations: ApiAdaptation['rawLlmConversations']
+  removedFromTextbook: boolean
   llmStatus:
     | {
         kind: 'inProgress'
@@ -96,6 +97,7 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
     },
     adjustmentPrompts: adaptation.adjustments.map((adjustment) => adjustment.userPrompt),
     rawLlmConversations: adaptation.rawLlmConversations,
+    removedFromTextbook: adaptation.removedFromTextbook,
     llmStatus,
     status,
   }

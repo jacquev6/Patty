@@ -15,6 +15,7 @@ import TextArea from './TextArea.vue'
 import { computed, useTemplateRef } from 'vue'
 
 defineProps<{
+  headers: string
   index: number
 }>()
 
@@ -56,7 +57,7 @@ defineExpose({
 </script>
 
 <template>
-  <h2>
+  <component :is="headers">
     Input {{ index }}
     <template v-if="model.inputFile !== undefined">
       <span class="discreet">({{ model.inputFile }})</span>
@@ -65,7 +66,7 @@ defineExpose({
       <WhiteSpace />
       <span class="discreet">(empty, ignored)</span>
     </template>
-  </h2>
+  </component>
   <p>
     Page: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />, exercise:
     <InputForNonEmptyStringOrNull data-cy="input-exercise-number" v-model="exerciseNumberProxy" />

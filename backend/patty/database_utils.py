@@ -16,15 +16,9 @@ Engine = sqlalchemy.Engine
 
 Session = sqlalchemy.orm.Session
 
-# Custom collation: https://dba.stackexchange.com/a/285230
-create_exercise_number_collation = sql.text(
-    "CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"
-)
-drop_exercise_number_collation = sql.text("DROP COLLATION exercise_number")
 
-
-def create_engine(url: str) -> Engine:
-    return sqlalchemy.create_engine(url)
+def create_engine(url: str, echo: bool = False) -> Engine:
+    return sqlalchemy.create_engine(url, echo=echo)
 
 
 def make_session(engine: Engine) -> Session:

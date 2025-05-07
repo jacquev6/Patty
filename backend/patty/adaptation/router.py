@@ -30,6 +30,7 @@ from .strategy import (
     ConcreteLlmResponseSpecification,
     JsonSchemaLlmResponseSpecification,
 )
+from .textbook import Textbook
 
 
 __all__ = ["router"]
@@ -73,6 +74,7 @@ class ApiAdaptation(ApiModel):
     initial_assistant_response: AssistantResponse | None
     adjustments: list[Adjustment]
     manual_edit: Exercise | None
+    removed_from_textbook: bool
 
 
 @router.post("/llm-response-schema")
@@ -272,7 +274,7 @@ class GetBatchesResponse(ApiModel):
 
 @router.get("/batches")
 async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
-    batches = session.query(Batch).order_by(-Batch.id).all()
+    batches = session.query(Batch).filter(Batch.textbook_id == None).order_by(-Batch.id).all()
     return GetBatchesResponse(
         batches=[
             GetBatchesResponse.Batch(
@@ -285,6 +287,164 @@ async def get_batches(session: database_utils.SessionDependable) -> GetBatchesRe
             for batch in batches
         ]
     )
+
+
+class PostTextbookRequest(ApiModel):
+    creator: str
+    title: str
+
+
+class PostTextbookResponse(ApiModel):
+    id: str
+
+
+@router.post("/textbook")
+def post_textbook(
+    req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
+) -> PostTextbookResponse:
+    textbook = Textbook(
+        title=req.title, created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc)
+    )
+    session.add(textbook)
+    session.flush()
+    return PostTextbookResponse(id=str(textbook.id))
+
+
+class ApiTextbook(ApiModel):
+    id: str
+    created_by: str
+    title: str
+
+    class Batch(ApiModel):
+        id: str
+        strategy: ApiStrategy
+        adaptations: list[ApiAdaptation]
+        removed_from_textbook: bool
+
+    batches: list[Batch]
+
+
+class GetTextbookResponse(ApiModel):
+    textbook: ApiTextbook
+    available_strategy_settings: list[str]
+
+
+@router.get("/textbook/{id}")
+async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
+    textbook = get_by_id(session, Textbook, id)
+    return GetTextbookResponse(
+        textbook=make_api_textbook(textbook),
+        available_strategy_settings=[
+            branch.name for branch in session.query(StrategySettingsBranch).order_by(StrategySettingsBranch.name).all()
+        ],
+    )
+
+
+class GetTextbooksResponse(ApiModel):
+    class Textbook(ApiModel):
+        id: str
+        created_by: str
+        created_at: datetime.datetime
+        title: str
+
+    textbooks: list[Textbook]
+
+
+@router.get("/textbooks")
+async def get_textbooks(session: database_utils.SessionDependable) -> GetTextbooksResponse:
+    textbooks = session.query(Textbook).order_by(-Textbook.id).all()
+    return GetTextbooksResponse(
+        textbooks=[
+            GetTextbooksResponse.Textbook(
+                id=str(textbook.id),
+                created_by=textbook.created_by,
+                created_at=textbook.created_at,
+                title=textbook.title,
+            )
+            for textbook in textbooks
+        ]
+    )
+
+
+class PostTextbookBatchRequest(ApiModel):
+    creator: str
+    model: llm.ConcreteModel
+    branch_name: str
+    inputs: list[ApiInput]
+
+
+@router.post("/textbook/{id}/batches")
+def post_textbook_batch(
+    id: str,
+    req: PostTextbookBatchRequest,
+    engine: database_utils.EngineDependable,
+    session: database_utils.SessionDependable,
+    background_tasks: fastapi.BackgroundTasks,
+) -> ApiTextbook:
+    textbook = get_by_id(session, Textbook, id)
+
+    branch = session.query(StrategySettingsBranch).filter(StrategySettingsBranch.name == req.branch_name).first()
+    assert branch is not None
+    assert branch.head is not None
+
+    strategy = DbStrategy(created_by=req.creator, model=req.model, settings=branch.head)
+    session.add(strategy)
+
+    batch = Batch(
+        textbook=textbook,
+        created_by=req.creator,
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        strategy=strategy,
+    )
+    session.add(batch)
+
+    for req_input in req.inputs:
+        input = DbInput(
+            created_by=req.creator,
+            page_number=req_input.page_number,
+            exercise_number=req_input.exercise_number,
+            text=req_input.text,
+        )
+        session.add(input)
+
+        adaptation = DbAdaptation(
+            created_by=req.creator,
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[],
+            initial_assistant_response=None,
+            adjustments=[],
+        )
+        session.add(adaptation)
+
+    session.flush()
+
+    background_tasks.add_task(submit_batch, engine, batch.id)
+
+    return make_api_textbook(textbook)
+
+
+@router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
+def put_textbook_batch_removed(
+    textbook_id: str, batch_id: str, removed: bool, session: database_utils.SessionDependable
+) -> ApiTextbook:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    batch = get_by_id(session, Batch, batch_id)
+    assert batch.textbook == textbook
+    batch.removed_from_textbook = removed
+    return make_api_textbook(textbook)
+
+
+@router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
+def put_textbook_adaptation_removed(
+    textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
+) -> ApiTextbook:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    adaptation = get_by_id(session, DbAdaptation, adaptation_id)
+    assert adaptation.batch.textbook == textbook
+    adaptation.removed_from_textbook = removed
+    return make_api_textbook(textbook)
 
 
 @router.get("/{id}")
@@ -389,11 +549,11 @@ def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> M
     try:
         numerical_id = int(id)
     except ValueError:
-        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
-    db_adaptation = session.get(model, numerical_id)
-    if db_adaptation is None:
-        raise fastapi.HTTPException(status_code=404, detail="Batch not found")
-    return db_adaptation
+        raise fastapi.HTTPException(status_code=404, detail=f"{model.__name__} not found")
+    instance = session.get(model, numerical_id)
+    if instance is None:
+        raise fastapi.HTTPException(status_code=404, detail=f"{model.__name__} not found")
+    return instance
 
 
 def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
@@ -407,6 +567,7 @@ def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
         initial_assistant_response=adaptation.initial_assistant_response,
         adjustments=adaptation.adjustments,
         manual_edit=adaptation.manual_edit,
+        removed_from_textbook=adaptation.removed_from_textbook,
     )
 
 
@@ -438,6 +599,23 @@ def make_api_strategy_settings_name(settings: StrategySettings) -> str | None:
 
 def make_api_input(input: DbInput) -> ApiInput:
     return ApiInput(page_number=input.page_number, exercise_number=input.exercise_number, text=input.text)
+
+
+def make_api_textbook(textbook: Textbook) -> ApiTextbook:
+    return ApiTextbook(
+        id=str(textbook.id),
+        created_by=textbook.created_by,
+        title=textbook.title,
+        batches=[
+            ApiTextbook.Batch(
+                id=str(batch.id),
+                strategy=make_api_strategy(batch.strategy),
+                adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
+                removed_from_textbook=batch.removed_from_textbook,
+            )
+            for batch in textbook.batches
+        ],
+    )
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -476,6 +654,39 @@ def export_batch(
     headers = {}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="test-batch-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
+export_textbook_template_file_path = os.path.join(
+    os.path.dirname(__file__), "templates", "textbook-export", "index.html"
+)
+
+
+@router.get("/export/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_textbook(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    textbook = get_by_id(session, Textbook, id)
+
+    adaptations = (
+        session.query(DbAdaptation)
+        .join(DbInput)
+        .join(Batch)
+        .filter(Batch.textbook_id == id)
+        .filter(Batch.removed_from_textbook == False)
+        .filter(DbAdaptation.removed_from_textbook == False)
+        .order_by(DbInput.page_number, DbInput.exercise_number)
+        .all()
+    )
+
+    data = list(filter(None, (make_exercise_data(adaptation) for adaptation in adaptations)))
+
+    content = render_template(export_textbook_template_file_path, "BATCH_EXPORT_DATA", data)
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="{textbook.title}.html"'
 
     return fastapi.responses.HTMLResponse(content=content, headers=headers)
 

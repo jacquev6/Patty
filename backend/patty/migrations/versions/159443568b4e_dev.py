@@ -47,6 +47,30 @@ def upgrade() -> None:
         "fk_adaptation_adaptations_batch_id_adaptation_batches", "adaptation_adaptations", type_="foreignkey"
     )
     op.drop_column("adaptation_strategy_settings", "name")
+    op.create_table(
+        "adaptation_textbooks",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("title", sa.String(), nullable=False),
+        sa.CheckConstraint("title != ''", name=op.f("ck_adaptation_textbooks_title_not_empty")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_textbooks")),
+    )
+    op.add_column(
+        "adaptation_adaptations",
+        sa.Column("removed_from_textbook", sa.Boolean(), server_default="false", nullable=False),
+    )
+    op.add_column("adaptation_batches", sa.Column("textbook_id", sa.Integer(), nullable=True))
+    op.add_column(
+        "adaptation_batches", sa.Column("removed_from_textbook", sa.Boolean(), server_default="false", nullable=False)
+    )
+    op.create_foreign_key(
+        op.f("fk_adaptation_batches_textbook_id_adaptation_textbooks"),
+        "adaptation_batches",
+        "adaptation_textbooks",
+        ["textbook_id"],
+        ["id"],
+    )
     # ### end Alembic commands ###
     op.create_foreign_key(
         op.f("fk_adaptation_strategy_settings_branches_head_id_id_adaptation_strategy_settings"),

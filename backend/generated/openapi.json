@@ -252,6 +252,264 @@
         }
       }
     },
+    "/api/adaptation/textbook": {
+      "post": {
+        "summary": "Post Textbook",
+        "operationId": "post_textbook_api_adaptation_textbook_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostTextbookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbook/{id}": {
+      "get": {
+        "summary": "Get Textbook",
+        "operationId": "get_textbook_api_adaptation_textbook__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTextbookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbooks": {
+      "get": {
+        "summary": "Get Textbooks",
+        "operationId": "get_textbooks_api_adaptation_textbooks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTextbooksResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbook/{id}/batches": {
+      "post": {
+        "summary": "Post Textbook Batch",
+        "operationId": "post_textbook_batch_api_adaptation_textbook__id__batches_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbook/{textbook_id}/batch/{batch_id}/removed": {
+      "put": {
+        "summary": "Put Textbook Batch Removed",
+        "operationId": "put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put",
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          },
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "removed",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Removed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed": {
+      "put": {
+        "summary": "Put Textbook Adaptation Removed",
+        "operationId": "put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put",
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          },
+          {
+            "name": "adaptation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Adaptation Id"
+            }
+          },
+          {
+            "name": "removed",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Removed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/adaptation/{id}": {
       "get": {
         "summary": "Get Adaptation",
@@ -562,6 +820,55 @@
           }
         }
       }
+    },
+    "/api/adaptation/export/textbook-{id}.html": {
+      "get": {
+        "summary": "Export Textbook",
+        "operationId": "export_textbook_api_adaptation_export_textbook__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -653,6 +960,10 @@
                 "type": "null"
               }
             ]
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
           }
         },
         "additionalProperties": false,
@@ -666,7 +977,8 @@
           "rawLlmConversations",
           "initialAssistantResponse",
           "adjustments",
-          "manualEdit"
+          "manualEdit",
+          "removedFromTextbook"
         ],
         "title": "ApiAdaptation"
       },
@@ -846,6 +1158,38 @@
         ],
         "title": "ApiStrategySettings"
       },
+      "ApiTextbook": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "batches": {
+            "items": {
+              "$ref": "#/components/schemas/patty__adaptation__router__ApiTextbook__Batch"
+            },
+            "type": "array",
+            "title": "Batches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "title",
+          "batches"
+        ],
+        "title": "ApiTextbook"
+      },
       "Arrow": {
         "properties": {
           "kind": {
@@ -928,58 +1272,6 @@
           "exercise"
         ],
         "title": "AssistantSuccess"
-      },
-      "Batch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "strategySettingsName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strategysettingsname"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "createdBy",
-          "createdAt",
-          "model",
-          "strategySettingsName"
-        ],
-        "title": "Batch"
       },
       "Choice-Input": {
         "properties": {
@@ -1478,7 +1770,7 @@
         "properties": {
           "batches": {
             "items": {
-              "$ref": "#/components/schemas/Batch"
+              "$ref": "#/components/schemas/patty__adaptation__router__GetBatchesResponse__Batch"
             },
             "type": "array",
             "title": "Batches"
@@ -1490,6 +1782,44 @@
           "batches"
         ],
         "title": "GetBatchesResponse"
+      },
+      "GetTextbookResponse": {
+        "properties": {
+          "textbook": {
+            "$ref": "#/components/schemas/ApiTextbook"
+          },
+          "availableStrategySettings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Availablestrategysettings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "textbook",
+          "availableStrategySettings"
+        ],
+        "title": "GetTextbookResponse"
+      },
+      "GetTextbooksResponse": {
+        "properties": {
+          "textbooks": {
+            "items": {
+              "$ref": "#/components/schemas/Textbook"
+            },
+            "type": "array",
+            "title": "Textbooks"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "textbooks"
+        ],
+        "title": "GetTextbooksResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -2168,6 +2498,81 @@
         ],
         "title": "PostBatchResponse"
       },
+      "PostTextbookBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "branchName": {
+            "type": "string",
+            "title": "Branchname"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "model",
+          "branchName",
+          "inputs"
+        ],
+        "title": "PostTextbookBatchRequest"
+      },
+      "PostTextbookRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "title"
+        ],
+        "title": "PostTextbookRequest"
+      },
+      "PostTextbookResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostTextbookResponse"
+      },
       "ReferenceComponents": {
         "properties": {
           "text": {
@@ -2439,6 +2844,36 @@
           "text"
         ]
       },
+      "Textbook": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "title"
+        ],
+        "title": "Textbook"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -2484,6 +2919,89 @@
         "required": [
           "kind"
         ]
+      },
+      "patty__adaptation__router__ApiTextbook__Batch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "adaptations": {
+            "items": {
+              "$ref": "#/components/schemas/ApiAdaptation"
+            },
+            "type": "array",
+            "title": "Adaptations"
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "adaptations",
+          "removedFromTextbook"
+        ],
+        "title": "Batch"
+      },
+      "patty__adaptation__router__GetBatchesResponse__Batch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "strategySettingsName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategysettingsname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "model",
+          "strategySettingsName"
+        ],
+        "title": "Batch"
       }
     }
   }

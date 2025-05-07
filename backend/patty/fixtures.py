@@ -1,15 +1,19 @@
-from typing import Iterable
+from typing import Any, Iterable, TypeVar
 import datetime
 import textwrap
 
 import compact_json  # type: ignore
 import fastapi
+import sqlalchemy.orm
 
 from . import adaptation
 from . import adapted
 from . import database_utils
 from . import llm
 from . import settings
+
+
+created_at = datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc)
 
 
 def make_default_system_prompt() -> str:
@@ -165,328 +169,539 @@ def make_default_system_prompt() -> str:
     )
 
 
-def create_default_adaptation_strategy() -> Iterable[object]:
-    strategy_settings = adaptation.StrategySettings(
-        created_by="Patty",
-        system_prompt=make_default_system_prompt(),
-        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
-            format="json",
-            formalism="json-schema",
-            instruction_components=adapted.InstructionComponents(
-                text=True, whitespace=True, arrow=True, formatted=True, choice=True
+class FixturesCreator:
+    def __init__(self, session: database_utils.Session) -> None:
+        self.__session = session
+
+    Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
+
+    def create(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = __model(**kwargs)
+        self.__session.add(instance)
+        self.__session.flush()
+        return instance
+
+    def create_default_adaptation_strategy(self) -> adaptation.Strategy:
+        strategy_settings = self.create(
+            adaptation.StrategySettings,
+            created_by="Patty",
+            system_prompt=make_default_system_prompt(),
+            response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+                format="json",
+                formalism="json-schema",
+                instruction_components=adapted.InstructionComponents(
+                    text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                ),
+                example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+                hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+                statement_components=adapted.StatementComponents(
+                    text=True,
+                    whitespace=True,
+                    arrow=True,
+                    formatted=True,
+                    free_text_input=False,
+                    multiple_choices_input=True,
+                    selectable_input=False,
+                    swappable_input=False,
+                    editable_text_input=False,
+                ),
+                reference_components=adapted.ReferenceComponents(
+                    text=True, whitespace=True, arrow=True, formatted=True
+                ),
             ),
-            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            statement_components=adapted.StatementComponents(
-                text=True,
-                whitespace=True,
-                arrow=True,
-                formatted=True,
-                free_text_input=False,
-                multiple_choices_input=True,
-                selectable_input=False,
-                swappable_input=False,
-                editable_text_input=False,
+        )
+        return self.create(
+            adaptation.Strategy,
+            created_by="Patty",
+            model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            settings=strategy_settings,
+        )
+
+    def create_dummy_adaptation_strategy_settings(
+        self, system_prompt: str = "Blah blah blah."
+    ) -> adaptation.StrategySettings:
+        return self.create(
+            adaptation.StrategySettings,
+            created_by="Patty",
+            system_prompt=system_prompt,
+            response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+                format="json",
+                formalism="json-schema",
+                instruction_components=adapted.InstructionComponents(
+                    text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                ),
+                example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+                hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+                statement_components=adapted.StatementComponents(
+                    text=True,
+                    whitespace=True,
+                    arrow=True,
+                    formatted=True,
+                    free_text_input=True,
+                    multiple_choices_input=True,
+                    selectable_input=True,
+                    swappable_input=True,
+                    editable_text_input=True,
+                ),
+                reference_components=adapted.ReferenceComponents(
+                    text=True, whitespace=True, arrow=True, formatted=True
+                ),
             ),
-            reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        ),
-    )
-    yield strategy_settings
-    yield adaptation.Strategy(
-        created_by="Patty", model=llm.OpenAiModel(name="gpt-4o-2024-08-06"), settings=strategy_settings
-    )
+        )
 
+    def create_dummy_adaptation_strategy(self) -> adaptation.Strategy:
+        settings = self.create_dummy_adaptation_strategy_settings()
+        return self.create(
+            adaptation.Strategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=settings
+        )
 
-def create_dummy_adaptation_strategy() -> Iterable[object]:
-    strategy_settings = adaptation.StrategySettings(
-        created_by="Patty",
-        system_prompt="Blah blah blah.",
-        response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
-            format="json",
-            formalism="json-schema",
-            instruction_components=adapted.InstructionComponents(
-                text=True, whitespace=True, arrow=True, formatted=True, choice=True
+    def create_default_adaptation_input(self) -> adaptation.Input:
+        return self.create(
+            adaptation.Input,
+            created_by="Patty",
+            page_number=42,
+            exercise_number="5",
+            text=textwrap.dedent(
+                """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
             ),
-            example_components=adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            statement_components=adapted.StatementComponents(
-                text=True,
-                whitespace=True,
-                arrow=True,
-                formatted=True,
-                free_text_input=True,
-                multiple_choices_input=True,
-                selectable_input=True,
-                swappable_input=True,
-                editable_text_input=True,
+        )
+
+    def create_successful_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+        return self.create(
+            adaptation.Adaptation,
+            created_by="Patty",
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[{"initial": "conversation"}],
+            _initial_assistant_response=adaptation.AssistantSuccess(
+                kind="success",
+                exercise=adapted.Exercise(
+                    **{  # type: ignore[arg-type]
+                        "format": "v1",
+                        "instruction": {
+                            "lines": [
+                                {
+                                    "contents": [
+                                        {"kind": "text", "text": "Complète"},
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "avec"},
+                                        {"kind": "whitespace"},
+                                        {
+                                            "kind": "choice",
+                                            "contents": [
+                                                {"kind": "text", "text": "le"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "vent"},
+                                            ],
+                                        },
+                                        {"kind": "whitespace"},
+                                        {"kind": "text", "text": "ou"},
+                                        {"kind": "whitespace"},
+                                        {
+                                            "kind": "choice",
+                                            "contents": [
+                                                {"kind": "text", "text": "la"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "pluie"},
+                                            ],
+                                        },
+                                    ]
+                                }
+                            ]
+                        },
+                        "example": None,
+                        "hint": None,
+                        "statement": {
+                            "pages": [
+                                {
+                                    "lines": [
+                                        {
+                                            "contents": [
+                                                {"kind": "text", "text": "a"},
+                                                {"kind": "text", "text": "."},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "Les"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "feuilles"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "sont"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "chahutées"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "par"},
+                                                {"kind": "whitespace"},
+                                                {
+                                                    "kind": "multipleChoicesInput",
+                                                    "choices": [
+                                                        {
+                                                            "contents": [
+                                                                {"kind": "text", "text": "le"},
+                                                                {"kind": "whitespace"},
+                                                                {"kind": "text", "text": "vent"},
+                                                            ]
+                                                        },
+                                                        {
+                                                            "contents": [
+                                                                {"kind": "text", "text": "la"},
+                                                                {"kind": "whitespace"},
+                                                                {"kind": "text", "text": "pluie"},
+                                                            ]
+                                                        },
+                                                    ],
+                                                    "showChoicesByDefault": False,
+                                                },
+                                            ]
+                                        },
+                                        {
+                                            "contents": [
+                                                {"kind": "text", "text": "b"},
+                                                {"kind": "text", "text": "."},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "Les"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "vitres"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "sont"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "mouillées"},
+                                                {"kind": "whitespace"},
+                                                {"kind": "text", "text": "par"},
+                                                {"kind": "whitespace"},
+                                                {
+                                                    "kind": "multipleChoicesInput",
+                                                    "choices": [
+                                                        {
+                                                            "contents": [
+                                                                {"kind": "text", "text": "le"},
+                                                                {"kind": "whitespace"},
+                                                                {"kind": "text", "text": "vent"},
+                                                            ]
+                                                        },
+                                                        {
+                                                            "contents": [
+                                                                {"kind": "text", "text": "la"},
+                                                                {"kind": "whitespace"},
+                                                                {"kind": "text", "text": "pluie"},
+                                                            ]
+                                                        },
+                                                    ],
+                                                    "showChoicesByDefault": False,
+                                                },
+                                            ]
+                                        },
+                                    ]
+                                }
+                            ]
+                        },
+                        "reference": None,
+                    }
+                ),
+            ).model_dump(),
+            _adjustments=[],
+            manual_edit=None,
+        )
+
+    def create_in_progress_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+        return self.create(
+            adaptation.Adaptation,
+            created_by="Patty",
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[{"initial": "conversation"}],
+            _initial_assistant_response=None,
+            _adjustments=[],
+            manual_edit=None,
+        )
+
+    def create_invalid_json_adaptation(
+        self, *, batch: object, strategy: object, input: object
+    ) -> adaptation.Adaptation:
+        return self.create(
+            adaptation.Adaptation,
+            created_by="Patty",
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[{"initial": "conversation"}],
+            _initial_assistant_response=adaptation.AssistantInvalidJsonError(
+                kind="error", error="invalid-json", parsed={}
+            ).model_dump(),
+            _adjustments=[],
+            manual_edit=None,
+        )
+
+    def create_not_json_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+        return self.create(
+            adaptation.Adaptation,
+            created_by="Patty",
+            batch=batch,
+            strategy=strategy,
+            input=input,
+            raw_llm_conversations=[{"initial": "conversation"}],
+            _initial_assistant_response=adaptation.AssistantNotJsonError(
+                kind="error", error="not-json", text="This is not JSON."
+            ).model_dump(),
+            _adjustments=[],
+            manual_edit=None,
+        )
+
+    def create_seed_data(self) -> None:
+        strategy = self.create_default_adaptation_strategy()
+        input = self.create_default_adaptation_input()
+        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
+
+    def create_dummy_adaptation(self) -> None:
+        strategy = self.create_dummy_adaptation_strategy()
+        input = self.create_default_adaptation_input()
+        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
+
+    def create_mixed_dummy_batch(self) -> None:
+        strategy = self.create_dummy_adaptation_strategy()
+        input = self.create_default_adaptation_input()
+        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_not_json_adaptation(batch=batch, strategy=strategy, input=input)
+
+    def create_dummy_branch(
+        self, *, name: str = "Branchy McBranchFace", system_prompt: str = "Blah blah blah."
+    ) -> adaptation.StrategySettingsBranch:
+        settings = self.create_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
+        branch = self.create(adaptation.StrategySettingsBranch, name=name)
+        settings.branch = branch
+        self.__session.flush()
+        branch.head = settings
+        self.__session.flush()
+        return branch
+
+    def create_dummy_textbook(self) -> None:
+        textbook = self.create(adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy")
+
+        success_branch_1 = self.create_dummy_branch(
+            name=f"Branch with successes 1", system_prompt=f"Thou shall succeed."
+        )
+        success_strategy_1 = self.create(
+            adaptation.Strategy,
+            created_by="Patty",
+            model=llm.DummyModel(name="dummy-1"),
+            settings=success_branch_1.head,
+        )
+        success_batch_1 = self.create(
+            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=success_strategy_1, textbook=textbook
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_1,
+            strategy=success_strategy_1,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=42,
+                exercise_number="5",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
             ),
-            reference_components=adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        ),
-    )
-    yield strategy_settings
-    yield adaptation.Strategy(created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings)
-
-
-def create_default_adaptation_input() -> Iterable[object]:
-    yield adaptation.Input(
-        created_by="Patty",
-        page_number=42,
-        exercise_number="5",
-        text=textwrap.dedent(
-            """\
-            Complète avec "le vent" ou "la pluie"
-            a. Les feuilles sont chahutées par ...
-            b. Les vitres sont mouillées par ...
-            """
-        ),
-    )
-
-
-def make_successful_adaptation(*, batch: object, strategy: object, input: object) -> object:
-    return adaptation.Adaptation(
-        created_by="Patty",
-        batch=batch,
-        strategy=strategy,
-        input=input,
-        raw_llm_conversations=[{"initial": "conversation"}],
-        _initial_assistant_response=adaptation.AssistantSuccess(
-            kind="success",
-            exercise=adapted.Exercise(
-                **{  # type: ignore[arg-type]
-                    "format": "v1",
-                    "instruction": {
-                        "lines": [
-                            {
-                                "contents": [
-                                    {"kind": "text", "text": "Complète"},
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "avec"},
-                                    {"kind": "whitespace"},
-                                    {
-                                        "kind": "choice",
-                                        "contents": [
-                                            {"kind": "text", "text": "le"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "vent"},
-                                        ],
-                                    },
-                                    {"kind": "whitespace"},
-                                    {"kind": "text", "text": "ou"},
-                                    {"kind": "whitespace"},
-                                    {
-                                        "kind": "choice",
-                                        "contents": [
-                                            {"kind": "text", "text": "la"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "pluie"},
-                                        ],
-                                    },
-                                ]
-                            }
-                        ]
-                    },
-                    "example": None,
-                    "hint": None,
-                    "statement": {
-                        "pages": [
-                            {
-                                "lines": [
-                                    {
-                                        "contents": [
-                                            {"kind": "text", "text": "a"},
-                                            {"kind": "text", "text": "."},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "Les"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "feuilles"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "sont"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "chahutées"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "par"},
-                                            {"kind": "whitespace"},
-                                            {
-                                                "kind": "multipleChoicesInput",
-                                                "choices": [
-                                                    {
-                                                        "contents": [
-                                                            {"kind": "text", "text": "le"},
-                                                            {"kind": "whitespace"},
-                                                            {"kind": "text", "text": "vent"},
-                                                        ]
-                                                    },
-                                                    {
-                                                        "contents": [
-                                                            {"kind": "text", "text": "la"},
-                                                            {"kind": "whitespace"},
-                                                            {"kind": "text", "text": "pluie"},
-                                                        ]
-                                                    },
-                                                ],
-                                                "showChoicesByDefault": False,
-                                            },
-                                        ]
-                                    },
-                                    {
-                                        "contents": [
-                                            {"kind": "text", "text": "b"},
-                                            {"kind": "text", "text": "."},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "Les"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "vitres"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "sont"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "mouillées"},
-                                            {"kind": "whitespace"},
-                                            {"kind": "text", "text": "par"},
-                                            {"kind": "whitespace"},
-                                            {
-                                                "kind": "multipleChoicesInput",
-                                                "choices": [
-                                                    {
-                                                        "contents": [
-                                                            {"kind": "text", "text": "le"},
-                                                            {"kind": "whitespace"},
-                                                            {"kind": "text", "text": "vent"},
-                                                        ]
-                                                    },
-                                                    {
-                                                        "contents": [
-                                                            {"kind": "text", "text": "la"},
-                                                            {"kind": "whitespace"},
-                                                            {"kind": "text", "text": "pluie"},
-                                                        ]
-                                                    },
-                                                ],
-                                                "showChoicesByDefault": False,
-                                            },
-                                        ]
-                                    },
-                                ]
-                            }
-                        ]
-                    },
-                    "reference": None,
-                }
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_1,
+            strategy=success_strategy_1,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=40,
+                exercise_number="6",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
             ),
-        ).model_dump(),
-        _adjustments=[],
-        manual_edit=None,
-    )
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_1,
+            strategy=success_strategy_1,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=40,
+                exercise_number="4",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
 
+        success_branch_2 = self.create_dummy_branch(
+            name=f"Branch with successes 2", system_prompt=f"Thou shall succeed as well."
+        )
+        success_strategy_2 = self.create(
+            adaptation.Strategy,
+            created_by="Patty",
+            model=llm.DummyModel(name="dummy-1"),
+            settings=success_branch_2.head,
+        )
+        success_batch_2 = self.create(
+            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=success_strategy_2, textbook=textbook
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_2,
+            strategy=success_strategy_2,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=42,
+                exercise_number="6",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_2,
+            strategy=success_strategy_2,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=40,
+                exercise_number="30",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
+        self.create_successful_adaptation(
+            batch=success_batch_2,
+            strategy=success_strategy_2,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=40,
+                exercise_number="8",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
+        removed_adaptation = self.create_successful_adaptation(
+            batch=success_batch_2,
+            strategy=success_strategy_2,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=40,
+                exercise_number="Removed",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
+        removed_adaptation.removed_from_textbook = True
 
-def make_in_progress_adaptation(*, batch: object, strategy: object, input: object) -> object:
-    return adaptation.Adaptation(
-        created_by="Patty",
-        batch=batch,
-        strategy=strategy,
-        input=input,
-        raw_llm_conversations=[{"initial": "conversation"}],
-        _initial_assistant_response=None,
-        _adjustments=[],
-        manual_edit=None,
-    )
+        removed_batch = self.create(
+            adaptation.Batch,
+            created_by="Patty",
+            created_at=created_at,
+            strategy=success_strategy_2,
+            textbook=textbook,
+            removed_from_textbook=True,
+        )
+        self.create_successful_adaptation(
+            batch=removed_batch,
+            strategy=success_strategy_2,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=47,
+                exercise_number="Removed",
+                text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+            ),
+        )
 
-
-def make_invalid_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
-    return adaptation.Adaptation(
-        created_by="Patty",
-        batch=batch,
-        strategy=strategy,
-        input=input,
-        raw_llm_conversations=[{"initial": "conversation"}],
-        _initial_assistant_response=adaptation.AssistantInvalidJsonError(
-            kind="error", error="invalid-json", parsed={}
-        ).model_dump(),
-        _adjustments=[],
-        manual_edit=None,
-    )
-
-
-def make_not_json_adaptation(*, batch: object, strategy: object, input: object) -> object:
-    return adaptation.Adaptation(
-        created_by="Patty",
-        batch=batch,
-        strategy=strategy,
-        input=input,
-        raw_llm_conversations=[{"initial": "conversation"}],
-        _initial_assistant_response=adaptation.AssistantNotJsonError(
-            kind="error", error="not-json", text="This is not JSON."
-        ).model_dump(),
-        _adjustments=[],
-        manual_edit=None,
-    )
-
-
-def create_seed_data() -> Iterable[object]:
-    [strategy_settings, strategy] = create_default_adaptation_strategy()
-    yield strategy_settings
-    yield strategy
-    [input] = create_default_adaptation_input()
-    yield input
-    batch = adaptation.Batch(
-        created_by="Patty",
-        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
-        strategy=strategy,
-    )
-    yield batch
-    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
-
-
-def create_dummy_adaptation() -> Iterable[object]:
-    [strategy_settings, strategy] = create_dummy_adaptation_strategy()
-    yield strategy_settings
-    yield strategy
-    [input] = create_default_adaptation_input()
-    yield input
-    batch = adaptation.Batch(
-        created_by="Patty",
-        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
-        strategy=strategy,
-    )
-    yield batch
-    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
-
-
-def create_mixed_dummy_batch() -> Iterable[object]:
-    [strategy_settings, strategy] = create_dummy_adaptation_strategy()
-    yield strategy_settings
-    yield strategy
-    [input] = create_default_adaptation_input()
-    yield input
-    batch = adaptation.Batch(
-        created_by="Patty",
-        created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
-        strategy=strategy,
-    )
-    yield batch
-    yield make_successful_adaptation(batch=batch, strategy=strategy, input=input)
-    yield make_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
-    yield make_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
-    yield make_not_json_adaptation(batch=batch, strategy=strategy, input=input)
-
-
-available_fixtures = {
-    "-".join(f.__name__.split("_")[1:]): f
-    for f in (
-        create_default_adaptation_input,
-        create_default_adaptation_strategy,
-        create_dummy_adaptation_strategy,
-        create_dummy_adaptation,
-        create_mixed_dummy_batch,
-        create_seed_data,
-    )
-}
+        errors_branch = self.create_dummy_branch(name=f"Branch with errors", system_prompt=f"Thou shall fail.")
+        errors_strategy = self.create(
+            adaptation.Strategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=errors_branch.head
+        )
+        errors_batch = self.create(
+            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=errors_strategy, textbook=textbook
+        )
+        self.create_not_json_adaptation(
+            batch=errors_batch,
+            strategy=errors_strategy,
+            input=self.create(
+                adaptation.Input, created_by="Patty", page_number=142, exercise_number="4", text="Not JSON"
+            ),
+        )
+        self.create_invalid_json_adaptation(
+            batch=errors_batch,
+            strategy=errors_strategy,
+            input=self.create(
+                adaptation.Input, created_by="Patty", page_number=140, exercise_number="4", text="Invalid JSON"
+            ),
+        )
 
 
 def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
+    creator = FixturesCreator(session)
+
+    available_fixtures = {
+        "-".join(f.__name__.split("_")[1:]): f
+        for f in (
+            creator.create_default_adaptation_input,
+            creator.create_default_adaptation_strategy,
+            creator.create_dummy_adaptation_strategy,
+            creator.create_dummy_adaptation,
+            creator.create_dummy_branch,
+            creator.create_dummy_textbook,
+            creator.create_mixed_dummy_batch,
+            creator.create_seed_data,
+        )
+    }
+
     database_utils.truncate_all_tables(session)
+
     for fixture in fixtures:
-        for instance in available_fixtures[fixture]():
-            session.add(instance)
+        available_fixtures[fixture]()
 
 
 app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))

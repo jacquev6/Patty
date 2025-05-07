@@ -12,6 +12,10 @@ export type LatestBatch =
 
 export type AdaptationStrategy = LatestBatch['strategy']
 
+export type Textbooks = paths['/api/adaptation/textbooks']['get']['responses']['200']['content']['application/json']
+export type Textbook =
+  paths['/api/adaptation/textbook/{id}']['get']['responses']['200']['content']['application/json']['textbook']
+
 export type Batches = paths['/api/adaptation/batches']['get']['responses']['200']['content']['application/json']
 export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200']['content']['application/json']
 

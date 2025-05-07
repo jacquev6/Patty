@@ -8,7 +8,8 @@ from .adaptation import (
 from .batch import Batch
 from .input import Input
 from .router import router
-from .strategy import Strategy, StrategySettings
+from .strategy import Strategy, StrategySettings, StrategySettingsBranch
+from .textbook import Textbook
 
 
 __all__ = [
@@ -22,4 +23,6 @@ __all__ = [
     "router",
     "Strategy",
     "StrategySettings",
+    "StrategySettingsBranch",
+    "Textbook",
 ]

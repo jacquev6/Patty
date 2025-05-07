@@ -22,7 +22,9 @@ const showEditor = ref(identifiedUser.identifier === '')
           Your first name:
           <input data-cy="identified-user" v-model="identifiedUser.identifier" />
           <WhiteSpace />
-          <button data-cy="identified-user-ok" @click="showEditor = false">OK</button>
+          <button data-cy="identified-user-ok" @click="showEditor = false" :disabled="identifiedUser.identifier === ''">
+            OK
+          </button>
         </p>
         <p>(Nothing is checked, this is used only to record who created what.)</p>
       </div>

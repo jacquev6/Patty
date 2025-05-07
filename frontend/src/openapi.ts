@@ -124,6 +124,108 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/textbook': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Textbook */
+    post: operations['post_textbook_api_adaptation_textbook_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/textbook/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Textbook */
+    get: operations['get_textbook_api_adaptation_textbook__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/textbooks': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Textbooks */
+    get: operations['get_textbooks_api_adaptation_textbooks_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/textbook/{id}/batches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Textbook Batch */
+    post: operations['post_textbook_batch_api_adaptation_textbook__id__batches_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/textbook/{textbook_id}/batch/{batch_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Batch Removed */
+    put: operations['put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Adaptation Removed */
+    put: operations['put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptation/{id}': {
     parameters: {
       query?: never
@@ -227,6 +329,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptation/export/textbook-{id}.html': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Export Textbook */
+    get: operations['export_textbook_api_adaptation_export_textbook__id__html_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -262,6 +381,8 @@ export interface components {
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
       manualEdit: components['schemas']['Exercise-Output'] | null
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
     }
     /** ApiInput */
     ApiInput: {
@@ -314,6 +435,17 @@ export interface components {
         | components['schemas']['JsonObjectLlmResponseSpecification']
         | components['schemas']['JsonSchemaLlmResponseSpecification']
     }
+    /** ApiTextbook */
+    ApiTextbook: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /** Title */
+      title: string
+      /** Batches */
+      batches: components['schemas']['patty__adaptation__router__ApiTextbook__Batch'][]
+    }
     Arrow: {
       /**
        * Kind
@@ -359,25 +491,6 @@ export interface components {
        */
       kind: 'success'
       exercise: components['schemas']['Exercise-Output']
-    }
-    /** Batch */
-    Batch: {
-      /** Id */
-      id: string
-      /** Createdby */
-      createdBy: string
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Model */
-      model:
-        | components['schemas']['DummyModel']
-        | components['schemas']['MistralAiModel']
-        | components['schemas']['OpenAiModel']
-      /** Strategysettingsname */
-      strategySettingsName: string | null
     }
     'Choice-Input': {
       /**
@@ -563,7 +676,18 @@ export interface components {
     /** GetBatchesResponse */
     GetBatchesResponse: {
       /** Batches */
-      batches: components['schemas']['Batch'][]
+      batches: components['schemas']['patty__adaptation__router__GetBatchesResponse__Batch'][]
+    }
+    /** GetTextbookResponse */
+    GetTextbookResponse: {
+      textbook: components['schemas']['ApiTextbook']
+      /** Availablestrategysettings */
+      availableStrategySettings: string[]
+    }
+    /** GetTextbooksResponse */
+    GetTextbooksResponse: {
+      /** Textbooks */
+      textbooks: components['schemas']['Textbook'][]
     }
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -838,6 +962,32 @@ export interface components {
       /** Id */
       id: string
     }
+    /** PostTextbookBatchRequest */
+    PostTextbookBatchRequest: {
+      /** Creator */
+      creator: string
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Branchname */
+      branchName: string
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
+    }
+    /** PostTextbookRequest */
+    PostTextbookRequest: {
+      /** Creator */
+      creator: string
+      /** Title */
+      title: string
+    }
+    /** PostTextbookResponse */
+    PostTextbookResponse: {
+      /** Id */
+      id: string
+    }
     /** ReferenceComponents */
     ReferenceComponents: {
       /**
@@ -967,6 +1117,20 @@ export interface components {
       /** Text */
       text: string
     }
+    /** Textbook */
+    Textbook: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Title */
+      title: string
+    }
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -982,6 +1146,35 @@ export interface components {
        * @constant
        */
       kind: 'whitespace'
+    }
+    /** Batch */
+    patty__adaptation__router__ApiTextbook__Batch: {
+      /** Id */
+      id: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Adaptations */
+      adaptations: components['schemas']['ApiAdaptation'][]
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
+    }
+    /** Batch */
+    patty__adaptation__router__GetBatchesResponse__Batch: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Model */
+      model:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+      /** Strategysettingsname */
+      strategySettingsName: string | null
     }
   }
   responses: never
@@ -1208,6 +1401,193 @@ export interface operations {
       }
     }
   }
+  post_textbook_api_adaptation_textbook_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTextbookRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostTextbookResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_textbook_api_adaptation_textbook__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetTextbookResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_textbooks_api_adaptation_textbooks_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetTextbooksResponse']
+        }
+      }
+    }
+  }
+  post_textbook_batch_api_adaptation_textbook__id__batches_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTextbookBatchRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiTextbook']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        batch_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiTextbook']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        adaptation_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiTextbook']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_adaptation_api_adaptation__id__get: {
     parameters: {
       query?: never
@@ -1405,6 +1785,39 @@ export interface operations {
     }
   }
   export_batch_api_adaptation_export_batch__id__html_get: {
+    parameters: {
+      query?: {
+        download?: boolean
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  export_textbook_api_adaptation_export_textbook__id__html_get: {
     parameters: {
       query?: {
         download?: boolean
