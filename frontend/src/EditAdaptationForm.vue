@@ -75,6 +75,8 @@ const manualAdaptedExerciseProxy = computed({
       return props.adaptation.llmStatus.text
     } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'invalid-json') {
       return jsonStringify(props.adaptation.llmStatus.parsed)
+    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'unknown') {
+      return ''
     } else {
       return ((status: never) => status)(props.adaptation.llmStatus)
     }
@@ -212,7 +214,12 @@ watch(Escape, () => {
         Created by: {{ adaptation.createdBy }}, part of
         <RouterLink :to="{ name: 'batch', params: { id: adaptation.batchId } }">this batch</RouterLink>.
       </p>
-      <AdaptationStrategyEditor :availableLlmModels="[]" :disabled="true" :modelValue="adaptation.strategy" />
+      <AdaptationStrategyEditor
+        :availableLlmModels="[]"
+        :availableStrategySettings="[]"
+        :disabled="true"
+        :modelValue="adaptation.strategy"
+      />
     </template>
     <template #col-2>
       <h1>Input</h1>
@@ -261,17 +268,21 @@ watch(Escape, () => {
               <template v-else-if="adaptation.llmStatus.error === 'not-json'">
                 The LLM returned a response that is not correct JSON.
               </template>
+              <template v-else-if="adaptation.llmStatus.error === 'unknown'">
+                The LLM caused an unknown error.
+              </template>
               <template v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</template>
               You can:
             </p>
             <ul>
-              <li>ask the LLM for an adjustment</li>
+              <li v-if="adaptation.llmStatus.error !== 'unknown'">ask the LLM for an adjustment</li>
               <li v-if="adaptation.llmStatus.error === 'invalid-json'">
                 edit the JSON manually to make it conform to the schema
               </li>
               <li v-else-if="adaptation.llmStatus.error === 'not-json'">
                 edit the response manually to make it correct JSON that conforms to the schema
               </li>
+              <li v-else-if="adaptation.llmStatus.error === 'unknown'">ask Vincent Jacques to investigate</li>
               <li v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</li>
             </ul>
           </template>

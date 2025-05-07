@@ -7,7 +7,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 set -x
 
-backup_to_load=s3://jacquev6/patty/prod/backups/patty-backup-20250430-111610.tar.gz
+backup_to_load=s3://jacquev6/patty/prod/backups/patty-backup-20250505-051611.tar.gz
 
 ./shell.sh -c "python -m patty restore-database --yes --patch-according-to-settings $backup_to_load"
 
@@ -28,5 +28,8 @@ then
 fi
 
 ./alembic.sh revision --autogenerate $rev_id -m dev
+
+read -p "Check (and fix) the generated migration file. Press enter to continue"
+
 ./alembic.sh upgrade head
 ./shell.sh -c "python -m patty migrate-data"

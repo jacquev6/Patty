@@ -10,6 +10,7 @@ import EditAdaptationView from './EditAdaptationView.vue'
 import EditBatchView from './EditBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
 import ExamplesView from './ExamplesView.vue'
+import EditTextbookView from './EditTextbookView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,6 +35,12 @@ const router = createRouter({
       path: '/adaptation-:id',
       name: 'adaptation',
       component: EditAdaptationView,
+      props: true,
+    },
+    {
+      path: '/textbook-:id',
+      name: 'textbook',
+      component: EditTextbookView,
       props: true,
     },
     {

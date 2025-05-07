@@ -33,6 +33,7 @@ services:
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
       "backend/patty/adaptation/templates/batch-export/index.html",
+      "backend/patty/adaptation/templates/textbook-export/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -72,6 +73,26 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/batch-export/index.html"]
+      interval: 0.5s
+      retries: 12
+
+  textbook-export-template-generator:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    environment:
+      PATTY_ENTRY_POINT_NAME: textbook-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/textbook-export", "--emptyOutDir"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      npm-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/textbook-export/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -146,7 +167,27 @@ services:
         condition: service_healthy
       batch-export-template-generator:
         condition: service_healthy
+      textbook-export-template-generator:
+        condition: service_healthy
       data-loader:
+        condition: service_completed_successfully
+  # The submission-daemon does not reload its code on changes.
+  # Use the following command:
+  # dev-env/docker-compose.sh down submission-daemon && dev-env/docker-compose.sh up --detach submission-daemon
+  submission-daemon:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["python", "-m", "patty", "run-submission-daemon"]
+    depends_on:
+      migrator:
         condition: service_completed_successfully
   default-system-prompt-generator:
     image: patty-dev_backend
@@ -307,6 +348,9 @@ services:
     volumes:
       - ./fanout/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - adminer
-      - backend
-      - frontend
+      adminer:
+        condition: service_started
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started

@@ -11,7 +11,7 @@ class Input(OrmBase):
 
     __table_args__ = (sql.CheckConstraint("exercise_number != ''", name="exercise_number_not_empty"),)
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_by: orm.Mapped[str]
 

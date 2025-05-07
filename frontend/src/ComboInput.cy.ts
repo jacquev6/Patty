@@ -42,21 +42,6 @@ describe('ComboInput', () => {
     screenshot()
   })
 
-  it('renders with many suggestions', () => {
-    cy.mount(ComboInput, {
-      props: {
-        modelValue: '',
-        suggestions: Array.from({ length: 10 }, (_, i) => `Suggestion ${i}`),
-        maxSuggestionsDisplayCount: 5,
-      },
-    })
-
-    cy.get('input').focus()
-    cy.get('div.suggestions > p.suggestion').should('have.length', 5)
-    cy.get('div.suggestions > p').should('have.length', 6)
-    screenshot()
-  })
-
   it('filters suggestions', () => {
     cy.mount(ComboInput, {
       props: {
@@ -67,10 +52,19 @@ describe('ComboInput', () => {
     })
 
     cy.get('input').focus()
-    cy.get('div.suggestions > p.suggestion').should('have.length', 4)
+    cy.get('[data-cy="suggestion"]').eq(0).should('have.text', 'Alpha 1')
+    cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Alpha 2')
+    cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Bravo')
+    cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Charlie')
     cy.get('input').type('h')
-    cy.get('div.suggestions > p.suggestion').should('have.length', 3)
+    cy.get('[data-cy="suggestion"]').eq(0).should('have.text', 'Alpha 1')
+    cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Alpha 2')
+    cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Charlie')
+    cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Bravo')
     cy.get('input').type('ar')
-    cy.get('div.suggestions > p.suggestion').should('have.length', 1)
+    cy.get('[data-cy="suggestion"]').eq(0).should('have.text', 'Charlie')
+    cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Bravo')
+    cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Alpha 1')
+    cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Alpha 2')
   })
 })

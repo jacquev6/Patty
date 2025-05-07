@@ -8,10 +8,12 @@ import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails
 import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
 import FixedColumns from './FixedColumns.vue'
+import ComboInput from './ComboInput.vue'
 
 const props = withDefaults(
   defineProps<{
     availableLlmModels: LlmModel[]
+    availableStrategySettings: AdaptationStrategy['settings'][]
     disabled?: boolean
   }>(),
   { disabled: false },
@@ -57,13 +59,13 @@ const llmName = computed({
 
 const llmResponseSpecificationFormalism = computed({
   get: () => {
-    return strategy.value.responseSpecification.formalism
+    return strategy.value.settings.responseSpecification.formalism
   },
-  set: (value: typeof strategy.value.responseSpecification.formalism) => {
+  set: (value: typeof strategy.value.settings.responseSpecification.formalism) => {
     if (value === 'json-object') {
-      strategy.value.responseSpecification = { format: 'json', formalism: 'json-object' }
+      strategy.value.settings.responseSpecification = { format: 'json', formalism: 'json-object' }
     } else if (value === 'json-schema') {
-      strategy.value.responseSpecification = {
+      strategy.value.settings.responseSpecification = {
         format: 'json',
         formalism: 'json-schema',
         instructionComponents: {
@@ -104,7 +106,7 @@ const llmResponseSpecificationFormalism = computed({
         },
       }
     } else if (value === 'text') {
-      strategy.value.responseSpecification = { format: 'json', formalism: 'text' }
+      strategy.value.settings.responseSpecification = { format: 'json', formalism: 'text' }
     } else {
       ;((v: never) => console.log(`Unknown response specification formalism: ${v}`))(value)
     }
@@ -113,11 +115,11 @@ const llmResponseSpecificationFormalism = computed({
 
 const schema = computedAsync(async () => {
   if (
-    strategy.value.responseSpecification.format === 'json' &&
-    strategy.value.responseSpecification.formalism === 'json-schema'
+    strategy.value.settings.responseSpecification.format === 'json' &&
+    strategy.value.settings.responseSpecification.formalism === 'json-schema'
   ) {
     const response = await client.POST('/api/adaptation/llm-response-schema', {
-      body: strategy.value.responseSpecification,
+      body: strategy.value.settings.responseSpecification,
     })
     assert(response.data !== undefined)
     return response.data
@@ -125,10 +127,36 @@ const schema = computedAsync(async () => {
     return null
   }
 }, {})
+
+const settingsName = computed({
+  get: () => {
+    if (strategy.value.settings.name === null) {
+      return ''
+    } else {
+      return strategy.value.settings.name
+    }
+  },
+  set: (value: string) => {
+    const found = props.availableStrategySettings.find((s) => s.name === value)
+    if (found === undefined) {
+      strategy.value.settings.name = value
+    } else {
+      Object.assign(strategy.value.settings, found)
+    }
+  },
+})
+
+const settingsNameSuggestions = computed(() => {
+  return props.availableStrategySettings.map((s) => {
+    assert(s.name !== null)
+    return s.name
+  })
+})
 </script>
 
 <template>
-  <h1>LLM model</h1>
+  <h1>Strategy</h1>
+  <h2>LLM model</h2>
   <p v-if="disabled">Provider: {{ strategy.model.provider }}, model: {{ strategy.model.name }}</p>
   <p v-else>
     Provider:
@@ -140,7 +168,18 @@ const schema = computedAsync(async () => {
     </select>
   </p>
 
-  <h1>Constraints on LLM's response</h1>
+  <h2>Settings</h2>
+  <p v-if="disabled">Name: {{ settingsName }}</p>
+  <p v-else>
+    Name:
+    <ComboInput
+      data-cy="settings-name"
+      :suggestions="settingsNameSuggestions"
+      :maxSuggestionsDisplayCount="10"
+      v-model="settingsName"
+    />
+  </p>
+  <h3>Constraints on LLM's response</h3>
   <p v-if="disabled">LLM response format: {{ llmResponseSpecificationFormalism }}</p>
   <p v-else>
     LLM response format:
@@ -150,14 +189,14 @@ const schema = computedAsync(async () => {
       <option value="json-schema">JSON schema</option>
     </select>
   </p>
-  <template v-if="strategy.responseSpecification.formalism === 'text'">
+  <template v-if="strategy.settings.responseSpecification.formalism === 'text'">
     <p v-if="!disabled">
       No constraints are placed on the LLM's response. The system prompt <b>must</b> instruct the LLM to respond with
       only a JSON object in its text response. This response format will likely lead to errors when we parse the JSON
       from the LLM's unconstrained text response and when we enforce the JSON schema.
     </p>
   </template>
-  <template v-else-if="strategy.responseSpecification.formalism === 'json-object'">
+  <template v-else-if="strategy.settings.responseSpecification.formalism === 'json-object'">
     <p v-if="!disabled">
       This response format ensures the LLM returns proper JSON. According to
       <a href="https://docs.mistral.ai/capabilities/structured-output/json_mode/">the MistralAI documentation</a>, the
@@ -165,17 +204,17 @@ const schema = computedAsync(async () => {
       when we enforce the JSON schema on the LLM's unconstrained JSON response.
     </p>
   </template>
-  <template v-else-if="strategy.responseSpecification.formalism === 'json-schema'">
+  <template v-else-if="strategy.settings.responseSpecification.formalism === 'json-schema'">
     <p v-if="!disabled">
       This response format ensures the LLM returns a JSON object that respects our schema (<a
         href="https://docs.mistral.ai/capabilities/structured-output/custom_structured_output/"
         >MistralAI documentation</a
       >).
     </p>
-    <h2>Allowed components</h2>
+    <h4>Allowed components</h4>
     <FixedColumns :columns="[1, 1, 1, 2, 1]">
       <template #col-1>
-        <h3>In instruction</h3>
+        <h5>In instruction</h5>
         <p>
           <label title="text, whitespace, arrow, formatted">
             <input type="checkbox" checked disabled /> text, <i>etc.</i>
@@ -186,7 +225,7 @@ const schema = computedAsync(async () => {
             ><input
               data-cy="allow-choice-in-instruction"
               type="checkbox"
-              v-model="strategy.responseSpecification.instructionComponents.choice"
+              v-model="strategy.settings.responseSpecification.instructionComponents.choice"
               :disabled
             />
             choice</label
@@ -194,7 +233,7 @@ const schema = computedAsync(async () => {
         </p>
       </template>
       <template #col-2>
-        <h3>In example</h3>
+        <h5>In example</h5>
         <p>
           <label title="text, whitespace, arrow, formatted">
             <input type="checkbox" checked disabled /> text, <i>etc.</i>
@@ -202,7 +241,7 @@ const schema = computedAsync(async () => {
         </p>
       </template>
       <template #col-3>
-        <h3>In hint</h3>
+        <h5>In hint</h5>
         <p>
           <label title="text, whitespace, arrow, formatted">
             <input type="checkbox" checked disabled /> text, <i>etc.</i>
@@ -210,7 +249,7 @@ const schema = computedAsync(async () => {
         </p>
       </template>
       <template #col-4>
-        <h3>In statement</h3>
+        <h5>In statement</h5>
         <FixedColumns :columns="[1, 1]" :gutters="false">
           <template #col-1>
             <p style="margin-bottom: 0">
@@ -223,7 +262,7 @@ const schema = computedAsync(async () => {
                 <input
                   data-cy="allow-free-text-input-in-statement"
                   type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.freeTextInput"
+                  v-model="strategy.settings.responseSpecification.statementComponents.freeTextInput"
                   :disabled
                 />
                 free text input
@@ -234,7 +273,7 @@ const schema = computedAsync(async () => {
                 <input
                   data-cy="allow-multiple-choices-input-in-statement"
                   type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.multipleChoicesInput"
+                  v-model="strategy.settings.responseSpecification.statementComponents.multipleChoicesInput"
                   :disabled
                 />
                 multiple choices input
@@ -247,7 +286,7 @@ const schema = computedAsync(async () => {
                 <input
                   data-cy="allow-selectable-input-in-statement"
                   type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.selectableInput"
+                  v-model="strategy.settings.responseSpecification.statementComponents.selectableInput"
                   :disabled
                 />
                 selectable input
@@ -258,7 +297,7 @@ const schema = computedAsync(async () => {
                 <input
                   data-cy="allow-swappable-input-in-statement"
                   type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.swappableInput"
+                  v-model="strategy.settings.responseSpecification.statementComponents.swappableInput"
                   :disabled
                 />
                 swappable input
@@ -269,7 +308,7 @@ const schema = computedAsync(async () => {
                 <input
                   data-cy="allow-editable-text-input-in-statement"
                   type="checkbox"
-                  v-model="strategy.responseSpecification.statementComponents.editableTextInput"
+                  v-model="strategy.settings.responseSpecification.statementComponents.editableTextInput"
                   :disabled
                 />
                 editable text input
@@ -279,7 +318,7 @@ const schema = computedAsync(async () => {
         </FixedColumns>
       </template>
       <template #col-5>
-        <h3>In reference</h3>
+        <h5>In reference</h5>
         <p>
           <label title="text, whitespace, arrow, formatted">
             <input type="checkbox" checked disabled /> text, <i>etc.</i>
@@ -290,15 +329,15 @@ const schema = computedAsync(async () => {
     <AdaptedExerciseJsonSchemaDetails v-if="schema !== null" :schema />
   </template>
   <template v-else>
-    <p>Unknown response specification: {{ ((f: never) => f)(strategy.responseSpecification) }}</p>
+    <p>Unknown response specification: {{ ((f: never) => f)(strategy.settings.responseSpecification) }}</p>
   </template>
-  <h1>System prompt</h1>
-  <MarkDown v-if="disabled" :markdown="strategy.systemPrompt" />
-  <TextArea v-else data-cy="system-prompt" v-model="strategy.systemPrompt"></TextArea>
+  <h3>System prompt</h3>
+  <MarkDown v-if="disabled" :markdown="strategy.settings.systemPrompt" />
+  <TextArea v-else data-cy="system-prompt" v-model="strategy.settings.systemPrompt"></TextArea>
 </template>
 
 <style scoped>
-h3 {
+h5 {
   margin: 0;
 }
 </style>

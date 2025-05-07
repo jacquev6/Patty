@@ -33,7 +33,12 @@ class AssistantNotJsonError(ApiModel):
     text: str
 
 
-AssistantResponse = AssistantSuccess | AssistantInvalidJsonError | AssistantNotJsonError
+class AssistantUnknownError(ApiModel):
+    kind: Literal["error"]
+    error: Literal["unknown"]
+
+
+AssistantResponse = AssistantSuccess | AssistantInvalidJsonError | AssistantNotJsonError | AssistantUnknownError
 
 
 class Adjustment(ApiModel):
@@ -50,18 +55,22 @@ class Adaptation(OrmBase):
         ),
     )
 
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_by: orm.Mapped[str]
 
-    batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Batch.id))
-    batch: orm.Mapped[Batch] = orm.relationship(Batch, foreign_keys=[batch_id], back_populates="adaptations")
+    batch_id: orm.Mapped[int] = orm.mapped_column()
+    batch: orm.Mapped[Batch] = orm.relationship(
+        Batch, foreign_keys=[batch_id], remote_side=[Batch.id], back_populates="adaptations"
+    )
+
+    removed_from_textbook: orm.Mapped[bool] = orm.mapped_column(default=False, server_default="false")
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
-    strategy: orm.Mapped[Strategy] = orm.relationship(Strategy)
+    strategy: orm.Mapped[Strategy] = orm.relationship(Strategy, foreign_keys=[strategy_id], remote_side=[Strategy.id])
 
     input_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Input.id))
-    input: orm.Mapped[Input] = orm.relationship(Input)
+    input: orm.Mapped[Input] = orm.relationship(Input, foreign_keys=[input_id], remote_side=[Input.id])
 
     # Kept only to help investigating future issues
     raw_llm_conversations: orm.Mapped[JsonList] = orm.mapped_column(sql.JSON)
@@ -119,7 +128,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
@@ -153,7 +161,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
@@ -197,7 +204,6 @@ class AdaptationTestCase(TestCaseWithDatabase):
         strategy_settings = self.create_model(
             StrategySettings,
             created_by="UnitTests",
-            name=None,
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )

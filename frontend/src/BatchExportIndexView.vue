@@ -12,8 +12,8 @@ const data = JSON.parse('##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##') as Data // @t
 
 <template>
   <p v-for="exercise in data">
-    <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }">
-      Exercise {{ exercise.exerciseId }}
-    </RouterLink>
+    <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }"
+      >Exercise {{ exercise.exerciseId }}</RouterLink
+    >
   </p>
 </template>

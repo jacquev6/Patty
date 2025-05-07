@@ -42,9 +42,14 @@ class DummyModel(Model):
         assert messages[-1].role == "user"
         content = messages[-1].content
 
-        response = {"Not JSON": "This is not JSON.", "Invalid JSON": "{}"}.get(
-            content, MessageTypeFactory.build().model_dump_json()
-        )
+        def raise_exception() -> str:
+            raise Exception("Unknown error from DummyModel")
+
+        response = {
+            "Not JSON": lambda: "This is not JSON.",
+            "Invalid JSON": lambda: "{}",
+            "Unknown error": raise_exception,
+        }.get(content, lambda: MessageTypeFactory.build().model_dump_json())()
 
         duration = 0.1
         if content.startswith("Sleep "):

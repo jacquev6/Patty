@@ -1,21 +1,4 @@
-function ignoreResizeObserverLoopError() {
-  Cypress.on('uncaught:exception', (error) => {
-    if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {
-      // @todo Deep dive into this issue: avoid the error instead of ignoring it.
-      // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver#observation_errors
-      return false
-    } else {
-      return true
-    }
-  })
-}
-
-function screenshot(name: string) {
-  cy.compareSnapshot({
-    name: `${name}.${Cypress.browser.name}`,
-    cypressScreenshotOptions: { disableTimersAndAnimations: true },
-  })
-}
+import { ignoreResizeObserverLoopError, screenshot } from './utils'
 
 describe('The batch creation page', () => {
   beforeEach(() => {
@@ -222,6 +205,15 @@ describe('The batch creation page', () => {
     ).should('exist')
   })
 
+  it('handles unknown error from the LLM', () => {
+    cy.get('[data-cy="input-text"]').eq(0).type('{selectAll}Unknown error', { delay: 0 })
+
+    cy.get('button:contains("Submit")').click()
+
+    cy.get('h2:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("The LLM caused an unknown error.")').should('exist')
+  })
+
   it('opens several text files as inputs', () => {
     cy.get('[data-cy="input-text"]').as('input-text')
     cy.get('[data-cy="input-page-number"]').as('input-page-number')
@@ -314,6 +306,184 @@ describe('The batch creation page', () => {
     cy.get('@input-page-number').eq(3).should('have.value', '')
     cy.get('@input-exercise-number').eq(3).should('have.value', '')
     cy.get('@input-text').eq(3).should('have.value', '')
+  })
+
+  it('saves and loads settings by name', () => {
+    cy.get('[data-cy="settings-name"]').as('settings-name')
+    cy.get('[data-cy="system-prompt"]').as('system-prompt')
+
+    // Create from scratch
+    cy.get('@settings-name').should('have.value', '')
+    cy.get('@settings-name').focus()
+    cy.get('[data-cy="suggestion"]').should('have.length', 0)
+    cy.get('@settings-name').type('Alpha', { delay: 0 })
+
+    cy.get('@system-prompt').type('{selectAll}Prompt alpha 1', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+
+    // Create from existing
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 1')
+    cy.get('@settings-name').type('{selectAll}{del}', { delay: 0 })
+    cy.get('@system-prompt').type('{selectAll}Not prompt', { delay: 0 })
+    cy.get('@settings-name').focus()
+    cy.get('[data-cy="suggestion"]').as('suggestions')
+    cy.get('@suggestions').should('have.length', 1)
+    cy.get('@suggestions').eq(0).should('have.text', 'Alpha').click()
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 1')
+
+    cy.get('@system-prompt').type('{selectAll}Prompt alpha 2', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+
+    // Create from latest version
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
+    cy.get('@settings-name').focus()
+    cy.get('@suggestions').should('have.length', 2)
+    cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)').click()
+    cy.get('@settings-name').should('have.value', 'Alpha (previous version)')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 1')
+    cy.get('@settings-name').type('{selectAll}{del}', { delay: 0 })
+    cy.get('@suggestions').eq(0).should('have.text', 'Alpha').click()
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
+
+    cy.get('@system-prompt').type('{selectAll}Prompt alpha 3 (bad)', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-4')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+    cy.visit('/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+
+    // Restore previous version
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 3 (bad)')
+    cy.get('@settings-name').focus()
+    cy.get('@suggestions').should('have.length', 2)
+    cy.get('@suggestions').eq(0).should('have.text', 'Alpha')
+    cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)').click()
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-5')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)') // Previous version again
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+    cy.visit('/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha') // Current version again
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-4')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
+
+    // Create from latest version
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
+    cy.get('@settings-name').focus()
+    cy.get('@suggestions').should('have.length', 2)
+    cy.get('@suggestions').eq(0).should('have.text', 'Alpha')
+    cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)')
+    cy.get('@system-prompt').type('{selectAll}Prompt alpha 3bis (bad)', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-6')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+    cy.visit('/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-4')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
+    cy.visit('/batch-5')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+
+    // Create from previous version
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 3bis (bad)')
+    cy.get('@settings-name').focus()
+    cy.get('@suggestions').should('have.length', 2)
+    cy.get('@suggestions').eq(0).should('have.text', 'Alpha')
+    cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)').click()
+    cy.get('@settings-name').should('have.value', 'Alpha (previous version)')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
+    cy.get('@system-prompt').type('{selectAll}Prompt alpha 3ter (good)', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-7')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+    cy.visit('/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-4')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
+    cy.visit('/batch-5')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-6')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
+
+    // Create without changing strategy
+    cy.visit('/new-batch')
+    cy.get('@settings-name').should('have.value', 'Alpha')
+    cy.get('@system-prompt').should('have.value', 'Prompt alpha 3ter (good)')
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/batch-8')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
+
+    cy.visit('/batch-2')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
+    cy.visit('/batch-3')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-4')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
+    cy.visit('/batch-5')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
+    cy.visit('/batch-6')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
+    cy.visit('/batch-7')
+    cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
+    cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
   })
 })
 

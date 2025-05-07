@@ -26,43 +26,79 @@ And I have to provide an ad-hoc implementation.
 -->
 
 <script setup lang="ts">
-import { useFocus } from '@vueuse/core'
+import { useElementSize, useFocus } from '@vueuse/core'
 import { computed, useTemplateRef } from 'vue'
+import { useFloating } from '@floating-ui/vue'
+import { levenshteinEditDistance } from 'levenshtein-edit-distance'
 
 const props = defineProps<{
   suggestions: string[]
-  maxSuggestionsDisplayCount: number
 }>()
 
+const model = defineModel<string>({ required: false, default: '' })
+
 const inputElement = useTemplateRef('inputElement')
+const suggestionsElement = useTemplateRef('suggestionsElement')
 
 const { focused } = useFocus(inputElement)
 
-const filteredSuggestions = computed(() => {
-  return props.suggestions.filter((suggestion) => {
-    return suggestion.toLowerCase().includes(model.value.toLowerCase())
-  })
+const sortedSuggestions = computed(() => {
+  const needle = model.value.toLowerCase()
+  if (model.value === '') {
+    return props.suggestions.map((suggestion) => ({ found: 0, index: -1, suggestion }))
+  } else {
+    return props.suggestions
+      .map((suggestion) => ({ distance: levenshteinEditDistance(needle, suggestion.toLowerCase()), suggestion }))
+      .sort((a, b) => a.distance - b.distance)
+      .map(({ suggestion }) => {
+        const index = suggestion.toLowerCase().indexOf(needle)
+        const found = index !== -1 ? 1 : 0
+        return { found, index, suggestion }
+      })
+      .sort((a, b) => b.found - a.found)
+  }
 })
 
-const model = defineModel<string>({ required: true })
+const { floatingStyles } = useFloating(inputElement, suggestionsElement, { placement: 'bottom-start' })
+
+const { width: inputElementWidth } = useElementSize(inputElement, { width: 100, height: 100 }, { box: 'border-box' })
+const sizeStyles = computed(() => {
+  return {
+    width: `${inputElementWidth.value}px`,
+  }
+})
+
+const style = computed(() => {
+  return { ...sizeStyles.value, ...floatingStyles.value }
+})
 </script>
 
 <template>
   <input ref="inputElement" v-model="model" type="text" v-bind="$attrs" />
   <span v-if="!focused" class="clue"></span>
-  <div v-if="focused" class="suggestions">
-    <p
-      v-for="suggestion in filteredSuggestions.slice(0, maxSuggestionsDisplayCount)"
-      class="suggestion"
-      @mousedown="model = suggestion"
-    >
-      {{ suggestion }}
-    </p>
-    <p v-if="filteredSuggestions.length > maxSuggestionsDisplayCount">... (type to filter)</p>
-  </div>
+  <Teleport to="body" v-if="focused">
+    <div ref="suggestionsElement" class="suggestions" :style>
+      <p
+        data-cy="suggestion"
+        v-for="{ index, suggestion } in sortedSuggestions"
+        class="suggestion"
+        @mousedown="model = suggestion"
+      >
+        <template v-if="index === -1">{{ suggestion }}</template>
+        <template v-else>
+          {{ suggestion.slice(0, index) }}<strong>{{ suggestion.slice(index, index + model.length) }}</strong
+          >{{ suggestion.slice(index + model.length) }}
+        </template>
+      </p>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
+div.suggestions {
+  background-color: white;
+  border: 1px solid black;
+}
 div.suggestions > p {
   margin: 0;
   padding: 0;
@@ -71,7 +107,7 @@ div.suggestions > p.suggestion {
   cursor: pointer;
 }
 div.suggestions > p.suggestion:hover {
-  background-color: #eee;
+  background-color: #ccc;
 }
 span.clue {
   display: inline-block;
