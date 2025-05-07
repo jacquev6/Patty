@@ -122,10 +122,7 @@ class PostBatchResponse(ApiModel):
 
 @router.post("/batch")
 async def post_batch(
-    req: PostBatchRequest,
-    engine: database_utils.EngineDependable,
-    session: database_utils.SessionDependable,
-    background_tasks: fastapi.BackgroundTasks,
+    req: PostBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostBatchResponse:
     if req.strategy.settings.name is None:
         base_settings = None
@@ -188,59 +185,13 @@ async def post_batch(
             strategy=strategy,
             input=input,
             raw_llm_conversations=[],
-            initial_assistant_response=None,
             adjustments=[],
         )
         session.add(adaptation)
 
     session.flush()
 
-    background_tasks.add_task(submit_batch, engine, batch.id)
-
     return PostBatchResponse(id=str(batch.id))
-
-
-async def submit_batch(engine: database_utils.Engine, id: int) -> None:
-    with database_utils.Session(engine) as session:
-        batch = session.get(Batch, id)
-        assert batch is not None
-
-        print(f"Submitting batch {batch.id}", flush=True)
-        response_format = batch.strategy.settings.response_specification.make_response_format()
-
-        async def submit_adaptation(adaptation: DbAdaptation) -> None:
-            assert adaptation.strategy is batch.strategy
-
-            messages: list[LlmMessage] = [
-                llm.SystemMessage(content=batch.strategy.settings.system_prompt),
-                llm.UserMessage(content=adaptation.input.text),
-            ]
-
-            try:
-                print(f"Submitting adaptation {adaptation.id}", flush=True)
-                response = await batch.strategy.model.complete(messages, response_format)
-            except llm.InvalidJsonLlmException as error:
-                print(f"Error 'invalid JSON' on adaptation {adaptation.id}", flush=True)
-                adaptation.raw_llm_conversations = [error.raw_conversation]
-                adaptation.initial_assistant_response = AssistantInvalidJsonError(
-                    kind="error", error="invalid-json", parsed=error.parsed
-                )
-            except llm.NotJsonLlmException as error:
-                print(f"Error 'not JSON' on adaptation {adaptation.id}", flush=True)
-                adaptation.raw_llm_conversations = [error.raw_conversation]
-                adaptation.initial_assistant_response = AssistantNotJsonError(
-                    kind="error", error="not-json", text=error.text
-                )
-            else:
-                print(f"Success on adaptation {adaptation.id}", flush=True)
-                adaptation.raw_llm_conversations = [response.raw_conversation]
-                adaptation.initial_assistant_response = AssistantSuccess(
-                    kind="success", exercise=Exercise(**response.message.content.model_dump())
-                )
-
-            session.commit()
-
-        await asyncio.gather(*(submit_adaptation(adaptation) for adaptation in batch.adaptations))
 
 
 class GetBatchResponse(ApiModel):
@@ -379,7 +330,6 @@ def post_textbook_batch(
     req: PostTextbookBatchRequest,
     engine: database_utils.EngineDependable,
     session: database_utils.SessionDependable,
-    background_tasks: fastapi.BackgroundTasks,
 ) -> ApiTextbook:
     textbook = get_by_id(session, Textbook, id)
 
@@ -413,14 +363,11 @@ def post_textbook_batch(
             strategy=strategy,
             input=input,
             raw_llm_conversations=[],
-            initial_assistant_response=None,
             adjustments=[],
         )
         session.add(adaptation)
 
     session.flush()
-
-    background_tasks.add_task(submit_batch, engine, batch.id)
 
     return make_api_textbook(textbook)
 

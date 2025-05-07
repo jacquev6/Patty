@@ -359,6 +359,7 @@ export interface components {
         | components['schemas']['AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
+        | components['schemas']['AssistantUnknownError']
     }
     /** ApiAdaptation */
     ApiAdaptation: {
@@ -377,6 +378,7 @@ export interface components {
         | components['schemas']['AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
+        | components['schemas']['AssistantUnknownError']
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
@@ -491,6 +493,19 @@ export interface components {
        */
       kind: 'success'
       exercise: components['schemas']['Exercise-Output']
+    }
+    /** AssistantUnknownError */
+    AssistantUnknownError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'unknown'
     }
     'Choice-Input': {
       /**

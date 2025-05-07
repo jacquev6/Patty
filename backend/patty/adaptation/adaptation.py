@@ -33,7 +33,12 @@ class AssistantNotJsonError(ApiModel):
     text: str
 
 
-AssistantResponse = AssistantSuccess | AssistantInvalidJsonError | AssistantNotJsonError
+class AssistantUnknownError(ApiModel):
+    kind: Literal["error"]
+    error: Literal["unknown"]
+
+
+AssistantResponse = AssistantSuccess | AssistantInvalidJsonError | AssistantNotJsonError | AssistantUnknownError
 
 
 class Adjustment(ApiModel):

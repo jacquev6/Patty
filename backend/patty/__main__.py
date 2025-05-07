@@ -1,20 +1,19 @@
-import copy
-import re
-import sys
 from typing import Iterable
-from urllib.parse import urlparse
+import asyncio
 import datetime
 import io
 import json
 import os
+import re
 import subprocess
+import sys
 import tarfile
-
-import sqlalchemy_utils
+import urllib.parse
 
 import boto3
 import click
 import requests
+import sqlalchemy_utils
 
 from . import adaptation
 from . import adapted
@@ -23,6 +22,7 @@ from . import database_utils
 from . import fixtures
 from . import llm
 from . import settings
+from .adaptation import submission
 
 
 @click.group()
@@ -71,10 +71,16 @@ def load_fixtures(fixture: Iterable[str]) -> None:
         session.commit()
 
 
-parsed_database_url = urlparse(settings.DATABASE_URL)
+@main.command()
+def run_submission_daemon() -> None:
+    engine = database_utils.create_engine(settings.DATABASE_URL)
+    asyncio.run(submission.daemon(engine))
+
+
+parsed_database_url = urllib.parse.urlparse(settings.DATABASE_URL)
 assert parsed_database_url.scheme == "postgresql+psycopg2"
 
-parsed_database_backups_url = urlparse(settings.DATABASE_BACKUPS_URL)
+parsed_database_backups_url = urllib.parse.urlparse(settings.DATABASE_BACKUPS_URL)
 
 
 @main.command()
@@ -145,7 +151,7 @@ def backup_database() -> None:
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
-    parsed_backup_url = urlparse(backup_url)
+    parsed_backup_url = urllib.parse.urlparse(backup_url)
 
     if parsed_backup_url.scheme == "file":
         with tarfile.open(parsed_backup_url.path, "r:gz") as tarball:
@@ -180,7 +186,7 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
     placeholder_database_url = settings.DATABASE_URL + "-restore"
     if not sqlalchemy_utils.functions.database_exists(placeholder_database_url):
         sqlalchemy_utils.functions.create_database(placeholder_database_url)
-    parsed_placeholder_database_url = urlparse(placeholder_database_url)
+    parsed_placeholder_database_url = urllib.parse.urlparse(placeholder_database_url)
     assert parsed_placeholder_database_url.hostname is not None
     assert parsed_placeholder_database_url.username is not None
     assert parsed_placeholder_database_url.password is not None

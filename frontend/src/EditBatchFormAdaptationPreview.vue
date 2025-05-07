@@ -64,6 +64,7 @@ watch(Escape, () => {
             <template v-else-if="adaptation.status.error === 'not-json'">
               The LLM returned a response that is not correct JSON.
             </template>
+            <template v-else-if="adaptation.status.error === 'unknown'"> The LLM caused an unknown error. </template>
             <template v-else>BUG: {{ ((status: never) => status)(adaptation.status) }}</template>
           </p>
         </template>

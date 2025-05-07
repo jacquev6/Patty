@@ -24,6 +24,10 @@ export type PreprocessedAdaptation = {
         text: string
       }
     | {
+        kind: 'error'
+        error: 'unknown'
+      }
+    | {
         kind: 'success'
         adaptedExercise: AdaptedExercise
       }
@@ -40,6 +44,10 @@ export type PreprocessedAdaptation = {
         kind: 'error'
         error: 'not-json'
         text: string
+      }
+    | {
+        kind: 'error'
+        error: 'unknown'
       }
     | {
         kind: 'success'
@@ -59,6 +67,8 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
       return { kind: 'error', error: 'invalid-json', parsed: response.parsed }
     } else if (response.kind === 'error' && response.error === 'not-json') {
       return { kind: 'error', error: 'not-json', text: response.text }
+    } else if (response.kind === 'error' && response.error === 'unknown') {
+      return { kind: 'error', error: 'unknown' }
     } else {
       return ((r: never) => r)(response)
     }

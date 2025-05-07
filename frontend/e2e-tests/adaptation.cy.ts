@@ -205,6 +205,15 @@ describe('The batch creation page', () => {
     ).should('exist')
   })
 
+  it('handles unknown error from the LLM', () => {
+    cy.get('[data-cy="input-text"]').eq(0).type('{selectAll}Unknown error', { delay: 0 })
+
+    cy.get('button:contains("Submit")').click()
+
+    cy.get('h2:contains("Error with the LLM")').should('exist')
+    cy.get('p:contains("The LLM caused an unknown error.")').should('exist')
+  })
+
   it('opens several text files as inputs', () => {
     cy.get('[data-cy="input-text"]').as('input-text')
     cy.get('[data-cy="input-page-number"]').as('input-page-number')

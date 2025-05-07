@@ -29,6 +29,17 @@ services:
       db:
         condition: service_healthy
 
+  submission-daemon:
+    image: jacquev6/patty:preview-backend
+    pull_policy: never
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    command: ["python", "-m", "patty", "run-submission-daemon"]
+    depends_on:
+      db:
+        condition: service_healthy
+
   frontend:
     image: jacquev6/patty:preview-frontend
     pull_policy: never

@@ -889,6 +889,9 @@
               },
               {
                 "$ref": "#/components/schemas/AssistantNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantUnknownError"
               }
             ],
             "title": "Assistantresponse"
@@ -937,6 +940,9 @@
               },
               {
                 "$ref": "#/components/schemas/AssistantNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantUnknownError"
               },
               {
                 "type": "null"
@@ -1272,6 +1278,27 @@
           "exercise"
         ],
         "title": "AssistantSuccess"
+      },
+      "AssistantUnknownError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "unknown",
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error"
+        ],
+        "title": "AssistantUnknownError"
       },
       "Choice-Input": {
         "properties": {
