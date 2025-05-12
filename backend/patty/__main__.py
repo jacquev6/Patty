@@ -72,9 +72,11 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 
 @main.command()
-def run_submission_daemon() -> None:
+@click.option("--parallelism", type=int, default=1)
+@click.option("--pause", type=float, default=1.)
+def run_submission_daemon(parallelism: int, pause: float) -> None:
     engine = database_utils.create_engine(settings.DATABASE_URL)
-    asyncio.run(submission.daemon(engine))
+    asyncio.run(submission.daemon(engine, parallelism, pause))
 
 
 parsed_database_url = urllib.parse.urlparse(settings.DATABASE_URL)
@@ -257,6 +259,55 @@ def migrate_data() -> None:
             strategy.model
         for strategy_settings in session.query(adaptation.StrategySettings).all():
             strategy_settings.response_specification
+
+
+@main.command()
+@click.argument("batch-id", type=int)
+@click.argument("count", type=int)
+@click.argument("parallelism", type=int)
+@click.argument("pause", type=float)
+def investigate_issue_39(batch_id: int, count: int, parallelism: int, pause: float) -> None:
+    reference_batch_id = batch_id
+    del batch_id
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    with database_utils.make_session(database_engine) as session:
+        reference_batch = session.get(adaptation.Batch, reference_batch_id)
+        assert reference_batch is not None
+        batch = adaptation.Batch(created_by="Patty", created_at=datetime.datetime.now(), strategy=reference_batch.strategy)
+        session.add(batch)
+
+        for n in range(count):
+            adaptation_ = adaptation.Adaptation(
+                created_by="Patty",
+                batch=batch,
+                strategy=batch.strategy,
+                input=reference_batch.adaptations[n % len(reference_batch.adaptations)].input,
+                raw_llm_conversations=[],
+                adjustments=[],
+                manual_edit=None,
+            )
+            session.add(adaptation_)
+        session.commit()
+        batch_id = batch.id
+
+    with database_utils.make_session(database_engine) as session:
+        asyncio.run(submission.daemon(database_engine, parallelism, pause, exit_when_done=True))
+
+    response_kind_count = {}
+    with database_utils.make_session(database_engine) as session:
+        batch = session.get(adaptation.Batch, batch_id)
+        assert batch is not None
+        for adaptation_ in batch.adaptations:
+            kind = adaptation_.initial_assistant_response.kind
+            if kind == "error":
+                kind = f"error:{adaptation_.initial_assistant_response.error}"
+            response_kind_count.setdefault(kind, 0)
+            response_kind_count[kind] += 1
+
+    print(f"Submitted batch {batch_id} with {count} adaptations based on batch {reference_batch_id}, {parallelism} at a time, pausing for {pause}s between submissions")
+    print(f"Response kind counts: {response_kind_count}")
+    print(f"Success rate: {response_kind_count.get('success', 0) / count:.2%}")
 
 
 if __name__ == "__main__":

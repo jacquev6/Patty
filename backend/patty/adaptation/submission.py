@@ -27,18 +27,22 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-async def daemon(engine: database_utils.Engine) -> None:
+async def daemon(engine: database_utils.Engine, parallelism: int, pause: float, exit_when_done: bool=False) -> None:
     last_time = time.monotonic()
     while True:
         log("Waking up...")
         try:
             with database_utils.Session(engine) as session:
-                adaptation = session.query(Adaptation).filter(Adaptation._initial_assistant_response == None).first()
-                if adaptation is None:
+                adaptations = session.query(Adaptation).filter(Adaptation._initial_assistant_response == None).limit(parallelism).all()
+                if len(adaptations) == 0:
                     log("No not-yet-submitted adaptation found")
+                    if exit_when_done:
+                        log("Exiting")
+                        break
                 else:
-                    log(f"Found adaptation {adaptation.id}")
-                    await submit_adaptation(adaptation)
+                    log(f"Found adaptation(s) {' '.join([str(adaptation.id) for adaptation in adaptations])}")
+                    submissions = [submit_adaptation(adaptation) for adaptation in adaptations]
+                    await asyncio.gather(*submissions)
                     session.commit()
             if time.monotonic() >= last_time + 60:
                 log("Calling pulse monitoring URL")
@@ -47,8 +51,8 @@ async def daemon(engine: database_utils.Engine) -> None:
         except:  # Pokemon programming: gotta catch 'em all
             log("UNEXPECTED ERROR")
             traceback.print_exc()
-        log("Sleeping...")
-        await asyncio.sleep(1)
+        log(f"Sleeping for {pause}s...")
+        await asyncio.sleep(pause)
 
 
 async def submit_adaptation(adaptation: Adaptation) -> None:
