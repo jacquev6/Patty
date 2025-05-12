@@ -27,13 +27,18 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-async def daemon(engine: database_utils.Engine, parallelism: int, pause: float, exit_when_done: bool=False) -> None:
+async def daemon(engine: database_utils.Engine, parallelism: int, pause: float, exit_when_done: bool = False) -> None:
     last_time = time.monotonic()
     while True:
         log("Waking up...")
         try:
             with database_utils.Session(engine) as session:
-                adaptations = session.query(Adaptation).filter(Adaptation._initial_assistant_response == None).limit(parallelism).all()
+                adaptations = (
+                    session.query(Adaptation)
+                    .filter(Adaptation._initial_assistant_response == None)
+                    .limit(parallelism)
+                    .all()
+                )
                 if len(adaptations) == 0:
                     log("No not-yet-submitted adaptation found")
                     if exit_when_done:

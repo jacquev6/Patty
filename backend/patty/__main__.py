@@ -73,7 +73,7 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 @main.command()
 @click.option("--parallelism", type=int, default=1)
-@click.option("--pause", type=float, default=1.)
+@click.option("--pause", type=float, default=1.0)
 def run_submission_daemon(parallelism: int, pause: float) -> None:
     engine = database_utils.create_engine(settings.DATABASE_URL)
     asyncio.run(submission.daemon(engine, parallelism, pause))
@@ -274,14 +274,16 @@ def investigate_issue_39(batch_id: int, count: int, parallelism: int, pause: flo
     with database_utils.make_session(database_engine) as session:
         reference_batch = session.get(adaptation.Batch, reference_batch_id)
         assert reference_batch is not None
-        batch = adaptation.Batch(created_by="Patty", created_at=datetime.datetime.now(), strategy=reference_batch.strategy)
-        session.add(batch)
+        new_batch = adaptation.Batch(
+            created_by="Patty", created_at=datetime.datetime.now(), strategy=reference_batch.strategy
+        )
+        session.add(new_batch)
 
         for n in range(count):
             adaptation_ = adaptation.Adaptation(
                 created_by="Patty",
-                batch=batch,
-                strategy=batch.strategy,
+                batch=new_batch,
+                strategy=new_batch.strategy,
                 input=reference_batch.adaptations[n % len(reference_batch.adaptations)].input,
                 raw_llm_conversations=[],
                 adjustments=[],
@@ -289,23 +291,27 @@ def investigate_issue_39(batch_id: int, count: int, parallelism: int, pause: flo
             )
             session.add(adaptation_)
         session.commit()
-        batch_id = batch.id
+        batch_id = new_batch.id
 
     with database_utils.make_session(database_engine) as session:
         asyncio.run(submission.daemon(database_engine, parallelism, pause, exit_when_done=True))
 
-    response_kind_count = {}
+    response_kind_count: dict[str, int] = {}
     with database_utils.make_session(database_engine) as session:
-        batch = session.get(adaptation.Batch, batch_id)
-        assert batch is not None
-        for adaptation_ in batch.adaptations:
-            kind = adaptation_.initial_assistant_response.kind
+        completed_batch = session.get(adaptation.Batch, batch_id)
+        assert completed_batch is not None
+        for adaptation_ in completed_batch.adaptations:
+            assert adaptation_.initial_assistant_response is not None
+            kind: str = adaptation_.initial_assistant_response.kind
             if kind == "error":
+                assert adaptation_.initial_assistant_response.kind == "error"
                 kind = f"error:{adaptation_.initial_assistant_response.error}"
             response_kind_count.setdefault(kind, 0)
             response_kind_count[kind] += 1
 
-    print(f"Submitted batch {batch_id} with {count} adaptations based on batch {reference_batch_id}, {parallelism} at a time, pausing for {pause}s between submissions")
+    print(
+        f"Submitted batch {batch_id} with {count} adaptations based on batch {reference_batch_id}, {parallelism} at a time, pausing for {pause}s between submissions"
+    )
     print(f"Response kind counts: {response_kind_count}")
     print(f"Success rate: {response_kind_count.get('success', 0) / count:.2%}")
 
