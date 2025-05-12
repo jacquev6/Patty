@@ -19,7 +19,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app
     env_file:
@@ -40,7 +40,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
@@ -60,7 +60,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
@@ -80,7 +80,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
@@ -105,7 +105,7 @@ services:
         USER_ID: $USER_ID
         GROUP_ID: $GROUP_ID
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
@@ -117,7 +117,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     command: ["pip", "install", "--user", "-r", "requirements-dev.txt", "-r", "requirements-run.txt"]
@@ -125,7 +125,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend/patty
     env_file:
@@ -141,7 +141,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
@@ -155,7 +155,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
@@ -172,13 +172,12 @@ services:
       data-loader:
         condition: service_completed_successfully
   # The submission-daemon does not reload its code on changes.
-  # Use the following command:
-  # dev-env/docker-compose.sh down submission-daemon && dev-env/docker-compose.sh up --detach submission-daemon
+  # Use the following command: ./dev.sh submission-daemon reload
   submission-daemon:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
@@ -193,14 +192,14 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "default-system-prompt.md", "python -m patty default-system-prompt"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-system-prompt.md", "python -m patty default-system-prompt"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -210,14 +209,14 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "openapi.json", "python -m patty openapi"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "openapi.json", "python -m patty openapi"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -227,14 +226,14 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema.json", "python -m patty adapted-exercise-schema"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema.json", "python -m patty adapted-exercise-schema"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -244,7 +243,7 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
@@ -258,14 +257,14 @@ services:
     image: patty-dev_backend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
     env_file:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["bash", "-c", "while true; do python -m patty backup-database; find /app/dev-env/db/backups -name 'patty-backup-*.tar.gz' -mmin +10 -delete; sleep 30; done"]
+    command: ["bash", "-c", "while true; do python -m patty backup-database; find /app/support/dev-env/db/backups -name 'patty-backup-*.tar.gz' -mmin +10 -delete; sleep 30; done"]
     depends_on:
       pip-installer:
         condition: service_completed_successfully
@@ -281,7 +280,7 @@ services:
         USER_ID: $USER_ID
         GROUP_ID: $GROUP_ID
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
       - /tmp/.X11-unix:/tmp/.X11-unix  # Allow running GUI apps in container, displaying on host
     working_dir: /app/frontend
@@ -295,7 +294,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     command: ["npm", "install"]
@@ -303,7 +302,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     command: ["npx", "cypress", "install"]
@@ -314,7 +313,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
@@ -329,7 +328,7 @@ services:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
-      - ..:/app
+      - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:

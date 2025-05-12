@@ -22,7 +22,7 @@ else
   exit 1
 fi
 
-../dev-env/clean.sh -f
+../dev.sh clean --force
 
 if ! docker buildx ls | grep patty-multi-platform-builder >/dev/null
 then
