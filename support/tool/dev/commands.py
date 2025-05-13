@@ -51,7 +51,8 @@ def clean(force: bool) -> None:
 
 @dev.command()
 @click.option("--build/--no-build", is_flag=True, default=True)
-def run(build: bool) -> None:
+@click.option("--keep-up-on-error", is_flag=True, default=False)
+def run(build: bool, keep_up_on_error: bool) -> None:
     """Run the development environment. Stop it with Ctrl+C."""
 
     if build:
@@ -73,9 +74,12 @@ def run(build: bool) -> None:
         except KeyboardInterrupt:
             pass
     finally:
-        print("Patty dev env: clean-up")
-        subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/dev-env", check=True)
-        subprocess.run(["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/dev-env", check=True)
+        if not keep_up_on_error:
+            print("Patty dev env: clean-up")
+            subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/dev-env", check=True)
+            subprocess.run(
+                ["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/dev-env", check=True
+            )
 
 
 @dev.command(name="compose")

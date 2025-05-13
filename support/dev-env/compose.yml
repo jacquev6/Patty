@@ -222,6 +222,10 @@ services:
         condition: service_completed_successfully
       pip-installer:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/openapi.json"]
+      interval: 0.5s
+      retries: 12
   adapted-exercise-json-schema-generator:
     image: patty-dev_backend
     pull_policy: never
@@ -239,6 +243,10 @@ services:
         condition: service_completed_successfully
       pip-installer:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema.json"]
+      interval: 0.5s
+      retries: 12
   fixtures-loader:
     image: patty-dev_backend
     pull_policy: never
@@ -318,12 +326,16 @@ services:
     working_dir: /app/frontend
     environment:
       SHELL: bash
-    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
+    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/src/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully
       openapi-json-generator:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/frontend/src/openapi.ts"]
+      interval: 0.5s
+      retries: 12
   frontend:
     image: patty-dev_frontend
     pull_policy: never
@@ -336,9 +348,9 @@ services:
     command: ["npx", "vite", "--host", "0.0.0.0", "--port", "80", "--strictPort"]
     depends_on:
       openapi-ts-generator:
-        condition: service_started
+        condition: service_healthy
       adapted-exercise-json-schema-generator:
-        condition: service_started
+        condition: service_healthy
 
   fanout:
     image: nginx:latest
