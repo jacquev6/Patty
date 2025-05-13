@@ -45,8 +45,8 @@ RUN pip install -r requirements-run.txt uvicorn
 FROM nginx:alpine AS final-frontend
 
 RUN rm /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*.html
-ADD prod/docker/frontend.conf /etc/nginx/conf.d/frontend.conf
-ADD --chmod=777 prod/docker/40-substitute.sh /docker-entrypoint.d/40-substitute.sh
+ADD support/prod/docker/frontend.conf /etc/nginx/conf.d/frontend.conf
+ADD --chmod=777 support/prod/docker/40-substitute.sh /docker-entrypoint.d/40-substitute.sh
 COPY --from=frontend-builder /app/dist /usr/share/nginx/templates/frontend
 
 

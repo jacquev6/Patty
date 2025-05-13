@@ -6,4 +6,7 @@ set -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 
-docker compose "$@"
+export USER_ID=$(id -u)
+export GROUP_ID=$(id -g)
+
+bash support/run.sh prod "$@"
