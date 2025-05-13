@@ -79,6 +79,12 @@ def run(build: bool) -> None:
 
 
 @dev.command()
+@click.argument("fixtures", nargs=-1)
+def load_fixtures(fixtures: tuple[str, ...]) -> None:
+    compose.run_in_backend_container(["python", "-m", "patty", "load-fixtures"] + list(fixtures), check=True)
+
+
+@dev.command()
 @click.option("--cost-money", is_flag=True)
 @click.option("--only-backend", is_flag=True)
 @click.option("--skip-backend", is_flag=True)
