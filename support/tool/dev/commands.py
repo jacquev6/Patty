@@ -78,6 +78,12 @@ def run(build: bool) -> None:
         subprocess.run(["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/dev-env", check=True)
 
 
+@dev.command(name="compose")
+@click.argument("args", nargs=-1)
+def compose_(args: tuple[str, ...]) -> None:
+    subprocess.run(["docker", "compose"] + list(args), cwd="support/dev-env", check=True)
+
+
 @dev.command()
 @click.argument("fixtures", nargs=-1)
 def load_fixtures(fixtures: tuple[str, ...]) -> None:
