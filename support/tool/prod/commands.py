@@ -43,10 +43,23 @@ def preview() -> None:
 def publish() -> None:
     # Check cleanliness
 
-    if subprocess.run(["git", "branch", "--show-current"], check=True, capture_output=True, universal_newlines=True).stdout.strip() != "main":
+    if (
+        subprocess.run(
+            ["git", "branch", "--show-current"], check=True, capture_output=True, universal_newlines=True
+        ).stdout.strip()
+        != "main"
+    ):
         print("Not on branch 'main'.")
         raise click.Abort()
-    if subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], check=True, capture_output=True, universal_newlines=True).stdout.strip() != "":
+    if (
+        subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard"],
+            check=True,
+            capture_output=True,
+            universal_newlines=True,
+        ).stdout.strip()
+        != ""
+    ):
         subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], check=True)
         print("Untracked files.")
         raise click.Abort()
@@ -54,7 +67,9 @@ def publish() -> None:
         print("Unstaged changes.")
         raise click.Abort()
     if subprocess.run(["git", "diff", "--stat", "--staged", "--exit-code"], check=False).returncode != 0:
-        input("Staged-but-not-committed changes will be included in publication commit. Press enter to continue, Ctrl+C to abort.")
+        input(
+            "Staged-but-not-committed changes will be included in publication commit. Press enter to continue, Ctrl+C to abort."
+        )
 
     # Prepare
 
@@ -68,7 +83,7 @@ def publish() -> None:
     elif len(dev_migrations) == 1:
         dev_migration = dev_migrations[0]
         os.rename(dev_migration, dev_migration.replace("_dev.py", f"_version-{patty_version}.py"))
-    
+
     subprocess.run(["git", "add", "."], check=True)
     subprocess.run(["git", "commit", "--allow-empty", "-m", f"Publish version {patty_version}"], check=True)
 
@@ -85,32 +100,46 @@ def publish() -> None:
 
 def build(patty_version: str, action: typing.Literal["push", "load"]) -> None:
     if action == "push":
-        platform="linux/amd64,linux/arm64"
-        push_load="--push"
+        platform = "linux/amd64,linux/arm64"
+        push_load = "--push"
     else:
-        platform="linux/amd64"
-        push_load="--load"
+        platform = "linux/amd64"
+        push_load = "--load"
 
     subprocess.run(["./dev.sh", "clean", "--force"])
 
-    builders = subprocess.run(["docker", "buildx", "ls"], check=True, capture_output=True, universal_newlines=True).stdout
+    builders = subprocess.run(
+        ["docker", "buildx", "ls"], check=True, capture_output=True, universal_newlines=True
+    ).stdout
     if "patty-multi-platform-builder" not in builders:
         subprocess.run(["docker", "buildx", "create", "--name", "patty-multi-platform-builder"], check=True)
 
     with open("support/prod/docker/Dockerfile") as f:
         parts = [line.split("-")[-1].strip() for line in f if "AS final-" in line]
-    
+
     for part in parts:
         print(part)
         print("-" * len(part))
-        subprocess.run([
-            "docker", "buildx", "build",
-            "--pull",
-            "--builder", "patty-multi-platform-builder",
-            ".", "--file", "support/prod/docker/Dockerfile",
-            "--target", f"final-{part}",
-            "--build-arg", f"PATTY_VERSION={patty_version}",
-            "--tag", f"jacquev6/patty:{patty_version}-{part}",
-            "--platform", platform,
-            push_load,
-        ], check=True)
+        subprocess.run(
+            [
+                "docker",
+                "buildx",
+                "build",
+                "--pull",
+                "--builder",
+                "patty-multi-platform-builder",
+                ".",
+                "--file",
+                "support/prod/docker/Dockerfile",
+                "--target",
+                f"final-{part}",
+                "--build-arg",
+                f"PATTY_VERSION={patty_version}",
+                "--tag",
+                f"jacquev6/patty:{patty_version}-{part}",
+                "--platform",
+                platform,
+                push_load,
+            ],
+            check=True,
+        )
