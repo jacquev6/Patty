@@ -181,16 +181,60 @@ describe('The autonomous HTML for a textbook', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-textbook')
+    cy.visit('/api/adaptation/export/textbook-1.html?download=false')
   })
 
-  it('is sorted by page and exercise number', () => {
-    cy.visit('/api/adaptation/export/textbook-1.html?download=false')
-    cy.get('a').should('have.length', 6)
+  it('displays the textbook title', () => {
+    cy.get('p:contains("Livre")').should('have.text', 'Livre: Dummy Textbook Title')
+  })
+
+  it('displays nothing', () => {
+    cy.get('p.message').should('not.exist')
+    cy.get('a').should('have.length', 0)
+  })
+
+  it('displays "Indique le numéro de la page."', () => {
+    cy.get('[data-cy="exercise-number-filter"]').type('42', { delay: 0 })
+    cy.get('p.message').should('exist').should('have.text', 'Indique le numéro de la page.')
+  })
+
+  it('displays "La page 27 n\'existe pas."', () => {
+    cy.get('[data-cy="page-number-filter"]').type('27', { delay: 0 })
+    cy.get('p.message').should('exist').should('have.text', "La page 27 n'existe pas.")
+  })
+
+  it('displays "L\'exercice numéro 12 n\'existe pas."', () => {
+    cy.get('[data-cy="page-number-filter"]').type('40', { delay: 0 })
+    cy.get('[data-cy="exercise-number-filter"]').type('12', { delay: 0 })
+    cy.get('p.message').should('exist').should('have.text', "L'exercice numéro 12 n'existe pas.")
+  })
+
+  it('filters exercises by page', () => {
+    cy.get('[data-cy="page-number-filter"]').type('42', { delay: 0 })
+    cy.get('a').should('have.length', 2)
+    cy.get('a').eq(0).should('have.text', 'Exercise P42Ex5')
+    cy.get('a').eq(1).should('have.text', 'Exercise P42Ex6')
+
+    cy.get('[data-cy="page-number-filter"]').type('{selectAll}40', { delay: 0 })
+    cy.get('a').should('have.length', 4)
     cy.get('a').eq(0).should('have.text', 'Exercise P40Ex4')
     cy.get('a').eq(1).should('have.text', 'Exercise P40Ex6')
     cy.get('a').eq(2).should('have.text', 'Exercise P40Ex8')
     cy.get('a').eq(3).should('have.text', 'Exercise P40Ex30')
-    cy.get('a').eq(4).should('have.text', 'Exercise P42Ex5')
-    cy.get('a').eq(5).should('have.text', 'Exercise P42Ex6')
+  })
+
+  it('filters exercises by page and number', () => {
+    cy.get('[data-cy="page-number-filter"]').type('42', { delay: 0 })
+    cy.get('[data-cy="exercise-number-filter"]').type('6', { delay: 0 })
+    cy.get('a').should('have.length', 1)
+    cy.get('a').eq(0).should('have.text', 'Exercise P42Ex6')
+  })
+
+  it('has working links', () => {
+    cy.get('[data-cy="page-number-filter"]').type('42', { delay: 0 })
+    cy.get('[data-cy="exercise-number-filter"]').type('6', { delay: 0 })
+    cy.get('a').click()
+    cy.location('hash').should('eq', '#/P42Ex6')
+    cy.get(':contains("Complète avec")').should('exist')
   })
 })

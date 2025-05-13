@@ -484,7 +484,9 @@ class FixturesCreator:
         return branch
 
     def create_dummy_textbook(self) -> None:
-        textbook = self.create(adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy")
+        textbook = self.create(
+            adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
+        )
 
         success_branch_1 = self.create_dummy_branch(
             name=f"Branch with successes 1", system_prompt=f"Thou shall succeed."

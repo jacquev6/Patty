@@ -27,6 +27,7 @@
     "openapi-fetch": "^0.13.5",
     "pinia": "^3.0.2",
     "split-grid": "^1.0.11",
+    "ts-pattern": "^5.7.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },

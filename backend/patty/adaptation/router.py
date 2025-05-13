@@ -627,9 +627,12 @@ def export_textbook(
         .all()
     )
 
-    data = list(filter(None, (make_exercise_data(adaptation) for adaptation in adaptations)))
+    data = dict(
+        title=textbook.title,
+        exercises=list(filter(None, (make_exercise_data(adaptation) for adaptation in adaptations))),
+    )
 
-    content = render_template(export_textbook_template_file_path, "BATCH_EXPORT_DATA", data)
+    content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
 
     headers = {}
     if download:
@@ -671,5 +674,7 @@ def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
         "studentAnswersStorageKey": hashlib.md5(
             json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
+        "pageNumber": adaptation.input.page_number,
+        "exerciseNumber": adaptation.input.exercise_number,
         "adaptedExercise": exercise_dump,
     }
