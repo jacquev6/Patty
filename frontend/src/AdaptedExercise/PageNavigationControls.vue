@@ -42,7 +42,7 @@ watch(ArrowRight, (value) => {
     <div class="control" :class="{ disabled: model === 0 }" @click="goLeft">
       <div class="arrow arrowLeft"></div>
     </div>
-    <div><slot></slot></div>
+    <slot></slot>
     <div class="control" :class="{ disabled: model === pagesCount - 1 }" @click="goRight">
       <div class="arrow"></div>
     </div>
