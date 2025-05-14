@@ -15,6 +15,33 @@ type Example = {
 
 const examples: Example[] = [
   {
+    title: 'Swappable inputs',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }] },
+                  { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }] },
+                  { kind: 'swappableInput', contents: [{ kind: 'text', text: 'C' }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'Edit sentence',
     exercise: {
       format: 'v1',

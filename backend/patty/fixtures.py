@@ -484,7 +484,9 @@ class FixturesCreator:
         return branch
 
     def create_dummy_textbook(self) -> None:
-        textbook = self.create(adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy")
+        textbook = self.create(
+            adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
+        )
 
         success_branch_1 = self.create_dummy_branch(
             name=f"Branch with successes 1", system_prompt=f"Thou shall succeed."
@@ -508,10 +510,10 @@ class FixturesCreator:
                 exercise_number="5",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -525,10 +527,10 @@ class FixturesCreator:
                 exercise_number="6",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -542,10 +544,10 @@ class FixturesCreator:
                 exercise_number="4",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -572,10 +574,10 @@ class FixturesCreator:
                 exercise_number="6",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -589,10 +591,10 @@ class FixturesCreator:
                 exercise_number="30",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -606,10 +608,10 @@ class FixturesCreator:
                 exercise_number="8",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -623,10 +625,10 @@ class FixturesCreator:
                 exercise_number="Removed",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )
@@ -650,10 +652,10 @@ class FixturesCreator:
                 exercise_number="Removed",
                 text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
             ),
         )

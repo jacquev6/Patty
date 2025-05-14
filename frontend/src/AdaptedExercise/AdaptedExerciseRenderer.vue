@@ -88,19 +88,21 @@ const totalPagesCount = computed(() => {
 })
 const pageIndex = ref(0)
 
-const inProgress = reactive<InProgressExercise>({
-  exercise: props.adaptedExercise,
-  selectedSwappable: null,
-})
+const inProgress = ref(
+  reactive<InProgressExercise>({
+    exercise: props.adaptedExercise,
+    selectedSwappable: null,
+  }),
+)
 watch(
   () => props.adaptedExercise,
   (exercise) => {
-    inProgress.exercise = exercise
-    inProgress.selectedSwappable = null
+    inProgress.value.exercise = exercise
+    inProgress.value.selectedSwappable = null
   },
 )
 watch(pageIndex, () => {
-  inProgress.selectedSwappable = null
+  inProgress.value.selectedSwappable = null
 })
 
 const defaultStudentAnswers = { pages: {} }

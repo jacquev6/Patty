@@ -45,8 +45,11 @@ describe('The edition form for textbooks', () => {
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
-  it('looks like this', () => {
+  it('looks like this - by batch', () => {
     screenshot('textbook-edition-form-by-batch')
+  })
+
+  it('looks like this - by page', () => {
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('p:contains("sorted by page")').should('exist')
     cy.get('h2').should('have.length', 2)

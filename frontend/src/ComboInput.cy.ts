@@ -3,10 +3,12 @@ import ComboInput from './ComboInput.vue'
 const screenshotsCounts: Record<string, number> = {}
 
 function screenshot() {
-  const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
-  screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
-  const name = `${baseName}-${screenshotsCounts[baseName]}-${Cypress.browser.name}`
-  cy.compareSnapshot(name)
+  if (!Cypress.config('isInteractive')) {
+    const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
+    screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
+    const name = `${baseName}-${screenshotsCounts[baseName]}-${Cypress.browser.name}`
+    cy.compareSnapshot(name)
+  }
 }
 
 describe('ComboInput', () => {
