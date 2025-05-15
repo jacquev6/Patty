@@ -682,6 +682,48 @@ class FixturesCreator:
             ),
         )
 
+    def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
+        self.create_dummy_textbook()
+
+        strategy = self.__session.get(adaptation.Strategy, 1)
+        batch = self.__session.get(adaptation.Batch, 1)
+
+        self.create_successful_adaptation(
+            batch=batch,
+            strategy=strategy,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=42,
+                exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
+                text=textwrap.dedent(
+                    """\
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
+                ),
+            ),
+        )
+
+        self.create_successful_adaptation(
+            batch=batch,
+            strategy=strategy,
+            input=self.create(
+                adaptation.Input,
+                created_by="Patty",
+                page_number=42,
+                exercise_number="Auto-dictée",
+                text=textwrap.dedent(
+                    """\
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
+                ),
+            ),
+        )
+
 
 def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)
@@ -695,6 +737,7 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             creator.create_dummy_adaptation,
             creator.create_dummy_branch,
             creator.create_dummy_textbook,
+            creator.create_dummy_textbook_with_text_exercise_numbers,
             creator.create_mixed_dummy_batch,
             creator.create_seed_data,
         )

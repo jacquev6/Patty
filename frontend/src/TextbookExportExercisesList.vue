@@ -15,8 +15,11 @@ const pageIndex = ref(0)
 const pagesCount = computed(() => Math.ceil(props.exercises.length / 4))
 
 const columns = computed(() => {
-  const columns: ({ id: string; number: string } | null)[][] = _.chunk(
-    props.exercises.map((e) => ({ number: e.exerciseNumber, id: e.exerciseId })),
+  const columns: ({ id: string; title: string } | null)[][] = _.chunk(
+    props.exercises.map((e) => ({
+      title: (Number.isNaN(Number.parseInt(e.exerciseNumber)) ? '' : 'Exercice ') + e.exerciseNumber,
+      id: e.exerciseId,
+    })),
     4,
   ).slice(pageIndex.value)
   const missing = 4 - columns[columns.length - 1]!.length
@@ -38,7 +41,7 @@ const columns = computed(() => {
           <template v-else>
             <RouterLink :to="{ name: 'exercise', params: { id: exercise.id } }" target="_blank">
               <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
-                <p>Exercice {{ exercise.number }}</p>
+                <p>{{ exercise.title }}</p>
               </div>
             </RouterLink>
           </template>
