@@ -106,6 +106,13 @@ const filtered = computed(() => {
 </template>
 
 <style scoped>
+*, :deep(*) {
+  font-family: Arial, sans-serif;
+  font-size: 32px;
+  word-spacing: 0.26em;
+  white-space-collapse: preserve;
+}
+
 .title {
   font-size: 150%;
   font-weight: bold;
