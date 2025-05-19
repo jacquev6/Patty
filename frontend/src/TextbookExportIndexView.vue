@@ -119,7 +119,6 @@ const filtered = computed(() => {
 }
 
 .title {
-  font-size: 150%;
   font-weight: bold;
   text-align: center;
 }
