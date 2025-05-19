@@ -19,6 +19,7 @@ import type { AdaptedExercise } from './apiClient'
 import TextbookExportExercisesList from './TextbookExportExercisesList.vue'
 import assert from './assert'
 import TriColoredInput from './TriColoredInput.vue'
+import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data // @todo Factorize with TextbookExportExerciseView.vue
 
@@ -95,6 +96,9 @@ const filtered = computed(() => {
       v-model="exerciseNumberFilter"
       data-cy="exercise-number-filter"
     />
+  </p>
+  <p>
+    <VirtualNumericalKeyboard />
   </p>
 
   <template v-if="filtered.kind === 'nothing'"></template>
