@@ -20,6 +20,8 @@ import TextbookExportExercisesList from './TextbookExportExercisesList.vue'
 import assert from './assert'
 import TriColoredInput from './TriColoredInput.vue'
 import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
+import VirtualEraser from './VirtualEraser.vue'
+import WhiteSpace from './WhiteSpace.vue'
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data // @todo Factorize with TextbookExportExerciseView.vue
 
@@ -99,6 +101,8 @@ const filtered = computed(() => {
   </p>
   <p>
     <VirtualNumericalKeyboard />
+    <WhiteSpace />
+    <VirtualEraser />
   </p>
 
   <template v-if="filtered.kind === 'nothing'"></template>
