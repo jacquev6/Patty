@@ -346,6 +346,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/token': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Login */
+    post: operations['login_api_token_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -1002,6 +1019,32 @@ export interface components {
     PostTextbookResponse: {
       /** Id */
       id: string
+    }
+    /** PostTokenRequest */
+    PostTokenRequest: {
+      /** Password */
+      password: string
+      /**
+       * Validity
+       * Format: duration
+       * @default PT3H
+       */
+      validity: string
+    }
+    /** PostTokenResponse */
+    PostTokenResponse: {
+      /** Accesstoken */
+      accessToken: string
+      /**
+       * Validuntil
+       * Format: date-time
+       */
+      validUntil: string
+      /**
+       * Tokentype
+       * @default bearer
+       */
+      tokenType: string
     }
     /** ReferenceComponents */
     ReferenceComponents: {
@@ -1768,8 +1811,9 @@ export interface operations {
   }
   export_adaptation_api_adaptation_export_adaptation__id__html_get: {
     parameters: {
-      query?: {
+      query: {
         download?: boolean
+        token: string
       }
       header?: never
       path: {
@@ -1801,8 +1845,9 @@ export interface operations {
   }
   export_batch_api_adaptation_export_batch__id__html_get: {
     parameters: {
-      query?: {
+      query: {
         download?: boolean
+        token: string
       }
       header?: never
       path: {
@@ -1834,8 +1879,9 @@ export interface operations {
   }
   export_textbook_api_adaptation_export_textbook__id__html_get: {
     parameters: {
-      query?: {
+      query: {
         download?: boolean
+        token: string
       }
       header?: never
       path: {
@@ -1852,6 +1898,39 @@ export interface operations {
         }
         content: {
           'text/html': string
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  login_api_token_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTokenRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostTokenResponse']
         }
       }
       /** @description Validation Error */

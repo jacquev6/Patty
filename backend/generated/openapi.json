@@ -115,13 +115,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation/latest-batch": {
       "get": {
         "summary": "Get Latest Batch",
         "operationId": "get_latest_batch_api_adaptation_latest_batch_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "user",
@@ -192,13 +202,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation/batch/{id}": {
       "get": {
         "summary": "Get Batch",
         "operationId": "get_batch_api_adaptation_batch__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -249,7 +269,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation/textbook": {
@@ -287,13 +312,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation/textbook/{id}": {
       "get": {
         "summary": "Get Textbook",
         "operationId": "get_textbook_api_adaptation_textbook__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -344,13 +379,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation/textbook/{id}/batches": {
       "post": {
         "summary": "Post Textbook Batch",
         "operationId": "post_textbook_batch_api_adaptation_textbook__id__batches_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -400,6 +445,11 @@
       "put": {
         "summary": "Put Textbook Batch Removed",
         "operationId": "put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "textbook_id",
@@ -457,6 +507,11 @@
       "put": {
         "summary": "Put Textbook Adaptation Removed",
         "operationId": "put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "textbook_id",
@@ -514,6 +569,11 @@
       "get": {
         "summary": "Get Adaptation",
         "operationId": "get_adaptation_api_adaptation__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -553,6 +613,11 @@
       "post": {
         "summary": "Post Adaptation Adjustment",
         "operationId": "post_adaptation_adjustment_api_adaptation__id__adjustment_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -602,6 +667,11 @@
       "delete": {
         "summary": "Delete Adaptation Last Adjustment",
         "operationId": "delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -641,6 +711,11 @@
       "put": {
         "summary": "Put Adaptation Manual Edit",
         "operationId": "put_adaptation_manual_edit_api_adaptation__id__manual_edit_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -688,6 +763,11 @@
       "delete": {
         "summary": "Delete Adaptation Manual Edit",
         "operationId": "delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -746,6 +826,15 @@
               "default": true,
               "title": "Download"
             }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
           }
         ],
         "responses": {
@@ -794,6 +883,15 @@
               "type": "boolean",
               "default": true,
               "title": "Download"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
             }
           }
         ],
@@ -844,6 +942,15 @@
               "default": true,
               "title": "Download"
             }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
           }
         ],
         "responses": {
@@ -853,6 +960,44 @@
               "text/html": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/token": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_api_token_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostTokenResponse"
                 }
               }
             }
@@ -2600,6 +2745,51 @@
         ],
         "title": "PostTextbookResponse"
       },
+      "PostTokenRequest": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "validity": {
+            "type": "string",
+            "format": "duration",
+            "title": "Validity",
+            "default": "PT3H"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "PostTokenRequest"
+      },
+      "PostTokenResponse": {
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "title": "Accesstoken"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Validuntil"
+          },
+          "tokenType": {
+            "type": "string",
+            "title": "Tokentype",
+            "default": "bearer"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accessToken",
+          "validUntil"
+        ],
+        "title": "PostTokenResponse"
+      },
       "ReferenceComponents": {
         "properties": {
           "text": {
@@ -3029,6 +3219,17 @@
           "strategySettingsName"
         ],
         "title": "Batch"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "token"
+          }
+        }
       }
     }
   }

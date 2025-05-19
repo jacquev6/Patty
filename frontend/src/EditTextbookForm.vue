@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import _ from 'lodash'
 
-import { type LlmModel, type Textbook, client } from './apiClient'
+import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
 import AdaptationPreview from './EditBatchFormAdaptationPreview.vue'
 import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
 import EditTextbookFormCreateBatchForm from './EditTextbookFormCreateBatchForm.vue'
@@ -17,6 +17,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'textbook-updated', textbook: Textbook): void
 }>()
+
+const client = useAuthenticatedClient()
 
 const view = ref<'batch' | 'page'>('batch')
 

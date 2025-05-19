@@ -4,6 +4,7 @@ import fastapi
 import sqlalchemy as sql
 
 from . import adaptation
+from . import authentication
 from . import database_utils
 from . import llm
 from . import settings
@@ -45,3 +46,5 @@ def get_available_llm_models() -> list[llm.ConcreteModel]:
 
 
 app.include_router(adaptation.router, prefix="/api/adaptation")
+
+app.include_router(authentication.router, prefix="/api")

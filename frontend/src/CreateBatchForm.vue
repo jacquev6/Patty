@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
 
-import { type LatestBatch, type LlmModel, client } from './apiClient'
+import { type LatestBatch, type LlmModel, useAuthenticatedClient } from './apiClient'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
@@ -18,6 +18,8 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+
+const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 

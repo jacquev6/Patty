@@ -10,6 +10,7 @@ import sys
 import tarfile
 import urllib.parse
 
+import argon2
 import boto3
 import click
 import requests
@@ -28,6 +29,12 @@ from .adaptation import submission
 @click.group()
 def main() -> None:
     pass
+
+
+@main.command()
+@click.argument("password")
+def hash_password(password: str) -> None:
+    print(argon2.PasswordHasher().hash(password))
 
 
 @main.command()

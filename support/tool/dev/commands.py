@@ -89,9 +89,9 @@ def compose_(args: tuple[str, ...]) -> None:
 
 
 @dev.command()
-@click.argument("fixtures", nargs=-1)
-def load_fixtures(fixtures: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["python", "-m", "patty", "load-fixtures"] + list(fixtures), check=True)
+@click.argument("args", nargs=-1)
+def patty(args: tuple[str, ...]) -> None:
+    compose.run_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
 
 
 @dev.command()

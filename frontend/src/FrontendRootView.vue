@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import AuthenticationModal from './AuthenticationModal.vue'
+
+const authenticationTokenStore = useAuthenticationTokenStore()
 
 function validDate(date: string): Date | null {
   const d = new Date(date)
@@ -29,6 +32,9 @@ const unavailableUntil = fromSubstitution ?? fromQuery
   <template v-if="unavailableUntil !== null">
     <h1>Unavailable</h1>
     <p>Patty is undergoing a maintenance operation. It's expected to be back on {{ unavailableUntil }}.</p>
+  </template>
+  <template v-else-if="authenticationTokenStore.token === null">
+    <AuthenticationModal />
   </template>
   <RouterView v-else />
 </template>

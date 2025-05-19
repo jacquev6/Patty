@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { computedAsync } from '@vueuse/core'
 
 import assert from './assert'
-import { type AdaptationStrategy, type LlmModel, client } from './apiClient'
+import { type AdaptationStrategy, type LlmModel, useAuthenticatedClient } from './apiClient'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
@@ -18,6 +18,8 @@ const props = withDefaults(
   }>(),
   { disabled: false },
 )
+
+const client = useAuthenticatedClient()
 
 const strategy = defineModel<AdaptationStrategy>({ required: true })
 

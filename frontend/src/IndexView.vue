@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
 
-import { type Batches, type Textbooks, client } from './apiClient'
+import { type Batches, type Textbooks, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 import FixedColumns from './FixedColumns.vue'
 import CreateTextbookForm from './CreateTextbookForm.vue'
 
+const client = useAuthenticatedClient()
+
 const batches = reactive<Batches['batches']>([])
 const textbooks = reactive<Textbooks['textbooks']>([])
 
 onMounted(async () => {
-  const batchesPromise = client.GET('/api/adaptation/batches')
-  const textbooksPromise = client.GET('/api/adaptation/textbooks')
+  const batchesPromise = client.GET(
+    '/api/adaptation/batches' /*, {headers: {Authorization: `Bearer ${authenticationTokenStore.token}`}}*/,
+  )
+  const textbooksPromise = client.GET(
+    '/api/adaptation/textbooks' /*, {headers: {Authorization: `Bearer ${authenticationTokenStore.token}`}}*/,
+  )
 
   const batchesResponse = await batchesPromise
   assert(batchesResponse.data !== undefined)

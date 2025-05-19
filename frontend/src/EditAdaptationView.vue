@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
-import { client, type Adaptation } from './apiClient'
+import { useAuthenticatedClient, type Adaptation } from './apiClient'
 import assert from './assert'
 import EditAdaptationForm from './EditAdaptationForm.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
@@ -9,6 +9,8 @@ import { preprocess as preprocessAdaptation } from './adaptations'
 const props = defineProps<{
   id: string
 }>()
+
+const client = useAuthenticatedClient()
 
 const found = ref<boolean | null>(null)
 const apiAdaptation = ref<Adaptation | null>(null)

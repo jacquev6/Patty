@@ -1,5 +1,4 @@
 from typing import Any, TypeVar
-import asyncio
 import datetime
 import hashlib
 import json
@@ -12,7 +11,7 @@ from .. import llm
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
-from ..api_utils import ApiModel
+from ..authentication import auth_bearer_dependable, auth_token_dependable
 from .adaptation import (
     Adaptation as DbAdaptation,
     Adjustment,
@@ -35,7 +34,7 @@ from .textbook import Textbook
 
 __all__ = ["router"]
 
-router = fastapi.APIRouter()
+api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_bearer_dependable)])
 
 
 LlmMessage = (
@@ -77,7 +76,7 @@ class ApiAdaptation(ApiModel):
     removed_from_textbook: bool
 
 
-@router.post("/llm-response-schema")
+@api_router.post("/llm-response-schema")
 def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
 
@@ -89,7 +88,7 @@ class LatestBatch(ApiModel):
     available_strategy_settings: list[ApiStrategySettings]
 
 
-@router.get("/latest-batch")
+@api_router.get("/latest-batch")
 def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
     for created_by in [user, "Patty"]:
         batch = session.query(Batch).filter(Batch.created_by == created_by).order_by(-Batch.id).first()
@@ -120,7 +119,7 @@ class PostBatchResponse(ApiModel):
     id: str
 
 
-@router.post("/batch")
+@api_router.post("/batch")
 async def post_batch(
     req: PostBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostBatchResponse:
@@ -201,7 +200,7 @@ class GetBatchResponse(ApiModel):
     adaptations: list[ApiAdaptation]
 
 
-@router.get("/batch/{id}")
+@api_router.get("/batch/{id}")
 async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
     batch = get_by_id(session, Batch, id)
     return GetBatchResponse(
@@ -223,7 +222,7 @@ class GetBatchesResponse(ApiModel):
     batches: list[Batch]
 
 
-@router.get("/batches")
+@api_router.get("/batches")
 async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
     batches = session.query(Batch).filter(Batch.textbook_id == None).order_by(-Batch.id).all()
     return GetBatchesResponse(
@@ -249,7 +248,7 @@ class PostTextbookResponse(ApiModel):
     id: str
 
 
-@router.post("/textbook")
+@api_router.post("/textbook")
 def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
@@ -280,7 +279,7 @@ class GetTextbookResponse(ApiModel):
     available_strategy_settings: list[str]
 
 
-@router.get("/textbook/{id}")
+@api_router.get("/textbook/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
     textbook = get_by_id(session, Textbook, id)
     return GetTextbookResponse(
@@ -301,7 +300,7 @@ class GetTextbooksResponse(ApiModel):
     textbooks: list[Textbook]
 
 
-@router.get("/textbooks")
+@api_router.get("/textbooks")
 async def get_textbooks(session: database_utils.SessionDependable) -> GetTextbooksResponse:
     textbooks = session.query(Textbook).order_by(-Textbook.id).all()
     return GetTextbooksResponse(
@@ -324,7 +323,7 @@ class PostTextbookBatchRequest(ApiModel):
     inputs: list[ApiInput]
 
 
-@router.post("/textbook/{id}/batches")
+@api_router.post("/textbook/{id}/batches")
 def post_textbook_batch(
     id: str,
     req: PostTextbookBatchRequest,
@@ -372,7 +371,7 @@ def post_textbook_batch(
     return make_api_textbook(textbook)
 
 
-@router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
+@api_router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
 def put_textbook_batch_removed(
     textbook_id: str, batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -383,7 +382,7 @@ def put_textbook_batch_removed(
     return make_api_textbook(textbook)
 
 
-@router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
+@api_router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
 def put_textbook_adaptation_removed(
     textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -394,7 +393,7 @@ def put_textbook_adaptation_removed(
     return make_api_textbook(textbook)
 
 
-@router.get("/{id}")
+@api_router.get("/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     return make_api_adaptation(get_by_id(session, DbAdaptation, id))
 
@@ -403,7 +402,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
     adjustment: str
 
 
-@router.post("/{id}/adjustment")
+@api_router.post("/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
@@ -460,7 +459,7 @@ async def post_adaptation_adjustment(
     return make_api_adaptation(db_adaptation)
 
 
-@router.delete("/{id}/last-adjustment")
+@api_router.delete("/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
 
@@ -475,14 +474,14 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
     return make_api_adaptation(db_adaptation)
 
 
-@router.put("/{id}/manual-edit")
+@api_router.put("/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = req
     return make_api_adaptation(db_adaptation)
 
 
-@router.delete("/{id}/manual-edit")
+@api_router.delete("/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = None
@@ -569,8 +568,10 @@ export_adaptation_template_file_path = os.path.join(
     os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
 )
 
+export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_token_dependable)])
 
-@router.get("/export/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
+
+@export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -588,7 +589,7 @@ def export_adaptation(
 export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templates", "batch-export", "index.html")
 
 
-@router.get("/export/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -610,7 +611,7 @@ export_textbook_template_file_path = os.path.join(
 )
 
 
-@router.get("/export/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -678,3 +679,8 @@ def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
         "exerciseNumber": adaptation.input.exercise_number,
         "adaptedExercise": exercise_dump,
     }
+
+
+router = fastapi.APIRouter()
+router.include_router(api_router)
+router.include_router(export_router, prefix="/export")

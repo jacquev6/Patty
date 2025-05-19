@@ -4,7 +4,7 @@ import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
 import { useMagicKeys } from '@vueuse/core'
 
-import { client, type Adaptation, type AdaptedExercise } from './apiClient'
+import { useAuthenticatedClient, type Adaptation, type AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import TextArea from './TextArea.vue'
@@ -24,6 +24,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'adaptation-updated', adaptation: Adaptation): void
 }>()
+
+const client = useAuthenticatedClient()
 
 const ajv = new Ajv()
 const validateAdaptedExercise = ajv.compile(adaptedExerciseSchema)
