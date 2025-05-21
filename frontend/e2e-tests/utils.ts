@@ -18,3 +18,9 @@ export function screenshot(name: string) {
     })
   }
 }
+
+export function visit(url: string) {
+  cy.visit(url)
+  cy.get('[data-cy="password"]').type('password')
+  cy.get('[data-cy="submit"]').click()
+}

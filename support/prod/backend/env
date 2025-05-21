@@ -1,2 +1,7 @@
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
 PATTY_DATABASE_BACKUPS_URL=s3://jacquev6/patty/preview/backups
+PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/preview/external-exercises
+PATTY_SECRET_JWT_KEY=not-so-secret
+# Hashed version of: password
+PATTY_HASHED_PASSWORD='$argon2id$v=19$m=65536,t=3,p=4$6i6V3Ldj3HOl5tY334Co3g$C/N8pcUFK9xofd9GkzsQLs/2iY2c7PnXKg2HM105uec'
+PATTY_AUTHENTICATION_MAX_VALIDITY=PT3H

@@ -1,13 +1,25 @@
 <script lang="ts">
+export type Exercise =
+  | {
+      exerciseId: string
+      pageNumber: number
+      exerciseNumber: string
+      kind: 'adapted'
+      studentAnswersStorageKey: string
+      adaptedExercise: AdaptedExercise
+    }
+  | {
+      exerciseId: string
+      pageNumber: number
+      exerciseNumber: string
+      kind: 'external'
+      originalFileName: string
+      data: string
+    }
+
 export type Data = {
   title: string
-  exercises: {
-    exerciseId: string
-    studentAnswersStorageKey: string
-    pageNumber: number | null
-    exerciseNumber: string | null
-    adaptedExercise: AdaptedExercise
-  }[]
+  exercises: Exercise[]
 }
 </script>
 
@@ -16,52 +28,45 @@ import { computed, ref } from 'vue'
 import { match, P } from 'ts-pattern'
 
 import type { AdaptedExercise } from './apiClient'
-import InputForNumberOrNull from './InputForNumberOrNull.vue'
-import InputForNonEmptyStringOrNull from './InputForNonEmptyStringOrNull.vue'
 import TextbookExportExercisesList from './TextbookExportExercisesList.vue'
-import assert from './assert'
+import TriColoredInput from './TriColoredInput.vue'
+import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
+import VirtualEraser from './VirtualEraser.vue'
+import WhiteSpace from './WhiteSpace.vue'
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data // @todo Factorize with TextbookExportExerciseView.vue
 
-const pageNumberFilter = ref<number | null>(null)
-const exerciseNumberFilter = ref<string | null>(null)
-
-type FilterableExercise = {
-  exerciseId: string
-  pageNumber: number
-  exerciseNumber: string
-}
-
-const filterableExercises = ((): FilterableExercise[] => {
-  return data.exercises.map(({ exerciseId, pageNumber, exerciseNumber }) => {
-    assert(pageNumber !== null)
-    assert(exerciseNumber !== null)
-    return {
-      exerciseId,
-      pageNumber,
-      exerciseNumber,
-    }
-  })
-})()
+const pageNumberFilter = ref<string>('')
+const exerciseNumberFilter = ref<string>('')
 
 type Filtered =
   | { kind: 'nothing' }
   | { kind: 'message'; message: string }
-  | { kind: 'exercises'; exercises: FilterableExercise[] }
+  | { kind: 'exercises'; exercises: Exercise[] }
 
 const filtered = computed(() => {
   return match([pageNumberFilter.value, exerciseNumberFilter.value])
     .returnType<Filtered>()
-    .with([null, null], () => ({ kind: 'nothing' }))
-    .with([null, P.nonNullable], () => {
+    .with(['', ''], () => ({ kind: 'nothing' }))
+    .with(['', P.string], () => {
       return { kind: 'message', message: 'Indique le numéro de la page.' }
     })
-    .with([P.nonNullable, P.any], ([page, number]) => {
-      const exercises = filterableExercises.filter((exercise) => exercise.pageNumber === page)
+    .with([P.string, P.string], ([pageString, number]) => {
+      const page = parseInt(pageString, 10)
+      const exercises = data.exercises.filter((exercise) => exercise.pageNumber === page)
       if (exercises.length === 0) {
         return { kind: 'message', message: `La page ${page} n'existe pas.` }
-      } else if (number === null) {
+      } else if (number === '') {
         return { kind: 'exercises', exercises }
+      } else if (Number.isNaN(Number.parseInt(number))) {
+        const exercises2 = exercises.filter((exercise) =>
+          exercise.exerciseNumber.toLowerCase().includes(number.toLowerCase()),
+        )
+        if (exercises2.length === 0) {
+          return { kind: 'message', message: `L'exercice ${number} n'existe pas.` }
+        } else {
+          return { kind: 'exercises', exercises: exercises2 }
+        }
       } else {
         const exercise = exercises.find((exercise) => exercise.exerciseNumber === number)
         if (exercise === undefined) {
@@ -76,10 +81,21 @@ const filtered = computed(() => {
 </script>
 
 <template>
-  <p class="title">Livre: {{ data.title }}</p>
-  <p>Quelle page ? <InputForNumberOrNull v-model="pageNumberFilter" data-cy="page-number-filter" /></p>
+  <p class="title">Livre&nbsp;: {{ data.title }}</p>
   <p>
-    Quelle exercice ? <InputForNonEmptyStringOrNull v-model="exerciseNumberFilter" data-cy="exercise-number-filter" />
+    Quelle page ? <wbr /><TriColoredInput :digitsOnly="true" v-model="pageNumberFilter" data-cy="page-number-filter" />
+  </p>
+  <p>
+    Quel exercice ? <wbr /><TriColoredInput
+      :digitsOnly="false"
+      v-model="exerciseNumberFilter"
+      data-cy="exercise-number-filter"
+    />
+  </p>
+  <p>
+    <VirtualNumericalKeyboard />
+    <WhiteSpace />
+    <VirtualEraser />
   </p>
 
   <template v-if="filtered.kind === 'nothing'"></template>
@@ -91,8 +107,15 @@ const filtered = computed(() => {
 </template>
 
 <style scoped>
+*,
+:deep(*) {
+  font-family: Arial, sans-serif;
+  font-size: 32px;
+  word-spacing: 0.26em;
+  white-space-collapse: preserve;
+}
+
 .title {
-  font-size: 150%;
   font-weight: bold;
   text-align: center;
 }

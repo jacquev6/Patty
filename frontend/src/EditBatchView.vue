@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 
-import { type Batch, client } from './apiClient'
+import { type Batch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import EditBatchForm from './EditBatchForm.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
@@ -9,6 +9,8 @@ import { preprocess as preprocessAdaptation } from './adaptations'
 const props = defineProps<{
   id: string
 }>()
+
+const client = useAuthenticatedClient()
 
 const found = ref<boolean | null>(null)
 const batch = ref<Batch | null>(null)

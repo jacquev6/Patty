@@ -3,20 +3,45 @@ import { computed, ref } from 'vue'
 import _ from 'lodash'
 
 import PageNavigationControls from './AdaptedExercise/PageNavigationControls.vue'
+import type { Exercise as FullExercise } from './TextbookExportIndexView.vue'
+import { match, P } from 'ts-pattern'
+
+type Exercise =
+  | Pick<FullExercise & { kind: 'adapted' }, 'kind' | 'exerciseId' | 'exerciseNumber'>
+  | (FullExercise & { kind: 'external' })
 
 const props = defineProps<{
-  exercises: {
-    exerciseId: string
-    exerciseNumber: string
-  }[]
+  exercises: Exercise[]
 }>()
 
 const pageIndex = ref(0)
 const pagesCount = computed(() => Math.ceil(props.exercises.length / 4))
 
+function hasExt(ext: string) {
+  return (filename: string) => filename.endsWith(ext)
+}
+
 const columns = computed(() => {
-  const columns: ({ id: string; number: string } | null)[][] = _.chunk(
-    props.exercises.map((e) => ({ number: e.exerciseNumber, id: e.exerciseId })),
+  const columns: ((Exercise & { title: string }) | null)[][] = _.chunk(
+    props.exercises.map((e) => {
+      const prefix = Number.isNaN(Number.parseInt(e.exerciseNumber)) ? '' : 'Exercice '
+      const suffix = match(e)
+        .returnType<string>()
+        .with({ kind: 'adapted' }, () => '')
+        .with({ kind: 'external', originalFileName: P.select() }, (originalFileName) =>
+          match(originalFileName)
+            .returnType<string>()
+            .with(P.string, hasExt('.pdf'), () => ` - PDF`)
+            .with(P.string, hasExt('.docx'), () => ` - Word`)
+            .with(P.string, hasExt('.odt'), () => ` - LibreOffice Writer`)
+            .with(P.string, hasExt('.xlsx'), () => ` - Excel`)
+            .with(P.string, hasExt('.ods'), () => ` - LibreOffice Calc`)
+            .with(P.string, hasExt('.ggb'), () => ` - GeoGebra`)
+            .otherwise(() => ' - Logiciel externe'),
+        )
+        .exhaustive()
+      return { title: prefix + e.exerciseNumber + suffix, ...e }
+    }),
     4,
   ).slice(pageIndex.value)
   const missing = 4 - columns[columns.length - 1]!.length
@@ -25,6 +50,20 @@ const columns = computed(() => {
   }
   return columns
 })
+
+// Until https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
+// is widely available:
+function Uint8ArrayFromBase64(base64: string) {
+  return Uint8Array.from(Array.from(atob(base64)).map((letter) => letter.charCodeAt(0)))
+}
+
+function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([Uint8ArrayFromBase64(exercise.data)]))
+  a.download = exercise.originalFileName
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
 </script>
 
 <template>
@@ -35,12 +74,22 @@ const columns = computed(() => {
           <template v-if="exercise === null">
             <div class="exercise" style="visibility: hidden"><p>&nbsp;</p></div>
           </template>
-          <template v-else>
-            <RouterLink :to="{ name: 'exercise', params: { id: exercise.id } }" target="_blank">
+          <template v-else-if="exercise.kind === 'adapted'">
+            <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }" target="_blank">
               <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
-                <p>Exercice {{ exercise.number }}</p>
+                <p>{{ exercise.title }}</p>
               </div>
             </RouterLink>
+          </template>
+          <template v-else-if="exercise.kind === 'external'">
+            <a @click="openExternalExercise(exercise)">
+              <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
+                <p>{{ exercise.title }}</p>
+              </div>
+            </a>
+          </template>
+          <template v-else>
+            {{ ((e: never) => console.log('Unexpected exercise', e))(exercise) }}
           </template>
         </template>
       </div>

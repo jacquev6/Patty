@@ -4,7 +4,7 @@ import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
 import { useMagicKeys } from '@vueuse/core'
 
-import { client, type Adaptation, type AdaptedExercise } from './apiClient'
+import { useAuthenticatedClient, type Adaptation, type AdaptedExercise } from './apiClient'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import TextArea from './TextArea.vue'
@@ -16,6 +16,7 @@ import MiniatureScreen from './MiniatureScreen.vue'
 import WhiteSpace from './WhiteSpace.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import { type PreprocessedAdaptation } from './adaptations'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 const props = defineProps<{
   adaptation: PreprocessedAdaptation
@@ -24,6 +25,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'adaptation-updated', adaptation: Adaptation): void
 }>()
+
+const client = useAuthenticatedClient()
+
+const authenticationTokenStore = useAuthenticationTokenStore()
 
 const ajv = new Ajv()
 const validateAdaptedExercise = ajv.compile(adaptedExerciseSchema)
@@ -321,7 +326,9 @@ watch(Escape, () => {
         <p>
           <button @click="fullScreen = true">Full screen</button>
           <WhiteSpace />
-          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html`">Download standalone HTML</a>
+          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html?token=${authenticationTokenStore.token}`">
+            Download standalone HTML
+          </a>
         </p>
       </template>
       <h1>Manual edition</h1>

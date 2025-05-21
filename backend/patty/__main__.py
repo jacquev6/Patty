@@ -10,6 +10,7 @@ import sys
 import tarfile
 import urllib.parse
 
+import argon2
 import boto3
 import click
 import requests
@@ -28,6 +29,12 @@ from .adaptation import submission
 @click.group()
 def main() -> None:
     pass
+
+
+@main.command()
+@click.argument("password")
+def hash_password(password: str) -> None:
+    print(argon2.PasswordHasher().hash(password))
 
 
 @main.command()
@@ -259,61 +266,6 @@ def migrate_data() -> None:
             strategy.model
         for strategy_settings in session.query(adaptation.StrategySettings).all():
             strategy_settings.response_specification
-
-
-@main.command()
-@click.argument("batch-id", type=int)
-@click.argument("count", type=int)
-@click.argument("parallelism", type=int)
-@click.argument("pause", type=float)
-def investigate_issue_39(batch_id: int, count: int, parallelism: int, pause: float) -> None:
-    reference_batch_id = batch_id
-    del batch_id
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-
-    with database_utils.make_session(database_engine) as session:
-        reference_batch = session.get(adaptation.Batch, reference_batch_id)
-        assert reference_batch is not None
-        new_batch = adaptation.Batch(
-            created_by="Patty", created_at=datetime.datetime.now(), strategy=reference_batch.strategy
-        )
-        session.add(new_batch)
-
-        for n in range(count):
-            adaptation_ = adaptation.Adaptation(
-                created_by="Patty",
-                batch=new_batch,
-                strategy=new_batch.strategy,
-                input=reference_batch.adaptations[n % len(reference_batch.adaptations)].input,
-                raw_llm_conversations=[],
-                adjustments=[],
-                manual_edit=None,
-            )
-            session.add(adaptation_)
-        session.commit()
-        batch_id = new_batch.id
-
-    with database_utils.make_session(database_engine) as session:
-        asyncio.run(submission.daemon(database_engine, parallelism, pause, exit_when_done=True))
-
-    response_kind_count: dict[str, int] = {}
-    with database_utils.make_session(database_engine) as session:
-        completed_batch = session.get(adaptation.Batch, batch_id)
-        assert completed_batch is not None
-        for adaptation_ in completed_batch.adaptations:
-            assert adaptation_.initial_assistant_response is not None
-            kind: str = adaptation_.initial_assistant_response.kind
-            if kind == "error":
-                assert adaptation_.initial_assistant_response.kind == "error"
-                kind = f"error:{adaptation_.initial_assistant_response.error}"
-            response_kind_count.setdefault(kind, 0)
-            response_kind_count[kind] += 1
-
-    print(
-        f"Submitted batch {batch_id} with {count} adaptations based on batch {reference_batch_id}, {parallelism} at a time, pausing for {pause}s between submissions"
-    )
-    print(f"Response kind counts: {response_kind_count}")
-    print(f"Success rate: {response_kind_count.get('success', 0) / count:.2%}")
 
 
 if __name__ == "__main__":

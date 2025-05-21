@@ -1,4 +1,5 @@
 alembic
+argon2-cffi
 boto3
 compact-json
 fastapi
@@ -7,6 +8,7 @@ openai
 polyfactory  # @todo Move this dependency to requirements-dev.txt
 psycopg2-binary
 pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests
+pyjwt
 requests
 sqlalchemy
 sqlalchemy-utils

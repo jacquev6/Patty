@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 
 import CreateBatchFormInputsEditor from './CreateBatchFormInputsEditor.vue'
-import { type LlmModel, type Textbook, client } from './apiClient'
+import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import { type InputWithFile } from './CreateBatchFormInputEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
@@ -17,6 +17,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'textbook-updated', textbook: Textbook): void
 }>()
+
+const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 

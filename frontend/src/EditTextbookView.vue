@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 
-import { type Textbook, type LlmModel, client } from './apiClient'
+import { type Textbook, type LlmModel, useAuthenticatedClient } from './apiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from './assert'
 import { preprocess as preprocessAdaptation } from './adaptations'
@@ -9,6 +9,8 @@ import { preprocess as preprocessAdaptation } from './adaptations'
 const props = defineProps<{
   id: string
 }>()
+
+const client = useAuthenticatedClient()
 
 const found = ref<boolean | null>(null)
 const textbook = ref<Textbook | null>(null)

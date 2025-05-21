@@ -1,18 +1,24 @@
 from typing import Any, TypeVar
-import asyncio
+import base64
 import datetime
 import hashlib
 import json
 import os
+import urllib.parse
 
+from sqlalchemy import orm
+import boto3
+import botocore.client
 import fastapi
+import sqlalchemy as sql
 
 from .. import database_utils
 from .. import llm
+from .. import settings
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
-from ..api_utils import ApiModel
+from ..authentication import auth_bearer_dependable, auth_token_dependable
 from .adaptation import (
     Adaptation as DbAdaptation,
     Adjustment,
@@ -24,18 +30,20 @@ from .adaptation import (
 from .batch import Batch
 from .input import Input as DbInput
 from .strategy import (
-    Strategy as DbStrategy,
-    StrategySettingsBranch,
-    StrategySettings,
     ConcreteLlmResponseSpecification,
     JsonSchemaLlmResponseSpecification,
+    Strategy as DbStrategy,
+    StrategySettings,
+    StrategySettingsBranch,
 )
-from .textbook import Textbook
+from .textbook import Textbook, ExternalExercise
 
 
 __all__ = ["router"]
 
-router = fastapi.APIRouter()
+s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
+
+api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_bearer_dependable)])
 
 
 LlmMessage = (
@@ -77,7 +85,7 @@ class ApiAdaptation(ApiModel):
     removed_from_textbook: bool
 
 
-@router.post("/llm-response-schema")
+@api_router.post("/llm-response-schema")
 def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
 
@@ -89,7 +97,7 @@ class LatestBatch(ApiModel):
     available_strategy_settings: list[ApiStrategySettings]
 
 
-@router.get("/latest-batch")
+@api_router.get("/latest-batch")
 def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
     for created_by in [user, "Patty"]:
         batch = session.query(Batch).filter(Batch.created_by == created_by).order_by(-Batch.id).first()
@@ -120,7 +128,7 @@ class PostBatchResponse(ApiModel):
     id: str
 
 
-@router.post("/batch")
+@api_router.post("/batch")
 async def post_batch(
     req: PostBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostBatchResponse:
@@ -201,7 +209,7 @@ class GetBatchResponse(ApiModel):
     adaptations: list[ApiAdaptation]
 
 
-@router.get("/batch/{id}")
+@api_router.get("/batch/{id}")
 async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
     batch = get_by_id(session, Batch, id)
     return GetBatchResponse(
@@ -223,7 +231,7 @@ class GetBatchesResponse(ApiModel):
     batches: list[Batch]
 
 
-@router.get("/batches")
+@api_router.get("/batches")
 async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
     batches = session.query(Batch).filter(Batch.textbook_id == None).order_by(-Batch.id).all()
     return GetBatchesResponse(
@@ -249,7 +257,7 @@ class PostTextbookResponse(ApiModel):
     id: str
 
 
-@router.post("/textbook")
+@api_router.post("/textbook")
 def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
@@ -274,13 +282,22 @@ class ApiTextbook(ApiModel):
 
     batches: list[Batch]
 
+    class ExternalExercise(ApiModel):
+        id: str
+        page_number: int | None
+        exercise_number: str | None
+        original_file_name: str
+        removed_from_textbook: bool
+
+    external_exercises: list[ExternalExercise]
+
 
 class GetTextbookResponse(ApiModel):
     textbook: ApiTextbook
     available_strategy_settings: list[str]
 
 
-@router.get("/textbook/{id}")
+@api_router.get("/textbook/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
     textbook = get_by_id(session, Textbook, id)
     return GetTextbookResponse(
@@ -301,7 +318,7 @@ class GetTextbooksResponse(ApiModel):
     textbooks: list[Textbook]
 
 
-@router.get("/textbooks")
+@api_router.get("/textbooks")
 async def get_textbooks(session: database_utils.SessionDependable) -> GetTextbooksResponse:
     textbooks = session.query(Textbook).order_by(-Textbook.id).all()
     return GetTextbooksResponse(
@@ -324,7 +341,7 @@ class PostTextbookBatchRequest(ApiModel):
     inputs: list[ApiInput]
 
 
-@router.post("/textbook/{id}/batches")
+@api_router.post("/textbook/{id}/batches")
 def post_textbook_batch(
     id: str,
     req: PostTextbookBatchRequest,
@@ -372,7 +389,7 @@ def post_textbook_batch(
     return make_api_textbook(textbook)
 
 
-@router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
+@api_router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
 def put_textbook_batch_removed(
     textbook_id: str, batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -383,7 +400,7 @@ def put_textbook_batch_removed(
     return make_api_textbook(textbook)
 
 
-@router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
+@api_router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
 def put_textbook_adaptation_removed(
     textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -394,7 +411,53 @@ def put_textbook_adaptation_removed(
     return make_api_textbook(textbook)
 
 
-@router.get("/{id}")
+class PostTextbookExternalExercisesRequest(ApiModel):
+    creator: str
+    page_number: int | None
+    exercise_number: str | None
+    original_file_name: str
+
+
+class PostTextbookExternalExercisesResponse(ApiModel):
+    put_url: str
+
+
+@api_router.post("/textbook/{textbook_id}/external-exercises")
+def post_textbook_external_exercises(
+    textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
+) -> PostTextbookExternalExercisesResponse:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    external_exercise = ExternalExercise(
+        created_by=req.creator,
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        textbook=textbook,
+        page_number=req.page_number,
+        exercise_number=req.exercise_number,
+        original_file_name=req.original_file_name,
+        removed_from_textbook=False,
+    )
+    session.add(external_exercise)
+    session.flush()
+    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
+    return PostTextbookExternalExercisesResponse(
+        put_url=s3.generate_presigned_url(
+            "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
+        )
+    )
+
+
+@api_router.put("/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed")
+def put_textbook_external_exercises_removed(
+    textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
+) -> ApiTextbook:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    external_exercise = get_by_id(session, ExternalExercise, external_exercise_id)
+    assert external_exercise.textbook == textbook
+    external_exercise.removed_from_textbook = removed
+    return make_api_textbook(textbook)
+
+
+@api_router.get("/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     return make_api_adaptation(get_by_id(session, DbAdaptation, id))
 
@@ -403,7 +466,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
     adjustment: str
 
 
-@router.post("/{id}/adjustment")
+@api_router.post("/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
@@ -460,7 +523,7 @@ async def post_adaptation_adjustment(
     return make_api_adaptation(db_adaptation)
 
 
-@router.delete("/{id}/last-adjustment")
+@api_router.delete("/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
 
@@ -475,14 +538,14 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
     return make_api_adaptation(db_adaptation)
 
 
-@router.put("/{id}/manual-edit")
+@api_router.put("/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = req
     return make_api_adaptation(db_adaptation)
 
 
-@router.delete("/{id}/manual-edit")
+@api_router.delete("/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     db_adaptation = get_by_id(session, DbAdaptation, id)
     db_adaptation.manual_edit = None
@@ -562,6 +625,16 @@ def make_api_textbook(textbook: Textbook) -> ApiTextbook:
             )
             for batch in textbook.batches
         ],
+        external_exercises=[
+            ApiTextbook.ExternalExercise(
+                id=str(external_exercise.id),
+                page_number=external_exercise.page_number,
+                exercise_number=external_exercise.exercise_number,
+                original_file_name=external_exercise.original_file_name,
+                removed_from_textbook=external_exercise.removed_from_textbook,
+            )
+            for external_exercise in textbook.external_exercises
+        ],
     )
 
 
@@ -569,12 +642,14 @@ export_adaptation_template_file_path = os.path.join(
     os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
 )
 
+export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_token_dependable)])
 
-@router.get("/export/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
+
+@export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = make_exercise_data(get_by_id(session, DbAdaptation, id))
+    data = make_adapted_exercise_data(get_by_id(session, DbAdaptation, id))
     assert data is not None
     content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
@@ -588,12 +663,14 @@ def export_adaptation(
 export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templates", "batch-export", "index.html")
 
 
-@router.get("/export/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     data = list(
-        filter(None, (make_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations))
+        filter(
+            None, (make_adapted_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations)
+        )
     )
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
@@ -610,27 +687,58 @@ export_textbook_template_file_path = os.path.join(
 )
 
 
-@router.get("/export/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     textbook = get_by_id(session, Textbook, id)
 
-    adaptations = (
-        session.query(DbAdaptation)
-        .join(DbInput)
-        .join(Batch)
-        .filter(Batch.textbook_id == id)
-        .filter(Batch.removed_from_textbook == False)
-        .filter(DbAdaptation.removed_from_textbook == False)
-        .order_by(DbInput.page_number, DbInput.exercise_number)
-        .all()
+    union = orm.aliased(
+        sql.union_all(
+            (
+                sql.select(
+                    DbInput.page_number,
+                    DbInput.exercise_number,
+                    DbAdaptation.id,
+                    sql.literal("adaptation").label("source"),
+                )
+                .join(DbAdaptation)
+                .join(Batch)
+                .filter(Batch.textbook_id == id)
+                .filter(Batch.removed_from_textbook == False)
+                .filter(DbAdaptation.removed_from_textbook == False)
+            ),
+            (
+                sql.select(
+                    ExternalExercise.page_number,
+                    ExternalExercise.exercise_number,
+                    ExternalExercise.id,
+                    sql.literal("external_exercise").label("source"),
+                )
+                .filter(ExternalExercise.textbook_id == id)
+                .filter(ExternalExercise.removed_from_textbook == False)
+            ),
+        ).subquery()
     )
 
-    data = dict(
-        title=textbook.title,
-        exercises=list(filter(None, (make_exercise_data(adaptation) for adaptation in adaptations))),
-    )
+    exercises: list[JsonDict | None] = []
+    for page_number, exercise_number, id, source in session.execute(
+        sql.select(union).order_by(union.c.page_number, union.c.exercise_number)
+    ).all():
+        if source == "adaptation":
+            adaptation = session.get(DbAdaptation, id)
+            assert adaptation is not None
+            adapted_exercise_data = make_adapted_exercise_data(adaptation)
+            if adapted_exercise_data is not None:
+                exercises.append(adapted_exercise_data)
+        elif source == "external_exercise":
+            external_exercise = session.get(ExternalExercise, id)
+            assert external_exercise is not None
+            exercises.append(make_external_exercise_data(external_exercise))
+        else:
+            assert False, f"Unknown source {source}"
+
+    data = dict(title=textbook.title, exercises=exercises)
 
     content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
 
@@ -649,7 +757,7 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
     )
 
 
-def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
+def make_adapted_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
     if adaptation.input.page_number is not None and adaptation.input.exercise_number is not None:
         exercise_id = f"P{adaptation.input.page_number}Ex{adaptation.input.exercise_number}"
     else:
@@ -671,10 +779,33 @@ def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
     exercise_dump = exercise.model_dump()
     return {
         "exerciseId": exercise_id,
+        "pageNumber": adaptation.input.page_number,
+        "exerciseNumber": adaptation.input.exercise_number,
+        "kind": "adapted",
         "studentAnswersStorageKey": hashlib.md5(
             json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
-        "pageNumber": adaptation.input.page_number,
-        "exerciseNumber": adaptation.input.exercise_number,
         "adaptedExercise": exercise_dump,
     }
+
+
+def make_external_exercise_data(external_exercise: ExternalExercise) -> JsonDict:
+    assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
+    exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
+    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
+    # @todo Download asynchronously from S3
+    object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
+    data = base64.b64encode(object["Body"].read()).decode("ascii")
+    return {
+        "exerciseId": exercise_id,
+        "pageNumber": external_exercise.page_number,
+        "exerciseNumber": external_exercise.exercise_number,
+        "kind": "external",
+        "originalFileName": external_exercise.original_file_name,
+        "data": data,
+    }
+
+
+router = fastapi.APIRouter()
+router.include_router(api_router)
+router.include_router(export_router, prefix="/export")

@@ -1,8 +1,19 @@
 import createClient from 'openapi-fetch'
 
 import type { paths } from './openapi'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
-export const client = createClient<paths>()
+export function useAuthenticationClient() {
+  return createClient<Pick<paths, '/api/token'>>()
+}
+
+export function useAuthenticatedClient() {
+  const authenticationTokenStore = useAuthenticationTokenStore()
+
+  return createClient<Omit<paths, '/api/token'>>({
+    headers: { Authorization: `Bearer ${authenticationTokenStore.token}` },
+  })
+}
 
 export type LlmModel =
   paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]

@@ -89,9 +89,9 @@ def compose_(args: tuple[str, ...]) -> None:
 
 
 @dev.command()
-@click.argument("fixtures", nargs=-1)
-def load_fixtures(fixtures: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["python", "-m", "patty", "load-fixtures"] + list(fixtures), check=True)
+@click.argument("args", nargs=-1)
+def patty(args: tuple[str, ...]) -> None:
+    compose.run_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
 
 
 @dev.command()
@@ -265,29 +265,6 @@ def reload() -> None:
     """Reload the fanout."""
 
     compose.run_in_container("fanout", ["nginx", "-s", "reload"])
-
-
-@dev.command()
-@click.option("--restore/--no-restore", is_flag=True, default=True)
-def investigate_issue_39(restore: bool) -> None:
-    # Outputs of actual runs of this script are in comments in https://github.com/jacquev6/Patty/issues/39
-
-    reference_batch_id = "46"
-    count = "50"
-
-    if restore:
-        backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250512-051611.tar.gz"
-        compose.run_in_backend_container(
-            ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings", backup_to_load]
-        )
-        compose.run_alembic(["upgrade", "head"])
-
-    compose.stop("submission-daemon")
-
-    for parallel in ["1", "10"]:
-        compose.run_in_backend_container(
-            ["python", "-m", "patty", "investigate-issue-39", reference_batch_id, count, parallel, "1"]
-        )
 
 
 @dev.group()

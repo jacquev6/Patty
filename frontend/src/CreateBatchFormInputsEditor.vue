@@ -1,3 +1,15 @@
+<script lang="ts">
+export function parseExerciseFileName(fileName: string) {
+  const match = fileName.match(/P(\d+)Ex(\d+)\..*/)
+  if (match === null) {
+    return { pageNumber: null, exerciseNumber: null }
+  }
+  const pageNumber = parseInt(match[1])
+  const exerciseNumber = match[2]
+  return { pageNumber, exerciseNumber }
+}
+</script>
+
 <script setup lang="ts">
 import _ from 'lodash'
 import * as zip from '@zip.js/zip.js'
@@ -28,22 +40,12 @@ async function openFiles(event: Event) {
   const files = (event.target as HTMLInputElement).files
   assert(files !== null)
 
-  function parseFileName(fileName: string) {
-    const match = fileName.match(/P(\d+)Ex(\d+)\.txt/)
-    if (match === null) {
-      return { pageNumber: null, exerciseNumber: null }
-    }
-    const pageNumber = parseInt(match[1])
-    const exerciseNumber = match[2]
-    return { pageNumber, exerciseNumber }
-  }
-
   const fileInputs: InputWithFile[] = []
   for (let index = 0; index < files.length; index++) {
     const file = files.item(index)
     assert(file !== null)
     if (file.name.endsWith('.txt')) {
-      const { pageNumber, exerciseNumber } = parseFileName(file.name)
+      const { pageNumber, exerciseNumber } = parseExerciseFileName(file.name)
       const text = await readFile(file)
       fileInputs.push({
         inputFile: file.name,
@@ -56,7 +58,7 @@ async function openFiles(event: Event) {
       for (const entry of await zipReader.getEntries()) {
         assert(entry.getData !== undefined)
         if (entry.filename.endsWith('.txt')) {
-          const { pageNumber, exerciseNumber } = parseFileName(entry.filename)
+          const { pageNumber, exerciseNumber } = parseExerciseFileName(entry.filename)
           const text = await entry.getData(new zip.TextWriter())
           fileInputs.push({
             inputFile: `${entry.filename} in ${file.name}`,

@@ -2,8 +2,10 @@
 import { ref, watch } from 'vue'
 
 import CreateBatchForm from './CreateBatchForm.vue'
-import { type LlmModel, type LatestBatch, client } from './apiClient'
+import { type LlmModel, type LatestBatch, useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+
+const client = useAuthenticatedClient()
 
 const availableLlmModels = ref<LlmModel[]>([])
 

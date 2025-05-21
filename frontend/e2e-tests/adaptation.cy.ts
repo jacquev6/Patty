@@ -1,11 +1,11 @@
-import { ignoreResizeObserverLoopError, screenshot } from './utils'
+import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
 
 describe('The batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
     ignoreResizeObserverLoopError()
-    cy.visit('/new-batch')
+    visit('/new-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
     cy.get('[data-cy="identified-user-ok"]').click()
   })
@@ -495,19 +495,21 @@ describe('The batch edition page', () => {
   })
 
   it('displays "Not found" when the batch does not exist', () => {
-    cy.visit('/batch-42')
+    visit('/batch-42')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
 
   it('displays "Not found" when the batch id is not an integer', () => {
-    cy.visit('/batch-nope')
+    visit('/batch-nope')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
 
   it('looks like this', () => {
-    cy.visit('/batch-1')
+    visit('/batch-1')
+
+    cy.get('h1:contains("Strategy")').should('exist')
 
     screenshot('batch-edition-page.1')
 
@@ -517,7 +519,7 @@ describe('The batch edition page', () => {
   })
 
   it('does not remember answers', () => {
-    cy.visit('/batch-1')
+    visit('/batch-1')
 
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
@@ -537,13 +539,13 @@ describe('The adaptation edition page', () => {
   })
 
   it('displays "Not found" when the adaptation does not exist', () => {
-    cy.visit('/adaptation-42')
+    visit('/adaptation-42')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
 
   it('displays "Not found" when the adaptation id is not an integer', () => {
-    cy.visit('/adaptation-nope')
+    visit('/adaptation-nope')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
@@ -643,7 +645,7 @@ describe('The edition page for an initially successful adaptation', () => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
     ignoreResizeObserverLoopError()
-    cy.visit('/adaptation-1')
+    visit('/adaptation-1')
     setUpAliases()
     shouldBeSuccess()
     shouldAllowAdjustment()
@@ -754,7 +756,7 @@ describe('The edition page for an initially invalid-json adaptation', () => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
     ignoreResizeObserverLoopError()
-    cy.visit('/adaptation-3')
+    visit('/adaptation-3')
     setUpAliases()
     shouldBeLlmInvalidJson()
     shouldAllowAdjustment()
@@ -815,7 +817,7 @@ describe('The edition page for an initially not-json adaptation', () => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
     ignoreResizeObserverLoopError()
-    cy.visit('/adaptation-4')
+    visit('/adaptation-4')
     setUpAliases()
     shouldBeLlmNotJson()
     shouldAllowAdjustment()

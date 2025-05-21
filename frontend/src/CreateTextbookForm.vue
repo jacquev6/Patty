@@ -2,12 +2,14 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { client } from './apiClient'
+import { useAuthenticatedClient } from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import BusyBox from './BusyBox.vue'
 
 const router = useRouter()
+
+const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
