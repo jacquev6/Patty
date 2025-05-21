@@ -27,7 +27,7 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-async def daemon(engine: database_utils.Engine, parallelism: int, pause: float, exit_when_done: bool = False) -> None:
+async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) -> None:
     last_time = time.monotonic()
     while True:
         log("Waking up...")
@@ -41,9 +41,6 @@ async def daemon(engine: database_utils.Engine, parallelism: int, pause: float, 
                 )
                 if len(adaptations) == 0:
                     log("No not-yet-submitted adaptation found")
-                    if exit_when_done:
-                        log("Exiting")
-                        break
                 else:
                     log(f"Found adaptation(s) {' '.join([str(adaptation.id) for adaptation in adaptations])}")
                     submissions = [submit_adaptation(adaptation) for adaptation in adaptations]
