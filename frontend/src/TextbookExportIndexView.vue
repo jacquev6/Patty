@@ -88,7 +88,7 @@ const filtered = computed(() => {
 </script>
 
 <template>
-  <p class="title">Livre: {{ data.title }}</p>
+  <p class="title">Livre&nbsp;: {{ data.title }}</p>
   <p>
     Quelle page ? <wbr /><TriColoredInput :digitsOnly="true" v-model="pageNumberFilter" data-cy="page-number-filter" />
   </p>
