@@ -15,3 +15,5 @@ HASHED_PASSWORD = os.environ["PATTY_HASHED_PASSWORD"]
 AUTHENTICATION_MAX_VALIDITY = pydantic.RootModel[datetime.timedelta](
     os.environ["PATTY_AUTHENTICATION_MAX_VALIDITY"]  # type: ignore[arg-type]
 ).root
+EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
+assert not EXTERNAL_EXERCISES_URL.endswith("/")

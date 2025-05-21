@@ -8,6 +8,7 @@ import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from 
 import EditTextbookFormCreateBatchForm from './EditTextbookFormCreateBatchForm.vue'
 import assert from './assert'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -35,7 +36,21 @@ const batches = computed(() =>
 )
 
 const pages = computed(() => {
-  const pages: Record<number, PreprocessedAdaptation[]> = {}
+  type Exercise =
+    | {
+        kind: 'adaptation'
+        adaptation: PreprocessedAdaptation
+      }
+    | {
+        kind: 'externalExercise'
+        externalExercise: {
+          pageNumber: number | null
+          exerciseNumber: string | null
+          originalFileName: string
+        }
+      }
+
+  const pages: Record<number, Exercise[]> = {}
   for (const batch of batches.value) {
     if (!batch.removedFromTextbook) {
       for (const adaptation of batch.adaptations) {
@@ -45,15 +60,28 @@ const pages = computed(() => {
           adaptation.status.kind === 'success'
         ) {
           pages[adaptation.input.pageNumber] ??= []
-          pages[adaptation.input.pageNumber].push(adaptation)
+          pages[adaptation.input.pageNumber].push({ kind: 'adaptation', adaptation })
         }
       }
+    }
+  }
+  for (const externalExercise of props.textbook.externalExercises) {
+    if (!externalExercise.removedFromTextbook && externalExercise.pageNumber !== null) {
+      pages[externalExercise.pageNumber] ??= []
+      pages[externalExercise.pageNumber].push({
+        kind: 'externalExercise',
+        externalExercise,
+      })
     }
   }
 
   for (const pageNumber in pages) {
     pages[pageNumber] = _.sortBy(pages[pageNumber], [
-      ({ input: { exerciseNumber } }) => {
+      (exercise) => {
+        const exerciseNumber =
+          exercise.kind === 'adaptation'
+            ? exercise.adaptation.input.exerciseNumber
+            : exercise.externalExercise.exerciseNumber
         if (exerciseNumber === null) {
           return 0
         } else {
@@ -91,6 +119,17 @@ async function removeAdaptation(id: string, removed: boolean) {
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
+
+async function removeExternalExercise(id: string, removed: boolean) {
+  const response = await client.PUT(
+    '/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed',
+    {
+      params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
+    },
+  )
+  assert(response.data !== undefined)
+  emit('textbook-updated', response.data)
+}
 </script>
 
 <template>
@@ -103,11 +142,17 @@ async function removeAdaptation(id: string, removed: boolean) {
   <p>
     View by
     <select data-cy="view-by" v-model="view">
-      <option value="batch">batch</option>
+      <option value="batch">batch and external exercises</option>
       <option value="page">page</option></select
     >:
-    <template v-if="view === 'batch'">in creation order, including errors and removed adaptations.</template>
-    <template v-else>sorted by page and exercise number, including only successful not-removed adaptations.</template>
+    <template v-if="view === 'batch'">
+      in creation order, including errors and removed adaptations. Batches first, external exercises
+      <a href="#external-exercises">below</a>.
+    </template>
+    <template v-else>
+      sorted by page and exercise number, including only successful not-removed adaptations. Batches and external
+      exercises together.
+    </template>
   </p>
   <template v-if="view === 'batch'">
     <h2>New batch</h2>
@@ -121,7 +166,8 @@ async function removeAdaptation(id: string, removed: boolean) {
     <template v-for="batch in batches">
       <template v-if="batch.removedFromTextbook">
         <h3>
-          {{ batch.strategy.settings.name }} (removed) <button @click="removeBatch(batch.id, false)">Re-add</button>
+          <span class="removed">{{ batch.strategy.settings.name }}</span> (removed)
+          <button @click="removeBatch(batch.id, false)">Re-add</button>
         </h3>
       </template>
       <template v-else>
@@ -129,7 +175,8 @@ async function removeAdaptation(id: string, removed: boolean) {
         <template v-for="(adaptation, index) in batch.adaptations">
           <template v-if="adaptation.removedFromTextbook">
             <h4 style="margin-top: 0">
-              P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }} (input {{ index + 1 }}, removed)
+              <span class="removed">P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>
+              (input {{ index + 1 }}, removed)
               <button @click="removeAdaptation(adaptation.id, false)">Re-add</button>
             </h4>
           </template>
@@ -142,13 +189,40 @@ async function removeAdaptation(id: string, removed: boolean) {
         </template>
       </template>
     </template>
+    <h2 id="external-exercises">New external exercise(s)</h2>
+    <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <h2>Existing external exercises</h2>
+    <template v-for="externalExercise in textbook.externalExercises">
+      <h3 v-if="externalExercise.removedFromTextbook">
+        <span class="removed">{{ externalExercise.originalFileName }}</span> (removed)
+        <button @click="removeExternalExercise(externalExercise.id, false)">Re-add</button>
+      </h3>
+      <h3 v-else>
+        {{ externalExercise.originalFileName }}
+        <button @click="removeExternalExercise(externalExercise.id, true)">Remove</button>
+      </h3>
+    </template>
   </template>
   <template v-else>
     <template v-for="(adaptations, pageNumber) in pages">
       <h2>Page {{ pageNumber }}</h2>
-      <AdaptationPreview header="h3" v-for="(adaptation, index) in adaptations" :index :adaptation>
-        <h3 style="margin-top: 0">Exercise {{ adaptation.input.exerciseNumber }}</h3>
-      </AdaptationPreview>
+      <template v-for="exercise in adaptations">
+        <template v-if="exercise.kind === 'adaptation'">
+          <AdaptationPreview header="h3" :index="0" :adaptation="exercise.adaptation">
+            <h3 style="margin-top: 0">Exercise {{ exercise.adaptation.input.exerciseNumber }}</h3>
+          </AdaptationPreview>
+        </template>
+        <template v-else-if="exercise.kind === 'externalExercise'">
+          <h3>Exercise {{ exercise.externalExercise.exerciseNumber }}</h3>
+          <p>{{ exercise.externalExercise.originalFileName }}</p>
+        </template>
+      </template>
     </template>
   </template>
 </template>
+
+<style scoped>
+.removed {
+  text-decoration: line-through;
+}
+</style>

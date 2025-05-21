@@ -1,13 +1,20 @@
 from typing import Any, TypeVar
+import base64
 import datetime
 import hashlib
 import json
 import os
+import urllib.parse
 
+from sqlalchemy import orm
+import boto3
+import botocore.client
 import fastapi
+import sqlalchemy as sql
 
 from .. import database_utils
 from .. import llm
+from .. import settings
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
@@ -23,16 +30,18 @@ from .adaptation import (
 from .batch import Batch
 from .input import Input as DbInput
 from .strategy import (
-    Strategy as DbStrategy,
-    StrategySettingsBranch,
-    StrategySettings,
     ConcreteLlmResponseSpecification,
     JsonSchemaLlmResponseSpecification,
+    Strategy as DbStrategy,
+    StrategySettings,
+    StrategySettingsBranch,
 )
-from .textbook import Textbook
+from .textbook import Textbook, ExternalExercise
 
 
 __all__ = ["router"]
+
+s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_bearer_dependable)])
 
@@ -273,6 +282,15 @@ class ApiTextbook(ApiModel):
 
     batches: list[Batch]
 
+    class ExternalExercise(ApiModel):
+        id: str
+        page_number: int | None
+        exercise_number: str | None
+        original_file_name: str
+        removed_from_textbook: bool
+
+    external_exercises: list[ExternalExercise]
+
 
 class GetTextbookResponse(ApiModel):
     textbook: ApiTextbook
@@ -390,6 +408,52 @@ def put_textbook_adaptation_removed(
     adaptation = get_by_id(session, DbAdaptation, adaptation_id)
     assert adaptation.batch.textbook == textbook
     adaptation.removed_from_textbook = removed
+    return make_api_textbook(textbook)
+
+
+class PostTextbookExternalExercisesRequest(ApiModel):
+    creator: str
+    page_number: int | None
+    exercise_number: str | None
+    original_file_name: str
+
+
+class PostTextbookExternalExercisesResponse(ApiModel):
+    put_url: str
+
+
+@api_router.post("/textbook/{textbook_id}/external-exercises")
+def post_textbook_external_exercises(
+    textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
+) -> PostTextbookExternalExercisesResponse:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    external_exercise = ExternalExercise(
+        created_by=req.creator,
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        textbook=textbook,
+        page_number=req.page_number,
+        exercise_number=req.exercise_number,
+        original_file_name=req.original_file_name,
+        removed_from_textbook=False,
+    )
+    session.add(external_exercise)
+    session.flush()
+    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
+    return PostTextbookExternalExercisesResponse(
+        put_url=s3.generate_presigned_url(
+            "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
+        )
+    )
+
+
+@api_router.put("/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed")
+def put_textbook_external_exercises_removed(
+    textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
+) -> ApiTextbook:
+    textbook = get_by_id(session, Textbook, textbook_id)
+    external_exercise = get_by_id(session, ExternalExercise, external_exercise_id)
+    assert external_exercise.textbook == textbook
+    external_exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
 
@@ -561,6 +625,16 @@ def make_api_textbook(textbook: Textbook) -> ApiTextbook:
             )
             for batch in textbook.batches
         ],
+        external_exercises=[
+            ApiTextbook.ExternalExercise(
+                id=str(external_exercise.id),
+                page_number=external_exercise.page_number,
+                exercise_number=external_exercise.exercise_number,
+                original_file_name=external_exercise.original_file_name,
+                removed_from_textbook=external_exercise.removed_from_textbook,
+            )
+            for external_exercise in textbook.external_exercises
+        ],
     )
 
 
@@ -575,7 +649,7 @@ export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_token_depen
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = make_exercise_data(get_by_id(session, DbAdaptation, id))
+    data = make_adapted_exercise_data(get_by_id(session, DbAdaptation, id))
     assert data is not None
     content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
@@ -594,7 +668,9 @@ def export_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     data = list(
-        filter(None, (make_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations))
+        filter(
+            None, (make_adapted_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations)
+        )
     )
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
@@ -617,21 +693,52 @@ def export_textbook(
 ) -> fastapi.responses.HTMLResponse:
     textbook = get_by_id(session, Textbook, id)
 
-    adaptations = (
-        session.query(DbAdaptation)
-        .join(DbInput)
-        .join(Batch)
-        .filter(Batch.textbook_id == id)
-        .filter(Batch.removed_from_textbook == False)
-        .filter(DbAdaptation.removed_from_textbook == False)
-        .order_by(DbInput.page_number, DbInput.exercise_number)
-        .all()
+    union = orm.aliased(
+        sql.union_all(
+            (
+                sql.select(
+                    DbInput.page_number,
+                    DbInput.exercise_number,
+                    DbAdaptation.id,
+                    sql.literal("adaptation").label("source"),
+                )
+                .join(DbAdaptation)
+                .join(Batch)
+                .filter(Batch.textbook_id == id)
+                .filter(Batch.removed_from_textbook == False)
+                .filter(DbAdaptation.removed_from_textbook == False)
+            ),
+            (
+                sql.select(
+                    ExternalExercise.page_number,
+                    ExternalExercise.exercise_number,
+                    ExternalExercise.id,
+                    sql.literal("external_exercise").label("source"),
+                )
+                .filter(ExternalExercise.textbook_id == id)
+                .filter(ExternalExercise.removed_from_textbook == False)
+            ),
+        ).subquery()
     )
 
-    data = dict(
-        title=textbook.title,
-        exercises=list(filter(None, (make_exercise_data(adaptation) for adaptation in adaptations))),
-    )
+    exercises: list[JsonDict | None] = []
+    for page_number, exercise_number, id, source in session.execute(
+        sql.select(union).order_by(union.c.page_number, union.c.exercise_number)
+    ).all():
+        if source == "adaptation":
+            adaptation = session.get(DbAdaptation, id)
+            assert adaptation is not None
+            adapted_exercise_data = make_adapted_exercise_data(adaptation)
+            if adapted_exercise_data is not None:
+                exercises.append(adapted_exercise_data)
+        elif source == "external_exercise":
+            external_exercise = session.get(ExternalExercise, id)
+            assert external_exercise is not None
+            exercises.append(make_external_exercise_data(external_exercise))
+        else:
+            assert False, f"Unknown source {source}"
+
+    data = dict(title=textbook.title, exercises=exercises)
 
     content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
 
@@ -650,7 +757,7 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
     )
 
 
-def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
+def make_adapted_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
     if adaptation.input.page_number is not None and adaptation.input.exercise_number is not None:
         exercise_id = f"P{adaptation.input.page_number}Ex{adaptation.input.exercise_number}"
     else:
@@ -672,12 +779,30 @@ def make_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
     exercise_dump = exercise.model_dump()
     return {
         "exerciseId": exercise_id,
+        "pageNumber": adaptation.input.page_number,
+        "exerciseNumber": adaptation.input.exercise_number,
+        "kind": "adapted",
         "studentAnswersStorageKey": hashlib.md5(
             json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
-        "pageNumber": adaptation.input.page_number,
-        "exerciseNumber": adaptation.input.exercise_number,
         "adaptedExercise": exercise_dump,
+    }
+
+
+def make_external_exercise_data(external_exercise: ExternalExercise) -> JsonDict:
+    assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
+    exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
+    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
+    # @todo Download asynchronously from S3
+    object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
+    data = base64.b64encode(object["Body"].read()).decode("ascii")
+    return {
+        "exerciseId": exercise_id,
+        "pageNumber": external_exercise.page_number,
+        "exerciseNumber": external_exercise.exercise_number,
+        "kind": "external",
+        "originalFileName": external_exercise.original_file_name,
+        "data": data,
     }
 
 

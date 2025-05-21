@@ -42,7 +42,11 @@ describe('TextbookExportExercisesList', () => {
   it('renders 4 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
-        exercises: _.range(1, 5).map((i) => ({ exerciseId: `P22Ex${i}`, exerciseNumber: `${i}` })),
+        exercises: _.range(1, 5).map((i) => ({
+          kind: 'adapted' as const,
+          exerciseId: `P22Ex${i}`,
+          exerciseNumber: `${i}`,
+        })),
       },
       global,
     })
@@ -56,7 +60,11 @@ describe('TextbookExportExercisesList', () => {
   it('renders 6 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
-        exercises: _.range(1, 7).map((i) => ({ exerciseId: `P22Ex${i}`, exerciseNumber: `${i}` })),
+        exercises: _.range(1, 7).map((i) => ({
+          kind: 'adapted' as const,
+          exerciseId: `P22Ex${i}`,
+          exerciseNumber: `${i}`,
+        })),
       },
       global,
     })
@@ -77,7 +85,11 @@ describe('TextbookExportExercisesList', () => {
   it('renders 100 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
-        exercises: _.range(1, 101).map((i) => ({ exerciseId: `P22Ex${i}`, exerciseNumber: `${i}` })),
+        exercises: _.range(1, 101).map((i) => ({
+          kind: 'adapted' as const,
+          exerciseId: `P22Ex${i}`,
+          exerciseNumber: `${i}`,
+        })),
       },
       global,
     })

@@ -565,6 +565,122 @@
         }
       }
     },
+    "/api/adaptation/textbook/{textbook_id}/external-exercises": {
+      "post": {
+        "summary": "Post Textbook External Exercises",
+        "operationId": "post_textbook_external_exercises_api_adaptation_textbook__textbook_id__external_exercises_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookExternalExercisesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostTextbookExternalExercisesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
+      "put": {
+        "summary": "Put Textbook External Exercises Removed",
+        "operationId": "put_textbook_external_exercises_removed_api_adaptation_textbook__textbook_id__external_exercises__external_exercise_id__removed_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          },
+          {
+            "name": "external_exercise_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Exercise Id"
+            }
+          },
+          {
+            "name": "removed",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Removed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/adaptation/{id}": {
       "get": {
         "summary": "Get Adaptation",
@@ -1329,6 +1445,13 @@
             },
             "type": "array",
             "title": "Batches"
+          },
+          "externalExercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalExercise"
+            },
+            "type": "array",
+            "title": "Externalexercises"
           }
         },
         "additionalProperties": false,
@@ -1337,7 +1460,8 @@
           "id",
           "createdBy",
           "title",
-          "batches"
+          "batches",
+          "externalExercises"
         ],
         "title": "ApiTextbook"
       },
@@ -1705,6 +1829,54 @@
           "statement",
           "reference"
         ]
+      },
+      "ExternalExercise": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "originalFileName": {
+            "type": "string",
+            "title": "Originalfilename"
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "originalFileName",
+          "removedFromTextbook"
+        ],
+        "title": "ExternalExercise"
       },
       "Formatted-Input": {
         "properties": {
@@ -2711,6 +2883,63 @@
           "inputs"
         ],
         "title": "PostTextbookBatchRequest"
+      },
+      "PostTextbookExternalExercisesRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "originalFileName": {
+            "type": "string",
+            "title": "Originalfilename"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "pageNumber",
+          "exerciseNumber",
+          "originalFileName"
+        ],
+        "title": "PostTextbookExternalExercisesRequest"
+      },
+      "PostTextbookExternalExercisesResponse": {
+        "properties": {
+          "putUrl": {
+            "type": "string",
+            "title": "Puturl"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "putUrl"
+        ],
+        "title": "PostTextbookExternalExercisesResponse"
       },
       "PostTextbookRequest": {
         "properties": {

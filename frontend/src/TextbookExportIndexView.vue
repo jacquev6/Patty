@@ -1,13 +1,25 @@
 <script lang="ts">
+export type Exercise =
+  | {
+      exerciseId: string
+      pageNumber: number
+      exerciseNumber: string
+      kind: 'adapted'
+      studentAnswersStorageKey: string
+      adaptedExercise: AdaptedExercise
+    }
+  | {
+      exerciseId: string
+      pageNumber: number
+      exerciseNumber: string
+      kind: 'external'
+      originalFileName: string
+      data: string
+    }
+
 export type Data = {
   title: string
-  exercises: {
-    exerciseId: string
-    studentAnswersStorageKey: string
-    pageNumber: number | null
-    exerciseNumber: string | null
-    adaptedExercise: AdaptedExercise
-  }[]
+  exercises: Exercise[]
 }
 </script>
 
@@ -17,7 +29,6 @@ import { match, P } from 'ts-pattern'
 
 import type { AdaptedExercise } from './apiClient'
 import TextbookExportExercisesList from './TextbookExportExercisesList.vue'
-import assert from './assert'
 import TriColoredInput from './TriColoredInput.vue'
 import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
 import VirtualEraser from './VirtualEraser.vue'
@@ -28,28 +39,10 @@ const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data //
 const pageNumberFilter = ref<string>('')
 const exerciseNumberFilter = ref<string>('')
 
-type FilterableExercise = {
-  exerciseId: string
-  pageNumber: number
-  exerciseNumber: string
-}
-
-const filterableExercises = ((): FilterableExercise[] => {
-  return data.exercises.map(({ exerciseId, pageNumber, exerciseNumber }) => {
-    assert(pageNumber !== null)
-    assert(exerciseNumber !== null)
-    return {
-      exerciseId,
-      pageNumber,
-      exerciseNumber,
-    }
-  })
-})()
-
 type Filtered =
   | { kind: 'nothing' }
   | { kind: 'message'; message: string }
-  | { kind: 'exercises'; exercises: FilterableExercise[] }
+  | { kind: 'exercises'; exercises: Exercise[] }
 
 const filtered = computed(() => {
   return match([pageNumberFilter.value, exerciseNumberFilter.value])
@@ -60,7 +53,7 @@ const filtered = computed(() => {
     })
     .with([P.string, P.string], ([pageString, number]) => {
       const page = parseInt(pageString, 10)
-      const exercises = filterableExercises.filter((exercise) => exercise.pageNumber === page)
+      const exercises = data.exercises.filter((exercise) => exercise.pageNumber === page)
       if (exercises.length === 0) {
         return { kind: 'message', message: `La page ${page} n'existe pas.` }
       } else if (number === '') {
