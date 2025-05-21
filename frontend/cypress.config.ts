@@ -1,3 +1,4 @@
+import { rmdir } from 'fs'
 import { defineConfig } from 'cypress'
 import getCompareSnapshotsPlugin from 'cypress-image-diff-js/plugin'
 
@@ -30,6 +31,20 @@ function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigO
     }
 
     return launchOptions
+  })
+
+  on('task', {
+    deleteFolder(folderName) {
+      return new Promise((resolve, reject) => {
+        rmdir(folderName, { maxRetries: 10, recursive: true }, (err) => {
+          if (err) {
+            console.error(err)
+            return reject(err)
+          }
+          resolve(null)
+        })
+      })
+    },
   })
 
   return config

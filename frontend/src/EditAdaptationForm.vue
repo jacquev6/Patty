@@ -16,6 +16,7 @@ import MiniatureScreen from './MiniatureScreen.vue'
 import WhiteSpace from './WhiteSpace.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import { type PreprocessedAdaptation } from './adaptations'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 const props = defineProps<{
   adaptation: PreprocessedAdaptation
@@ -26,6 +27,8 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
+
+const authenticationTokenStore = useAuthenticationTokenStore()
 
 const ajv = new Ajv()
 const validateAdaptedExercise = ajv.compile(adaptedExerciseSchema)
@@ -323,7 +326,9 @@ watch(Escape, () => {
         <p>
           <button @click="fullScreen = true">Full screen</button>
           <WhiteSpace />
-          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html`">Download standalone HTML</a>
+          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html?token=${authenticationTokenStore.token}`">
+            Download standalone HTML
+          </a>
         </p>
       </template>
       <h1>Manual edition</h1>

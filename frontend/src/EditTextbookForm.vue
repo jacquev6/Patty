@@ -7,6 +7,7 @@ import AdaptationPreview from './EditBatchFormAdaptationPreview.vue'
 import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
 import EditTextbookFormCreateBatchForm from './EditTextbookFormCreateBatchForm.vue'
 import assert from './assert'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 const props = defineProps<{
   textbook: Textbook
@@ -19,6 +20,8 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
+
+const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
@@ -92,7 +95,11 @@ async function removeAdaptation(id: string, removed: boolean) {
 
 <template>
   <h1>{{ textbook.title }}</h1>
-  <p><a :href="`/api/adaptation/export/textbook-${textbook.id}.html`">Download standalone HTML</a></p>
+  <p>
+    <a :href="`/api/adaptation/export/textbook-${textbook.id}.html?token=${authenticationTokenStore.token}`">
+      Download standalone HTML
+    </a>
+  </p>
   <p>
     View by
     <select data-cy="view-by" v-model="view">
