@@ -39,7 +39,7 @@ class DevelopmentCycle:
 
         if self.do_backend:
             if self.do_migration:
-                backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250521-091610.tar.gz"
+                backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250527-061611.tar.gz"
                 run_in_backend_container(
                     [
                         "python",

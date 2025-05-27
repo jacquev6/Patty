@@ -54,7 +54,12 @@ def run_in_container(
     else:
         env_string = f" with environment {' '.join(f'{k}={v}' for k, v in env.items())}"
 
-    print(f"Running {shlex.join(command)!r} in {container}{workdir_string}{env_string}")
+    if capture:
+        capture_string = ", capturing output"
+    else:
+        capture_string = ""
+
+    print(f"Running {shlex.join(command)!r} in {container}{workdir_string}{env_string}{capture_string}")
 
     return subprocess.run(
         ["docker", "compose", "exec"] + env_options + workdir_options + [container] + command,
