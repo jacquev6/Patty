@@ -2,7 +2,7 @@ from typing import Any, Iterable, TypeVar
 import datetime
 import textwrap
 
-import compact_json  # type: ignore
+import compact_json  # type: ignore[import-untyped]
 import fastapi
 import sqlalchemy.orm
 
