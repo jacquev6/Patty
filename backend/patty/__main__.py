@@ -319,5 +319,29 @@ def migrate_data() -> None:
             strategy_settings.response_specification
 
 
+@main.command()
+def dump_database() -> None:
+    from . import database_utils
+    from . import orm_models
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        data = database_utils.dump(session)
+    json.dump(data, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+
+
+@main.command()
+def load_database() -> None:
+    from . import database_utils
+    from . import orm_models
+
+    data = json.load(sys.stdin)
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        database_utils.load(session, data, {"old_adaptation_strategy_settings_branches": ["head_id"]})
+        session.commit()
+
+
 if __name__ == "__main__":
     main()
