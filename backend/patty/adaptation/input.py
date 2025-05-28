@@ -25,6 +25,6 @@ class Input(OrmBase):
 class InputTestCase(TestCaseWithDatabase):
     def test_create_with_empty_exercise_number(self) -> None:
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(Input, created_by="test", page_number=1, exercise_number="", text="test")
+            self.flush_model(Input, created_by="test", page_number=1, exercise_number="", text="test")
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
         self.assertEqual(cm.exception.orig.diag.constraint_name, "ck_adaptation_input_exercise_number_not_empty")

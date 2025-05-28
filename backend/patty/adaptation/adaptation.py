@@ -123,27 +123,27 @@ class Adaptation(OrmBase):
 
 class AdaptationTestCase(TestCaseWithDatabase):
     def test_create(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
+        strategy_settings = self.flush_model(
             StrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy = self.create_model(
+        strategy = self.flush_model(
             Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        batch = self.create_model(
+        batch = self.flush_model(
             Batch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
             strategy=strategy,
         )
 
-        self.create_model(
+        self.flush_model(
             Adaptation,
             created_by="UnitTests",
             batch=batch,
@@ -156,24 +156,24 @@ class AdaptationTestCase(TestCaseWithDatabase):
         )
 
     def test_create_with_inconsistent_strategy__with_orm(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
+        strategy_settings = self.flush_model(
             StrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy_1 = self.create_model(
+        strategy_1 = self.flush_model(
             Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        strategy_2 = self.create_model(
+        strategy_2 = self.flush_model(
             Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
-        batch = self.create_model(
+        batch = self.flush_model(
             Batch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
@@ -181,7 +181,7 @@ class AdaptationTestCase(TestCaseWithDatabase):
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
+            self.flush_model(
                 Adaptation,
                 created_by="UnitTests",
                 batch=batch,
@@ -199,24 +199,24 @@ class AdaptationTestCase(TestCaseWithDatabase):
         )
 
     def test_create_with_inconsistent_strategy__without_orm(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(Input, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
+        strategy_settings = self.flush_model(
             StrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy_1 = self.create_model(
+        strategy_1 = self.flush_model(
             Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        strategy_2 = self.create_model(
+        strategy_2 = self.flush_model(
             Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
-        batch = self.create_model(
+        batch = self.flush_model(
             Batch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),

@@ -176,8 +176,12 @@ class TestCaseWithDatabase(unittest.TestCase):
         self.session.close()
         super().tearDown()
 
-    def create_model(self, __model: type[Model], **kwargs: Any) -> Model:
+    def add_model(self, __model: type[Model], **kwargs: Any) -> Model:
         instance = __model(**kwargs)
         self.session.add(instance)
+        return instance
+
+    def flush_model(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = self.add_model(__model, **kwargs)
         self.session.flush()
         return instance

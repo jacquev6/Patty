@@ -161,9 +161,9 @@ class StrategyTestCase(TestCaseWithDatabase):
     response_specification = JsonFromTextLlmResponseSpecification(format="json", formalism="text")
 
     def test_create_two_branches_with_same_name(self) -> None:
-        self.create_model(StrategySettingsBranch, name="branch")
+        self.flush_model(StrategySettingsBranch, name="branch")
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch")
+            self.flush_model(StrategySettingsBranch, name="branch")
 
         assert isinstance(cm.exception.orig, psycopg2.errors.UniqueViolation)
         self.assertEqual(str(cm.exception.orig.diag.constraint_name), "uq_adaptation_strategy_settings_branches_name")
@@ -173,7 +173,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         # and 'alembic version --autogenerate' doesn't create the foreign key in that case.
         # (See https://github.com/sqlalchemy/alembic/issues/326)
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch", head_id=42)
+            self.flush_model(StrategySettingsBranch, name="branch", head_id=42)
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
@@ -182,7 +182,7 @@ class StrategyTestCase(TestCaseWithDatabase):
 
     def test_create_branch_with_empty_name(self) -> None:
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="")
+            self.flush_model(StrategySettingsBranch, name="")
 
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
         self.assertEqual(
@@ -190,7 +190,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_branch_with_head_belonging_to_other_branch__with_orm(self) -> None:
-        head = self.create_model(
+        head = self.flush_model(
             StrategySettings,
             created_by="test",
             system_prompt="prompt",
@@ -198,7 +198,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch", head=head)
+            self.flush_model(StrategySettingsBranch, name="branch", head=head)
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
@@ -206,7 +206,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_branch_with_head_belonging_to_other_branch__without_orm(self) -> None:
-        head = self.create_model(
+        head = self.flush_model(
             StrategySettings,
             created_by="test",
             system_prompt="prompt",
@@ -222,15 +222,15 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_branch_history(self) -> None:
-        branch = self.create_model(StrategySettingsBranch, name="branch")
-        settings_1 = self.create_model(
+        branch = self.flush_model(StrategySettingsBranch, name="branch")
+        settings_1 = self.flush_model(
             StrategySettings,
             branch=branch,
             created_by="test",
             system_prompt="prompt a",
             response_specification=self.response_specification,
         )
-        settings_2 = self.create_model(
+        settings_2 = self.flush_model(
             StrategySettings,
             branch=branch,
             parent=settings_1,
@@ -238,7 +238,7 @@ class StrategyTestCase(TestCaseWithDatabase):
             system_prompt="prompt b",
             response_specification=self.response_specification,
         )
-        settings_3 = self.create_model(
+        settings_3 = self.flush_model(
             StrategySettings,
             branch=branch,
             parent=settings_2,
@@ -254,9 +254,9 @@ class StrategyTestCase(TestCaseWithDatabase):
         self.assertEqual(branch.head.parent.parent.system_prompt, "prompt a")
 
     def test_create_child_settings_with_inconsistent_branch__with_orm(self) -> None:
-        branch_1 = self.create_model(StrategySettingsBranch, name="branch_1")
-        branch_2 = self.create_model(StrategySettingsBranch, name="branch_2")
-        parent = self.create_model(
+        branch_1 = self.flush_model(StrategySettingsBranch, name="branch_1")
+        branch_2 = self.flush_model(StrategySettingsBranch, name="branch_2")
+        parent = self.flush_model(
             StrategySettings,
             branch=branch_1,
             created_by="test",
@@ -265,7 +265,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
+            self.flush_model(
                 StrategySettings,
                 branch=branch_2,
                 parent=parent,
@@ -280,9 +280,9 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_child_settings_with_inconsistent_branch__without_orm(self) -> None:
-        branch_1 = self.create_model(StrategySettingsBranch, name="branch_1")
-        branch_2 = self.create_model(StrategySettingsBranch, name="branch_2")
-        parent = self.create_model(
+        branch_1 = self.flush_model(StrategySettingsBranch, name="branch_1")
+        branch_2 = self.flush_model(StrategySettingsBranch, name="branch_2")
+        parent = self.flush_model(
             StrategySettings,
             branch=branch_1,
             created_by="test",
@@ -307,14 +307,14 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_settings_with_parent_but_without_branch__with_orm(self) -> None:
-        parent = self.create_model(
+        parent = self.flush_model(
             StrategySettings,
             created_by="test",
             system_prompt="prompt",
             response_specification=self.response_specification,
         )
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
+            self.flush_model(
                 StrategySettings,
                 branch=None,
                 parent=parent,
@@ -329,7 +329,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_settings_with_parent_but_without_branch__without_orm(self) -> None:
-        parent = self.create_model(
+        parent = self.flush_model(
             StrategySettings,
             created_by="test",
             system_prompt="prompt",
@@ -352,7 +352,7 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
     def test_create_settings_without_branch(self) -> None:
-        settings = self.create_model(
+        settings = self.flush_model(
             StrategySettings,
             branch=None,
             created_by="test",
@@ -362,8 +362,8 @@ class StrategyTestCase(TestCaseWithDatabase):
         self.assertIsNone(settings.branch)
 
     def test_create_settings_with_branch(self) -> None:
-        branch = self.create_model(StrategySettingsBranch, name="branch")
-        settings = self.create_model(
+        branch = self.flush_model(StrategySettingsBranch, name="branch")
+        settings = self.flush_model(
             StrategySettings,
             branch=branch,
             created_by="test",
