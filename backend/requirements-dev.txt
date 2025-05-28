@@ -1,4 +1,6 @@
 black
+graphviz
+httpie
 mypy
 types-boto3
 types-psycopg2

@@ -9,7 +9,7 @@ from .batch import Batch
 from .input import Input
 from .router import router
 from .strategy import Strategy, StrategySettings, StrategySettingsBranch
-from .textbook import Textbook
+from .textbook import Textbook, ExternalExercise
 
 
 __all__ = [
@@ -19,6 +19,7 @@ __all__ = [
     "AssistantResponse",
     "AssistantSuccess",
     "Batch",
+    "ExternalExercise",
     "Input",
     "router",
     "Strategy",

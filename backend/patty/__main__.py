@@ -8,12 +8,14 @@ import re
 import subprocess
 import sys
 import tarfile
+import typing
 import urllib.parse
 
 import argon2
 import boto3
 import click
 import requests
+import sqlalchemy
 import sqlalchemy_utils
 
 from . import adaptation
@@ -22,6 +24,7 @@ from . import asgi
 from . import database_utils
 from . import fixtures
 from . import llm
+from . import orm_models
 from . import settings
 from .adaptation import submission
 
@@ -40,6 +43,37 @@ def hash_password(password: str) -> None:
 @main.command()
 def openapi() -> None:
     print(json.dumps(asgi.app.openapi(), indent=2))
+
+
+@main.command()
+def db_tables_graph() -> None:
+    import graphviz  # type: ignore[import-untyped]
+
+    graph = graphviz.Digraph(node_attr={"shape": "none"})
+
+    for model in orm_models.all_models:
+        table = typing.cast(sqlalchemy.Table, model.__table__)
+
+        fields = []
+        for column_index, column in enumerate(table.columns):
+            color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
+            fields.append(
+                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{column.type}</TD></TR>"""
+            )
+
+        graph.node(
+            table.name,
+            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+        )
+
+        for fk in table.foreign_key_constraints:
+            target_table = fk.elements[0].column.table.name
+            label = (
+                ", ".join(col.name for col in fk.columns) + "\\n→ " + ", ".join(el.column.name for el in fk.elements)
+            )
+            graph.edge(table.name, target_table, label=label)
+
+    sys.stdout.buffer.write(graph.pipe(format="png"))
 
 
 @main.command()

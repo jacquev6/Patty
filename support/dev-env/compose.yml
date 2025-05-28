@@ -30,6 +30,7 @@ services:
       "backend/generated/default-system-prompt.md",
       "backend/generated/openapi.json",
       "backend/generated/adapted-exercise-schema.json",
+      "backend/generated/db-tables-graph.png",
       "frontend/src/openapi.ts",
       "backend/patty/adaptation/templates/adaptation-export/index.html",
       "backend/patty/adaptation/templates/batch-export/index.html",
@@ -247,6 +248,23 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema.json"]
       interval: 0.5s
       retries: 12
+  db-tables-graph-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph.png", "python -m patty db-tables-graph"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
   fixtures-loader:
     image: patty-dev_backend
     pull_policy: never
