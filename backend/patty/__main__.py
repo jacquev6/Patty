@@ -11,22 +11,12 @@ import tarfile
 import typing
 import urllib.parse
 
-import argon2
-import boto3
-import click
-import requests
-import sqlalchemy
-import sqlalchemy_utils
+# In this file, we favor importing third-party and local modules in the appropriate command functions to avoid
+# loading unused modules. Before doing that, 'python -m patty --help' took 6s. Now it takes less than 1s.
 
-from . import adaptation
-from . import adapted
-from . import asgi
-from . import database_utils
-from . import fixtures
-from . import llm
-from . import orm_models
+import click
+
 from . import settings
-from .adaptation import submission
 
 
 @click.group()
@@ -37,17 +27,24 @@ def main() -> None:
 @main.command()
 @click.argument("password")
 def hash_password(password: str) -> None:
+    import argon2
+
     print(argon2.PasswordHasher().hash(password))
 
 
 @main.command()
 def openapi() -> None:
+    from . import asgi
+
     print(json.dumps(asgi.app.openapi(), indent=2))
 
 
 @main.command()
 def db_tables_graph() -> None:
     import graphviz  # type: ignore[import-untyped]
+    import sqlalchemy
+
+    from . import orm_models
 
     graph = graphviz.Digraph(node_attr={"shape": "none"})
 
@@ -78,6 +75,9 @@ def db_tables_graph() -> None:
 
 @main.command()
 def adapted_exercise_schema() -> None:
+    from . import adapted
+    from . import llm
+
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
         adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
@@ -100,12 +100,17 @@ def adapted_exercise_schema() -> None:
 
 @main.command()
 def default_system_prompt() -> None:
+    from . import fixtures
+
     print(fixtures.make_default_system_prompt())
 
 
 @main.command()
 @click.argument("fixture", type=str, nargs=-1)
 def load_fixtures(fixture: Iterable[str]) -> None:
+    from . import database_utils
+    from . import fixtures
+
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         fixtures.load(session, fixture)
@@ -116,6 +121,9 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 @click.option("--parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
 def run_submission_daemon(parallelism: int, pause: float) -> None:
+    from . import database_utils
+    from .adaptation import submission
+
     engine = database_utils.create_engine(settings.DATABASE_URL)
     asyncio.run(submission.daemon(engine, parallelism, pause))
 
@@ -128,6 +136,9 @@ parsed_database_backups_url = urllib.parse.urlparse(settings.DATABASE_BACKUPS_UR
 
 @main.command()
 def backup_database() -> None:
+    import boto3
+    import requests
+
     now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_name = f"patty-backup-{now}"
     archive_name = f"{backup_name}.tar.gz"
@@ -194,6 +205,9 @@ def backup_database() -> None:
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
+    import boto3
+    import sqlalchemy_utils
+
     parsed_backup_url = urllib.parse.urlparse(backup_url)
 
     if parsed_backup_url.scheme == "file":
@@ -269,6 +283,9 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 
 @main.command()
 def migrate_data() -> None:
+    from . import adaptation
+    from . import database_utils
+
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
 
     # Migrate JSON fields according to evolution of schemas
