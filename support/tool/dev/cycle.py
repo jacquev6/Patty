@@ -77,7 +77,7 @@ class DevelopmentCycle:
                 )
 
             if self.do_lint:
-                pass  # @todo Investigate linters for Python code
+                pass  # @todo Investigate linters for Python code (e.g. PyLint, ruff)
 
             if self.do_type_check:
                 run_in_backend_container(["mypy", "backend", "support/tool", "--strict"], workdir="/app")

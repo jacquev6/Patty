@@ -15,7 +15,8 @@ do
 done < <(find . -name '*.template')
 $ok
 
-if ! (diff .venv/requirements-dev.txt backend/requirements-dev.txt && diff .venv/requirements-run.txt backend/requirements-run.txt) >/dev/null 2>&1
+# @todo Evaluate if https://github.com/astral-sh/uv can make this use case easier
+if ! diff .venv/requirements.txt <(head -n 1000 backend/requirements-*.txt) >/dev/null 2>&1
 then
   rm -rf .venv
   python3 -m venv .venv
