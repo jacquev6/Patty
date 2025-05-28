@@ -181,9 +181,9 @@ class FixturesCreator:
         self.__session.flush()
         return instance
 
-    def create_default_adaptation_strategy(self) -> adaptation.Strategy:
+    def create_default_adaptation_strategy(self) -> adaptation.OldStrategy:
         strategy_settings = self.create(
-            adaptation.StrategySettings,
+            adaptation.OldStrategySettings,
             created_by="Patty",
             system_prompt=make_default_system_prompt(),
             response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
@@ -211,7 +211,7 @@ class FixturesCreator:
             ),
         )
         return self.create(
-            adaptation.Strategy,
+            adaptation.OldStrategy,
             created_by="Patty",
             model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
             settings=strategy_settings,
@@ -219,9 +219,9 @@ class FixturesCreator:
 
     def create_dummy_adaptation_strategy_settings(
         self, system_prompt: str = "Blah blah blah."
-    ) -> adaptation.StrategySettings:
+    ) -> adaptation.OldStrategySettings:
         return self.create(
-            adaptation.StrategySettings,
+            adaptation.OldStrategySettings,
             created_by="Patty",
             system_prompt=system_prompt,
             response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
@@ -249,15 +249,15 @@ class FixturesCreator:
             ),
         )
 
-    def create_dummy_adaptation_strategy(self) -> adaptation.Strategy:
+    def create_dummy_adaptation_strategy(self) -> adaptation.OldStrategy:
         settings = self.create_dummy_adaptation_strategy_settings()
         return self.create(
-            adaptation.Strategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=settings
+            adaptation.OldStrategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=settings
         )
 
-    def create_default_adaptation_input(self) -> adaptation.Input:
+    def create_default_adaptation_input(self) -> adaptation.OldInput:
         return self.create(
-            adaptation.Input,
+            adaptation.OldInput,
             created_by="Patty",
             page_number=42,
             exercise_number="5",
@@ -270,9 +270,11 @@ class FixturesCreator:
             ),
         )
 
-    def create_successful_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+    def create_successful_adaptation(
+        self, *, batch: object, strategy: object, input: object
+    ) -> adaptation.OldAdaptation:
         return self.create(
-            adaptation.Adaptation,
+            adaptation.OldAdaptation,
             created_by="Patty",
             batch=batch,
             strategy=strategy,
@@ -406,9 +408,11 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_in_progress_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+    def create_in_progress_adaptation(
+        self, *, batch: object, strategy: object, input: object
+    ) -> adaptation.OldAdaptation:
         return self.create(
-            adaptation.Adaptation,
+            adaptation.OldAdaptation,
             created_by="Patty",
             batch=batch,
             strategy=strategy,
@@ -421,9 +425,9 @@ class FixturesCreator:
 
     def create_invalid_json_adaptation(
         self, *, batch: object, strategy: object, input: object
-    ) -> adaptation.Adaptation:
+    ) -> adaptation.OldAdaptation:
         return self.create(
-            adaptation.Adaptation,
+            adaptation.OldAdaptation,
             created_by="Patty",
             batch=batch,
             strategy=strategy,
@@ -436,9 +440,9 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_not_json_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.Adaptation:
+    def create_not_json_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.OldAdaptation:
         return self.create(
-            adaptation.Adaptation,
+            adaptation.OldAdaptation,
             created_by="Patty",
             batch=batch,
             strategy=strategy,
@@ -454,19 +458,19 @@ class FixturesCreator:
     def create_seed_data(self) -> None:
         strategy = self.create_default_adaptation_strategy()
         input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
         self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
 
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
         self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
 
     def create_mixed_dummy_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.Batch, created_by="Patty", created_at=created_at, strategy=strategy)
+        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
         self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
         self.create_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
         self.create_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
@@ -474,9 +478,9 @@ class FixturesCreator:
 
     def create_dummy_branch(
         self, *, name: str = "Branchy McBranchFace", system_prompt: str = "Blah blah blah."
-    ) -> adaptation.StrategySettingsBranch:
+    ) -> adaptation.OldStrategySettingsBranch:
         settings = self.create_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
-        branch = self.create(adaptation.StrategySettingsBranch, name=name)
+        branch = self.create(adaptation.OldStrategySettingsBranch, name=name)
         settings.branch = branch
         self.__session.flush()
         branch.head = settings
@@ -485,26 +489,30 @@ class FixturesCreator:
 
     def create_dummy_textbook(self) -> None:
         textbook = self.create(
-            adaptation.Textbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
+            adaptation.OldTextbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
         )
 
         success_branch_1 = self.create_dummy_branch(
             name=f"Branch with successes 1", system_prompt=f"Thou shall succeed."
         )
         success_strategy_1 = self.create(
-            adaptation.Strategy,
+            adaptation.OldStrategy,
             created_by="Patty",
             model=llm.DummyModel(name="dummy-1"),
             settings=success_branch_1.head,
         )
         success_batch_1 = self.create(
-            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=success_strategy_1, textbook=textbook
+            adaptation.OldBatch,
+            created_by="Patty",
+            created_at=created_at,
+            strategy=success_strategy_1,
+            textbook=textbook,
         )
         self.create_successful_adaptation(
             batch=success_batch_1,
             strategy=success_strategy_1,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=42,
                 exercise_number="5",
@@ -521,7 +529,7 @@ class FixturesCreator:
             batch=success_batch_1,
             strategy=success_strategy_1,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=40,
                 exercise_number="6",
@@ -538,7 +546,7 @@ class FixturesCreator:
             batch=success_batch_1,
             strategy=success_strategy_1,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=40,
                 exercise_number="4",
@@ -556,19 +564,23 @@ class FixturesCreator:
             name=f"Branch with successes 2", system_prompt=f"Thou shall succeed as well."
         )
         success_strategy_2 = self.create(
-            adaptation.Strategy,
+            adaptation.OldStrategy,
             created_by="Patty",
             model=llm.DummyModel(name="dummy-1"),
             settings=success_branch_2.head,
         )
         success_batch_2 = self.create(
-            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=success_strategy_2, textbook=textbook
+            adaptation.OldBatch,
+            created_by="Patty",
+            created_at=created_at,
+            strategy=success_strategy_2,
+            textbook=textbook,
         )
         self.create_successful_adaptation(
             batch=success_batch_2,
             strategy=success_strategy_2,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=42,
                 exercise_number="6",
@@ -585,7 +597,7 @@ class FixturesCreator:
             batch=success_batch_2,
             strategy=success_strategy_2,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=40,
                 exercise_number="30",
@@ -602,7 +614,7 @@ class FixturesCreator:
             batch=success_batch_2,
             strategy=success_strategy_2,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=40,
                 exercise_number="8",
@@ -619,7 +631,7 @@ class FixturesCreator:
             batch=success_batch_2,
             strategy=success_strategy_2,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=40,
                 exercise_number="Removed",
@@ -635,7 +647,7 @@ class FixturesCreator:
         removed_adaptation.removed_from_textbook = True
 
         removed_batch = self.create(
-            adaptation.Batch,
+            adaptation.OldBatch,
             created_by="Patty",
             created_at=created_at,
             strategy=success_strategy_2,
@@ -646,7 +658,7 @@ class FixturesCreator:
             batch=removed_batch,
             strategy=success_strategy_2,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=47,
                 exercise_number="Removed",
@@ -662,37 +674,40 @@ class FixturesCreator:
 
         errors_branch = self.create_dummy_branch(name=f"Branch with errors", system_prompt=f"Thou shall fail.")
         errors_strategy = self.create(
-            adaptation.Strategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=errors_branch.head
+            adaptation.OldStrategy,
+            created_by="Patty",
+            model=llm.DummyModel(name="dummy-1"),
+            settings=errors_branch.head,
         )
         errors_batch = self.create(
-            adaptation.Batch, created_by="Patty", created_at=created_at, strategy=errors_strategy, textbook=textbook
+            adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=errors_strategy, textbook=textbook
         )
         self.create_not_json_adaptation(
             batch=errors_batch,
             strategy=errors_strategy,
             input=self.create(
-                adaptation.Input, created_by="Patty", page_number=142, exercise_number="4", text="Not JSON"
+                adaptation.OldInput, created_by="Patty", page_number=142, exercise_number="4", text="Not JSON"
             ),
         )
         self.create_invalid_json_adaptation(
             batch=errors_batch,
             strategy=errors_strategy,
             input=self.create(
-                adaptation.Input, created_by="Patty", page_number=140, exercise_number="4", text="Invalid JSON"
+                adaptation.OldInput, created_by="Patty", page_number=140, exercise_number="4", text="Invalid JSON"
             ),
         )
 
     def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
         self.create_dummy_textbook()
 
-        strategy = self.__session.get(adaptation.Strategy, 1)
-        batch = self.__session.get(adaptation.Batch, 1)
+        strategy = self.__session.get(adaptation.OldStrategy, 1)
+        batch = self.__session.get(adaptation.OldBatch, 1)
 
         self.create_successful_adaptation(
             batch=batch,
             strategy=strategy,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=42,
                 exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
@@ -710,7 +725,7 @@ class FixturesCreator:
             batch=batch,
             strategy=strategy,
             input=self.create(
-                adaptation.Input,
+                adaptation.OldInput,
                 created_by="Patty",
                 page_number=42,
                 exercise_number="Auto-dictée",

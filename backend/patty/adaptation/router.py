@@ -21,23 +21,23 @@ from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
 from .adaptation import (
-    Adaptation as DbAdaptation,
+    OldAdaptation as DbAdaptation,
     Adjustment,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantResponse,
     AssistantSuccess,
 )
-from .batch import Batch
-from .input import Input as DbInput
+from .batch import OldBatch as Batch
+from .input import OldInput as DbInput
 from .strategy import (
     ConcreteLlmResponseSpecification,
     JsonSchemaLlmResponseSpecification,
-    Strategy as DbStrategy,
-    StrategySettings,
-    StrategySettingsBranch,
+    OldStrategy as DbStrategy,
+    OldStrategySettings as StrategySettings,
+    OldStrategySettingsBranch as StrategySettingsBranch,
 )
-from .textbook import Textbook, ExternalExercise
+from .textbook import OldTextbook as Textbook, OldExternalExercise as ExternalExercise
 
 
 __all__ = ["router"]

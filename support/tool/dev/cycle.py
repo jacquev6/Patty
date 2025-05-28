@@ -37,6 +37,8 @@ class DevelopmentCycle:
                 run_in_backend_container(
                     ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
+                # @todo(after a5c3c863f388 is applied in production) Remove. No rush: it's a no-op if already applied.
+                run_alembic(["upgrade", "a5c3c863f388"])
                 existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
                 assert len(existing) <= 1
                 if len(existing) == 1:

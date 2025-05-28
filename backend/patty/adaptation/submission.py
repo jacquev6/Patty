@@ -9,7 +9,7 @@ from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
 from .adaptation import (
-    Adaptation,
+    OldAdaptation,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantUnknownError,
@@ -34,8 +34,8 @@ async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) 
         try:
             with database_utils.Session(engine) as session:
                 adaptations = (
-                    session.query(Adaptation)
-                    .filter(Adaptation._initial_assistant_response == None)
+                    session.query(OldAdaptation)
+                    .filter(OldAdaptation._initial_assistant_response == None)
                     .limit(parallelism)
                     .all()
                 )
@@ -57,7 +57,7 @@ async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) 
         await asyncio.sleep(pause)
 
 
-async def submit_adaptation(adaptation: Adaptation) -> None:
+async def submit_adaptation(adaptation: OldAdaptation) -> None:
     response_format = adaptation.strategy.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [

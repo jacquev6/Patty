@@ -1,24 +1,35 @@
 from .adaptation import (
-    Adaptation,
-    Batch,
-    ExternalExercise,
-    Input,
-    Strategy,
-    StrategySettings,
-    StrategySettingsBranch,
-    Textbook,
+    OldAdaptation,
+    OldBatch,
+    OldExternalExercise,
+    OldInput,
+    OldStrategy,
+    OldStrategySettings,
+    OldStrategySettingsBranch,
+    OldTextbook,
 )
+from .database_utils import OrmBase
+
 
 __all__ = [
-    "Adaptation",
-    "Batch",
-    "ExternalExercise",
-    "Input",
-    "Strategy",
-    "StrategySettings",
-    "StrategySettingsBranch",
-    "Textbook",
+    "OldAdaptation",
+    "OldBatch",
+    "OldExternalExercise",
+    "OldInput",
+    "OldStrategy",
+    "OldStrategySettings",
+    "OldStrategySettingsBranch",
+    "OldTextbook",
 ]
 
 
-all_models = [Adaptation, Batch, ExternalExercise, Input, Strategy, StrategySettings, StrategySettingsBranch, Textbook]
+all_models: list[type[OrmBase]] = [
+    OldAdaptation,
+    OldBatch,
+    OldExternalExercise,
+    OldInput,
+    OldStrategy,
+    OldStrategySettings,
+    OldStrategySettingsBranch,
+    OldTextbook,
+]

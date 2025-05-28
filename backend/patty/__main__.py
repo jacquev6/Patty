@@ -305,32 +305,32 @@ def migrate_data() -> None:
 
     # Migrate JSON fields according to evolution of schemas
     with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.Adaptation).all():
+        for adaptation_ in session.query(adaptation.OldAdaptation).all():
             pass
-        for batch in session.query(adaptation.Batch).all():
+        for batch in session.query(adaptation.OldBatch).all():
             pass
-        for input in session.query(adaptation.Input).all():
+        for input in session.query(adaptation.OldInput).all():
             pass
-        for strategy in session.query(adaptation.Strategy).all():
+        for strategy in session.query(adaptation.OldStrategy).all():
             pass
-        for strategy_settings in session.query(adaptation.StrategySettings).all():
+        for strategy_settings in session.query(adaptation.OldStrategySettings).all():
             pass
         session.commit()
 
     # Check that all JSON fields are valid
     with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.Adaptation).all():
+        for adaptation_ in session.query(adaptation.OldAdaptation).all():
             # No need to check 'adaptation_.raw_llm_conversations': it has no schema
             adaptation_.initial_assistant_response
             adaptation_.adjustments
             adaptation_.manual_edit
-        for batch in session.query(adaptation.Batch).all():
+        for batch in session.query(adaptation.OldBatch).all():
             pass
-        for input in session.query(adaptation.Input).all():
+        for input in session.query(adaptation.OldInput).all():
             pass
-        for strategy in session.query(adaptation.Strategy).all():
+        for strategy in session.query(adaptation.OldStrategy).all():
             strategy.model
-        for strategy_settings in session.query(adaptation.StrategySettings).all():
+        for strategy_settings in session.query(adaptation.OldStrategySettings).all():
             strategy_settings.response_specification
 
 
@@ -364,7 +364,7 @@ def export_all(directory: str) -> None:
     import fastapi
 
     from . import database_utils
-    from .adaptation import Adaptation, Batch, Textbook
+    from .adaptation import OldAdaptation as Adaptation, OldBatch as Batch, OldTextbook as Textbook
     from .adaptation.router import make_adapted_exercise_data, export_adaptation, export_batch, export_textbook
 
     shutil.rmtree(directory, ignore_errors=True)

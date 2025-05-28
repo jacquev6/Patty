@@ -44,7 +44,7 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
 
 
 def truncate_all_tables(session: Session) -> None:
-    session.execute(OrmBase.metadata.tables["adaptation_strategy_settings_branches"].update().values(head_id=None))
+    session.execute(OrmBase.metadata.tables["old_adaptation_strategy_settings_branches"].update().values(head_id=None))
 
     for table in reversed(OrmBase.metadata.sorted_tables):
         try:

@@ -6,8 +6,8 @@ import sqlalchemy.exc
 from ..database_utils import OrmBase, TestCaseWithDatabase
 
 
-class Input(OrmBase):
-    __tablename__ = "adaptation_input"
+class OldInput(OrmBase):
+    __tablename__ = "old_adaptation_input"
 
     __table_args__ = (sql.CheckConstraint("exercise_number != ''", name="exercise_number_not_empty"),)
 
@@ -25,6 +25,6 @@ class Input(OrmBase):
 class InputTestCase(TestCaseWithDatabase):
     def test_create_with_empty_exercise_number(self) -> None:
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.flush_model(Input, created_by="test", page_number=1, exercise_number="", text="test")
+            self.flush_model(OldInput, created_by="test", page_number=1, exercise_number="", text="test")
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
-        self.assertEqual(cm.exception.orig.diag.constraint_name, "ck_adaptation_input_exercise_number_not_empty")
+        self.assertEqual(cm.exception.orig.diag.constraint_name, "ck_old_adaptation_input_exercise_number_not_empty")
