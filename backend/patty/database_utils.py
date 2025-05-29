@@ -133,7 +133,7 @@ class TestCaseWithDatabase(unittest.TestCase):
     Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
 
     __database_url: str
-    __database_engine: Engine
+    engine: Engine
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -144,7 +144,7 @@ class TestCaseWithDatabase(unittest.TestCase):
             f"{settings.DATABASE_URL}-{cls.__name__}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         )
         sqlalchemy_utils.functions.create_database(cls.__database_url)
-        cls.__database_engine = create_engine(cls.__database_url)
+        cls.engine = create_engine(cls.__database_url)
 
         # Creating the DB using Alembic by default is very important:
         # It lets us test that the migrations produce the DB we expect.
@@ -155,10 +155,10 @@ class TestCaseWithDatabase(unittest.TestCase):
         # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
         # but would have failed in production.
         if os.environ.get("PATTY_TESTS_SKIP_MIGRATIONS", "false") == "true":
-            with cls.__database_engine.connect() as conn:
+            with cls.engine.connect() as conn:
                 conn.execute(create_exercise_number_collation)
                 conn.commit()
-            OrmBase.metadata.create_all(cls.__database_engine)
+            OrmBase.metadata.create_all(cls.engine)
         else:
             # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
             previous_dir = os.getcwd()
@@ -175,13 +175,13 @@ class TestCaseWithDatabase(unittest.TestCase):
     def tearDownClass(cls) -> None:
         import sqlalchemy_utils.functions
 
-        cls.__database_engine.dispose()
+        cls.engine.dispose()
         sqlalchemy_utils.functions.drop_database(cls.__database_url)
         super().tearDownClass()
 
     def setUp(self) -> None:
         super().setUp()
-        self.session = make_session(self.__database_engine)
+        self.session = make_session(self.engine)
 
     def tearDown(self) -> None:
         self.session.close()

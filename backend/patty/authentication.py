@@ -84,15 +84,16 @@ AuthParamDependable = typing.Annotated[typing.Literal[True], fastapi.Depends(aut
 
 class AuthenticationApiTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        app = self.app = fastapi.FastAPI()
+        super().setUp()
 
-        app.include_router(router)
+        self.app = fastapi.FastAPI()
+        self.app.include_router(router)
 
-        @app.get("/bearer")
+        @self.app.get("/bearer")
         def bearer(token_is_valid: AuthBearerDependable) -> typing.Literal[True]:
             return token_is_valid
 
-        @app.get("/param")
+        @self.app.get("/param")
         def param(token_is_valid: AuthParamDependable) -> typing.Literal[True]:
             return token_is_valid
 

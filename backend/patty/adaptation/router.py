@@ -10,15 +10,16 @@ from sqlalchemy import orm
 import boto3
 import botocore.client
 import fastapi
+import fastapi.testclient
 import sqlalchemy as sql
 
+from .. import authentication
 from .. import database_utils
 from .. import llm
 from .. import settings
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
-from ..authentication import auth_bearer_dependable, auth_param_dependable
 from .adaptation import (
     Adaptation as DbAdaptation,
     Adjustment,
@@ -43,7 +44,7 @@ __all__ = ["router"]
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
-api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_bearer_dependable)])
+api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
 
 LlmMessage = (
@@ -642,7 +643,7 @@ export_adaptation_template_file_path = os.path.join(
     os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
 )
 
-export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_param_dependable)])
+export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_param_dependable)])
 
 
 @export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -809,3 +810,15 @@ def make_external_exercise_data(external_exercise: ExternalExercise) -> JsonDict
 router = fastapi.APIRouter()
 router.include_router(api_router)
 router.include_router(export_router, prefix="/export")
+
+
+class AdaptationApiTestCase(database_utils.TestCaseWithDatabase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.app = fastapi.FastAPI(database_engine=self.engine)
+        self.app.include_router(router)
+        access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
+        self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
+
+    def test_get_no_textbooks(self) -> None:
+        self.assertEqual(self.client.get("/textbooks").json(), {"textbooks": []})
