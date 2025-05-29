@@ -18,7 +18,7 @@ from .. import settings
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
-from ..authentication import auth_bearer_dependable, auth_token_dependable
+from ..authentication import auth_bearer_dependable, auth_param_dependable
 from .adaptation import (
     Adaptation as DbAdaptation,
     Adjustment,
@@ -642,7 +642,7 @@ export_adaptation_template_file_path = os.path.join(
     os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
 )
 
-export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_token_dependable)])
+export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(auth_param_dependable)])
 
 
 @export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
