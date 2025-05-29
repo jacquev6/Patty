@@ -63,7 +63,7 @@ def db_tables_graph() -> None:
             label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
         )
 
-        for fk in table.foreign_key_constraints:
+        for fk in sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name)):
             target_table = fk.elements[0].column.table.name
             label = (
                 ", ".join(col.name for col in fk.columns) + "\\n→ " + ", ".join(el.column.name for el in fk.elements)
