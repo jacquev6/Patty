@@ -25,6 +25,12 @@ def make_session(engine: Engine) -> Session:
     return Session(engine)
 
 
+# Custom collation: https://dba.stackexchange.com/a/285230
+create_exercise_number_collation = sql.text(
+    "CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"
+)
+
+
 class OrmBase(sqlalchemy.orm.DeclarativeBase):
     metadata = sqlalchemy.MetaData(
         naming_convention=dict(
@@ -140,7 +146,7 @@ class TestCaseWithDatabase(unittest.TestCase):
         sqlalchemy_utils.functions.create_database(cls.__database_url)
         cls.__database_engine = create_engine(cls.__database_url)
 
-        # Creating the DB using Alembic is very important:
+        # Creating the DB using Alembic by default is very important:
         # It lets us test that the migrations produce the DB we expect.
         # The alternative, using 'OrmBase.metadata.create_all', always produces exactly the DB described
         # by the ORM models, but migrations could diverge from that.
@@ -148,17 +154,22 @@ class TestCaseWithDatabase(unittest.TestCase):
         # (Documented: https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
         # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
         # but would have failed in production.
-
-        # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
-        previous_dir = os.getcwd()
-        previous_database_url = settings.DATABASE_URL
-        try:
-            os.chdir(os.path.dirname(__file__))
-            settings.DATABASE_URL = cls.__database_url
-            alembic.command.upgrade(alembic.config.Config(file_="alembic.ini"), "head")
-        finally:
-            settings.DATABASE_URL = previous_database_url
-            os.chdir(previous_dir)
+        if os.environ.get("PATTY_TESTS_SKIP_MIGRATIONS", "false") == "true":
+            with cls.__database_engine.connect() as conn:
+                conn.execute(create_exercise_number_collation)
+                conn.commit()
+            OrmBase.metadata.create_all(cls.__database_engine)
+        else:
+            # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
+            previous_dir = os.getcwd()
+            previous_database_url = settings.DATABASE_URL
+            try:
+                os.chdir(os.path.dirname(__file__))
+                settings.DATABASE_URL = cls.__database_url
+                alembic.command.upgrade(alembic.config.Config(file_="alembic.ini"), "head")
+            finally:
+                settings.DATABASE_URL = previous_database_url
+                os.chdir(previous_dir)
 
     @classmethod
     def tearDownClass(cls) -> None:

@@ -32,11 +32,6 @@ class DevelopmentCycle:
             raise DevelopmentCycleError()
 
     def do_run(self) -> None:
-        if self.cost_money:
-            env_for_tests = {"PATTY_RUN_TESTS_COSTING_MONEY": "true"}
-        else:
-            env_for_tests = {}
-
         if self.do_backend:
             if self.do_migration:
                 backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250527-061611.tar.gz"
@@ -83,9 +78,13 @@ class DevelopmentCycle:
                 run_in_backend_container(["mypy", "backend", "support/tool", "--strict"], workdir="/app")
 
             if self.do_test:
-                run_in_backend_container(
-                    ["python", "-m", "unittest", "discover", "--pattern", "*.py"], env=env_for_tests
-                )
+                env: dict[str, str] = {}
+                if self.cost_money:
+                    env["PATTY_TESTS_SPEND_MONEY"] = "true"
+                if not self.do_migration:
+                    env["PATTY_TESTS_SKIP_MIGRATIONS"] = "true"
+
+                run_in_backend_container(["python", "-m", "unittest", "discover", "--pattern", "*.py"], env=env)
 
         if self.do_frontend:
             if self.do_format:
