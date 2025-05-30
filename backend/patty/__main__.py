@@ -5,6 +5,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -341,6 +342,41 @@ def load_database() -> None:
     with database_utils.make_session(database_engine) as session:
         database_utils.load(session, data, {"old_adaptation_strategy_settings_branches": ["head_id"]})
         session.commit()
+
+
+@main.command()
+@click.argument("directory", type=click.Path(file_okay=False))
+def export_all(directory: str) -> None:
+    import fastapi
+
+    from . import database_utils
+    from .adaptation import Adaptation, Batch, Textbook
+    from .adaptation.router import make_adapted_exercise_data, export_adaptation, export_batch, export_textbook
+
+    shutil.rmtree(directory, ignore_errors=True)
+    os.makedirs(directory)
+    with open(os.path.join(directory, ".gitignore"), "w") as gitignore:
+        gitignore.write("*\n")
+
+    def save(kind: str, id: int, res: fastapi.responses.HTMLResponse) -> None:
+        filepath = os.path.join(directory, f"{kind}-{id}.html")
+        print(f"Exporting {kind} {id} to {filepath}")
+        with open(filepath, "wb") as file:
+            file.write(res.body)
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        for adaptation in session.query(Adaptation).all():
+            if make_adapted_exercise_data(adaptation) is None:
+                print(f"Skipping adaptation {adaptation.id} because it has no adapted exercise data")
+            else:
+                save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
+
+        for batch in session.query(Batch).all():
+            save("batch", batch.id, export_batch(str(batch.id), session))
+
+        for textbook in session.query(Textbook).all():
+            save("textbook", textbook.id, export_textbook(str(textbook.id), session))
 
 
 if __name__ == "__main__":
