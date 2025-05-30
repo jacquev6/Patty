@@ -47,29 +47,43 @@ def db_tables_graph() -> None:
 
     from . import orm_models
 
-    graph = graphviz.Digraph(node_attr={"shape": "none"})
+    models = orm_models.all_models
+    tables = [typing.cast(sqlalchemy.Table, model.__table__) for model in models]
+    known_table_names = set(table.name for table in tables)
 
-    for model in orm_models.all_models:
-        table = typing.cast(sqlalchemy.Table, model.__table__)
+    graph = graphviz.Digraph(node_attr={"shape": "none"})
+    for table in tables:
+        foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
+
+        foreign_keys_by_field: dict[str, list[str]] = {}
+        for foreign_key_index, foreign_key in enumerate(foreign_keys):
+            for column in foreign_key.columns:
+                foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
 
         fields = []
         for column_index, column in enumerate(table.columns):
             color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
-            fields.append(
-                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{column.type}</TD></TR>"""
+            type = str(column.type)
+            if " " in type:
+                type = "<BR/>".join(type.split(" ", 1))
+            pk_status = "PK" if column.primary_key else ""
+            null_status = "nullable" if column.nullable else ""
+            status = ", ".join(
+                filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
             )
-
+            fields.append(
+                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
+            )
         graph.node(
             table.name,
-            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="2" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
         )
 
-        for fk in sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name)):
-            target_table = fk.elements[0].column.table.name
-            label = (
-                ", ".join(col.name for col in fk.columns) + "\\n→ " + ", ".join(el.column.name for el in fk.elements)
-            )
-            graph.edge(table.name, target_table, label=label)
+        for foreign_key_index, foreign_key in enumerate(foreign_keys):
+            target_table = foreign_key.elements[0].column.table.name
+            if target_table in known_table_names:
+                label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
+                graph.edge(table.name, target_table, label=label)
 
     sys.stdout.buffer.write(graph.pipe(format="png"))
 
