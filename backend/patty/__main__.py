@@ -202,7 +202,7 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250527-061611.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

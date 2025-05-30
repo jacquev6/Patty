@@ -34,17 +34,8 @@ class DevelopmentCycle:
     def do_run(self) -> None:
         if self.do_backend:
             if self.do_migration:
-                backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250527-061611.tar.gz"
                 run_in_backend_container(
-                    [
-                        "python",
-                        "-m",
-                        "patty",
-                        "restore-database",
-                        "--yes",
-                        "--patch-according-to-settings",
-                        backup_to_load,
-                    ]
+                    ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
                 existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
                 assert len(existing) <= 1
