@@ -95,6 +95,12 @@ def patty(args: tuple[str, ...]) -> None:
 
 
 @dev.command()
+@click.argument("args", nargs=-1)
+def alembic(args: tuple[str, ...]) -> None:
+    compose.run_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
+
+
+@dev.command()
 @click.option("--cost-money", is_flag=True)
 @click.option("--only-backend", is_flag=True)
 @click.option("--skip-backend", is_flag=True)
