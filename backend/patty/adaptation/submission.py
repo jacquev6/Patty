@@ -8,13 +8,8 @@ import requests
 from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
-from .adaptation import (
-    OldAdaptation,
-    AssistantInvalidJsonError,
-    AssistantNotJsonError,
-    AssistantUnknownError,
-    AssistantSuccess,
-)
+from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
+from .orm_models import Adaptation
 from .router import LlmMessage
 from .. import settings
 
@@ -34,8 +29,8 @@ async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) 
         try:
             with database_utils.Session(engine) as session:
                 adaptations = (
-                    session.query(OldAdaptation)
-                    .filter(OldAdaptation._initial_assistant_response == None)
+                    session.query(Adaptation)
+                    .filter(Adaptation._initial_assistant_response == None)
                     .limit(parallelism)
                     .all()
                 )
@@ -57,12 +52,12 @@ async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) 
         await asyncio.sleep(pause)
 
 
-async def submit_adaptation(adaptation: OldAdaptation) -> None:
+async def submit_adaptation(adaptation: Adaptation) -> None:
     response_format = adaptation.strategy.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [
         llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
-        llm.UserMessage(content=adaptation.input.text),
+        llm.UserMessage(content=adaptation.exercise.full_text),
     ]
 
     # All branches must set 'adaptation.initial_assistant_response' to avoid infinite loop

@@ -216,7 +216,7 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250527-061611.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250531-061611.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -298,40 +298,13 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 
 @main.command()
 def migrate_data() -> None:
-    from . import adaptation
     from . import database_utils
+    from . import data_migration
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
-
-    # Migrate JSON fields according to evolution of schemas
     with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.OldAdaptation).all():
-            pass
-        for batch in session.query(adaptation.OldBatch).all():
-            pass
-        for input in session.query(adaptation.OldInput).all():
-            pass
-        for strategy in session.query(adaptation.OldStrategy).all():
-            pass
-        for strategy_settings in session.query(adaptation.OldStrategySettings).all():
-            pass
+        data_migration.migrate(session)
         session.commit()
-
-    # Check that all JSON fields are valid
-    with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.OldAdaptation).all():
-            # No need to check 'adaptation_.raw_llm_conversations': it has no schema
-            adaptation_.initial_assistant_response
-            adaptation_.adjustments
-            adaptation_.manual_edit
-        for batch in session.query(adaptation.OldBatch).all():
-            pass
-        for input in session.query(adaptation.OldInput).all():
-            pass
-        for strategy in session.query(adaptation.OldStrategy).all():
-            strategy.model
-        for strategy_settings in session.query(adaptation.OldStrategySettings).all():
-            strategy_settings.response_specification
 
 
 @main.command()
@@ -364,7 +337,7 @@ def export_all(directory: str) -> None:
     import fastapi
 
     from . import database_utils
-    from .adaptation import OldAdaptation as Adaptation, OldBatch as Batch, OldTextbook as Textbook
+    from .orm_models import Adaptation, SandboxAdaptationBatch, Textbook
     from .adaptation.router import make_adapted_exercise_data, export_adaptation, export_batch, export_textbook
 
     shutil.rmtree(directory, ignore_errors=True)
@@ -386,7 +359,7 @@ def export_all(directory: str) -> None:
             else:
                 save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
 
-        for batch in session.query(Batch).all():
+        for batch in session.query(SandboxAdaptationBatch).all():
             save("batch", batch.id, export_batch(str(batch.id), session))
 
         for textbook in session.query(Textbook).all():

@@ -6,12 +6,10 @@ import json
 import os
 import urllib.parse
 
-from sqlalchemy import orm
 import boto3
 import botocore.client
 import fastapi
 import fastapi.testclient
-import sqlalchemy as sql
 
 from .. import authentication
 from .. import database_utils
@@ -20,24 +18,15 @@ from .. import settings
 from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
+from . import orm_models as db
 from .adaptation import (
-    OldAdaptation as DbAdaptation,
     Adjustment,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantResponse,
     AssistantSuccess,
 )
-from .batch import OldBatch as Batch
-from .input import OldInput as DbInput
-from .strategy import (
-    ConcreteLlmResponseSpecification,
-    JsonSchemaLlmResponseSpecification,
-    OldStrategy as DbStrategy,
-    OldStrategySettings as StrategySettings,
-    OldStrategySettingsBranch as StrategySettingsBranch,
-)
-from .textbook import OldTextbook as Textbook, OldExternalExercise as ExternalExercise
+from .strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 
 
 __all__ = ["router"]
@@ -101,20 +90,27 @@ class LatestBatch(ApiModel):
 @api_router.get("/latest-batch")
 def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
     for created_by in [user, "Patty"]:
-        batch = session.query(Batch).filter(Batch.created_by == created_by).order_by(-Batch.id).first()
+        batch = (
+            session.query(db.SandboxAdaptationBatch)
+            .filter(db.SandboxAdaptationBatch.created_by_username == created_by)
+            .order_by(-db.SandboxAdaptationBatch.id)
+            .first()
+        )
         if batch is not None:
             break
     assert batch is not None
     available_strategy_settings = []
-    for branch in session.query(StrategySettingsBranch).order_by(StrategySettingsBranch.name).all():
-        assert branch.head is not None
-        available_strategy_settings.append(make_api_strategy_settings(branch.head))
-        if branch.head.parent is not None:
-            available_strategy_settings.append(make_api_strategy_settings(branch.head.parent))
+    for exercise_class in session.query(db.ExerciseClass).order_by(db.ExerciseClass.name).all():
+        assert exercise_class.latest_strategy_settings is not None
+        available_strategy_settings.append(make_api_strategy_settings(exercise_class.latest_strategy_settings))
+        if exercise_class.latest_strategy_settings.parent is not None:
+            available_strategy_settings.append(
+                make_api_strategy_settings(exercise_class.latest_strategy_settings.parent)
+            )
     return LatestBatch(
         id=str(batch.id),
         strategy=make_api_strategy(batch.strategy),
-        inputs=[make_api_input(adaptation.input) for adaptation in batch.adaptations],
+        inputs=[make_api_input(adaptation.exercise) for adaptation in batch.adaptations],
         available_strategy_settings=available_strategy_settings,
     )
 
@@ -133,68 +129,88 @@ class PostBatchResponse(ApiModel):
 async def post_batch(
     req: PostBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostBatchResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+
     if req.strategy.settings.name is None:
         base_settings = None
-        branch = None
+        exercise_class = None
     else:
         # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
         if req.strategy.settings.name.endswith(" (previous version)"):
             branch_name = req.strategy.settings.name[:-19]
         else:
             branch_name = req.strategy.settings.name
-        branch = session.query(StrategySettingsBranch).filter(StrategySettingsBranch.name == branch_name).first()
-        if branch is None:
+        exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == branch_name).first()
+        if exercise_class is None:
             assert branch_name == req.strategy.settings.name
             base_settings = None
-            branch = StrategySettingsBranch(name=branch_name)
-            session.add(branch)
+            exercise_class = db.ExerciseClass(
+                name=branch_name, created_by_username=req.creator, created_at=now, latest_strategy_settings=None
+            )
+            session.add(exercise_class)
         else:
-            assert branch.head is not None
+            assert exercise_class.latest_strategy_settings is not None
             if branch_name == req.strategy.settings.name:
-                base_settings = branch.head
+                base_settings = exercise_class.latest_strategy_settings
             else:
-                base_settings = branch.head.parent
+                base_settings = exercise_class.latest_strategy_settings.parent
 
     if (
         base_settings is None
         or base_settings.system_prompt != req.strategy.settings.system_prompt
         or base_settings.response_specification != req.strategy.settings.response_specification
     ):
-        settings = StrategySettings(
-            branch=branch,
+        settings = db.AdaptationStrategySettings(
+            exercise_class=exercise_class,
             parent=base_settings,
-            created_by=req.creator,
+            created_by_username=req.creator,
+            created_at=now,
             system_prompt=req.strategy.settings.system_prompt,
             response_specification=req.strategy.settings.response_specification,
         )
         session.add(settings)
     else:
         settings = base_settings
-    if branch is not None:
+    if exercise_class is not None:
         session.flush()
-        branch.head = settings
-    strategy = DbStrategy(created_by=req.creator, model=req.strategy.model, settings=settings)
+        exercise_class.latest_strategy_settings = settings
+    strategy = db.AdaptationStrategy(
+        created_by_username=req.creator, created_at=now, model=req.strategy.model, settings=settings
+    )
     session.add(strategy)
 
-    batch = Batch(created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc), strategy=strategy)
+    batch = db.SandboxAdaptationBatch(
+        created_by_username=req.creator, created_at=now, strategy=strategy, textbook=None, removed_from_textbook=False
+    )
     session.add(batch)
 
     for req_input in req.inputs:
-        input = DbInput(
-            created_by=req.creator,
+        exercise = db.AdaptableExercise(
+            created_by_username=req.creator,
+            created_by_extraction_id=None,
+            created_at=now,
+            textbook=None,
+            removed_from_textbook=False,
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
-            text=req_input.text,
+            full_text=req_input.text,
+            classified_at=now,
+            classified_by_username=req.creator,
+            classified_by_classification_id=None,
+            exercise_class=exercise_class,
         )
-        session.add(input)
+        session.add(exercise)
 
-        adaptation = DbAdaptation(
-            created_by=req.creator,
-            batch=batch,
+        adaptation = db.Adaptation(
+            created_by_username=req.creator,
+            created_at=now,
+            sandbox_batch=batch,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[],
+            initial_assistant_response=None,
             adjustments=[],
+            manual_edit=None,
         )
         session.add(adaptation)
 
@@ -212,10 +228,10 @@ class GetBatchResponse(ApiModel):
 
 @api_router.get("/batch/{id}")
 async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
-    batch = get_by_id(session, Batch, id)
+    batch = get_by_id(session, db.SandboxAdaptationBatch, id)
     return GetBatchResponse(
         id=str(batch.id),
-        created_by=batch.created_by,
+        created_by=batch.created_by_username,
         strategy=make_api_strategy(batch.strategy),
         adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
     )
@@ -234,12 +250,17 @@ class GetBatchesResponse(ApiModel):
 
 @api_router.get("/batches")
 async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
-    batches = session.query(Batch).filter(Batch.textbook_id == None).order_by(-Batch.id).all()
+    batches = (
+        session.query(db.SandboxAdaptationBatch)
+        .filter(db.SandboxAdaptationBatch.textbook_id == None)
+        .order_by(-db.SandboxAdaptationBatch.id)
+        .all()
+    )
     return GetBatchesResponse(
         batches=[
             GetBatchesResponse.Batch(
                 id=str(batch.id),
-                created_by=batch.created_by,
+                created_by=batch.created_by_username,
                 created_at=batch.created_at,
                 model=batch.strategy.model,
                 strategy_settings_name=make_api_strategy_settings_name(batch.strategy.settings),
@@ -262,8 +283,8 @@ class PostTextbookResponse(ApiModel):
 def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
-    textbook = Textbook(
-        title=req.title, created_by=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc)
+    textbook = db.Textbook(
+        title=req.title, created_by_username=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc)
     )
     session.add(textbook)
     session.flush()
@@ -300,11 +321,12 @@ class GetTextbookResponse(ApiModel):
 
 @api_router.get("/textbook/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
-    textbook = get_by_id(session, Textbook, id)
+    textbook = get_by_id(session, db.Textbook, id)
     return GetTextbookResponse(
         textbook=make_api_textbook(textbook),
         available_strategy_settings=[
-            branch.name for branch in session.query(StrategySettingsBranch).order_by(StrategySettingsBranch.name).all()
+            exercise_class.name
+            for exercise_class in session.query(db.ExerciseClass).order_by(db.ExerciseClass.name).all()
         ],
     )
 
@@ -321,12 +343,12 @@ class GetTextbooksResponse(ApiModel):
 
 @api_router.get("/textbooks")
 async def get_textbooks(session: database_utils.SessionDependable) -> GetTextbooksResponse:
-    textbooks = session.query(Textbook).order_by(-Textbook.id).all()
+    textbooks = session.query(db.Textbook).order_by(-db.Textbook.id).all()
     return GetTextbooksResponse(
         textbooks=[
             GetTextbooksResponse.Textbook(
                 id=str(textbook.id),
-                created_by=textbook.created_by,
+                created_by=textbook.created_by_username,
                 created_at=textbook.created_at,
                 title=textbook.title,
             )
@@ -349,39 +371,58 @@ def post_textbook_batch(
     engine: database_utils.EngineDependable,
     session: database_utils.SessionDependable,
 ) -> ApiTextbook:
-    textbook = get_by_id(session, Textbook, id)
+    textbook = get_by_id(session, db.Textbook, id)
 
-    branch = session.query(StrategySettingsBranch).filter(StrategySettingsBranch.name == req.branch_name).first()
-    assert branch is not None
-    assert branch.head is not None
+    now = datetime.datetime.now(datetime.timezone.utc)
 
-    strategy = DbStrategy(created_by=req.creator, model=req.model, settings=branch.head)
+    exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == req.branch_name).first()
+    assert exercise_class is not None
+    assert exercise_class.latest_strategy_settings is not None
+
+    strategy = db.AdaptationStrategy(
+        created_by_username=req.creator,
+        created_at=now,
+        model=req.model,
+        settings=exercise_class.latest_strategy_settings,
+    )
     session.add(strategy)
 
-    batch = Batch(
+    batch = db.SandboxAdaptationBatch(
         textbook=textbook,
-        created_by=req.creator,
-        created_at=datetime.datetime.now(datetime.timezone.utc),
+        removed_from_textbook=False,
+        created_by_username=req.creator,
+        created_at=now,
         strategy=strategy,
     )
     session.add(batch)
 
     for req_input in req.inputs:
-        input = DbInput(
-            created_by=req.creator,
+        exercise = db.AdaptableExercise(
+            created_by_username=req.creator,
+            created_by_extraction_id=None,
+            created_at=now,
+            textbook=textbook,
+            removed_from_textbook=False,
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
-            text=req_input.text,
+            full_text=req_input.text,
+            classified_at=now,
+            classified_by_username=req.creator,
+            classified_by_classification_id=None,
+            exercise_class=exercise_class,
         )
-        session.add(input)
+        session.add(exercise)
 
-        adaptation = DbAdaptation(
-            created_by=req.creator,
-            batch=batch,
+        adaptation = db.Adaptation(
+            created_by_username=req.creator,
+            created_at=now,
+            sandbox_batch=batch,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[],
+            initial_assistant_response=None,
             adjustments=[],
+            manual_edit=None,
         )
         session.add(adaptation)
 
@@ -394,8 +435,8 @@ def post_textbook_batch(
 def put_textbook_batch_removed(
     textbook_id: str, batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
-    textbook = get_by_id(session, Textbook, textbook_id)
-    batch = get_by_id(session, Batch, batch_id)
+    textbook = get_by_id(session, db.Textbook, textbook_id)
+    batch = get_by_id(session, db.SandboxAdaptationBatch, batch_id)
     assert batch.textbook == textbook
     batch.removed_from_textbook = removed
     return make_api_textbook(textbook)
@@ -405,10 +446,10 @@ def put_textbook_batch_removed(
 def put_textbook_adaptation_removed(
     textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
-    textbook = get_by_id(session, Textbook, textbook_id)
-    adaptation = get_by_id(session, DbAdaptation, adaptation_id)
-    assert adaptation.batch.textbook == textbook
-    adaptation.removed_from_textbook = removed
+    textbook = get_by_id(session, db.Textbook, textbook_id)
+    adaptation = get_by_id(session, db.Adaptation, adaptation_id)
+    assert adaptation.sandbox_batch.textbook == textbook
+    adaptation.exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
 
@@ -427,15 +468,15 @@ class PostTextbookExternalExercisesResponse(ApiModel):
 def post_textbook_external_exercises(
     textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
 ) -> PostTextbookExternalExercisesResponse:
-    textbook = get_by_id(session, Textbook, textbook_id)
-    external_exercise = ExternalExercise(
-        created_by=req.creator,
+    textbook = get_by_id(session, db.Textbook, textbook_id)
+    external_exercise = db.ExternalExercise(
         created_at=datetime.datetime.now(datetime.timezone.utc),
+        created_by_username=req.creator,
         textbook=textbook,
+        removed_from_textbook=False,
         page_number=req.page_number,
         exercise_number=req.exercise_number,
         original_file_name=req.original_file_name,
-        removed_from_textbook=False,
     )
     session.add(external_exercise)
     session.flush()
@@ -451,8 +492,8 @@ def post_textbook_external_exercises(
 def put_textbook_external_exercises_removed(
     textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
-    textbook = get_by_id(session, Textbook, textbook_id)
-    external_exercise = get_by_id(session, ExternalExercise, external_exercise_id)
+    textbook = get_by_id(session, db.Textbook, textbook_id)
+    external_exercise = get_by_id(session, db.ExternalExercise, external_exercise_id)
     assert external_exercise.textbook == textbook
     external_exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
@@ -460,7 +501,7 @@ def put_textbook_external_exercises_removed(
 
 @api_router.get("/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    return make_api_adaptation(get_by_id(session, DbAdaptation, id))
+    return make_api_adaptation(get_by_id(session, db.Adaptation, id))
 
 
 class PostAdaptationAdjustmentRequest(ApiModel):
@@ -471,8 +512,8 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
-    db_adaptation = get_by_id(session, DbAdaptation, id)
-    assert db_adaptation.initial_assistant_response is not None
+    adaptation = get_by_id(session, db.Adaptation, id)
+    assert adaptation.initial_assistant_response is not None
 
     def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
         if isinstance(assistant_response, AssistantSuccess):
@@ -485,19 +526,19 @@ async def post_adaptation_adjustment(
             raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(content=db_adaptation.strategy.settings.system_prompt),
-        llm.UserMessage(content=db_adaptation.input.text),
-        make_assistant_message(db_adaptation.initial_assistant_response),
+        llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
+        llm.UserMessage(content=adaptation.exercise.full_text),
+        make_assistant_message(adaptation.initial_assistant_response),
     ]
-    for adjustment in db_adaptation.adjustments:
+    for adjustment in adaptation.adjustments:
         assert isinstance(adjustment.assistant_response, AssistantSuccess)
         messages.append(llm.UserMessage(content=adjustment.user_prompt))
         make_assistant_message(adjustment.assistant_response)
     messages.append(llm.UserMessage(content=req.adjustment))
 
     try:
-        response = await db_adaptation.strategy.model.complete(
-            messages, db_adaptation.strategy.settings.response_specification.make_response_format()
+        response = await adaptation.strategy.model.complete(
+            messages, adaptation.strategy.settings.response_specification.make_response_format()
         )
     except llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
@@ -513,44 +554,44 @@ async def post_adaptation_adjustment(
             kind="success", exercise=Exercise(**response.message.content.model_dump())
         )
 
-    raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
+    raw_llm_conversations = list(adaptation.raw_llm_conversations)
     raw_llm_conversations.append(raw_conversation)
-    db_adaptation.raw_llm_conversations = raw_llm_conversations
+    adaptation.raw_llm_conversations = raw_llm_conversations
 
-    adjustments = list(db_adaptation.adjustments)
+    adjustments = list(adaptation.adjustments)
     adjustments.append(Adjustment(user_prompt=req.adjustment, assistant_response=assistant_response))
-    db_adaptation.adjustments = adjustments
+    adaptation.adjustments = adjustments
 
-    return make_api_adaptation(db_adaptation)
+    return make_api_adaptation(adaptation)
 
 
 @api_router.delete("/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = get_by_id(session, DbAdaptation, id)
+    adaptation = get_by_id(session, db.Adaptation, id)
 
-    raw_llm_conversations = list(db_adaptation.raw_llm_conversations)
+    raw_llm_conversations = list(adaptation.raw_llm_conversations)
     raw_llm_conversations.pop()
-    db_adaptation.raw_llm_conversations = raw_llm_conversations
+    adaptation.raw_llm_conversations = raw_llm_conversations
 
-    adjustments = list(db_adaptation.adjustments)
+    adjustments = list(adaptation.adjustments)
     adjustments.pop()
-    db_adaptation.adjustments = adjustments
+    adaptation.adjustments = adjustments
 
-    return make_api_adaptation(db_adaptation)
+    return make_api_adaptation(adaptation)
 
 
 @api_router.put("/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = get_by_id(session, DbAdaptation, id)
-    db_adaptation.manual_edit = req
-    return make_api_adaptation(db_adaptation)
+    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation.manual_edit = req
+    return make_api_adaptation(adaptation)
 
 
 @api_router.delete("/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    db_adaptation = get_by_id(session, DbAdaptation, id)
-    db_adaptation.manual_edit = None
-    return make_api_adaptation(db_adaptation)
+    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation.manual_edit = None
+    return make_api_adaptation(adaptation)
 
 
 Model = TypeVar("Model", bound=database_utils.OrmBase)
@@ -567,26 +608,26 @@ def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> M
     return instance
 
 
-def make_api_adaptation(adaptation: DbAdaptation) -> ApiAdaptation:
+def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
-        created_by=adaptation.created_by,
-        batch_id=str(adaptation.batch_id),
+        created_by=adaptation.created_by_username,
+        batch_id=str(adaptation.sandbox_batch_id),
         strategy=make_api_strategy(adaptation.strategy),
-        input=make_api_input(adaptation.input),
+        input=make_api_input(adaptation.exercise),
         raw_llm_conversations=adaptation.raw_llm_conversations,
         initial_assistant_response=adaptation.initial_assistant_response,
         adjustments=adaptation.adjustments,
         manual_edit=adaptation.manual_edit,
-        removed_from_textbook=adaptation.removed_from_textbook,
+        removed_from_textbook=adaptation.exercise.removed_from_textbook,
     )
 
 
-def make_api_strategy(strategy: DbStrategy) -> ApiStrategy:
+def make_api_strategy(strategy: db.AdaptationStrategy) -> ApiStrategy:
     return ApiStrategy(model=strategy.model, settings=make_api_strategy_settings(strategy.settings))
 
 
-def make_api_strategy_settings(settings: StrategySettings) -> ApiStrategySettings:
+def make_api_strategy_settings(settings: db.AdaptationStrategySettings) -> ApiStrategySettings:
     return ApiStrategySettings(
         name=make_api_strategy_settings_name(settings),
         system_prompt=settings.system_prompt,
@@ -594,28 +635,28 @@ def make_api_strategy_settings(settings: StrategySettings) -> ApiStrategySetting
     )
 
 
-def make_api_strategy_settings_name(settings: StrategySettings) -> str | None:
-    if settings.branch is None:
+def make_api_strategy_settings_name(settings: db.AdaptationStrategySettings) -> str | None:
+    if settings.exercise_class is None:
         return None
     else:
-        assert settings.branch.head is not None
-        if settings.branch.head.id == settings.id:
-            return settings.branch.name
+        assert settings.exercise_class.latest_strategy_settings is not None
+        if settings.exercise_class.latest_strategy_settings.id == settings.id:
+            return settings.exercise_class.name
         # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
-        elif settings.branch.head.parent_id == settings.id:
-            return f"{settings.branch.name} (previous version)"
+        elif settings.exercise_class.latest_strategy_settings.parent_id == settings.id:
+            return f"{settings.exercise_class.name} (previous version)"
         else:
-            return f"{settings.branch.name} (older version)"
+            return f"{settings.exercise_class.name} (older version)"
 
 
-def make_api_input(input: DbInput) -> ApiInput:
-    return ApiInput(page_number=input.page_number, exercise_number=input.exercise_number, text=input.text)
+def make_api_input(exercise: db.AdaptableExercise) -> ApiInput:
+    return ApiInput(page_number=exercise.page_number, exercise_number=exercise.exercise_number, text=exercise.full_text)
 
 
-def make_api_textbook(textbook: Textbook) -> ApiTextbook:
+def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
     return ApiTextbook(
         id=str(textbook.id),
-        created_by=textbook.created_by,
+        created_by=textbook.created_by_username,
         title=textbook.title,
         batches=[
             ApiTextbook.Batch(
@@ -634,7 +675,8 @@ def make_api_textbook(textbook: Textbook) -> ApiTextbook:
                 original_file_name=external_exercise.original_file_name,
                 removed_from_textbook=external_exercise.removed_from_textbook,
             )
-            for external_exercise in textbook.external_exercises
+            for external_exercise in textbook.exercises
+            if isinstance(external_exercise, db.ExternalExercise)  # @todo Filter in DBMS
         ],
     )
 
@@ -650,7 +692,7 @@ export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.a
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = make_adapted_exercise_data(get_by_id(session, DbAdaptation, id))
+    data = make_adapted_exercise_data(get_by_id(session, db.Adaptation, id))
     assert data is not None
     content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
@@ -670,7 +712,11 @@ def export_batch(
 ) -> fastapi.responses.HTMLResponse:
     data = list(
         filter(
-            None, (make_adapted_exercise_data(adaptation) for adaptation in get_by_id(session, Batch, id).adaptations)
+            None,
+            (
+                make_adapted_exercise_data(adaptation)
+                for adaptation in get_by_id(session, db.SandboxAdaptationBatch, id).adaptations
+            ),
         )
     )
 
@@ -692,52 +738,26 @@ export_textbook_template_file_path = os.path.join(
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    textbook = get_by_id(session, Textbook, id)
+    textbook = get_by_id(session, db.Textbook, id)
 
-    union = orm.aliased(
-        sql.union_all(
-            (
-                sql.select(
-                    DbInput.page_number,
-                    DbInput.exercise_number,
-                    DbAdaptation.id,
-                    sql.literal("adaptation").label("source"),
-                )
-                .join(DbAdaptation)
-                .join(Batch)
-                .filter(Batch.textbook_id == id)
-                .filter(Batch.removed_from_textbook == False)
-                .filter(DbAdaptation.removed_from_textbook == False)
-            ),
-            (
-                sql.select(
-                    ExternalExercise.page_number,
-                    ExternalExercise.exercise_number,
-                    ExternalExercise.id,
-                    sql.literal("external_exercise").label("source"),
-                )
-                .filter(ExternalExercise.textbook_id == id)
-                .filter(ExternalExercise.removed_from_textbook == False)
-            ),
-        ).subquery()
-    )
-
-    exercises: list[JsonDict | None] = []
-    for page_number, exercise_number, id, source in session.execute(
-        sql.select(union).order_by(union.c.page_number, union.c.exercise_number)
-    ).all():
-        if source == "adaptation":
-            adaptation = session.get(DbAdaptation, id)
-            assert adaptation is not None
-            adapted_exercise_data = make_adapted_exercise_data(adaptation)
-            if adapted_exercise_data is not None:
-                exercises.append(adapted_exercise_data)
-        elif source == "external_exercise":
-            external_exercise = session.get(ExternalExercise, id)
-            assert external_exercise is not None
-            exercises.append(make_external_exercise_data(external_exercise))
-        else:
-            assert False, f"Unknown source {source}"
+    exercises: list[JsonDict] = []
+    for exercise in textbook.exercises:
+        if not exercise.removed_from_textbook:
+            if isinstance(exercise, db.AdaptableExercise):
+                if exercise.adaptation is not None:
+                    if (
+                        exercise.adaptation.sandbox_batch is not None
+                        and exercise.adaptation.sandbox_batch.removed_from_textbook
+                    ):
+                        adapted_exercise_data = None
+                    else:
+                        adapted_exercise_data = make_adapted_exercise_data(exercise.adaptation)
+                if adapted_exercise_data is not None:
+                    exercises.append(adapted_exercise_data)
+            elif isinstance(exercise, db.ExternalExercise):
+                exercises.append(make_external_exercise_data(exercise))
+            else:
+                assert False
 
     data = dict(title=textbook.title, exercises=exercises)
 
@@ -758,9 +778,9 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
     )
 
 
-def make_adapted_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
-    if adaptation.input.page_number is not None and adaptation.input.exercise_number is not None:
-        exercise_id = f"P{adaptation.input.page_number}Ex{adaptation.input.exercise_number}"
+def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
+    if adaptation.exercise.page_number is not None and adaptation.exercise.exercise_number is not None:
+        exercise_id = f"P{adaptation.exercise.page_number}Ex{adaptation.exercise.exercise_number}"
     else:
         exercise_id = f"exercice-{adaptation.id}"
 
@@ -768,29 +788,29 @@ def make_adapted_exercise_data(adaptation: DbAdaptation) -> JsonDict | None:
         if len(adaptation.adjustments) == 0:
             if not isinstance(adaptation.initial_assistant_response, AssistantSuccess):
                 return None
-            exercise = adaptation.initial_assistant_response.exercise
+            adapted_exercise = adaptation.initial_assistant_response.exercise
         else:
             last_adjustment = adaptation.adjustments[-1]
             if not isinstance(last_adjustment.assistant_response, AssistantSuccess):
                 return None
-            exercise = last_adjustment.assistant_response.exercise
+            adapted_exercise = last_adjustment.assistant_response.exercise
     else:
-        exercise = adaptation.manual_edit
+        adapted_exercise = adaptation.manual_edit
 
-    exercise_dump = exercise.model_dump()
+    adapted_exercise_dump = adapted_exercise.model_dump()
     return {
         "exerciseId": exercise_id,
-        "pageNumber": adaptation.input.page_number,
-        "exerciseNumber": adaptation.input.exercise_number,
+        "pageNumber": adaptation.exercise.page_number,
+        "exerciseNumber": adaptation.exercise.exercise_number,
         "kind": "adapted",
         "studentAnswersStorageKey": hashlib.md5(
-            json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()
+            json.dumps(adapted_exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
-        "adaptedExercise": exercise_dump,
+        "adaptedExercise": adapted_exercise_dump,
     }
 
 
-def make_external_exercise_data(external_exercise: ExternalExercise) -> JsonDict:
+def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonDict:
     assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
     exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
     target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")

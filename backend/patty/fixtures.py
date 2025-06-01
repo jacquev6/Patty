@@ -8,6 +8,7 @@ import sqlalchemy.orm
 
 from . import adaptation
 from . import adapted
+from . import data_migration
 from . import database_utils
 from . import llm
 from . import settings
@@ -762,6 +763,8 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
 
     for fixture in fixtures:
         available_fixtures[fixture]()
+
+    data_migration.migrate(session)
 
 
 app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))

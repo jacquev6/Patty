@@ -1,11 +1,14 @@
 from typing import Annotated, Any, Iterable, TypeVar
+import contextlib
 import datetime
 import os
+import typing
 import unittest
 
 from fastapi import Depends, Request
 import alembic.command
 import alembic.config
+import psycopg2
 import sqlalchemy as sql
 import sqlalchemy.exc
 import sqlalchemy.orm
@@ -45,16 +48,22 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
 
 def truncate_all_tables(session: Session) -> None:
     session.execute(OrmBase.metadata.tables["old_adaptation_strategy_settings_branches"].update().values(head_id=None))
+    session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 
     for table in reversed(OrmBase.metadata.sorted_tables):
         try:
-            session.execute(table.delete())
-            session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+            with session.begin_nested():
+                session.execute(table.delete())
         except sqlalchemy.exc.ProgrammingError:
             # E.g. when the table does not exist yet
-            session.rollback()
-        else:
-            session.commit()
+            pass
+
+        try:
+            with session.begin_nested():
+                session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+        except sqlalchemy.exc.ProgrammingError:
+            # E.g. when the table has no auto-incremented ID
+            pass
 
 
 def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
@@ -62,7 +71,7 @@ def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
 
     for table in OrmBase.metadata.sorted_tables:
         data[table.name] = []
-        for row in session.execute(table.select().order_by("id")):
+        for row in session.execute(table.select()):
             data[table.name].append({})
             for column in table.columns:
                 value = getattr(row, column.name)
@@ -93,6 +102,15 @@ def load(session: Session, data: dict[str, list[dict[str, Any]]], deferred: dict
                 row_data.pop(column_name, None)
 
             session.execute(table.insert().values(row_data))
+
+        if len(rows) != 0 and "id" in rows[0]:
+            max_id = max(row["id"] for row in rows if "id" in row)
+            try:
+                with session.begin_nested():
+                    session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH {max_id + 1}"))
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table has no auto-incremented ID
+                pass
 
     for table_name, field_names in deferred.items():
         for row in data.get(table_name, []):
@@ -196,3 +214,16 @@ class TestCaseWithDatabase(unittest.TestCase):
         instance = self.add_model(__model, **kwargs)
         self.session.flush()
         return instance
+
+    def commit_model(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = self.add_model(__model, **kwargs)
+        self.session.commit()
+        return instance
+
+    @contextlib.contextmanager
+    def assert_integrity_error(self, name: str) -> typing.Generator[None, None, None]:
+        with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
+            yield None
+        assert isinstance(cm.exception.orig, psycopg2.errors.IntegrityError)
+        self.assertEqual(cm.exception.orig.diag.constraint_name, name)
+        self.session.rollback()
