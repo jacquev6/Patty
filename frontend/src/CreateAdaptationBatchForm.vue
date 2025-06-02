@@ -69,7 +69,7 @@ const availableStrategySettings = computed(() => props.latestAdaptationBatch.ava
     <ResizableColumns :columns="[1, 1]">
       <template #col-1>
         <p>Created by: <IdentifiedUser /></p>
-        <AdaptationStrategyEditor :availableLlmModels :availableStrategySettings v-model="strategy" />
+        <AdaptationStrategyEditor :availableLlmModels :availableStrategySettings :disabled="false" v-model="strategy" />
       </template>
       <template #col-2>
         <h1>Inputs</h1>

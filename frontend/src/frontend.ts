@@ -6,6 +6,7 @@ import { createPinia } from 'pinia'
 import './main.css'
 import IndexView from './IndexView.vue'
 import CreateAdaptationBatchView from './CreateAdaptationBatchView.vue'
+import CreateClassificationBatchView from './CreateClassificationBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
 import EditAdaptationBatchView from './EditAdaptationBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
@@ -19,6 +20,11 @@ const router = createRouter({
       path: '/',
       name: 'index',
       component: IndexView,
+    },
+    {
+      path: '/new-classification-batch',
+      name: 'create-classification-batch',
+      component: CreateClassificationBatchView,
     },
     {
       path: '/new-adaptation-batch',

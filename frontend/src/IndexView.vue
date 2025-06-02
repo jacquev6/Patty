@@ -36,9 +36,19 @@ onMounted(async () => {
       <template #col-1>
         <h1>Sandbox</h1>
         <h2>New batch</h2>
-        <p><RouterLink :to="{ name: 'create-adaptation-batch' }">New adaptation batch</RouterLink></p>
+        <p>
+          <RouterLink :to="{ name: 'create-classification-batch' }">New classification batch</RouterLink> (for exercises
+          not yet classified)
+        </p>
+        <p>
+          <RouterLink :to="{ name: 'create-adaptation-batch' }">New adaptation batch</RouterLink> (for exercises already
+          classified by hand)
+        </p>
 
-        <h2>Existing batches</h2>
+        <h2>Existing classification batches</h2>
+        <!-- <p>@todo List existing classification batches</p> -->
+
+        <h2>Existing adaptation batches</h2>
         <ul>
           <li v-for="adaptationBatch in adaptationBatches">
             <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptationBatch.id } }">
