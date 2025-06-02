@@ -11,38 +11,29 @@ import botocore.client
 import fastapi
 import fastapi.testclient
 
-from .. import authentication
-from .. import database_utils
-from .. import llm
-from .. import settings
-from ..adapted import Exercise
-from ..any_json import JsonDict, JsonList
-from ..api_utils import ApiModel
-from . import orm_models as db
-from .adaptation import (
+from . import authentication
+from . import database_utils
+from . import llm
+from . import settings
+from .adapted import Exercise
+from .any_json import JsonDict, JsonList
+from .api_utils import ApiModel
+from . import new_orm_models as db
+from .adaptation.adaptation import (
     Adjustment,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantResponse,
     AssistantSuccess,
 )
-from .strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
-
+from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
+from .adaptation.submission import LlmMessage
 
 __all__ = ["router"]
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
-
-
-LlmMessage = (
-    llm.UserMessage
-    | llm.SystemMessage
-    | llm.AssistantMessage[Exercise]
-    | llm.InvalidJsonAssistantMessage
-    | llm.NotJsonAssistantMessage
-)
 
 
 class ApiStrategySettings(ApiModel):
@@ -75,7 +66,7 @@ class ApiAdaptation(ApiModel):
     removed_from_textbook: bool
 
 
-@api_router.post("/llm-response-schema")
+@api_router.post("/adaptation-llm-response-schema")
 def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
 
@@ -125,7 +116,7 @@ class PostAdaptationBatchResponse(ApiModel):
     id: str
 
 
-@api_router.post("/adaptation-batch")
+@api_router.post("/adaptation-batches")
 async def post_adaptation_batch(
     req: PostAdaptationBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostAdaptationBatchResponse:
@@ -226,7 +217,7 @@ class GetAdaptationBatchResponse(ApiModel):
     adaptations: list[ApiAdaptation]
 
 
-@api_router.get("/adaptation-batch/{id}")
+@api_router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, db.AdaptationBatch, id)
     return GetAdaptationBatchResponse(
@@ -279,7 +270,7 @@ class PostTextbookResponse(ApiModel):
     id: str
 
 
-@api_router.post("/textbook")
+@api_router.post("/textbooks")
 def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
@@ -319,7 +310,7 @@ class GetTextbookResponse(ApiModel):
     available_strategy_settings: list[str]
 
 
-@api_router.get("/textbook/{id}")
+@api_router.get("/textbooks/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
     textbook = get_by_id(session, db.Textbook, id)
     return GetTextbookResponse(
@@ -364,7 +355,7 @@ class PostTextbookAdaptationBatchRequest(ApiModel):
     inputs: list[ApiInput]
 
 
-@api_router.post("/textbook/{id}/adaptation-batches")
+@api_router.post("/textbooks/{id}/adaptation-batches")
 def post_textbook_adaptation_batch(
     id: str,
     req: PostTextbookAdaptationBatchRequest,
@@ -431,7 +422,7 @@ def post_textbook_adaptation_batch(
     return make_api_textbook(textbook)
 
 
-@api_router.put("/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed")
+@api_router.put("/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed")
 def put_textbook_adaptation_batch_removed(
     textbook_id: str, adaptation_batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -442,7 +433,7 @@ def put_textbook_adaptation_batch_removed(
     return make_api_textbook(textbook)
 
 
-@api_router.put("/textbook/{textbook_id}/adaptation/{adaptation_id}/removed")
+@api_router.put("/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed")
 def put_textbook_adaptation_removed(
     textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -464,7 +455,7 @@ class PostTextbookExternalExercisesResponse(ApiModel):
     put_url: str
 
 
-@api_router.post("/textbook/{textbook_id}/external-exercises")
+@api_router.post("/textbooks/{textbook_id}/external-exercises")
 def post_textbook_external_exercises(
     textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
 ) -> PostTextbookExternalExercisesResponse:
@@ -488,7 +479,7 @@ def post_textbook_external_exercises(
     )
 
 
-@api_router.put("/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed")
+@api_router.put("/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed")
 def put_textbook_external_exercises_removed(
     textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
@@ -499,7 +490,7 @@ def put_textbook_external_exercises_removed(
     return make_api_textbook(textbook)
 
 
-@api_router.get("/{id}")
+@api_router.get("/adaptations/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     return make_api_adaptation(get_by_id(session, db.Adaptation, id))
 
@@ -508,7 +499,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
     adjustment: str
 
 
-@api_router.post("/{id}/adjustment")
+@api_router.post("/adaptations/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
@@ -565,7 +556,7 @@ async def post_adaptation_adjustment(
     return make_api_adaptation(adaptation)
 
 
-@api_router.delete("/{id}/last-adjustment")
+@api_router.delete("/adaptations/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     adaptation = get_by_id(session, db.Adaptation, id)
 
@@ -580,14 +571,14 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
     return make_api_adaptation(adaptation)
 
 
-@api_router.put("/{id}/manual-edit")
+@api_router.put("/adaptations/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
     adaptation = get_by_id(session, db.Adaptation, id)
     adaptation.manual_edit = req
     return make_api_adaptation(adaptation)
 
 
-@api_router.delete("/{id}/manual-edit")
+@api_router.delete("/adaptations/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
     adaptation = get_by_id(session, db.Adaptation, id)
     adaptation.manual_edit = None
@@ -685,11 +676,11 @@ export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.a
 
 
 export_adaptation_batch_template_file_path = os.path.join(
-    os.path.dirname(__file__), "templates", "adaptation-batch-export", "index.html"
+    os.path.dirname(__file__), "export", "templates", "adaptation-batch", "index.html"
 )
 
 
-@export_router.get("/adaptation-batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation_batch(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -713,11 +704,11 @@ def export_adaptation_batch(
 
 
 export_adaptation_template_file_path = os.path.join(
-    os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
+    os.path.dirname(__file__), "export", "templates", "adaptation", "index.html"
 )
 
 
-@export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/adaptation/{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
@@ -733,11 +724,11 @@ def export_adaptation(
 
 
 export_textbook_template_file_path = os.path.join(
-    os.path.dirname(__file__), "templates", "textbook-export", "index.html"
+    os.path.dirname(__file__), "export", "templates", "textbook", "index.html"
 )
 
 
-@export_router.get("/textbook-{id}.html", response_class=fastapi.responses.HTMLResponse)
+@export_router.get("/textbook/{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:

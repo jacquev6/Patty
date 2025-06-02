@@ -15,7 +15,7 @@ const latestAdaptationBatch = ref<LatestAdaptationBatch | null>(null)
 
 async function refresh() {
   const llmModelsPromise = client.GET('/api/available-llm-models')
-  const latestAdaptationBatchPromise = client.GET('/api/adaptation/latest-adaptation-batch', {
+  const latestAdaptationBatchPromise = client.GET('/api/latest-adaptation-batch', {
     params: { query: { user: identifiedUser.identifier } },
   })
 

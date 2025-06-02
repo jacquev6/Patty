@@ -338,12 +338,7 @@ def export_all(directory: str) -> None:
 
     from . import database_utils
     from .orm_models import Adaptation, AdaptationBatch, Textbook
-    from .adaptation.router import (
-        make_adapted_exercise_data,
-        export_adaptation,
-        export_adaptation_batch,
-        export_textbook,
-    )
+    from .api_router import make_adapted_exercise_data, export_adaptation, export_adaptation_batch, export_textbook
 
     shutil.rmtree(directory, ignore_errors=True)
     os.makedirs(directory)

@@ -101,7 +101,7 @@ const manualAdaptedExerciseProxy = computed({
     assert(parsed !== null)
     if (validateAdaptedExercise(parsed)) {
       manualAdaptedExercise.value = { raw, parsed, syntaxError: null, validationErrors: [] }
-      /* No await: fire and forget */ client.PUT('/api/adaptation/{id}/manual-edit', {
+      /* No await: fire and forget */ client.PUT('/api/adaptations/{id}/manual-edit', {
         params: { path: { id: props.adaptation.id } },
         body: parsed,
       })
@@ -167,7 +167,7 @@ const busy = ref(false)
 async function submitAdjustment() {
   busy.value = true
 
-  const responsePromise = client.POST(`/api/adaptation/{id}/adjustment`, {
+  const responsePromise = client.POST(`/api/adaptations/{id}/adjustment`, {
     params: { path: { id: props.adaptation.id } },
     body: { adjustment: adjustmentPrompt.value },
   })
@@ -183,7 +183,7 @@ async function submitAdjustment() {
 }
 
 async function deleteLastAdjustment() {
-  const responsePromise = client.DELETE(`/api/adaptation/{id}/last-adjustment`, {
+  const responsePromise = client.DELETE(`/api/adaptations/{id}/last-adjustment`, {
     params: { path: { id: props.adaptation.id } },
   })
 
@@ -195,7 +195,7 @@ async function deleteLastAdjustment() {
 
 function resetManualEdit() {
   manualAdaptedExercise.value = null
-  /* No await: fire and forget */ client.DELETE('/api/adaptation/{id}/manual-edit', {
+  /* No await: fire and forget */ client.DELETE('/api/adaptations/{id}/manual-edit', {
     params: { path: { id: props.adaptation.id } },
   })
 }
@@ -328,7 +328,7 @@ watch(Escape, () => {
         <p>
           <button @click="fullScreen = true">Full screen</button>
           <WhiteSpace />
-          <a :href="`/api/adaptation/export/adaptation-${adaptation.id}.html?token=${authenticationTokenStore.token}`">
+          <a :href="`/api/export/adaptation/${adaptation.id}.html?token=${authenticationTokenStore.token}`">
             Download standalone HTML
           </a>
         </p>

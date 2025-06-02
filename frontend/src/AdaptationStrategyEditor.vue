@@ -82,7 +82,7 @@ const schema = computedAsync(async () => {
     strategy.value.settings.responseSpecification.format === 'json' &&
     strategy.value.settings.responseSpecification.formalism === 'json-schema'
   ) {
-    const response = await client.POST('/api/adaptation/llm-response-schema', {
+    const response = await client.POST('/api/adaptation-llm-response-schema', {
       body: strategy.value.settings.responseSpecification,
     })
     assert(response.data !== undefined)

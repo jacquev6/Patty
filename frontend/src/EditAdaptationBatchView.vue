@@ -19,7 +19,7 @@ let refreshes = 0
 let refreshTimeoutId: number | null = null
 
 async function refresh() {
-  const response = await client.GET(`/api/adaptation/adaptation-batch/{id}`, { params: { path: { id: props.id } } })
+  const response = await client.GET(`/api/adaptation-batches/{id}`, { params: { path: { id: props.id } } })
 
   if (response.response.status === 404) {
     found.value = false

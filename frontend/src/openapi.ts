@@ -39,7 +39,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/llm-response-schema': {
+  '/api/adaptation-llm-response-schema': {
     parameters: {
       query?: never
       header?: never
@@ -56,7 +56,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/latest-adaptation-batch': {
+  '/api/latest-adaptation-batch': {
     parameters: {
       query?: never
       header?: never
@@ -64,7 +64,7 @@ export interface paths {
       cookie?: never
     }
     /** Get Latest Adaptation Batch */
-    get: operations['get_latest_adaptation_batch_api_adaptation_latest_adaptation_batch_get']
+    get: operations['get_latest_adaptation_batch_api_latest_adaptation_batch_get']
     put?: never
     post?: never
     delete?: never
@@ -73,41 +73,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/adaptation-batch': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Post Adaptation Batch */
-    post: operations['post_adaptation_batch_api_adaptation_adaptation_batch_post']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/adaptation-batch/{id}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Adaptation Batch */
-    get: operations['get_adaptation_batch_api_adaptation_adaptation_batch__id__get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/adaptation-batches': {
+  '/api/adaptation-batches': {
     parameters: {
       query?: never
       header?: never
@@ -115,7 +81,25 @@ export interface paths {
       cookie?: never
     }
     /** Get Adaptation Batches */
-    get: operations['get_adaptation_batches_api_adaptation_adaptation_batches_get']
+    get: operations['get_adaptation_batches_api_adaptation_batches_get']
+    put?: never
+    /** Post Adaptation Batch */
+    post: operations['post_adaptation_batch_api_adaptation_batches_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptation-batches/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Adaptation Batch */
+    get: operations['get_adaptation_batch_api_adaptation_batches__id__get']
     put?: never
     post?: never
     delete?: never
@@ -124,41 +108,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /** Post Textbook */
-    post: operations['post_textbook_api_adaptation_textbook_post']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/textbook/{id}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Get Textbook */
-    get: operations['get_textbook_api_adaptation_textbook__id__get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/adaptation/textbooks': {
+  '/api/textbooks': {
     parameters: {
       query?: never
       header?: never
@@ -166,7 +116,25 @@ export interface paths {
       cookie?: never
     }
     /** Get Textbooks */
-    get: operations['get_textbooks_api_adaptation_textbooks_get']
+    get: operations['get_textbooks_api_textbooks_get']
+    put?: never
+    /** Post Textbook */
+    post: operations['post_textbook_api_textbooks_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/textbooks/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Textbook */
+    get: operations['get_textbook_api_textbooks__id__get']
     put?: never
     post?: never
     delete?: never
@@ -175,7 +143,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook/{id}/adaptation-batches': {
+  '/api/textbooks/{id}/adaptation-batches': {
     parameters: {
       query?: never
       header?: never
@@ -185,14 +153,14 @@ export interface paths {
     get?: never
     put?: never
     /** Post Textbook Adaptation Batch */
-    post: operations['post_textbook_adaptation_batch_api_adaptation_textbook__id__adaptation_batches_post']
+    post: operations['post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post']
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed': {
+  '/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed': {
     parameters: {
       query?: never
       header?: never
@@ -201,7 +169,7 @@ export interface paths {
     }
     get?: never
     /** Put Textbook Adaptation Batch Removed */
-    put: operations['put_textbook_adaptation_batch_removed_api_adaptation_textbook__textbook_id__adaptation_batch__adaptation_batch_id__removed_put']
+    put: operations['put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put']
     post?: never
     delete?: never
     options?: never
@@ -209,7 +177,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed': {
+  '/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed': {
     parameters: {
       query?: never
       header?: never
@@ -218,7 +186,7 @@ export interface paths {
     }
     get?: never
     /** Put Textbook Adaptation Removed */
-    put: operations['put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put']
+    put: operations['put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put']
     post?: never
     delete?: never
     options?: never
@@ -226,7 +194,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook/{textbook_id}/external-exercises': {
+  '/api/textbooks/{textbook_id}/external-exercises': {
     parameters: {
       query?: never
       header?: never
@@ -236,14 +204,14 @@ export interface paths {
     get?: never
     put?: never
     /** Post Textbook External Exercises */
-    post: operations['post_textbook_external_exercises_api_adaptation_textbook__textbook_id__external_exercises_post']
+    post: operations['post_textbook_external_exercises_api_textbooks__textbook_id__external_exercises_post']
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed': {
+  '/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed': {
     parameters: {
       query?: never
       header?: never
@@ -252,7 +220,7 @@ export interface paths {
     }
     get?: never
     /** Put Textbook External Exercises Removed */
-    put: operations['put_textbook_external_exercises_removed_api_adaptation_textbook__textbook_id__external_exercises__external_exercise_id__removed_put']
+    put: operations['put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put']
     post?: never
     delete?: never
     options?: never
@@ -260,7 +228,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}': {
+  '/api/adaptations/{id}': {
     parameters: {
       query?: never
       header?: never
@@ -268,7 +236,7 @@ export interface paths {
       cookie?: never
     }
     /** Get Adaptation */
-    get: operations['get_adaptation_api_adaptation__id__get']
+    get: operations['get_adaptation_api_adaptations__id__get']
     put?: never
     post?: never
     delete?: never
@@ -277,7 +245,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}/adjustment': {
+  '/api/adaptations/{id}/adjustment': {
     parameters: {
       query?: never
       header?: never
@@ -287,14 +255,14 @@ export interface paths {
     get?: never
     put?: never
     /** Post Adaptation Adjustment */
-    post: operations['post_adaptation_adjustment_api_adaptation__id__adjustment_post']
+    post: operations['post_adaptation_adjustment_api_adaptations__id__adjustment_post']
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}/last-adjustment': {
+  '/api/adaptations/{id}/last-adjustment': {
     parameters: {
       query?: never
       header?: never
@@ -305,13 +273,13 @@ export interface paths {
     put?: never
     post?: never
     /** Delete Adaptation Last Adjustment */
-    delete: operations['delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete']
+    delete: operations['delete_adaptation_last_adjustment_api_adaptations__id__last_adjustment_delete']
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/api/adaptation/{id}/manual-edit': {
+  '/api/adaptations/{id}/manual-edit': {
     parameters: {
       query?: never
       header?: never
@@ -320,16 +288,16 @@ export interface paths {
     }
     get?: never
     /** Put Adaptation Manual Edit */
-    put: operations['put_adaptation_manual_edit_api_adaptation__id__manual_edit_put']
+    put: operations['put_adaptation_manual_edit_api_adaptations__id__manual_edit_put']
     post?: never
     /** Delete Adaptation Manual Edit */
-    delete: operations['delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete']
+    delete: operations['delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete']
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/api/adaptation/export/adaptation-batch-{id}.html': {
+  '/api/export/adaptation-batch/{id}.html': {
     parameters: {
       query?: never
       header?: never
@@ -337,7 +305,7 @@ export interface paths {
       cookie?: never
     }
     /** Export Adaptation Batch */
-    get: operations['export_adaptation_batch_api_adaptation_export_adaptation_batch__id__html_get']
+    get: operations['export_adaptation_batch_api_export_adaptation_batch__id__html_get']
     put?: never
     post?: never
     delete?: never
@@ -346,7 +314,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/export/adaptation-{id}.html': {
+  '/api/export/adaptation/{id}.html': {
     parameters: {
       query?: never
       header?: never
@@ -354,7 +322,7 @@ export interface paths {
       cookie?: never
     }
     /** Export Adaptation */
-    get: operations['export_adaptation_api_adaptation_export_adaptation__id__html_get']
+    get: operations['export_adaptation_api_export_adaptation__id__html_get']
     put?: never
     post?: never
     delete?: never
@@ -363,7 +331,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/adaptation/export/textbook-{id}.html': {
+  '/api/export/textbook/{id}.html': {
     parameters: {
       query?: never
       header?: never
@@ -371,7 +339,7 @@ export interface paths {
       cookie?: never
     }
     /** Export Textbook */
-    get: operations['export_textbook_api_adaptation_export_textbook__id__html_get']
+    get: operations['export_textbook_api_export_textbook__id__html_get']
     put?: never
     post?: never
     delete?: never
@@ -497,7 +465,7 @@ export interface components {
       /** Title */
       title: string
       /** Adaptationbatches */
-      adaptationBatches: components['schemas']['patty__adaptation__router__ApiTextbook__AdaptationBatch'][]
+      adaptationBatches: components['schemas']['patty__api_router__ApiTextbook__AdaptationBatch'][]
       /** Externalexercises */
       externalExercises: components['schemas']['ExternalExercise'][]
     }
@@ -757,7 +725,7 @@ export interface components {
     /** GetAdaptationBatchesResponse */
     GetAdaptationBatchesResponse: {
       /** Adaptationbatches */
-      adaptationBatches: components['schemas']['patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch'][]
+      adaptationBatches: components['schemas']['patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch'][]
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1271,7 +1239,7 @@ export interface components {
       kind: 'whitespace'
     }
     /** AdaptationBatch */
-    patty__adaptation__router__ApiTextbook__AdaptationBatch: {
+    patty__api_router__ApiTextbook__AdaptationBatch: {
       /** Id */
       id: string
       strategy: components['schemas']['ApiStrategy-Output']
@@ -1281,7 +1249,7 @@ export interface components {
       removedFromTextbook: boolean
     }
     /** AdaptationBatch */
-    patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch: {
+    patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch: {
       /** Id */
       id: string
       /** Createdby */
@@ -1409,7 +1377,7 @@ export interface operations {
       }
     }
   }
-  get_latest_adaptation_batch_api_adaptation_latest_adaptation_batch_get: {
+  get_latest_adaptation_batch_api_latest_adaptation_batch_get: {
     parameters: {
       query: {
         user: string
@@ -1440,7 +1408,27 @@ export interface operations {
       }
     }
   }
-  post_adaptation_batch_api_adaptation_adaptation_batch_post: {
+  get_adaptation_batches_api_adaptation_batches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetAdaptationBatchesResponse']
+        }
+      }
+    }
+  }
+  post_adaptation_batch_api_adaptation_batches_post: {
     parameters: {
       query?: never
       header?: never
@@ -1473,7 +1461,7 @@ export interface operations {
       }
     }
   }
-  get_adaptation_batch_api_adaptation_adaptation_batch__id__get: {
+  get_adaptation_batch_api_adaptation_batches__id__get: {
     parameters: {
       query?: never
       header?: never
@@ -1504,7 +1492,7 @@ export interface operations {
       }
     }
   }
-  get_adaptation_batches_api_adaptation_adaptation_batches_get: {
+  get_textbooks_api_textbooks_get: {
     parameters: {
       query?: never
       header?: never
@@ -1519,12 +1507,12 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['GetAdaptationBatchesResponse']
+          'application/json': components['schemas']['GetTextbooksResponse']
         }
       }
     }
   }
-  post_textbook_api_adaptation_textbook_post: {
+  post_textbook_api_textbooks_post: {
     parameters: {
       query?: never
       header?: never
@@ -1557,7 +1545,7 @@ export interface operations {
       }
     }
   }
-  get_textbook_api_adaptation_textbook__id__get: {
+  get_textbook_api_textbooks__id__get: {
     parameters: {
       query?: never
       header?: never
@@ -1588,27 +1576,7 @@ export interface operations {
       }
     }
   }
-  get_textbooks_api_adaptation_textbooks_get: {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['GetTextbooksResponse']
-        }
-      }
-    }
-  }
-  post_textbook_adaptation_batch_api_adaptation_textbook__id__adaptation_batches_post: {
+  post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post: {
     parameters: {
       query?: never
       header?: never
@@ -1643,7 +1611,7 @@ export interface operations {
       }
     }
   }
-  put_textbook_adaptation_batch_removed_api_adaptation_textbook__textbook_id__adaptation_batch__adaptation_batch_id__removed_put: {
+  put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put: {
     parameters: {
       query: {
         removed: boolean
@@ -1677,7 +1645,7 @@ export interface operations {
       }
     }
   }
-  put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put: {
+  put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put: {
     parameters: {
       query: {
         removed: boolean
@@ -1711,7 +1679,7 @@ export interface operations {
       }
     }
   }
-  post_textbook_external_exercises_api_adaptation_textbook__textbook_id__external_exercises_post: {
+  post_textbook_external_exercises_api_textbooks__textbook_id__external_exercises_post: {
     parameters: {
       query?: never
       header?: never
@@ -1746,7 +1714,7 @@ export interface operations {
       }
     }
   }
-  put_textbook_external_exercises_removed_api_adaptation_textbook__textbook_id__external_exercises__external_exercise_id__removed_put: {
+  put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put: {
     parameters: {
       query: {
         removed: boolean
@@ -1780,7 +1748,7 @@ export interface operations {
       }
     }
   }
-  get_adaptation_api_adaptation__id__get: {
+  get_adaptation_api_adaptations__id__get: {
     parameters: {
       query?: never
       header?: never
@@ -1811,7 +1779,7 @@ export interface operations {
       }
     }
   }
-  post_adaptation_adjustment_api_adaptation__id__adjustment_post: {
+  post_adaptation_adjustment_api_adaptations__id__adjustment_post: {
     parameters: {
       query?: never
       header?: never
@@ -1846,7 +1814,7 @@ export interface operations {
       }
     }
   }
-  delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete: {
+  delete_adaptation_last_adjustment_api_adaptations__id__last_adjustment_delete: {
     parameters: {
       query?: never
       header?: never
@@ -1877,7 +1845,7 @@ export interface operations {
       }
     }
   }
-  put_adaptation_manual_edit_api_adaptation__id__manual_edit_put: {
+  put_adaptation_manual_edit_api_adaptations__id__manual_edit_put: {
     parameters: {
       query?: never
       header?: never
@@ -1912,7 +1880,7 @@ export interface operations {
       }
     }
   }
-  delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete: {
+  delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete: {
     parameters: {
       query?: never
       header?: never
@@ -1943,7 +1911,7 @@ export interface operations {
       }
     }
   }
-  export_adaptation_batch_api_adaptation_export_adaptation_batch__id__html_get: {
+  export_adaptation_batch_api_export_adaptation_batch__id__html_get: {
     parameters: {
       query: {
         download?: boolean
@@ -1977,7 +1945,7 @@ export interface operations {
       }
     }
   }
-  export_adaptation_api_adaptation_export_adaptation__id__html_get: {
+  export_adaptation_api_export_adaptation__id__html_get: {
     parameters: {
       query: {
         download?: boolean
@@ -2011,7 +1979,7 @@ export interface operations {
       }
     }
   }
-  export_textbook_api_adaptation_export_textbook__id__html_get: {
+  export_textbook_api_export_textbook__id__html_get: {
     parameters: {
       query: {
         download?: boolean

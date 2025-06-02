@@ -30,9 +30,7 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     </template>
     <template #col-2>
       <p>
-        <a
-          :href="`/api/adaptation/export/adaptation-batch-${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`"
-        >
+        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
           Download standalone HTML
         </a>
       </p>

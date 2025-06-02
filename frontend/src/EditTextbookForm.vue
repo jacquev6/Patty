@@ -105,18 +105,15 @@ function textbookUpdated(textbook: Textbook) {
 }
 
 async function removeAdaptationBatch(id: string, removed: boolean) {
-  const response = await client.PUT(
-    '/api/adaptation/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed',
-    {
-      params: { path: { textbook_id: props.textbook.id, adaptation_batch_id: id }, query: { removed } },
-    },
-  )
+  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, adaptation_batch_id: id }, query: { removed } },
+  })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
 
 async function removeAdaptation(id: string, removed: boolean) {
-  const response = await client.PUT('/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed', {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, adaptation_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
@@ -124,12 +121,9 @@ async function removeAdaptation(id: string, removed: boolean) {
 }
 
 async function removeExternalExercise(id: string, removed: boolean) {
-  const response = await client.PUT(
-    '/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed',
-    {
-      params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
-    },
-  )
+  const response = await client.PUT('/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
+  })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
@@ -138,7 +132,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
 <template>
   <h1>{{ textbook.title }}</h1>
   <p>
-    <a :href="`/api/adaptation/export/textbook-${textbook.id}.html?token=${authenticationTokenStore.token}`">
+    <a :href="`/api/export/textbook/${textbook.id}.html?token=${authenticationTokenStore.token}`">
       Download standalone HTML
     </a>
   </p>

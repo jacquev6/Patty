@@ -79,7 +79,7 @@
         }
       }
     },
-    "/api/adaptation/llm-response-schema": {
+    "/api/adaptation-llm-response-schema": {
       "post": {
         "summary": "Get Llm Response Schema",
         "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_post",
@@ -123,10 +123,10 @@
         ]
       }
     },
-    "/api/adaptation/latest-adaptation-batch": {
+    "/api/latest-adaptation-batch": {
       "get": {
         "summary": "Get Latest Adaptation Batch",
-        "operationId": "get_latest_adaptation_batch_api_adaptation_latest_adaptation_batch_get",
+        "operationId": "get_latest_adaptation_batch_api_latest_adaptation_batch_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -167,10 +167,31 @@
         }
       }
     },
-    "/api/adaptation/adaptation-batch": {
+    "/api/adaptation-batches": {
+      "get": {
+        "summary": "Get Adaptation Batches",
+        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
       "post": {
         "summary": "Post Adaptation Batch",
-        "operationId": "post_adaptation_batch_api_adaptation_adaptation_batch_post",
+        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -210,10 +231,10 @@
         ]
       }
     },
-    "/api/adaptation/adaptation-batch/{id}": {
+    "/api/adaptation-batches/{id}": {
       "get": {
         "summary": "Get Adaptation Batch",
-        "operationId": "get_adaptation_batch_api_adaptation_adaptation_batch__id__get",
+        "operationId": "get_adaptation_batch_api_adaptation_batches__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -254,17 +275,17 @@
         }
       }
     },
-    "/api/adaptation/adaptation-batches": {
+    "/api/textbooks": {
       "get": {
-        "summary": "Get Adaptation Batches",
-        "operationId": "get_adaptation_batches_api_adaptation_adaptation_batches_get",
+        "summary": "Get Textbooks",
+        "operationId": "get_textbooks_api_textbooks_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
+                  "$ref": "#/components/schemas/GetTextbooksResponse"
                 }
               }
             }
@@ -275,12 +296,10 @@
             "OAuth2PasswordBearer": []
           }
         ]
-      }
-    },
-    "/api/adaptation/textbook": {
+      },
       "post": {
         "summary": "Post Textbook",
-        "operationId": "post_textbook_api_adaptation_textbook_post",
+        "operationId": "post_textbook_api_textbooks_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -320,10 +339,10 @@
         ]
       }
     },
-    "/api/adaptation/textbook/{id}": {
+    "/api/textbooks/{id}": {
       "get": {
         "summary": "Get Textbook",
-        "operationId": "get_textbook_api_adaptation_textbook__id__get",
+        "operationId": "get_textbook_api_textbooks__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -364,33 +383,10 @@
         }
       }
     },
-    "/api/adaptation/textbooks": {
-      "get": {
-        "summary": "Get Textbooks",
-        "operationId": "get_textbooks_api_adaptation_textbooks_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetTextbooksResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/api/adaptation/textbook/{id}/adaptation-batches": {
+    "/api/textbooks/{id}/adaptation-batches": {
       "post": {
         "summary": "Post Textbook Adaptation Batch",
-        "operationId": "post_textbook_adaptation_batch_api_adaptation_textbook__id__adaptation_batches_post",
+        "operationId": "post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -441,10 +437,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed": {
+    "/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed": {
       "put": {
         "summary": "Put Textbook Adaptation Batch Removed",
-        "operationId": "put_textbook_adaptation_batch_removed_api_adaptation_textbook__textbook_id__adaptation_batch__adaptation_batch_id__removed_put",
+        "operationId": "put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -503,10 +499,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed": {
+    "/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed": {
       "put": {
         "summary": "Put Textbook Adaptation Removed",
-        "operationId": "put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put",
+        "operationId": "put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -565,10 +561,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/external-exercises": {
+    "/api/textbooks/{textbook_id}/external-exercises": {
       "post": {
         "summary": "Post Textbook External Exercises",
-        "operationId": "post_textbook_external_exercises_api_adaptation_textbook__textbook_id__external_exercises_post",
+        "operationId": "post_textbook_external_exercises_api_textbooks__textbook_id__external_exercises_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -619,10 +615,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
+    "/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
       "put": {
         "summary": "Put Textbook External Exercises Removed",
-        "operationId": "put_textbook_external_exercises_removed_api_adaptation_textbook__textbook_id__external_exercises__external_exercise_id__removed_put",
+        "operationId": "put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -681,10 +677,10 @@
         }
       }
     },
-    "/api/adaptation/{id}": {
+    "/api/adaptations/{id}": {
       "get": {
         "summary": "Get Adaptation",
-        "operationId": "get_adaptation_api_adaptation__id__get",
+        "operationId": "get_adaptation_api_adaptations__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -725,10 +721,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/adjustment": {
+    "/api/adaptations/{id}/adjustment": {
       "post": {
         "summary": "Post Adaptation Adjustment",
-        "operationId": "post_adaptation_adjustment_api_adaptation__id__adjustment_post",
+        "operationId": "post_adaptation_adjustment_api_adaptations__id__adjustment_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -779,10 +775,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/last-adjustment": {
+    "/api/adaptations/{id}/last-adjustment": {
       "delete": {
         "summary": "Delete Adaptation Last Adjustment",
-        "operationId": "delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete",
+        "operationId": "delete_adaptation_last_adjustment_api_adaptations__id__last_adjustment_delete",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -823,10 +819,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/manual-edit": {
+    "/api/adaptations/{id}/manual-edit": {
       "put": {
         "summary": "Put Adaptation Manual Edit",
-        "operationId": "put_adaptation_manual_edit_api_adaptation__id__manual_edit_put",
+        "operationId": "put_adaptation_manual_edit_api_adaptations__id__manual_edit_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -878,7 +874,7 @@
       },
       "delete": {
         "summary": "Delete Adaptation Manual Edit",
-        "operationId": "delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete",
+        "operationId": "delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -919,10 +915,10 @@
         }
       }
     },
-    "/api/adaptation/export/adaptation-batch-{id}.html": {
+    "/api/export/adaptation-batch/{id}.html": {
       "get": {
         "summary": "Export Adaptation Batch",
-        "operationId": "export_adaptation_batch_api_adaptation_export_adaptation_batch__id__html_get",
+        "operationId": "export_adaptation_batch_api_export_adaptation_batch__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -977,10 +973,10 @@
         }
       }
     },
-    "/api/adaptation/export/adaptation-{id}.html": {
+    "/api/export/adaptation/{id}.html": {
       "get": {
         "summary": "Export Adaptation",
-        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
+        "operationId": "export_adaptation_api_export_adaptation__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -1035,10 +1031,10 @@
         }
       }
     },
-    "/api/adaptation/export/textbook-{id}.html": {
+    "/api/export/textbook/{id}.html": {
       "get": {
         "summary": "Export Textbook",
-        "operationId": "export_textbook_api_adaptation_export_textbook__id__html_get",
+        "operationId": "export_textbook_api_export_textbook__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -1441,7 +1437,7 @@
           },
           "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__ApiTextbook__AdaptationBatch"
+              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
             },
             "type": "array",
             "title": "Adaptationbatches"
@@ -2114,7 +2110,7 @@
         "properties": {
           "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch"
+              "$ref": "#/components/schemas/patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch"
             },
             "type": "array",
             "title": "Adaptationbatches"
@@ -3366,7 +3362,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__router__ApiTextbook__AdaptationBatch": {
+      "patty__api_router__ApiTextbook__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -3397,7 +3393,7 @@
         ],
         "title": "AdaptationBatch"
       },
-      "patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch": {
+      "patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",

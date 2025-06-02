@@ -8,7 +8,7 @@ from .adaptation import (
     OldStrategySettingsBranch,
     OldTextbook,
 )
-from .adaptation.orm_models import (
+from .new_orm_models import (
     AdaptableExercise,
     Adaptation,
     AdaptationBatch,

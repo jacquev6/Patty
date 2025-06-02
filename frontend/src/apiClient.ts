@@ -19,20 +19,20 @@ export type LlmModel =
   paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
 
 export type LatestAdaptationBatch =
-  paths['/api/adaptation/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
+  paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
 
 export type AdaptationStrategy = LatestAdaptationBatch['strategy']
 
-export type Textbooks = paths['/api/adaptation/textbooks']['get']['responses']['200']['content']['application/json']
+export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['content']['application/json']
 export type Textbook =
-  paths['/api/adaptation/textbook/{id}']['get']['responses']['200']['content']['application/json']['textbook']
+  paths['/api/textbooks/{id}']['get']['responses']['200']['content']['application/json']['textbook']
 
 export type AdaptationBatches =
-  paths['/api/adaptation/adaptation-batches']['get']['responses']['200']['content']['application/json']
+  paths['/api/adaptation-batches']['get']['responses']['200']['content']['application/json']
 export type AdaptationBatch =
-  paths['/api/adaptation/adaptation-batch/{id}']['get']['responses']['200']['content']['application/json']
+  paths['/api/adaptation-batches/{id}']['get']['responses']['200']['content']['application/json']
 
-export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
+export type Adaptation = paths['/api/adaptations/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
 
 export type ActiveEditableTextInput = {

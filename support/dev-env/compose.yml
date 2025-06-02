@@ -32,9 +32,9 @@ services:
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph.png",
       "frontend/src/openapi.ts",
-      "backend/patty/adaptation/templates/adaptation-export/index.html",
-      "backend/patty/adaptation/templates/adaptation-batch-export/index.html",
-      "backend/patty/adaptation/templates/textbook-export/index.html",
+      "backend/patty/export/templates/adaptation/index.html",
+      "backend/patty/export/templates/adaptation-batch/index.html",
+      "backend/patty/export/templates/textbook/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -46,14 +46,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: adaptation-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/adaptation-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/adaptation", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/adaptation/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -66,14 +66,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: adaptation-batch-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/adaptation-batch-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/adaptation-batch", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-batch-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/adaptation-batch/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -86,14 +86,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: textbook-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/textbook-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/textbook", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/textbook-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/textbook/index.html"]
       interval: 0.5s
       retries: 12
 

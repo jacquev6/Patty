@@ -23,7 +23,7 @@ let refreshTimeoutId: number | null = null
 
 async function refresh() {
   const llmModelsPromise = client.GET('/api/available-llm-models')
-  const textbookPromise = client.GET(`/api/adaptation/textbook/{id}`, { params: { path: { id: props.id } } })
+  const textbookPromise = client.GET(`/api/textbooks/{id}`, { params: { path: { id: props.id } } })
 
   const llmModelsResponse = await llmModelsPromise
   if (llmModelsResponse.data !== undefined) {

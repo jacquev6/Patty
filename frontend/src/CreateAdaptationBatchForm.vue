@@ -38,7 +38,7 @@ const busy = ref(false)
 async function submit() {
   busy.value = true
 
-  const response = await client.POST('/api/adaptation/adaptation-batch', {
+  const response = await client.POST('/api/adaptation-batches', {
     body: {
       creator: identifiedUser.identifier,
       strategy,

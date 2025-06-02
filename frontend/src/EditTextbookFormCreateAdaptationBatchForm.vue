@@ -68,7 +68,7 @@ const busy = ref(false)
 async function submit() {
   busy.value = true
 
-  const response = await client.POST('/api/adaptation/textbook/{id}/adaptation-batches', {
+  const response = await client.POST('/api/textbooks/{id}/adaptation-batches', {
     params: { path: { id: props.textbookId } },
     body: {
       creator: identifiedUser.identifier,

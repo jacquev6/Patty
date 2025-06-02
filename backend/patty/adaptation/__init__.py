@@ -7,7 +7,6 @@ from .adaptation import (
 )
 from .batch import OldBatch
 from .input import OldInput
-from .router import router
 from .strategy import OldStrategy, OldStrategySettings, OldStrategySettingsBranch
 from .textbook import OldTextbook, OldExternalExercise
 

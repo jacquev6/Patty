@@ -8,12 +8,14 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 import pydantic
 
-from .. import llm
-from ..adapted import Exercise as AdaptedExercise
-from ..any_json import JsonDict, JsonList
-from ..database_utils import OrmBase as OrmBaseBase
-from .adaptation import Adjustment, AssistantResponse
-from .strategy import ConcreteLlmResponseSpecification
+from . import llm
+from .adapted import Exercise as AdaptedExercise
+from .any_json import JsonDict, JsonList
+from .database_utils import OrmBase as OrmBaseBase
+from .adaptation.adaptation import Adjustment, AssistantResponse
+from .adaptation.strategy import ConcreteLlmResponseSpecification
+
+# @todo: Remove ORM models in 'adaptation', move the models in this file into 'orm_models.py', remove this file.
 
 
 class OrmBase(OrmBaseBase):

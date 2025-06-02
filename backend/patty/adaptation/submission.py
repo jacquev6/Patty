@@ -9,8 +9,7 @@ from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
-from .orm_models import Adaptation
-from .router import LlmMessage
+from ..new_orm_models import Adaptation
 from .. import settings
 
 
@@ -20,6 +19,15 @@ from .. import settings
 def log(message: str) -> None:
     # @todo Use actual logging
     print(datetime.datetime.now(), message, flush=True)
+
+
+LlmMessage = (
+    llm.UserMessage
+    | llm.SystemMessage
+    | llm.AssistantMessage[Exercise]
+    | llm.InvalidJsonAssistantMessage
+    | llm.NotJsonAssistantMessage
+)
 
 
 async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) -> None:

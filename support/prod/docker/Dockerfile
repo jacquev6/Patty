@@ -59,8 +59,8 @@ FROM backend-dependencies AS final-backend
 
 ADD backend .
 
-COPY --from=adaptation-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/adaptation-export/index.html
-COPY --from=adaptation-batch-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/adaptation-batch-export/index.html
-COPY --from=textbook-export-template-builder /app/dist/index.html /app/patty/adaptation/templates/textbook-export/index.html
+COPY --from=adaptation-export-template-builder /app/dist/index.html /app/patty/export/templates/adaptation/index.html
+COPY --from=adaptation-batch-export-template-builder /app/dist/index.html /app/patty/export/templates/adaptation-batch/index.html
+COPY --from=textbook-export-template-builder /app/dist/index.html /app/patty/export/templates/textbook/index.html
 
 CMD ["uvicorn", "patty.asgi:app", "--host", "0.0.0.0", "--port", "80"]
