@@ -175,7 +175,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptable_exercises")),
     )
     op.create_table(
-        "sandbox_adaptation_batches",
+        "adaptation_batches",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("created_by_username", sa.String(), nullable=False),
@@ -185,12 +185,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["strategy_id"],
             ["adaptation_strategies.id"],
-            name=op.f("fk_sandbox_adaptation_batches_strategy_id_adaptation_strategies"),
+            name=op.f("fk_adaptation_batches_strategy_id_adaptation_strategies"),
         ),
         sa.ForeignKeyConstraint(
-            ["textbook_id"], ["textbooks.id"], name=op.f("fk_sandbox_adaptation_batches_textbook_id_textbooks")
+            ["textbook_id"], ["textbooks.id"], name=op.f("fk_adaptation_batches_textbook_id_textbooks")
         ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_sandbox_adaptation_batches")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_batches")),
     )
     op.create_table(
         "adaptations",
@@ -199,18 +199,18 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("exercise_id", sa.Integer(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
-        sa.Column("sandbox_batch_id", sa.Integer(), nullable=False),
+        sa.Column("adaptation_batch_id", sa.Integer(), nullable=False),
         sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),
         sa.Column("initial_assistant_response", sa.JSON(), nullable=True),
         sa.Column("adjustments", sa.JSON(), nullable=False),
         sa.Column("manual_edit", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["exercise_id"], ["adaptable_exercises.id"], name=op.f("fk_adaptations_exercise_id_adaptable_exercises")
+            ["adaptation_batch_id"],
+            ["adaptation_batches.id"],
+            name=op.f("fk_adaptations_adaptation_batch_id_adaptation_batches"),
         ),
         sa.ForeignKeyConstraint(
-            ["sandbox_batch_id"],
-            ["sandbox_adaptation_batches.id"],
-            name=op.f("fk_adaptations_sandbox_batch_id_sandbox_adaptation_batches"),
+            ["exercise_id"], ["adaptable_exercises.id"], name=op.f("fk_adaptations_exercise_id_adaptable_exercises")
         ),
         sa.ForeignKeyConstraint(
             ["strategy_id"], ["adaptation_strategies.id"], name=op.f("fk_adaptations_strategy_id_adaptation_strategies")

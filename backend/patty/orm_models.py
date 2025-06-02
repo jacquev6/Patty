@@ -11,6 +11,7 @@ from .adaptation import (
 from .adaptation.orm_models import (
     AdaptableExercise,
     Adaptation,
+    AdaptationBatch,
     AdaptationStrategy,
     AdaptationStrategySettings,
     BaseExercise,
@@ -21,7 +22,6 @@ from .adaptation.orm_models import (
     Extraction,
     ExtractionStrategy,
     PdfFile,
-    SandboxAdaptationBatch,
     Textbook,
     TextbookRange,
 )
@@ -31,6 +31,7 @@ from .database_utils import OrmBase
 __all__ = [
     "AdaptableExercise",
     "Adaptation",
+    "AdaptationBatch",
     "AdaptationStrategy",
     "AdaptationStrategySettings",
     "BaseExercise",
@@ -49,7 +50,6 @@ __all__ = [
     "OldStrategySettingsBranch",
     "OldTextbook",
     "PdfFile",
-    "SandboxAdaptationBatch",
     "Textbook",
     "TextbookRange",
 ]
@@ -58,6 +58,7 @@ __all__ = [
 all_models: list[type[OrmBase]] = [
     AdaptableExercise,
     Adaptation,
+    AdaptationBatch,
     AdaptationStrategy,
     AdaptationStrategySettings,
     BaseExercise,
@@ -76,7 +77,6 @@ all_models: list[type[OrmBase]] = [
     OldStrategySettingsBranch,
     OldTextbook,
     PdfFile,
-    SandboxAdaptationBatch,
     Textbook,
     TextbookRange,
 ]

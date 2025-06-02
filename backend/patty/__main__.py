@@ -337,8 +337,13 @@ def export_all(directory: str) -> None:
     import fastapi
 
     from . import database_utils
-    from .orm_models import Adaptation, SandboxAdaptationBatch, Textbook
-    from .adaptation.router import make_adapted_exercise_data, export_adaptation, export_batch, export_textbook
+    from .orm_models import Adaptation, AdaptationBatch, Textbook
+    from .adaptation.router import (
+        make_adapted_exercise_data,
+        export_adaptation,
+        export_adaptation_batch,
+        export_textbook,
+    )
 
     shutil.rmtree(directory, ignore_errors=True)
     os.makedirs(directory)
@@ -359,8 +364,8 @@ def export_all(directory: str) -> None:
             else:
                 save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
 
-        for batch in session.query(SandboxAdaptationBatch).all():
-            save("batch", batch.id, export_batch(str(batch.id), session))
+        for adaptation_batch in session.query(AdaptationBatch).all():
+            save("adaptation-batch", adaptation_batch.id, export_adaptation_batch(str(adaptation_batch.id), session))
 
         for textbook in session.query(Textbook).all():
             save("textbook", textbook.id, export_textbook(str(textbook.id), session))

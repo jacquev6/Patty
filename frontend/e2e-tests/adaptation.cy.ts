@@ -1,17 +1,17 @@
 import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
 
-describe('The batch creation page', () => {
+describe('The adaptation batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
     ignoreResizeObserverLoopError()
-    visit('/new-batch')
+    visit('/new-adaptation-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('looks like this', () => {
-    screenshot('batch-creation-page')
+    screenshot('adaptation-batch-creation-page')
   })
 
   it('lets user add and remove input exercises', () => {
@@ -53,7 +53,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@llm-name').should('have.value', 'dummy-2')
   })
 
@@ -65,7 +65,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@system-prompt').should('have.value', 'Blah blah blah. Blih blih.')
   })
 
@@ -77,7 +77,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@allow-choice-in-instruction').should('not.be.checked')
   })
 
@@ -89,7 +89,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@allow-free-text-input-in-statement').should('not.be.checked')
   })
 
@@ -101,7 +101,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@allow-multiple-choices-input-in-statement').should('not.be.checked')
   })
 
@@ -113,7 +113,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@allow-selectable-input-in-statement').should('not.be.checked')
   })
 
@@ -126,7 +126,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@input-text').should('have.length', 3)
     cy.get('@input-text').eq(0).should('have.value', 'Blah blah.')
     cy.get('@input-text').eq(1).should('have.value', 'Bleh bleh.')
@@ -148,7 +148,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@system-prompt').should('have.value', "Alice's prompt.")
     cy.get('@input-text').eq(0).should('have.value', "Alice's input.")
     cy.get('[data-cy="edit-identified-user"]').click()
@@ -166,7 +166,7 @@ describe('The batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Bob")').should('exist')
 
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@system-prompt').should('have.value', "Bob's prompt.")
     cy.get('@input-text').eq(0).should('have.value', "Bob's input.")
     cy.get('[data-cy="edit-identified-user"]').click()
@@ -176,7 +176,7 @@ describe('The batch creation page', () => {
     cy.get('@input-text').eq(0).should('have.value', "Alice's input.")
   })
 
-  it('submits a batch and refreshes until it is ready', () => {
+  it('submits an adaptation batch and refreshes until it is ready', () => {
     cy.get('[data-cy="input-text"]').eq(0).type('{selectAll}Sleep 2', { delay: 0 })
 
     cy.get('button:contains("Submit")').click()
@@ -320,12 +320,12 @@ describe('The batch creation page', () => {
 
     cy.get('@system-prompt').type('{selectAll}Prompt alpha 1', { delay: 0 })
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-2')
+    cy.location('pathname').should('equal', '/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
 
     // Create from existing
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 1')
     cy.get('@settings-name').type('{selectAll}{del}', { delay: 0 })
@@ -339,16 +339,16 @@ describe('The batch creation page', () => {
 
     cy.get('@system-prompt').type('{selectAll}Prompt alpha 2', { delay: 0 })
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-3')
+    cy.location('pathname').should('equal', '/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
 
     // Create from latest version
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
     cy.get('@settings-name').focus()
@@ -363,19 +363,19 @@ describe('The batch creation page', () => {
 
     cy.get('@system-prompt').type('{selectAll}Prompt alpha 3 (bad)', { delay: 0 })
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-4')
+    cy.location('pathname').should('equal', '/adaptation-batch-4')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
-    cy.visit('/batch-3')
+    cy.visit('/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
 
     // Restore previous version
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 3 (bad)')
     cy.get('@settings-name').focus()
@@ -384,22 +384,22 @@ describe('The batch creation page', () => {
     cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)').click()
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-5')
+    cy.location('pathname').should('equal', '/adaptation-batch-5')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)') // Previous version again
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
-    cy.visit('/batch-3')
+    cy.visit('/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha') // Current version again
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-4')
+    cy.visit('/adaptation-batch-4')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
 
     // Create from latest version
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
     cy.get('@settings-name').focus()
@@ -408,25 +408,25 @@ describe('The batch creation page', () => {
     cy.get('@suggestions').eq(1).should('have.text', 'Alpha (previous version)')
     cy.get('@system-prompt').type('{selectAll}Prompt alpha 3bis (bad)', { delay: 0 })
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-6')
+    cy.location('pathname').should('equal', '/adaptation-batch-6')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
-    cy.visit('/batch-3')
+    cy.visit('/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-4')
+    cy.visit('/adaptation-batch-4')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
-    cy.visit('/batch-5')
+    cy.visit('/adaptation-batch-5')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
 
     // Create from previous version
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 3bis (bad)')
     cy.get('@settings-name').focus()
@@ -437,96 +437,96 @@ describe('The batch creation page', () => {
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 2')
     cy.get('@system-prompt').type('{selectAll}Prompt alpha 3ter (good)', { delay: 0 })
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-7')
+    cy.location('pathname').should('equal', '/adaptation-batch-7')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
-    cy.visit('/batch-3')
+    cy.visit('/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-4')
+    cy.visit('/adaptation-batch-4')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
-    cy.visit('/batch-5')
+    cy.visit('/adaptation-batch-5')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-6')
+    cy.visit('/adaptation-batch-6')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
 
     // Create without changing strategy
-    cy.visit('/new-batch')
+    cy.visit('/new-adaptation-batch')
     cy.get('@settings-name').should('have.value', 'Alpha')
     cy.get('@system-prompt').should('have.value', 'Prompt alpha 3ter (good)')
     cy.get('button:contains("Submit")').click()
-    cy.location('pathname').should('equal', '/batch-8')
+    cy.location('pathname').should('equal', '/adaptation-batch-8')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
 
-    cy.visit('/batch-2')
+    cy.visit('/adaptation-batch-2')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 1')
-    cy.visit('/batch-3')
+    cy.visit('/adaptation-batch-3')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-4')
+    cy.visit('/adaptation-batch-4')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3 (bad)')
-    cy.visit('/batch-5')
+    cy.visit('/adaptation-batch-5')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (previous version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 2')
-    cy.visit('/batch-6')
+    cy.visit('/adaptation-batch-6')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha (older version)')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3bis (bad)')
-    cy.visit('/batch-7')
+    cy.visit('/adaptation-batch-7')
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
   })
 })
 
-describe('The batch edition page', () => {
+describe('The adaptation batch edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
     ignoreResizeObserverLoopError()
   })
 
-  it('displays "Not found" when the batch does not exist', () => {
-    visit('/batch-42')
+  it('displays "Not found" when the adaptation batch does not exist', () => {
+    visit('/adaptation-batch-42')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
 
-  it('displays "Not found" when the batch id is not an integer', () => {
-    visit('/batch-nope')
+  it('displays "Not found" when the adaptation batch id is not an integer', () => {
+    visit('/adaptation-batch-nope')
 
     cy.get('h1:contains("Not found")').should('exist')
   })
 
   it('looks like this', () => {
-    visit('/batch-1')
+    visit('/adaptation-batch-1')
 
     cy.get('h1:contains("Strategy")').should('exist')
 
-    screenshot('batch-edition-page.1')
+    screenshot('adaptation-batch-edition-page.1')
 
     cy.get('button:contains("Full screen")').eq(0).click()
 
-    screenshot('batch-edition-page.2')
+    screenshot('adaptation-batch-edition-page.2')
   })
 
   it('does not remember answers', () => {
-    visit('/batch-1')
+    visit('/adaptation-batch-1')
 
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
     cy.get('[data-cy="choice0"]').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
   })
 })
@@ -534,7 +534,7 @@ describe('The batch edition page', () => {
 describe('The adaptation edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
     ignoreResizeObserverLoopError()
   })
 
@@ -643,7 +643,7 @@ function shouldForbidAdjustment() {
 describe('The edition page for an initially successful adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
     ignoreResizeObserverLoopError()
     visit('/adaptation-1')
     setUpAliases()
@@ -754,7 +754,7 @@ describe('The edition page for an initially successful adaptation', () => {
 describe('The edition page for an initially invalid-json adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
     ignoreResizeObserverLoopError()
     visit('/adaptation-3')
     setUpAliases()
@@ -815,7 +815,7 @@ describe('The edition page for an initially invalid-json adaptation', () => {
 describe('The edition page for an initially not-json adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
     ignoreResizeObserverLoopError()
     visit('/adaptation-4')
     setUpAliases()

@@ -64,8 +64,8 @@ function refreshIfNeeded() {
 
 function needsRefresh() {
   assert(textbook.value !== null)
-  for (const batch of textbook.value.batches) {
-    for (const adaptation of batch.adaptations) {
+  for (const adaptationBatch of textbook.value.adaptationBatches) {
+    for (const adaptation of adaptationBatch.adaptations) {
       if (preprocessAdaptation(adaptation).status.kind === 'inProgress') {
         return true
       }

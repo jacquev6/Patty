@@ -65,7 +65,7 @@ class ApiInput(ApiModel):
 class ApiAdaptation(ApiModel):
     id: str
     created_by: str
-    batch_id: str
+    adaptation_batch_id: str
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -80,25 +80,25 @@ def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecifi
     return response_specification.make_response_schema()
 
 
-class LatestBatch(ApiModel):
+class LatestAdaptationBatch(ApiModel):
     id: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
     available_strategy_settings: list[ApiStrategySettings]
 
 
-@api_router.get("/latest-batch")
-def get_latest_batch(user: str, session: database_utils.SessionDependable) -> LatestBatch:
+@api_router.get("/latest-adaptation-batch")
+def get_latest_adaptation_batch(user: str, session: database_utils.SessionDependable) -> LatestAdaptationBatch:
     for created_by in [user, "Patty"]:
-        batch = (
-            session.query(db.SandboxAdaptationBatch)
-            .filter(db.SandboxAdaptationBatch.created_by_username == created_by)
-            .order_by(-db.SandboxAdaptationBatch.id)
+        adaptation_batch = (
+            session.query(db.AdaptationBatch)
+            .filter(db.AdaptationBatch.created_by_username == created_by)
+            .order_by(-db.AdaptationBatch.id)
             .first()
         )
-        if batch is not None:
+        if adaptation_batch is not None:
             break
-    assert batch is not None
+    assert adaptation_batch is not None
     available_strategy_settings = []
     for exercise_class in session.query(db.ExerciseClass).order_by(db.ExerciseClass.name).all():
         assert exercise_class.latest_strategy_settings is not None
@@ -107,28 +107,28 @@ def get_latest_batch(user: str, session: database_utils.SessionDependable) -> La
             available_strategy_settings.append(
                 make_api_strategy_settings(exercise_class.latest_strategy_settings.parent)
             )
-    return LatestBatch(
-        id=str(batch.id),
-        strategy=make_api_strategy(batch.strategy),
-        inputs=[make_api_input(adaptation.exercise) for adaptation in batch.adaptations],
+    return LatestAdaptationBatch(
+        id=str(adaptation_batch.id),
+        strategy=make_api_strategy(adaptation_batch.strategy),
+        inputs=[make_api_input(adaptation.exercise) for adaptation in adaptation_batch.adaptations],
         available_strategy_settings=available_strategy_settings,
     )
 
 
-class PostBatchRequest(ApiModel):
+class PostAdaptationBatchRequest(ApiModel):
     creator: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
 
 
-class PostBatchResponse(ApiModel):
+class PostAdaptationBatchResponse(ApiModel):
     id: str
 
 
-@api_router.post("/batch")
-async def post_batch(
-    req: PostBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
-) -> PostBatchResponse:
+@api_router.post("/adaptation-batch")
+async def post_adaptation_batch(
+    req: PostAdaptationBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
+) -> PostAdaptationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
 
     if req.strategy.settings.name is None:
@@ -179,10 +179,10 @@ async def post_batch(
     )
     session.add(strategy)
 
-    batch = db.SandboxAdaptationBatch(
+    adaptation_batch = db.AdaptationBatch(
         created_by_username=req.creator, created_at=now, strategy=strategy, textbook=None, removed_from_textbook=False
     )
-    session.add(batch)
+    session.add(adaptation_batch)
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
@@ -204,7 +204,7 @@ async def post_batch(
         adaptation = db.Adaptation(
             created_by_username=req.creator,
             created_at=now,
-            sandbox_batch=batch,
+            adaptation_batch=adaptation_batch,
             strategy=strategy,
             exercise=exercise,
             raw_llm_conversations=[],
@@ -216,56 +216,56 @@ async def post_batch(
 
     session.flush()
 
-    return PostBatchResponse(id=str(batch.id))
+    return PostAdaptationBatchResponse(id=str(adaptation_batch.id))
 
 
-class GetBatchResponse(ApiModel):
+class GetAdaptationBatchResponse(ApiModel):
     id: str
     created_by: str
     strategy: ApiStrategy
     adaptations: list[ApiAdaptation]
 
 
-@api_router.get("/batch/{id}")
-async def get_batch(id: str, session: database_utils.SessionDependable) -> GetBatchResponse:
-    batch = get_by_id(session, db.SandboxAdaptationBatch, id)
-    return GetBatchResponse(
-        id=str(batch.id),
-        created_by=batch.created_by_username,
-        strategy=make_api_strategy(batch.strategy),
-        adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
+@api_router.get("/adaptation-batch/{id}")
+async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
+    adaptation_batch = get_by_id(session, db.AdaptationBatch, id)
+    return GetAdaptationBatchResponse(
+        id=str(adaptation_batch.id),
+        created_by=adaptation_batch.created_by_username,
+        strategy=make_api_strategy(adaptation_batch.strategy),
+        adaptations=[make_api_adaptation(adaptation) for adaptation in adaptation_batch.adaptations],
     )
 
 
-class GetBatchesResponse(ApiModel):
-    class Batch(ApiModel):
+class GetAdaptationBatchesResponse(ApiModel):
+    class AdaptationBatch(ApiModel):
         id: str
         created_by: str
         created_at: datetime.datetime
         model: llm.ConcreteModel
         strategy_settings_name: str | None
 
-    batches: list[Batch]
+    adaptation_batches: list[AdaptationBatch]
 
 
-@api_router.get("/batches")
-async def get_batches(session: database_utils.SessionDependable) -> GetBatchesResponse:
-    batches = (
-        session.query(db.SandboxAdaptationBatch)
-        .filter(db.SandboxAdaptationBatch.textbook_id == None)
-        .order_by(-db.SandboxAdaptationBatch.id)
+@api_router.get("/adaptation-batches")
+async def get_adaptation_batches(session: database_utils.SessionDependable) -> GetAdaptationBatchesResponse:
+    adaptation_batches = (
+        session.query(db.AdaptationBatch)
+        .filter(db.AdaptationBatch.textbook_id == None)
+        .order_by(-db.AdaptationBatch.id)
         .all()
     )
-    return GetBatchesResponse(
-        batches=[
-            GetBatchesResponse.Batch(
-                id=str(batch.id),
-                created_by=batch.created_by_username,
-                created_at=batch.created_at,
-                model=batch.strategy.model,
-                strategy_settings_name=make_api_strategy_settings_name(batch.strategy.settings),
+    return GetAdaptationBatchesResponse(
+        adaptation_batches=[
+            GetAdaptationBatchesResponse.AdaptationBatch(
+                id=str(adaptation_batch.id),
+                created_by=adaptation_batch.created_by_username,
+                created_at=adaptation_batch.created_at,
+                model=adaptation_batch.strategy.model,
+                strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.strategy.settings),
             )
-            for batch in batches
+            for adaptation_batch in adaptation_batches
         ]
     )
 
@@ -296,13 +296,13 @@ class ApiTextbook(ApiModel):
     created_by: str
     title: str
 
-    class Batch(ApiModel):
+    class AdaptationBatch(ApiModel):
         id: str
         strategy: ApiStrategy
         adaptations: list[ApiAdaptation]
         removed_from_textbook: bool
 
-    batches: list[Batch]
+    adaptation_batches: list[AdaptationBatch]
 
     class ExternalExercise(ApiModel):
         id: str
@@ -357,17 +357,17 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
     )
 
 
-class PostTextbookBatchRequest(ApiModel):
+class PostTextbookAdaptationBatchRequest(ApiModel):
     creator: str
     model: llm.ConcreteModel
     branch_name: str
     inputs: list[ApiInput]
 
 
-@api_router.post("/textbook/{id}/batches")
-def post_textbook_batch(
+@api_router.post("/textbook/{id}/adaptation-batches")
+def post_textbook_adaptation_batch(
     id: str,
-    req: PostTextbookBatchRequest,
+    req: PostTextbookAdaptationBatchRequest,
     engine: database_utils.EngineDependable,
     session: database_utils.SessionDependable,
 ) -> ApiTextbook:
@@ -387,14 +387,14 @@ def post_textbook_batch(
     )
     session.add(strategy)
 
-    batch = db.SandboxAdaptationBatch(
+    adaptation_batch = db.AdaptationBatch(
         textbook=textbook,
         removed_from_textbook=False,
         created_by_username=req.creator,
         created_at=now,
         strategy=strategy,
     )
-    session.add(batch)
+    session.add(adaptation_batch)
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
@@ -416,7 +416,7 @@ def post_textbook_batch(
         adaptation = db.Adaptation(
             created_by_username=req.creator,
             created_at=now,
-            sandbox_batch=batch,
+            adaptation_batch=adaptation_batch,
             strategy=strategy,
             exercise=exercise,
             raw_llm_conversations=[],
@@ -431,14 +431,14 @@ def post_textbook_batch(
     return make_api_textbook(textbook)
 
 
-@api_router.put("/textbook/{textbook_id}/batch/{batch_id}/removed")
-def put_textbook_batch_removed(
-    textbook_id: str, batch_id: str, removed: bool, session: database_utils.SessionDependable
+@api_router.put("/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed")
+def put_textbook_adaptation_batch_removed(
+    textbook_id: str, adaptation_batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
-    batch = get_by_id(session, db.SandboxAdaptationBatch, batch_id)
-    assert batch.textbook == textbook
-    batch.removed_from_textbook = removed
+    adaptation_batch = get_by_id(session, db.AdaptationBatch, adaptation_batch_id)
+    assert adaptation_batch.textbook == textbook
+    adaptation_batch.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
 
@@ -448,7 +448,7 @@ def put_textbook_adaptation_removed(
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
     adaptation = get_by_id(session, db.Adaptation, adaptation_id)
-    assert adaptation.sandbox_batch.textbook == textbook
+    assert adaptation.adaptation_batch.textbook == textbook
     adaptation.exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
@@ -612,7 +612,7 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         created_by=adaptation.created_by_username,
-        batch_id=str(adaptation.sandbox_batch_id),
+        adaptation_batch_id=str(adaptation.adaptation_batch_id),
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.exercise),
         raw_llm_conversations=adaptation.raw_llm_conversations,
@@ -658,14 +658,14 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         id=str(textbook.id),
         created_by=textbook.created_by_username,
         title=textbook.title,
-        batches=[
-            ApiTextbook.Batch(
-                id=str(batch.id),
-                strategy=make_api_strategy(batch.strategy),
-                adaptations=[make_api_adaptation(adaptation) for adaptation in batch.adaptations],
-                removed_from_textbook=batch.removed_from_textbook,
+        adaptation_batches=[
+            ApiTextbook.AdaptationBatch(
+                id=str(adaptation_batch.id),
+                strategy=make_api_strategy(adaptation_batch.strategy),
+                adaptations=[make_api_adaptation(adaptation) for adaptation in adaptation_batch.adaptations],
+                removed_from_textbook=adaptation_batch.removed_from_textbook,
             )
-            for batch in textbook.batches
+            for adaptation_batch in textbook.adaptation_batches
         ],
         external_exercises=[
             ApiTextbook.ExternalExercise(
@@ -681,11 +681,40 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
     )
 
 
+export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_param_dependable)])
+
+
+export_adaptation_batch_template_file_path = os.path.join(
+    os.path.dirname(__file__), "templates", "adaptation-batch-export", "index.html"
+)
+
+
+@export_router.get("/adaptation-batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_adaptation_batch(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    data = list(
+        filter(
+            None,
+            (
+                make_adapted_exercise_data(adaptation)
+                for adaptation in get_by_id(session, db.AdaptationBatch, id).adaptations
+            ),
+        )
+    )
+
+    content = render_template(export_adaptation_batch_template_file_path, "ADAPTATION_BATCH_EXPORT_DATA", data)
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-adaptation-batch-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
 export_adaptation_template_file_path = os.path.join(
     os.path.dirname(__file__), "templates", "adaptation-export", "index.html"
 )
-
-export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_param_dependable)])
 
 
 @export_router.get("/adaptation-{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -699,32 +728,6 @@ def export_adaptation(
     headers = {}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{data['exerciseId']}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
-
-
-export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "templates", "batch-export", "index.html")
-
-
-@export_router.get("/batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_batch(
-    id: str, session: database_utils.SessionDependable, download: bool = True
-) -> fastapi.responses.HTMLResponse:
-    data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(adaptation)
-                for adaptation in get_by_id(session, db.SandboxAdaptationBatch, id).adaptations
-            ),
-        )
-    )
-
-    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
-
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(content=content, headers=headers)
 
@@ -746,8 +749,8 @@ def export_textbook(
             if isinstance(exercise, db.AdaptableExercise):
                 if exercise.adaptation is not None:
                     if (
-                        exercise.adaptation.sandbox_batch is not None
-                        and exercise.adaptation.sandbox_batch.removed_from_textbook
+                        exercise.adaptation.adaptation_batch is not None
+                        and exercise.adaptation.adaptation_batch.removed_from_textbook
                     ):
                         adapted_exercise_data = None
                     else:

@@ -272,12 +272,12 @@ class FixturesCreator:
         )
 
     def create_successful_adaptation(
-        self, *, batch: object, strategy: object, input: object
+        self, *, adaptation_batch: object, strategy: object, input: object
     ) -> adaptation.OldAdaptation:
         return self.create(
             adaptation.OldAdaptation,
             created_by="Patty",
-            batch=batch,
+            batch=adaptation_batch,
             strategy=strategy,
             input=input,
             raw_llm_conversations=[{"initial": "conversation"}],
@@ -410,12 +410,12 @@ class FixturesCreator:
         )
 
     def create_in_progress_adaptation(
-        self, *, batch: object, strategy: object, input: object
+        self, *, adaptation_batch: object, strategy: object, input: object
     ) -> adaptation.OldAdaptation:
         return self.create(
             adaptation.OldAdaptation,
             created_by="Patty",
-            batch=batch,
+            batch=adaptation_batch,
             strategy=strategy,
             input=input,
             raw_llm_conversations=[{"initial": "conversation"}],
@@ -425,12 +425,12 @@ class FixturesCreator:
         )
 
     def create_invalid_json_adaptation(
-        self, *, batch: object, strategy: object, input: object
+        self, *, adaptation_batch: object, strategy: object, input: object
     ) -> adaptation.OldAdaptation:
         return self.create(
             adaptation.OldAdaptation,
             created_by="Patty",
-            batch=batch,
+            batch=adaptation_batch,
             strategy=strategy,
             input=input,
             raw_llm_conversations=[{"initial": "conversation"}],
@@ -441,11 +441,13 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_not_json_adaptation(self, *, batch: object, strategy: object, input: object) -> adaptation.OldAdaptation:
+    def create_not_json_adaptation(
+        self, *, adaptation_batch: object, strategy: object, input: object
+    ) -> adaptation.OldAdaptation:
         return self.create(
             adaptation.OldAdaptation,
             created_by="Patty",
-            batch=batch,
+            batch=adaptation_batch,
             strategy=strategy,
             input=input,
             raw_llm_conversations=[{"initial": "conversation"}],
@@ -460,22 +462,22 @@ class FixturesCreator:
         strategy = self.create_default_adaptation_strategy()
         input = self.create_default_adaptation_input()
         batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
 
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         input = self.create_default_adaptation_input()
         batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
 
-    def create_mixed_dummy_batch(self) -> None:
+    def create_mixed_dummy_adaptation_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         input = self.create_default_adaptation_input()
         batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(batch=batch, strategy=strategy, input=input)
-        self.create_in_progress_adaptation(batch=batch, strategy=strategy, input=input)
-        self.create_invalid_json_adaptation(batch=batch, strategy=strategy, input=input)
-        self.create_not_json_adaptation(batch=batch, strategy=strategy, input=input)
+        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        self.create_in_progress_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        self.create_invalid_json_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        self.create_not_json_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
 
     def create_dummy_branch(
         self, *, name: str = "Branchy McBranchFace", system_prompt: str = "Blah blah blah."
@@ -502,7 +504,7 @@ class FixturesCreator:
             model=llm.DummyModel(name="dummy-1"),
             settings=success_branch_1.head,
         )
-        success_batch_1 = self.create(
+        success_adaptation_batch_1 = self.create(
             adaptation.OldBatch,
             created_by="Patty",
             created_at=created_at,
@@ -510,7 +512,7 @@ class FixturesCreator:
             textbook=textbook,
         )
         self.create_successful_adaptation(
-            batch=success_batch_1,
+            adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
             input=self.create(
                 adaptation.OldInput,
@@ -527,7 +529,7 @@ class FixturesCreator:
             ),
         )
         self.create_successful_adaptation(
-            batch=success_batch_1,
+            adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
             input=self.create(
                 adaptation.OldInput,
@@ -544,7 +546,7 @@ class FixturesCreator:
             ),
         )
         self.create_successful_adaptation(
-            batch=success_batch_1,
+            adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
             input=self.create(
                 adaptation.OldInput,
@@ -570,7 +572,7 @@ class FixturesCreator:
             model=llm.DummyModel(name="dummy-1"),
             settings=success_branch_2.head,
         )
-        success_batch_2 = self.create(
+        success_adaptation_batch_2 = self.create(
             adaptation.OldBatch,
             created_by="Patty",
             created_at=created_at,
@@ -578,7 +580,7 @@ class FixturesCreator:
             textbook=textbook,
         )
         self.create_successful_adaptation(
-            batch=success_batch_2,
+            adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
             input=self.create(
                 adaptation.OldInput,
@@ -595,7 +597,7 @@ class FixturesCreator:
             ),
         )
         self.create_successful_adaptation(
-            batch=success_batch_2,
+            adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
             input=self.create(
                 adaptation.OldInput,
@@ -612,7 +614,7 @@ class FixturesCreator:
             ),
         )
         self.create_successful_adaptation(
-            batch=success_batch_2,
+            adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
             input=self.create(
                 adaptation.OldInput,
@@ -629,7 +631,7 @@ class FixturesCreator:
             ),
         )
         removed_adaptation = self.create_successful_adaptation(
-            batch=success_batch_2,
+            adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
             input=self.create(
                 adaptation.OldInput,
@@ -647,7 +649,7 @@ class FixturesCreator:
         )
         removed_adaptation.removed_from_textbook = True
 
-        removed_batch = self.create(
+        removed_adaptation_batch = self.create(
             adaptation.OldBatch,
             created_by="Patty",
             created_at=created_at,
@@ -656,7 +658,7 @@ class FixturesCreator:
             removed_from_textbook=True,
         )
         self.create_successful_adaptation(
-            batch=removed_batch,
+            adaptation_batch=removed_adaptation_batch,
             strategy=success_strategy_2,
             input=self.create(
                 adaptation.OldInput,
@@ -680,18 +682,18 @@ class FixturesCreator:
             model=llm.DummyModel(name="dummy-1"),
             settings=errors_branch.head,
         )
-        errors_batch = self.create(
+        errors_adaptation_batch = self.create(
             adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=errors_strategy, textbook=textbook
         )
         self.create_not_json_adaptation(
-            batch=errors_batch,
+            adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
             input=self.create(
                 adaptation.OldInput, created_by="Patty", page_number=142, exercise_number="4", text="Not JSON"
             ),
         )
         self.create_invalid_json_adaptation(
-            batch=errors_batch,
+            adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
             input=self.create(
                 adaptation.OldInput, created_by="Patty", page_number=140, exercise_number="4", text="Invalid JSON"
@@ -705,7 +707,7 @@ class FixturesCreator:
         batch = self.__session.get(adaptation.OldBatch, 1)
 
         self.create_successful_adaptation(
-            batch=batch,
+            adaptation_batch=batch,
             strategy=strategy,
             input=self.create(
                 adaptation.OldInput,
@@ -723,7 +725,7 @@ class FixturesCreator:
         )
 
         self.create_successful_adaptation(
-            batch=batch,
+            adaptation_batch=batch,
             strategy=strategy,
             input=self.create(
                 adaptation.OldInput,
@@ -754,7 +756,7 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             creator.create_dummy_branch,
             creator.create_dummy_textbook,
             creator.create_dummy_textbook_with_text_exercise_numbers,
-            creator.create_mixed_dummy_batch,
+            creator.create_mixed_dummy_adaptation_batch,
             creator.create_seed_data,
         )
     }

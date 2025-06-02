@@ -6,7 +6,7 @@ import BusyBox from './BusyBox.vue'
 import assert from './assert'
 import { useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
-import { parseExerciseFileName } from './CreateBatchFormInputsEditor.vue'
+import { parseExerciseFileName } from './CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
   textbookId: string

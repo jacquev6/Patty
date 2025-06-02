@@ -123,10 +123,10 @@
         ]
       }
     },
-    "/api/adaptation/latest-batch": {
+    "/api/adaptation/latest-adaptation-batch": {
       "get": {
-        "summary": "Get Latest Batch",
-        "operationId": "get_latest_batch_api_adaptation_latest_batch_get",
+        "summary": "Get Latest Adaptation Batch",
+        "operationId": "get_latest_adaptation_batch_api_adaptation_latest_adaptation_batch_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -149,7 +149,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LatestBatch"
+                  "$ref": "#/components/schemas/LatestAdaptationBatch"
                 }
               }
             }
@@ -167,15 +167,15 @@
         }
       }
     },
-    "/api/adaptation/batch": {
+    "/api/adaptation/adaptation-batch": {
       "post": {
-        "summary": "Post Batch",
-        "operationId": "post_batch_api_adaptation_batch_post",
+        "summary": "Post Adaptation Batch",
+        "operationId": "post_adaptation_batch_api_adaptation_adaptation_batch_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostBatchRequest"
+                "$ref": "#/components/schemas/PostAdaptationBatchRequest"
               }
             }
           },
@@ -187,7 +187,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PostBatchResponse"
+                  "$ref": "#/components/schemas/PostAdaptationBatchResponse"
                 }
               }
             }
@@ -210,10 +210,10 @@
         ]
       }
     },
-    "/api/adaptation/batch/{id}": {
+    "/api/adaptation/adaptation-batch/{id}": {
       "get": {
-        "summary": "Get Batch",
-        "operationId": "get_batch_api_adaptation_batch__id__get",
+        "summary": "Get Adaptation Batch",
+        "operationId": "get_adaptation_batch_api_adaptation_adaptation_batch__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -236,7 +236,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBatchResponse"
+                  "$ref": "#/components/schemas/GetAdaptationBatchResponse"
                 }
               }
             }
@@ -254,17 +254,17 @@
         }
       }
     },
-    "/api/adaptation/batches": {
+    "/api/adaptation/adaptation-batches": {
       "get": {
-        "summary": "Get Batches",
-        "operationId": "get_batches_api_adaptation_batches_get",
+        "summary": "Get Adaptation Batches",
+        "operationId": "get_adaptation_batches_api_adaptation_adaptation_batches_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBatchesResponse"
+                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
                 }
               }
             }
@@ -387,10 +387,10 @@
         ]
       }
     },
-    "/api/adaptation/textbook/{id}/batches": {
+    "/api/adaptation/textbook/{id}/adaptation-batches": {
       "post": {
-        "summary": "Post Textbook Batch",
-        "operationId": "post_textbook_batch_api_adaptation_textbook__id__batches_post",
+        "summary": "Post Textbook Adaptation Batch",
+        "operationId": "post_textbook_adaptation_batch_api_adaptation_textbook__id__adaptation_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -412,7 +412,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostTextbookBatchRequest"
+                "$ref": "#/components/schemas/PostTextbookAdaptationBatchRequest"
               }
             }
           }
@@ -441,10 +441,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/batch/{batch_id}/removed": {
+    "/api/adaptation/textbook/{textbook_id}/adaptation-batch/{adaptation_batch_id}/removed": {
       "put": {
-        "summary": "Put Textbook Batch Removed",
-        "operationId": "put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put",
+        "summary": "Put Textbook Adaptation Batch Removed",
+        "operationId": "put_textbook_adaptation_batch_removed_api_adaptation_textbook__textbook_id__adaptation_batch__adaptation_batch_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -461,12 +461,12 @@
             }
           },
           {
-            "name": "batch_id",
+            "name": "adaptation_batch_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Batch Id"
+              "title": "Adaptation Batch Id"
             }
           },
           {
@@ -919,10 +919,10 @@
         }
       }
     },
-    "/api/adaptation/export/adaptation-{id}.html": {
+    "/api/adaptation/export/adaptation-batch-{id}.html": {
       "get": {
-        "summary": "Export Adaptation",
-        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
+        "summary": "Export Adaptation Batch",
+        "operationId": "export_adaptation_batch_api_adaptation_export_adaptation_batch__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -977,10 +977,10 @@
         }
       }
     },
-    "/api/adaptation/export/batch-{id}.html": {
+    "/api/adaptation/export/adaptation-{id}.html": {
       "get": {
-        "summary": "Export Batch",
-        "operationId": "export_batch_api_adaptation_export_batch__id__html_get",
+        "summary": "Export Adaptation",
+        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -1176,9 +1176,9 @@
             "type": "string",
             "title": "Createdby"
           },
-          "batchId": {
+          "adaptationBatchId": {
             "type": "string",
-            "title": "Batchid"
+            "title": "Adaptationbatchid"
           },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
@@ -1238,7 +1238,7 @@
         "required": [
           "id",
           "createdBy",
-          "batchId",
+          "adaptationBatchId",
           "strategy",
           "input",
           "rawLlmConversations",
@@ -1439,12 +1439,12 @@
             "type": "string",
             "title": "Title"
           },
-          "batches": {
+          "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__ApiTextbook__Batch"
+              "$ref": "#/components/schemas/patty__adaptation__router__ApiTextbook__AdaptationBatch"
             },
             "type": "array",
-            "title": "Batches"
+            "title": "Adaptationbatches"
           },
           "externalExercises": {
             "items": {
@@ -1460,7 +1460,7 @@
           "id",
           "createdBy",
           "title",
-          "batches",
+          "adaptationBatches",
           "externalExercises"
         ],
         "title": "ApiTextbook"
@@ -2079,7 +2079,7 @@
           "kind"
         ]
       },
-      "GetBatchResponse": {
+      "GetAdaptationBatchResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -2108,24 +2108,24 @@
           "strategy",
           "adaptations"
         ],
-        "title": "GetBatchResponse"
+        "title": "GetAdaptationBatchResponse"
       },
-      "GetBatchesResponse": {
+      "GetAdaptationBatchesResponse": {
         "properties": {
-          "batches": {
+          "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__GetBatchesResponse__Batch"
+              "$ref": "#/components/schemas/patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch"
             },
             "type": "array",
-            "title": "Batches"
+            "title": "Adaptationbatches"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "batches"
+          "adaptationBatches"
         ],
-        "title": "GetBatchesResponse"
+        "title": "GetAdaptationBatchesResponse"
       },
       "GetTextbookResponse": {
         "properties": {
@@ -2332,7 +2332,7 @@
         ],
         "title": "JsonSchemaLlmResponseSpecification"
       },
-      "LatestBatch": {
+      "LatestAdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -2364,7 +2364,7 @@
           "inputs",
           "availableStrategySettings"
         ],
-        "title": "LatestBatch"
+        "title": "LatestAdaptationBatch"
       },
       "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
@@ -2802,7 +2802,7 @@
         ],
         "title": "PostAdaptationAdjustmentRequest"
       },
-      "PostBatchRequest": {
+      "PostAdaptationBatchRequest": {
         "properties": {
           "creator": {
             "type": "string",
@@ -2826,9 +2826,9 @@
           "strategy",
           "inputs"
         ],
-        "title": "PostBatchRequest"
+        "title": "PostAdaptationBatchRequest"
       },
-      "PostBatchResponse": {
+      "PostAdaptationBatchResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -2840,9 +2840,9 @@
         "required": [
           "id"
         ],
-        "title": "PostBatchResponse"
+        "title": "PostAdaptationBatchResponse"
       },
-      "PostTextbookBatchRequest": {
+      "PostTextbookAdaptationBatchRequest": {
         "properties": {
           "creator": {
             "type": "string",
@@ -2882,7 +2882,7 @@
           "branchName",
           "inputs"
         ],
-        "title": "PostTextbookBatchRequest"
+        "title": "PostTextbookAdaptationBatchRequest"
       },
       "PostTextbookExternalExercisesRequest": {
         "properties": {
@@ -3366,7 +3366,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__router__ApiTextbook__Batch": {
+      "patty__adaptation__router__ApiTextbook__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -3395,9 +3395,9 @@
           "adaptations",
           "removedFromTextbook"
         ],
-        "title": "Batch"
+        "title": "AdaptationBatch"
       },
-      "patty__adaptation__router__GetBatchesResponse__Batch": {
+      "patty__adaptation__router__GetAdaptationBatchesResponse__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -3447,7 +3447,7 @@
           "model",
           "strategySettingsName"
         ],
-        "title": "Batch"
+        "title": "AdaptationBatch"
       }
     },
     "securitySchemes": {

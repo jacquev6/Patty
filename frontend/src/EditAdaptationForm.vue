@@ -217,7 +217,9 @@ watch(Escape, () => {
     <template #col-1>
       <p>
         Created by: {{ adaptation.createdBy }}, part of
-        <RouterLink :to="{ name: 'batch', params: { id: adaptation.batchId } }">this batch</RouterLink>.
+        <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptation.adaptationBatchId } }"
+          >this batch</RouterLink
+        >.
       </p>
       <AdaptationStrategyEditor
         :availableLlmModels="[]"

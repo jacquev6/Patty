@@ -2,8 +2,8 @@ import { createApp } from 'vue'
 import 'modern-normalize/modern-normalize.css'
 import { createRouter, createWebHashHistory, RouterView } from 'vue-router'
 
-import BatchExportIndexView from './BatchExportIndexView.vue'
-import BatchExportExerciseView from './BatchExportExerciseView.vue'
+import AdaptationBatchExportIndexView from './AdaptationBatchExportIndexView.vue'
+import AdaptationBatchExportExerciseView from './AdaptationBatchExportExerciseView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -11,12 +11,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'index',
-      component: BatchExportIndexView,
+      component: AdaptationBatchExportIndexView,
     },
     {
       path: '/:id',
       name: 'exercise',
-      component: BatchExportExerciseView,
+      component: AdaptationBatchExportExerciseView,
       props: true,
     },
   ],

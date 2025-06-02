@@ -34,6 +34,7 @@ def migrate_data(
 ) -> dict[str, list[dict[str, typing.Any]]]:
     for key in [
         "adaptable_exercises",
+        "adaptation_batches",
         "adaptation_strategies",
         "adaptation_strategy_settings",
         "adaptations",
@@ -45,7 +46,6 @@ def migrate_data(
         "extraction_strategies",
         "extractions",
         "pdf_files",
-        "sandbox_adaptation_batches",
         "textbook_ranges",
         "textbooks",
     ]:
@@ -134,7 +134,7 @@ def migrate_data(
             }
         )
 
-    data_after["sandbox_adaptation_batches"] = []
+    data_after["adaptation_batches"] = []
     for old_batch in old_adaptation_batches:
         old_batch = copy.deepcopy(old_batch)
         id = old_batch.pop("id")
@@ -144,7 +144,7 @@ def migrate_data(
         textbook_id = old_batch.pop("textbook_id")
         removed_from_textbook = old_batch.pop("removed_from_textbook")
         assert len(old_batch) == 0
-        data_after["sandbox_adaptation_batches"].append(
+        data_after["adaptation_batches"].append(
             {
                 "id": id,
                 "created_at": created_at,
@@ -198,7 +198,7 @@ def migrate_data(
                 "created_by_username": adaptation_created_by,
                 "exercise_id": adaptation_id,
                 "strategy_id": adaptation_strategy_id,
-                "sandbox_batch_id": adaptation_batch_id,
+                "adaptation_batch_id": adaptation_batch_id,
                 "raw_llm_conversations": adaptation_raw_llm_conversations,
                 "initial_assistant_response": adaptation_initial_assistant_response,
                 "adjustments": adaptation_adjustments,
@@ -263,8 +263,8 @@ def check_parsed_fields(session: database_utils.Session) -> None:
     for strategy_settings in session.query(orm_models.AdaptationStrategySettings).all():
         strategy_settings.created_at
         strategy_settings.response_specification
-    for batch in session.query(orm_models.SandboxAdaptationBatch).all():
-        batch.created_at
+    for adaptation_batch in session.query(orm_models.AdaptationBatch).all():
+        adaptation_batch.created_at
     for strategy in session.query(orm_models.AdaptationStrategy).all():
         strategy.created_at
     for textbook in session.query(orm_models.Textbook).all():

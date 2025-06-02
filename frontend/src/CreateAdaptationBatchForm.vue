@@ -3,18 +3,18 @@ import { computed, reactive, ref, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
 
-import { type LatestBatch, type LlmModel, useAuthenticatedClient } from './apiClient'
+import { type LatestAdaptationBatch, type LlmModel, useAuthenticatedClient } from './apiClient'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
-import { type InputWithFile } from './CreateBatchFormInputEditor.vue'
-import CreateBatchFormInputsEditor from './CreateBatchFormInputsEditor.vue'
+import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
+import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
   availableLlmModels: LlmModel[]
-  latestBatch: LatestBatch
+  latestAdaptationBatch: LatestAdaptationBatch
 }>()
 
 const router = useRouter()
@@ -23,10 +23,10 @@ const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const strategy = reactive(deepCopy(props.latestBatch.strategy))
-const inputs = reactive<InputWithFile[]>(deepCopy(props.latestBatch.inputs))
+const strategy = reactive(deepCopy(props.latestAdaptationBatch.strategy))
+const inputs = reactive<InputWithFile[]>(deepCopy(props.latestAdaptationBatch.inputs))
 watch(
-  () => props.latestBatch,
+  () => props.latestAdaptationBatch,
   (newValue) => {
     Object.assign(strategy, deepCopy(newValue.strategy))
     inputs.splice(0, inputs.length, ...deepCopy(newValue.inputs))
@@ -38,7 +38,7 @@ const busy = ref(false)
 async function submit() {
   busy.value = true
 
-  const response = await client.POST('/api/adaptation/batch', {
+  const response = await client.POST('/api/adaptation/adaptation-batch', {
     body: {
       creator: identifiedUser.identifier,
       strategy,
@@ -47,7 +47,7 @@ async function submit() {
   })
   busy.value = false
   if (response.data !== undefined) {
-    router.push({ name: 'batch', params: { id: response.data.id } })
+    router.push({ name: 'adaptation-batch', params: { id: response.data.id } })
   }
 }
 
@@ -61,7 +61,7 @@ const disabled = computed(() => {
   return strategy.settings.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
 })
 
-const availableStrategySettings = computed(() => props.latestBatch.availableStrategySettings)
+const availableStrategySettings = computed(() => props.latestAdaptationBatch.availableStrategySettings)
 </script>
 
 <template>
@@ -74,7 +74,7 @@ const availableStrategySettings = computed(() => props.latestBatch.availableStra
       <template #col-2>
         <h1>Inputs</h1>
         <p><button @click="submit" :disabled>Submit</button></p>
-        <CreateBatchFormInputsEditor headers="h2" v-model="inputs" />
+        <CreateAdaptationBatchFormInputsEditor headers="h2" v-model="inputs" />
       </template>
     </ResizableColumns>
   </BusyBox>

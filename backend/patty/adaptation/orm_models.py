@@ -49,8 +49,8 @@ class Textbook(OrmBase):
         back_populates="textbook", order_by=lambda: [BaseExercise.page_number, BaseExercise.exercise_number]
     )
 
-    batches: orm.Mapped[list[SandboxAdaptationBatch]] = orm.relationship(
-        back_populates="textbook", order_by=lambda: [SandboxAdaptationBatch.id]
+    adaptation_batches: orm.Mapped[list[AdaptationBatch]] = orm.relationship(
+        back_populates="textbook", order_by=lambda: [AdaptationBatch.id]
     )
 
 
@@ -248,8 +248,8 @@ class AdaptationStrategy(OrmBase):
         self._model = value.model_dump()
 
 
-class SandboxAdaptationBatch(OrmBase):
-    __tablename__ = "sandbox_adaptation_batches"
+class AdaptationBatch(OrmBase):
+    __tablename__ = "adaptation_batches"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -263,12 +263,12 @@ class SandboxAdaptationBatch(OrmBase):
 
     textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
     textbook: orm.Mapped[Textbook | None] = orm.relationship(
-        foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="batches"
+        foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="adaptation_batches"
     )
     removed_from_textbook: orm.Mapped[bool]
 
     adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
-        back_populates="sandbox_batch", order_by="Adaptation.id"
+        back_populates="adaptation_batch", order_by="Adaptation.id"
     )
 
 
@@ -290,9 +290,9 @@ class Adaptation(OrmBase):
         foreign_keys=[strategy_id], remote_side=[AdaptationStrategy.id]
     )
 
-    sandbox_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxAdaptationBatch.id))
-    sandbox_batch: orm.Mapped[SandboxAdaptationBatch] = orm.relationship(
-        foreign_keys=[sandbox_batch_id], remote_side=[SandboxAdaptationBatch.id], back_populates="adaptations"
+    adaptation_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationBatch.id))
+    adaptation_batch: orm.Mapped[AdaptationBatch] = orm.relationship(
+        foreign_keys=[adaptation_batch_id], remote_side=[AdaptationBatch.id], back_populates="adaptations"
     )
 
     # Help investigation of future issues

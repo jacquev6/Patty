@@ -181,34 +181,34 @@ describe('The autonomous HTML for a single adaptation', () => {
   })
 })
 
-describe('The autonomous HTML for a batch', () => {
+describe('The autonomous HTML for an adaptation batch', () => {
   before(login)
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-batch')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
   })
 
   it('is downloadable', () => {
     cy.task('deleteFolder', Cypress.config('downloadsFolder'))
-    cy.readFile(`${Cypress.config('downloadsFolder')}/test-batch-1.html`).should('not.exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`).should('not.exist')
 
-    visit('/batch-1')
+    visit('/adaptation-batch-1')
     cy.get('a:contains("Download standalone HTML")').click()
     cy.wait(1000)
     cy.get('a:contains("Download standalone HTML")').should('exist')
-    cy.readFile(`${Cypress.config('downloadsFolder')}/test-batch-1.html`)
+    cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`)
   })
 
   it('remembers student answers ands shares them with the autonomous HTML for a single adaptation', () => {
-    visitExport('/api/adaptation/export/batch-1.html')
+    visitExport('/api/adaptation/export/adaptation-batch-1.html')
     cy.get('a:contains("Exercise P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
     cy.get('[data-cy="choice0"]').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
-    visitExport('/api/adaptation/export/batch-1.html')
+    visitExport('/api/adaptation/export/adaptation-batch-1.html')
     cy.get('a:contains("Exercise P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
