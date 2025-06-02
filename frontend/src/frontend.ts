@@ -12,6 +12,7 @@ import EditAdaptationBatchView from './EditAdaptationBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
 import ExamplesView from './ExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
+import EditClassificationBatchView from './EditClassificationBatchView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -25,6 +26,12 @@ const router = createRouter({
       path: '/new-classification-batch',
       name: 'create-classification-batch',
       component: CreateClassificationBatchView,
+    },
+    {
+      path: '/classification-batch-:id',
+      name: 'classification-batch',
+      component: EditClassificationBatchView,
+      props: true,
     },
     {
       path: '/new-adaptation-batch',

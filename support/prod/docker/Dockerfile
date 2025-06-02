@@ -32,7 +32,7 @@ ENV PATTY_ENTRY_POINT_NAME=textbook-export
 RUN npx vite build
 
 
-FROM python:3.13-slim AS backend-dependencies
+FROM python:3.12-slim AS backend-dependencies
 
 RUN set -x \
  && apt-get update \
@@ -42,9 +42,10 @@ RUN set -x \
 
 WORKDIR /app
 
-ADD backend/requirements-run.txt .
+ADD backend/requirements-10-torch.txt .
+ADD backend/requirements-20-main.txt .
 
-RUN pip install -r requirements-run.txt uvicorn
+RUN pip install -r requirements-10-torch.txt backend/requirements-20-main.txt uvicorn
 
 
 FROM nginx:alpine AS final-frontend

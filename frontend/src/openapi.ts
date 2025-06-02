@@ -108,6 +108,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification-batches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Create Classification Batch */
+    post: operations['create_classification_batch_api_classification_batches_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification-batches/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Classification Batch */
+    get: operations['get_classification_batch_api_classification_batches__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks': {
     parameters: {
       query?: never
@@ -401,7 +435,7 @@ export interface components {
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
-      manualEdit: components['schemas']['Exercise-Output'] | null
+      manualEdit: components['schemas']['patty__adapted__Exercise-Output'] | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
@@ -513,7 +547,7 @@ export interface components {
        * @constant
        */
       kind: 'success'
-      exercise: components['schemas']['Exercise-Output']
+      exercise: components['schemas']['patty__adapted__Exercise-Output']
     }
     /** AssistantUnknownError */
     AssistantUnknownError: {
@@ -556,6 +590,19 @@ export interface components {
         | components['schemas']['Formatted-Output']
       )[]
     }
+    /** ClassificationInput */
+    ClassificationInput: {
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Instructionexamplehinttext */
+      instructionExampleHintText: string
+      /** Statementtext */
+      statementText: string
+    }
+    /** ClassificationStrategy */
+    ClassificationStrategy: Record<string, never>
     /** DummyModel */
     DummyModel: {
       /**
@@ -613,18 +660,6 @@ export interface components {
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-    }
-    'Exercise-Output': {
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v1'
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
     /** ExternalExercise */
     ExternalExercise: {
@@ -726,6 +761,22 @@ export interface components {
     GetAdaptationBatchesResponse: {
       /** Adaptationbatches */
       adaptationBatches: components['schemas']['patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch'][]
+    }
+    /** GetClassificationBatchResponse */
+    GetClassificationBatchResponse: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      strategy: components['schemas']['ClassificationStrategy']
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | null
+      /** Exercises */
+      exercises: components['schemas']['patty__api_router__GetClassificationBatchResponse__Exercise'][]
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1011,6 +1062,25 @@ export interface components {
       /** Id */
       id: string
     }
+    /** PostClassificationBatchRequest */
+    PostClassificationBatchRequest: {
+      /** Creator */
+      creator: string
+      strategy: components['schemas']['ClassificationStrategy']
+      /** Inputs */
+      inputs: components['schemas']['ClassificationInput'][]
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | null
+    }
+    /** PostClassificationBatchResponse */
+    PostClassificationBatchResponse: {
+      /** Id */
+      id: string
+    }
     /** PostTextbookAdaptationBatchRequest */
     PostTextbookAdaptationBatchRequest: {
       /** Creator */
@@ -1238,6 +1308,18 @@ export interface components {
        */
       kind: 'whitespace'
     }
+    'patty__adapted__Exercise-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+    }
     /** AdaptationBatch */
     patty__api_router__ApiTextbook__AdaptationBatch: {
       /** Id */
@@ -1266,6 +1348,17 @@ export interface components {
         | components['schemas']['OpenAiModel']
       /** Strategysettingsname */
       strategySettingsName: string | null
+    }
+    /** Exercise */
+    patty__api_router__GetClassificationBatchResponse__Exercise: {
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Exerciseclass */
+      exerciseClass: string | null
     }
   }
   responses: never
@@ -1479,6 +1572,70 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetAdaptationBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  create_classification_batch_api_classification_batches_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostClassificationBatchRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostClassificationBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_classification_batch_api_classification_batches__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetClassificationBatchResponse']
         }
       }
       /** @description Validation Error */

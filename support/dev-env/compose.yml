@@ -121,7 +121,7 @@ services:
       - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
-    command: ["pip", "install", "--user", "-r", "requirements-dev.txt", "-r", "requirements-run.txt"]
+    command: ["bash", "-c", "pip install --upgrade pip; for req in requirements-*.txt; do pip --cache-dir /home/patty/.local/cache install -r $$req; done"]
   migrator:
     image: patty-dev_backend
     pull_policy: never

@@ -742,6 +742,10 @@ class FixturesCreator:
             ),
         )
 
+    def create_dummy_coche_exercise_classes(self) -> None:
+        self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
+        self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
+
 
 def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)
@@ -754,8 +758,9 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             creator.create_dummy_adaptation_strategy,
             creator.create_dummy_adaptation,
             creator.create_dummy_branch,
-            creator.create_dummy_textbook,
+            creator.create_dummy_coche_exercise_classes,
             creator.create_dummy_textbook_with_text_exercise_numbers,
+            creator.create_dummy_textbook,
             creator.create_mixed_dummy_adaptation_batch,
             creator.create_seed_data,
         )

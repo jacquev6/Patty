@@ -39,7 +39,7 @@ def migrate_data(
         "adaptation_strategy_settings",
         "adaptations",
         "classification_strategies",
-        "classifications",
+        "classification_batches",
         "exercise_classes",
         "exercises",
         "external_exercises",
@@ -223,7 +223,7 @@ def migrate_data(
                 "created_by_extraction_id": None,
                 "full_text": input_text,
                 "classified_at": None if exercise_class_id is None else migration_date,
-                "classified_by_classification_id": None,
+                "classified_by_classification_batch_id": None,
                 "classified_by_username": None if exercise_class_id is None else adaptation_created_by,
                 "exercise_class_id": exercise_class_id,
             }

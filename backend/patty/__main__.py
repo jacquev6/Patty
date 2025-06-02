@@ -1,3 +1,5 @@
+import time
+import traceback
 from typing import Iterable
 import asyncio
 import datetime
@@ -133,14 +135,42 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 
 @main.command()
-@click.option("--parallelism", type=int, default=1)
+@click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(parallelism: int, pause: float) -> None:
+def run_submission_daemon(adaptation_parallelism: int, pause: float) -> None:
+    import requests
+
     from . import database_utils
-    from .adaptation import submission
+    from .adaptation.submission import submit_adaptations
+    from .classification import submit_classifications
+
+    def log(message: str) -> None:
+        # @todo Use actual logging
+        print(datetime.datetime.now(), message, flush=True)
 
     engine = database_utils.create_engine(settings.DATABASE_URL)
-    asyncio.run(submission.daemon(engine, parallelism, pause))
+
+    async def daemon() -> None:
+        last_time = time.monotonic()
+        while True:
+            log("Waking up...")
+            try:
+                with database_utils.Session(engine) as session:
+                    submit_classifications(session)
+                    submissions = submit_adaptations(session, adaptation_parallelism)
+                    await asyncio.gather(*submissions)
+                    session.commit()
+                if time.monotonic() >= last_time + 60:
+                    log("Calling pulse monitoring URL")
+                    last_time = time.monotonic()
+                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+            except:  # Pokemon programming: gotta catch 'em all
+                log("UNEXPECTED ERROR")
+                traceback.print_exc()
+            log(f"Sleeping for {pause}s...")
+            await asyncio.sleep(pause)
+
+    asyncio.run(daemon())
 
 
 parsed_database_url = urllib.parse.urlparse(settings.DATABASE_URL)

@@ -3,7 +3,7 @@ import glob
 import os
 import subprocess
 
-from .compose import run_alembic, run_in_backend_container, run_in_frontend_container
+from .compose import run_alembic, run_in_backend_container, run_in_frontend_container, restart
 
 
 class DevelopmentCycleError(Exception):
@@ -116,5 +116,7 @@ class DevelopmentCycle:
                     specs = []
                 else:
                     specs = ["--spec", ",".join(self.end_to_end_specs)]
+
+                restart("submission-daemon")
                 for browser in self.browsers:
                     run_in_frontend_container(["npx", "cypress", "run", "--e2e", "--browser", browser] + specs)

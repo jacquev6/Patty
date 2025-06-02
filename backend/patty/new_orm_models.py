@@ -91,16 +91,42 @@ class ClassificationStrategy(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
 
-class Classification(OrmBase):
-    __tablename__ = "classifications"
+
+class ClassificationBatch(OrmBase):
+    __tablename__ = "classification_batches"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationStrategy.id))
     strategy: orm.Mapped[ClassificationStrategy] = orm.relationship(
         foreign_keys=[strategy_id], remote_side=[ClassificationStrategy.id]
     )
+
+    exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
+        back_populates="classified_by_classification_batch", order_by=lambda: [AdaptableExercise.id]
+    )
+
+    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> llm.ConcreteModel | None:
+        if self._model_for_adaptation is None:
+            return None
+        else:
+            return pydantic.RootModel[llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: llm.ConcreteModel | None) -> None:
+        if value is None:
+            self._model_for_adaptation = sql.null()
+        else:
+            self._model_for_adaptation = value.model_dump()
 
 
 class ExerciseClass(OrmBase):
@@ -181,11 +207,17 @@ class AdaptableExercise(BaseExercise):
     )
 
     full_text: orm.Mapped[str]
+    instruction_example_hint_text: orm.Mapped[str | None]
+    statement_text: orm.Mapped[str | None]
 
     classified_at: orm.Mapped[datetime.datetime | None] = orm.mapped_column(sql.DateTime(timezone=True))
-    classified_by_classification_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Classification.id))
-    classified_by_classification: orm.Mapped[Classification | None] = orm.relationship(
-        foreign_keys=[classified_by_classification_id], remote_side=[Classification.id]
+    classified_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
+        sql.ForeignKey(ClassificationBatch.id)
+    )
+    classified_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
+        foreign_keys=[classified_by_classification_batch_id],
+        remote_side=[ClassificationBatch.id],
+        back_populates="exercises",
     )
     classified_by_username: orm.Mapped[str | None]
     exercise_class_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseClass.id))
@@ -292,8 +324,8 @@ class Adaptation(OrmBase):
         foreign_keys=[strategy_id], remote_side=[AdaptationStrategy.id]
     )
 
-    adaptation_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationBatch.id))
-    adaptation_batch: orm.Mapped[AdaptationBatch] = orm.relationship(
+    adaptation_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(AdaptationBatch.id))
+    adaptation_batch: orm.Mapped[AdaptationBatch | None] = orm.relationship(
         foreign_keys=[adaptation_batch_id], remote_side=[AdaptationBatch.id], back_populates="adaptations"
     )
 

@@ -10,6 +10,7 @@ import boto3
 import botocore.client
 import fastapi
 import fastapi.testclient
+import sqlalchemy as sql
 
 from . import authentication
 from . import database_utils
@@ -91,7 +92,15 @@ def get_latest_adaptation_batch(user: str, session: database_utils.SessionDepend
             break
     assert adaptation_batch is not None
     available_strategy_settings = []
-    for exercise_class in session.query(db.ExerciseClass).order_by(db.ExerciseClass.name).all():
+    for exercise_class in (
+        session.execute(
+            sql.select(db.ExerciseClass)
+            .where(db.ExerciseClass.latest_strategy_settings != None)
+            .order_by(db.ExerciseClass.name)
+        )
+        .scalars()
+        .all()
+    ):
         assert exercise_class.latest_strategy_settings is not None
         available_strategy_settings.append(make_api_strategy_settings(exercise_class.latest_strategy_settings))
         if exercise_class.latest_strategy_settings.parent is not None:
@@ -118,7 +127,7 @@ class PostAdaptationBatchResponse(ApiModel):
 
 @api_router.post("/adaptation-batches")
 async def post_adaptation_batch(
-    req: PostAdaptationBatchRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
+    req: PostAdaptationBatchRequest, session: database_utils.SessionDependable
 ) -> PostAdaptationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -185,9 +194,11 @@ async def post_adaptation_batch(
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
             full_text=req_input.text,
+            instruction_example_hint_text=None,
+            statement_text=None,
             classified_at=now,
             classified_by_username=req.creator,
-            classified_by_classification_id=None,
+            classified_by_classification_batch=None,
             exercise_class=exercise_class,
         )
         session.add(exercise)
@@ -258,6 +269,104 @@ async def get_adaptation_batches(session: database_utils.SessionDependable) -> G
             )
             for adaptation_batch in adaptation_batches
         ]
+    )
+
+
+class ClassificationStrategy(ApiModel):
+    pass
+
+
+class ClassificationInput(ApiModel):
+    page_number: int | None
+    exercise_number: str | None
+    instruction_example_hint_text: str
+    statement_text: str
+
+
+class PostClassificationBatchRequest(ApiModel):
+    creator: str
+    strategy: ClassificationStrategy
+    inputs: list[ClassificationInput]
+    model_for_adaptation: llm.ConcreteModel | None
+
+
+class PostClassificationBatchResponse(ApiModel):
+    id: str
+
+
+@api_router.post("/classification-batches")
+def create_classification_batch(
+    req: PostClassificationBatchRequest, session: database_utils.SessionDependable
+) -> PostClassificationBatchResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    strategy = db.ClassificationStrategy(created_by_username=req.creator, created_at=now)
+    session.add(strategy)
+    classification_batch = db.ClassificationBatch(
+        created_by_username=req.creator,
+        created_at=now,
+        strategy=strategy,
+        model_for_adaptation=req.model_for_adaptation,
+    )
+    session.add(classification_batch)
+
+    for req_input in req.inputs:
+        exercise = db.AdaptableExercise(
+            created_by_username=req.creator,
+            created_by_extraction_id=None,
+            created_at=now,
+            textbook=None,
+            removed_from_textbook=False,
+            page_number=req_input.page_number,
+            exercise_number=req_input.exercise_number,
+            full_text=req_input.instruction_example_hint_text + "\n" + req_input.statement_text,
+            instruction_example_hint_text=req_input.instruction_example_hint_text,
+            statement_text=req_input.statement_text,
+            classified_at=None,
+            classified_by_username=None,
+            classified_by_classification_batch=classification_batch,
+            exercise_class=None,
+        )
+        session.add(exercise)
+
+    session.flush()
+
+    return PostClassificationBatchResponse(id=str(classification_batch.id))
+
+
+class GetClassificationBatchResponse(ApiModel):
+    id: str
+    created_by: str
+    strategy: ClassificationStrategy
+    model_for_adaptation: llm.ConcreteModel | None
+
+    class Exercise(ApiModel):
+        page_number: int | None
+        exercise_number: str | None
+        full_text: str
+        exercise_class: str | None
+
+    exercises: list[Exercise]
+
+
+@api_router.get("/classification-batches/{id}")
+async def get_classification_batch(
+    id: str, session: database_utils.SessionDependable
+) -> GetClassificationBatchResponse:
+    classification_batch = get_by_id(session, db.ClassificationBatch, id)
+    return GetClassificationBatchResponse(
+        id=str(classification_batch.id),
+        created_by=classification_batch.created_by_username,
+        strategy=ClassificationStrategy(),
+        model_for_adaptation=classification_batch.model_for_adaptation,
+        exercises=[
+            GetClassificationBatchResponse.Exercise(
+                page_number=exercise.page_number,
+                exercise_number=exercise.exercise_number,
+                full_text=exercise.full_text,
+                exercise_class=exercise.exercise_class.name if exercise.exercise_class else None,
+            )
+            for exercise in classification_batch.exercises
+        ],
     )
 
 
@@ -397,9 +506,11 @@ def post_textbook_adaptation_batch(
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
             full_text=req_input.text,
+            instruction_example_hint_text=None,
+            statement_text=None,
             classified_at=now,
             classified_by_username=req.creator,
-            classified_by_classification_id=None,
+            classified_by_classification_batch=None,
             exercise_class=exercise_class,
         )
         session.add(exercise)
@@ -439,6 +550,7 @@ def put_textbook_adaptation_removed(
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
     adaptation = get_by_id(session, db.Adaptation, adaptation_id)
+    assert adaptation.adaptation_batch is not None
     assert adaptation.adaptation_batch.textbook == textbook
     adaptation.exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)

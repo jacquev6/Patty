@@ -81,9 +81,9 @@ defineExpose({
     <InputForNonEmptyStringOrNull data-cy="input-exercise-number" v-model="exerciseNumberProxy" />
   </p>
   <p>Instruction, example, hint:</p>
-  <TextArea ref="textArea" id="input-text" data-cy="input-text" v-model="instructionExampleHintTextProxy"></TextArea>
+  <TextArea ref="textArea" data-cy="input-instruction-text" v-model="instructionExampleHintTextProxy"></TextArea>
   <p>Statement:</p>
-  <TextArea id="input-text" data-cy="input-text" v-model="statementTextProxy"></TextArea>
+  <TextArea data-cy="input-statement-text" v-model="statementTextProxy"></TextArea>
 </template>
 
 <style scoped>

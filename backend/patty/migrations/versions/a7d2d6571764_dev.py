@@ -15,6 +15,8 @@ def upgrade() -> None:
     op.create_table(
         "classification_strategies",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("created_by_username", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_classification_strategies")),
     )
     op.create_table(
@@ -72,15 +74,18 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_strategy_settings")),
     )
     op.create_table(
-        "classifications",
+        "classification_batches",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
+        sa.Column("model_for_adaptation", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["strategy_id"],
             ["classification_strategies.id"],
-            name=op.f("fk_classifications_strategy_id_classification_strategies"),
+            name=op.f("fk_classification_batches_strategy_id_classification_strategies"),
         ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_classifications")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_classification_batches")),
     )
     op.create_table(
         "exercises",
@@ -152,14 +157,16 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_by_extraction_id", sa.Integer(), nullable=True),
         sa.Column("full_text", sa.String(), nullable=False),
+        sa.Column("instruction_example_hint_text", sa.String(), nullable=True),
+        sa.Column("statement_text", sa.String(), nullable=True),
         sa.Column("classified_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("classified_by_classification_id", sa.Integer(), nullable=True),
+        sa.Column("classified_by_classification_batch_id", sa.Integer(), nullable=True),
         sa.Column("classified_by_username", sa.String(), nullable=True),
         sa.Column("exercise_class_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["classified_by_classification_id"],
-            ["classifications.id"],
-            name=op.f("fk_adaptable_exercises_classified_by_classification_id_classifications"),
+            ["classified_by_classification_batch_id"],
+            ["classification_batches.id"],
+            name=op.f("fk_adaptable_exercises_classified_by_classification_batch_id_classification_batches"),
         ),
         sa.ForeignKeyConstraint(
             ["created_by_extraction_id"],
@@ -199,7 +206,7 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("exercise_id", sa.Integer(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
-        sa.Column("adaptation_batch_id", sa.Integer(), nullable=False),
+        sa.Column("adaptation_batch_id", sa.Integer(), nullable=True),
         sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),
         sa.Column("initial_assistant_response", sa.JSON(), nullable=True),
         sa.Column("adjustments", sa.JSON(), nullable=False),

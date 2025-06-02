@@ -1,16 +1,13 @@
-import asyncio
 import datetime
-import time
 import traceback
+import typing
 
-import requests
 
 from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
 from ..new_orm_models import Adaptation
-from .. import settings
 
 
 # @todo Reload code changes in the development environment
@@ -30,34 +27,14 @@ LlmMessage = (
 )
 
 
-async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) -> None:
-    last_time = time.monotonic()
-    while True:
-        log("Waking up...")
-        try:
-            with database_utils.Session(engine) as session:
-                adaptations = (
-                    session.query(Adaptation)
-                    .filter(Adaptation._initial_assistant_response == None)
-                    .limit(parallelism)
-                    .all()
-                )
-                if len(adaptations) == 0:
-                    log("No not-yet-submitted adaptation found")
-                else:
-                    log(f"Found adaptation(s) {' '.join([str(adaptation.id) for adaptation in adaptations])}")
-                    submissions = [submit_adaptation(adaptation) for adaptation in adaptations]
-                    await asyncio.gather(*submissions)
-                    session.commit()
-            if time.monotonic() >= last_time + 60:
-                log("Calling pulse monitoring URL")
-                last_time = time.monotonic()
-                requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
-        except:  # Pokemon programming: gotta catch 'em all
-            log("UNEXPECTED ERROR")
-            traceback.print_exc()
-        log(f"Sleeping for {pause}s...")
-        await asyncio.sleep(pause)
+def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
+    adaptations = (
+        session.query(Adaptation).filter(Adaptation._initial_assistant_response == None).limit(parallelism).all()
+    )
+    log(
+        f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
+    )
+    return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 
 async def submit_adaptation(adaptation: Adaptation) -> None:

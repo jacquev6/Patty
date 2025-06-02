@@ -2,6 +2,7 @@ black
 graphviz
 httpie
 mypy
+pandas-stubs
 types-boto3
 types-psycopg2
 types-requests

@@ -275,6 +275,93 @@
         }
       }
     },
+    "/api/classification-batches": {
+      "post": {
+        "summary": "Create Classification Batch",
+        "operationId": "create_classification_batch_api_classification_batches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostClassificationBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostClassificationBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/classification-batches/{id}": {
+      "get": {
+        "summary": "Get Classification Batch",
+        "operationId": "get_classification_batch_api_classification_batches__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClassificationBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/textbooks": {
       "get": {
         "summary": "Get Textbooks",
@@ -1217,7 +1304,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise-Output"
+                "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
               },
               {
                 "type": "null"
@@ -1533,7 +1620,7 @@
             "title": "Kind"
           },
           "exercise": {
-            "$ref": "#/components/schemas/Exercise-Output"
+            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
           }
         },
         "additionalProperties": false,
@@ -1632,6 +1719,55 @@
           "kind",
           "contents"
         ]
+      },
+      "ClassificationInput": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "instructionExampleHintText": {
+            "type": "string",
+            "title": "Instructionexamplehinttext"
+          },
+          "statementText": {
+            "type": "string",
+            "title": "Statementtext"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "instructionExampleHintText",
+          "statementText"
+        ],
+        "title": "ClassificationInput"
+      },
+      "ClassificationStrategy": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ClassificationStrategy"
       },
       "DummyModel": {
         "properties": {
@@ -1755,60 +1891,6 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "format",
-          "instruction",
-          "example",
-          "hint",
-          "statement",
-          "reference"
-        ]
-      },
-      "Exercise-Output": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "const": "v1",
-            "title": "Format"
-          },
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
               },
               {
                 "type": "null"
@@ -2122,6 +2204,55 @@
           "adaptationBatches"
         ],
         "title": "GetAdaptationBatchesResponse"
+      },
+      "GetClassificationBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ClassificationStrategy"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__GetClassificationBatchResponse__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "strategy",
+          "modelForAdaptation",
+          "exercises"
+        ],
+        "title": "GetClassificationBatchResponse"
       },
       "GetTextbookResponse": {
         "properties": {
@@ -2838,6 +2969,64 @@
         ],
         "title": "PostAdaptationBatchResponse"
       },
+      "PostClassificationBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ClassificationStrategy"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "strategy",
+          "inputs",
+          "modelForAdaptation"
+        ],
+        "title": "PostClassificationBatchRequest"
+      },
+      "PostClassificationBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostClassificationBatchResponse"
+      },
       "PostTextbookAdaptationBatchRequest": {
         "properties": {
           "creator": {
@@ -3362,6 +3551,60 @@
           "kind"
         ]
       },
+      "patty__adapted__Exercise-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instruction",
+          "example",
+          "hint",
+          "statement",
+          "reference"
+        ]
+      },
       "patty__api_router__ApiTextbook__AdaptationBatch": {
         "properties": {
           "id": {
@@ -3444,6 +3687,56 @@
           "strategySettingsName"
         ],
         "title": "AdaptationBatch"
+      },
+      "patty__api_router__GetClassificationBatchResponse__Exercise": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "type": "string",
+            "title": "Fulltext"
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass"
+        ],
+        "title": "Exercise"
       }
     },
     "securitySchemes": {

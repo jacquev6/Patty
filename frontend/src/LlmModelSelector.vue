@@ -50,7 +50,10 @@ const llmName = computed({
 </script>
 
 <template>
-  <template v-if="disabled">Provider: {{ model.provider }}, model: {{ model.name }}</template>
+  <template v-if="disabled"
+    ><slot name="provider">Provider:</slot> {{ model.provider }}<slot name="model">, model:</slot>
+    {{ model.name }}</template
+  >
   <template v-else>
     <slot name="provider">Provider:</slot><WhiteSpace />
     <select data-cy="llm-provider" v-model="llmProvider">
