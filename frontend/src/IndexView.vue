@@ -13,12 +13,8 @@ const adaptationBatches = reactive<AdaptationBatches['adaptationBatches']>([])
 const textbooks = reactive<Textbooks['textbooks']>([])
 
 onMounted(async () => {
-  const adaptationBatchesPromise = client.GET(
-    '/api/adaptation/adaptation-batches' /*, {headers: {Authorization: `Bearer ${authenticationTokenStore.token}`}}*/,
-  )
-  const textbooksPromise = client.GET(
-    '/api/adaptation/textbooks' /*, {headers: {Authorization: `Bearer ${authenticationTokenStore.token}`}}*/,
-  )
+  const adaptationBatchesPromise = client.GET('/api/adaptation/adaptation-batches')
+  const textbooksPromise = client.GET('/api/adaptation/textbooks')
 
   const adaptationBatchesResponse = await adaptationBatchesPromise
   assert(adaptationBatchesResponse.data !== undefined)
