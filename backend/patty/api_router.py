@@ -57,7 +57,8 @@ class ApiInput(ApiModel):
 class ApiAdaptation(ApiModel):
     id: str
     created_by: str
-    adaptation_batch_id: str
+    classification_batch_id: str | None
+    adaptation_batch_id: str | None
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -207,6 +208,7 @@ async def post_adaptation_batch(
         adaptation = db.Adaptation(
             created_by_username=req.creator,
             created_at=now,
+            classification_batch=None,
             adaptation_batch=adaptation_batch,
             strategy=strategy,
             exercise=exercise,
@@ -549,6 +551,7 @@ def post_textbook_adaptation_batch(
         adaptation = db.Adaptation(
             created_by_username=req.creator,
             created_at=now,
+            classification_batch=None,
             adaptation_batch=adaptation_batch,
             strategy=strategy,
             exercise=exercise,
@@ -746,7 +749,10 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         created_by=adaptation.created_by_username,
-        adaptation_batch_id=str(adaptation.adaptation_batch_id),
+        classification_batch_id=(
+            None if adaptation.classification_batch_id is None else str(adaptation.classification_batch_id)
+        ),
+        adaptation_batch_id=None if adaptation.adaptation_batch_id is None else str(adaptation.adaptation_batch_id),
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.exercise),
         raw_llm_conversations=adaptation.raw_llm_conversations,

@@ -421,8 +421,10 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string
+      /** Classificationbatchid */
+      classificationBatchId: string | null
       /** Adaptationbatchid */
-      adaptationBatchId: string
+      adaptationBatchId: string | null
       strategy: components['schemas']['ApiStrategy-Output']
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */

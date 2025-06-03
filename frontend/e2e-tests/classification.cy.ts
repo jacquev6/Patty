@@ -87,6 +87,9 @@ describe('The classification batch creation page', () => {
     cy.get('div.busy').should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
 
+    cy.visit('/adaptation-2')
+    cy.get('a:contains("this batch")').should('have.attr', 'href', '/classification-batch-1')
+
     cy.visit('/new-adaptation-batch')
     cy.get('[data-cy="settings-name"]').type('VraiFaux', { delay: 0 })
     cy.get('button:contains("Submit")').click()

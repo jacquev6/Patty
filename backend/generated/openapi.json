@@ -1280,8 +1280,26 @@
             "type": "string",
             "title": "Createdby"
           },
+          "classificationBatchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classificationbatchid"
+          },
           "adaptationBatchId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Adaptationbatchid"
           },
           "strategy": {
@@ -1342,6 +1360,7 @@
         "required": [
           "id",
           "createdBy",
+          "classificationBatchId",
           "adaptationBatchId",
           "strategy",
           "input",

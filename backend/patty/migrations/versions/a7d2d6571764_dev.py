@@ -206,6 +206,7 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("exercise_id", sa.Integer(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
+        sa.Column("classification_batch_id", sa.Integer(), nullable=True),
         sa.Column("adaptation_batch_id", sa.Integer(), nullable=True),
         sa.Column("raw_llm_conversations", sa.JSON(), nullable=False),
         sa.Column("initial_assistant_response", sa.JSON(), nullable=True),
@@ -215,6 +216,11 @@ def upgrade() -> None:
             ["adaptation_batch_id"],
             ["adaptation_batches.id"],
             name=op.f("fk_adaptations_adaptation_batch_id_adaptation_batches"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["classification_batch_id"],
+            ["classification_batches.id"],
+            name=op.f("fk_adaptations_classification_batch_id_classification_batches"),
         ),
         sa.ForeignKeyConstraint(
             ["exercise_id"], ["adaptable_exercises.id"], name=op.f("fk_adaptations_exercise_id_adaptable_exercises")

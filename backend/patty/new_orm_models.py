@@ -128,6 +128,10 @@ class ClassificationBatch(OrmBase):
         else:
             self._model_for_adaptation = value.model_dump()
 
+    adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
+        back_populates="classification_batch", order_by="Adaptation.id"
+    )
+
 
 class ExerciseClass(OrmBase):
     __tablename__ = "exercise_classes"
@@ -322,6 +326,11 @@ class Adaptation(OrmBase):
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationStrategy.id))
     strategy: orm.Mapped[AdaptationStrategy] = orm.relationship(
         foreign_keys=[strategy_id], remote_side=[AdaptationStrategy.id]
+    )
+
+    classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ClassificationBatch.id))
+    classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
+        foreign_keys=[classification_batch_id], remote_side=[ClassificationBatch.id], back_populates="adaptations"
     )
 
     adaptation_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(AdaptationBatch.id))

@@ -549,6 +549,12 @@ describe('The adaptation edition page', () => {
 
     cy.get('h1:contains("Not found")').should('exist')
   })
+
+  it('has a link to its adaptation batch', () => {
+    visit('/adaptation-1')
+
+    cy.get('a:contains("this batch")').should('have.attr', 'href', '/adaptation-batch-1')
+  })
 })
 
 function setUpAliases() {

@@ -113,6 +113,7 @@ def submit_classifications(session: database_utils.Session) -> None:
                     created_by_username="Classification",
                     exercise=exercise,
                     strategy=adaptation_strategy,
+                    classification_batch=batch,
                     adaptation_batch=None,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
