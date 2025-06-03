@@ -37,7 +37,7 @@ describe('The classification batch creation page', () => {
     cy.get('p:contains("Adaptation was not requested.")').should('exist')
   })
 
-  it('creates a new classification batch with adaptation afterwards and refreshes it until it is done', () => {
+  it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class', () => {
     cy.get('[data-cy="run-adaptation"]').select('yes')
     cy.get('[data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="llm-name"]').select('dummy-1')
@@ -74,6 +74,7 @@ describe('The classification batch creation page', () => {
       .type('a. Bleu est une couleur\nb. Un triangle a quatre côtés', { delay: 0 })
 
     cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('eq', '/classification-batch-1')
     cy.get('p:contains("Created by: Alice")').should('exist')
     cy.get(
       'p:contains("Run adaptation after classification: yes, using provider dummy and model dummy-1 with the latest settings for each known exercise class.")',
@@ -85,5 +86,17 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 3: VraiFaux")').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
+
+    cy.visit('/new-adaptation-batch')
+    cy.get('[data-cy="settings-name"]').type('VraiFaux', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("Created by: Alice")').should('exist')
+    cy.get('div.busy').should('not.exist')
+
+    cy.visit('/classification-batch-1')
+    cy.get(
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+    ).should('exist')
+    // @todo Submit the adaptation using the new settings.
   })
 })

@@ -149,8 +149,9 @@ async def post_adaptation_batch(
             )
             session.add(exercise_class)
         else:
-            assert exercise_class.latest_strategy_settings is not None
-            if branch_name == req.strategy.settings.name:
+            if exercise_class.latest_strategy_settings is None:
+                base_settings = None
+            elif branch_name == req.strategy.settings.name:
                 base_settings = exercise_class.latest_strategy_settings
             else:
                 base_settings = exercise_class.latest_strategy_settings.parent

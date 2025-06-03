@@ -66,11 +66,15 @@ watch(Escape, () => {
       </template>
       <template #col-2>
         <template v-if="adaptation === null">
-          <p v-if="adaptationWasRequested && exercise.exerciseClass !== null && !exercise.exerciseClassHasSettings">
+          <p v-if="!adaptationWasRequested">Adaptation was not requested.</p>
+          <BusyBox v-else-if="exercise.exerciseClass == null" :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
+          <p v-else-if="!exercise.exerciseClassHasSettings">
             Exercise class <b>{{ exercise.exerciseClass }}</b> does not have adaptation settings yet.
           </p>
-          <p v-else-if="!adaptationWasRequested">Adaptation was not requested.</p>
-          <BusyBox v-else :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
+          <p v-else>
+            Exercise class <b>{{ exercise.exerciseClass }}</b> did not have adaptation settings when this classification
+            batch was submitted.
+          </p>
         </template>
         <template v-else-if="adaptation.status.kind === 'inProgress'">
           <BusyBox :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
