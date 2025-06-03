@@ -76,7 +76,7 @@ def submit_classifications(session: database_utils.Session) -> None:
         dataframe = pd.DataFrame(
             {
                 "id": exercise.id,
-                "instruction": exercise.instruction_example_hint_text,
+                "instruction": exercise.instruction_hint_example_text,
                 "statement": exercise.statement_text,
             }
             for exercise in exercises

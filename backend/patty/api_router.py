@@ -196,7 +196,7 @@ async def post_adaptation_batch(
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
             full_text=req_input.text,
-            instruction_example_hint_text=None,
+            instruction_hint_example_text=None,
             statement_text=None,
             classified_at=now,
             classified_by_username=req.creator,
@@ -282,7 +282,7 @@ class ClassificationStrategy(ApiModel):
 class ClassificationInput(ApiModel):
     page_number: int | None
     exercise_number: str | None
-    instruction_example_hint_text: str
+    instruction_hint_example_text: str
     statement_text: str
 
 
@@ -321,8 +321,8 @@ def create_classification_batch(
             removed_from_textbook=False,
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
-            full_text=req_input.instruction_example_hint_text + "\n" + req_input.statement_text,
-            instruction_example_hint_text=req_input.instruction_example_hint_text,
+            full_text=req_input.instruction_hint_example_text + "\n" + req_input.statement_text,
+            instruction_hint_example_text=req_input.instruction_hint_example_text,
             statement_text=req_input.statement_text,
             classified_at=None,
             classified_by_username=None,
@@ -539,7 +539,7 @@ def post_textbook_adaptation_batch(
             page_number=req_input.page_number,
             exercise_number=req_input.exercise_number,
             full_text=req_input.text,
-            instruction_example_hint_text=None,
+            instruction_hint_example_text=None,
             statement_text=None,
             classified_at=now,
             classified_by_username=req.creator,

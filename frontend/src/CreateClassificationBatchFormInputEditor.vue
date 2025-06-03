@@ -3,7 +3,7 @@ export type InputWithFile = {
   pageNumber: number | null
   exerciseNumber: string | null
   inputFile?: string
-  instructionExampleHintText: string
+  instructionHintExampleText: string
   statementText: string
 }
 </script>
@@ -38,10 +38,10 @@ const exerciseNumberProxy = computed({
   },
 })
 
-const instructionExampleHintTextProxy = computed({
-  get: () => model.value.instructionExampleHintText,
+const instructionHintExampleTextProxy = computed({
+  get: () => model.value.instructionHintExampleText,
   set: (value) => {
-    model.value.instructionExampleHintText = value
+    model.value.instructionHintExampleText = value
     model.value.inputFile = undefined
   },
 })
@@ -71,7 +71,7 @@ defineExpose({
     <template v-if="model.inputFile !== undefined">
       <span class="discreet">({{ model.inputFile }})</span>
     </template>
-    <template v-if="model.instructionExampleHintText.trim() === '' && model.statementText.trim() === ''">
+    <template v-if="model.instructionHintExampleText.trim() === '' && model.statementText.trim() === ''">
       <WhiteSpace />
       <span class="discreet">(empty, ignored)</span>
     </template>
@@ -80,8 +80,8 @@ defineExpose({
     Page: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />, exercise:
     <InputForNonEmptyStringOrNull data-cy="input-exercise-number" v-model="exerciseNumberProxy" />
   </p>
-  <p>Instruction, example, hint:</p>
-  <TextArea ref="textArea" data-cy="input-instruction-text" v-model="instructionExampleHintTextProxy"></TextArea>
+  <p>Instruction, hint and example:</p>
+  <TextArea ref="textArea" data-cy="input-instruction-text" v-model="instructionHintExampleTextProxy"></TextArea>
   <p>Statement:</p>
   <TextArea data-cy="input-statement-text" v-model="statementTextProxy"></TextArea>
 </template>

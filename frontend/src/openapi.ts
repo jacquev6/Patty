@@ -611,8 +611,8 @@ export interface components {
       pageNumber: number | null
       /** Exercisenumber */
       exerciseNumber: string | null
-      /** Instructionexamplehinttext */
-      instructionExampleHintText: string
+      /** Instructionhintexampletext */
+      instructionHintExampleText: string
       /** Statementtext */
       statementText: string
     }

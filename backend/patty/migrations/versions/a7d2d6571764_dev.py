@@ -157,7 +157,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("created_by_extraction_id", sa.Integer(), nullable=True),
         sa.Column("full_text", sa.String(), nullable=False),
-        sa.Column("instruction_example_hint_text", sa.String(), nullable=True),
+        sa.Column("instruction_hint_example_text", sa.String(), nullable=True),
         sa.Column("statement_text", sa.String(), nullable=True),
         sa.Column("classified_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("classified_by_classification_batch_id", sa.Integer(), nullable=True),

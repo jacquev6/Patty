@@ -211,7 +211,7 @@ class AdaptableExercise(BaseExercise):
     )
 
     full_text: orm.Mapped[str]
-    instruction_example_hint_text: orm.Mapped[str | None]
+    instruction_hint_example_text: orm.Mapped[str | None]
     statement_text: orm.Mapped[str | None]
 
     classified_at: orm.Mapped[datetime.datetime | None] = orm.mapped_column(sql.DateTime(timezone=True))

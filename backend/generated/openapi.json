@@ -1809,9 +1809,9 @@
             ],
             "title": "Exercisenumber"
           },
-          "instructionExampleHintText": {
+          "instructionHintExampleText": {
             "type": "string",
-            "title": "Instructionexamplehinttext"
+            "title": "Instructionhintexampletext"
           },
           "statementText": {
             "type": "string",
@@ -1823,7 +1823,7 @@
         "required": [
           "pageNumber",
           "exerciseNumber",
-          "instructionExampleHintText",
+          "instructionHintExampleText",
           "statementText"
         ],
         "title": "ClassificationInput"

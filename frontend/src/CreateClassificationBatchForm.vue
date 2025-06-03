@@ -31,11 +31,11 @@ const busy = ref(false)
 
 const cleanedUpInputs = computed(() =>
   inputs
-    .filter((input) => input.instructionExampleHintText.trim() !== '' || input.statementText.trim() !== '')
-    .map(({ pageNumber, exerciseNumber, instructionExampleHintText, statementText }) => ({
+    .filter((input) => input.instructionHintExampleText.trim() !== '' || input.statementText.trim() !== '')
+    .map(({ pageNumber, exerciseNumber, instructionHintExampleText, statementText }) => ({
       pageNumber,
       exerciseNumber,
-      instructionExampleHintText,
+      instructionHintExampleText,
       statementText,
     })),
 )
@@ -77,6 +77,5 @@ async function submit() {
   </p>
   <h1>Inputs</h1>
   <p><button @click="submit">Submit</button></p>
-  <!-- <p>@todo Open .tsv file</p> -->
   <CreateClassificationBatchFormInputsEditor headers="h2" v-model="inputs" />
 </template>

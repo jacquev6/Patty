@@ -14,6 +14,41 @@ describe('The classification batch creation page', () => {
     screenshot('classification-batch-creation-page')
   })
 
+  it('opens a .tsv file', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.tsv')
+    cy.get('[data-cy="input-page-number"]').should('have.length', 4)
+    cy.get('[data-cy="input-page-number"]').eq(0).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '2')
+    cy.get('[data-cy="input-instruction-text"]')
+      .eq(0)
+      .should('have.value', 'Classe les mots en trois groupes : nom, verbe, adjectif.')
+    cy.get('[data-cy="input-statement-text"]')
+      .eq(0)
+      .should(
+        'have.value',
+        'verrou ◆ baigner ◆ joli ◆ chaleur ◆ grosse ◆ surveiller ◆ degré ◆ librairie ◆ repas ◆ parler',
+      )
+    cy.get('[data-cy="input-page-number"]').eq(1).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(1).should('have.value', '4')
+    cy.get('[data-cy="input-instruction-text"]')
+      .eq(1)
+      .should(
+        'have.value',
+        "Écris une phrase en respectant l'ordre des classes grammaticales indiquées. pronom personnel / verbe / déterminant / nom commun : Je mange une pomme.",
+      )
+    cy.get('[data-cy="input-statement-text"]')
+      .eq(1)
+      .should('have.value', 'nom propre / verbe / déterminant / adjectif / nom commun')
+    cy.get('[data-cy="input-page-number"]').eq(2).should('have.value', '7')
+    cy.get('[data-cy="input-exercise-number"]').eq(2).should('have.value', '11')
+    cy.get('[data-cy="input-instruction-text"]')
+      .eq(2)
+      .should('have.value', 'Ajoute le suffixe –eur aux verbes. Indique la classe des mots fabriqués.')
+    cy.get('[data-cy="input-statement-text"]')
+      .eq(2)
+      .should('have.value', 'nager ➞ ... ◆ tracter ➞ ... ◆ manger ➞ ... ◆ inventer ➞ ... ◆ livrer ➞ ...')
+  })
+
   it('creates a new classification batch without adaptation afterwards and refreshes it until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('no')
 
