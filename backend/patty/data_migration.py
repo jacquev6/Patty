@@ -49,7 +49,8 @@ def migrate_data(
         "textbook_ranges",
         "textbooks",
     ]:
-        data_before.pop(key)
+        assert len(data_before[key]) == 0, key
+        del data_before[key]
 
     data_after: dict[str, list[dict[str, typing.Any]]] = {}
 
