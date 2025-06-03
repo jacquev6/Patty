@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
+import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
 
 defineProps<{
   classificationBatch: ClassificationBatch
@@ -19,16 +20,17 @@ defineProps<{
         <template #provider>provider</template>
         <template #model> and model</template>
       </LlmModelSelector>
-      with the latest settings for each class.</template
+      with the latest settings for each known exercise class.</template
     >
   </p>
   <h1>Inputs</h1>
-  <template v-for="(exercise, exerciseIndex) in classificationBatch.exercises">
-    <h2>
-      Input {{ exerciseIndex + 1
-      }}<span v-if="exercise.exerciseClass === null" class="inProgress"> (in progress, will refresh when done)</span>
-      <template v-else>: {{ exercise.exerciseClass }} </template>
-    </h2>
+  <template v-for="(exercise, index) in classificationBatch.exercises">
+    <EditClassificationBatchFormExercisePreview
+      header="h2"
+      :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
+      :exercise
+      :index
+    />
   </template>
 </template>
 

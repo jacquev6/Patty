@@ -344,6 +344,8 @@ class GetClassificationBatchResponse(ApiModel):
         exercise_number: str | None
         full_text: str
         exercise_class: str | None
+        exercise_class_has_settings: bool
+        adaptation: ApiAdaptation | None
 
     exercises: list[Exercise]
 
@@ -363,7 +365,11 @@ async def get_classification_batch(
                 page_number=exercise.page_number,
                 exercise_number=exercise.exercise_number,
                 full_text=exercise.full_text,
-                exercise_class=exercise.exercise_class.name if exercise.exercise_class else None,
+                exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                exercise_class_has_settings=(
+                    exercise.exercise_class is not None and exercise.exercise_class.latest_strategy_settings is not None
+                ),
+                adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
             )
             for exercise in classification_batch.exercises
         ],

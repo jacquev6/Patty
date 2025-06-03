@@ -3789,6 +3789,20 @@
               }
             ],
             "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "type": "boolean",
+            "title": "Exerciseclasshassettings"
+          },
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -3797,7 +3811,9 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
-          "exerciseClass"
+          "exerciseClass",
+          "exerciseClassHasSettings",
+          "adaptation"
         ],
         "title": "Exercise"
       }

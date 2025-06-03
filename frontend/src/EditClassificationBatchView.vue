@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { type ClassificationBatch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import EditClassificationBatchForm from './EditClassificationBatchForm.vue'
+import { preprocess as preprocessAdaptation } from './adaptations'
 
 const props = defineProps<{
   id: string
@@ -31,6 +32,10 @@ async function refresh() {
     let needsRefresh = false
     for (const exercise of classificationBatch.value.exercises) {
       if (exercise.exerciseClass === null) {
+        needsRefresh = true
+        break
+      }
+      if (exercise.adaptation !== null && preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress') {
         needsRefresh = true
         break
       }

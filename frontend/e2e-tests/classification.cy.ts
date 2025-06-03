@@ -34,6 +34,7 @@ describe('The classification batch creation page', () => {
     cy.get('p:contains("Run adaptation after classification: no")').should('exist')
     cy.get('h2:contains("Input 1 (in progress, will refresh when done)")').should('exist')
     cy.get('h2:contains("Input 1: CocheMot")').should('exist')
+    cy.get('p:contains("Adaptation was not requested.")').should('exist')
   })
 
   it('creates a new classification batch with adaptation afterwards and refreshes it until it is done', () => {
@@ -61,7 +62,7 @@ describe('The classification batch creation page', () => {
     cy.get('[data-cy="input-statement-text"]')
       .eq(1)
       .type(
-        "a. Ce chien a mordu son maître*. b. Je rentre à la maison à midi pour déjeuner en famille. c. On a froid dans ce sous-bois ombragé. d. Il pense toujours qu'il a raison. e. Tu joues à chat avec moi ?",
+        "a. Ce chien a mordu son maître*.\nb. Je rentre à la maison à midi pour déjeuner en famille.\nc. On a froid dans ce sous-bois ombragé.\nd. Il pense toujours qu'il a raison.\ne. Tu joues à chat avec moi ?",
         { delay: 0 },
       )
 
@@ -75,12 +76,14 @@ describe('The classification batch creation page', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('p:contains("Created by: Alice")').should('exist')
     cy.get(
-      'p:contains("Run adaptation after classification: yes, using provider dummy and model dummy-1 with the latest settings for each class.")',
+      'p:contains("Run adaptation after classification: yes, using provider dummy and model dummy-1 with the latest settings for each known exercise class.")',
     ).should('exist')
+    cy.get('div.busy').should('exist')
     cy.get('h2:contains("Input 1 (in progress, will refresh when done)")').should('exist')
     cy.get('h2:contains("Input 1: CocheMot")').should('exist')
     cy.get('h2:contains("Input 2: CochePhrase")').should('exist')
     cy.get('h2:contains("Input 3: VraiFaux")').should('exist')
-    // @todo Check adaptation has been run
+    cy.get('div.busy').should('not.exist')
+    cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
   })
 })

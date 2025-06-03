@@ -1377,6 +1377,9 @@ export interface components {
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
+      adaptation: components['schemas']['ApiAdaptation'] | null
     }
   }
   responses: never

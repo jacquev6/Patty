@@ -72,7 +72,7 @@ async function submit() {
         <template #provider>provider</template>
         <template #model> and model</template>
       </LlmModelSelector>
-      with the latest settings for each class.</template
+      with the latest settings for each known exercise class.</template
     >
   </p>
   <h1>Inputs</h1>
