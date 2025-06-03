@@ -370,6 +370,30 @@ async def get_classification_batch(
     )
 
 
+class GetClassificationBatchesResponse(ApiModel):
+    class ClassificationBatch(ApiModel):
+        id: str
+        created_by: str
+        created_at: datetime.datetime
+
+    classification_batches: list[ClassificationBatch]
+
+
+@api_router.get("/classification-batches")
+async def get_classification_batches(session: database_utils.SessionDependable) -> GetClassificationBatchesResponse:
+    classification_batches = session.query(db.ClassificationBatch).order_by(-db.ClassificationBatch.id).all()
+    return GetClassificationBatchesResponse(
+        classification_batches=[
+            GetClassificationBatchesResponse.ClassificationBatch(
+                id=str(classification_batch.id),
+                created_by=classification_batch.created_by_username,
+                created_at=classification_batch.created_at,
+            )
+            for classification_batch in classification_batches
+        ]
+    )
+
+
 class PostTextbookRequest(ApiModel):
     creator: str
     title: str

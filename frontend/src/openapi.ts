@@ -115,7 +115,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    /** Get Classification Batches */
+    get: operations['get_classification_batches_api_classification_batches_get']
     put?: never
     /** Create Classification Batch */
     post: operations['create_classification_batch_api_classification_batches_post']
@@ -590,6 +591,18 @@ export interface components {
         | components['schemas']['Formatted-Output']
       )[]
     }
+    /** ClassificationBatch */
+    ClassificationBatch: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+    }
     /** ClassificationInput */
     ClassificationInput: {
       /** Pagenumber */
@@ -777,6 +790,11 @@ export interface components {
         | null
       /** Exercises */
       exercises: components['schemas']['patty__api_router__GetClassificationBatchResponse__Exercise'][]
+    }
+    /** GetClassificationBatchesResponse */
+    GetClassificationBatchesResponse: {
+      /** Classificationbatches */
+      classificationBatches: components['schemas']['ClassificationBatch'][]
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1581,6 +1599,26 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_classification_batches_api_classification_batches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetClassificationBatchesResponse']
         }
       }
     }

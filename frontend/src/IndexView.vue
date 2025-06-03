@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
 
-import { type AdaptationBatches, type Textbooks, useAuthenticatedClient } from './apiClient'
+import { type ClassificationBatches, type AdaptationBatches, type Textbooks, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 import FixedColumns from './FixedColumns.vue'
@@ -9,12 +9,22 @@ import CreateTextbookForm from './CreateTextbookForm.vue'
 
 const client = useAuthenticatedClient()
 
+const classificationBatches = reactive<ClassificationBatches['classificationBatches']>([])
 const adaptationBatches = reactive<AdaptationBatches['adaptationBatches']>([])
 const textbooks = reactive<Textbooks['textbooks']>([])
 
 onMounted(async () => {
+  const classificationBatchesPromise = client.GET('/api/classification-batches')
   const adaptationBatchesPromise = client.GET('/api/adaptation-batches')
   const textbooksPromise = client.GET('/api/textbooks')
+
+  const classificationBatchesResponse = await classificationBatchesPromise
+  assert(classificationBatchesResponse.data !== undefined)
+  classificationBatches.splice(
+    0,
+    classificationBatches.length,
+    ...classificationBatchesResponse.data.classificationBatches,
+  )
 
   const adaptationBatchesResponse = await adaptationBatchesPromise
   assert(adaptationBatchesResponse.data !== undefined)
@@ -42,13 +52,21 @@ onMounted(async () => {
         </p>
 
         <h2>Existing classification batches</h2>
-        <!-- <p>@todo List existing classification batches</p> -->
+        <ul>
+          <li v-for="classificationBatch in classificationBatches">
+            <RouterLink :to="{ name: 'classification-batch', params: { id: classificationBatch.id } }">
+              Batch C{{ classificationBatch.id }}
+            </RouterLink>
+            (created by {{ classificationBatch.createdBy }} on
+            {{ new Date(classificationBatch.createdAt).toLocaleString() }})
+          </li>
+        </ul>
 
         <h2>Existing adaptation batches</h2>
         <ul>
           <li v-for="adaptationBatch in adaptationBatches">
             <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptationBatch.id } }">
-              Batch {{ adaptationBatch.id }}
+              Batch A{{ adaptationBatch.id }}
             </RouterLink>
             (<template v-if="adaptationBatch.strategySettingsName !== null"
               >{{ adaptationBatch.strategySettingsName }}<WhiteSpace /></template

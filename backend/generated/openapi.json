@@ -276,6 +276,27 @@
       }
     },
     "/api/classification-batches": {
+      "get": {
+        "summary": "Get Classification Batches",
+        "operationId": "get_classification_batches_api_classification_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
       "post": {
         "summary": "Create Classification Batch",
         "operationId": "create_classification_batch_api_classification_batches_post",
@@ -1720,6 +1741,31 @@
           "contents"
         ]
       },
+      "ClassificationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "ClassificationBatch"
+      },
       "ClassificationInput": {
         "properties": {
           "pageNumber": {
@@ -2253,6 +2299,23 @@
           "exercises"
         ],
         "title": "GetClassificationBatchResponse"
+      },
+      "GetClassificationBatchesResponse": {
+        "properties": {
+          "classificationBatches": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationBatch"
+            },
+            "type": "array",
+            "title": "Classificationbatches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "classificationBatches"
+        ],
+        "title": "GetClassificationBatchesResponse"
       },
       "GetTextbookResponse": {
         "properties": {
