@@ -801,7 +801,7 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
                 removed_from_textbook=external_exercise.removed_from_textbook,
             )
             for external_exercise in textbook.exercises
-            if isinstance(external_exercise, db.ExternalExercise)  # @todo Filter in DBMS
+            if isinstance(external_exercise, db.ExternalExercise)
         ],
     )
 
