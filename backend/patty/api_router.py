@@ -19,7 +19,7 @@ from . import settings
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
-from . import new_orm_models as db
+from . import orm_models as db
 from .adaptation.adaptation import (
     Adjustment,
     AssistantInvalidJsonError,

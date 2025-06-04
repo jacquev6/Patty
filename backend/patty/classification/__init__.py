@@ -12,7 +12,7 @@ import torch.utils.data
 import transformers  # type: ignore[import-untyped]
 
 from .. import database_utils
-from .. import new_orm_models as db
+from .. import orm_models as db
 from .models import SingleBert
 
 

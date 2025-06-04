@@ -6,12 +6,13 @@ import compact_json  # type: ignore[import-untyped]
 import fastapi
 import sqlalchemy.orm
 
-from . import adaptation
 from . import adapted
-from . import data_migration
 from . import database_utils
 from . import llm
+from . import orm_models as db
 from . import settings
+from .adaptation import adaptation
+from .adaptation import strategy as adaptation_strategy
 
 
 created_at = datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc)
@@ -182,12 +183,13 @@ class FixturesCreator:
         self.__session.flush()
         return instance
 
-    def create_default_adaptation_strategy(self) -> adaptation.OldStrategy:
+    def create_default_adaptation_strategy(self) -> db.AdaptationStrategy:
         strategy_settings = self.create(
-            adaptation.OldStrategySettings,
-            created_by="Patty",
+            db.AdaptationStrategySettings,
+            created_by_username="Patty",
+            created_at=created_at,
             system_prompt=make_default_system_prompt(),
-            response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            response_specification=adaptation_strategy.JsonSchemaLlmResponseSpecification(
                 format="json",
                 formalism="json-schema",
                 instruction_components=adapted.InstructionComponents(
@@ -210,22 +212,26 @@ class FixturesCreator:
                     text=True, whitespace=True, arrow=True, formatted=True
                 ),
             ),
+            exercise_class=None,
+            parent=None,
         )
         return self.create(
-            adaptation.OldStrategy,
-            created_by="Patty",
+            db.AdaptationStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
             model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
             settings=strategy_settings,
         )
 
     def create_dummy_adaptation_strategy_settings(
         self, system_prompt: str = "Blah blah blah."
-    ) -> adaptation.OldStrategySettings:
+    ) -> db.AdaptationStrategySettings:
         return self.create(
-            adaptation.OldStrategySettings,
-            created_by="Patty",
+            db.AdaptationStrategySettings,
+            created_by_username="Patty",
+            created_at=created_at,
             system_prompt=system_prompt,
-            response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
+            response_specification=adaptation_strategy.JsonSchemaLlmResponseSpecification(
                 format="json",
                 formalism="json-schema",
                 instruction_components=adapted.InstructionComponents(
@@ -248,40 +254,61 @@ class FixturesCreator:
                     text=True, whitespace=True, arrow=True, formatted=True
                 ),
             ),
+            exercise_class=None,
+            parent=None,
         )
 
-    def create_dummy_adaptation_strategy(self) -> adaptation.OldStrategy:
+    def create_dummy_adaptation_strategy(self) -> db.AdaptationStrategy:
         settings = self.create_dummy_adaptation_strategy_settings()
         return self.create(
-            adaptation.OldStrategy, created_by="Patty", model=llm.DummyModel(name="dummy-1"), settings=settings
+            db.AdaptationStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
+            model=llm.DummyModel(name="dummy-1"),
+            settings=settings,
         )
 
-    def create_default_adaptation_input(self) -> adaptation.OldInput:
+    def create_default_adaptation_input(self) -> db.AdaptableExercise:
         return self.create(
-            adaptation.OldInput,
-            created_by="Patty",
+            db.AdaptableExercise,
+            created_by_username="Patty",
+            created_at=created_at,
             page_number=42,
             exercise_number="5",
-            text=textwrap.dedent(
+            textbook=None,
+            removed_from_textbook=False,
+            full_text=textwrap.dedent(
                 """\
                 Complète avec "le vent" ou "la pluie"
                 a. Les feuilles sont chahutées par ...
                 b. Les vitres sont mouillées par ...
                 """
             ),
+            instruction_hint_example_text=None,
+            statement_text=None,
+            classified_at=None,
+            classified_by_classification_batch=None,
+            classified_by_username=None,
+            exercise_class=None,
         )
 
     def create_successful_adaptation(
-        self, *, adaptation_batch: object, strategy: object, input: object
-    ) -> adaptation.OldAdaptation:
+        self,
+        *,
+        adaptation_batch: db.AdaptationBatch | None,
+        strategy: db.AdaptationStrategy,
+        exercise: db.AdaptableExercise,
+    ) -> db.Adaptation:
         return self.create(
-            adaptation.OldAdaptation,
-            created_by="Patty",
-            batch=adaptation_batch,
+            db.Adaptation,
+            created_by_username="Patty",
+            created_at=created_at,
+            adaptation_batch=adaptation_batch,
+            classification_batch=None,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[{"initial": "conversation"}],
-            _initial_assistant_response=adaptation.AssistantSuccess(
+            initial_assistant_response=adaptation.AssistantSuccess(
                 kind="success",
                 exercise=adapted.Exercise(
                     **{  # type: ignore[arg-type]
@@ -404,160 +431,242 @@ class FixturesCreator:
                         "reference": None,
                     }
                 ),
-            ).model_dump(),
-            _adjustments=[],
+            ),
+            adjustments=[],
             manual_edit=None,
         )
 
     def create_in_progress_adaptation(
-        self, *, adaptation_batch: object, strategy: object, input: object
-    ) -> adaptation.OldAdaptation:
+        self,
+        *,
+        adaptation_batch: db.AdaptationBatch | None,
+        strategy: db.AdaptationStrategy,
+        exercise: db.AdaptableExercise,
+    ) -> db.Adaptation:
         return self.create(
-            adaptation.OldAdaptation,
-            created_by="Patty",
-            batch=adaptation_batch,
+            db.Adaptation,
+            created_by_username="Patty",
+            created_at=created_at,
+            adaptation_batch=adaptation_batch,
+            classification_batch=None,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[{"initial": "conversation"}],
+            # Hack: store a JSON null in _initial_assistant_response instead of a SQL NULL to avoid
+            # being picked up by the submission daemon, but still pass as in-progress in the tests.
             _initial_assistant_response=None,
-            _adjustments=[],
+            adjustments=[],
             manual_edit=None,
         )
 
     def create_invalid_json_adaptation(
-        self, *, adaptation_batch: object, strategy: object, input: object
-    ) -> adaptation.OldAdaptation:
+        self,
+        *,
+        adaptation_batch: db.AdaptationBatch | None,
+        strategy: db.AdaptationStrategy,
+        exercise: db.AdaptableExercise,
+    ) -> db.Adaptation:
         return self.create(
-            adaptation.OldAdaptation,
-            created_by="Patty",
-            batch=adaptation_batch,
+            db.Adaptation,
+            created_by_username="Patty",
+            created_at=created_at,
+            adaptation_batch=adaptation_batch,
+            classification_batch=None,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[{"initial": "conversation"}],
-            _initial_assistant_response=adaptation.AssistantInvalidJsonError(
+            initial_assistant_response=adaptation.AssistantInvalidJsonError(
                 kind="error", error="invalid-json", parsed={}
-            ).model_dump(),
-            _adjustments=[],
+            ),
+            adjustments=[],
             manual_edit=None,
         )
 
     def create_not_json_adaptation(
-        self, *, adaptation_batch: object, strategy: object, input: object
-    ) -> adaptation.OldAdaptation:
+        self,
+        *,
+        adaptation_batch: db.AdaptationBatch | None,
+        strategy: db.AdaptationStrategy,
+        exercise: db.AdaptableExercise,
+    ) -> db.Adaptation:
         return self.create(
-            adaptation.OldAdaptation,
-            created_by="Patty",
-            batch=adaptation_batch,
+            db.Adaptation,
+            created_by_username="Patty",
+            created_at=created_at,
+            adaptation_batch=adaptation_batch,
+            classification_batch=None,
             strategy=strategy,
-            input=input,
+            exercise=exercise,
             raw_llm_conversations=[{"initial": "conversation"}],
-            _initial_assistant_response=adaptation.AssistantNotJsonError(
+            initial_assistant_response=adaptation.AssistantNotJsonError(
                 kind="error", error="not-json", text="This is not JSON."
-            ).model_dump(),
-            _adjustments=[],
+            ),
+            adjustments=[],
             manual_edit=None,
         )
 
     def create_seed_data(self) -> None:
         strategy = self.create_default_adaptation_strategy()
-        input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        batch = self.create(
+            db.AdaptationBatch,
+            created_by_username="Patty",
+            created_at=created_at,
+            textbook=None,
+            removed_from_textbook=False,
+            strategy=strategy,
+        )
+        self.create_successful_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
 
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
-        input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        batch = self.create(
+            db.AdaptationBatch,
+            created_by_username="Patty",
+            created_at=created_at,
+            textbook=None,
+            removed_from_textbook=False,
+            strategy=strategy,
+        )
+        self.create_successful_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
 
     def create_mixed_dummy_adaptation_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
-        input = self.create_default_adaptation_input()
-        batch = self.create(adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=strategy)
-        self.create_successful_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
-        self.create_in_progress_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
-        self.create_invalid_json_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
-        self.create_not_json_adaptation(adaptation_batch=batch, strategy=strategy, input=input)
+        batch = self.create(
+            db.AdaptationBatch,
+            created_by_username="Patty",
+            created_at=created_at,
+            textbook=None,
+            removed_from_textbook=False,
+            strategy=strategy,
+        )
+        self.create_successful_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
+        self.create_in_progress_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
+        self.create_invalid_json_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
+        self.create_not_json_adaptation(
+            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+        )
 
     def create_dummy_branch(
         self, *, name: str = "Branchy McBranchFace", system_prompt: str = "Blah blah blah."
-    ) -> adaptation.OldStrategySettingsBranch:
+    ) -> db.ExerciseClass:
         settings = self.create_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
-        branch = self.create(adaptation.OldStrategySettingsBranch, name=name)
-        settings.branch = branch
-        self.__session.flush()
-        branch.head = settings
-        self.__session.flush()
-        return branch
+        exercise_class = self.create(
+            db.ExerciseClass,
+            created_by_username="Patty",
+            created_at=created_at,
+            name=name,
+            latest_strategy_settings=settings,
+        )
+        settings.exercise_class = exercise_class
+        return exercise_class
 
     def create_dummy_textbook(self) -> None:
         textbook = self.create(
-            adaptation.OldTextbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
+            db.Textbook, created_by_username="Patty", created_at=created_at, title="Dummy Textbook Title"
         )
 
         success_branch_1 = self.create_dummy_branch(name="Branch with successes 1", system_prompt="Thou shall succeed.")
         success_strategy_1 = self.create(
-            adaptation.OldStrategy,
-            created_by="Patty",
+            db.AdaptationStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
             model=llm.DummyModel(name="dummy-1"),
-            settings=success_branch_1.head,
+            settings=success_branch_1.latest_strategy_settings,
         )
         success_adaptation_batch_1 = self.create(
-            adaptation.OldBatch,
-            created_by="Patty",
+            db.AdaptationBatch,
+            created_by_username="Patty",
             created_at=created_at,
             strategy=success_strategy_1,
             textbook=textbook,
+            removed_from_textbook=False,
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=42,
                 exercise_number="5",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=40,
                 exercise_number="6",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=40,
                 exercise_number="4",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
 
@@ -565,91 +674,128 @@ class FixturesCreator:
             name="Branch with successes 2", system_prompt="Thou shall succeed as well."
         )
         success_strategy_2 = self.create(
-            adaptation.OldStrategy,
-            created_by="Patty",
+            db.AdaptationStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
             model=llm.DummyModel(name="dummy-1"),
-            settings=success_branch_2.head,
+            settings=success_branch_2.latest_strategy_settings,
         )
         success_adaptation_batch_2 = self.create(
-            adaptation.OldBatch,
-            created_by="Patty",
+            db.AdaptationBatch,
+            created_by_username="Patty",
             created_at=created_at,
             strategy=success_strategy_2,
             textbook=textbook,
+            removed_from_textbook=False,
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=42,
                 exercise_number="6",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=40,
                 exercise_number="30",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
         self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=40,
                 exercise_number="8",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
-        removed_adaptation = self.create_successful_adaptation(
+        self.create_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=40,
                 exercise_number="Removed",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=True,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
-        removed_adaptation.removed_from_textbook = True
 
         removed_adaptation_batch = self.create(
-            adaptation.OldBatch,
-            created_by="Patty",
+            db.AdaptationBatch,
+            created_by_username="Patty",
             created_at=created_at,
             strategy=success_strategy_2,
             textbook=textbook,
@@ -658,85 +804,146 @@ class FixturesCreator:
         self.create_successful_adaptation(
             adaptation_batch=removed_adaptation_batch,
             strategy=success_strategy_2,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=47,
                 exercise_number="Removed",
-                text=textwrap.dedent(
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
 
         errors_branch = self.create_dummy_branch(name="Branch with errors", system_prompt="Thou shall fail.")
         errors_strategy = self.create(
-            adaptation.OldStrategy,
-            created_by="Patty",
+            db.AdaptationStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
             model=llm.DummyModel(name="dummy-1"),
-            settings=errors_branch.head,
+            settings=errors_branch.latest_strategy_settings,
         )
         errors_adaptation_batch = self.create(
-            adaptation.OldBatch, created_by="Patty", created_at=created_at, strategy=errors_strategy, textbook=textbook
+            db.AdaptationBatch,
+            created_by_username="Patty",
+            created_at=created_at,
+            strategy=errors_strategy,
+            textbook=textbook,
+            removed_from_textbook=False,
         )
         self.create_not_json_adaptation(
             adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
-            input=self.create(
-                adaptation.OldInput, created_by="Patty", page_number=142, exercise_number="4", text="Not JSON"
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
+                page_number=142,
+                exercise_number="4",
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text="Not JSON",
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
         self.create_invalid_json_adaptation(
             adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
-            input=self.create(
-                adaptation.OldInput, created_by="Patty", page_number=140, exercise_number="4", text="Invalid JSON"
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
+                page_number=140,
+                exercise_number="4",
+                textbook=textbook,
+                removed_from_textbook=False,
+                full_text="Invalid JSON",
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
 
     def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
         self.create_dummy_textbook()
 
-        strategy = self.__session.get(adaptation.OldStrategy, 1)
-        batch = self.__session.get(adaptation.OldBatch, 1)
+        strategy = self.__session.get(db.AdaptationStrategy, 1)
+        assert strategy is not None
+        batch = self.__session.get(db.AdaptationBatch, 1)
+        assert batch is not None
 
         self.create_successful_adaptation(
             adaptation_batch=batch,
             strategy=strategy,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=42,
                 exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
-                text=textwrap.dedent(
+                textbook=batch.textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
 
         self.create_successful_adaptation(
             adaptation_batch=batch,
             strategy=strategy,
-            input=self.create(
-                adaptation.OldInput,
-                created_by="Patty",
+            exercise=self.create(
+                db.AdaptableExercise,
+                created_by_username="Patty",
+                created_at=created_at,
                 page_number=42,
                 exercise_number="Auto-dictée",
-                text=textwrap.dedent(
+                textbook=batch.textbook,
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
                     a. Les feuilles sont chahutées par ...
                     b. Les vitres sont mouillées par ...
                     """
                 ),
+                instruction_hint_example_text=None,
+                statement_text=None,
+                classified_at=None,
+                classified_by_classification_batch=None,
+                classified_by_username=None,
+                exercise_class=None,
             ),
         )
 
@@ -768,8 +975,6 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
 
     for fixture in fixtures:
         available_fixtures[fixture]()
-
-    data_migration.migrate(session)
 
 
 app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATABASE_URL))

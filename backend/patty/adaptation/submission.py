@@ -8,7 +8,7 @@ from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
-from ..new_orm_models import Adaptation
+from ..orm_models import Adaptation
 
 
 def log(message: str) -> None:
