@@ -189,7 +189,6 @@ async def post_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
-            created_by_extraction_id=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -305,7 +304,6 @@ def create_classification_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
-            created_by_extraction_id=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -520,7 +518,6 @@ def post_textbook_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
-            created_by_extraction_id=None,
             created_at=now,
             textbook=textbook,
             removed_from_textbook=False,

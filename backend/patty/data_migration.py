@@ -42,10 +42,6 @@ def migrate_data(
         "exercise_classes",
         "exercises",
         "external_exercises",
-        "extraction_strategies",
-        "extractions",
-        "pdf_files",
-        "textbook_ranges",
         "textbooks",
     ]:
         assert len(data_before[key]) == 0, key
@@ -220,7 +216,6 @@ def migrate_data(
         data_after["adaptable_exercises"].append(
             {
                 "id": adaptation_id,
-                "created_by_extraction_id": None,
                 "full_text": input_text,
                 "classified_at": None if exercise_class_id is None else migration_date,
                 "classified_by_classification_batch_id": None,

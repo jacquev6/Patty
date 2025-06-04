@@ -36,16 +36,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_classes")),
     )
     op.create_table(
-        "extraction_strategies",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_extraction_strategies")),
-    )
-    op.create_table(
-        "pdf_files",
-        sa.Column("sha256", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("sha256", name=op.f("pk_pdf_files")),
-    )
-    op.create_table(
         "textbooks",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
@@ -88,20 +78,27 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercises")),
     )
     op.create_table(
-        "textbook_ranges",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("textbook_id", sa.Integer(), nullable=False),
-        sa.Column("pdf_file_sha256", sa.String(), nullable=True),
-        sa.Column("textbook_start_page_number", sa.Integer(), nullable=False),
-        sa.Column("pdf_file_start_page_number", sa.Integer(), nullable=False),
-        sa.Column("pages_count", sa.Integer(), nullable=False),
+        "adaptable_exercises",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("full_text", sa.String(), nullable=False),
+        sa.Column("instruction_hint_example_text", sa.String(), nullable=True),
+        sa.Column("statement_text", sa.String(), nullable=True),
+        sa.Column("classified_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("classified_by_classification_batch_id", sa.Integer(), nullable=True),
+        sa.Column("classified_by_username", sa.String(), nullable=True),
+        sa.Column("exercise_class_id", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["pdf_file_sha256"], ["pdf_files.sha256"], name=op.f("fk_textbook_ranges_pdf_file_sha256_pdf_files")
+            ["classified_by_classification_batch_id"],
+            ["classification_batches.id"],
+            name=op.f("fk_adaptable_exercises_classified_by_classification_batch_id_classification_batches"),
         ),
         sa.ForeignKeyConstraint(
-            ["textbook_id"], ["textbooks.id"], name=op.f("fk_textbook_ranges_textbook_id_textbooks")
+            ["exercise_class_id"],
+            ["exercise_classes.id"],
+            name=op.f("fk_adaptable_exercises_exercise_class_id_exercise_classes"),
         ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_textbook_ranges")),
+        sa.ForeignKeyConstraint(["id"], ["exercises.id"], name=op.f("fk_adaptable_exercises_id_exercises")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptable_exercises")),
     )
     op.create_table(
         "adaptation_strategies",
@@ -123,50 +120,6 @@ def upgrade() -> None:
         sa.Column("original_file_name", sa.String(), nullable=False),
         sa.ForeignKeyConstraint(["id"], ["exercises.id"], name=op.f("fk_external_exercises_id_exercises")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_external_exercises")),
-    )
-    op.create_table(
-        "extractions",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.Column("created_by_username", sa.String(), nullable=False),
-        sa.Column("strategy_id", sa.Integer(), nullable=False),
-        sa.Column("range_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["range_id"], ["textbook_ranges.id"], name=op.f("fk_extractions_range_id_textbook_ranges")
-        ),
-        sa.ForeignKeyConstraint(
-            ["strategy_id"], ["extraction_strategies.id"], name=op.f("fk_extractions_strategy_id_extraction_strategies")
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_extractions")),
-    )
-    op.create_table(
-        "adaptable_exercises",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("created_by_extraction_id", sa.Integer(), nullable=True),
-        sa.Column("full_text", sa.String(), nullable=False),
-        sa.Column("instruction_hint_example_text", sa.String(), nullable=True),
-        sa.Column("statement_text", sa.String(), nullable=True),
-        sa.Column("classified_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("classified_by_classification_batch_id", sa.Integer(), nullable=True),
-        sa.Column("classified_by_username", sa.String(), nullable=True),
-        sa.Column("exercise_class_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["classified_by_classification_batch_id"],
-            ["classification_batches.id"],
-            name=op.f("fk_adaptable_exercises_classified_by_classification_batch_id_classification_batches"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["created_by_extraction_id"],
-            ["extractions.id"],
-            name=op.f("fk_adaptable_exercises_created_by_extraction_id_extractions"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["exercise_class_id"],
-            ["exercise_classes.id"],
-            name=op.f("fk_adaptable_exercises_exercise_class_id_exercise_classes"),
-        ),
-        sa.ForeignKeyConstraint(["id"], ["exercises.id"], name=op.f("fk_adaptable_exercises_id_exercises")),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptable_exercises")),
     )
     op.create_table(
         "adaptation_batches",

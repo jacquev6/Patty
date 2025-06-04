@@ -18,11 +18,7 @@ from .new_orm_models import (
     ClassificationBatch,
     ExerciseClass,
     ExternalExercise,
-    Extraction,
-    ExtractionStrategy,
-    PdfFile,
     Textbook,
-    TextbookRange,
 )
 from .database_utils import OrmBase
 
@@ -37,8 +33,6 @@ __all__ = [
     "ClassificationBatch",
     "ExerciseClass",
     "ExternalExercise",
-    "Extraction",
-    "ExtractionStrategy",
     "OldAdaptation",
     "OldBatch",
     "OldExternalExercise",
@@ -47,9 +41,7 @@ __all__ = [
     "OldStrategySettings",
     "OldStrategySettingsBranch",
     "OldTextbook",
-    "PdfFile",
     "Textbook",
-    "TextbookRange",
 ]
 
 
@@ -63,8 +55,6 @@ all_models: list[type[OrmBase]] = [
     ClassificationBatch,
     ExerciseClass,
     ExternalExercise,
-    Extraction,
-    ExtractionStrategy,
     OldAdaptation,
     OldBatch,
     OldExternalExercise,
@@ -73,7 +63,5 @@ all_models: list[type[OrmBase]] = [
     OldStrategySettings,
     OldStrategySettingsBranch,
     OldTextbook,
-    PdfFile,
     Textbook,
-    TextbookRange,
 ]

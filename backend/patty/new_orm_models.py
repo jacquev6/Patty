@@ -137,64 +137,12 @@ class ExerciseClass(OrmBase):
     )
 
 
-class PdfFile(OrmBase):
-    __tablename__ = "pdf_files"
-
-    sha256: orm.Mapped[str] = orm.mapped_column(primary_key=True)
-
-
-class TextbookRange(OrmBase):
-    __tablename__ = "textbook_ranges"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
-    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
-
-    pdf_file_sha256: orm.Mapped[str | None] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
-    pdf_file: orm.Mapped[PdfFile | None] = orm.relationship(
-        foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256]
-    )
-
-    textbook_start_page_number: orm.Mapped[int]
-    pdf_file_start_page_number: orm.Mapped[int]
-    pages_count: orm.Mapped[int]
-
-
-class ExtractionStrategy(OrmBase):
-    __tablename__ = "extraction_strategies"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-
-class Extraction(OrmBase):
-    __tablename__ = "extractions"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
-
-    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
-    strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
-        foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
-    )
-
-    range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(TextbookRange.id))
-    range: orm.Mapped[TextbookRange] = orm.relationship(foreign_keys=[range_id], remote_side=[TextbookRange.id])
-
-
 class AdaptableExercise(BaseExercise):
     __tablename__ = "adaptable_exercises"
 
     __mapper_args__ = {"polymorphic_identity": "adaptable"}
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
-
-    created_by_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Extraction.id))
-    created_by_extraction: orm.Mapped[Extraction | None] = orm.relationship(
-        foreign_keys=[created_by_extraction_id], remote_side=[Extraction.id]
-    )
 
     full_text: orm.Mapped[str]
     instruction_hint_example_text: orm.Mapped[str | None]
