@@ -2,10 +2,13 @@
 import { type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
 import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
+import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 defineProps<{
   classificationBatch: ClassificationBatch
 }>()
+
+const authenticationTokenStore = useAuthenticationTokenStore()
 </script>
 
 <template>
@@ -33,6 +36,13 @@ defineProps<{
       </LlmModelSelector>
       with the latest settings for each known exercise class.</template
     >
+  </p>
+  <p>
+    <a
+      :href="`/api/export/classification-batch/${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
+    >
+      Download standalone HTML
+    </a>
   </p>
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">

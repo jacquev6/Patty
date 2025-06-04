@@ -7,7 +7,7 @@ type Data = {
   adaptedExercise: AdaptedExercise
 }[]
 
-const data = JSON.parse('##TO_BE_SUBSTITUTED_ADAPTATION_BATCH_EXPORT_DATA##') as Data // @todo Factorize with AdaptationBatchExportExerciseView.vue
+const data = JSON.parse('##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##') as Data // @todo Factorize with BatchExportExerciseView.vue
 </script>
 
 <template>

@@ -809,9 +809,7 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
 export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_param_dependable)])
 
 
-export_adaptation_batch_template_file_path = os.path.join(
-    os.path.dirname(__file__), "export", "templates", "adaptation-batch", "index.html"
-)
+export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "export", "templates", "batch", "index.html")
 
 
 @export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -828,11 +826,35 @@ def export_adaptation_batch(
         )
     )
 
-    content = render_template(export_adaptation_batch_template_file_path, "ADAPTATION_BATCH_EXPORT_DATA", data)
+    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
     headers = {}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="test-adaptation-batch-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
+@export_router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_classification_batch(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    data = list(
+        filter(
+            None,
+            (
+                make_adapted_exercise_data(exercise.adaptation)
+                for exercise in get_by_id(session, db.ClassificationBatch, id).exercises
+                if exercise.adaptation is not None
+            ),
+        )
+    )
+
+    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-classification-batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(content=content, headers=headers)
 

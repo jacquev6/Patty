@@ -33,7 +33,7 @@ services:
       "backend/generated/db-tables-graph.png",
       "frontend/src/openapi.ts",
       "backend/patty/export/templates/adaptation/index.html",
-      "backend/patty/export/templates/adaptation-batch/index.html",
+      "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
     ]
 
@@ -57,7 +57,7 @@ services:
       interval: 0.5s
       retries: 12
 
-  adaptation-batch-export-template-generator:
+  batch-export-template-generator:
     image: patty-dev_frontend
     pull_policy: never
     volumes:
@@ -65,15 +65,15 @@ services:
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
-      PATTY_ENTRY_POINT_NAME: adaptation-batch-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/adaptation-batch", "--emptyOutDir"]
+      PATTY_ENTRY_POINT_NAME: batch-export
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/batch", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/adaptation-batch/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/batch/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -166,7 +166,7 @@ services:
     depends_on:
       adaptation-export-template-generator:
         condition: service_healthy
-      adaptation-batch-export-template-generator:
+      batch-export-template-generator:
         condition: service_healthy
       textbook-export-template-generator:
         condition: service_healthy
