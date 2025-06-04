@@ -48,13 +48,13 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-def submit_classifications(session: database_utils.Session) -> None:
+def submit_classifications(session: database_utils.Session, parallelism: int) -> None:
     exercise_classes_by_name = {
         exercise_class.name: exercise_class
         for exercise_class in session.execute(sql.select(db.ExerciseClass)).scalars().all()
     }
 
-    batches = (
+    batch = (
         session.execute(
             sql.select(db.ClassificationBatch)
             .options(orm.load_only(db.ClassificationBatch.id))
@@ -63,15 +63,25 @@ def submit_classifications(session: database_utils.Session) -> None:
             .distinct()
         )
         .scalars()
-        .all()
+        .first()
     )
-    log(
-        f"Found {len(batches)} classification batches with not-yet-classified exercises: {' '.join(str(batch.id) for batch in batches)}"
-    )
-    for batch in batches:
-        exercises = list(batch.exercises)
+    if batch is None:
+        log(f"Found no classification batch with not-yet-classified exercises")
+    else:
+        exercises = list(
+            session.execute(
+                sql.select(db.AdaptableExercise)
+                .where(
+                    db.AdaptableExercise.classified_by_classification_batch == batch,
+                    db.AdaptableExercise.classified_at == None,
+                )
+                .limit(parallelism)
+            )
+            .scalars()
+            .all()
+        )
         log(
-            f"Classifying batch {batch.id} with {len(exercises)} exercises: {' '.join(str(exercise.id) for exercise in exercises)}"
+            f"Classifying {len(exercises)} exercises from batch {batch.id}: {' '.join(str(exercise.id) for exercise in exercises)}"
         )
         dataframe = pd.DataFrame(
             {
@@ -96,7 +106,6 @@ def submit_classifications(session: database_utils.Session) -> None:
                     latest_strategy_settings=None,
                 )
                 session.add(exercise_class)
-                # session.flush()
                 exercise_classes_by_name[exercise_class_name] = exercise_class
             exercise.exercise_class = exercise_class
 

@@ -135,9 +135,10 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 
 @main.command()
+@click.option("--classification-parallelism", type=int, default=20)
 @click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(adaptation_parallelism: int, pause: float) -> None:
+def run_submission_daemon(classification_parallelism: int, adaptation_parallelism: int, pause: float) -> None:
     import requests
 
     from . import database_utils
@@ -156,7 +157,7 @@ def run_submission_daemon(adaptation_parallelism: int, pause: float) -> None:
             log("Waking up...")
             try:
                 with database_utils.Session(engine) as session:
-                    submit_classifications(session)
+                    submit_classifications(session, classification_parallelism)
                     submissions = submit_adaptations(session, adaptation_parallelism)
                     await asyncio.gather(*submissions)
                     session.commit()
