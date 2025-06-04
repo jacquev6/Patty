@@ -108,16 +108,22 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                 session.add(adaptation)
 
 
+device = torch.device("cpu")
+model: SingleBert | None = None
+
+
 def classify(dataframe: pd.DataFrame) -> None:
-    # @todo Avoid loading these on every request.
-    device = torch.device("cpu")
-    model: SingleBert = torch.load(
-        os.path.join(os.path.dirname(__file__), "models/classification_camembert.pt"),
-        weights_only=False,
-        map_location=device,
-    )
-    model.to(device)
-    model.eval()
+    global model
+
+    if model is None:
+        model_: SingleBert = torch.load(
+            os.path.join(os.path.dirname(__file__), "models/classification_camembert.pt"),
+            weights_only=False,
+            map_location=device,
+        )
+        model = model_
+        model.to(device)
+        model.eval()
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         os.path.join(os.path.dirname(__file__), "models/camembert_base"), do_lower_case=True, use_fast=False
