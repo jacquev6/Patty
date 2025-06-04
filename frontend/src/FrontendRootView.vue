@@ -25,7 +25,17 @@ const fromQuery = (() => {
   }
 })()
 
-const unavailableUntil = fromSubstitution ?? fromQuery
+const forceAvailable = (() => {
+  // For testing during maintenance.
+  const q = new URLSearchParams(window.location.search).get('forceAvailable')
+  if (q === null) {
+    return false
+  } else {
+    return q === 'true'
+  }
+})()
+
+const unavailableUntil = forceAvailable ? null : (fromSubstitution ?? fromQuery)
 </script>
 
 <template>
