@@ -40,6 +40,8 @@ const cleanedUpInputs = computed(() =>
     })),
 )
 
+const disabled = computed(() => cleanedUpInputs.value.length === 0)
+
 async function submit() {
   busy.value = true
   const response = await client.POST('/api/classification-batches', {
@@ -86,6 +88,6 @@ async function submit() {
     >
   </p>
   <h1>Inputs</h1>
-  <p><button @click="submit">Submit</button></p>
+  <p><button @click="submit" :disabled>Submit</button></p>
   <CreateClassificationBatchFormInputsEditor headers="h2" v-model="inputs" />
 </template>
