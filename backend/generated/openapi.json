@@ -79,7 +79,7 @@
         }
       }
     },
-    "/api/adaptation/llm-response-schema": {
+    "/api/adaptation-llm-response-schema": {
       "post": {
         "summary": "Get Llm Response Schema",
         "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_post",
@@ -123,10 +123,10 @@
         ]
       }
     },
-    "/api/adaptation/latest-batch": {
+    "/api/latest-adaptation-batch": {
       "get": {
-        "summary": "Get Latest Batch",
-        "operationId": "get_latest_batch_api_adaptation_latest_batch_get",
+        "summary": "Get Latest Adaptation Batch",
+        "operationId": "get_latest_adaptation_batch_api_latest_adaptation_batch_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -149,7 +149,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LatestBatch"
+                  "$ref": "#/components/schemas/LatestAdaptationBatch"
                 }
               }
             }
@@ -167,15 +167,36 @@
         }
       }
     },
-    "/api/adaptation/batch": {
+    "/api/adaptation-batches": {
+      "get": {
+        "summary": "Get Adaptation Batches",
+        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
       "post": {
-        "summary": "Post Batch",
-        "operationId": "post_batch_api_adaptation_batch_post",
+        "summary": "Post Adaptation Batch",
+        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostBatchRequest"
+                "$ref": "#/components/schemas/PostAdaptationBatchRequest"
               }
             }
           },
@@ -187,7 +208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PostBatchResponse"
+                  "$ref": "#/components/schemas/PostAdaptationBatchResponse"
                 }
               }
             }
@@ -210,10 +231,10 @@
         ]
       }
     },
-    "/api/adaptation/batch/{id}": {
+    "/api/adaptation-batches/{id}": {
       "get": {
-        "summary": "Get Batch",
-        "operationId": "get_batch_api_adaptation_batch__id__get",
+        "summary": "Get Adaptation Batch",
+        "operationId": "get_adaptation_batch_api_adaptation_batches__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -236,7 +257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBatchResponse"
+                  "$ref": "#/components/schemas/GetAdaptationBatchResponse"
                 }
               }
             }
@@ -254,17 +275,58 @@
         }
       }
     },
-    "/api/adaptation/batches": {
+    "/api/classification-batches": {
       "get": {
-        "summary": "Get Batches",
-        "operationId": "get_batches_api_adaptation_batches_get",
+        "summary": "Get Classification Batches",
+        "operationId": "get_classification_batches_api_classification_batches_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBatchesResponse"
+                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Classification Batch",
+        "operationId": "create_classification_batch_api_classification_batches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostClassificationBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostClassificationBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -277,10 +339,75 @@
         ]
       }
     },
-    "/api/adaptation/textbook": {
+    "/api/classification-batches/{id}": {
+      "get": {
+        "summary": "Get Classification Batch",
+        "operationId": "get_classification_batch_api_classification_batches__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClassificationBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/textbooks": {
+      "get": {
+        "summary": "Get Textbooks",
+        "operationId": "get_textbooks_api_textbooks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTextbooksResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
       "post": {
         "summary": "Post Textbook",
-        "operationId": "post_textbook_api_adaptation_textbook_post",
+        "operationId": "post_textbook_api_textbooks_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -320,10 +447,10 @@
         ]
       }
     },
-    "/api/adaptation/textbook/{id}": {
+    "/api/textbooks/{id}": {
       "get": {
         "summary": "Get Textbook",
-        "operationId": "get_textbook_api_adaptation_textbook__id__get",
+        "operationId": "get_textbook_api_textbooks__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -364,33 +491,10 @@
         }
       }
     },
-    "/api/adaptation/textbooks": {
-      "get": {
-        "summary": "Get Textbooks",
-        "operationId": "get_textbooks_api_adaptation_textbooks_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetTextbooksResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
-      }
-    },
-    "/api/adaptation/textbook/{id}/batches": {
+    "/api/textbooks/{id}/adaptation-batches": {
       "post": {
-        "summary": "Post Textbook Batch",
-        "operationId": "post_textbook_batch_api_adaptation_textbook__id__batches_post",
+        "summary": "Post Textbook Adaptation Batch",
+        "operationId": "post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -412,7 +516,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostTextbookBatchRequest"
+                "$ref": "#/components/schemas/PostTextbookAdaptationBatchRequest"
               }
             }
           }
@@ -441,10 +545,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/batch/{batch_id}/removed": {
+    "/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed": {
       "put": {
-        "summary": "Put Textbook Batch Removed",
-        "operationId": "put_textbook_batch_removed_api_adaptation_textbook__textbook_id__batch__batch_id__removed_put",
+        "summary": "Put Textbook Adaptation Batch Removed",
+        "operationId": "put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -461,12 +565,12 @@
             }
           },
           {
-            "name": "batch_id",
+            "name": "adaptation_batch_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Batch Id"
+              "title": "Adaptation Batch Id"
             }
           },
           {
@@ -503,10 +607,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed": {
+    "/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed": {
       "put": {
         "summary": "Put Textbook Adaptation Removed",
-        "operationId": "put_textbook_adaptation_removed_api_adaptation_textbook__textbook_id__adaptation__adaptation_id__removed_put",
+        "operationId": "put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -565,10 +669,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/external-exercises": {
+    "/api/textbooks/{textbook_id}/external-exercises": {
       "post": {
         "summary": "Post Textbook External Exercises",
-        "operationId": "post_textbook_external_exercises_api_adaptation_textbook__textbook_id__external_exercises_post",
+        "operationId": "post_textbook_external_exercises_api_textbooks__textbook_id__external_exercises_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -619,10 +723,10 @@
         }
       }
     },
-    "/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
+    "/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
       "put": {
         "summary": "Put Textbook External Exercises Removed",
-        "operationId": "put_textbook_external_exercises_removed_api_adaptation_textbook__textbook_id__external_exercises__external_exercise_id__removed_put",
+        "operationId": "put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -681,10 +785,10 @@
         }
       }
     },
-    "/api/adaptation/{id}": {
+    "/api/adaptations/{id}": {
       "get": {
         "summary": "Get Adaptation",
-        "operationId": "get_adaptation_api_adaptation__id__get",
+        "operationId": "get_adaptation_api_adaptations__id__get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -725,10 +829,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/adjustment": {
+    "/api/adaptations/{id}/adjustment": {
       "post": {
         "summary": "Post Adaptation Adjustment",
-        "operationId": "post_adaptation_adjustment_api_adaptation__id__adjustment_post",
+        "operationId": "post_adaptation_adjustment_api_adaptations__id__adjustment_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -779,10 +883,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/last-adjustment": {
+    "/api/adaptations/{id}/last-adjustment": {
       "delete": {
         "summary": "Delete Adaptation Last Adjustment",
-        "operationId": "delete_adaptation_last_adjustment_api_adaptation__id__last_adjustment_delete",
+        "operationId": "delete_adaptation_last_adjustment_api_adaptations__id__last_adjustment_delete",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -823,10 +927,10 @@
         }
       }
     },
-    "/api/adaptation/{id}/manual-edit": {
+    "/api/adaptations/{id}/manual-edit": {
       "put": {
         "summary": "Put Adaptation Manual Edit",
-        "operationId": "put_adaptation_manual_edit_api_adaptation__id__manual_edit_put",
+        "operationId": "put_adaptation_manual_edit_api_adaptations__id__manual_edit_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -878,7 +982,7 @@
       },
       "delete": {
         "summary": "Delete Adaptation Manual Edit",
-        "operationId": "delete_adaptation_manual_edit_api_adaptation__id__manual_edit_delete",
+        "operationId": "delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -919,10 +1023,126 @@
         }
       }
     },
-    "/api/adaptation/export/adaptation-{id}.html": {
+    "/api/export/adaptation-batch/{id}.html": {
+      "get": {
+        "summary": "Export Adaptation Batch",
+        "operationId": "export_adaptation_batch_api_export_adaptation_batch__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/classification-batch/{id}.html": {
+      "get": {
+        "summary": "Export Classification Batch",
+        "operationId": "export_classification_batch_api_export_classification_batch__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/adaptation/{id}.html": {
       "get": {
         "summary": "Export Adaptation",
-        "operationId": "export_adaptation_api_adaptation_export_adaptation__id__html_get",
+        "operationId": "export_adaptation_api_export_adaptation__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -977,68 +1197,10 @@
         }
       }
     },
-    "/api/adaptation/export/batch-{id}.html": {
-      "get": {
-        "summary": "Export Batch",
-        "operationId": "export_batch_api_adaptation_export_batch__id__html_get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "download",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true,
-              "title": "Download"
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/adaptation/export/textbook-{id}.html": {
+    "/api/export/textbook/{id}.html": {
       "get": {
         "summary": "Export Textbook",
-        "operationId": "export_textbook_api_adaptation_export_textbook__id__html_get",
+        "operationId": "export_textbook_api_export_textbook__id__html_get",
         "parameters": [
           {
             "name": "id",
@@ -1176,9 +1338,27 @@
             "type": "string",
             "title": "Createdby"
           },
-          "batchId": {
-            "type": "string",
-            "title": "Batchid"
+          "classificationBatchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Classificationbatchid"
+          },
+          "adaptationBatchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adaptationbatchid"
           },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
@@ -1221,7 +1401,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Exercise-Output"
+                "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
               },
               {
                 "type": "null"
@@ -1238,7 +1418,8 @@
         "required": [
           "id",
           "createdBy",
-          "batchId",
+          "classificationBatchId",
+          "adaptationBatchId",
           "strategy",
           "input",
           "rawLlmConversations",
@@ -1439,12 +1620,12 @@
             "type": "string",
             "title": "Title"
           },
-          "batches": {
+          "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__ApiTextbook__Batch"
+              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
             },
             "type": "array",
-            "title": "Batches"
+            "title": "Adaptationbatches"
           },
           "externalExercises": {
             "items": {
@@ -1460,7 +1641,7 @@
           "id",
           "createdBy",
           "title",
-          "batches",
+          "adaptationBatches",
           "externalExercises"
         ],
         "title": "ApiTextbook"
@@ -1537,7 +1718,7 @@
             "title": "Kind"
           },
           "exercise": {
-            "$ref": "#/components/schemas/Exercise-Output"
+            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
           }
         },
         "additionalProperties": false,
@@ -1636,6 +1817,74 @@
           "kind",
           "contents"
         ]
+      },
+      "ClassificationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "ClassificationBatch"
+      },
+      "ClassificationInput": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "instructionHintExampleText": {
+            "type": "string",
+            "title": "Instructionhintexampletext"
+          },
+          "statementText": {
+            "type": "string",
+            "title": "Statementtext"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "instructionHintExampleText",
+          "statementText"
+        ],
+        "title": "ClassificationInput"
       },
       "DummyModel": {
         "properties": {
@@ -1759,60 +2008,6 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "format",
-          "instruction",
-          "example",
-          "hint",
-          "statement",
-          "reference"
-        ]
-      },
-      "Exercise-Output": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "const": "v1",
-            "title": "Format"
-          },
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
               },
               {
                 "type": "null"
@@ -2079,7 +2274,7 @@
           "kind"
         ]
       },
-      "GetBatchResponse": {
+      "GetAdaptationBatchResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -2108,24 +2303,86 @@
           "strategy",
           "adaptations"
         ],
-        "title": "GetBatchResponse"
+        "title": "GetAdaptationBatchResponse"
       },
-      "GetBatchesResponse": {
+      "GetAdaptationBatchesResponse": {
         "properties": {
-          "batches": {
+          "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__adaptation__router__GetBatchesResponse__Batch"
+              "$ref": "#/components/schemas/patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch"
             },
             "type": "array",
-            "title": "Batches"
+            "title": "Adaptationbatches"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "batches"
+          "adaptationBatches"
         ],
-        "title": "GetBatchesResponse"
+        "title": "GetAdaptationBatchesResponse"
+      },
+      "GetClassificationBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__GetClassificationBatchResponse__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "modelForAdaptation",
+          "exercises"
+        ],
+        "title": "GetClassificationBatchResponse"
+      },
+      "GetClassificationBatchesResponse": {
+        "properties": {
+          "classificationBatches": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationBatch"
+            },
+            "type": "array",
+            "title": "Classificationbatches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "classificationBatches"
+        ],
+        "title": "GetClassificationBatchesResponse"
       },
       "GetTextbookResponse": {
         "properties": {
@@ -2332,7 +2589,7 @@
         ],
         "title": "JsonSchemaLlmResponseSpecification"
       },
-      "LatestBatch": {
+      "LatestAdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -2364,7 +2621,7 @@
           "inputs",
           "availableStrategySettings"
         ],
-        "title": "LatestBatch"
+        "title": "LatestAdaptationBatch"
       },
       "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
@@ -2802,7 +3059,7 @@
         ],
         "title": "PostAdaptationAdjustmentRequest"
       },
-      "PostBatchRequest": {
+      "PostAdaptationBatchRequest": {
         "properties": {
           "creator": {
             "type": "string",
@@ -2826,9 +3083,9 @@
           "strategy",
           "inputs"
         ],
-        "title": "PostBatchRequest"
+        "title": "PostAdaptationBatchRequest"
       },
-      "PostBatchResponse": {
+      "PostAdaptationBatchResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -2840,9 +3097,63 @@
         "required": [
           "id"
         ],
-        "title": "PostBatchResponse"
+        "title": "PostAdaptationBatchResponse"
       },
-      "PostTextbookBatchRequest": {
+      "PostClassificationBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "inputs",
+          "modelForAdaptation"
+        ],
+        "title": "PostClassificationBatchRequest"
+      },
+      "PostClassificationBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostClassificationBatchResponse"
+      },
+      "PostTextbookAdaptationBatchRequest": {
         "properties": {
           "creator": {
             "type": "string",
@@ -2882,7 +3193,7 @@
           "branchName",
           "inputs"
         ],
-        "title": "PostTextbookBatchRequest"
+        "title": "PostTextbookAdaptationBatchRequest"
       },
       "PostTextbookExternalExercisesRequest": {
         "properties": {
@@ -3366,7 +3677,61 @@
           "kind"
         ]
       },
-      "patty__adaptation__router__ApiTextbook__Batch": {
+      "patty__adapted__Exercise-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instruction",
+          "example",
+          "hint",
+          "statement",
+          "reference"
+        ]
+      },
+      "patty__api_router__ApiTextbook__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -3395,9 +3760,9 @@
           "adaptations",
           "removedFromTextbook"
         ],
-        "title": "Batch"
+        "title": "AdaptationBatch"
       },
-      "patty__adaptation__router__GetBatchesResponse__Batch": {
+      "patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch": {
         "properties": {
           "id": {
             "type": "string",
@@ -3447,7 +3812,73 @@
           "model",
           "strategySettingsName"
         ],
-        "title": "Batch"
+        "title": "AdaptationBatch"
+      },
+      "patty__api_router__GetClassificationBatchResponse__Exercise": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "type": "string",
+            "title": "Fulltext"
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "type": "boolean",
+            "title": "Exerciseclasshassettings"
+          },
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise"
       }
     },
     "securitySchemes": {

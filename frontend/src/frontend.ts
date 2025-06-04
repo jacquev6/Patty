@@ -5,12 +5,14 @@ import { createPinia } from 'pinia'
 
 import './main.css'
 import IndexView from './IndexView.vue'
-import CreateBatchView from './CreateBatchView.vue'
+import CreateAdaptationBatchView from './CreateAdaptationBatchView.vue'
+import CreateClassificationBatchView from './CreateClassificationBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
-import EditBatchView from './EditBatchView.vue'
+import EditAdaptationBatchView from './EditAdaptationBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
 import ExamplesView from './ExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
+import EditClassificationBatchView from './EditClassificationBatchView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,14 +23,25 @@ const router = createRouter({
       component: IndexView,
     },
     {
-      path: '/new-batch',
-      name: 'create-batch',
-      component: CreateBatchView,
+      path: '/new-classification-batch',
+      name: 'create-classification-batch',
+      component: CreateClassificationBatchView,
     },
     {
-      path: '/batch-:id',
-      name: 'batch',
-      component: EditBatchView,
+      path: '/classification-batch-:id',
+      name: 'classification-batch',
+      component: EditClassificationBatchView,
+      props: true,
+    },
+    {
+      path: '/new-adaptation-batch',
+      name: 'create-adaptation-batch',
+      component: CreateAdaptationBatchView,
+    },
+    {
+      path: '/adaptation-batch-:id',
+      name: 'adaptation-batch',
+      component: EditAdaptationBatchView,
       props: true,
     },
     {

@@ -9,55 +9,17 @@ import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
 import FixedColumns from './FixedColumns.vue'
 import ComboInput from './ComboInput.vue'
+import LlmModelSelector from './LlmModelSelector.vue'
 
-const props = withDefaults(
-  defineProps<{
-    availableLlmModels: LlmModel[]
-    availableStrategySettings: AdaptationStrategy['settings'][]
-    disabled?: boolean
-  }>(),
-  { disabled: false },
-)
+const props = defineProps<{
+  availableLlmModels: LlmModel[]
+  availableStrategySettings: AdaptationStrategy['settings'][]
+  disabled: boolean
+}>()
 
 const client = useAuthenticatedClient()
 
 const strategy = defineModel<AdaptationStrategy>({ required: true })
-
-const availableLlmModels = computed(() => props.availableLlmModels)
-
-assert(props.disabled || availableLlmModels.value.length !== 0)
-
-const llmProviders = computed(() => {
-  return [...new Set(availableLlmModels.value.map((model) => model.provider))]
-})
-
-const llmProvider = computed({
-  get: () => {
-    return strategy.value.model.provider
-  },
-  set: (value: string) => {
-    const model = availableLlmModels.value.find((model) => model.provider === value)
-    assert(model !== undefined)
-    strategy.value.model = model
-  },
-})
-
-const llmNames = computed(() => {
-  return availableLlmModels.value.filter((model) => model.provider === llmProvider.value).map((model) => model.name)
-})
-
-const llmName = computed({
-  get: () => {
-    return strategy.value.model.name
-  },
-  set: (value: string) => {
-    const model = availableLlmModels.value.find(
-      (model) => model.provider === strategy.value.model.provider && model.name === value,
-    )
-    assert(model !== undefined)
-    strategy.value.model = model
-  },
-})
 
 const llmResponseSpecificationFormalism = computed({
   get: () => {
@@ -120,7 +82,7 @@ const schema = computedAsync(async () => {
     strategy.value.settings.responseSpecification.format === 'json' &&
     strategy.value.settings.responseSpecification.formalism === 'json-schema'
   ) {
-    const response = await client.POST('/api/adaptation/llm-response-schema', {
+    const response = await client.POST('/api/adaptation-llm-response-schema', {
       body: strategy.value.settings.responseSpecification,
     })
     assert(response.data !== undefined)
@@ -159,16 +121,7 @@ const settingsNameSuggestions = computed(() => {
 <template>
   <h1>Strategy</h1>
   <h2>LLM model</h2>
-  <p v-if="disabled">Provider: {{ strategy.model.provider }}, model: {{ strategy.model.name }}</p>
-  <p v-else>
-    Provider:
-    <select data-cy="llm-provider" v-model="llmProvider">
-      <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option></select
-    >, model:
-    <select data-cy="llm-name" v-model="llmName">
-      <option v-for="name in llmNames">{{ name }}</option>
-    </select>
-  </p>
+  <p><LlmModelSelector :availableLlmModels :disabled v-model="strategy.model" /></p>
 
   <h2>Settings</h2>
   <p v-if="disabled">Name: {{ settingsName }}</p>

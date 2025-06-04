@@ -1,4 +1,10 @@
-*Patty* is an interface to help the MALIN team experiment with generating adapted exercises using an LLM.
+*Patty* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
+
+
+# Documentation
+
+There is little documentation because our small team focuses on creating a working prototype.
+There is however a [graph of the DB tables](backend/generated/db-tables-graph.png), generated from the ORM models.
 
 
 # Development

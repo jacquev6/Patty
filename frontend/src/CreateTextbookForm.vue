@@ -22,7 +22,7 @@ const busy = ref(false)
 async function submit() {
   busy.value = true
 
-  const response = await client.POST('/api/adaptation/textbook', {
+  const response = await client.POST('/api/textbooks', {
     body: {
       creator: identifiedUser.identifier,
       title: title.value,

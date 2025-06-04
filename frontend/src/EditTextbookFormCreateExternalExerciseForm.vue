@@ -6,7 +6,7 @@ import BusyBox from './BusyBox.vue'
 import assert from './assert'
 import { useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
-import { parseExerciseFileName } from './CreateBatchFormInputsEditor.vue'
+import { parseExerciseFileName } from './CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
   textbookId: string
@@ -32,7 +32,7 @@ async function upload() {
     const file = input.value.files.item(index)
     assert(file !== null)
     const { pageNumber, exerciseNumber } = parseExerciseFileName(file.name)
-    const response = await client.POST('/api/adaptation/textbook/{textbook_id}/external-exercises', {
+    const response = await client.POST('/api/textbooks/{textbook_id}/external-exercises', {
       params: {
         path: {
           textbook_id: props.textbookId,
@@ -57,7 +57,7 @@ async function upload() {
     assert(uploadResponse.status === 200)
   }
 
-  const textbookResponse = await client.GET(`/api/adaptation/textbook/{id}`, {
+  const textbookResponse = await client.GET(`/api/textbooks/{id}`, {
     params: { path: { id: props.textbookId } },
   })
   assert(textbookResponse.data !== undefined)

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 
-import CreateBatchFormInputsEditor from './CreateBatchFormInputsEditor.vue'
+import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
 import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
-import { type InputWithFile } from './CreateBatchFormInputEditor.vue'
+import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
@@ -68,7 +68,7 @@ const busy = ref(false)
 async function submit() {
   busy.value = true
 
-  const response = await client.POST('/api/adaptation/textbook/{id}/batches', {
+  const response = await client.POST('/api/textbooks/{id}/adaptation-batches', {
     params: { path: { id: props.textbookId } },
     body: {
       creator: identifiedUser.identifier,
@@ -112,5 +112,5 @@ const disabled = computed(() => {
     </select>
   </p>
   <p><button @click="submit" :disabled>Submit</button></p>
-  <CreateBatchFormInputsEditor headers="h3" v-model="inputs" />
+  <CreateAdaptationBatchFormInputsEditor headers="h3" v-model="inputs" />
 </template>

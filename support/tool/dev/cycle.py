@@ -28,29 +28,17 @@ class DevelopmentCycle:
     def run(self) -> None:
         try:
             self.do_run()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             raise DevelopmentCycleError()
 
     def do_run(self) -> None:
-        if self.cost_money:
-            env_for_tests = {"PATTY_RUN_TESTS_COSTING_MONEY": "true"}
-        else:
-            env_for_tests = {}
-
         if self.do_backend:
             if self.do_migration:
-                backup_to_load = "s3://jacquev6/patty/prod/backups/patty-backup-20250521-091610.tar.gz"
                 run_in_backend_container(
-                    [
-                        "python",
-                        "-m",
-                        "patty",
-                        "restore-database",
-                        "--yes",
-                        "--patch-according-to-settings",
-                        backup_to_load,
-                    ]
+                    ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
+                # @todo(after a5c3c863f388 is applied in production) Remove. No rush: it's a no-op if already applied.
+                run_alembic(["upgrade", "a5c3c863f388"])
                 existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
                 assert len(existing) <= 1
                 if len(existing) == 1:
@@ -77,15 +65,19 @@ class DevelopmentCycle:
                 )
 
             if self.do_lint:
-                pass  # @todo Investigate linters for Python code
+                run_in_backend_container(["ruff", "check", "backend", "support/tool", "--fix"], workdir="/app")
 
             if self.do_type_check:
                 run_in_backend_container(["mypy", "backend", "support/tool", "--strict"], workdir="/app")
 
             if self.do_test:
-                run_in_backend_container(
-                    ["python", "-m", "unittest", "discover", "--pattern", "*.py"], env=env_for_tests
-                )
+                env: dict[str, str] = {}
+                if self.cost_money:
+                    env["PATTY_TESTS_SPEND_MONEY"] = "true"
+                if not self.do_migration:
+                    env["PATTY_TESTS_SKIP_MIGRATIONS"] = "true"
+
+                run_in_backend_container(["python", "-m", "unittest", "discover", "--pattern", "*.py"], env=env)
 
         if self.do_frontend:
             if self.do_format:
@@ -124,5 +116,6 @@ class DevelopmentCycle:
                     specs = []
                 else:
                     specs = ["--spec", ",".join(self.end_to_end_specs)]
+
                 for browser in self.browsers:
                     run_in_frontend_container(["npx", "cypress", "run", "--e2e", "--browser", browser] + specs)

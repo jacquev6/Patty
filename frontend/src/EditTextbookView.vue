@@ -23,7 +23,7 @@ let refreshTimeoutId: number | null = null
 
 async function refresh() {
   const llmModelsPromise = client.GET('/api/available-llm-models')
-  const textbookPromise = client.GET(`/api/adaptation/textbook/{id}`, { params: { path: { id: props.id } } })
+  const textbookPromise = client.GET(`/api/textbooks/{id}`, { params: { path: { id: props.id } } })
 
   const llmModelsResponse = await llmModelsPromise
   if (llmModelsResponse.data !== undefined) {
@@ -64,8 +64,8 @@ function refreshIfNeeded() {
 
 function needsRefresh() {
   assert(textbook.value !== null)
-  for (const batch of textbook.value.batches) {
-    for (const adaptation of batch.adaptations) {
+  for (const adaptationBatch of textbook.value.adaptationBatches) {
+    for (const adaptation of adaptationBatch.adaptations) {
       if (preprocessAdaptation(adaptation).status.kind === 'inProgress') {
         return true
       }

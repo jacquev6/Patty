@@ -75,25 +75,26 @@ def auth_bearer_dependable(
 AuthBearerDependable = typing.Annotated[typing.Literal[True], fastapi.Depends(auth_bearer_dependable)]
 
 
-def auth_token_dependable(token: str) -> typing.Literal[True]:
+def auth_param_dependable(token: str) -> typing.Literal[True]:
     return check_token_validity(token)
 
 
-AuthTokenDependable = typing.Annotated[typing.Literal[True], fastapi.Depends(auth_token_dependable)]
+AuthParamDependable = typing.Annotated[typing.Literal[True], fastapi.Depends(auth_param_dependable)]
 
 
 class AuthenticationApiTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        app = self.app = fastapi.FastAPI()
+        super().setUp()
 
-        app.include_router(router)
+        self.app = fastapi.FastAPI()
+        self.app.include_router(router)
 
-        @app.get("/bearer")
+        @self.app.get("/bearer")
         def bearer(token_is_valid: AuthBearerDependable) -> typing.Literal[True]:
             return token_is_valid
 
-        @app.get("/param")
-        def param(token_is_valid: AuthTokenDependable) -> typing.Literal[True]:
+        @self.app.get("/param")
+        def param(token_is_valid: AuthParamDependable) -> typing.Literal[True]:
             return token_is_valid
 
         self.client = fastapi.testclient.TestClient(self.app)

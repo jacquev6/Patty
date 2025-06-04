@@ -1,3 +1,5 @@
+import time
+import traceback
 from typing import Iterable
 import asyncio
 import datetime
@@ -5,25 +7,19 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
+import typing
 import urllib.parse
 
-import argon2
-import boto3
-import click
-import requests
-import sqlalchemy_utils
+# In this file, we favor importing third-party and local modules in the appropriate command functions to avoid
+# loading unused modules. Before doing that, 'python -m patty --help' took 6s. Now it takes less than 1s.
 
-from . import adaptation
-from . import adapted
-from . import asgi
-from . import database_utils
-from . import fixtures
-from . import llm
+import click
+
 from . import settings
-from .adaptation import submission
 
 
 @click.group()
@@ -34,16 +30,71 @@ def main() -> None:
 @main.command()
 @click.argument("password")
 def hash_password(password: str) -> None:
+    import argon2
+
     print(argon2.PasswordHasher().hash(password))
 
 
 @main.command()
 def openapi() -> None:
+    from . import asgi
+
     print(json.dumps(asgi.app.openapi(), indent=2))
 
 
 @main.command()
+def db_tables_graph() -> None:
+    import graphviz  # type: ignore[import-untyped]
+    import sqlalchemy
+
+    from . import orm_models
+
+    models = orm_models.all_models
+    tables = [typing.cast(sqlalchemy.Table, model.__table__) for model in models]
+    known_table_names = set(table.name for table in tables)
+
+    graph = graphviz.Digraph(node_attr={"shape": "none"})
+    for table in tables:
+        foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
+
+        foreign_keys_by_field: dict[str, list[str]] = {}
+        for foreign_key_index, foreign_key in enumerate(foreign_keys):
+            for column in foreign_key.columns:
+                foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
+
+        fields = []
+        for column_index, column in enumerate(table.columns):
+            color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
+            type = str(column.type)
+            if " " in type:
+                type = "<BR/>".join(type.split(" ", 1))
+            pk_status = "PK" if column.primary_key else ""
+            null_status = "nullable" if column.nullable else ""
+            status = ", ".join(
+                filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
+            )
+            fields.append(
+                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
+            )
+        graph.node(
+            table.name,
+            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+        )
+
+        for foreign_key_index, foreign_key in enumerate(foreign_keys):
+            target_table = foreign_key.elements[0].column.table.name
+            if target_table in known_table_names:
+                label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
+                graph.edge(table.name, target_table, label=label)
+
+    sys.stdout.buffer.write(graph.pipe(format="png"))
+
+
+@main.command()
 def adapted_exercise_schema() -> None:
+    from . import adapted
+    from . import llm
+
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
         adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
@@ -66,12 +117,17 @@ def adapted_exercise_schema() -> None:
 
 @main.command()
 def default_system_prompt() -> None:
+    from . import fixtures
+
     print(fixtures.make_default_system_prompt())
 
 
 @main.command()
 @click.argument("fixture", type=str, nargs=-1)
 def load_fixtures(fixture: Iterable[str]) -> None:
+    from . import database_utils
+    from . import fixtures
+
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         fixtures.load(session, fixture)
@@ -79,11 +135,44 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 
 @main.command()
-@click.option("--parallelism", type=int, default=1)
+@click.option("--classification-parallelism", type=int, default=20)
+@click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(parallelism: int, pause: float) -> None:
+def run_submission_daemon(classification_parallelism: int, adaptation_parallelism: int, pause: float) -> None:
+    import requests
+
+    from . import database_utils
+    from .adaptation.submission import submit_adaptations
+    from .classification import submit_classifications
+
+    def log(message: str) -> None:
+        # @todo Use actual logging
+        print(datetime.datetime.now(), message, flush=True)
+
     engine = database_utils.create_engine(settings.DATABASE_URL)
-    asyncio.run(submission.daemon(engine, parallelism, pause))
+
+    async def daemon() -> None:
+        log("Starting")
+        last_time = time.monotonic()
+        while True:
+            log("Waking up...")
+            try:
+                with database_utils.Session(engine) as session:
+                    submit_classifications(session, classification_parallelism)
+                    submissions = submit_adaptations(session, adaptation_parallelism)
+                    await asyncio.gather(*submissions)
+                    session.commit()
+                if time.monotonic() >= last_time + 60:
+                    log("Calling pulse monitoring URL")
+                    last_time = time.monotonic()
+                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+            except Exception:  # Pokemon programming: gotta catch 'em all
+                log("UNEXPECTED ERROR")
+                traceback.print_exc()
+            log(f"Sleeping for {pause}s...")
+            await asyncio.sleep(pause)
+
+    asyncio.run(daemon())
 
 
 parsed_database_url = urllib.parse.urlparse(settings.DATABASE_URL)
@@ -94,6 +183,9 @@ parsed_database_backups_url = urllib.parse.urlparse(settings.DATABASE_BACKUPS_UR
 
 @main.command()
 def backup_database() -> None:
+    import boto3
+    import requests
+
     now = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_name = f"patty-backup-{now}"
     archive_name = f"{backup_name}.tar.gz"
@@ -156,10 +248,13 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250603-091611.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
+    import boto3
+    import sqlalchemy_utils
+
     parsed_backup_url = urllib.parse.urlparse(backup_url)
 
     if parsed_backup_url.scheme == "file":
@@ -235,37 +330,72 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 
 @main.command()
 def migrate_data() -> None:
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    from . import database_utils
+    from . import data_migration
 
-    # Migrate JSON fields according to evolution of schemas
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.Adaptation).all():
-            pass
-        for batch in session.query(adaptation.Batch).all():
-            pass
-        for input in session.query(adaptation.Input).all():
-            pass
-        for strategy in session.query(adaptation.Strategy).all():
-            pass
-        for strategy_settings in session.query(adaptation.StrategySettings).all():
-            pass
+        data_migration.migrate(session)
         session.commit()
 
-    # Check that all JSON fields are valid
+
+@main.command()
+def dump_database() -> None:
+    from . import database_utils
+    from . import orm_models  # noqa: F401 to populate the metadata
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
-        for adaptation_ in session.query(adaptation.Adaptation).all():
-            # No need to check 'adaptation_.raw_llm_conversations': it has no schema
-            adaptation_.initial_assistant_response
-            adaptation_.adjustments
-            adaptation_.manual_edit
-        for batch in session.query(adaptation.Batch).all():
-            pass
-        for input in session.query(adaptation.Input).all():
-            pass
-        for strategy in session.query(adaptation.Strategy).all():
-            strategy.model
-        for strategy_settings in session.query(adaptation.StrategySettings).all():
-            strategy_settings.response_specification
+        data = database_utils.dump(session)
+    json.dump(data, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+
+
+@main.command()
+def load_database() -> None:
+    from . import database_utils
+    from . import orm_models  # noqa: F401 to populate the metadata
+
+    data = json.load(sys.stdin)
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        database_utils.load(session, data, {"old_adaptation_strategy_settings_branches": ["head_id"]})
+        session.commit()
+
+
+@main.command()
+@click.argument("directory", type=click.Path(file_okay=False))
+def export_all(directory: str) -> None:
+    import fastapi
+
+    from . import database_utils
+    from .orm_models import Adaptation, AdaptationBatch, Textbook
+    from .api_router import make_adapted_exercise_data, export_adaptation, export_adaptation_batch, export_textbook
+
+    shutil.rmtree(directory, ignore_errors=True)
+    os.makedirs(directory)
+    with open(os.path.join(directory, ".gitignore"), "w") as gitignore:
+        gitignore.write("*\n")
+
+    def save(kind: str, id: int, res: fastapi.responses.HTMLResponse) -> None:
+        filepath = os.path.join(directory, f"{kind}-{id}.html")
+        print(f"Exporting {kind} {id} to {filepath}")
+        with open(filepath, "wb") as file:
+            file.write(res.body)
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        for adaptation in session.query(Adaptation).all():
+            if make_adapted_exercise_data(adaptation) is None:
+                print(f"Skipping adaptation {adaptation.id} because it has no adapted exercise data")
+            else:
+                save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
+
+        for adaptation_batch in session.query(AdaptationBatch).all():
+            save("adaptation-batch", adaptation_batch.id, export_adaptation_batch(str(adaptation_batch.id), session))
+
+        for textbook in session.query(Textbook).all():
+            save("textbook", textbook.id, export_textbook(str(textbook.id), session))
 
 
 if __name__ == "__main__":

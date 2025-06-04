@@ -1,28 +1,28 @@
 from .adaptation import (
-    Adaptation,
-    AssistantSuccess,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantResponse,
+    AssistantSuccess,
+    OldAdaptation,
 )
-from .batch import Batch
-from .input import Input
-from .router import router
-from .strategy import Strategy, StrategySettings, StrategySettingsBranch
-from .textbook import Textbook
+from .batch import OldBatch
+from .input import OldInput
+from .strategy import OldStrategy, OldStrategySettings, OldStrategySettingsBranch
+from .textbook import OldTextbook, OldExternalExercise
 
 
 __all__ = [
-    "Adaptation",
     "AssistantInvalidJsonError",
     "AssistantNotJsonError",
     "AssistantResponse",
     "AssistantSuccess",
-    "Batch",
-    "Input",
+    "OldAdaptation",
+    "OldBatch",
+    "OldExternalExercise",
+    "OldInput",
+    "OldStrategy",
+    "OldStrategySettings",
+    "OldStrategySettingsBranch",
+    "OldTextbook",
     "router",
-    "Strategy",
-    "StrategySettings",
-    "StrategySettingsBranch",
-    "Textbook",
 ]

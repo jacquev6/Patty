@@ -3,9 +3,9 @@ import { computed, ref } from 'vue'
 import _ from 'lodash'
 
 import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
-import AdaptationPreview from './EditBatchFormAdaptationPreview.vue'
+import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
 import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
-import EditTextbookFormCreateBatchForm from './EditTextbookFormCreateBatchForm.vue'
+import EditTextbookFormCreateAdaptationBatchForm from './EditTextbookFormCreateAdaptationBatchForm.vue'
 import assert from './assert'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
@@ -26,11 +26,11 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-const batches = computed(() =>
-  props.textbook.batches.map((batch) => {
+const adaptationBatches = computed(() =>
+  props.textbook.adaptationBatches.map((adaptationBatch) => {
     return {
-      ...batch,
-      adaptations: batch.adaptations.map(preprocessAdaptation),
+      ...adaptationBatch,
+      adaptations: adaptationBatch.adaptations.map(preprocessAdaptation),
     }
   }),
 )
@@ -51,9 +51,9 @@ const pages = computed(() => {
       }
 
   const pages: Record<number, Exercise[]> = {}
-  for (const batch of batches.value) {
-    if (!batch.removedFromTextbook) {
-      for (const adaptation of batch.adaptations) {
+  for (const adaptationBatch of adaptationBatches.value) {
+    if (!adaptationBatch.removedFromTextbook) {
+      for (const adaptation of adaptationBatch.adaptations) {
         if (
           !adaptation.removedFromTextbook &&
           adaptation.input.pageNumber !== null &&
@@ -104,16 +104,16 @@ function textbookUpdated(textbook: Textbook) {
   emit('textbook-updated', textbook)
 }
 
-async function removeBatch(id: string, removed: boolean) {
-  const response = await client.PUT('/api/adaptation/textbook/{textbook_id}/batch/{batch_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, batch_id: id }, query: { removed } },
+async function removeAdaptationBatch(id: string, removed: boolean) {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, adaptation_batch_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
 
 async function removeAdaptation(id: string, removed: boolean) {
-  const response = await client.PUT('/api/adaptation/textbook/{textbook_id}/adaptation/{adaptation_id}/removed', {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, adaptation_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
@@ -121,12 +121,9 @@ async function removeAdaptation(id: string, removed: boolean) {
 }
 
 async function removeExternalExercise(id: string, removed: boolean) {
-  const response = await client.PUT(
-    '/api/adaptation/textbook/{textbook_id}/external-exercises/{external_exercise_id}/removed',
-    {
-      params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
-    },
-  )
+  const response = await client.PUT('/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
+  })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
@@ -135,7 +132,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
 <template>
   <h1>{{ textbook.title }}</h1>
   <p>
-    <a :href="`/api/adaptation/export/textbook-${textbook.id}.html?token=${authenticationTokenStore.token}`">
+    <a :href="`/api/export/textbook/${textbook.id}.html?token=${authenticationTokenStore.token}`">
       Download standalone HTML
     </a>
   </p>
@@ -156,23 +153,26 @@ async function removeExternalExercise(id: string, removed: boolean) {
   </p>
   <template v-if="view === 'batch'">
     <h2>New batch</h2>
-    <EditTextbookFormCreateBatchForm
+    <EditTextbookFormCreateAdaptationBatchForm
       :availableLlmModels
       :availableStrategySettings
       :textbookId="textbook.id"
       @textbookUpdated="textbookUpdated"
     />
     <h2>Existing batches</h2>
-    <template v-for="batch in batches">
-      <template v-if="batch.removedFromTextbook">
+    <template v-for="adaptationBatch in adaptationBatches">
+      <template v-if="adaptationBatch.removedFromTextbook">
         <h3>
-          <span class="removed">{{ batch.strategy.settings.name }}</span> (removed)
-          <button @click="removeBatch(batch.id, false)">Re-add</button>
+          <span class="removed">{{ adaptationBatch.strategy.settings.name }}</span> (removed)
+          <button @click="removeAdaptationBatch(adaptationBatch.id, false)">Re-add</button>
         </h3>
       </template>
       <template v-else>
-        <h3>{{ batch.strategy.settings.name }} <button @click="removeBatch(batch.id, true)">Remove</button></h3>
-        <template v-for="(adaptation, index) in batch.adaptations">
+        <h3>
+          {{ adaptationBatch.strategy.settings.name }}
+          <button @click="removeAdaptationBatch(adaptationBatch.id, true)">Remove</button>
+        </h3>
+        <template v-for="(adaptation, index) in adaptationBatch.adaptations">
           <template v-if="adaptation.removedFromTextbook">
             <h4 style="margin-top: 0">
               <span class="removed">P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>

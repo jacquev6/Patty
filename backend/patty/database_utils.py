@@ -1,11 +1,14 @@
 from typing import Annotated, Any, Iterable, TypeVar
+import contextlib
 import datetime
 import os
+import typing
 import unittest
 
 from fastapi import Depends, Request
 import alembic.command
 import alembic.config
+import psycopg2
 import sqlalchemy as sql
 import sqlalchemy.exc
 import sqlalchemy.orm
@@ -25,6 +28,12 @@ def make_session(engine: Engine) -> Session:
     return Session(engine)
 
 
+# Custom collation: https://dba.stackexchange.com/a/285230
+create_exercise_number_collation = sql.text(
+    "CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"
+)
+
+
 class OrmBase(sqlalchemy.orm.DeclarativeBase):
     metadata = sqlalchemy.MetaData(
         naming_convention=dict(
@@ -38,17 +47,80 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
 
 
 def truncate_all_tables(session: Session) -> None:
-    session.execute(OrmBase.metadata.tables["adaptation_strategy_settings_branches"].update().values(head_id=None))
+    session.execute(OrmBase.metadata.tables["old_adaptation_strategy_settings_branches"].update().values(head_id=None))
+    session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 
     for table in reversed(OrmBase.metadata.sorted_tables):
         try:
-            session.execute(table.delete())
-            session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+            with session.begin_nested():
+                session.execute(table.delete())
         except sqlalchemy.exc.ProgrammingError:
             # E.g. when the table does not exist yet
-            session.rollback()
-        else:
-            session.commit()
+            pass
+
+        try:
+            with session.begin_nested():
+                session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+        except sqlalchemy.exc.ProgrammingError:
+            # E.g. when the table has no auto-incremented ID
+            pass
+
+
+def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
+    data: dict[str, list[dict[str, Any]]] = {}
+
+    for table in OrmBase.metadata.sorted_tables:
+        data[table.name] = []
+        for row in session.execute(table.select()):
+            data[table.name].append({})
+            for column in table.columns:
+                value = getattr(row, column.name)
+                if isinstance(column.type, sql.DateTime) and value is not None:
+                    assert isinstance(value, datetime.datetime)
+                    value = value.isoformat()
+                data[table.name][-1][column.name] = value
+
+    return data
+
+
+def load(session: Session, data: dict[str, list[dict[str, Any]]], deferred: dict[str, list[str]]) -> None:
+    truncate_all_tables(session)
+
+    for table in OrmBase.metadata.sorted_tables:
+        rows = data.get(table.name, [])
+
+        for row in rows:
+            row_data = {}
+            for column in table.columns:
+                value = row.get(column.name, None)
+                if isinstance(column.type, sql.DateTime) and value is not None:
+                    assert isinstance(value, str)
+                    value = datetime.datetime.fromisoformat(value)
+                row_data[column.name] = value
+
+            for column_name in deferred.get(table.name, []):
+                row_data.pop(column_name, None)
+
+            session.execute(table.insert().values(row_data))
+
+        if len(rows) != 0 and "id" in rows[0]:
+            max_id = max(row["id"] for row in rows if "id" in row)
+            try:
+                with session.begin_nested():
+                    session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH {max_id + 1}"))
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table has no auto-incremented ID
+                pass
+
+    for table_name, field_names in deferred.items():
+        for row in data.get(table_name, []):
+            row_data = {field_name: row[field_name] for field_name in field_names}
+            session.execute(
+                OrmBase.metadata.tables[table_name]
+                .update()
+                .where(OrmBase.metadata.tables[table_name].c.id == row["id"])
+                .values(row_data)
+            )
 
 
 def _db_engine_dependable(request: Request) -> Engine:
@@ -79,7 +151,7 @@ class TestCaseWithDatabase(unittest.TestCase):
     Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
 
     __database_url: str
-    __database_engine: Engine
+    engine: Engine
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -90,9 +162,9 @@ class TestCaseWithDatabase(unittest.TestCase):
             f"{settings.DATABASE_URL}-{cls.__name__}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         )
         sqlalchemy_utils.functions.create_database(cls.__database_url)
-        cls.__database_engine = create_engine(cls.__database_url)
+        cls.engine = create_engine(cls.__database_url)
 
-        # Creating the DB using Alembic is very important:
+        # Creating the DB using Alembic by default is very important:
         # It lets us test that the migrations produce the DB we expect.
         # The alternative, using 'OrmBase.metadata.create_all', always produces exactly the DB described
         # by the ORM models, but migrations could diverge from that.
@@ -100,36 +172,58 @@ class TestCaseWithDatabase(unittest.TestCase):
         # (Documented: https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
         # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
         # but would have failed in production.
-
-        # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
-        previous_dir = os.getcwd()
-        previous_database_url = settings.DATABASE_URL
-        try:
-            os.chdir(os.path.dirname(__file__))
-            settings.DATABASE_URL = cls.__database_url
-            alembic.command.upgrade(alembic.config.Config(file_="alembic.ini"), "head")
-        finally:
-            settings.DATABASE_URL = previous_database_url
-            os.chdir(previous_dir)
+        if os.environ.get("PATTY_TESTS_SKIP_MIGRATIONS", "false") == "true":
+            with cls.engine.connect() as conn:
+                conn.execute(create_exercise_number_collation)
+                conn.commit()
+            OrmBase.metadata.create_all(cls.engine)
+        else:
+            # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
+            previous_dir = os.getcwd()
+            previous_database_url = settings.DATABASE_URL
+            try:
+                os.chdir(os.path.dirname(__file__))
+                settings.DATABASE_URL = cls.__database_url
+                alembic.command.upgrade(alembic.config.Config(file_="alembic.ini"), "head")
+            finally:
+                settings.DATABASE_URL = previous_database_url
+                os.chdir(previous_dir)
 
     @classmethod
     def tearDownClass(cls) -> None:
         import sqlalchemy_utils.functions
 
-        cls.__database_engine.dispose()
+        cls.engine.dispose()
         sqlalchemy_utils.functions.drop_database(cls.__database_url)
         super().tearDownClass()
 
     def setUp(self) -> None:
         super().setUp()
-        self.session = make_session(self.__database_engine)
+        self.session = make_session(self.engine)
 
     def tearDown(self) -> None:
         self.session.close()
         super().tearDown()
 
-    def create_model(self, __model: type[Model], **kwargs: Any) -> Model:
+    def add_model(self, __model: type[Model], **kwargs: Any) -> Model:
         instance = __model(**kwargs)
         self.session.add(instance)
+        return instance
+
+    def flush_model(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = self.add_model(__model, **kwargs)
         self.session.flush()
         return instance
+
+    def commit_model(self, __model: type[Model], **kwargs: Any) -> Model:
+        instance = self.add_model(__model, **kwargs)
+        self.session.commit()
+        return instance
+
+    @contextlib.contextmanager
+    def assert_integrity_error(self, name: str) -> typing.Generator[None, None, None]:
+        with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
+            yield None
+        assert isinstance(cm.exception.orig, psycopg2.errors.IntegrityError)
+        self.assertEqual(cm.exception.orig.diag.constraint_name, name)
+        self.session.rollback()

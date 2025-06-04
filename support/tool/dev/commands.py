@@ -95,6 +95,12 @@ def patty(args: tuple[str, ...]) -> None:
 
 
 @dev.command()
+@click.argument("args", nargs=-1)
+def alembic(args: tuple[str, ...]) -> None:
+    compose.run_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
+
+
+@dev.command()
 @click.option("--cost-money", is_flag=True)
 @click.option("--only-backend", is_flag=True)
 @click.option("--skip-backend", is_flag=True)
@@ -225,7 +231,7 @@ def cycle(
     )
     try:
         cycle.run()
-    except DevelopmentCycleError as e:
+    except DevelopmentCycleError:
         raise click.Abort()
 
 
@@ -255,6 +261,15 @@ def visual_diff() -> None:
     compose.run_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
 
 
+@tests.command()
+def accept_visual_diffs() -> None:
+    for f in os.listdir("frontend/cypress-image-diff-screenshots/comparison"):
+        shutil.move(
+            os.path.join("frontend/cypress-image-diff-screenshots/comparison", f),
+            os.path.join("frontend/cypress-image-diff-screenshots/baseline", f),
+        )
+
+
 @dev.group()
 def fanout() -> None:
     pass
@@ -265,13 +280,3 @@ def reload() -> None:
     """Reload the fanout."""
 
     compose.run_in_container("fanout", ["nginx", "-s", "reload"])
-
-
-@dev.group()
-def submission_daemon() -> None:
-    pass
-
-
-@submission_daemon.command(name="reload")
-def reload_submission_daemon() -> None:
-    compose.restart("submission-daemon")

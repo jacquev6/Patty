@@ -1,25 +1,14 @@
-import asyncio
 import datetime
-import time
 import traceback
+import typing
 
-import requests
+import sqlalchemy as sql
 
 from .. import database_utils
 from .. import llm
 from ..adapted import Exercise
-from .adaptation import (
-    Adaptation,
-    AssistantInvalidJsonError,
-    AssistantNotJsonError,
-    AssistantUnknownError,
-    AssistantSuccess,
-)
-from .router import LlmMessage
-from .. import settings
-
-
-# @todo Reload code changes in the development environment
+from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
+from ..new_orm_models import Adaptation
 
 
 def log(message: str) -> None:
@@ -27,34 +16,23 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-async def daemon(engine: database_utils.Engine, parallelism: int, pause: float) -> None:
-    last_time = time.monotonic()
-    while True:
-        log("Waking up...")
-        try:
-            with database_utils.Session(engine) as session:
-                adaptations = (
-                    session.query(Adaptation)
-                    .filter(Adaptation._initial_assistant_response == None)
-                    .limit(parallelism)
-                    .all()
-                )
-                if len(adaptations) == 0:
-                    log("No not-yet-submitted adaptation found")
-                else:
-                    log(f"Found adaptation(s) {' '.join([str(adaptation.id) for adaptation in adaptations])}")
-                    submissions = [submit_adaptation(adaptation) for adaptation in adaptations]
-                    await asyncio.gather(*submissions)
-                    session.commit()
-            if time.monotonic() >= last_time + 60:
-                log("Calling pulse monitoring URL")
-                last_time = time.monotonic()
-                requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
-        except:  # Pokemon programming: gotta catch 'em all
-            log("UNEXPECTED ERROR")
-            traceback.print_exc()
-        log(f"Sleeping for {pause}s...")
-        await asyncio.sleep(pause)
+LlmMessage = (
+    llm.UserMessage
+    | llm.SystemMessage
+    | llm.AssistantMessage[Exercise]
+    | llm.InvalidJsonAssistantMessage
+    | llm.NotJsonAssistantMessage
+)
+
+
+def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
+    adaptations = (
+        session.query(Adaptation).filter(Adaptation._initial_assistant_response == sql.null()).limit(parallelism).all()
+    )
+    log(
+        f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
+    )
+    return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 
 async def submit_adaptation(adaptation: Adaptation) -> None:
@@ -62,7 +40,7 @@ async def submit_adaptation(adaptation: Adaptation) -> None:
 
     messages: list[LlmMessage] = [
         llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
-        llm.UserMessage(content=adaptation.input.text),
+        llm.UserMessage(content=adaptation.exercise.full_text),
     ]
 
     # All branches must set 'adaptation.initial_assistant_response' to avoid infinite loop
@@ -80,7 +58,7 @@ async def submit_adaptation(adaptation: Adaptation) -> None:
         log(f"Error 'not JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
-    except:
+    except Exception:
         log(f"UNEXPECTED ERROR on adaptation {adaptation.id}")
         adaptation.initial_assistant_response = AssistantUnknownError(kind="error", error="unknown")
         traceback.print_exc()

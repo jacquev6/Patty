@@ -24,7 +24,7 @@ const adaptation = computed(() => {
 })
 
 onMounted(async () => {
-  const response = await client.GET(`/api/adaptation/{id}`, { params: { path: { id: props.id } } })
+  const response = await client.GET(`/api/adaptations/{id}`, { params: { path: { id: props.id } } })
 
   if (response.response.status === 404) {
     found.value = false

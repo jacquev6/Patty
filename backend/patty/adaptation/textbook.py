@@ -7,8 +7,8 @@ from . import batch
 from ..database_utils import OrmBase
 
 
-class Textbook(OrmBase):
-    __tablename__ = "adaptation_textbooks"
+class OldTextbook(OrmBase):
+    __tablename__ = "old_adaptation_textbooks"
 
     __table_args__ = (sql.CheckConstraint("title != ''", name="title_not_empty"),)
 
@@ -19,25 +19,25 @@ class Textbook(OrmBase):
 
     title: orm.Mapped[str]
 
-    batches: orm.Mapped[list["batch.Batch"]] = orm.relationship(
-        foreign_keys="Batch.textbook_id", back_populates="textbook", order_by="Batch.id"
+    batches: orm.Mapped[list["batch.OldBatch"]] = orm.relationship(
+        foreign_keys="OldBatch.textbook_id", back_populates="textbook", order_by="OldBatch.id"
     )
 
-    external_exercises: orm.Mapped[list["ExternalExercise"]] = orm.relationship(
-        foreign_keys="ExternalExercise.textbook_id", back_populates="textbook", order_by="ExternalExercise.id"
+    external_exercises: orm.Mapped[list["OldExternalExercise"]] = orm.relationship(
+        foreign_keys="OldExternalExercise.textbook_id", back_populates="textbook", order_by="OldExternalExercise.id"
     )
 
 
-class ExternalExercise(OrmBase):
-    __tablename__ = "adaptation_external_exercises"
+class OldExternalExercise(OrmBase):
+    __tablename__ = "old_adaptation_external_exercises"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_by: orm.Mapped[str]
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
-    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey("adaptation_textbooks.id"))
-    textbook: orm.Mapped[Textbook] = orm.relationship(back_populates="external_exercises")
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(OldTextbook.id))
+    textbook: orm.Mapped[OldTextbook] = orm.relationship(back_populates="external_exercises")
     removed_from_textbook: orm.Mapped[bool]
 
     page_number: orm.Mapped[int | None]

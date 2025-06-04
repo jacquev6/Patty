@@ -18,19 +18,26 @@ export function useAuthenticatedClient() {
 export type LlmModel =
   paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
 
-export type LatestBatch =
-  paths['/api/adaptation/latest-batch']['get']['responses']['200']['content']['application/json']
+export type LatestAdaptationBatch =
+  paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
 
-export type AdaptationStrategy = LatestBatch['strategy']
+export type AdaptationStrategy = LatestAdaptationBatch['strategy']
 
-export type Textbooks = paths['/api/adaptation/textbooks']['get']['responses']['200']['content']['application/json']
+export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['content']['application/json']
 export type Textbook =
-  paths['/api/adaptation/textbook/{id}']['get']['responses']['200']['content']['application/json']['textbook']
+  paths['/api/textbooks/{id}']['get']['responses']['200']['content']['application/json']['textbook']
 
-export type Batches = paths['/api/adaptation/batches']['get']['responses']['200']['content']['application/json']
-export type Batch = paths['/api/adaptation/batch/{id}']['get']['responses']['200']['content']['application/json']
+export type ClassificationBatches =
+  paths['/api/classification-batches']['get']['responses']['200']['content']['application/json']
+export type ClassificationBatch =
+  paths['/api/classification-batches/{id}']['get']['responses']['200']['content']['application/json']
 
-export type Adaptation = paths['/api/adaptation/{id}']['get']['responses']['200']['content']['application/json']
+export type AdaptationBatches =
+  paths['/api/adaptation-batches']['get']['responses']['200']['content']['application/json']
+export type AdaptationBatch =
+  paths['/api/adaptation-batches/{id}']['get']['responses']['200']['content']['application/json']
+
+export type Adaptation = paths['/api/adaptations/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
 
 export type ActiveEditableTextInput = {

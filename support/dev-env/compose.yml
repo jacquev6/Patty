@@ -30,10 +30,11 @@ services:
       "backend/generated/default-system-prompt.md",
       "backend/generated/openapi.json",
       "backend/generated/adapted-exercise-schema.json",
+      "backend/generated/db-tables-graph.png",
       "frontend/src/openapi.ts",
-      "backend/patty/adaptation/templates/adaptation-export/index.html",
-      "backend/patty/adaptation/templates/batch-export/index.html",
-      "backend/patty/adaptation/templates/textbook-export/index.html",
+      "backend/patty/export/templates/adaptation/index.html",
+      "backend/patty/export/templates/batch/index.html",
+      "backend/patty/export/templates/textbook/index.html",
     ]
 
   adaptation-export-template-generator:
@@ -45,14 +46,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: adaptation-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/adaptation-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/adaptation", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/adaptation-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/adaptation/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -65,14 +66,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: batch-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/batch-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/batch", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/batch-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/batch/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -85,14 +86,14 @@ services:
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: textbook-export
-    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/adaptation/templates/textbook-export", "--emptyOutDir"]
+    command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/textbook", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
       npm-installer:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/backend/patty/adaptation/templates/textbook-export/index.html"]
+      test: ["CMD", "test", "-f", "/app/backend/patty/export/templates/textbook/index.html"]
       interval: 0.5s
       retries: 12
 
@@ -120,7 +121,7 @@ services:
       - ../..:/app
       - ./backend/pip-packages:/home/patty/.local
     working_dir: /app/backend
-    command: ["pip", "install", "--user", "-r", "requirements-dev.txt", "-r", "requirements-run.txt"]
+    command: ["bash", "-c", "pip install --upgrade pip; for req in requirements-*.txt; do pip --cache-dir /home/patty/.local/cache install -r $$req; done"]
   migrator:
     image: patty-dev_backend
     pull_policy: never
@@ -171,8 +172,6 @@ services:
         condition: service_healthy
       data-loader:
         condition: service_completed_successfully
-  # The submission-daemon does not reload its code on changes.
-  # Use the following command: ./dev.sh submission-daemon reload
   submission-daemon:
     image: patty-dev_backend
     pull_policy: never
@@ -184,7 +183,10 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["python", "-m", "patty", "run-submission-daemon"]
+    command: [
+      "watchmedo", "auto-restart", "--directory", "/app", "--pattern", "*.py", "--recursive", "--",
+      "python", "-m", "patty", "run-submission-daemon"
+    ]
     depends_on:
       migrator:
         condition: service_completed_successfully
@@ -247,6 +249,23 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema.json"]
       interval: 0.5s
       retries: 12
+  db-tables-graph-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph.png", "python -m patty db-tables-graph"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
   fixtures-loader:
     image: patty-dev_backend
     pull_policy: never

@@ -7,7 +7,7 @@ describe("Patty's authentication system", () => {
   })
 
   it('asks for password, warns if it is incorrect, and stores it', () => {
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('h1:contains("Inputs")').should('not.exist')
     cy.get('[data-cy="password"]').should('exist')
     cy.get('[data-cy="password"]').type('not-the-password')
@@ -21,7 +21,7 @@ describe("Patty's authentication system", () => {
     cy.get('[data-cy="submit"]').should('not.exist')
     cy.get('h1:contains("Inputs")').should('exist').should('be.visible')
 
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('h1:contains("Inputs")').should('exist').should('be.visible')
   })
 
@@ -32,7 +32,7 @@ describe("Patty's authentication system", () => {
       })
     })
 
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('[data-cy="password"]').type('password')
     cy.get('[data-cy="submit"]').click()
     cy.get('h1:contains("Inputs")').should('exist')
@@ -48,12 +48,12 @@ describe("Patty's authentication system", () => {
       })
     })
 
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('[data-cy="password"]').type('password')
     cy.get('[data-cy="submit"]').click()
     cy.get('h1:contains("Inputs")').should('exist')
 
-    cy.visit('/batch-1')
+    cy.visit('/adaptation-batch-1')
     cy.get('h1:contains("Inputs")').should('exist')
     // Some time passes, the token is about to expire => ask for password again
     cy.get('h1:contains("Inputs")').should('not.exist')

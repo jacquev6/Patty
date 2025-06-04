@@ -14,7 +14,7 @@ export function parseExerciseFileName(fileName: string) {
 import _ from 'lodash'
 import * as zip from '@zip.js/zip.js'
 
-import CreateBatchFormInputEditor, { type InputWithFile } from './CreateBatchFormInputEditor.vue'
+import CreateAdaptationBatchFormInputEditor, { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import assert from './assert'
 import { useTemplateRef, watch } from 'vue'
 
@@ -91,7 +91,7 @@ async function openFiles(event: Event) {
   inputs.value.splice(0, inputs.value.length, ...sortedInputs)
 }
 
-const editors = useTemplateRef<InstanceType<typeof CreateBatchFormInputEditor>[]>('editors')
+const editors = useTemplateRef<InstanceType<typeof CreateAdaptationBatchFormInputEditor>[]>('editors')
 
 watch(
   inputs,
@@ -120,6 +120,6 @@ watch(
     <input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" />
   </p>
   <template v-for="index in inputs.length">
-    <CreateBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />
+    <CreateAdaptationBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />
   </template>
 </template>

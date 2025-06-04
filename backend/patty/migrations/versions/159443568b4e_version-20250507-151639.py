@@ -2,7 +2,6 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 revision: str = "159443568b4e"
 down_revision: Union[str, None] = "239538041ab7"

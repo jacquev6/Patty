@@ -10,7 +10,7 @@ describe('The creation form for textbooks', () => {
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
-  it('creates a textbook with a batch', () => {
+  it('creates a textbook with an adaptation batch', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
     cy.get('[data-cy="textbook-title"]').type('Dummy title', { delay: 0 })
     cy.get('button:contains("Submit")').should('be.enabled').click()

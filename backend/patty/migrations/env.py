@@ -1,7 +1,7 @@
 from alembic import context
 
 from patty import database_utils
-from patty import orm_models  # To populate the metadata
+from patty import orm_models  # noqa: F401 to populate the metadata
 from patty import settings
 
 

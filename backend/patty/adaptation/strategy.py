@@ -61,15 +61,15 @@ ConcreteLlmResponseSpecification = (
 )
 
 
-class StrategySettingsBranch(OrmBase):
-    __tablename__ = "adaptation_strategy_settings_branches"
+class OldStrategySettingsBranch(OrmBase):
+    __tablename__ = "old_adaptation_strategy_settings_branches"
 
     __table_args__ = (
         sql.CheckConstraint("name != ''", name="name_not_empty"),
         # Ensure self.head.branch == self
         sql.ForeignKeyConstraint(
             ["head_id", "id"],
-            ["adaptation_strategy_settings.id", "adaptation_strategy_settings.branch_id"],
+            ["old_adaptation_strategy_settings.id", "old_adaptation_strategy_settings.branch_id"],
             use_alter=True,
         ),
     )
@@ -78,24 +78,25 @@ class StrategySettingsBranch(OrmBase):
 
     # Head is temporarily None on creation, before the first settings are created.
     head_id: orm.Mapped[int | None] = orm.mapped_column()
-    head: orm.Mapped[StrategySettings | None] = orm.relationship(
-        "StrategySettings",
+    head: orm.Mapped[OldStrategySettings | None] = orm.relationship(
+        "OldStrategySettings",
         foreign_keys=[head_id, id],
-        remote_side=lambda: [StrategySettings.id, StrategySettings.branch_id],
+        remote_side=lambda: [OldStrategySettings.id, OldStrategySettings.branch_id],
     )
 
     name: orm.Mapped[str] = orm.mapped_column(unique=True)
 
 
-class StrategySettings(OrmBase):
-    __tablename__ = "adaptation_strategy_settings"
+class OldStrategySettings(OrmBase):
+    __tablename__ = "old_adaptation_strategy_settings"
 
     __table_args__ = (
         # Redondant ('id' is unique by itself), but required for the foreign key in 'StrategySettingsBranch'
         sql.UniqueConstraint("id", "branch_id"),
         # Ensure self.parent.branch == self.branch
         sql.ForeignKeyConstraint(
-            ["parent_id", "branch_id"], ["adaptation_strategy_settings.id", "adaptation_strategy_settings.branch_id"]
+            ["parent_id", "branch_id"],
+            ["old_adaptation_strategy_settings.id", "old_adaptation_strategy_settings.branch_id"],
         ),
         # Ensure having a parent requires having a branch
         sql.CheckConstraint("parent_id IS NULL OR branch_id IS NOT NULL", name="branch_required_if_parent"),
@@ -103,14 +104,14 @@ class StrategySettings(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    branch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(StrategySettingsBranch.id))
-    branch: orm.Mapped[StrategySettingsBranch | None] = orm.relationship(
-        StrategySettingsBranch, foreign_keys=[branch_id], remote_side=[StrategySettingsBranch.id]
+    branch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(OldStrategySettingsBranch.id))
+    branch: orm.Mapped[OldStrategySettingsBranch | None] = orm.relationship(
+        OldStrategySettingsBranch, foreign_keys=[branch_id], remote_side=[OldStrategySettingsBranch.id]
     )
 
     parent_id: orm.Mapped[int | None] = orm.mapped_column()
-    parent: orm.Mapped[StrategySettings | None] = orm.relationship(
-        "StrategySettings", foreign_keys=[parent_id], remote_side=[id]
+    parent: orm.Mapped[OldStrategySettings | None] = orm.relationship(
+        "OldStrategySettings", foreign_keys=[parent_id], remote_side=[id]
     )
 
     created_by: orm.Mapped[str]
@@ -131,8 +132,8 @@ class StrategySettings(OrmBase):
         self._response_specification = value.model_dump()
 
 
-class Strategy(OrmBase):
-    __tablename__ = "adaptation_strategies"
+class OldStrategy(OrmBase):
+    __tablename__ = "old_adaptation_strategies"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -151,9 +152,9 @@ class Strategy(OrmBase):
     def model(self, value: llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
-    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(StrategySettings.id))
-    settings: orm.Mapped[StrategySettings] = orm.relationship(
-        StrategySettings, foreign_keys=[settings_id], remote_side=[StrategySettings.id]
+    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(OldStrategySettings.id))
+    settings: orm.Mapped[OldStrategySettings] = orm.relationship(
+        OldStrategySettings, foreign_keys=[settings_id], remote_side=[OldStrategySettings.id]
     )
 
 
@@ -161,85 +162,87 @@ class StrategyTestCase(TestCaseWithDatabase):
     response_specification = JsonFromTextLlmResponseSpecification(format="json", formalism="text")
 
     def test_create_two_branches_with_same_name(self) -> None:
-        self.create_model(StrategySettingsBranch, name="branch")
+        self.flush_model(OldStrategySettingsBranch, name="branch")
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch")
+            self.flush_model(OldStrategySettingsBranch, name="branch")
 
         assert isinstance(cm.exception.orig, psycopg2.errors.UniqueViolation)
-        self.assertEqual(str(cm.exception.orig.diag.constraint_name), "uq_adaptation_strategy_settings_branches_name")
+        self.assertEqual(
+            str(cm.exception.orig.diag.constraint_name), "uq_old_adaptation_strategy_settings_branches_name"
+        )
 
     def test_create_branch_with_bad_head(self) -> None:
         # This test is required because we're using a foreign key with use_alter=True (to break a cycle)
         # and 'alembic version --autogenerate' doesn't create the foreign key in that case.
         # (See https://github.com/sqlalchemy/alembic/issues/326)
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch", head_id=42)
+            self.flush_model(OldStrategySettingsBranch, name="branch", head_id=42)
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_id_ada_7eb5"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_strategy_settings_branches_head_id_id_efb0"
         )
 
     def test_create_branch_with_empty_name(self) -> None:
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="")
+            self.flush_model(OldStrategySettingsBranch, name="")
 
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
         self.assertEqual(
-            str(cm.exception.orig.diag.constraint_name), "ck_adaptation_strategy_settings_branches_name_not_empty"
+            str(cm.exception.orig.diag.constraint_name), "ck_old_adaptation_strategy_settings_branches_name_not_empty"
         )
 
     def test_create_branch_with_head_belonging_to_other_branch__with_orm(self) -> None:
-        head = self.create_model(
-            StrategySettings,
+        head = self.flush_model(
+            OldStrategySettings,
             created_by="test",
             system_prompt="prompt",
             response_specification=self.response_specification,
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(StrategySettingsBranch, name="branch", head=head)
+            self.flush_model(OldStrategySettingsBranch, name="branch", head=head)
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_id_ada_7eb5"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_strategy_settings_branches_head_id_id_efb0"
         )
 
     def test_create_branch_with_head_belonging_to_other_branch__without_orm(self) -> None:
-        head = self.create_model(
-            StrategySettings,
+        head = self.flush_model(
+            OldStrategySettings,
             created_by="test",
             system_prompt="prompt",
             response_specification=self.response_specification,
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.session.execute(sql.insert(StrategySettingsBranch).values(name="branch", head_id=head.id))
+            self.session.execute(sql.insert(OldStrategySettingsBranch).values(name="branch", head_id=head.id))
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_branches_head_id_id_ada_7eb5"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_strategy_settings_branches_head_id_id_efb0"
         )
 
     def test_create_branch_history(self) -> None:
-        branch = self.create_model(StrategySettingsBranch, name="branch")
-        settings_1 = self.create_model(
-            StrategySettings,
+        branch = self.flush_model(OldStrategySettingsBranch, name="branch")
+        settings_1 = self.flush_model(
+            OldStrategySettings,
             branch=branch,
             created_by="test",
             system_prompt="prompt a",
             response_specification=self.response_specification,
         )
-        settings_2 = self.create_model(
-            StrategySettings,
+        settings_2 = self.flush_model(
+            OldStrategySettings,
             branch=branch,
             parent=settings_1,
             created_by="test",
             system_prompt="prompt b",
             response_specification=self.response_specification,
         )
-        settings_3 = self.create_model(
-            StrategySettings,
+        settings_3 = self.flush_model(
+            OldStrategySettings,
             branch=branch,
             parent=settings_2,
             created_by="test",
@@ -254,10 +257,10 @@ class StrategyTestCase(TestCaseWithDatabase):
         self.assertEqual(branch.head.parent.parent.system_prompt, "prompt a")
 
     def test_create_child_settings_with_inconsistent_branch__with_orm(self) -> None:
-        branch_1 = self.create_model(StrategySettingsBranch, name="branch_1")
-        branch_2 = self.create_model(StrategySettingsBranch, name="branch_2")
-        parent = self.create_model(
-            StrategySettings,
+        branch_1 = self.flush_model(OldStrategySettingsBranch, name="branch_1")
+        branch_2 = self.flush_model(OldStrategySettingsBranch, name="branch_2")
+        parent = self.flush_model(
+            OldStrategySettings,
             branch=branch_1,
             created_by="test",
             system_prompt="prompt",
@@ -265,8 +268,8 @@ class StrategyTestCase(TestCaseWithDatabase):
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
-                StrategySettings,
+            self.flush_model(
+                OldStrategySettings,
                 branch=branch_2,
                 parent=parent,
                 created_by="test",
@@ -276,14 +279,14 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_parent_id_branch_id_ada_901a"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_strategy_settings_parent_id_branch_id_33e7"
         )
 
     def test_create_child_settings_with_inconsistent_branch__without_orm(self) -> None:
-        branch_1 = self.create_model(StrategySettingsBranch, name="branch_1")
-        branch_2 = self.create_model(StrategySettingsBranch, name="branch_2")
-        parent = self.create_model(
-            StrategySettings,
+        branch_1 = self.flush_model(OldStrategySettingsBranch, name="branch_1")
+        branch_2 = self.flush_model(OldStrategySettingsBranch, name="branch_2")
+        parent = self.flush_model(
+            OldStrategySettings,
             branch=branch_1,
             created_by="test",
             system_prompt="prompt",
@@ -292,7 +295,7 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
             self.session.execute(
-                sql.insert(StrategySettings).values(
+                sql.insert(OldStrategySettings).values(
                     branch_id=branch_2.id,
                     parent_id=parent.id,
                     created_by="test",
@@ -303,19 +306,19 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_strategy_settings_parent_id_branch_id_ada_901a"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_strategy_settings_parent_id_branch_id_33e7"
         )
 
     def test_create_settings_with_parent_but_without_branch__with_orm(self) -> None:
-        parent = self.create_model(
-            StrategySettings,
+        parent = self.flush_model(
+            OldStrategySettings,
             created_by="test",
             system_prompt="prompt",
             response_specification=self.response_specification,
         )
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
-                StrategySettings,
+            self.flush_model(
+                OldStrategySettings,
                 branch=None,
                 parent=parent,
                 created_by="test",
@@ -325,19 +328,19 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
         self.assertEqual(
-            str(cm.exception.orig.diag.constraint_name), "ck_adaptation_strategy_settings_branch_required_if_parent"
+            str(cm.exception.orig.diag.constraint_name), "ck_old_adaptation_strategy_settings_branch_required_if_parent"
         )
 
     def test_create_settings_with_parent_but_without_branch__without_orm(self) -> None:
-        parent = self.create_model(
-            StrategySettings,
+        parent = self.flush_model(
+            OldStrategySettings,
             created_by="test",
             system_prompt="prompt",
             response_specification=self.response_specification,
         )
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
             self.session.execute(
-                sql.insert(StrategySettings).values(
+                sql.insert(OldStrategySettings).values(
                     branch_id=None,
                     parent_id=parent.id,
                     created_by="test",
@@ -348,12 +351,12 @@ class StrategyTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.CheckViolation)
         self.assertEqual(
-            str(cm.exception.orig.diag.constraint_name), "ck_adaptation_strategy_settings_branch_required_if_parent"
+            str(cm.exception.orig.diag.constraint_name), "ck_old_adaptation_strategy_settings_branch_required_if_parent"
         )
 
     def test_create_settings_without_branch(self) -> None:
-        settings = self.create_model(
-            StrategySettings,
+        settings = self.flush_model(
+            OldStrategySettings,
             branch=None,
             created_by="test",
             system_prompt="prompt",
@@ -362,9 +365,9 @@ class StrategyTestCase(TestCaseWithDatabase):
         self.assertIsNone(settings.branch)
 
     def test_create_settings_with_branch(self) -> None:
-        branch = self.create_model(StrategySettingsBranch, name="branch")
-        settings = self.create_model(
-            StrategySettings,
+        branch = self.flush_model(OldStrategySettingsBranch, name="branch")
+        settings = self.flush_model(
+            OldStrategySettings,
             branch=branch,
             created_by="test",
             system_prompt="prompt",

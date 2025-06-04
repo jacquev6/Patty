@@ -11,9 +11,9 @@ from ..adapted import Exercise
 from ..any_json import JsonDict, JsonList
 from ..api_utils import ApiModel
 from ..database_utils import OrmBase, TestCaseWithDatabase
-from .batch import Batch
-from .input import Input
-from .strategy import Strategy, StrategySettings, JsonFromTextLlmResponseSpecification
+from .batch import OldBatch
+from .input import OldInput
+from .strategy import OldStrategy, OldStrategySettings, JsonFromTextLlmResponseSpecification
 
 
 class AssistantSuccess(ApiModel):
@@ -46,12 +46,12 @@ class Adjustment(ApiModel):
     assistant_response: AssistantResponse
 
 
-class Adaptation(OrmBase):
-    __tablename__ = "adaptation_adaptations"
+class OldAdaptation(OrmBase):
+    __tablename__ = "old_adaptation_adaptations"
 
     __table_args__ = (
         sql.ForeignKeyConstraint(
-            ["batch_id", "strategy_id"], ["adaptation_batches.id", "adaptation_batches.strategy_id"]
+            ["batch_id", "strategy_id"], ["old_adaptation_batches.id", "old_adaptation_batches.strategy_id"]
         ),
     )
 
@@ -60,17 +60,19 @@ class Adaptation(OrmBase):
     created_by: orm.Mapped[str]
 
     batch_id: orm.Mapped[int] = orm.mapped_column()
-    batch: orm.Mapped[Batch] = orm.relationship(
-        Batch, foreign_keys=[batch_id], remote_side=[Batch.id], back_populates="adaptations"
+    batch: orm.Mapped[OldBatch] = orm.relationship(
+        OldBatch, foreign_keys=[batch_id], remote_side=[OldBatch.id], back_populates="adaptations"
     )
 
     removed_from_textbook: orm.Mapped[bool] = orm.mapped_column(default=False, server_default="false")
 
-    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Strategy.id))
-    strategy: orm.Mapped[Strategy] = orm.relationship(Strategy, foreign_keys=[strategy_id], remote_side=[Strategy.id])
+    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(OldStrategy.id))
+    strategy: orm.Mapped[OldStrategy] = orm.relationship(
+        OldStrategy, foreign_keys=[strategy_id], remote_side=[OldStrategy.id]
+    )
 
-    input_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Input.id))
-    input: orm.Mapped[Input] = orm.relationship(Input, foreign_keys=[input_id], remote_side=[Input.id])
+    input_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(OldInput.id))
+    input: orm.Mapped[OldInput] = orm.relationship(OldInput, foreign_keys=[input_id], remote_side=[OldInput.id])
 
     # Kept only to help investigating future issues
     raw_llm_conversations: orm.Mapped[JsonList] = orm.mapped_column(sql.JSON)
@@ -123,28 +125,28 @@ class Adaptation(OrmBase):
 
 class AdaptationTestCase(TestCaseWithDatabase):
     def test_create(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(OldInput, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
-            StrategySettings,
+        strategy_settings = self.flush_model(
+            OldStrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy = self.create_model(
-            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
+        strategy = self.flush_model(
+            OldStrategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        batch = self.create_model(
-            Batch,
+        batch = self.flush_model(
+            OldBatch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
             strategy=strategy,
         )
 
-        self.create_model(
-            Adaptation,
+        self.flush_model(
+            OldAdaptation,
             created_by="UnitTests",
             batch=batch,
             strategy=strategy,
@@ -156,33 +158,33 @@ class AdaptationTestCase(TestCaseWithDatabase):
         )
 
     def test_create_with_inconsistent_strategy__with_orm(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(OldInput, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
-            StrategySettings,
+        strategy_settings = self.flush_model(
+            OldStrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy_1 = self.create_model(
-            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
+        strategy_1 = self.flush_model(
+            OldStrategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        strategy_2 = self.create_model(
-            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
+        strategy_2 = self.flush_model(
+            OldStrategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
-        batch = self.create_model(
-            Batch,
+        batch = self.flush_model(
+            OldBatch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
             strategy=strategy_1,
         )
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
-            self.create_model(
-                Adaptation,
+            self.flush_model(
+                OldAdaptation,
                 created_by="UnitTests",
                 batch=batch,
                 strategy=strategy_2,  # Inconsistent strategy
@@ -195,29 +197,29 @@ class AdaptationTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_adaptations_batch_id_strategy_id_adaptati_52e6"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_adaptations_batch_id_strategy_id_old__9f1e"
         )
 
     def test_create_with_inconsistent_strategy__without_orm(self) -> None:
-        input = self.create_model(Input, created_by="UnitTests", text="Input text")
+        input = self.flush_model(OldInput, created_by="UnitTests", text="Input text")
 
-        strategy_settings = self.create_model(
-            StrategySettings,
+        strategy_settings = self.flush_model(
+            OldStrategySettings,
             created_by="UnitTests",
             system_prompt="System prompt",
             response_specification=JsonFromTextLlmResponseSpecification(format="json", formalism="text"),
         )
 
-        strategy_1 = self.create_model(
-            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
+        strategy_1 = self.flush_model(
+            OldStrategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-1"), settings=strategy_settings
         )
 
-        strategy_2 = self.create_model(
-            Strategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
+        strategy_2 = self.flush_model(
+            OldStrategy, created_by="UnitTests", model=llm.DummyModel(name="dummy-2"), settings=strategy_settings
         )
 
-        batch = self.create_model(
-            Batch,
+        batch = self.flush_model(
+            OldBatch,
             created_by="UnitTests",
             created_at=datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc),
             strategy=strategy_1,
@@ -225,7 +227,7 @@ class AdaptationTestCase(TestCaseWithDatabase):
 
         with self.assertRaises(sqlalchemy.exc.IntegrityError) as cm:
             self.session.execute(
-                sql.insert(Adaptation).values(
+                sql.insert(OldAdaptation).values(
                     created_by="UnitTests",
                     batch_id=batch.id,
                     strategy_id=strategy_2.id,  # Inconsistent strategy
@@ -239,5 +241,5 @@ class AdaptationTestCase(TestCaseWithDatabase):
 
         assert isinstance(cm.exception.orig, psycopg2.errors.ForeignKeyViolation)
         self.assertEqual(
-            cm.exception.orig.diag.constraint_name, "fk_adaptation_adaptations_batch_id_strategy_id_adaptati_52e6"
+            cm.exception.orig.diag.constraint_name, "fk_old_adaptation_adaptations_batch_id_strategy_id_old__9f1e"
         )

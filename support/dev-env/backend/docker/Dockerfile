@@ -1,4 +1,4 @@
-FROM python:3.13
+FROM python:3.12
 
 RUN set -x \
  && rm -f /etc/apt/apt.conf.d/docker-clean \
@@ -9,6 +9,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     set -x \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
+      graphviz \
       postgresql-client \
  && true
 
