@@ -152,6 +152,7 @@ def run_submission_daemon(classification_parallelism: int, adaptation_parallelis
     engine = database_utils.create_engine(settings.DATABASE_URL)
 
     async def daemon() -> None:
+        log("Starting")
         last_time = time.monotonic()
         while True:
             log("Waking up...")

@@ -10,9 +10,6 @@ from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, Assist
 from ..new_orm_models import Adaptation
 
 
-# @todo Reload code changes in the development environment
-
-
 def log(message: str) -> None:
     # @todo Use actual logging
     print(datetime.datetime.now(), message, flush=True)

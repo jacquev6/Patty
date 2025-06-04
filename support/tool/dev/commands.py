@@ -280,13 +280,3 @@ def reload() -> None:
     """Reload the fanout."""
 
     compose.run_in_container("fanout", ["nginx", "-s", "reload"])
-
-
-@dev.group()
-def submission_daemon() -> None:
-    pass
-
-
-@submission_daemon.command(name="reload")
-def reload_submission_daemon() -> None:
-    compose.restart("submission-daemon")

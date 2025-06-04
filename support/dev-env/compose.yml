@@ -172,8 +172,6 @@ services:
         condition: service_healthy
       data-loader:
         condition: service_completed_successfully
-  # The submission-daemon does not reload its code on changes.
-  # Use the following command: ./dev.sh submission-daemon reload
   submission-daemon:
     image: patty-dev_backend
     pull_policy: never
@@ -185,7 +183,10 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["python", "-m", "patty", "run-submission-daemon"]
+    command: [
+      "watchmedo", "auto-restart", "--directory", "/app", "--pattern", "*.py", "--recursive", "--",
+      "python", "-m", "patty", "run-submission-daemon"
+    ]
     depends_on:
       migrator:
         condition: service_completed_successfully
