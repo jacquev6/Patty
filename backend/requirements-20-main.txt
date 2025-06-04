@@ -14,4 +14,4 @@ requests
 scikit-learn
 sqlalchemy
 sqlalchemy-utils
-transformers==4.41.2  # @todo Try removing the version pinning; remove it or document why it is needed
+transformers
