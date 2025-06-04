@@ -231,7 +231,7 @@ def cycle(
     )
     try:
         cycle.run()
-    except DevelopmentCycleError as e:
+    except DevelopmentCycleError:
         raise click.Abort()
 
 

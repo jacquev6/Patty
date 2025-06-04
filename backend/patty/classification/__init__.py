@@ -35,21 +35,21 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             sql.select(db.ClassificationBatch)
             .options(orm.load_only(db.ClassificationBatch.id))
             .join(db.AdaptableExercise)
-            .where(db.AdaptableExercise.classified_at == None)
+            .where(db.AdaptableExercise.classified_at == sql.null())
             .distinct()
         )
         .scalars()
         .first()
     )
     if batch is None:
-        log(f"Found no classification batch with not-yet-classified exercises")
+        log("Found no classification batch with not-yet-classified exercises")
     else:
         exercises = list(
             session.execute(
                 sql.select(db.AdaptableExercise)
                 .where(
                     db.AdaptableExercise.classified_by_classification_batch == batch,
-                    db.AdaptableExercise.classified_at == None,
+                    db.AdaptableExercise.classified_at == sql.null(),
                 )
                 .limit(parallelism)
             )

@@ -3,6 +3,7 @@ graphviz
 httpie
 mypy
 pandas-stubs
+ruff
 types-boto3
 types-psycopg2
 types-requests

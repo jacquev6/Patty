@@ -1,7 +1,6 @@
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
 
 from patty.database_utils import create_exercise_number_collation
 

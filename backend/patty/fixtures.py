@@ -495,9 +495,7 @@ class FixturesCreator:
             adaptation.OldTextbook, created_by="Patty", created_at=created_at, title="Dummy Textbook Title"
         )
 
-        success_branch_1 = self.create_dummy_branch(
-            name=f"Branch with successes 1", system_prompt=f"Thou shall succeed."
-        )
+        success_branch_1 = self.create_dummy_branch(name="Branch with successes 1", system_prompt="Thou shall succeed.")
         success_strategy_1 = self.create(
             adaptation.OldStrategy,
             created_by="Patty",
@@ -564,7 +562,7 @@ class FixturesCreator:
         )
 
         success_branch_2 = self.create_dummy_branch(
-            name=f"Branch with successes 2", system_prompt=f"Thou shall succeed as well."
+            name="Branch with successes 2", system_prompt="Thou shall succeed as well."
         )
         success_strategy_2 = self.create(
             adaptation.OldStrategy,
@@ -675,7 +673,7 @@ class FixturesCreator:
             ),
         )
 
-        errors_branch = self.create_dummy_branch(name=f"Branch with errors", system_prompt=f"Thou shall fail.")
+        errors_branch = self.create_dummy_branch(name="Branch with errors", system_prompt="Thou shall fail.")
         errors_strategy = self.create(
             adaptation.OldStrategy,
             created_by="Patty",

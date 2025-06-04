@@ -2,6 +2,7 @@ import datetime
 import traceback
 import typing
 
+import sqlalchemy as sql
 
 from .. import database_utils
 from .. import llm
@@ -26,7 +27,7 @@ LlmMessage = (
 
 def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     adaptations = (
-        session.query(Adaptation).filter(Adaptation._initial_assistant_response == None).limit(parallelism).all()
+        session.query(Adaptation).filter(Adaptation._initial_assistant_response == sql.null()).limit(parallelism).all()
     )
     log(
         f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
@@ -57,7 +58,7 @@ async def submit_adaptation(adaptation: Adaptation) -> None:
         log(f"Error 'not JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
-    except:
+    except Exception:
         log(f"UNEXPECTED ERROR on adaptation {adaptation.id}")
         adaptation.initial_assistant_response = AssistantUnknownError(kind="error", error="unknown")
         traceback.print_exc()

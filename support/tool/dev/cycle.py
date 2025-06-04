@@ -28,7 +28,7 @@ class DevelopmentCycle:
     def run(self) -> None:
         try:
             self.do_run()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             raise DevelopmentCycleError()
 
     def do_run(self) -> None:
@@ -65,7 +65,7 @@ class DevelopmentCycle:
                 )
 
             if self.do_lint:
-                pass  # @todo Investigate linters for Python code (e.g. PyLint, ruff)
+                run_in_backend_container(["ruff", "check", "backend", "support/tool", "--fix"], workdir="/app")
 
             if self.do_type_check:
                 run_in_backend_container(["mypy", "backend", "support/tool", "--strict"], workdir="/app")

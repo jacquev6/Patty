@@ -166,7 +166,7 @@ def run_submission_daemon(classification_parallelism: int, adaptation_parallelis
                     log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
                     requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
-            except:  # Pokemon programming: gotta catch 'em all
+            except Exception:  # Pokemon programming: gotta catch 'em all
                 log("UNEXPECTED ERROR")
                 traceback.print_exc()
             log(f"Sleeping for {pause}s...")
@@ -342,7 +342,7 @@ def migrate_data() -> None:
 @main.command()
 def dump_database() -> None:
     from . import database_utils
-    from . import orm_models
+    from . import orm_models  # noqa: F401 to populate the metadata
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
@@ -354,7 +354,7 @@ def dump_database() -> None:
 @main.command()
 def load_database() -> None:
     from . import database_utils
-    from . import orm_models
+    from . import orm_models  # noqa: F401 to populate the metadata
 
     data = json.load(sys.stdin)
     database_engine = database_utils.create_engine(settings.DATABASE_URL)

@@ -96,7 +96,7 @@ def get_latest_adaptation_batch(user: str, session: database_utils.SessionDepend
     for exercise_class in (
         session.execute(
             sql.select(db.ExerciseClass)
-            .where(db.ExerciseClass.latest_strategy_settings != None)
+            .where(db.ExerciseClass.latest_strategy_settings != sql.null())
             .order_by(db.ExerciseClass.name)
         )
         .scalars()
@@ -256,7 +256,7 @@ class GetAdaptationBatchesResponse(ApiModel):
 async def get_adaptation_batches(session: database_utils.SessionDependable) -> GetAdaptationBatchesResponse:
     adaptation_batches = (
         session.query(db.AdaptationBatch)
-        .filter(db.AdaptationBatch.textbook_id == None)
+        .filter(db.AdaptationBatch.textbook_id == sql.null())
         .order_by(-db.AdaptationBatch.id)
         .all()
     )
