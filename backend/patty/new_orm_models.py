@@ -86,15 +86,6 @@ class ExternalExercise(BaseExercise):
     original_file_name: orm.Mapped[str]
 
 
-class ClassificationStrategy(OrmBase):
-    __tablename__ = "classification_strategies"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
-
-
 class ClassificationBatch(OrmBase):
     __tablename__ = "classification_batches"
 
@@ -102,11 +93,6 @@ class ClassificationBatch(OrmBase):
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
     created_by_username: orm.Mapped[str]
-
-    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationStrategy.id))
-    strategy: orm.Mapped[ClassificationStrategy] = orm.relationship(
-        foreign_keys=[strategy_id], remote_side=[ClassificationStrategy.id]
-    )
 
     exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
         back_populates="classified_by_classification_batch", order_by=lambda: [AdaptableExercise.id]

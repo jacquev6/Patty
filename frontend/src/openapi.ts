@@ -616,8 +616,6 @@ export interface components {
       /** Statementtext */
       statementText: string
     }
-    /** ClassificationStrategy */
-    ClassificationStrategy: Record<string, never>
     /** DummyModel */
     DummyModel: {
       /**
@@ -783,7 +781,6 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string
-      strategy: components['schemas']['ClassificationStrategy']
       /** Modelforadaptation */
       modelForAdaptation:
         | components['schemas']['DummyModel']
@@ -1086,7 +1083,6 @@ export interface components {
     PostClassificationBatchRequest: {
       /** Creator */
       creator: string
-      strategy: components['schemas']['ClassificationStrategy']
       /** Inputs */
       inputs: components['schemas']['ClassificationInput'][]
       /** Modelforadaptation */

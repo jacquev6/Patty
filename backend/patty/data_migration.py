@@ -38,7 +38,6 @@ def migrate_data(
         "adaptation_strategies",
         "adaptation_strategy_settings",
         "adaptations",
-        "classification_strategies",
         "classification_batches",
         "exercise_classes",
         "exercises",

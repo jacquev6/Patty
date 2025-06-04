@@ -275,10 +275,6 @@ async def get_adaptation_batches(session: database_utils.SessionDependable) -> G
     )
 
 
-class ClassificationStrategy(ApiModel):
-    pass
-
-
 class ClassificationInput(ApiModel):
     page_number: int | None
     exercise_number: str | None
@@ -288,7 +284,6 @@ class ClassificationInput(ApiModel):
 
 class PostClassificationBatchRequest(ApiModel):
     creator: str
-    strategy: ClassificationStrategy
     inputs: list[ClassificationInput]
     model_for_adaptation: llm.ConcreteModel | None
 
@@ -302,13 +297,8 @@ def create_classification_batch(
     req: PostClassificationBatchRequest, session: database_utils.SessionDependable
 ) -> PostClassificationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    strategy = db.ClassificationStrategy(created_by_username=req.creator, created_at=now)
-    session.add(strategy)
     classification_batch = db.ClassificationBatch(
-        created_by_username=req.creator,
-        created_at=now,
-        strategy=strategy,
-        model_for_adaptation=req.model_for_adaptation,
+        created_by_username=req.creator, created_at=now, model_for_adaptation=req.model_for_adaptation
     )
     session.add(classification_batch)
 
@@ -339,7 +329,6 @@ def create_classification_batch(
 class GetClassificationBatchResponse(ApiModel):
     id: str
     created_by: str
-    strategy: ClassificationStrategy
     model_for_adaptation: llm.ConcreteModel | None
 
     class Exercise(ApiModel):
@@ -361,7 +350,6 @@ async def get_classification_batch(
     return GetClassificationBatchResponse(
         id=str(classification_batch.id),
         created_by=classification_batch.created_by_username,
-        strategy=ClassificationStrategy(),
         model_for_adaptation=classification_batch.model_for_adaptation,
         exercises=[
             GetClassificationBatchResponse.Exercise(

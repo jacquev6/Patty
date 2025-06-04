@@ -1828,12 +1828,6 @@
         ],
         "title": "ClassificationInput"
       },
-      "ClassificationStrategy": {
-        "properties": {},
-        "additionalProperties": false,
-        "type": "object",
-        "title": "ClassificationStrategy"
-      },
       "DummyModel": {
         "properties": {
           "provider": {
@@ -2280,9 +2274,6 @@
             "type": "string",
             "title": "Createdby"
           },
-          "strategy": {
-            "$ref": "#/components/schemas/ClassificationStrategy"
-          },
           "modelForAdaptation": {
             "anyOf": [
               {
@@ -2313,7 +2304,6 @@
         "required": [
           "id",
           "createdBy",
-          "strategy",
           "modelForAdaptation",
           "exercises"
         ],
@@ -3057,9 +3047,6 @@
             "type": "string",
             "title": "Creator"
           },
-          "strategy": {
-            "$ref": "#/components/schemas/ClassificationStrategy"
-          },
           "inputs": {
             "items": {
               "$ref": "#/components/schemas/ClassificationInput"
@@ -3089,7 +3076,6 @@
         "type": "object",
         "required": [
           "creator",
-          "strategy",
           "inputs",
           "modelForAdaptation"
         ],

@@ -261,6 +261,15 @@ def visual_diff() -> None:
     compose.run_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
 
 
+@tests.command()
+def accept_visual_diffs() -> None:
+    for f in os.listdir("frontend/cypress-image-diff-screenshots/comparison"):
+        shutil.move(
+            os.path.join("frontend/cypress-image-diff-screenshots/comparison", f),
+            os.path.join("frontend/cypress-image-diff-screenshots/baseline", f),
+        )
+
+
 @dev.group()
 def fanout() -> None:
     pass
