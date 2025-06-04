@@ -143,3 +143,9 @@ def build(patty_version: str, action: typing.Literal["push", "load"]) -> None:
             ],
             check=True,
         )
+
+
+@prod.command()
+@click.argument("args", nargs=-1)
+def compose(args: tuple[str, ...]) -> None:
+    subprocess.run(["docker", "compose"] + list(args), cwd="support/prod", check=True)

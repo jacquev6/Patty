@@ -26,6 +26,7 @@ def clean(force: bool) -> None:
         if any(
             candidate.startswith(prefix)
             for prefix in [
+                ".ruff_cache/",
                 ".mypy_cache/",
                 "backend/",
                 "frontend/",
