@@ -136,6 +136,23 @@ class ExerciseClass(OrmBase):
     )
 
 
+class ExtractionBatch(OrmBase):
+    __tablename__ = "extraction_batches"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
+
+    # strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
+    # strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
+    #     foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
+    # )
+
+    # range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    # range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
+
+
 class AdaptableExercise(BaseExercise):
     __tablename__ = "adaptable_exercises"
 

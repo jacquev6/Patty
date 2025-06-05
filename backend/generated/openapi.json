@@ -383,6 +383,114 @@
         }
       }
     },
+    "/api/extraction-batches": {
+      "get": {
+        "summary": "Get Extraction Batches",
+        "operationId": "get_extraction_batches_api_extraction_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Extraction Batch",
+        "operationId": "create_extraction_batch_api_extraction_batches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostExtractionBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostExtractionBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/extraction-batches/{id}": {
+      "get": {
+        "summary": "Get Extraction Batch",
+        "operationId": "get_extraction_batch_api_extraction_batches__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/textbooks": {
       "get": {
         "summary": "Get Textbooks",
@@ -1006,6 +1114,64 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiAdaptation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/export/extraction-batch/{id}.html": {
+      "get": {
+        "summary": "Export Extraction Batch",
+        "operationId": "export_extraction_batch_api_export_extraction_batch__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -2073,6 +2239,31 @@
         ],
         "title": "ExternalExercise"
       },
+      "ExtractionBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "ExtractionBatch"
+      },
       "Formatted-Input": {
         "properties": {
           "kind": {
@@ -2383,6 +2574,42 @@
           "classificationBatches"
         ],
         "title": "GetClassificationBatchesResponse"
+      },
+      "GetExtractionBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy"
+        ],
+        "title": "GetExtractionBatchResponse"
+      },
+      "GetExtractionBatchesResponse": {
+        "properties": {
+          "extractionBatches": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractionBatch"
+            },
+            "type": "array",
+            "title": "Extractionbatches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "extractionBatches"
+        ],
+        "title": "GetExtractionBatchesResponse"
       },
       "GetTextbookResponse": {
         "properties": {
@@ -3152,6 +3379,34 @@
           "id"
         ],
         "title": "PostClassificationBatchResponse"
+      },
+      "PostExtractionBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator"
+        ],
+        "title": "PostExtractionBatchRequest"
+      },
+      "PostExtractionBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostExtractionBatchResponse"
       },
       "PostTextbookAdaptationBatchRequest": {
         "properties": {

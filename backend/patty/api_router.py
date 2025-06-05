@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import json
 import os
+import typing
 import urllib.parse
 
 import boto3
@@ -385,6 +386,64 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
                 created_at=classification_batch.created_at,
             )
             for classification_batch in classification_batches
+        ]
+    )
+
+
+class PostExtractionBatchRequest(ApiModel):
+    creator: str
+
+
+class PostExtractionBatchResponse(ApiModel):
+    id: str
+
+
+@api_router.post("/extraction-batches")
+def create_extraction_batch(
+    req: PostExtractionBatchRequest, session: database_utils.SessionDependable
+) -> PostExtractionBatchResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    # @todo Implement
+    extraction_batch = db.ExtractionBatch(created_by_username=req.creator, created_at=now)
+    session.add(extraction_batch)
+
+    session.flush()
+
+    return PostExtractionBatchResponse(id=str(extraction_batch.id))
+
+
+class GetExtractionBatchResponse(ApiModel):
+    id: str
+    created_by: str
+
+
+@api_router.get("/extraction-batches/{id}")
+async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
+    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    # @todo Implement
+    return GetExtractionBatchResponse(id=str(extraction_batch.id), created_by=extraction_batch.created_by_username)
+
+
+class GetExtractionBatchesResponse(ApiModel):
+    class ExtractionBatch(ApiModel):
+        id: str
+        created_by: str
+        created_at: datetime.datetime
+
+    extraction_batches: list[ExtractionBatch]
+
+
+@api_router.get("/extraction-batches")
+async def get_extraction_batches(session: database_utils.SessionDependable) -> GetExtractionBatchesResponse:
+    extraction_batches = session.query(db.ExtractionBatch).order_by(-db.ExtractionBatch.id).all()
+    return GetExtractionBatchesResponse(
+        extraction_batches=[
+            GetExtractionBatchesResponse.ExtractionBatch(
+                id=str(extraction_batch.id),
+                created_by=extraction_batch.created_by_username,
+                created_at=extraction_batch.created_at,
+            )
+            for extraction_batch in extraction_batches
         ]
     )
 
@@ -810,6 +869,30 @@ export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.a
 
 
 export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "export", "templates", "batch", "index.html")
+
+
+@export_router.get("/extraction-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_extraction_batch(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    data = list(
+        filter(
+            None,
+            (
+                make_adapted_exercise_data(adaptation)
+                # @todo Implement
+                for adaptation in (get_by_id(session, db.ExtractionBatch, id), typing.cast(list[db.Adaptation], []))[1]
+            ),
+        )
+    )
+
+    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-extraction-batch-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
 
 
 @export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)

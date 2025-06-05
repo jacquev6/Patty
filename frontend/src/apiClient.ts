@@ -27,6 +27,11 @@ export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['cont
 export type Textbook =
   paths['/api/textbooks/{id}']['get']['responses']['200']['content']['application/json']['textbook']
 
+export type ExtractionBatches =
+  paths['/api/extraction-batches']['get']['responses']['200']['content']['application/json']
+export type ExtractionBatch =
+  paths['/api/extraction-batches/{id}']['get']['responses']['200']['content']['application/json']
+
 export type ClassificationBatches =
   paths['/api/classification-batches']['get']['responses']['200']['content']['application/json']
 export type ClassificationBatch =

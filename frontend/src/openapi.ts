@@ -143,6 +143,41 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/extraction-batches': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Extraction Batches */
+    get: operations['get_extraction_batches_api_extraction_batches_get']
+    put?: never
+    /** Create Extraction Batch */
+    post: operations['create_extraction_batch_api_extraction_batches_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Extraction Batch */
+    get: operations['get_extraction_batch_api_extraction_batches__id__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks': {
     parameters: {
       query?: never
@@ -327,6 +362,23 @@ export interface paths {
     post?: never
     /** Delete Adaptation Manual Edit */
     delete: operations['delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/export/extraction-batch/{id}.html': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Export Extraction Batch */
+    get: operations['export_extraction_batch_api_export_extraction_batch__id__html_get']
+    put?: never
+    post?: never
+    delete?: never
     options?: never
     head?: never
     patch?: never
@@ -704,6 +756,18 @@ export interface components {
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
+    /** ExtractionBatch */
+    ExtractionBatch: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+    }
     'Formatted-Input': {
       /**
        * Kind
@@ -811,6 +875,18 @@ export interface components {
     GetClassificationBatchesResponse: {
       /** Classificationbatches */
       classificationBatches: components['schemas']['ClassificationBatch'][]
+    }
+    /** GetExtractionBatchResponse */
+    GetExtractionBatchResponse: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string
+    }
+    /** GetExtractionBatchesResponse */
+    GetExtractionBatchesResponse: {
+      /** Extractionbatches */
+      extractionBatches: components['schemas']['ExtractionBatch'][]
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1111,6 +1187,16 @@ export interface components {
     }
     /** PostClassificationBatchResponse */
     PostClassificationBatchResponse: {
+      /** Id */
+      id: string
+    }
+    /** PostExtractionBatchRequest */
+    PostExtractionBatchRequest: {
+      /** Creator */
+      creator: string
+    }
+    /** PostExtractionBatchResponse */
+    PostExtractionBatchResponse: {
       /** Id */
       id: string
     }
@@ -1705,6 +1791,90 @@ export interface operations {
       }
     }
   }
+  get_extraction_batches_api_extraction_batches_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetExtractionBatchesResponse']
+        }
+      }
+    }
+  }
+  create_extraction_batch_api_extraction_batches_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostExtractionBatchRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostExtractionBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_extraction_batch_api_extraction_batches__id__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetExtractionBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_textbooks_api_textbooks_get: {
     parameters: {
       query?: never
@@ -2111,6 +2281,40 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiAdaptation']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  export_extraction_batch_api_export_extraction_batch__id__html_get: {
+    parameters: {
+      query: {
+        download?: boolean
+        token: string
+      }
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/html': string
         }
       }
       /** @description Validation Error */

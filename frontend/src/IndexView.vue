@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
 
-import { type ClassificationBatches, type AdaptationBatches, type Textbooks, useAuthenticatedClient } from './apiClient'
+import {
+  type ExtractionBatches,
+  type ClassificationBatches,
+  type AdaptationBatches,
+  type Textbooks,
+  useAuthenticatedClient,
+} from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 import FixedColumns from './FixedColumns.vue'
@@ -9,14 +15,20 @@ import CreateTextbookForm from './CreateTextbookForm.vue'
 
 const client = useAuthenticatedClient()
 
+const extractionBatches = reactive<ExtractionBatches['extractionBatches']>([])
 const classificationBatches = reactive<ClassificationBatches['classificationBatches']>([])
 const adaptationBatches = reactive<AdaptationBatches['adaptationBatches']>([])
 const textbooks = reactive<Textbooks['textbooks']>([])
 
 onMounted(async () => {
+  const extractionBatchesPromise = client.GET('/api/extraction-batches')
   const classificationBatchesPromise = client.GET('/api/classification-batches')
   const adaptationBatchesPromise = client.GET('/api/adaptation-batches')
   const textbooksPromise = client.GET('/api/textbooks')
+
+  const extractionBatchesResponse = await extractionBatchesPromise
+  assert(extractionBatchesResponse.data !== undefined)
+  extractionBatches.splice(0, extractionBatches.length, ...extractionBatchesResponse.data.extractionBatches)
 
   const classificationBatchesResponse = await classificationBatchesPromise
   assert(classificationBatchesResponse.data !== undefined)
@@ -42,6 +54,7 @@ onMounted(async () => {
       <template #col-1>
         <h1>Sandbox</h1>
         <h2>New batch</h2>
+        <p><RouterLink :to="{ name: 'create-extraction-batch' }">New extraction batch</RouterLink> (from a PDF)</p>
         <p>
           <RouterLink :to="{ name: 'create-classification-batch' }">New classification batch</RouterLink> (for exercises
           not yet classified)
@@ -50,6 +63,16 @@ onMounted(async () => {
           <RouterLink :to="{ name: 'create-adaptation-batch' }">New adaptation batch</RouterLink> (for exercises already
           classified by hand)
         </p>
+
+        <h2>Existing extraction batches</h2>
+        <ul>
+          <li v-for="extractionBatch in extractionBatches">
+            <RouterLink :to="{ name: 'extraction-batch', params: { id: extractionBatch.id } }">
+              Batch E{{ extractionBatch.id }}
+            </RouterLink>
+            (created by {{ extractionBatch.createdBy }} on {{ new Date(extractionBatch.createdAt).toLocaleString() }})
+          </li>
+        </ul>
 
         <h2>Existing classification batches</h2>
         <ul>

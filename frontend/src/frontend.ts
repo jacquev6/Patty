@@ -7,8 +7,10 @@ import './main.css'
 import IndexView from './IndexView.vue'
 import CreateAdaptationBatchView from './CreateAdaptationBatchView.vue'
 import CreateClassificationBatchView from './CreateClassificationBatchView.vue'
+import CreateExtractionBatchView from './CreateExtractionBatchView.vue'
 import EditAdaptationView from './EditAdaptationView.vue'
 import EditAdaptationBatchView from './EditAdaptationBatchView.vue'
+import EditExtractionBatchView from './EditExtractionBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
 import ExamplesView from './ExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
@@ -21,6 +23,17 @@ const router = createRouter({
       path: '/',
       name: 'index',
       component: IndexView,
+    },
+    {
+      path: '/new-extraction-batch',
+      name: 'create-extraction-batch',
+      component: CreateExtractionBatchView,
+    },
+    {
+      path: '/extraction-batch-:id',
+      name: 'extraction-batch',
+      component: EditExtractionBatchView,
+      props: true,
     },
     {
       path: '/new-classification-batch',
