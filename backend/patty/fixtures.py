@@ -1,7 +1,10 @@
+import itertools
 from typing import Any, Iterable, TypeVar
 import datetime
 import textwrap
 
+import boto3
+import botocore
 import compact_json  # type: ignore[import-untyped]
 import fastapi
 import sqlalchemy.orm
@@ -972,6 +975,18 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
     }
 
     database_utils.truncate_all_tables(session)
+
+    s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
+    for batch in itertools.batched(
+        (
+            {"Key": obj["Key"]}
+            for page in s3.get_paginator("list_objects_v2").paginate(Bucket="jacquev6", Prefix="patty/dev")
+            if "Contents" in page
+            for obj in page["Contents"]
+        ),
+        1000,
+    ):
+        s3.delete_objects(Bucket="jacquev6", Delete={"Objects": batch})
 
     for fixture in fixtures:
         available_fixtures[fixture]()

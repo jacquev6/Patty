@@ -15,7 +15,11 @@ describe('The extraction batch creation page', () => {
   // })
 
   it('creates an extraction batch', () => {
-    cy.get('button:contains("Submit")').click()
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("PDF file:")').should('contain.text', '(uploading...)')
+    cy.get('p:contains("PDF file:")').should('contain.text', '(uploaded)', { timeout: 10000 })
+    cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('eq', '/extraction-batch-1')
     cy.get('p:contains("Created by: Alice")').should('exist')
     cy.get('a:contains("Download standalone HTML")')

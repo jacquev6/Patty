@@ -27,8 +27,6 @@ const runAdaptation = computed(() => runAdaptationAsString.value === 'yes')
 
 const inputs = reactive<InputWithFile[]>([])
 
-const busy = ref(false)
-
 const cleanedUpInputs = computed(() =>
   inputs
     .filter((input) => input.instructionHintExampleText.trim() !== '' || input.statementText.trim() !== '')
@@ -43,7 +41,6 @@ const cleanedUpInputs = computed(() =>
 const disabled = computed(() => cleanedUpInputs.value.length === 0)
 
 async function submit() {
-  busy.value = true
   const response = await client.POST('/api/classification-batches', {
     body: {
       creator: identifiedUser.identifier,
@@ -51,7 +48,6 @@ async function submit() {
       modelForAdaptation: runAdaptation.value ? llmModel.value : null,
     },
   })
-  busy.value = false
   if (response.data !== undefined) {
     router.push({ name: 'classification-batch', params: { id: response.data.id } })
   }

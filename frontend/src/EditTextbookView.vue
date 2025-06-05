@@ -54,7 +54,7 @@ function textbookUpdated(newTextbook: Textbook) {
 
 function refreshIfNeeded() {
   if (needsRefresh()) {
-    refreshTimeoutId = setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
+    refreshTimeoutId = window.setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
     refreshes++
   } else {
     refreshTimeoutId = null
@@ -76,7 +76,7 @@ function needsRefresh() {
 
 function cancelRefresh() {
   if (refreshTimeoutId !== null) {
-    clearTimeout(refreshTimeoutId)
+    window.clearTimeout(refreshTimeoutId)
     refreshTimeoutId = null
   }
   refreshes = 0

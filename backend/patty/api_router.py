@@ -11,6 +11,7 @@ import boto3
 import botocore.client
 import fastapi
 import fastapi.testclient
+import requests
 import sqlalchemy as sql
 
 from . import authentication
@@ -388,6 +389,50 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
             for classification_batch in classification_batches
         ]
     )
+
+
+class CreatePdfFileRequest(ApiModel):
+    creator: str
+    file_name: str
+    bytes_count: int
+    sha256: str
+
+
+class CreatePdfFileResponse(ApiModel):
+    upload_url: str | None
+
+
+@api_router.post("/pdf-files")
+def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDependable) -> CreatePdfFileResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    pdf_file = session.get(db.PdfFile, req.sha256)
+    if pdf_file is None:
+        pdf_file = db.PdfFile(
+            sha256=req.sha256,
+            created_by_username=req.creator,
+            created_at=now,
+            known_file_names=[],
+            bytes_count=req.bytes_count,
+        )
+        session.add(pdf_file)
+
+    if req.file_name not in pdf_file.known_file_names:
+        pdf_file.known_file_names = pdf_file.known_file_names + [req.file_name]
+
+    target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{pdf_file.sha256}")
+    try:
+        s3.head_object(Bucket=target.netloc, Key=target.path[1:])
+    except botocore.exceptions.ClientError as error:
+        if error.response["Error"]["Code"] == "404":
+            upload_url = s3.generate_presigned_url(
+                "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
+            )
+        else:
+            raise
+    else:
+        upload_url = None
+
+    return CreatePdfFileResponse(upload_url=upload_url)
 
 
 class PostExtractionBatchRequest(ApiModel):
@@ -1065,7 +1110,7 @@ router.include_router(api_router)
 router.include_router(export_router, prefix="/export")
 
 
-class AdaptationApiTestCase(database_utils.TestCaseWithDatabase):
+class ApiTestCase(database_utils.TestCaseWithDatabase):
     def setUp(self) -> None:
         super().setUp()
         self.app = fastapi.FastAPI(database_engine=self.engine)
@@ -1073,5 +1118,34 @@ class AdaptationApiTestCase(database_utils.TestCaseWithDatabase):
         access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
         self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
 
-    def test_get_no_textbooks(self) -> None:
-        self.assertEqual(self.client.get("/textbooks").json(), {"textbooks": []})
+    def test_create_the_same_pdf_file_several_times(self) -> None:
+        sha = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        try:
+            s3.delete_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
+        except botocore.exceptions.ClientError:
+            pass
+
+        r = self.client.post(
+            "/pdf-files", json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "sha256": sha}
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIsNotNone(r.json()["uploadUrl"])
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf"])
+
+        r = self.client.post(
+            "/pdf-files", json={"creator": "UnitTest", "fileName": "bar.pdf", "bytesCount": 0, "sha256": sha}
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        upload_url = r.json()["uploadUrl"]
+        self.assertIsNotNone(upload_url)
+        requests.put(upload_url, data=b"")
+        s3.head_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
+
+        r = self.client.post(
+            "/pdf-files", json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "sha256": sha}
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIsNone(r.json()["uploadUrl"])
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])

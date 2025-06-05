@@ -383,6 +383,49 @@
         }
       }
     },
+    "/api/pdf-files": {
+      "post": {
+        "summary": "Create Pdf File",
+        "operationId": "create_pdf_file_api_pdf_files_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePdfFileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePdfFileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/extraction-batches": {
       "get": {
         "summary": "Get Extraction Batches",
@@ -2051,6 +2094,56 @@
           "statementText"
         ],
         "title": "ClassificationInput"
+      },
+      "CreatePdfFileRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "bytesCount": {
+            "type": "integer",
+            "title": "Bytescount"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "fileName",
+          "bytesCount",
+          "sha256"
+        ],
+        "title": "CreatePdfFileRequest"
+      },
+      "CreatePdfFileResponse": {
+        "properties": {
+          "uploadUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadurl"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "uploadUrl"
+        ],
+        "title": "CreatePdfFileResponse"
       },
       "DummyModel": {
         "properties": {

@@ -65,6 +65,11 @@ def truncate_all_tables(session: Session) -> None:
             pass
 
 
+# @todo Decide the fate of 'dump' and 'load' functions.
+# They may be misguided as they do not handle files for 'pdf-files' and 'external-exercises' tables.
+# (See how these files are deleted in 'load_fixtures')
+
+
 def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
     data: dict[str, list[dict[str, Any]]] = {}
 
@@ -217,6 +222,11 @@ class TestCaseWithDatabase(unittest.TestCase):
     def commit_model(self, __model: type[Model], **kwargs: Any) -> Model:
         instance = self.add_model(__model, **kwargs)
         self.session.commit()
+        return instance
+
+    def get_model(self, model: type[Model], pk: Any) -> Model:
+        instance = self.session.get(model, pk)
+        assert instance is not None
         return instance
 
     @contextlib.contextmanager

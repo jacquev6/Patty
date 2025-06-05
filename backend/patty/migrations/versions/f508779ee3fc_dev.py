@@ -18,6 +18,15 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_extraction_batches")),
     )
+    op.create_table(
+        "pdf_files",
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("created_by_username", sa.String(), nullable=False),
+        sa.Column("sha256", sa.String(), nullable=False),
+        sa.Column("bytes_count", sa.Integer(), nullable=False),
+        sa.Column("known_file_names", sa.JSON(), nullable=False),
+        sa.PrimaryKeyConstraint("sha256", name=op.f("pk_pdf_files")),
+    )
     # ### end Alembic commands ###
     op.drop_table("old_adaptation_external_exercises")
     op.drop_table("old_adaptation_adaptations")

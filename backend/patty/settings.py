@@ -17,3 +17,5 @@ AUTHENTICATION_MAX_VALIDITY = pydantic.RootModel[datetime.timedelta](
 ).root
 EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
 assert not EXTERNAL_EXERCISES_URL.endswith("/")
+PDF_FILES_URL = os.environ["PATTY_PDF_FILES_URL"]
+assert not PDF_FILES_URL.endswith("/")

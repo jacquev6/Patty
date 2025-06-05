@@ -136,6 +136,17 @@ class ExerciseClass(OrmBase):
     )
 
 
+class PdfFile(OrmBase):
+    __tablename__ = "pdf_files"
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
+
+    sha256: orm.Mapped[str] = orm.mapped_column(primary_key=True)
+    bytes_count: orm.Mapped[int]
+    known_file_names: orm.Mapped[list[str]] = orm.mapped_column(sql.JSON)
+
+
 class ExtractionBatch(OrmBase):
     __tablename__ = "extraction_batches"
 

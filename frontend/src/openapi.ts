@@ -143,6 +143,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/pdf-files': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Create Pdf File */
+    post: operations['create_pdf_file_api_pdf_files_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/extraction-batches': {
     parameters: {
       query?: never
@@ -684,6 +701,22 @@ export interface components {
       instructionHintExampleText: string
       /** Statementtext */
       statementText: string
+    }
+    /** CreatePdfFileRequest */
+    CreatePdfFileRequest: {
+      /** Creator */
+      creator: string
+      /** Filename */
+      fileName: string
+      /** Bytescount */
+      bytesCount: number
+      /** Sha256 */
+      sha256: string
+    }
+    /** CreatePdfFileResponse */
+    CreatePdfFileResponse: {
+      /** Uploadurl */
+      uploadUrl: string | null
     }
     /** DummyModel */
     DummyModel: {
@@ -1778,6 +1811,39 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetClassificationBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  create_pdf_file_api_pdf_files_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePdfFileRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CreatePdfFileResponse']
         }
       }
       /** @description Validation Error */
