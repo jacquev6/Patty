@@ -4,6 +4,7 @@ boto3
 compact-json
 datasets
 fastapi
+google-cloud-aiplatform
 mistralai
 openai
 pillow

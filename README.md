@@ -1,5 +1,12 @@
 *Patty* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
 
+# Authors
+
+(in `random.shuffle` order)
+
+- [Elise Lincker](https://github.com/eliselinc/) (classification)
+- [Mohamed Amine Lasheb](https://aminelasheb.github.io/) (extraction)
+- [Vincent Jacques](https://vincent-jacques.net/) (everything else)
 
 # Documentation
 
