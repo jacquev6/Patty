@@ -79,7 +79,7 @@ class DevelopmentCycle:
 
         if self.do_frontend:
             if self.do_format:
-                run_in_frontend_container(["npm", "run", "format"])
+                run_in_frontend_container(["npx", "prettier", "--write", "src/", "e2e-tests/"])
 
             if self.do_lint:
                 for file in glob.glob("**/*.cy.ts", recursive=True):
@@ -91,10 +91,10 @@ class DevelopmentCycle:
                                     exit(1)
                     except IsADirectoryError:
                         pass
-                run_in_frontend_container(["npm", "run", "lint"])
+                run_in_frontend_container(["npx", "eslint", ".", "--ignore-pattern", "**/*.min.js", "--fix"])
 
             if self.do_type_check:
-                run_in_frontend_container(["npm", "run", "type-check"])
+                run_in_frontend_container(["npx", "vue-tsc", "--build"])
 
             if self.do_test:
                 if self.frontend_specs is None:
