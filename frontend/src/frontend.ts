@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
 import { createPinia } from 'pinia'
 
+import pdfjs from './pdfjs'
 import './main.css'
 import IndexView from './IndexView.vue'
 import CreateAdaptationBatchView from './CreateAdaptationBatchView.vue'
@@ -15,6 +16,8 @@ import FrontendRootView from './FrontendRootView.vue'
 import ExamplesView from './ExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
 import EditClassificationBatchView from './EditClassificationBatchView.vue'
+
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 const router = createRouter({
   history: createWebHistory(),

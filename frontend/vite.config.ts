@@ -41,6 +41,7 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
   }
 
   return {
+    publicDir: `src/${entryPointName}-public`,
     plugins,
     server: {
       allowedHosts: true,

@@ -144,7 +144,24 @@ class PdfFile(OrmBase):
 
     sha256: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     bytes_count: orm.Mapped[int]
+    pages_count: orm.Mapped[int]
     known_file_names: orm.Mapped[list[str]] = orm.mapped_column(sql.JSON)
+
+
+class PdfFileRange(OrmBase):
+    __tablename__ = "pdf_file_ranges"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
+
+    pdf_file_sha256: orm.Mapped[str | None] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
+    pdf_file: orm.Mapped[PdfFile | None] = orm.relationship(
+        foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256]
+    )
+    pdf_file_first_page_number: orm.Mapped[int]
+    pages_count: orm.Mapped[int]
 
 
 class ExtractionBatch(OrmBase):
@@ -160,8 +177,8 @@ class ExtractionBatch(OrmBase):
     #     foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
     # )
 
-    # range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
-    # range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
+    range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
 
 
 class AdaptableExercise(BaseExercise):

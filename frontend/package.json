@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "eslint . --fix",
+    "lint": "eslint . --ignore-pattern '**/*.min.js' --fix",
     "format": "prettier --write src/ e2e-tests/"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "marked": "^15.0.7",
     "modern-normalize": "^3.0.1",
     "openapi-fetch": "^0.13.5",
+    "pdfjs-dist": "^4.10.38",
     "pinia": "^3.0.2",
     "sha.js": "^2.4.11",
     "split-grid": "^1.0.11",

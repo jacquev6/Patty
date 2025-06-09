@@ -2109,6 +2109,10 @@
             "type": "integer",
             "title": "Bytescount"
           },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
+          },
           "sha256": {
             "type": "string",
             "title": "Sha256"
@@ -2120,6 +2124,7 @@
           "creator",
           "fileName",
           "bytesCount",
+          "pagesCount",
           "sha256"
         ],
         "title": "CreatePdfFileRequest"
@@ -3478,12 +3483,27 @@
           "creator": {
             "type": "string",
             "title": "Creator"
+          },
+          "pdfFileSha256": {
+            "type": "string",
+            "title": "Pdffilesha256"
+          },
+          "firstPage": {
+            "type": "integer",
+            "title": "Firstpage"
+          },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "creator"
+          "creator",
+          "pdfFileSha256",
+          "firstPage",
+          "pagesCount"
         ],
         "title": "PostExtractionBatchRequest"
       },

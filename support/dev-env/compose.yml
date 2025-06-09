@@ -336,6 +336,17 @@ services:
     depends_on:
       npm-installer:
         condition: service_completed_successfully
+  pdfjs-worker-copier:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend-public/pdf.worker.min.js"]
+    depends_on:
+      npm-installer:
+        condition: service_completed_successfully
   openapi-ts-generator:
     image: patty-dev_frontend
     pull_policy: never
@@ -370,6 +381,8 @@ services:
         condition: service_healthy
       adapted-exercise-json-schema-generator:
         condition: service_healthy
+      pdfjs-worker-copier:
+        condition: service_completed_successfully
 
   fanout:
     image: nginx:latest

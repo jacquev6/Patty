@@ -710,6 +710,8 @@ export interface components {
       fileName: string
       /** Bytescount */
       bytesCount: number
+      /** Pagescount */
+      pagesCount: number
       /** Sha256 */
       sha256: string
     }
@@ -1227,6 +1229,12 @@ export interface components {
     PostExtractionBatchRequest: {
       /** Creator */
       creator: string
+      /** Pdffilesha256 */
+      pdfFileSha256: string
+      /** Firstpage */
+      firstPage: number
+      /** Pagescount */
+      pagesCount: number
     }
     /** PostExtractionBatchResponse */
     PostExtractionBatchResponse: {

@@ -395,6 +395,7 @@ class CreatePdfFileRequest(ApiModel):
     creator: str
     file_name: str
     bytes_count: int
+    pages_count: int
     sha256: str
 
 
@@ -411,8 +412,9 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
             sha256=req.sha256,
             created_by_username=req.creator,
             created_at=now,
-            known_file_names=[],
             bytes_count=req.bytes_count,
+            pages_count=req.pages_count,
+            known_file_names=[],
         )
         session.add(pdf_file)
 
@@ -437,6 +439,9 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
 
 class PostExtractionBatchRequest(ApiModel):
     creator: str
+    pdf_file_sha256: str
+    first_page: int
+    pages_count: int
 
 
 class PostExtractionBatchResponse(ApiModel):
@@ -448,8 +453,16 @@ def create_extraction_batch(
     req: PostExtractionBatchRequest, session: database_utils.SessionDependable
 ) -> PostExtractionBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
+    range = db.PdfFileRange(
+        created_by_username=req.creator,
+        created_at=now,
+        pdf_file_sha256=req.pdf_file_sha256,
+        pdf_file_first_page_number=req.first_page,
+        pages_count=req.pages_count,
+    )
+    session.add(range)
+    extraction_batch = db.ExtractionBatch(created_by_username=req.creator, created_at=now, range=range)
     # @todo Implement
-    extraction_batch = db.ExtractionBatch(created_by_username=req.creator, created_at=now)
     session.add(extraction_batch)
 
     session.flush()
@@ -1127,14 +1140,16 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
             pass
 
         r = self.client.post(
-            "/pdf-files", json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "sha256": sha}
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
         )
         self.assertEqual(r.status_code, 200, r.text)
         self.assertIsNotNone(r.json()["uploadUrl"])
         self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf"])
 
         r = self.client.post(
-            "/pdf-files", json={"creator": "UnitTest", "fileName": "bar.pdf", "bytesCount": 0, "sha256": sha}
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "bar.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
         )
         self.assertEqual(r.status_code, 200, r.text)
         upload_url = r.json()["uploadUrl"]
@@ -1144,7 +1159,8 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
 
         r = self.client.post(
-            "/pdf-files", json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "sha256": sha}
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
         )
         self.assertEqual(r.status_code, 200, r.text)
         self.assertIsNone(r.json()["uploadUrl"])
