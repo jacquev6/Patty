@@ -6,6 +6,7 @@ datasets
 fastapi
 mistralai
 openai
+pillow
 polyfactory  # @todo Move this dependency to requirements-10-dev.txt
 psycopg2-binary
 pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests
