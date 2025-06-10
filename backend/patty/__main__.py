@@ -130,14 +130,15 @@ def default_extraction_prompt() -> None:
 
 
 @main.command()
+@click.option("--truncate", is_flag=True, help="Truncate DB before loading")
 @click.argument("fixture", type=str, nargs=-1)
-def load_fixtures(fixture: Iterable[str]) -> None:
+def load_fixtures(truncate: bool, fixture: Iterable[str]) -> None:
     from . import database_utils
     from . import fixtures
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
-        fixtures.load(session, fixture)
+        fixtures.load(session, truncate, fixture)
         session.commit()
 
 

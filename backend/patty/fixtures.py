@@ -586,6 +586,7 @@ class FixturesCreator:
         self.create_successful_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
+        self.create_default_extraction_strategy()
 
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
@@ -1038,7 +1039,7 @@ class FixturesCreator:
         )
 
 
-def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
+def load(session: database_utils.Session, truncate: bool, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)
 
     available_fixtures = {
@@ -1059,19 +1060,20 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
         )
     }
 
-    database_utils.truncate_all_tables(session)
+    if truncate:
+        database_utils.truncate_all_tables(session)
 
-    s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
-    for batch in itertools.batched(
-        (
-            {"Key": obj["Key"]}
-            for page in s3.get_paginator("list_objects_v2").paginate(Bucket="jacquev6", Prefix="patty/dev")
-            if "Contents" in page
-            for obj in page["Contents"]
-        ),
-        1000,
-    ):
-        s3.delete_objects(Bucket="jacquev6", Delete={"Objects": batch})
+        s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
+        for batch in itertools.batched(
+            (
+                {"Key": obj["Key"]}
+                for page in s3.get_paginator("list_objects_v2").paginate(Bucket="jacquev6", Prefix="patty/dev")
+                if "Contents" in page
+                for obj in page["Contents"]
+            ),
+            1000,
+        ):
+            s3.delete_objects(Bucket="jacquev6", Delete={"Objects": batch})
 
     for fixture in fixtures:
         available_fixtures[fixture]()
@@ -1082,4 +1084,4 @@ app = fastapi.FastAPI(database_engine=database_utils.create_engine(settings.DATA
 
 @app.post("/load")
 def post_load(fixtures: str, session: database_utils.SessionDependable) -> None:
-    load(session, [] if fixtures == "" else fixtures.split(","))
+    load(session, True, [] if fixtures == "" else fixtures.split(","))
