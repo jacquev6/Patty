@@ -22,7 +22,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/available-llm-models': {
+  '/api/available-adaptation-llm-models': {
     parameters: {
       query?: never
       header?: never
@@ -30,7 +30,7 @@ export interface paths {
       cookie?: never
     }
     /** Get Available Llm Models */
-    get: operations['get_available_llm_models_api_available_llm_models_get']
+    get: operations['get_available_llm_models_api_available_adaptation_llm_models_get']
     put?: never
     post?: never
     delete?: never
@@ -1576,7 +1576,7 @@ export interface operations {
       }
     }
   }
-  get_available_llm_models_api_available_llm_models_get: {
+  get_available_llm_models_api_available_adaptation_llm_models_get: {
     parameters: {
       query?: never
       header?: never

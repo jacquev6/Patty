@@ -8,12 +8,12 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 import pydantic
 
-from . import llm
+from .adaptation import llm as adaptation_llm
+from .adaptation.adaptation import Adjustment, AssistantResponse
+from .adaptation.strategy import ConcreteLlmResponseSpecification
 from .adapted import Exercise as AdaptedExercise
 from .any_json import JsonDict, JsonList
 from .database_utils import OrmBase as OrmBaseBase
-from .adaptation.adaptation import Adjustment, AssistantResponse
-from .adaptation.strategy import ConcreteLlmResponseSpecification
 
 
 class OrmBase(OrmBaseBase):
@@ -100,14 +100,14 @@ class ClassificationBatch(OrmBase):
     _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
 
     @property
-    def model_for_adaptation(self) -> llm.ConcreteModel | None:
+    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
         if self._model_for_adaptation is None:
             return None
         else:
-            return pydantic.RootModel[llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
 
     @model_for_adaptation.setter
-    def model_for_adaptation(self, value: llm.ConcreteModel | None) -> None:
+    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
         if value is None:
             self._model_for_adaptation = sql.null()
         else:
@@ -287,11 +287,11 @@ class AdaptationStrategy(OrmBase):
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
 
     @property
-    def model(self) -> llm.ConcreteModel:
-        return pydantic.RootModel[llm.ConcreteModel](self._model).root  # type: ignore[arg-type]
+    def model(self) -> adaptation_llm.ConcreteModel:
+        return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model).root  # type: ignore[arg-type]
 
     @model.setter
-    def model(self, value: llm.ConcreteModel) -> None:
+    def model(self, value: adaptation_llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
 

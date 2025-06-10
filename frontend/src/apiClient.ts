@@ -15,8 +15,8 @@ export function useAuthenticatedClient() {
   })
 }
 
-export type LlmModel =
-  paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
+export type AdaptationLlmModel =
+  paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number]
 
 export type LatestAdaptationBatch =
   paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']

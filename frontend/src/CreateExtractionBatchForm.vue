@@ -5,7 +5,7 @@ import shajs from 'sha.js'
 import { computedAsync } from '@vueuse/core'
 
 import pdfjs, { type PDFDocumentProxy } from './pdfjs'
-import { type LlmModel, useAuthenticatedClient } from './apiClient'
+import { type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import assert from './assert'
@@ -13,7 +13,7 @@ import PdfPageRenderer from './PdfPageRenderer.vue'
 import PdfNavigationControls from './PdfNavigationControls.vue'
 
 defineProps<{
-  availableLlmModels: LlmModel[]
+  availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
 const router = useRouter()

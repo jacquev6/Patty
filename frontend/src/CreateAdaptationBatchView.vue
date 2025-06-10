@@ -2,26 +2,26 @@
 import { ref, watch } from 'vue'
 
 import CreateAdaptationBatchForm from './CreateAdaptationBatchForm.vue'
-import { type LlmModel, type LatestAdaptationBatch, useAuthenticatedClient } from './apiClient'
+import { type AdaptationLlmModel, type LatestAdaptationBatch, useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const client = useAuthenticatedClient()
 
-const availableLlmModels = ref<LlmModel[]>([])
+const availableAdaptationLlmModels = ref<AdaptationLlmModel[]>([])
 
 const identifiedUser = useIdentifiedUserStore()
 
 const latestAdaptationBatch = ref<LatestAdaptationBatch | null>(null)
 
 async function refresh() {
-  const llmModelsPromise = client.GET('/api/available-llm-models')
+  const availableAdaptationLlmModelsPromise = client.GET('/api/available-adaptation-llm-models')
   const latestAdaptationBatchPromise = client.GET('/api/latest-adaptation-batch', {
     params: { query: { user: identifiedUser.identifier } },
   })
 
-  const llmModelsResponse = await llmModelsPromise
-  if (llmModelsResponse.data !== undefined) {
-    availableLlmModels.value = llmModelsResponse.data
+  const availableAdaptationLlmModelsResponse = await availableAdaptationLlmModelsPromise
+  if (availableAdaptationLlmModelsResponse.data !== undefined) {
+    availableAdaptationLlmModels.value = availableAdaptationLlmModelsResponse.data
   }
 
   const latestAdaptationBatchResponse = await latestAdaptationBatchPromise
@@ -36,8 +36,8 @@ watch(() => identifiedUser.identifier, refresh, { immediate: true })
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <CreateAdaptationBatchForm
-      v-if="availableLlmModels.length !== 0 && latestAdaptationBatch !== null"
-      :availableLlmModels
+      v-if="availableAdaptationLlmModels.length !== 0 && latestAdaptationBatch !== null"
+      :availableAdaptationLlmModels
       :latestAdaptationBatch
     />
   </div>

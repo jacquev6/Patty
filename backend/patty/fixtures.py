@@ -12,10 +12,10 @@ import sqlalchemy.orm
 from . import adapted
 from . import database_utils
 from . import extracted
-from . import llm
 from . import orm_models as db
 from . import settings
 from .adaptation import adaptation
+from .adaptation import llm as adaptation_llm
 from .adaptation import strategy as adaptation_strategy
 
 
@@ -286,7 +286,7 @@ class FixturesCreator:
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            model=adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
             settings=strategy_settings,
         )
 
@@ -331,7 +331,7 @@ class FixturesCreator:
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=settings,
         )
 
@@ -647,7 +647,7 @@ class FixturesCreator:
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_1.latest_strategy_settings,
         )
         success_adaptation_batch_1 = self.create(
@@ -744,7 +744,7 @@ class FixturesCreator:
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_2.latest_strategy_settings,
         )
         success_adaptation_batch_2 = self.create(
@@ -900,7 +900,7 @@ class FixturesCreator:
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=errors_branch.latest_strategy_settings,
         )
         errors_adaptation_batch = self.create(

@@ -5,7 +5,7 @@ import typing
 import sqlalchemy as sql
 
 from .. import database_utils
-from .. import llm
+from . import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
 from ..orm_models import Adaptation

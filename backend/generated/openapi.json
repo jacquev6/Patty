@@ -47,10 +47,10 @@
         }
       }
     },
-    "/api/available-llm-models": {
+    "/api/available-adaptation-llm-models": {
       "get": {
         "summary": "Get Available Llm Models",
-        "operationId": "get_available_llm_models_api_available_llm_models_get",
+        "operationId": "get_available_llm_models_api_available_adaptation_llm_models_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -71,12 +71,17 @@
                     ]
                   },
                   "type": "array",
-                  "title": "Response Get Available Llm Models Api Available Llm Models Get"
+                  "title": "Response Get Available Llm Models Api Available Adaptation Llm Models Get"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation-llm-response-schema": {

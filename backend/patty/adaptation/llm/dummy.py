@@ -6,7 +6,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 import pydantic
 
 
-from ..any_json import JsonDict
+from ...any_json import JsonDict
 from .base import (
     AssistantMessage,
     InvalidJsonAssistantMessage,
@@ -72,7 +72,7 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(response.message.content, Response)
 
     async def test_adaptation_schema(self) -> None:
-        from ..adapted import Exercise
+        from ...adapted import Exercise
 
         model = DummyModel(name="dummy-1")
 

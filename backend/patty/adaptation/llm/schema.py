@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import mistralai.extra
 import openai.lib._parsing._completions
 
-from ..any_json import JsonDict
+from ...any_json import JsonDict
 
 
 CustomPydanticModel = TypeVar("CustomPydanticModel", bound=BaseModel)

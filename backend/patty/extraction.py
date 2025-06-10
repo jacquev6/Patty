@@ -20,7 +20,7 @@ from . import database_utils
 from . import extracted
 from . import settings
 from .fixtures import make_default_extraction_prompt
-from .llm.test_utils import costs_money
+from .test_utils import costs_money
 from .orm_models import PageExtraction, AdaptableExercise, ExtractionStrategy
 
 

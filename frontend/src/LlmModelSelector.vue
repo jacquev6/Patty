@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { type LlmModel } from './apiClient'
+import { type AdaptationLlmModel } from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 
 const props = defineProps<{
-  availableLlmModels: LlmModel[]
+  availableLlmModels: AdaptationLlmModel[]
   disabled: boolean
 }>()
 
-const model = defineModel<LlmModel>({ required: true })
+const model = defineModel<AdaptationLlmModel>({ required: true })
 
 assert(props.disabled || props.availableLlmModels.length !== 0)
 

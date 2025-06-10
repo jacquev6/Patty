@@ -4,6 +4,7 @@ import os
 import pydantic
 
 
+ENVIRONMENT = os.environ.get("PATTY_ENVIRONMENT")
 DATABASE_URL = os.environ["PATTY_DATABASE_URL"]
 DATABASE_BACKUPS_URL = os.environ["PATTY_DATABASE_BACKUPS_URL"]
 assert not DATABASE_BACKUPS_URL.endswith("/")

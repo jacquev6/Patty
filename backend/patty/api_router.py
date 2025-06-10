@@ -16,8 +16,8 @@ import sqlalchemy as sql
 
 from . import authentication
 from . import database_utils
-from . import llm
 from . import settings
+from .adaptation import llm as adaptation_llm
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
@@ -39,6 +39,28 @@ s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", s
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
 
+@api_router.get("/available-adaptation-llm-models")
+def get_available_llm_models() -> list[adaptation_llm.ConcreteModel]:
+    if settings.ENVIRONMENT == "dev":
+        return [
+            adaptation_llm.DummyModel(name="dummy-1"),
+            adaptation_llm.DummyModel(name="dummy-2"),
+            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+        ]
+    else:
+        return [
+            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(name="dummy-1"),
+            adaptation_llm.DummyModel(name="dummy-2"),
+        ]
+
+
 class ApiStrategySettings(ApiModel):
     name: str | None
     system_prompt: str
@@ -46,7 +68,7 @@ class ApiStrategySettings(ApiModel):
 
 
 class ApiStrategy(ApiModel):
-    model: llm.ConcreteModel
+    model: adaptation_llm.ConcreteModel
     settings: ApiStrategySettings
 
 
@@ -248,7 +270,7 @@ class GetAdaptationBatchesResponse(ApiModel):
         id: str
         created_by: str
         created_at: datetime.datetime
-        model: llm.ConcreteModel
+        model: adaptation_llm.ConcreteModel
         strategy_settings_name: str | None
 
     adaptation_batches: list[AdaptationBatch]
@@ -286,7 +308,7 @@ class ClassificationInput(ApiModel):
 class PostClassificationBatchRequest(ApiModel):
     creator: str
     inputs: list[ClassificationInput]
-    model_for_adaptation: llm.ConcreteModel | None
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
 
 
 class PostClassificationBatchResponse(ApiModel):
@@ -329,7 +351,7 @@ def create_classification_batch(
 class GetClassificationBatchResponse(ApiModel):
     id: str
     created_by: str
-    model_for_adaptation: llm.ConcreteModel | None
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
 
     class Exercise(ApiModel):
         page_number: int | None
@@ -607,7 +629,7 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
 
 class PostTextbookAdaptationBatchRequest(ApiModel):
     creator: str
-    model: llm.ConcreteModel
+    model: adaptation_llm.ConcreteModel
     branch_name: str
     inputs: list[ApiInput]
 
@@ -768,35 +790,35 @@ async def post_adaptation_adjustment(
 
     def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
         if isinstance(assistant_response, AssistantSuccess):
-            return llm.AssistantMessage[Exercise](content=assistant_response.exercise)
+            return adaptation_llm.AssistantMessage[Exercise](content=assistant_response.exercise)
         elif isinstance(assistant_response, AssistantInvalidJsonError):
-            return llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
+            return adaptation_llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
         elif isinstance(assistant_response, AssistantNotJsonError):
-            return llm.NotJsonAssistantMessage(content=assistant_response.text)
+            return adaptation_llm.NotJsonAssistantMessage(content=assistant_response.text)
         else:
             raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
-        llm.UserMessage(content=adaptation.exercise.full_text),
+        adaptation_llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
+        adaptation_llm.UserMessage(content=adaptation.exercise.full_text),
         make_assistant_message(adaptation.initial_assistant_response),
     ]
     for adjustment in adaptation.adjustments:
         assert isinstance(adjustment.assistant_response, AssistantSuccess)
-        messages.append(llm.UserMessage(content=adjustment.user_prompt))
+        messages.append(adaptation_llm.UserMessage(content=adjustment.user_prompt))
         make_assistant_message(adjustment.assistant_response)
-    messages.append(llm.UserMessage(content=req.adjustment))
+    messages.append(adaptation_llm.UserMessage(content=req.adjustment))
 
     try:
         response = await adaptation.strategy.model.complete(
             messages, adaptation.strategy.settings.response_specification.make_response_format()
         )
-    except llm.InvalidJsonLlmException as error:
+    except adaptation_llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
         assistant_response: AssistantResponse = AssistantInvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
-    except llm.NotJsonLlmException as error:
+    except adaptation_llm.NotJsonLlmException as error:
         raw_conversation = error.raw_conversation
         assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
     else:

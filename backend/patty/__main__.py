@@ -93,7 +93,7 @@ def db_tables_graph() -> None:
 @main.command()
 def adapted_exercise_schema() -> None:
     from . import adapted
-    from . import llm
+    from .adaptation import llm
 
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),

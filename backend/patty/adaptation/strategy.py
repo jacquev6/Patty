@@ -3,7 +3,7 @@ from typing import Literal
 
 
 from .. import adapted
-from .. import llm
+from . import llm
 from ..any_json import JsonDict
 from ..api_utils import ApiModel
 
