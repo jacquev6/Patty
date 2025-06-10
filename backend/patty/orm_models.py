@@ -156,12 +156,21 @@ class PdfFileRange(OrmBase):
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
     created_by_username: orm.Mapped[str]
 
-    pdf_file_sha256: orm.Mapped[str | None] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
-    pdf_file: orm.Mapped[PdfFile | None] = orm.relationship(
-        foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256]
-    )
+    pdf_file_sha256: orm.Mapped[str] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
+    pdf_file: orm.Mapped[PdfFile] = orm.relationship(foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256])
     pdf_file_first_page_number: orm.Mapped[int]
     pages_count: orm.Mapped[int]
+
+
+class ExtractionStrategy(OrmBase):
+    __tablename__ = "extraction_strategies"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
+
+    prompt: orm.Mapped[str]
 
 
 class ExtractionBatch(OrmBase):
@@ -172,13 +181,30 @@ class ExtractionBatch(OrmBase):
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
     created_by_username: orm.Mapped[str]
 
-    # strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
-    # strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
-    #     foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
-    # )
+    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
+    strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
+        foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
+    )
 
     range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
     range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
+
+
+class PageExtraction(OrmBase):
+    __tablename__ = "page_extractions"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]
+
+    extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
+    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
+        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id]
+    )
+
+    page_number: orm.Mapped[int]
+    status: orm.Mapped[typing.Literal["pending", "success", "failure"]]
 
 
 class AdaptableExercise(BaseExercise):
@@ -187,6 +213,11 @@ class AdaptableExercise(BaseExercise):
     __mapper_args__ = {"polymorphic_identity": "adaptable"}
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
+
+    created_by_page_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
+    created_by_page_extraction: orm.Mapped[PageExtraction | None] = orm.relationship(
+        foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id]
+    )
 
     full_text: orm.Mapped[str]
     instruction_hint_example_text: orm.Mapped[str | None]
@@ -373,6 +404,8 @@ all_models: list[type[OrmBase]] = [
     ExerciseClass,
     ExternalExercise,
     ExtractionBatch,
+    ExtractionStrategy,
+    PageExtraction,
     PdfFile,
     PdfFileRange,
     Textbook,

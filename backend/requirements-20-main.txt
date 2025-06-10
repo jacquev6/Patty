@@ -1,6 +1,7 @@
 alembic
 argon2-cffi
 boto3
+cachetools
 compact-json
 datasets
 fastapi

@@ -453,17 +453,29 @@ def create_extraction_batch(
     req: PostExtractionBatchRequest, session: database_utils.SessionDependable
 ) -> PostExtractionBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    range = db.PdfFileRange(
+    pdf_file_range = db.PdfFileRange(
         created_by_username=req.creator,
         created_at=now,
         pdf_file_sha256=req.pdf_file_sha256,
         pdf_file_first_page_number=req.first_page,
         pages_count=req.pages_count,
     )
-    session.add(range)
-    extraction_batch = db.ExtractionBatch(created_by_username=req.creator, created_at=now, range=range)
-    # @todo Implement
+    session.add(pdf_file_range)
+    strategy = session.get(db.ExtractionStrategy, 1)  # @todo Get the strategy from the request
+    assert strategy is not None
+    extraction_batch = db.ExtractionBatch(
+        created_by_username=req.creator, created_at=now, strategy=strategy, range=pdf_file_range
+    )
     session.add(extraction_batch)
+    for page_number in range(req.first_page, req.first_page + req.pages_count):
+        page = db.PageExtraction(
+            created_by_username=req.creator,
+            created_at=now,
+            extraction_batch=extraction_batch,
+            page_number=page_number,
+            status="pending",
+        )
+        session.add(page)
 
     session.flush()
 

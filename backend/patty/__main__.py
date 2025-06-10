@@ -123,6 +123,13 @@ def default_adaptation_prompt() -> None:
 
 
 @main.command()
+def default_extraction_prompt() -> None:
+    from . import fixtures
+
+    print(fixtures.make_default_extraction_prompt())
+
+
+@main.command()
 @click.argument("fixture", type=str, nargs=-1)
 def load_fixtures(fixture: Iterable[str]) -> None:
     from . import database_utils
@@ -135,15 +142,19 @@ def load_fixtures(fixture: Iterable[str]) -> None:
 
 
 @main.command()
+@click.option("--extraction-parallelism", type=int, default=1)
 @click.option("--classification-parallelism", type=int, default=20)
 @click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(classification_parallelism: int, adaptation_parallelism: int, pause: float) -> None:
+def run_submission_daemon(
+    extraction_parallelism: int, classification_parallelism: int, adaptation_parallelism: int, pause: float
+) -> None:
     import requests
 
     from . import database_utils
     from .adaptation.submission import submit_adaptations
     from .classification import submit_classifications
+    from .extraction import submit_extractions
 
     def log(message: str) -> None:
         # @todo Use actual logging
@@ -158,16 +169,16 @@ def run_submission_daemon(classification_parallelism: int, adaptation_parallelis
             log("Waking up...")
             try:
                 with database_utils.Session(engine) as session:
+                    await asyncio.gather(*submit_extractions(session, extraction_parallelism))
                     submit_classifications(session, classification_parallelism)
-                    submissions = submit_adaptations(session, adaptation_parallelism)
-                    await asyncio.gather(*submissions)
+                    await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
                     session.commit()
                 if time.monotonic() >= last_time + 60:
                     log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
                     requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
-                log("UNEXPECTED ERROR")
+                log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
             log(f"Sleeping for {pause}s...")
             await asyncio.sleep(pause)

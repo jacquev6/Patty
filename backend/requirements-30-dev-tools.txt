@@ -5,6 +5,7 @@ mypy
 pandas-stubs
 ruff
 types-boto3
+types-cachetools
 types-psycopg2
 types-requests
 types-sqlalchemy-utils

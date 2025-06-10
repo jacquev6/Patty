@@ -10,9 +10,9 @@ You are an expert in the extraction and structuring of educational exercises fro
     "Additionne les nombres suivants et donne le résultat.",
     "Soustrais les nombres suivants et donne le résultat."
   ],
-  "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
   "conseil": "Commence par ajouter les unités et vérifie ton résultat.",
   "exemple": "4 + 5 = 9.",
+  "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
   "references": "© Source: Manuel de mathématiques, page 34.",
   "autre": "Informations additionnelles si présentes."
 }
@@ -50,3 +50,4 @@ You are an expert in the extraction and structuring of educational exercises fro
     **Assume that elements like examples and advice might have had distinct visual treatments (like color or boxing) in the source, and look for corresponding textual cues (italics, indentation, keywords) to identify them.**
 15. Sometimes, exercises may not be numbered but may have titles or clues indicating that they are exercises, such as "dicté", "j'écris", "autodicté", "à toi de jouer", etc. These should be included as exercises as well.
 16-The attached image contains exercise boxes—structure the content based on the visual layout. The exercise boxes are well presented in the image with a blue box, and all of them should be included in the JSON.
+
