@@ -81,7 +81,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
             )
             exercise = AdaptableExercise(
                 created_at=datetime.datetime.now(),
-                created_by_username="Extraction",
+                created_by_username=None,
                 textbook=None,
                 removed_from_textbook=False,
                 page_number=extraction.page_number,

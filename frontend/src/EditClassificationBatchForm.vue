@@ -54,10 +54,3 @@ const authenticationTokenStore = useAuthenticationTokenStore()
     />
   </template>
 </template>
-
-<style scoped>
-span.inProgress {
-  color: gray;
-  font-size: 70%;
-}
-</style>

@@ -4,6 +4,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import EditExtractionBatchForm from './EditExtractionBatchForm.vue'
 import { type ExtractionBatch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
+import { preprocess as preprocessAdaptation } from './adaptations'
 
 const props = defineProps<{
   id: string
@@ -28,7 +29,26 @@ async function refresh() {
     assert(response.data !== undefined)
     extractionBatch.value = response.data
 
-    const needsRefresh = false
+    let needsRefresh = false
+    for (const page of response.data.pages) {
+      if (page.done) {
+        for (const exercise of page.exercises) {
+          if (response.data.runClassification && exercise.exerciseClass === null) {
+            needsRefresh = true
+            break
+          }
+          if (exercise.adaptation !== null && preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress') {
+            needsRefresh = true
+            break
+          }
+        }
+      } else {
+        needsRefresh = true
+      }
+      if (needsRefresh) {
+        break
+      }
+    }
     if (needsRefresh) {
       refreshTimeoutId = window.setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
       refreshes++

@@ -507,13 +507,57 @@ def create_extraction_batch(
 class GetExtractionBatchResponse(ApiModel):
     id: str
     created_by: str
+    run_classification: bool
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
+
+    class Page(ApiModel):
+        page_number: int
+        done: bool
+
+        class Exercise(ApiModel):
+            page_number: int | None
+            exercise_number: str | None
+            full_text: str
+            exercise_class: str | None
+            exercise_class_has_settings: bool
+            adaptation: ApiAdaptation | None
+
+        exercises: list[Exercise]
+
+    pages: list[Page]
 
 
 @api_router.get("/extraction-batches/{id}")
 async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
     extraction_batch = get_by_id(session, db.ExtractionBatch, id)
-    # @todo Implement
-    return GetExtractionBatchResponse(id=str(extraction_batch.id), created_by=extraction_batch.created_by_username)
+    pages = [
+        GetExtractionBatchResponse.Page(
+            page_number=page_extraction.page_number,
+            done=page_extraction.status != "pending",
+            exercises=[
+                GetExtractionBatchResponse.Page.Exercise(
+                    page_number=exercise.page_number,
+                    exercise_number=exercise.exercise_number,
+                    full_text=exercise.full_text,
+                    exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                    exercise_class_has_settings=(
+                        exercise.exercise_class is not None
+                        and exercise.exercise_class.latest_strategy_settings is not None
+                    ),
+                    adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
+                )
+                for exercise in page_extraction.exercises
+            ],
+        )
+        for page_extraction in extraction_batch.page_extractions
+    ]
+    return GetExtractionBatchResponse(
+        id=str(extraction_batch.id),
+        created_by=extraction_batch.created_by_username,
+        run_classification=False,
+        model_for_adaptation=None,
+        pages=pages,
+    )
 
 
 class GetExtractionBatchesResponse(ApiModel):

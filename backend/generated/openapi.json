@@ -2687,13 +2687,44 @@
           "createdBy": {
             "type": "string",
             "title": "Createdby"
+          },
+          "runClassification": {
+            "type": "boolean",
+            "title": "Runclassification"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/Page"
+            },
+            "type": "array",
+            "title": "Pages"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
-          "createdBy"
+          "createdBy",
+          "runClassification",
+          "modelForAdaptation",
+          "pages"
         ],
         "title": "GetExtractionBatchResponse"
       },
@@ -3254,6 +3285,33 @@
           "name"
         ],
         "title": "OpenAiModel"
+      },
+      "Page": {
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "done",
+          "exercises"
+        ],
+        "title": "Page"
       },
       "Page_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
@@ -4188,6 +4246,72 @@
         "title": "AdaptationBatch"
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "type": "string",
+            "title": "Fulltext"
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "type": "boolean",
+            "title": "Exerciseclasshassettings"
+          },
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise"
+      },
+      "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
         "properties": {
           "pageNumber": {
             "anyOf": [

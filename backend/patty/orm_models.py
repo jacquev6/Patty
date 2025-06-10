@@ -66,7 +66,7 @@ class BaseExercise(OrmBase):
     kind: orm.Mapped[str]
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str | None]
 
     textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
     textbook: orm.Mapped[Textbook | None] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
@@ -200,6 +200,10 @@ class ExtractionBatch(OrmBase):
     range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
     range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
 
+    page_extractions: orm.Mapped[list[PageExtraction]] = orm.relationship(
+        back_populates="extraction_batch", order_by=lambda: [PageExtraction.page_number]
+    )
+
 
 class PageExtraction(OrmBase):
     __tablename__ = "page_extractions"
@@ -211,11 +215,15 @@ class PageExtraction(OrmBase):
 
     extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
     extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
-        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id]
+        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id], back_populates="page_extractions"
     )
 
     page_number: orm.Mapped[int]
     status: orm.Mapped[typing.Literal["pending", "success", "failure"]]
+
+    exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
+        back_populates="created_by_page_extraction", order_by=[BaseExercise.page_number, BaseExercise.exercise_number]
+    )
 
 
 class AdaptableExercise(BaseExercise):
@@ -227,7 +235,7 @@ class AdaptableExercise(BaseExercise):
 
     created_by_page_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
     created_by_page_extraction: orm.Mapped[PageExtraction | None] = orm.relationship(
-        foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id]
+        foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id], back_populates="exercises"
     )
 
     full_text: orm.Mapped[str]

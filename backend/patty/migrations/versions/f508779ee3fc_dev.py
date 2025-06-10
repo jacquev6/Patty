@@ -83,6 +83,7 @@ def upgrade() -> None:
         ["created_by_page_extraction_id"],
         ["id"],
     )
+    op.alter_column("exercises", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
     # ### end Alembic commands ###
     op.drop_table("old_adaptation_external_exercises")
     op.drop_table("old_adaptation_adaptations")

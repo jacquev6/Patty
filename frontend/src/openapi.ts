@@ -917,6 +917,16 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string
+      /** Runclassification */
+      runClassification: boolean
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | null
+      /** Pages */
+      pages: components['schemas']['Page'][]
     }
     /** GetExtractionBatchesResponse */
     GetExtractionBatchesResponse: {
@@ -1156,6 +1166,15 @@ export interface components {
        * @enum {string}
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+    }
+    /** Page */
+    Page: {
+      /** Pagenumber */
+      pageNumber: number
+      /** Done */
+      done: boolean
+      /** Exercises */
+      exercises: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page__Exercise'][]
     }
     'Page_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Lines */
@@ -1511,6 +1530,20 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__GetClassificationBatchResponse__Exercise: {
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Exerciseclass */
+      exerciseClass: string | null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
+      adaptation: components['schemas']['ApiAdaptation'] | null
+    }
+    /** Exercise */
+    patty__api_router__GetExtractionBatchResponse__Page__Exercise: {
       /** Pagenumber */
       pageNumber: number | null
       /** Exercisenumber */
