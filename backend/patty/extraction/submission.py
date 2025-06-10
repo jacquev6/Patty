@@ -1,35 +1,25 @@
 import datetime
 import io
-import json
-import os
 import subprocess
 import traceback
 import typing
-import unittest
 
 import boto3
 import botocore
 import cachetools
-import google.genai.types
 import PIL.Image
-import pydantic
 import sqlalchemy as sql
 import urllib.parse
 
-from . import database_utils
-from . import extracted
-from . import settings
-from .fixtures import make_default_extraction_prompt
-from .test_utils import costs_money
-from .orm_models import PageExtraction, AdaptableExercise, ExtractionStrategy
+from .. import database_utils
+from .. import settings
+from ..orm_models import PageExtraction, AdaptableExercise
 
 
 def log(message: str) -> None:
     # @todo Use actual logging
     print(datetime.datetime.now(), message, flush=True)
 
-
-client = google.genai.Client(api_key=os.environ["GEMINIAI_KEY"])
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
@@ -65,7 +55,9 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
     try:
         log(f"Submitting page extraction {extraction.id}")
         # @todo Use Gemini with an asynchronous client
-        extracted_exercises = extract(image, extraction.extraction_batch.strategy)
+        extracted_exercises = extraction.extraction_batch.strategy.model.extract(
+            extraction.extraction_batch.strategy.prompt, image
+        )
     except Exception:
         log(f"UNEXPECTED ERROR on page extraction {extraction.id}")
         traceback.print_exc()
@@ -107,20 +99,6 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         extraction.status = "success"
 
 
-def extract(image: PIL.Image.Image, strategy: ExtractionStrategy) -> list[extracted.Exercise]:
-    contents: list[google.genai.types.ContentUnion] = [strategy.prompt, image]
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=contents).text
-    assert response is not None
-
-    cleaned_response = response.strip()
-    if cleaned_response.startswith("```json"):
-        cleaned_response = cleaned_response.replace("```json", "").strip()
-    if cleaned_response.endswith("```"):
-        cleaned_response = cleaned_response[:-3].strip()
-
-    return pydantic.RootModel[list[extracted.Exercise]](json.loads(cleaned_response)).root
-
-
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:
     # Not using PyMuPDF or pdf2image:
     #  - MuPDF allegedly has lesser rendering fidelity than Poppler's pdftoppm
@@ -129,61 +107,3 @@ def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:
     page = str(page_number)
     process = subprocess.run(["pdftoppm", "-f", page, "-l", page], input=pdf_data, capture_output=True, check=True)
     return PIL.Image.open(io.BytesIO(process.stdout))
-
-
-class ExtractionTestCase(unittest.TestCase):
-    def setUp(self) -> None:
-        with open("../frontend/e2e-tests/inputs/test.pdf", "rb") as f:
-            self.pdf_data = f.read()
-
-    def test_pdf_page_as_image(self) -> None:
-        self.assertIsInstance(pdf_page_as_image(self.pdf_data, 1), PIL.Image.Image)
-
-    @costs_money
-    def test_extract(self) -> None:
-        exercises = extract(
-            pdf_page_as_image(self.pdf_data, 2), ExtractionStrategy(prompt=make_default_extraction_prompt())
-        )
-        actual_ids = tuple(exercise.id for exercise in exercises)
-        possible_expected_ids = [
-            (
-                "p7_ex5",
-                "p7_ex6",
-                "p7_ex7",
-                "p7_ex8",
-                "p7_exDefiLangue",
-                "p7_ex9",
-                "p7_ex10",
-                "p7_ex11",
-                "p7_ex12",
-                "p7_ex13",
-                "p7_ex14",
-            ),
-            (
-                "p7_ex5",
-                "p7_ex6",
-                "p7_ex7",
-                "p7_ex8",
-                "p7_exDefiLangue",
-                "p7_ex9",
-                "p7_ex10",
-                "p7_ex11",
-                "p7_ex12",
-                "p7_exJecris13",
-                "p7_ex14",
-            ),
-            (
-                "p7_ex5",
-                "p7_ex6",
-                "p7_ex7",
-                "p7_ex8",
-                "p7_exDefiLangue",
-                "p7_ex9",
-                "p7_ex10",
-                "p7_ex11",
-                "p7_ex12",
-                "p7_exJecris",
-                "p7_ex14",
-            ),
-        ]
-        self.assertIn(actual_ids, possible_expected_ids)

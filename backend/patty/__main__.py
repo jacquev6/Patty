@@ -154,7 +154,7 @@ def run_submission_daemon(
     from . import database_utils
     from .adaptation.submission import submit_adaptations
     from .classification import submit_classifications
-    from .extraction import submit_extractions
+    from .extraction.submission import submit_extractions
 
     def log(message: str) -> None:
         # @todo Use actual logging

@@ -17,6 +17,7 @@ from . import settings
 from .adaptation import adaptation
 from .adaptation import llm as adaptation_llm
 from .adaptation import strategy as adaptation_strategy
+from .extraction import llm as extraction_llm
 
 
 created_at = datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc)
@@ -1023,7 +1024,17 @@ class FixturesCreator:
             db.ExtractionStrategy,
             created_by_username="Patty",
             created_at=created_at,
+            model=extraction_llm.GeminiModel(name="gemini-2.0-flash"),
             prompt=make_default_extraction_prompt(),
+        )
+
+    def create_dummy_extraction_strategy(self) -> None:
+        self.create(
+            db.ExtractionStrategy,
+            created_by_username="Patty",
+            created_at=created_at,
+            model=extraction_llm.DummyModel(name="dummy-1"),
+            prompt="Blah blah blah.",
         )
 
 
@@ -1040,6 +1051,7 @@ def load(session: database_utils.Session, fixtures: Iterable[str]) -> None:
             creator.create_dummy_adaptation,
             creator.create_dummy_branch,
             creator.create_dummy_coche_exercise_classes,
+            creator.create_dummy_extraction_strategy,
             creator.create_dummy_textbook_with_text_exercise_numbers,
             creator.create_dummy_textbook,
             creator.create_mixed_dummy_adaptation_batch,

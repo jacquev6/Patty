@@ -16,6 +16,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("created_by_username", sa.String(), nullable=False),
+        sa.Column("model", sa.JSON(), nullable=False),
         sa.Column("prompt", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_extraction_strategies")),
     )

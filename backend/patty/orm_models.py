@@ -14,6 +14,7 @@ from .adaptation.strategy import ConcreteLlmResponseSpecification
 from .adapted import Exercise as AdaptedExercise
 from .any_json import JsonDict, JsonList
 from .database_utils import OrmBase as OrmBaseBase
+from .extraction import llm as extraction_llm
 
 
 class OrmBase(OrmBaseBase):
@@ -169,6 +170,16 @@ class ExtractionStrategy(OrmBase):
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
     created_by_username: orm.Mapped[str]
+
+    _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
+
+    @property
+    def model(self) -> extraction_llm.ConcreteModel:
+        return pydantic.RootModel[extraction_llm.ConcreteModel](self._model).root  # type: ignore[arg-type]
+
+    @model.setter
+    def model(self, value: extraction_llm.ConcreteModel) -> None:
+        self._model = value.model_dump()
 
     prompt: orm.Mapped[str]
 
