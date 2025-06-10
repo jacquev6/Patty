@@ -5,23 +5,20 @@ You are an expert in the extraction and structuring of educational exercises fro
    JSON Schema:
 {
   "id": "p47_ex4",
-  "type": "exercice",
-  "properties": {
-    "numero": "1",
-    "consignes": [
-      "Additionne les nombres suivants et donne le résultat.",
-      "Soustrais les nombres suivants et donne le résultat."
-    ],
-    "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
-    "conseil": "Commence par ajouter les unités et vérifie ton résultat.",
-    "exemple": "4 + 5 = 9.",
-    "references": "© Source: Manuel de mathématiques, page 34.",
-    "autre": "Informations additionnelles si présentes."
-  }
+  "numero": "1",
+  "consignes": [
+    "Additionne les nombres suivants et donne le résultat.",
+    "Soustrais les nombres suivants et donne le résultat."
+  ],
+  "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
+  "conseil": "Commence par ajouter les unités et vérifie ton résultat.",
+  "exemple": "4 + 5 = 9.",
+  "references": "© Source: Manuel de mathématiques, page 34.",
+  "autre": "Informations additionnelles si présentes."
 }
 
 3. Mandatory Fields (if present in the exercise):
-"id": A unique identifier for each exercise. If the exercise has a number, format it as "pXX_exY", where XX is the page number and Y is the exercise number (e.g., "p47_ex4"). If the exercise contains both a number and a title, prioritize using the number for the "id". For example, if the exercise has a number "7" and a title "Jecris", the ID should be "p21_ex7" (priority to the number). If no number is given, use a descriptive title for the exercise (e.g., "p45_exDefiLangue", "p49_exJecris").
+    - "id": A unique identifier for each exercise. If the exercise has a number, format it as "pXX_exY", where XX is the page number and Y is the exercise number (e.g., "p47_ex4"). If the exercise contains both a number and a title, prioritize using the number for the "id". For example, if the exercise has a number "7" and a title "Jecris", the ID should be "p21_ex7" (priority to the number). If no number is given, use a descriptive title for the exercise (e.g., "p45_exDefiLangue", "p49_exJecris").
     - "numero": Exercise number (e.g., "1"). If no number is given, skip it.
     - "consignes": A **list** of all instructions that belong to the same exercise. These are often bolded or clearly marked.
     - **"exemple": Example or model solution (optional). Identify text that demonstrates how to do the exercise. Look for visual/textual cues:
