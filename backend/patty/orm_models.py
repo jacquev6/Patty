@@ -372,5 +372,8 @@ all_models: list[type[OrmBase]] = [
     ClassificationBatch,
     ExerciseClass,
     ExternalExercise,
+    ExtractionBatch,
+    PdfFile,
+    PdfFileRange,
     Textbook,
 ]
