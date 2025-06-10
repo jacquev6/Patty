@@ -27,14 +27,14 @@ services:
       - backend/secrets.env
     command: [
       "rm", "-f",
-      "backend/generated/default-system-prompt.md",
-      "backend/generated/openapi.json",
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph.png",
-      "frontend/src/openapi.ts",
+      "backend/generated/default-adaptation-prompt.md",
+      "backend/generated/openapi.json",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
+      "frontend/src/openapi.ts",
     ]
 
   adaptation-export-template-generator:
@@ -190,7 +190,7 @@ services:
     depends_on:
       migrator:
         condition: service_completed_successfully
-  default-system-prompt-generator:
+  default-adaptation-prompt-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -201,7 +201,7 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-system-prompt.md", "python -m patty default-system-prompt"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-adaptation-prompt.md", "python -m patty default-adaptation-prompt"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully

@@ -116,10 +116,10 @@ def adapted_exercise_schema() -> None:
 
 
 @main.command()
-def default_system_prompt() -> None:
+def default_adaptation_prompt() -> None:
     from . import fixtures
 
-    print(fixtures.make_default_system_prompt())
+    print(fixtures.make_default_adaptation_prompt())
 
 
 @main.command()

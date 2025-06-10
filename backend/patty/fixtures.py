@@ -21,7 +21,7 @@ from .adaptation import strategy as adaptation_strategy
 created_at = datetime.datetime(2000, 1, 1, 0, 0, 0, 0, datetime.timezone.utc)
 
 
-def make_default_system_prompt() -> str:
+def make_default_adaptation_prompt() -> str:
     # Be very careful to KEEP THESE TWO VERSIONS of the exercise IN SYNC.
 
     text_exercise = textwrap.dedent(
@@ -191,7 +191,7 @@ class FixturesCreator:
             db.AdaptationStrategySettings,
             created_by_username="Patty",
             created_at=created_at,
-            system_prompt=make_default_system_prompt(),
+            system_prompt=make_default_adaptation_prompt(),
             response_specification=adaptation_strategy.JsonSchemaLlmResponseSpecification(
                 format="json",
                 formalism="json-schema",
