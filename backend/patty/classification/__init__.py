@@ -24,7 +24,7 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-def submit_classifications(session: database_utils.Session, parallelism: int) -> None:
+def submit_classifications(session: database_utils.Session, parallelism: int) -> bool:
     exercise_classes_by_name = {
         exercise_class.name: exercise_class
         for exercise_class in session.execute(sql.select(db.ExerciseClass)).scalars().all()
@@ -42,7 +42,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
         .first()
     )
     if batch is None:
-        log("Found no classification batch with not-yet-classified exercises")
+        return False
     else:
         exercises = list(
             session.execute(
@@ -106,6 +106,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                     manual_edit=None,
                 )
                 session.add(adaptation)
+        return True
 
 
 device = torch.device("cpu")

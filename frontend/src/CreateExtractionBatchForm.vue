@@ -11,8 +11,9 @@ import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import assert from './assert'
 import PdfPageRenderer from './PdfPageRenderer.vue'
 import PdfNavigationControls from './PdfNavigationControls.vue'
+import LlmModelSelector from './LlmModelSelector.vue'
 
-defineProps<{
+const props = defineProps<{
   availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
@@ -21,6 +22,13 @@ const router = useRouter()
 const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
+
+const runClassificationAsString = ref('yes')
+const runClassification = computed(() => runClassificationAsString.value === 'yes')
+
+const runAdaptationAsString = ref('yes')
+const modelForAdaptation = ref(props.availableAdaptationLlmModels[0])
+const runAdaptation = computed(() => runClassification.value && runAdaptationAsString.value === 'yes')
 
 const uploading = ref(false)
 const uploadedFileSha256 = ref<string | null>(null)
@@ -89,6 +97,8 @@ async function submit() {
       pdfFileSha256: uploadedFileSha256.value,
       firstPage: firstPageNumber.value,
       pagesCount: lastPageNumber.value - firstPageNumber.value + 1,
+      runClassification: runClassification.value,
+      modelForAdaptation: runAdaptation.value ? modelForAdaptation.value : null,
     },
   })
   if (response.data !== undefined) {
@@ -116,6 +126,34 @@ const lastPage = computedAsync(async () => {
 <template>
   <h1>Settings</h1>
   <p>Created by: <IdentifiedUser /></p>
+  <p>
+    Run classification after extraction:
+    <select data-cy="run-classification" v-model="runClassificationAsString">
+      <option>yes</option>
+      <option>no</option></select
+    ><template v-if="runClassification">
+      using <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</template
+    >
+  </p>
+  <p v-if="runClassification">
+    Run adaptations after classification:
+    <select data-cy="run-adaptation" v-model="runAdaptationAsString">
+      <option>yes</option>
+      <option>no</option>
+    </select>
+    <template v-if="runAdaptation">
+      using
+      <LlmModelSelector
+        :availableLlmModels="availableAdaptationLlmModels"
+        :disabled="false"
+        v-model="modelForAdaptation"
+      >
+        <template #provider>provider</template>
+        <template #model> and model</template>
+      </LlmModelSelector>
+      with the latest settings for each known exercise class.</template
+    >
+  </p>
   <p>
     PDF file: <input type="file" @change="openFile" accept=".pdf" :disabled="uploading" />
     <template v-if="uploading"> (uploading...)</template>

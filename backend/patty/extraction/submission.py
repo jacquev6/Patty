@@ -13,7 +13,7 @@ import urllib.parse
 
 from .. import database_utils
 from .. import settings
-from ..orm_models import PageExtraction, AdaptableExercise
+from ..orm_models import PageExtraction, AdaptableExercise, ClassificationBatch
 
 
 def log(message: str) -> None:
@@ -32,9 +32,10 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
         .scalars()
         .all()
     )
-    log(
-        f"Found {len(extractions)} pending page extractions: {' '.join(str(extraction.id) for extraction in extractions)}"
-    )
+    if len(extractions) > 0:
+        log(
+            f"Found {len(extractions)} pending page extractions: {' '.join(str(extraction.id) for extraction in extractions)}"
+        )
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
@@ -64,6 +65,19 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         extraction.status = "failure"
     else:
         log(f"Success on page extraction {extraction.id}")
+
+        created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+
+        if extraction.extraction_batch.run_classification:
+            classification_batch = ClassificationBatch(
+                created_at=created_at,
+                created_by_username="Extraction",
+                model_for_adaptation=extraction.extraction_batch.model_for_adaptation,
+            )
+            session.add(classification_batch)
+        else:
+            classification_batch = None
+
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
                 filter(None, extracted_exercise.consignes + [extracted_exercise.conseil, extracted_exercise.exemple])
@@ -80,8 +94,8 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
                 )
             )
             exercise = AdaptableExercise(
-                created_at=datetime.datetime.now(),
-                created_by_username=None,
+                created_at=created_at,
+                created_by_username="Extraction",
                 textbook=None,
                 removed_from_textbook=False,
                 page_number=extraction.page_number,
@@ -91,7 +105,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
                 instruction_hint_example_text=instruction_hint_example_text,
                 statement_text=extracted_exercise.enonce,
                 classified_at=None,
-                classified_by_classification_batch=None,
+                classified_by_classification_batch=classification_batch,
                 classified_by_username=None,
                 exercise_class=None,
             )

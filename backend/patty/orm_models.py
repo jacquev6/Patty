@@ -66,7 +66,7 @@ class BaseExercise(OrmBase):
     kind: orm.Mapped[str]
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]
+    created_by_username: orm.Mapped[str]
 
     textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
     textbook: orm.Mapped[Textbook | None] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
@@ -203,6 +203,24 @@ class ExtractionBatch(OrmBase):
     page_extractions: orm.Mapped[list[PageExtraction]] = orm.relationship(
         back_populates="extraction_batch", order_by=lambda: [PageExtraction.page_number]
     )
+
+    run_classification: orm.Mapped[bool]
+
+    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
+        if self._model_for_adaptation is None:
+            return None
+        else:
+            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
+        if value is None:
+            self._model_for_adaptation = sql.null()
+        else:
+            self._model_for_adaptation = value.model_dump()
 
 
 class PageExtraction(OrmBase):

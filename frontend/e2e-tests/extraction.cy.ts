@@ -3,7 +3,7 @@ import { ignoreResizeObserverLoopError, visit } from './utils'
 describe('The extraction batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-extraction-strategy')
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-extraction-strategy,dummy-coche-exercise-classes')
     ignoreResizeObserverLoopError()
     visit('/new-extraction-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -14,8 +14,9 @@ describe('The extraction batch creation page', () => {
   //   screenshot('extraction-batch-creation-page')
   // })
 
-  it('creates an extraction batch', () => {
+  it('creates an extraction batch without classification or adaptation', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="run-classification"]').select('no')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
     cy.get('p:contains("PDF file:")').should('contain.text', '(uploading...)')
     cy.get('button:contains("Submit")').should('be.disabled')
@@ -27,7 +28,9 @@ describe('The extraction batch creation page', () => {
     cy.get('h2 span.inProgress:contains("in progress")').should('exist')
     cy.get('h2 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('h2:contains("Page")').should('have.length', 2)
-    cy.get('h3:contains("Exercise")').should('have.length.at.least', 6)
+    cy.get('h3:contains("Exercise")').should('have.length', 4)
+    cy.get('p:contains("Run classification after extraction: no")').should('exist')
+    cy.get('p:contains("Run adaptations")').should('not.exist')
     cy.get('p:contains("Created by: Alice")').should('exist')
     cy.get('a:contains("Download standalone HTML")')
       .should('have.attr', 'href')
@@ -38,5 +41,22 @@ describe('The extraction batch creation page', () => {
     cy.visit('/')
     cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
     cy.get('a:contains("Batch E1")').should('have.attr', 'href', '/extraction-batch-1')
+  })
+
+  it('creates an extraction batch with classification and adaptation', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('button:contains("Submit")').should('be.enabled').click()
+    cy.location('pathname').should('eq', '/extraction-batch-1')
+    cy.get('h2 span.inProgress:contains("in progress")').should('have.length', 2)
+    cy.get('h2 span.inProgress:contains("in progress")').should('have.length', 1)
+    cy.get('h2 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 4)
+    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 2)
+    cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get('div.busy').should('have.length', 4)
+    cy.get('div.busy').should('have.length', 3)
+    cy.get('div.busy').should('have.length', 2)
+    cy.get('div.busy').should('have.length', 1)
+    cy.get('div.busy').should('not.exist')
   })
 })

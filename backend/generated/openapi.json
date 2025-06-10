@@ -3558,6 +3558,27 @@
           "pagesCount": {
             "type": "integer",
             "title": "Pagescount"
+          },
+          "runClassification": {
+            "type": "boolean",
+            "title": "Runclassification"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
           }
         },
         "additionalProperties": false,
@@ -3566,7 +3587,9 @@
           "creator",
           "pdfFileSha256",
           "firstPage",
-          "pagesCount"
+          "pagesCount",
+          "runClassification",
+          "modelForAdaptation"
         ],
         "title": "PostExtractionBatchRequest"
       },

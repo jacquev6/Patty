@@ -167,12 +167,14 @@ def run_submission_daemon(
         log("Starting")
         last_time = time.monotonic()
         while True:
-            log("Waking up...")
             try:
                 with database_utils.Session(engine) as session:
-                    await asyncio.gather(*submit_extractions(session, extraction_parallelism))
-                    submit_classifications(session, classification_parallelism)
-                    await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
+                    # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
+                    go_on = len(await asyncio.gather(*submit_extractions(session, extraction_parallelism))) == 0
+                    if go_on:
+                        go_on = not submit_classifications(session, classification_parallelism)
+                        if go_on:
+                            await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
                     session.commit()
                 if time.monotonic() >= last_time + 60:
                     log("Calling pulse monitoring URL")

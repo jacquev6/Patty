@@ -464,6 +464,8 @@ class PostExtractionBatchRequest(ApiModel):
     pdf_file_sha256: str
     first_page: int
     pages_count: int
+    run_classification: bool
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
 
 
 class PostExtractionBatchResponse(ApiModel):
@@ -486,7 +488,12 @@ def create_extraction_batch(
     strategy = session.get(db.ExtractionStrategy, 1)  # @todo Get the strategy from the request
     assert strategy is not None
     extraction_batch = db.ExtractionBatch(
-        created_by_username=req.creator, created_at=now, strategy=strategy, range=pdf_file_range
+        created_by_username=req.creator,
+        created_at=now,
+        strategy=strategy,
+        range=pdf_file_range,
+        run_classification=req.run_classification,
+        model_for_adaptation=req.model_for_adaptation,
     )
     session.add(extraction_batch)
     for page_number in range(req.first_page, req.first_page + req.pages_count):
@@ -554,8 +561,8 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
     return GetExtractionBatchResponse(
         id=str(extraction_batch.id),
         created_by=extraction_batch.created_by_username,
-        run_classification=False,
-        model_for_adaptation=None,
+        run_classification=extraction_batch.run_classification,
+        model_for_adaptation=extraction_batch.model_for_adaptation,
         pages=pages,
     )
 

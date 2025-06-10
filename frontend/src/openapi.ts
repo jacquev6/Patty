@@ -1254,6 +1254,14 @@ export interface components {
       firstPage: number
       /** Pagescount */
       pagesCount: number
+      /** Runclassification */
+      runClassification: boolean
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | null
     }
     /** PostExtractionBatchResponse */
     PostExtractionBatchResponse: {

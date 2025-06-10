@@ -50,6 +50,8 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=False),
         sa.Column("range_id", sa.Integer(), nullable=False),
+        sa.Column("run_classification", sa.Boolean(), nullable=False),
+        sa.Column("model_for_adaptation", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["range_id"], ["pdf_file_ranges.id"], name=op.f("fk_extraction_batches_range_id_pdf_file_ranges")
         ),
@@ -83,7 +85,6 @@ def upgrade() -> None:
         ["created_by_page_extraction_id"],
         ["id"],
     )
-    op.alter_column("exercises", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
     # ### end Alembic commands ###
     op.drop_table("old_adaptation_external_exercises")
     op.drop_table("old_adaptation_adaptations")
