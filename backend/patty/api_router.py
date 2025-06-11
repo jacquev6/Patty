@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import json
 import os
-import typing
 import urllib.parse
 
 import boto3
@@ -1022,9 +1021,10 @@ def export_extraction_batch(
         filter(
             None,
             (
-                make_adapted_exercise_data(adaptation)
-                # @todo Implement
-                for adaptation in (get_by_id(session, db.ExtractionBatch, id), typing.cast(list[db.Adaptation], []))[1]
+                make_adapted_exercise_data(exercise.adaptation)
+                for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
+                for exercise in page.exercises
+                if exercise.adaptation is not None
             ),
         )
     )

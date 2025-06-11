@@ -32,11 +32,6 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("Run classification after extraction: no")').should('exist')
     cy.get('p:contains("Run adaptations")').should('not.exist')
     cy.get('p:contains("Created by: Alice")').should('exist')
-    cy.get('a:contains("Download standalone HTML")')
-      .should('have.attr', 'href')
-      .then((href) => {
-        expect(href).to.include('/api/export/extraction-batch/1.html?token=')
-      })
 
     cy.visit('/')
     cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
@@ -58,5 +53,13 @@ describe('The extraction batch creation page', () => {
     cy.get('div.busy').should('have.length', 2)
     cy.get('div.busy').should('have.length', 1)
     cy.get('div.busy').should('not.exist')
+
+    cy.get('a:contains("Download standalone HTML")')
+      .should('have.attr', 'href')
+      .then((href) => {
+        expect(href).to.include('/api/export/extraction-batch/1.html?token=')
+        cy.visit(`${href}&download=false`)
+      })
+    cy.get('a:contains("Exercise")').should('have.length', 4)
   })
 })
