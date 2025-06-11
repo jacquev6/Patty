@@ -71,9 +71,11 @@ const authenticationTokenStore = useAuthenticationTokenStore()
           >
             <h3>
               Exercise {{ exercise.exerciseNumber
-              }}<span v-if="exercise.exerciseClass === null" class="inProgress">
-                (in progress, will refresh when done) </span
-              ><template v-else>: {{ exercise.exerciseClass }} </template>
+              }}<template v-if="extractionBatch.runClassification"
+                ><span v-if="exercise.exerciseClass === null" class="inProgress">
+                  (in progress, will refresh when done) </span
+                ><template v-else>: {{ exercise.exerciseClass }} </template></template
+              >
             </h3>
           </EditClassificationBatchFormExercisePreview>
         </template>
