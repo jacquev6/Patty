@@ -10,16 +10,18 @@ import boto3
 import botocore.client
 import fastapi
 import fastapi.testclient
+import requests
 import sqlalchemy as sql
 
 from . import authentication
 from . import database_utils
-from . import llm
+from . import extracted
+from . import orm_models as db
 from . import settings
+from .adaptation import llm as adaptation_llm
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
-from . import new_orm_models as db
 from .adaptation.adaptation import (
     Adjustment,
     AssistantInvalidJsonError,
@@ -29,12 +31,36 @@ from .adaptation.adaptation import (
 )
 from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 from .adaptation.submission import LlmMessage
+from .extraction import llm as extraction_llm
+from .extraction import assistant_responses as extraction_responses
 
 __all__ = ["router"]
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
+
+
+@api_router.get("/available-adaptation-llm-models")
+def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
+    if settings.ENVIRONMENT == "dev":
+        return [
+            adaptation_llm.DummyModel(name="dummy-1"),
+            adaptation_llm.DummyModel(name="dummy-2"),
+            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+        ]
+    else:
+        return [
+            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(name="dummy-1"),
+            adaptation_llm.DummyModel(name="dummy-2"),
+        ]
 
 
 class ApiStrategySettings(ApiModel):
@@ -44,7 +70,7 @@ class ApiStrategySettings(ApiModel):
 
 
 class ApiStrategy(ApiModel):
-    model: llm.ConcreteModel
+    model: adaptation_llm.ConcreteModel
     settings: ApiStrategySettings
 
 
@@ -56,7 +82,7 @@ class ApiInput(ApiModel):
 
 class ApiAdaptation(ApiModel):
     id: str
-    created_by: str
+    created_by: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
     strategy: ApiStrategy
@@ -69,7 +95,7 @@ class ApiAdaptation(ApiModel):
 
 
 @api_router.post("/adaptation-llm-response-schema")
-def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
+def make_adaptation_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
 
 
@@ -146,7 +172,11 @@ async def post_adaptation_batch(
             assert branch_name == req.strategy.settings.name
             base_settings = None
             exercise_class = db.ExerciseClass(
-                name=branch_name, created_by_username=req.creator, created_at=now, latest_strategy_settings=None
+                name=branch_name,
+                created_by_username=req.creator,
+                created_by_classification_batch=None,
+                created_at=now,
+                latest_strategy_settings=None,
             )
             session.add(exercise_class)
         else:
@@ -177,7 +207,11 @@ async def post_adaptation_batch(
         session.flush()
         exercise_class.latest_strategy_settings = settings
     strategy = db.AdaptationStrategy(
-        created_by_username=req.creator, created_at=now, model=req.strategy.model, settings=settings
+        created_by_username=req.creator,
+        created_by_classification_batch=None,
+        created_at=now,
+        model=req.strategy.model,
+        settings=settings,
     )
     session.add(strategy)
 
@@ -189,6 +223,7 @@ async def post_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -246,7 +281,7 @@ class GetAdaptationBatchesResponse(ApiModel):
         id: str
         created_by: str
         created_at: datetime.datetime
-        model: llm.ConcreteModel
+        model: adaptation_llm.ConcreteModel
         strategy_settings_name: str | None
 
     adaptation_batches: list[AdaptationBatch]
@@ -284,7 +319,7 @@ class ClassificationInput(ApiModel):
 class PostClassificationBatchRequest(ApiModel):
     creator: str
     inputs: list[ClassificationInput]
-    model_for_adaptation: llm.ConcreteModel | None
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
 
 
 class PostClassificationBatchResponse(ApiModel):
@@ -297,13 +332,17 @@ def create_classification_batch(
 ) -> PostClassificationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
     classification_batch = db.ClassificationBatch(
-        created_by_username=req.creator, created_at=now, model_for_adaptation=req.model_for_adaptation
+        created_by_username=req.creator,
+        created_by_page_extraction=None,
+        created_at=now,
+        model_for_adaptation=req.model_for_adaptation,
     )
     session.add(classification_batch)
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -326,8 +365,8 @@ def create_classification_batch(
 
 class GetClassificationBatchResponse(ApiModel):
     id: str
-    created_by: str
-    model_for_adaptation: llm.ConcreteModel | None
+    created_by: str | None
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
 
     class Exercise(ApiModel):
         page_number: int | None
@@ -368,7 +407,7 @@ async def get_classification_batch(
 class GetClassificationBatchesResponse(ApiModel):
     class ClassificationBatch(ApiModel):
         id: str
-        created_by: str
+        created_by: str | None
         created_at: datetime.datetime
 
     classification_batches: list[ClassificationBatch]
@@ -376,7 +415,11 @@ class GetClassificationBatchesResponse(ApiModel):
 
 @api_router.get("/classification-batches")
 async def get_classification_batches(session: database_utils.SessionDependable) -> GetClassificationBatchesResponse:
-    classification_batches = session.query(db.ClassificationBatch).order_by(-db.ClassificationBatch.id).all()
+    request = (
+        sql.select(db.ClassificationBatch)
+        .filter(db.ClassificationBatch.created_by_username != sql.null())
+        .order_by(-db.ClassificationBatch.id)
+    )
     return GetClassificationBatchesResponse(
         classification_batches=[
             GetClassificationBatchesResponse.ClassificationBatch(
@@ -384,7 +427,230 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
                 created_by=classification_batch.created_by_username,
                 created_at=classification_batch.created_at,
             )
-            for classification_batch in classification_batches
+            for classification_batch in session.execute(request).scalars().all()
+        ]
+    )
+
+
+class CreatePdfFileRequest(ApiModel):
+    creator: str
+    file_name: str
+    bytes_count: int
+    pages_count: int
+    sha256: str
+
+
+class CreatePdfFileResponse(ApiModel):
+    upload_url: str | None
+
+
+@api_router.post("/pdf-files")
+def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDependable) -> CreatePdfFileResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    pdf_file = session.get(db.PdfFile, req.sha256)
+    if pdf_file is None:
+        pdf_file = db.PdfFile(
+            sha256=req.sha256,
+            created_by_username=req.creator,
+            created_at=now,
+            bytes_count=req.bytes_count,
+            pages_count=req.pages_count,
+            known_file_names=[],
+        )
+        session.add(pdf_file)
+
+    if req.file_name not in pdf_file.known_file_names:
+        pdf_file.known_file_names = pdf_file.known_file_names + [req.file_name]
+
+    target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{pdf_file.sha256}")
+    try:
+        s3.head_object(Bucket=target.netloc, Key=target.path[1:])
+    except botocore.exceptions.ClientError as error:
+        if error.response["Error"]["Code"] == "404":
+            upload_url = s3.generate_presigned_url(
+                "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
+            )
+        else:
+            raise
+    else:
+        upload_url = None
+
+    return CreatePdfFileResponse(upload_url=upload_url)
+
+
+@api_router.get("/extraction-llm-response-schema")
+def get_extraction_llm_response_schema() -> JsonDict:
+    return extracted.ExercisesList.model_json_schema()
+
+
+@api_router.get("/available-extraction-llm-models")
+def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
+    if settings.ENVIRONMENT == "dev":
+        return [
+            extraction_llm.DummyModel(name="dummy-1"),
+            extraction_llm.DummyModel(name="dummy-2"),
+            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+        ]
+    else:
+        return [
+            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(name="dummy-1"),
+            extraction_llm.DummyModel(name="dummy-2"),
+        ]
+
+
+class ApiExtractionStrategy(ApiModel):
+    id: str
+    model: extraction_llm.ConcreteModel
+    prompt: str
+
+
+@api_router.get("/latest-extraction-strategy")
+def get_latest_extraction_strategy(session: database_utils.SessionDependable) -> ApiExtractionStrategy:
+    strategy = session.execute(sql.select(db.ExtractionStrategy).order_by(-db.ExtractionStrategy.id)).scalars().first()
+    assert strategy is not None
+    return ApiExtractionStrategy(id=str(strategy.id), model=strategy.model, prompt=strategy.prompt)
+
+
+class PostExtractionBatchRequest(ApiModel):
+    creator: str
+    pdf_file_sha256: str
+    first_page: int
+    pages_count: int
+    strategy: ApiExtractionStrategy
+    run_classification: bool
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
+
+
+class PostExtractionBatchResponse(ApiModel):
+    id: str
+
+
+@api_router.post("/extraction-batches")
+def create_extraction_batch(
+    req: PostExtractionBatchRequest, session: database_utils.SessionDependable
+) -> PostExtractionBatchResponse:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    pdf_file_range = db.PdfFileRange(
+        created_by_username=req.creator,
+        created_at=now,
+        pdf_file_sha256=req.pdf_file_sha256,
+        pdf_file_first_page_number=req.first_page,
+        pages_count=req.pages_count,
+    )
+    session.add(pdf_file_range)
+    strategy = session.get(db.ExtractionStrategy, req.strategy.id)
+    if strategy is None or strategy.model != req.strategy.model or strategy.prompt != req.strategy.prompt:
+        strategy = db.ExtractionStrategy(
+            created_by_username=req.creator, created_at=now, model=req.strategy.model, prompt=req.strategy.prompt
+        )
+        session.add(strategy)
+    extraction_batch = db.ExtractionBatch(
+        created_by_username=req.creator,
+        created_at=now,
+        strategy=strategy,
+        range=pdf_file_range,
+        run_classification=req.run_classification,
+        model_for_adaptation=req.model_for_adaptation,
+    )
+    session.add(extraction_batch)
+    for page_number in range(req.first_page, req.first_page + req.pages_count):
+        page = db.PageExtraction(
+            created_by_username=req.creator,
+            created_at=now,
+            extraction_batch=extraction_batch,
+            page_number=page_number,
+            assistant_response=None,
+        )
+        session.add(page)
+
+    session.flush()
+
+    return PostExtractionBatchResponse(id=str(extraction_batch.id))
+
+
+class GetExtractionBatchResponse(ApiModel):
+    id: str
+    created_by: str
+    strategy: ApiExtractionStrategy
+    run_classification: bool
+    model_for_adaptation: adaptation_llm.ConcreteModel | None
+
+    class Page(ApiModel):
+        page_number: int
+        assistant_response: extraction_responses.AssistantResponse | None
+
+        class Exercise(ApiModel):
+            page_number: int | None
+            exercise_number: str | None
+            full_text: str
+            exercise_class: str | None
+            exercise_class_has_settings: bool
+            adaptation: ApiAdaptation | None
+
+        exercises: list[Exercise]
+
+    pages: list[Page]
+
+
+@api_router.get("/extraction-batches/{id}")
+async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
+    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    pages = [
+        GetExtractionBatchResponse.Page(
+            page_number=page_extraction.page_number,
+            assistant_response=page_extraction.assistant_response,
+            exercises=[
+                GetExtractionBatchResponse.Page.Exercise(
+                    page_number=exercise.page_number,
+                    exercise_number=exercise.exercise_number,
+                    full_text=exercise.full_text,
+                    exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                    exercise_class_has_settings=(
+                        exercise.exercise_class is not None
+                        and exercise.exercise_class.latest_strategy_settings is not None
+                    ),
+                    adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
+                )
+                for exercise in page_extraction.exercises
+            ],
+        )
+        for page_extraction in extraction_batch.page_extractions
+    ]
+    return GetExtractionBatchResponse(
+        id=str(extraction_batch.id),
+        created_by=extraction_batch.created_by_username,
+        strategy=ApiExtractionStrategy(
+            id=str(extraction_batch.strategy.id),
+            model=extraction_batch.strategy.model,
+            prompt=extraction_batch.strategy.prompt,
+        ),
+        run_classification=extraction_batch.run_classification,
+        model_for_adaptation=extraction_batch.model_for_adaptation,
+        pages=pages,
+    )
+
+
+class GetExtractionBatchesResponse(ApiModel):
+    class ExtractionBatch(ApiModel):
+        id: str
+        created_by: str
+        created_at: datetime.datetime
+
+    extraction_batches: list[ExtractionBatch]
+
+
+@api_router.get("/extraction-batches")
+async def get_extraction_batches(session: database_utils.SessionDependable) -> GetExtractionBatchesResponse:
+    extraction_batches = session.query(db.ExtractionBatch).order_by(-db.ExtractionBatch.id).all()
+    return GetExtractionBatchesResponse(
+        extraction_batches=[
+            GetExtractionBatchesResponse.ExtractionBatch(
+                id=str(extraction_batch.id),
+                created_by=extraction_batch.created_by_username,
+                created_at=extraction_batch.created_at,
+            )
+            for extraction_batch in extraction_batches
         ]
     )
 
@@ -478,7 +744,7 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
 
 class PostTextbookAdaptationBatchRequest(ApiModel):
     creator: str
-    model: llm.ConcreteModel
+    model: adaptation_llm.ConcreteModel
     branch_name: str
     inputs: list[ApiInput]
 
@@ -500,6 +766,7 @@ def post_textbook_adaptation_batch(
 
     strategy = db.AdaptationStrategy(
         created_by_username=req.creator,
+        created_by_classification_batch=None,
         created_at=now,
         model=req.model,
         settings=exercise_class.latest_strategy_settings,
@@ -518,6 +785,7 @@ def post_textbook_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=textbook,
             removed_from_textbook=False,
@@ -639,35 +907,35 @@ async def post_adaptation_adjustment(
 
     def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
         if isinstance(assistant_response, AssistantSuccess):
-            return llm.AssistantMessage[Exercise](content=assistant_response.exercise)
+            return adaptation_llm.AssistantMessage[Exercise](content=assistant_response.exercise)
         elif isinstance(assistant_response, AssistantInvalidJsonError):
-            return llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
+            return adaptation_llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
         elif isinstance(assistant_response, AssistantNotJsonError):
-            return llm.NotJsonAssistantMessage(content=assistant_response.text)
+            return adaptation_llm.NotJsonAssistantMessage(content=assistant_response.text)
         else:
             raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
-        llm.UserMessage(content=adaptation.exercise.full_text),
+        adaptation_llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
+        adaptation_llm.UserMessage(content=adaptation.exercise.full_text),
         make_assistant_message(adaptation.initial_assistant_response),
     ]
     for adjustment in adaptation.adjustments:
         assert isinstance(adjustment.assistant_response, AssistantSuccess)
-        messages.append(llm.UserMessage(content=adjustment.user_prompt))
+        messages.append(adaptation_llm.UserMessage(content=adjustment.user_prompt))
         make_assistant_message(adjustment.assistant_response)
-    messages.append(llm.UserMessage(content=req.adjustment))
+    messages.append(adaptation_llm.UserMessage(content=req.adjustment))
 
     try:
         response = await adaptation.strategy.model.complete(
             messages, adaptation.strategy.settings.response_specification.make_response_format()
         )
-    except llm.InvalidJsonLlmException as error:
+    except adaptation_llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
         assistant_response: AssistantResponse = AssistantInvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
-    except llm.NotJsonLlmException as error:
+    except adaptation_llm.NotJsonLlmException as error:
         raw_conversation = error.raw_conversation
         assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
     else:
@@ -810,6 +1078,31 @@ export_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.a
 
 
 export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "export", "templates", "batch", "index.html")
+
+
+@export_router.get("/extraction-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_extraction_batch(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    data = list(
+        filter(
+            None,
+            (
+                make_adapted_exercise_data(exercise.adaptation)
+                for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
+                for exercise in page.exercises
+                if exercise.adaptation is not None
+            ),
+        )
+    )
+
+    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-extraction-batch-{id}.html"'
+
+    return fastapi.responses.HTMLResponse(content=content, headers=headers)
 
 
 @export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -982,7 +1275,7 @@ router.include_router(api_router)
 router.include_router(export_router, prefix="/export")
 
 
-class AdaptationApiTestCase(database_utils.TestCaseWithDatabase):
+class ApiTestCase(database_utils.TestCaseWithDatabase):
     def setUp(self) -> None:
         super().setUp()
         self.app = fastapi.FastAPI(database_engine=self.engine)
@@ -990,5 +1283,37 @@ class AdaptationApiTestCase(database_utils.TestCaseWithDatabase):
         access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
         self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
 
-    def test_get_no_textbooks(self) -> None:
-        self.assertEqual(self.client.get("/textbooks").json(), {"textbooks": []})
+    def test_create_the_same_pdf_file_several_times(self) -> None:
+        sha = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+        try:
+            s3.delete_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
+        except botocore.exceptions.ClientError:
+            pass
+
+        r = self.client.post(
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIsNotNone(r.json()["uploadUrl"])
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf"])
+
+        r = self.client.post(
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "bar.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        upload_url = r.json()["uploadUrl"]
+        self.assertIsNotNone(upload_url)
+        requests.put(upload_url, data=b"")
+        s3.head_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
+
+        r = self.client.post(
+            "/pdf-files",
+            json={"creator": "UnitTest", "fileName": "foo.pdf", "bytesCount": 0, "pagesCount": 0, "sha256": sha},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIsNone(r.json()["uploadUrl"])
+        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])

@@ -47,10 +47,10 @@
         }
       }
     },
-    "/api/available-llm-models": {
+    "/api/available-adaptation-llm-models": {
       "get": {
-        "summary": "Get Available Llm Models",
-        "operationId": "get_available_llm_models_api_available_llm_models_get",
+        "summary": "Get Available Adaptation Llm Models",
+        "operationId": "get_available_adaptation_llm_models_api_available_adaptation_llm_models_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -71,18 +71,23 @@
                     ]
                   },
                   "type": "array",
-                  "title": "Response Get Available Llm Models Api Available Llm Models Get"
+                  "title": "Response Get Available Adaptation Llm Models Api Available Adaptation Llm Models Get"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/adaptation-llm-response-schema": {
       "post": {
-        "summary": "Get Llm Response Schema",
-        "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_post",
+        "summary": "Make Adaptation Llm Response Schema",
+        "operationId": "make_adaptation_llm_response_schema_api_adaptation_llm_response_schema_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -100,7 +105,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Post"
+                  "title": "Response Make Adaptation Llm Response Schema Api Adaptation Llm Response Schema Post"
                 }
               }
             }
@@ -366,6 +371,238 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetClassificationBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pdf-files": {
+      "post": {
+        "summary": "Create Pdf File",
+        "operationId": "create_pdf_file_api_pdf_files_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePdfFileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePdfFileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/extraction-llm-response-schema": {
+      "get": {
+        "summary": "Get Extraction Llm Response Schema",
+        "operationId": "get_extraction_llm_response_schema_api_extraction_llm_response_schema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Get Extraction Llm Response Schema Api Extraction Llm Response Schema Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/available-extraction-llm-models": {
+      "get": {
+        "summary": "Get Available Extraction Llm Models",
+        "operationId": "get_available_extraction_llm_models_api_available_extraction_llm_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/DummyModel"
+                      },
+                      {
+                        "$ref": "#/components/schemas/GeminiModel"
+                      }
+                    ]
+                  },
+                  "type": "array",
+                  "title": "Response Get Available Extraction Llm Models Api Available Extraction Llm Models Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/latest-extraction-strategy": {
+      "get": {
+        "summary": "Get Latest Extraction Strategy",
+        "operationId": "get_latest_extraction_strategy_api_latest_extraction_strategy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExtractionStrategy"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/extraction-batches": {
+      "get": {
+        "summary": "Get Extraction Batches",
+        "operationId": "get_extraction_batches_api_extraction_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Extraction Batch",
+        "operationId": "create_extraction_batch_api_extraction_batches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostExtractionBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostExtractionBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/extraction-batches/{id}": {
+      "get": {
+        "summary": "Get Extraction Batch",
+        "operationId": "get_extraction_batch_api_extraction_batches__id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchResponse"
                 }
               }
             }
@@ -1023,6 +1260,64 @@
         }
       }
     },
+    "/api/export/extraction-batch/{id}.html": {
+      "get": {
+        "summary": "Export Extraction Batch",
+        "operationId": "export_extraction_batch_api_export_extraction_batch__id__html_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Download"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/export/adaptation-batch/{id}.html": {
       "get": {
         "summary": "Export Adaptation Batch",
@@ -1305,7 +1600,7 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -1335,7 +1630,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "classificationBatchId": {
@@ -1374,7 +1676,7 @@
           "initialAssistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -1429,6 +1731,37 @@
           "removedFromTextbook"
         ],
         "title": "ApiAdaptation"
+      },
+      "ApiExtractionStrategy": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "prompt"
+        ],
+        "title": "ApiExtractionStrategy"
       },
       "ApiInput": {
         "properties": {
@@ -1710,25 +2043,6 @@
         ],
         "title": "AssistantNotJsonError"
       },
-      "AssistantSuccess": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercise": {
-            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "AssistantSuccess"
-      },
       "AssistantUnknownError": {
         "properties": {
           "kind": {
@@ -1825,7 +2139,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "createdAt": {
@@ -1885,6 +2206,61 @@
           "statementText"
         ],
         "title": "ClassificationInput"
+      },
+      "CreatePdfFileRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "fileName": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "bytesCount": {
+            "type": "integer",
+            "title": "Bytescount"
+          },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "fileName",
+          "bytesCount",
+          "pagesCount",
+          "sha256"
+        ],
+        "title": "CreatePdfFileRequest"
+      },
+      "CreatePdfFileResponse": {
+        "properties": {
+          "uploadUrl": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploadurl"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "uploadUrl"
+        ],
+        "title": "CreatePdfFileResponse"
       },
       "DummyModel": {
         "properties": {
@@ -2072,6 +2448,31 @@
           "removedFromTextbook"
         ],
         "title": "ExternalExercise"
+      },
+      "ExtractionBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt"
+        ],
+        "title": "ExtractionBatch"
       },
       "Formatted-Input": {
         "properties": {
@@ -2274,6 +2675,26 @@
           "kind"
         ]
       },
+      "GeminiModel": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "const": "gemini",
+            "title": "Provider",
+            "default": "gemini"
+          },
+          "name": {
+            "type": "string",
+            "const": "gemini-2.0-flash",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GeminiModel"
+      },
       "GetAdaptationBatchResponse": {
         "properties": {
           "id": {
@@ -2329,7 +2750,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "modelForAdaptation": {
@@ -2383,6 +2811,77 @@
           "classificationBatches"
         ],
         "title": "GetClassificationBatchesResponse"
+      },
+      "GetExtractionBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiExtractionStrategy"
+          },
+          "runClassification": {
+            "type": "boolean",
+            "title": "Runclassification"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/Page"
+            },
+            "type": "array",
+            "title": "Pages"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "strategy",
+          "runClassification",
+          "modelForAdaptation",
+          "pages"
+        ],
+        "title": "GetExtractionBatchResponse"
+      },
+      "GetExtractionBatchesResponse": {
+        "properties": {
+          "extractionBatches": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractionBatch"
+            },
+            "type": "array",
+            "title": "Extractionbatches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "extractionBatches"
+        ],
+        "title": "GetExtractionBatchesResponse"
       },
       "GetTextbookResponse": {
         "properties": {
@@ -2925,6 +3424,49 @@
         ],
         "title": "OpenAiModel"
       },
+      "Page": {
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "assistantResponse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__extraction__assistant_responses__AssistantSuccess"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantUnknownError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistantresponse"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "assistantResponse",
+          "exercises"
+        ],
+        "title": "Page"
+      },
       "Page_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
           "lines": {
@@ -3152,6 +3694,76 @@
           "id"
         ],
         "title": "PostClassificationBatchResponse"
+      },
+      "PostExtractionBatchRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "pdfFileSha256": {
+            "type": "string",
+            "title": "Pdffilesha256"
+          },
+          "firstPage": {
+            "type": "integer",
+            "title": "Firstpage"
+          },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiExtractionStrategy"
+          },
+          "runClassification": {
+            "type": "boolean",
+            "title": "Runclassification"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "pdfFileSha256",
+          "firstPage",
+          "pagesCount",
+          "strategy",
+          "runClassification",
+          "modelForAdaptation"
+        ],
+        "title": "PostExtractionBatchRequest"
+      },
+      "PostExtractionBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "PostExtractionBatchResponse"
       },
       "PostTextbookAdaptationBatchRequest": {
         "properties": {
@@ -3677,6 +4289,25 @@
           "kind"
         ]
       },
+      "patty__adaptation__adaptation__AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "AssistantSuccess"
+      },
       "patty__adapted__Exercise-Output": {
         "properties": {
           "format": {
@@ -3879,6 +4510,186 @@
           "adaptation"
         ],
         "title": "Exercise"
+      },
+      "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
+        "properties": {
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "type": "string",
+            "title": "Fulltext"
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "type": "boolean",
+            "title": "Exerciseclasshassettings"
+          },
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise"
+      },
+      "patty__extracted__Exercise": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "consignes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Consignes",
+            "default": []
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          }
+        },
+        "type": "object",
+        "title": "Exercise"
+      },
+      "patty__extraction__assistant_responses__AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__extracted__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercises"
+        ],
+        "title": "AssistantSuccess"
       }
     },
     "securitySchemes": {

@@ -5,10 +5,10 @@ import typing
 import sqlalchemy as sql
 
 from .. import database_utils
-from .. import llm
+from . import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
-from ..new_orm_models import Adaptation
+from ..orm_models import Adaptation
 
 
 def log(message: str) -> None:
@@ -29,9 +29,10 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
     adaptations = (
         session.query(Adaptation).filter(Adaptation._initial_assistant_response == sql.null()).limit(parallelism).all()
     )
-    log(
-        f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
-    )
+    if len(adaptations) > 0:
+        log(
+            f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
+        )
     return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 

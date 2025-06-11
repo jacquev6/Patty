@@ -47,7 +47,6 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
 
 
 def truncate_all_tables(session: Session) -> None:
-    session.execute(OrmBase.metadata.tables["old_adaptation_strategy_settings_branches"].update().values(head_id=None))
     session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 
     for table in reversed(OrmBase.metadata.sorted_tables):
@@ -64,6 +63,11 @@ def truncate_all_tables(session: Session) -> None:
         except sqlalchemy.exc.ProgrammingError:
             # E.g. when the table has no auto-incremented ID
             pass
+
+
+# @todo Decide the fate of 'dump' and 'load' functions.
+# They may be misguided as they do not handle files for 'pdf-files' and 'external-exercises' tables.
+# (See how these files are deleted in 'load_fixtures')
 
 
 def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
@@ -218,6 +222,11 @@ class TestCaseWithDatabase(unittest.TestCase):
     def commit_model(self, __model: type[Model], **kwargs: Any) -> Model:
         instance = self.add_model(__model, **kwargs)
         self.session.commit()
+        return instance
+
+    def get_model(self, model: type[Model], pk: Any) -> Model:
+        instance = self.session.get(model, pk)
+        assert instance is not None
         return instance
 
     @contextlib.contextmanager

@@ -37,8 +37,6 @@ class DevelopmentCycle:
                 run_in_backend_container(
                     ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
-                # @todo(after a5c3c863f388 is applied in production) Remove. No rush: it's a no-op if already applied.
-                run_alembic(["upgrade", "a5c3c863f388"])
                 existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
                 assert len(existing) <= 1
                 if len(existing) == 1:
@@ -81,7 +79,7 @@ class DevelopmentCycle:
 
         if self.do_frontend:
             if self.do_format:
-                run_in_frontend_container(["npm", "run", "format"])
+                run_in_frontend_container(["npx", "prettier", "--write", "src/", "e2e-tests/"])
 
             if self.do_lint:
                 for file in glob.glob("**/*.cy.ts", recursive=True):
@@ -93,10 +91,10 @@ class DevelopmentCycle:
                                     exit(1)
                     except IsADirectoryError:
                         pass
-                run_in_frontend_container(["npm", "run", "lint"])
+                run_in_frontend_container(["npx", "eslint", ".", "--ignore-pattern", "**/*.min.js", "--fix"])
 
             if self.do_type_check:
-                run_in_frontend_container(["npm", "run", "type-check"])
+                run_in_frontend_container(["npx", "vue-tsc", "--build"])
 
             if self.do_test:
                 if self.frontend_specs is None:

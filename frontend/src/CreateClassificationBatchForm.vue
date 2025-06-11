@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type LlmModel, useAuthenticatedClient } from './apiClient'
+import { type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputsEditor from './CreateClassificationBatchFormInputsEditor.vue'
@@ -10,7 +10,7 @@ import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
-  availableLlmModels: LlmModel[]
+  availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
 const router = useRouter()
@@ -21,13 +21,11 @@ const identifiedUser = useIdentifiedUserStore()
 
 const runAdaptationAsString = ref('yes')
 
-const llmModel = ref(props.availableLlmModels[0])
+const llmModel = ref(props.availableAdaptationLlmModels[0])
 
 const runAdaptation = computed(() => runAdaptationAsString.value === 'yes')
 
 const inputs = reactive<InputWithFile[]>([])
-
-const busy = ref(false)
 
 const cleanedUpInputs = computed(() =>
   inputs
@@ -43,7 +41,6 @@ const cleanedUpInputs = computed(() =>
 const disabled = computed(() => cleanedUpInputs.value.length === 0)
 
 async function submit() {
-  busy.value = true
   const response = await client.POST('/api/classification-batches', {
     body: {
       creator: identifiedUser.identifier,
@@ -51,7 +48,6 @@ async function submit() {
       modelForAdaptation: runAdaptation.value ? llmModel.value : null,
     },
   })
-  busy.value = false
   if (response.data !== undefined) {
     router.push({ name: 'classification-batch', params: { id: response.data.id } })
   }
@@ -65,12 +61,11 @@ async function submit() {
   <p>
     Class names produced: <code>Associe</code>, <code>AssocieCoche</code>, <code>CM</code>, <code>CacheIntrus</code>,
     <code>Classe</code>, <code>ClasseCM</code>, <code>CliqueEcrire</code>, <code>CocheGroupeMots</code>,
-    <code>CocheIntrus</code>, <code>CocheLettre</code>, <code>CocheMot</code>, <code>CocheMot</code>",
+    <code>CocheIntrus</code>, <code>CocheLettre</code>, <code>CocheMot</code>, <code>CocheMot*</code>,
     <code>CochePhrase</code>, <code>Echange</code>, <code>EditPhrase</code>, <code>EditTexte</code>,
     <code>ExpressionEcrite</code>, <code>GenreNombre</code>, <code>Phrases</code>, <code>Question</code>,
     <code>RC</code>, <code>RCCadre</code>, <code>RCDouble</code>, <code>RCImage</code>, <code>Texte</code>,
-    <code>Trait</code>, <code>TransformeMot</code>, <code>TransformePhrase</code>,
-    <code>VraiFaux</code>
+    <code>Trait</code>, <code>TransformeMot</code>, <code>TransformePhrase</code>, <code>VraiFaux</code>
   </p>
   <p>
     Run adaptations after classification:
@@ -80,7 +75,7 @@ async function submit() {
     </select>
     <template v-if="runAdaptation">
       using
-      <LlmModelSelector :availableLlmModels :disabled="false" v-model="llmModel">
+      <LlmModelSelector :availableLlmModels="availableAdaptationLlmModels" :disabled="false" v-model="llmModel">
         <template #provider>provider</template>
         <template #model> and model</template>
       </LlmModelSelector>

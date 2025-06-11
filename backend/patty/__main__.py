@@ -93,7 +93,7 @@ def db_tables_graph() -> None:
 @main.command()
 def adapted_exercise_schema() -> None:
     from . import adapted
-    from . import llm
+    from .adaptation import llm
 
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
@@ -116,34 +116,53 @@ def adapted_exercise_schema() -> None:
 
 
 @main.command()
-def default_system_prompt() -> None:
-    from . import fixtures
+def extracted_exercise_schema() -> None:
+    from . import extracted
 
-    print(fixtures.make_default_system_prompt())
+    print(json.dumps(extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
+def default_adaptation_prompt() -> None:
+    from . import fixtures
+
+    print(fixtures.make_default_adaptation_prompt())
+
+
+@main.command()
+def default_extraction_prompt() -> None:
+    from . import fixtures
+
+    print(fixtures.make_default_extraction_prompt())
+
+
+@main.command()
+@click.option("--truncate", is_flag=True, help="Truncate DB before loading")
 @click.argument("fixture", type=str, nargs=-1)
-def load_fixtures(fixture: Iterable[str]) -> None:
+def load_fixtures(truncate: bool, fixture: Iterable[str]) -> None:
     from . import database_utils
     from . import fixtures
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
-        fixtures.load(session, fixture)
+        fixtures.load(session, truncate, fixture)
         session.commit()
 
 
 @main.command()
+@click.option("--extraction-parallelism", type=int, default=1)
 @click.option("--classification-parallelism", type=int, default=20)
 @click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(classification_parallelism: int, adaptation_parallelism: int, pause: float) -> None:
+def run_submission_daemon(
+    extraction_parallelism: int, classification_parallelism: int, adaptation_parallelism: int, pause: float
+) -> None:
     import requests
 
     from . import database_utils
     from .adaptation.submission import submit_adaptations
     from .classification import submit_classifications
+    from .extraction.submission import submit_extractions
 
     def log(message: str) -> None:
         # @todo Use actual logging
@@ -155,19 +174,21 @@ def run_submission_daemon(classification_parallelism: int, adaptation_parallelis
         log("Starting")
         last_time = time.monotonic()
         while True:
-            log("Waking up...")
             try:
                 with database_utils.Session(engine) as session:
-                    submit_classifications(session, classification_parallelism)
-                    submissions = submit_adaptations(session, adaptation_parallelism)
-                    await asyncio.gather(*submissions)
+                    # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
+                    go_on = len(await asyncio.gather(*submit_extractions(session, extraction_parallelism))) == 0
+                    if go_on:
+                        go_on = not submit_classifications(session, classification_parallelism)
+                        if go_on:
+                            await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
                     session.commit()
                 if time.monotonic() >= last_time + 60:
                     log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
                     requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
-                log("UNEXPECTED ERROR")
+                log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
             log(f"Sleeping for {pause}s...")
             await asyncio.sleep(pause)
@@ -248,7 +269,7 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250604-141611.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250611-041603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

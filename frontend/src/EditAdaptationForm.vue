@@ -230,7 +230,7 @@ watch(Escape, () => {
         >.
       </p>
       <AdaptationStrategyEditor
-        :availableLlmModels="[]"
+        :availableAdaptationLlmModels="[]"
         :availableStrategySettings="[]"
         :disabled="true"
         :modelValue="adaptation.strategy"

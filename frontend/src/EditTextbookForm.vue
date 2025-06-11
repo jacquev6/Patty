@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import _ from 'lodash'
 
-import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
+import { type AdaptationLlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
 import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
 import EditTextbookFormCreateAdaptationBatchForm from './EditTextbookFormCreateAdaptationBatchForm.vue'
@@ -12,7 +12,7 @@ import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreate
 
 const props = defineProps<{
   textbook: Textbook
-  availableLlmModels: LlmModel[]
+  availableAdaptationLlmModels: AdaptationLlmModel[]
   availableStrategySettings: string[]
 }>()
 
@@ -154,7 +154,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
   <template v-if="view === 'batch'">
     <h2>New batch</h2>
     <EditTextbookFormCreateAdaptationBatchForm
-      :availableLlmModels
+      :availableAdaptationLlmModels
       :availableStrategySettings
       :textbookId="textbook.id"
       @textbookUpdated="textbookUpdated"

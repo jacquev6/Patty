@@ -1,11 +1,14 @@
 alembic
 argon2-cffi
 boto3
+cachetools
 compact-json
 datasets
 fastapi
+google-cloud-aiplatform
 mistralai
 openai
+pillow
 polyfactory  # @todo Move this dependency to requirements-10-dev.txt
 psycopg2-binary
 pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests

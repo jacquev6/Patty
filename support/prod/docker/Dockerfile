@@ -14,6 +14,8 @@ ADD frontend .
 
 FROM frontend-dependencies AS frontend-builder
 ENV PATTY_ENTRY_POINT_NAME=frontend
+RUN test ! -e src/frontend-public/pdf.worker.min.js
+RUN cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs src/frontend-public/pdf.worker.min.js
 RUN npx vite build
 
 
@@ -37,7 +39,8 @@ FROM python:3.12-slim AS backend-dependencies
 RUN set -x \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
-    postgresql-client \
+      poppler-utils \
+      postgresql-client \
  && true
 
 WORKDIR /app

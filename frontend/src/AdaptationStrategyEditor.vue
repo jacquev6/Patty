@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { computedAsync } from '@vueuse/core'
 
 import assert from './assert'
-import { type AdaptationStrategy, type LlmModel, useAuthenticatedClient } from './apiClient'
+import { type AdaptationStrategy, type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
@@ -12,7 +12,7 @@ import ComboInput from './ComboInput.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
 
 const props = defineProps<{
-  availableLlmModels: LlmModel[]
+  availableAdaptationLlmModels: AdaptationLlmModel[]
   availableStrategySettings: AdaptationStrategy['settings'][]
   disabled: boolean
 }>()
@@ -121,7 +121,7 @@ const settingsNameSuggestions = computed(() => {
 <template>
   <h1>Strategy</h1>
   <h2>LLM model</h2>
-  <p><LlmModelSelector :availableLlmModels :disabled v-model="strategy.model" /></p>
+  <p><LlmModelSelector :availableLlmModels="availableAdaptationLlmModels" :disabled v-model="strategy.model" /></p>
 
   <h2>Settings</h2>
   <p v-if="disabled">Name: {{ settingsName }}</p>

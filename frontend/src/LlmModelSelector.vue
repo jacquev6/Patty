@@ -1,7 +1,10 @@
-<script setup lang="ts">
+<script lang="ts">
+import { type AdaptationLlmModel, type ExtractionLlmModel } from './apiClient'
+</script>
+
+<script setup lang="ts" generic="LlmModel extends AdaptationLlmModel | ExtractionLlmModel">
 import { computed } from 'vue'
 
-import { type LlmModel } from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 

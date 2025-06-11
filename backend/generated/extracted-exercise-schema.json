@@ -1,0 +1,107 @@
+{
+  "$defs": {
+    "Exercise": {
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "numero": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numero"
+        },
+        "consignes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Consignes",
+          "type": "array"
+        },
+        "conseil": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conseil"
+        },
+        "exemple": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exemple"
+        },
+        "enonce": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enonce"
+        },
+        "references": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "References"
+        },
+        "autre": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Autre"
+        }
+      },
+      "title": "Exercise",
+      "type": "object"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/Exercise"
+  },
+  "title": "RootModel[list[Exercise]]",
+  "type": "array"
+}

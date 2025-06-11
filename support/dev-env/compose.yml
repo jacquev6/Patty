@@ -27,14 +27,16 @@ services:
       - backend/secrets.env
     command: [
       "rm", "-f",
-      "backend/generated/default-system-prompt.md",
-      "backend/generated/openapi.json",
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph.png",
-      "frontend/src/openapi.ts",
+      "backend/generated/default-adaptation-prompt.md",
+      "backend/generated/default-extraction-prompt.md",
+      "backend/generated/extracted-exercise-schema.json",
+      "backend/generated/openapi.json",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
+      "frontend/src/openapi.ts",
     ]
 
   adaptation-export-template-generator:
@@ -148,7 +150,7 @@ services:
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["python", "-m", "patty", "load-fixtures", "dummy-adaptation"]
+    command: ["python", "-m", "patty", "load-fixtures", "--truncate", "dummy-adaptation", "dummy-extraction-strategy"]
     depends_on:
       migrator:
         condition: service_completed_successfully
@@ -184,13 +186,13 @@ services:
       - backend/secrets.env
     init: true
     command: [
-      "watchmedo", "auto-restart", "--directory", "/app", "--pattern", "*.py", "--recursive", "--",
+      "watchmedo", "auto-restart", "--pattern", "*.py", "--recursive", "--",
       "python", "-m", "patty", "run-submission-daemon"
     ]
     depends_on:
       migrator:
         condition: service_completed_successfully
-  default-system-prompt-generator:
+  default-adaptation-prompt-generator:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -201,7 +203,24 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-system-prompt.md", "python -m patty default-system-prompt"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-adaptation-prompt.md", "python -m patty default-adaptation-prompt"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  default-extraction-prompt-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "default-extraction-prompt.md", "python -m patty default-extraction-prompt"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -226,6 +245,27 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/generated/openapi.json"]
+      interval: 0.5s
+      retries: 12
+  extracted-exercise-json-schema-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "extracted-exercise-schema.json", "python -m patty extracted-exercise-schema"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/extracted-exercise-schema.json"]
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator:
@@ -336,6 +376,17 @@ services:
     depends_on:
       npm-installer:
         condition: service_completed_successfully
+  pdfjs-worker-copier:
+    image: patty-dev_frontend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./frontend/cache:/home/patty/.cache
+    working_dir: /app/frontend
+    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend-public/pdf.worker.min.js"]
+    depends_on:
+      npm-installer:
+        condition: service_completed_successfully
   openapi-ts-generator:
     image: patty-dev_frontend
     pull_policy: never
@@ -370,6 +421,10 @@ services:
         condition: service_healthy
       adapted-exercise-json-schema-generator:
         condition: service_healthy
+      extracted-exercise-json-schema-generator:
+        condition: service_healthy
+      pdfjs-worker-copier:
+        condition: service_completed_successfully
 
   fanout:
     image: nginx:latest

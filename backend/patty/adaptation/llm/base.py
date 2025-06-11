@@ -4,7 +4,7 @@ import abc
 
 import pydantic
 
-from ..any_json import JsonDict
+from ...any_json import JsonDict
 
 
 T = TypeVar("T", bound=pydantic.BaseModel)

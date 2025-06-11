@@ -15,9 +15,13 @@ export function useAuthenticatedClient() {
   })
 }
 
-export type LlmModel =
-  paths['/api/available-llm-models']['get']['responses']['200']['content']['application/json'][number]
+export type ExtractionLlmModel =
+  paths['/api/available-extraction-llm-models']['get']['responses']['200']['content']['application/json'][number]
+export type ExtractionStrategy =
+  paths['/api/latest-extraction-strategy']['get']['responses']['200']['content']['application/json']
 
+export type AdaptationLlmModel =
+  paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number]
 export type LatestAdaptationBatch =
   paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
 
@@ -26,6 +30,11 @@ export type AdaptationStrategy = LatestAdaptationBatch['strategy']
 export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['content']['application/json']
 export type Textbook =
   paths['/api/textbooks/{id}']['get']['responses']['200']['content']['application/json']['textbook']
+
+export type ExtractionBatches =
+  paths['/api/extraction-batches']['get']['responses']['200']['content']['application/json']
+export type ExtractionBatch =
+  paths['/api/extraction-batches/{id}']['get']['responses']['200']['content']['application/json']
 
 export type ClassificationBatches =
   paths['/api/classification-batches']['get']['responses']['200']['content']['application/json']

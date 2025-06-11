@@ -4,6 +4,7 @@ import os
 import pydantic
 
 
+ENVIRONMENT = os.environ.get("PATTY_ENVIRONMENT")
 DATABASE_URL = os.environ["PATTY_DATABASE_URL"]
 DATABASE_BACKUPS_URL = os.environ["PATTY_DATABASE_BACKUPS_URL"]
 assert not DATABASE_BACKUPS_URL.endswith("/")
@@ -17,3 +18,5 @@ AUTHENTICATION_MAX_VALIDITY = pydantic.RootModel[datetime.timedelta](
 ).root
 EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
 assert not EXTERNAL_EXERCISES_URL.endswith("/")
+PDF_FILES_URL = os.environ["PATTY_PDF_FILES_URL"]
+assert not PDF_FILES_URL.endswith("/")

@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
-import { type LlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
+import { type AdaptationLlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
@@ -10,7 +10,7 @@ import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
   textbookId: string
-  availableLlmModels: LlmModel[]
+  availableAdaptationLlmModels: AdaptationLlmModel[]
   availableStrategySettings: string[]
 }>()
 
@@ -22,14 +22,14 @@ const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const availableLlmModels = computed(() => props.availableLlmModels)
+const availableAdaptationLlmModels = computed(() => props.availableAdaptationLlmModels)
 
-const model = ref(availableLlmModels.value[0])
+const model = ref(availableAdaptationLlmModels.value[0])
 
-assert(availableLlmModels.value.length !== 0)
+assert(availableAdaptationLlmModels.value.length !== 0)
 
 const llmProviders = computed(() => {
-  return [...new Set(availableLlmModels.value.map((model) => model.provider))]
+  return [...new Set(availableAdaptationLlmModels.value.map((model) => model.provider))]
 })
 
 const llmProvider = computed({
@@ -37,14 +37,16 @@ const llmProvider = computed({
     return model.value.provider
   },
   set: (value: string) => {
-    const m = availableLlmModels.value.find((m) => m.provider === value)
+    const m = availableAdaptationLlmModels.value.find((m) => m.provider === value)
     assert(m !== undefined)
     model.value = m
   },
 })
 
 const llmNames = computed(() => {
-  return availableLlmModels.value.filter((model) => model.provider === llmProvider.value).map((model) => model.name)
+  return availableAdaptationLlmModels.value
+    .filter((model) => model.provider === llmProvider.value)
+    .map((model) => model.name)
 })
 
 const llmName = computed({
@@ -52,7 +54,7 @@ const llmName = computed({
     return model.value.name
   },
   set: (value: string) => {
-    const m = availableLlmModels.value.find((m) => m.provider === model.value.provider && m.name === value)
+    const m = availableAdaptationLlmModels.value.find((m) => m.provider === model.value.provider && m.name === value)
     assert(m !== undefined)
     model.value = m
   },

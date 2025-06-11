@@ -12,7 +12,7 @@ import torch.utils.data
 import transformers  # type: ignore[import-untyped]
 
 from .. import database_utils
-from .. import new_orm_models as db
+from .. import orm_models as db
 from .models import SingleBert
 
 
@@ -24,7 +24,7 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-def submit_classifications(session: database_utils.Session, parallelism: int) -> None:
+def submit_classifications(session: database_utils.Session, parallelism: int) -> bool:
     exercise_classes_by_name = {
         exercise_class.name: exercise_class
         for exercise_class in session.execute(sql.select(db.ExerciseClass)).scalars().all()
@@ -42,7 +42,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
         .first()
     )
     if batch is None:
-        log("Found no classification batch with not-yet-classified exercises")
+        return False
     else:
         exercises = list(
             session.execute(
@@ -77,7 +77,8 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             if exercise_class is None:
                 exercise_class = db.ExerciseClass(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
+                    created_by_classification_batch=batch,
                     name=exercise_class_name,
                     latest_strategy_settings=None,
                 )
@@ -88,14 +89,15 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             if batch.model_for_adaptation is not None and exercise_class.latest_strategy_settings is not None:
                 adaptation_strategy = db.AdaptationStrategy(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
+                    created_by_classification_batch=batch,
                     model=batch.model_for_adaptation,
                     settings=exercise_class.latest_strategy_settings,
                 )
                 session.add(adaptation_strategy)
                 adaptation = db.Adaptation(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
                     exercise=exercise,
                     strategy=adaptation_strategy,
                     classification_batch=batch,
@@ -106,6 +108,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                     manual_edit=None,
                 )
                 session.add(adaptation)
+        return True
 
 
 device = torch.device("cpu")
