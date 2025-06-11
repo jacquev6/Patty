@@ -1,16 +1,19 @@
-<script setup lang="ts">
+<script lang="ts">
+import { type AdaptationLlmModel, type ExtractionLlmModel } from './apiClient'
+</script>
+
+<script setup lang="ts" generic="LlmModel extends AdaptationLlmModel | ExtractionLlmModel">
 import { computed } from 'vue'
 
-import { type AdaptationLlmModel } from './apiClient'
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 
 const props = defineProps<{
-  availableLlmModels: AdaptationLlmModel[]
+  availableLlmModels: LlmModel[]
   disabled: boolean
 }>()
 
-const model = defineModel<AdaptationLlmModel>({ required: true })
+const model = defineModel<LlmModel>({ required: true })
 
 assert(props.disabled || props.availableLlmModels.length !== 0)
 

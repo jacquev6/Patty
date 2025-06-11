@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef } from 'vue'
+import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import shajs from 'sha.js'
 import { computedAsync } from '@vueuse/core'
+import deepCopy from 'deep-copy'
 
 import pdfjs, { type PDFDocumentProxy } from './pdfjs'
-import { type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
+import {
+  type ExtractionLlmModel,
+  type ExtractionStrategy,
+  type AdaptationLlmModel,
+  useAuthenticatedClient,
+} from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import assert from './assert'
 import PdfPageRenderer from './PdfPageRenderer.vue'
 import PdfNavigationControls from './PdfNavigationControls.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
+import ResizableColumns from './ResizableColumns.vue'
+import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
+import TextArea from './TextArea.vue'
 
 const props = defineProps<{
+  availableExtractionLlmModels: ExtractionLlmModel[]
+  latestExtractionStrategy: ExtractionStrategy
+  extractionLlmResponseSchema: Record<string, never>
   availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
@@ -22,6 +34,14 @@ const router = useRouter()
 const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
+
+const strategy = reactive(deepCopy(props.latestExtractionStrategy))
+watch(
+  () => props.latestExtractionStrategy,
+  (newValue) => {
+    Object.assign(strategy, deepCopy(newValue))
+  },
+)
 
 const runClassificationAsString = ref('yes')
 const runClassification = computed(() => runClassificationAsString.value === 'yes')
@@ -97,6 +117,7 @@ async function submit() {
       pdfFileSha256: uploadedFileSha256.value,
       firstPage: firstPageNumber.value,
       pagesCount: lastPageNumber.value - firstPageNumber.value + 1,
+      strategy,
       runClassification: runClassification.value,
       modelForAdaptation: runAdaptation.value ? modelForAdaptation.value : null,
     },
@@ -124,57 +145,77 @@ const lastPage = computedAsync(async () => {
 </script>
 
 <template>
-  <h1>Settings</h1>
-  <p>Created by: <IdentifiedUser /></p>
-  <p>
-    Run classification after extraction:
-    <select data-cy="run-classification" v-model="runClassificationAsString">
-      <option>yes</option>
-      <option>no</option></select
-    ><template v-if="runClassification">
-      using <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</template
-    >
-  </p>
-  <p v-if="runClassification">
-    Run adaptations after classification:
-    <select data-cy="run-adaptation" v-model="runAdaptationAsString">
-      <option>yes</option>
-      <option>no</option>
-    </select>
-    <template v-if="runAdaptation">
-      using
-      <LlmModelSelector
-        :availableLlmModels="availableAdaptationLlmModels"
-        :disabled="false"
-        v-model="modelForAdaptation"
-      >
-        <template #provider>provider</template>
-        <template #model> and model</template>
-      </LlmModelSelector>
-      with the latest settings for each known exercise class.</template
-    >
-  </p>
-  <p>
-    PDF file: <input type="file" @change="openFile" accept=".pdf" :disabled="uploading" />
-    <template v-if="uploading"> (uploading...)</template>
-    <template v-if="uploadedFileSha256 !== null"> (uploaded)</template>
-  </p>
-  <template v-if="document !== null">
-    <p>
-      Pages: from
-      <span class="pagePreview">
-        <PdfNavigationControls v-model:page="firstPageNumber" :pagesCount="document.numPages" />
-        <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
-      </span>
-      to
-      <span class="pagePreview">
-        <PdfNavigationControls v-model:page="lastPageNumber" :pagesCount="document.numPages" />
-        <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
-      </span>
-      (of {{ document.numPages }})
-    </p>
-  </template>
-  <p><button @click="submit" :disabled>Submit</button></p>
+  <ResizableColumns :columns="[1, 1]">
+    <template #col-1>
+      <p>Created by: <IdentifiedUser /></p>
+      <h1>Strategy</h1>
+      <h2>LLM model</h2>
+      <p>
+        <LlmModelSelector
+          :availableLlmModels="availableExtractionLlmModels"
+          :disabled="false"
+          v-model="strategy.model"
+        />
+      </p>
+      <h2>Settings</h2>
+      <AdaptedExerciseJsonSchemaDetails :schema="extractionLlmResponseSchema" />
+      <h3>Prompt</h3>
+      <TextArea data-cy="prompt" v-model="strategy.prompt"></TextArea>
+    </template>
+    <template #col-2>
+      <h1>Follow-ups</h1>
+      <p>
+        Run classification after extraction:
+        <select data-cy="run-classification" v-model="runClassificationAsString">
+          <option>yes</option>
+          <option>no</option></select
+        ><template v-if="runClassification">
+          using <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</template
+        >
+      </p>
+      <p v-if="runClassification">
+        Run adaptations after classification:
+        <select data-cy="run-adaptation" v-model="runAdaptationAsString">
+          <option>yes</option>
+          <option>no</option>
+        </select>
+        <template v-if="runAdaptation">
+          using
+          <LlmModelSelector
+            :availableLlmModels="availableAdaptationLlmModels"
+            :disabled="false"
+            v-model="modelForAdaptation"
+          >
+            <template #provider>provider</template>
+            <template #model> and model</template>
+          </LlmModelSelector>
+          with the latest settings for each known exercise class.</template
+        >
+      </p>
+      <h1>Input</h1>
+      <p>
+        PDF file: <input type="file" @change="openFile" accept=".pdf" :disabled="uploading" />
+        <template v-if="uploading"> (uploading...)</template>
+        <template v-if="uploadedFileSha256 !== null"> (uploaded)</template>
+      </p>
+      <template v-if="document !== null">
+        <p>
+          Pages: from
+          <span class="pagePreview">
+            <PdfNavigationControls v-model:page="firstPageNumber" :pagesCount="document.numPages" />
+            <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
+          </span>
+          to
+          <span class="pagePreview">
+            <PdfNavigationControls v-model:page="lastPageNumber" :pagesCount="document.numPages" />
+            <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
+          </span>
+          (of {{ document.numPages }})
+        </p>
+      </template>
+      <p><button @click="submit" :disabled>Submit</button></p>
+    </template>
+  </ResizableColumns>
 </template>
 
 <style scoped>

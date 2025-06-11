@@ -49,8 +49,8 @@
     },
     "/api/available-adaptation-llm-models": {
       "get": {
-        "summary": "Get Available Llm Models",
-        "operationId": "get_available_llm_models_api_available_adaptation_llm_models_get",
+        "summary": "Get Available Adaptation Llm Models",
+        "operationId": "get_available_adaptation_llm_models_api_available_adaptation_llm_models_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -71,7 +71,7 @@
                     ]
                   },
                   "type": "array",
-                  "title": "Response Get Available Llm Models Api Available Adaptation Llm Models Get"
+                  "title": "Response Get Available Adaptation Llm Models Api Available Adaptation Llm Models Get"
                 }
               }
             }
@@ -86,8 +86,8 @@
     },
     "/api/adaptation-llm-response-schema": {
       "post": {
-        "summary": "Get Llm Response Schema",
-        "operationId": "get_llm_response_schema_api_adaptation_llm_response_schema_post",
+        "summary": "Make Adaptation Llm Response Schema",
+        "operationId": "make_adaptation_llm_response_schema_api_adaptation_llm_response_schema_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -105,7 +105,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "title": "Response Get Llm Response Schema Api Adaptation Llm Response Schema Post"
+                  "title": "Response Make Adaptation Llm Response Schema Api Adaptation Llm Response Schema Post"
                 }
               }
             }
@@ -419,6 +419,87 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/extraction-llm-response-schema": {
+      "get": {
+        "summary": "Get Extraction Llm Response Schema",
+        "operationId": "get_extraction_llm_response_schema_api_extraction_llm_response_schema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Get Extraction Llm Response Schema Api Extraction Llm Response Schema Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/available-extraction-llm-models": {
+      "get": {
+        "summary": "Get Available Extraction Llm Models",
+        "operationId": "get_available_extraction_llm_models_api_available_extraction_llm_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/DummyModel"
+                      },
+                      {
+                        "$ref": "#/components/schemas/GeminiModel"
+                      }
+                    ]
+                  },
+                  "type": "array",
+                  "title": "Response Get Available Extraction Llm Models Api Available Extraction Llm Models Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/latest-extraction-strategy": {
+      "get": {
+        "summary": "Get Latest Extraction Strategy",
+        "operationId": "get_latest_extraction_strategy_api_latest_extraction_strategy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExtractionStrategy"
                 }
               }
             }
@@ -1644,6 +1725,37 @@
         ],
         "title": "ApiAdaptation"
       },
+      "ApiExtractionStrategy": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "model",
+          "prompt"
+        ],
+        "title": "ApiExtractionStrategy"
+      },
       "ApiInput": {
         "properties": {
           "pageNumber": {
@@ -2568,6 +2680,26 @@
           "kind"
         ]
       },
+      "GeminiModel": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "const": "gemini",
+            "title": "Provider",
+            "default": "gemini"
+          },
+          "name": {
+            "type": "string",
+            "const": "gemini-2.0-flash",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "GeminiModel"
+      },
       "GetAdaptationBatchResponse": {
         "properties": {
           "id": {
@@ -2688,6 +2820,9 @@
             "type": "string",
             "title": "Createdby"
           },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiExtractionStrategy"
+          },
           "runClassification": {
             "type": "boolean",
             "title": "Runclassification"
@@ -2722,6 +2857,7 @@
         "required": [
           "id",
           "createdBy",
+          "strategy",
           "runClassification",
           "modelForAdaptation",
           "pages"
@@ -3559,6 +3695,9 @@
             "type": "integer",
             "title": "Pagescount"
           },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiExtractionStrategy"
+          },
           "runClassification": {
             "type": "boolean",
             "title": "Runclassification"
@@ -3588,6 +3727,7 @@
           "pdfFileSha256",
           "firstPage",
           "pagesCount",
+          "strategy",
           "runClassification",
           "modelForAdaptation"
         ],

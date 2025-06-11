@@ -15,9 +15,13 @@ export function useAuthenticatedClient() {
   })
 }
 
+export type ExtractionLlmModel =
+  paths['/api/available-extraction-llm-models']['get']['responses']['200']['content']['application/json'][number]
+export type ExtractionStrategy =
+  paths['/api/latest-extraction-strategy']['get']['responses']['200']['content']['application/json']
+
 export type AdaptationLlmModel =
   paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number]
-
 export type LatestAdaptationBatch =
   paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
 

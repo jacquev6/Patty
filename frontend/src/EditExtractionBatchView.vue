@@ -14,26 +14,30 @@ const client = useAuthenticatedClient()
 
 const found = ref<boolean | null>(null)
 const extractionBatch = ref<ExtractionBatch | null>(null)
+const extractionLlmResponseSchema = ref<Record<string, never>>({})
+
 let refreshes = 0
 
 let refreshTimeoutId: number | null = null
 
 async function refresh() {
-  const response = await client.GET(`/api/extraction-batches/{id}`, { params: { path: { id: props.id } } })
+  const extractionBatchPromise = client.GET(`/api/extraction-batches/{id}`, { params: { path: { id: props.id } } })
+  const extractionLlmResponseSchemaPromise = client.GET('/api/extraction-llm-response-schema')
 
-  if (response.response.status === 404) {
+  const extractionBatchResponse = await extractionBatchPromise
+  if (extractionBatchResponse.response.status === 404) {
     found.value = false
     extractionBatch.value = null
   } else {
     found.value = true
-    assert(response.data !== undefined)
-    extractionBatch.value = response.data
+    assert(extractionBatchResponse.data !== undefined)
+    extractionBatch.value = extractionBatchResponse.data
 
     let needsRefresh = false
-    for (const page of response.data.pages) {
+    for (const page of extractionBatchResponse.data.pages) {
       if (page.done) {
         for (const exercise of page.exercises) {
-          if (response.data.runClassification && exercise.exerciseClass === null) {
+          if (extractionBatchResponse.data.runClassification && exercise.exerciseClass === null) {
             needsRefresh = true
             break
           }
@@ -57,6 +61,11 @@ async function refresh() {
       refreshes = 0
     }
   }
+
+  const extractionLlmResponseSchemaResponse = await extractionLlmResponseSchemaPromise
+  if (extractionLlmResponseSchemaResponse.data !== undefined) {
+    extractionLlmResponseSchema.value = extractionLlmResponseSchemaResponse.data
+  }
 }
 
 onMounted(refresh)
@@ -73,7 +82,7 @@ onUnmounted(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="extractionBatch !== null">
-      <EditExtractionBatchForm :extractionBatch />
+      <EditExtractionBatchForm :extractionBatch :extractionLlmResponseSchema />
     </template>
     <template v-else-if="found === false">
       <h1>Not found</h1>

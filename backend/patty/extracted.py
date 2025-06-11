@@ -15,3 +15,6 @@ class Exercise(pydantic.BaseModel):
     enonce: str | None = None
     references: str | None = None
     autre: str | None = None
+
+
+ExercisesList = pydantic.RootModel[list[Exercise]]

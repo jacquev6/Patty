@@ -15,6 +15,7 @@ import sqlalchemy as sql
 
 from . import authentication
 from . import database_utils
+from . import extracted
 from . import settings
 from .adaptation import llm as adaptation_llm
 from .adapted import Exercise
@@ -30,6 +31,7 @@ from .adaptation.adaptation import (
 )
 from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 from .adaptation.submission import LlmMessage
+from .extraction import llm as extraction_llm
 
 __all__ = ["router"]
 
@@ -39,7 +41,7 @@ api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth
 
 
 @api_router.get("/available-adaptation-llm-models")
-def get_available_llm_models() -> list[adaptation_llm.ConcreteModel]:
+def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
     if settings.ENVIRONMENT == "dev":
         return [
             adaptation_llm.DummyModel(name="dummy-1"),
@@ -92,7 +94,7 @@ class ApiAdaptation(ApiModel):
 
 
 @api_router.post("/adaptation-llm-response-schema")
-def get_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
+def make_adaptation_llm_response_schema(response_specification: JsonSchemaLlmResponseSpecification) -> JsonDict:
     return response_specification.make_response_schema()
 
 
@@ -458,11 +460,46 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
     return CreatePdfFileResponse(upload_url=upload_url)
 
 
+@api_router.get("/extraction-llm-response-schema")
+def get_extraction_llm_response_schema() -> JsonDict:
+    return extracted.ExercisesList.model_json_schema()
+
+
+@api_router.get("/available-extraction-llm-models")
+def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
+    if settings.ENVIRONMENT == "dev":
+        return [
+            extraction_llm.DummyModel(name="dummy-1"),
+            extraction_llm.DummyModel(name="dummy-2"),
+            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+        ]
+    else:
+        return [
+            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(name="dummy-1"),
+            extraction_llm.DummyModel(name="dummy-2"),
+        ]
+
+
+class ApiExtractionStrategy(ApiModel):
+    id: str
+    model: extraction_llm.ConcreteModel
+    prompt: str
+
+
+@api_router.get("/latest-extraction-strategy")
+def get_latest_extraction_strategy(session: database_utils.SessionDependable) -> ApiExtractionStrategy:
+    strategy = session.execute(sql.select(db.ExtractionStrategy).order_by(-db.ExtractionStrategy.id)).scalars().first()
+    assert strategy is not None
+    return ApiExtractionStrategy(id=str(strategy.id), model=strategy.model, prompt=strategy.prompt)
+
+
 class PostExtractionBatchRequest(ApiModel):
     creator: str
     pdf_file_sha256: str
     first_page: int
     pages_count: int
+    strategy: ApiExtractionStrategy
     run_classification: bool
     model_for_adaptation: adaptation_llm.ConcreteModel | None
 
@@ -484,8 +521,12 @@ def create_extraction_batch(
         pages_count=req.pages_count,
     )
     session.add(pdf_file_range)
-    strategy = session.get(db.ExtractionStrategy, 1)  # @todo Get the strategy from the request
-    assert strategy is not None
+    strategy = session.get(db.ExtractionStrategy, req.strategy.id)
+    if strategy is None or strategy.model != req.strategy.model or strategy.prompt != req.strategy.prompt:
+        strategy = db.ExtractionStrategy(
+            created_by_username=req.creator, created_at=now, model=req.strategy.model, prompt=req.strategy.prompt
+        )
+        session.add(strategy)
     extraction_batch = db.ExtractionBatch(
         created_by_username=req.creator,
         created_at=now,
@@ -513,6 +554,7 @@ def create_extraction_batch(
 class GetExtractionBatchResponse(ApiModel):
     id: str
     created_by: str
+    strategy: ApiExtractionStrategy
     run_classification: bool
     model_for_adaptation: adaptation_llm.ConcreteModel | None
 
@@ -560,6 +602,11 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
     return GetExtractionBatchResponse(
         id=str(extraction_batch.id),
         created_by=extraction_batch.created_by_username,
+        strategy=ApiExtractionStrategy(
+            id=str(extraction_batch.strategy.id),
+            model=extraction_batch.strategy.model,
+            prompt=extraction_batch.strategy.prompt,
+        ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,
         pages=pages,

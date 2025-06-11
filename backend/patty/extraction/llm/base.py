@@ -17,7 +17,7 @@ class Model(abc.ABC, pydantic.BaseModel):
         if cleaned_response.endswith("```"):
             cleaned_response = cleaned_response[:-3].strip()
 
-        return pydantic.RootModel[list[extracted.Exercise]](json.loads(cleaned_response)).root
+        return extracted.ExercisesList(json.loads(cleaned_response)).root
 
     @abc.abstractmethod
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str: ...

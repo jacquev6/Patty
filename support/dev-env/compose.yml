@@ -31,6 +31,7 @@ services:
       "backend/generated/db-tables-graph.png",
       "backend/generated/default-adaptation-prompt.md",
       "backend/generated/default-extraction-prompt.md",
+      "backend/generated/extracted-exercise-schema.json",
       "backend/generated/openapi.json",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
@@ -246,6 +247,27 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/openapi.json"]
       interval: 0.5s
       retries: 12
+  extracted-exercise-json-schema-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "extracted-exercise-schema.json", "python -m patty extracted-exercise-schema"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/extracted-exercise-schema.json"]
+      interval: 0.5s
+      retries: 12
   adapted-exercise-json-schema-generator:
     image: patty-dev_backend
     pull_policy: never
@@ -398,6 +420,8 @@ services:
       openapi-ts-generator:
         condition: service_healthy
       adapted-exercise-json-schema-generator:
+        condition: service_healthy
+      extracted-exercise-json-schema-generator:
         condition: service_healthy
       pdfjs-worker-copier:
         condition: service_completed_successfully

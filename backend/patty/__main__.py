@@ -116,6 +116,13 @@ def adapted_exercise_schema() -> None:
 
 
 @main.command()
+def extracted_exercise_schema() -> None:
+    from . import extracted
+
+    print(json.dumps(extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+
+
+@main.command()
 def default_adaptation_prompt() -> None:
     from . import fixtures
 

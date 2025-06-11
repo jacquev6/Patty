@@ -29,8 +29,8 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get Available Llm Models */
-    get: operations['get_available_llm_models_api_available_adaptation_llm_models_get']
+    /** Get Available Adaptation Llm Models */
+    get: operations['get_available_adaptation_llm_models_api_available_adaptation_llm_models_get']
     put?: never
     post?: never
     delete?: never
@@ -48,8 +48,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** Get Llm Response Schema */
-    post: operations['get_llm_response_schema_api_adaptation_llm_response_schema_post']
+    /** Make Adaptation Llm Response Schema */
+    post: operations['make_adaptation_llm_response_schema_api_adaptation_llm_response_schema_post']
     delete?: never
     options?: never
     head?: never
@@ -154,6 +154,57 @@ export interface paths {
     put?: never
     /** Create Pdf File */
     post: operations['create_pdf_file_api_pdf_files_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-llm-response-schema': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Extraction Llm Response Schema */
+    get: operations['get_extraction_llm_response_schema_api_extraction_llm_response_schema_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/available-extraction-llm-models': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Available Extraction Llm Models */
+    get: operations['get_available_extraction_llm_models_api_available_extraction_llm_models_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/latest-extraction-strategy': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Latest Extraction Strategy */
+    get: operations['get_latest_extraction_strategy_api_latest_extraction_strategy_get']
+    put?: never
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -528,6 +579,15 @@ export interface components {
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
+    /** ApiExtractionStrategy */
+    ApiExtractionStrategy: {
+      /** Id */
+      id: string
+      /** Model */
+      model: components['schemas']['DummyModel'] | components['schemas']['GeminiModel']
+      /** Prompt */
+      prompt: string
+    }
     /** ApiInput */
     ApiInput: {
       /** Pagenumber */
@@ -876,6 +936,20 @@ export interface components {
        */
       kind: 'freeTextInput'
     }
+    /** GeminiModel */
+    GeminiModel: {
+      /**
+       * Provider
+       * @default gemini
+       * @constant
+       */
+      provider: 'gemini'
+      /**
+       * Name
+       * @constant
+       */
+      name: 'gemini-2.0-flash'
+    }
     /** GetAdaptationBatchResponse */
     GetAdaptationBatchResponse: {
       /** Id */
@@ -917,6 +991,7 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string
+      strategy: components['schemas']['ApiExtractionStrategy']
       /** Runclassification */
       runClassification: boolean
       /** Modelforadaptation */
@@ -1254,6 +1329,7 @@ export interface components {
       firstPage: number
       /** Pagescount */
       pagesCount: number
+      strategy: components['schemas']['ApiExtractionStrategy']
       /** Runclassification */
       runClassification: boolean
       /** Modelforadaptation */
@@ -1617,7 +1693,7 @@ export interface operations {
       }
     }
   }
-  get_available_llm_models_api_available_adaptation_llm_models_get: {
+  get_available_adaptation_llm_models_api_available_adaptation_llm_models_get: {
     parameters: {
       query?: never
       header?: never
@@ -1641,7 +1717,7 @@ export interface operations {
       }
     }
   }
-  get_llm_response_schema_api_adaptation_llm_response_schema_post: {
+  make_adaptation_llm_response_schema_api_adaptation_llm_response_schema_post: {
     parameters: {
       query?: never
       header?: never
@@ -1902,6 +1978,66 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_extraction_llm_response_schema_api_extraction_llm_response_schema_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': Record<string, never>
+        }
+      }
+    }
+  }
+  get_available_extraction_llm_models_api_available_extraction_llm_models_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': (components['schemas']['DummyModel'] | components['schemas']['GeminiModel'])[]
+        }
+      }
+    }
+  }
+  get_latest_extraction_strategy_api_latest_extraction_strategy_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiExtractionStrategy']
         }
       }
     }
