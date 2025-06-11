@@ -557,7 +557,7 @@ export interface components {
       /** Id */
       id: string
       /** Createdby */
-      createdBy: string
+      createdBy: string | null
       /** Classificationbatchid */
       classificationBatchId: string | null
       /** Adaptationbatchid */
@@ -744,7 +744,7 @@ export interface components {
       /** Id */
       id: string
       /** Createdby */
-      createdBy: string
+      createdBy: string | null
       /**
        * Createdat
        * Format: date-time
@@ -970,7 +970,7 @@ export interface components {
       /** Id */
       id: string
       /** Createdby */
-      createdBy: string
+      createdBy: string | null
       /** Modelforadaptation */
       modelForAdaptation:
         | components['schemas']['DummyModel']

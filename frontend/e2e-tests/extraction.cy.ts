@@ -33,10 +33,6 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("Run classification after extraction: no")').should('exist')
     cy.get('p:contains("Run adaptations")').should('not.exist')
     cy.get('p:contains("Created by: Alice")').should('exist')
-
-    cy.visit('/')
-    cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
-    cy.get('a:contains("Batch E1")').should('have.attr', 'href', '/extraction-batch-1')
   })
 
   it('creates an extraction batch with classification and adaptation', () => {
@@ -62,6 +58,11 @@ describe('The extraction batch creation page', () => {
         cy.visit(`${href}&download=false`)
       })
     cy.get('a:contains("Exercise")').should('have.length', 4)
+
+    cy.visit('/')
+    cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
+    cy.get('a:contains("Batch E1")').should('have.attr', 'href', '/extraction-batch-1')
+    cy.get('ul:contains("Batch C")').should('not.exist')
   })
 
   it('remembers the last strategy used', () => {

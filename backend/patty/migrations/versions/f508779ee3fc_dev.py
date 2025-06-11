@@ -85,6 +85,35 @@ def upgrade() -> None:
         ["created_by_page_extraction_id"],
         ["id"],
     )
+    op.add_column("adaptation_strategies", sa.Column("created_by_classification_batch_id", sa.Integer(), nullable=True))
+    op.alter_column("adaptation_strategies", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
+    op.create_foreign_key(
+        op.f("fk_adaptation_strategies_created_by_classification_batch_id_classification_batches"),
+        "adaptation_strategies",
+        "classification_batches",
+        ["created_by_classification_batch_id"],
+        ["id"],
+    )
+    op.alter_column("adaptations", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
+    op.add_column("classification_batches", sa.Column("created_by_page_extraction_id", sa.Integer(), nullable=True))
+    op.alter_column("classification_batches", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
+    op.create_foreign_key(
+        op.f("fk_classification_batches_created_by_page_extraction_id_page_extractions"),
+        "classification_batches",
+        "page_extractions",
+        ["created_by_page_extraction_id"],
+        ["id"],
+    )
+    op.add_column("exercise_classes", sa.Column("created_by_classification_batch_id", sa.Integer(), nullable=True))
+    op.alter_column("exercise_classes", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
+    op.create_foreign_key(
+        op.f("fk_exercise_classes_created_by_classification_batch_id_classification_batches"),
+        "exercise_classes",
+        "classification_batches",
+        ["created_by_classification_batch_id"],
+        ["id"],
+    )
+    op.alter_column("exercises", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
     # ### end Alembic commands ###
     op.drop_table("old_adaptation_external_exercises")
     op.drop_table("old_adaptation_adaptations")

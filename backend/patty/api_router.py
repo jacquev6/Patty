@@ -81,7 +81,7 @@ class ApiInput(ApiModel):
 
 class ApiAdaptation(ApiModel):
     id: str
-    created_by: str
+    created_by: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
     strategy: ApiStrategy
@@ -171,7 +171,11 @@ async def post_adaptation_batch(
             assert branch_name == req.strategy.settings.name
             base_settings = None
             exercise_class = db.ExerciseClass(
-                name=branch_name, created_by_username=req.creator, created_at=now, latest_strategy_settings=None
+                name=branch_name,
+                created_by_username=req.creator,
+                created_by_classification_batch=None,
+                created_at=now,
+                latest_strategy_settings=None,
             )
             session.add(exercise_class)
         else:
@@ -202,7 +206,11 @@ async def post_adaptation_batch(
         session.flush()
         exercise_class.latest_strategy_settings = settings
     strategy = db.AdaptationStrategy(
-        created_by_username=req.creator, created_at=now, model=req.strategy.model, settings=settings
+        created_by_username=req.creator,
+        created_by_classification_batch=None,
+        created_at=now,
+        model=req.strategy.model,
+        settings=settings,
     )
     session.add(strategy)
 
@@ -214,6 +222,7 @@ async def post_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -322,13 +331,17 @@ def create_classification_batch(
 ) -> PostClassificationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
     classification_batch = db.ClassificationBatch(
-        created_by_username=req.creator, created_at=now, model_for_adaptation=req.model_for_adaptation
+        created_by_username=req.creator,
+        created_by_page_extraction=None,
+        created_at=now,
+        model_for_adaptation=req.model_for_adaptation,
     )
     session.add(classification_batch)
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=None,
             removed_from_textbook=False,
@@ -351,7 +364,7 @@ def create_classification_batch(
 
 class GetClassificationBatchResponse(ApiModel):
     id: str
-    created_by: str
+    created_by: str | None
     model_for_adaptation: adaptation_llm.ConcreteModel | None
 
     class Exercise(ApiModel):
@@ -393,7 +406,7 @@ async def get_classification_batch(
 class GetClassificationBatchesResponse(ApiModel):
     class ClassificationBatch(ApiModel):
         id: str
-        created_by: str
+        created_by: str | None
         created_at: datetime.datetime
 
     classification_batches: list[ClassificationBatch]
@@ -401,7 +414,11 @@ class GetClassificationBatchesResponse(ApiModel):
 
 @api_router.get("/classification-batches")
 async def get_classification_batches(session: database_utils.SessionDependable) -> GetClassificationBatchesResponse:
-    classification_batches = session.query(db.ClassificationBatch).order_by(-db.ClassificationBatch.id).all()
+    request = (
+        sql.select(db.ClassificationBatch)
+        .filter(db.ClassificationBatch.created_by_username != sql.null())
+        .order_by(-db.ClassificationBatch.id)
+    )
     return GetClassificationBatchesResponse(
         classification_batches=[
             GetClassificationBatchesResponse.ClassificationBatch(
@@ -409,7 +426,7 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
                 created_by=classification_batch.created_by_username,
                 created_at=classification_batch.created_at,
             )
-            for classification_batch in classification_batches
+            for classification_batch in session.execute(request).scalars().all()
         ]
     )
 
@@ -748,6 +765,7 @@ def post_textbook_adaptation_batch(
 
     strategy = db.AdaptationStrategy(
         created_by_username=req.creator,
+        created_by_classification_batch=None,
         created_at=now,
         model=req.model,
         settings=exercise_class.latest_strategy_settings,
@@ -766,6 +784,7 @@ def post_textbook_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created_by_username=req.creator,
+            created_by_page_extraction=None,
             created_at=now,
             textbook=textbook,
             removed_from_textbook=False,

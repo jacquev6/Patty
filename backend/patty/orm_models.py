@@ -43,7 +43,7 @@ class Textbook(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'Textbook's are created manually
 
     title: orm.Mapped[str]
 
@@ -66,7 +66,7 @@ class BaseExercise(OrmBase):
     kind: orm.Mapped[str]
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str | None]  # Some 'AdaptableExercise's are created by a 'PageExtraction'
 
     textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
     textbook: orm.Mapped[Textbook | None] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
@@ -86,62 +86,11 @@ class ExternalExercise(BaseExercise):
     original_file_name: orm.Mapped[str]
 
 
-class ClassificationBatch(OrmBase):
-    __tablename__ = "classification_batches"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
-
-    exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
-        back_populates="classified_by_classification_batch", order_by=lambda: [AdaptableExercise.id]
-    )
-
-    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
-
-    @property
-    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
-        if self._model_for_adaptation is None:
-            return None
-        else:
-            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
-
-    @model_for_adaptation.setter
-    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
-        if value is None:
-            self._model_for_adaptation = sql.null()
-        else:
-            self._model_for_adaptation = value.model_dump()
-
-    adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
-        back_populates="classification_batch", order_by="Adaptation.id"
-    )
-
-
-class ExerciseClass(OrmBase):
-    __tablename__ = "exercise_classes"
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
-
-    name: orm.Mapped[str]
-
-    latest_strategy_settings_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey("adaptation_strategy_settings.id", use_alter=True)
-    )
-    latest_strategy_settings: orm.Mapped[AdaptationStrategySettings | None] = orm.relationship(
-        foreign_keys=[latest_strategy_settings_id], remote_side=lambda: [AdaptationStrategySettings.id]
-    )
-
-
 class PdfFile(OrmBase):
     __tablename__ = "pdf_files"
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'PdfFile's are created manually
 
     sha256: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     bytes_count: orm.Mapped[int]
@@ -155,7 +104,7 @@ class PdfFileRange(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'PdfFileRange's are created manually
 
     pdf_file_sha256: orm.Mapped[str] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
     pdf_file: orm.Mapped[PdfFile] = orm.relationship(foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256])
@@ -169,7 +118,7 @@ class ExtractionStrategy(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'ExtractionStrategy's are created manually
 
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
 
@@ -190,7 +139,7 @@ class ExtractionBatch(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'ExtractionBatch's are created manually
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
     strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
@@ -229,7 +178,7 @@ class PageExtraction(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'PageExtraction's are created manually
 
     extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
     extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
@@ -241,6 +190,67 @@ class PageExtraction(OrmBase):
 
     exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
         back_populates="created_by_page_extraction", order_by=[BaseExercise.page_number, BaseExercise.exercise_number]
+    )
+
+
+class ClassificationBatch(OrmBase):
+    __tablename__ = "classification_batches"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str | None]  # Some 'ClassificationBatch's are created by a 'PageExtraction'
+    created_by_page_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
+    created_by_page_extraction: orm.Mapped[PageExtraction | None] = orm.relationship(
+        foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id]
+    )
+
+    exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
+        back_populates="classified_by_classification_batch", order_by=lambda: [AdaptableExercise.id]
+    )
+
+    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
+        if self._model_for_adaptation is None:
+            return None
+        else:
+            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
+        if value is None:
+            self._model_for_adaptation = sql.null()
+        else:
+            self._model_for_adaptation = value.model_dump()
+
+    adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
+        back_populates="classification_batch", order_by="Adaptation.id"
+    )
+
+
+class ExerciseClass(OrmBase):
+    __tablename__ = "exercise_classes"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str | None]  # Some 'ExerciseClass's are created by a 'ClassificationBatch'
+    created_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
+        sql.ForeignKey(ClassificationBatch.id)
+    )
+    created_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
+        foreign_keys=[created_by_classification_batch_id], remote_side=[ClassificationBatch.id]
+    )
+
+    name: orm.Mapped[str]
+
+    latest_strategy_settings_id: orm.Mapped[int | None] = orm.mapped_column(
+        sql.ForeignKey("adaptation_strategy_settings.id", use_alter=True)
+    )
+    latest_strategy_settings: orm.Mapped[AdaptationStrategySettings | None] = orm.relationship(
+        foreign_keys=[latest_strategy_settings_id], remote_side=lambda: [AdaptationStrategySettings.id]
     )
 
 
@@ -284,7 +294,7 @@ class AdaptationStrategySettings(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'AdaptationStrategySettings's are created manually
 
     exercise_class_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseClass.id))
     exercise_class: orm.Mapped[ExerciseClass | None] = orm.relationship(
@@ -314,7 +324,13 @@ class AdaptationStrategy(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str | None]  # Some 'AdaptationStrategy's are created by a 'ClassificationBatch'
+    created_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
+        sql.ForeignKey(ClassificationBatch.id)
+    )
+    created_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
+        foreign_keys=[created_by_classification_batch_id], remote_side=[ClassificationBatch.id]
+    )
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationStrategySettings.id))
     settings: orm.Mapped[AdaptationStrategySettings] = orm.relationship(
@@ -338,7 +354,7 @@ class AdaptationBatch(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str]  # All 'AdaptationBatch's are created manually
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationStrategy.id))
     strategy: orm.Mapped[AdaptationStrategy] = orm.relationship(
@@ -362,7 +378,7 @@ class Adaptation(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]
+    created_by_username: orm.Mapped[str | None]  # Some 'Adaptation's are created by a 'ClassificationBatch'
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(

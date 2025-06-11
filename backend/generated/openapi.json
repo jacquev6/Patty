@@ -1630,7 +1630,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "classificationBatchId": {
@@ -2151,7 +2158,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "createdAt": {
@@ -2755,7 +2769,14 @@
             "title": "Id"
           },
           "createdBy": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Createdby"
           },
           "modelForAdaptation": {

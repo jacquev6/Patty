@@ -71,7 +71,8 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         if extraction.extraction_batch.run_classification:
             classification_batch = ClassificationBatch(
                 created_at=created_at,
-                created_by_username="Extraction",
+                created_by_username=None,
+                created_by_page_extraction=extraction,
                 model_for_adaptation=extraction.extraction_batch.model_for_adaptation,
             )
             session.add(classification_batch)
@@ -95,7 +96,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
             )
             exercise = AdaptableExercise(
                 created_at=created_at,
-                created_by_username="Extraction",
+                created_by_username=None,
                 textbook=None,
                 removed_from_textbook=False,
                 page_number=extraction.page_number,

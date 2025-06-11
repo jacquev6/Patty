@@ -2,7 +2,7 @@ import type { Adaptation as ApiAdaptation, AdaptedExercise } from './apiClient'
 
 export type PreprocessedAdaptation = {
   id: string
-  createdBy: string
+  createdBy: string | null
   classificationBatchId: string | null
   adaptationBatchId: string | null
   strategy: ApiAdaptation['strategy']

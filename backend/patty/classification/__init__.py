@@ -77,7 +77,8 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             if exercise_class is None:
                 exercise_class = db.ExerciseClass(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
+                    created_by_classification_batch=batch,
                     name=exercise_class_name,
                     latest_strategy_settings=None,
                 )
@@ -88,14 +89,15 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             if batch.model_for_adaptation is not None and exercise_class.latest_strategy_settings is not None:
                 adaptation_strategy = db.AdaptationStrategy(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
+                    created_by_classification_batch=batch,
                     model=batch.model_for_adaptation,
                     settings=exercise_class.latest_strategy_settings,
                 )
                 session.add(adaptation_strategy)
                 adaptation = db.Adaptation(
                     created_at=now,
-                    created_by_username="Classification",
+                    created_by_username=None,
                     exercise=exercise,
                     strategy=adaptation_strategy,
                     classification_batch=batch,
