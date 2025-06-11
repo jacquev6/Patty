@@ -69,7 +69,7 @@ def upgrade() -> None:
         sa.Column("created_by_username", sa.String(), nullable=False),
         sa.Column("extraction_batch_id", sa.Integer(), nullable=False),
         sa.Column("page_number", sa.Integer(), nullable=False),
-        sa.Column("status", sa.Enum("pending", "success", "failure", native_enum=False), nullable=False),
+        sa.Column("assistant_response", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["extraction_batch_id"],
             ["extraction_batches.id"],

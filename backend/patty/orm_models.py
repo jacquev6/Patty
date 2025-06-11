@@ -8,8 +8,9 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 import pydantic
 
+from .extraction import assistant_responses as extraction_responses
+from .adaptation import adaptation as adaptation_responses
 from .adaptation import llm as adaptation_llm
-from .adaptation.adaptation import Adjustment, AssistantResponse
 from .adaptation.strategy import ConcreteLlmResponseSpecification
 from .adapted import Exercise as AdaptedExercise
 from .any_json import JsonDict, JsonList
@@ -186,7 +187,22 @@ class PageExtraction(OrmBase):
     )
 
     page_number: orm.Mapped[int]
-    status: orm.Mapped[typing.Literal["pending", "success", "failure"]]
+
+    _assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("assistant_response", sql.JSON)
+
+    @property
+    def assistant_response(self) -> extraction_responses.AssistantResponse | None:
+        if self._assistant_response is None:
+            return None
+        else:
+            return pydantic.RootModel[extraction_responses.AssistantResponse](self._assistant_response).root  # type: ignore[arg-type]
+
+    @assistant_response.setter
+    def assistant_response(self, value: extraction_responses.AssistantResponse | None) -> None:
+        if value is None:
+            self._assistant_response = sql.null()
+        else:
+            self._assistant_response = value.model_dump()
 
     exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
         back_populates="created_by_page_extraction", order_by=[BaseExercise.page_number, BaseExercise.exercise_number]
@@ -406,14 +422,14 @@ class Adaptation(OrmBase):
     _initial_assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("initial_assistant_response", sql.JSON)
 
     @property
-    def initial_assistant_response(self) -> AssistantResponse | None:
+    def initial_assistant_response(self) -> adaptation_responses.AssistantResponse | None:
         if self._initial_assistant_response is None:
             return None
         else:
-            return pydantic.RootModel[AssistantResponse](self._initial_assistant_response).root  # type: ignore[arg-type]
+            return pydantic.RootModel[adaptation_responses.AssistantResponse](self._initial_assistant_response).root  # type: ignore[arg-type]
 
     @initial_assistant_response.setter
-    def initial_assistant_response(self, value: AssistantResponse | None) -> None:
+    def initial_assistant_response(self, value: adaptation_responses.AssistantResponse | None) -> None:
         if value is None:
             self._initial_assistant_response = sql.null()
         else:
@@ -422,11 +438,11 @@ class Adaptation(OrmBase):
     _adjustments: orm.Mapped[JsonList] = orm.mapped_column("adjustments", sql.JSON)
 
     @property
-    def adjustments(self) -> list[Adjustment]:
-        return [Adjustment(**adjustment) for adjustment in self._adjustments]
+    def adjustments(self) -> list[adaptation_responses.Adjustment]:
+        return [adaptation_responses.Adjustment(**adjustment) for adjustment in self._adjustments]
 
     @adjustments.setter
-    def adjustments(self, value: list[Adjustment]) -> None:
+    def adjustments(self, value: list[adaptation_responses.Adjustment]) -> None:
         self._adjustments = [adjustment.model_dump() for adjustment in value]
 
     _manual_edit: orm.Mapped[JsonDict | None] = orm.mapped_column("manual_edit", sql.JSON)

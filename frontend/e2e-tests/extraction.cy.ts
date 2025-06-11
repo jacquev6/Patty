@@ -86,4 +86,33 @@ describe('The extraction batch creation page', () => {
     cy.get('[data-cy="llm-name"]').should('have.value', 'dummy-2')
     cy.get('[data-cy="prompt"]').should('have.value', 'Bleh bleh.')
   })
+
+  it('handles non-JSON response from the LLM', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('[data-cy="prompt"]').type('{selectAll}Not JSON')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}1')
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("The LLM returned a response that is not correct JSON.")').should('exist')
+  })
+
+  it('handles invalid JSON response from the LLM', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('[data-cy="prompt"]').type('{selectAll}Invalid JSON')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}1')
+    cy.get('button:contains("Submit")').click()
+    cy.get(
+      'p:contains("The LLM returned a JSON response that does not validate against the extracted exercises list schema.")',
+    ).should('exist')
+  })
+
+  it('handles unknown error from the LLM', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('[data-cy="prompt"]').type('{selectAll}Unknown error')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}1')
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("The LLM caused an unknown error.")').should('exist')
+  })
 })

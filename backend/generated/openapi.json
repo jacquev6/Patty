@@ -1600,7 +1600,7 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -1676,7 +1676,7 @@
           "initialAssistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -2042,25 +2042,6 @@
           "text"
         ],
         "title": "AssistantNotJsonError"
-      },
-      "AssistantSuccess": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercise": {
-            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "AssistantSuccess"
       },
       "AssistantUnknownError": {
         "properties": {
@@ -3449,9 +3430,25 @@
             "type": "integer",
             "title": "Pagenumber"
           },
-          "done": {
-            "type": "boolean",
-            "title": "Done"
+          "assistantResponse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__extraction__assistant_responses__AssistantSuccess"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AssistantUnknownError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistantresponse"
           },
           "exercises": {
             "items": {
@@ -3465,7 +3462,7 @@
         "type": "object",
         "required": [
           "pageNumber",
-          "done",
+          "assistantResponse",
           "exercises"
         ],
         "title": "Page"
@@ -4292,6 +4289,25 @@
           "kind"
         ]
       },
+      "patty__adaptation__adaptation__AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "AssistantSuccess"
+      },
       "patty__adapted__Exercise-Output": {
         "properties": {
           "format": {
@@ -4560,6 +4576,120 @@
           "adaptation"
         ],
         "title": "Exercise"
+      },
+      "patty__extracted__Exercise": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "consignes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Consignes",
+            "default": []
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          }
+        },
+        "type": "object",
+        "title": "Exercise"
+      },
+      "patty__extraction__assistant_responses__AssistantSuccess": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__extracted__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercises"
+        ],
+        "title": "AssistantSuccess"
       }
     },
     "securitySchemes": {

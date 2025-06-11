@@ -547,7 +547,7 @@ export interface components {
       userPrompt: string
       /** Assistantresponse */
       assistantResponse:
-        | components['schemas']['AssistantSuccess']
+        | components['schemas']['patty__adaptation__adaptation__AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
         | components['schemas']['AssistantUnknownError']
@@ -568,7 +568,7 @@ export interface components {
       rawLlmConversations: unknown[]
       /** Initialassistantresponse */
       initialAssistantResponse:
-        | components['schemas']['AssistantSuccess']
+        | components['schemas']['patty__adaptation__adaptation__AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
         | components['schemas']['AssistantUnknownError']
@@ -688,15 +688,6 @@ export interface components {
       error: 'not-json'
       /** Text */
       text: string
-    }
-    /** AssistantSuccess */
-    AssistantSuccess: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'success'
-      exercise: components['schemas']['patty__adapted__Exercise-Output']
     }
     /** AssistantUnknownError */
     AssistantUnknownError: {
@@ -1246,8 +1237,13 @@ export interface components {
     Page: {
       /** Pagenumber */
       pageNumber: number
-      /** Done */
-      done: boolean
+      /** Assistantresponse */
+      assistantResponse:
+        | components['schemas']['patty__extraction__assistant_responses__AssistantSuccess']
+        | components['schemas']['AssistantInvalidJsonError']
+        | components['schemas']['AssistantNotJsonError']
+        | components['schemas']['AssistantUnknownError']
+        | null
       /** Exercises */
       exercises: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page__Exercise'][]
     }
@@ -1571,6 +1567,15 @@ export interface components {
        */
       kind: 'whitespace'
     }
+    /** AssistantSuccess */
+    patty__adaptation__adaptation__AssistantSuccess: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      exercise: components['schemas']['patty__adapted__Exercise-Output']
+    }
     'patty__adapted__Exercise-Output': {
       /**
        * Format
@@ -1639,6 +1644,38 @@ export interface components {
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
+    }
+    /** Exercise */
+    patty__extracted__Exercise: {
+      /** Id */
+      id?: string | null
+      /** Numero */
+      numero?: string | null
+      /**
+       * Consignes
+       * @default []
+       */
+      consignes: string[]
+      /** Conseil */
+      conseil?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Enonce */
+      enonce?: string | null
+      /** References */
+      references?: string | null
+      /** Autre */
+      autre?: string | null
+    }
+    /** AssistantSuccess */
+    patty__extraction__assistant_responses__AssistantSuccess: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /** Exercises */
+      exercises: components['schemas']['patty__extracted__Exercise'][]
     }
   }
   responses: never

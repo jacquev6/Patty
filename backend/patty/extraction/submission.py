@@ -14,6 +14,13 @@ import urllib.parse
 from .. import database_utils
 from .. import settings
 from ..orm_models import PageExtraction, AdaptableExercise, ClassificationBatch
+from .assistant_responses import (
+    AssistantSuccess,
+    AssistantUnknownError,
+    AssistantInvalidJsonError,
+    AssistantNotJsonError,
+)
+from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
 def log(message: str) -> None:
@@ -28,7 +35,9 @@ pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 
 def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     extractions = (
-        session.execute(sql.select(PageExtraction).where(PageExtraction.status == "pending").limit(parallelism))
+        session.execute(
+            sql.select(PageExtraction).where(PageExtraction._assistant_response == sql.null()).limit(parallelism)
+        )
         .scalars()
         .all()
     )
@@ -51,7 +60,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         pdf_data_cache[sha256] = pdf_data
     image = pdf_page_as_image(pdf_data, extraction.page_number)
 
-    # All branches must set 'extraction.status' to avoid infinite loop
+    # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {extraction.id}")
@@ -59,10 +68,18 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         extracted_exercises = extraction.extraction_batch.strategy.model.extract(
             extraction.extraction_batch.strategy.prompt, image
         )
+    except InvalidJsonLlmException as error:
+        log(f"Error 'invalid JSON' on page extraction {extraction.id}")
+        extraction.assistant_response = AssistantInvalidJsonError(
+            kind="error", error="invalid-json", parsed=error.parsed
+        )
+    except NotJsonLlmException as error:
+        log(f"Error 'not JSON' on page extraction {extraction.id}")
+        extraction.assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
     except Exception:
         log(f"UNEXPECTED ERROR on page extraction {extraction.id}")
         traceback.print_exc()
-        extraction.status = "failure"
+        extraction.assistant_response = AssistantUnknownError(kind="error", error="unknown")
     else:
         log(f"Success on page extraction {extraction.id}")
 
@@ -111,7 +128,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
                 exercise_class=None,
             )
             session.add(exercise)
-        extraction.status = "success"
+        extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

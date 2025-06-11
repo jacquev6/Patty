@@ -35,7 +35,9 @@ async function refresh() {
 
     let needsRefresh = false
     for (const page of extractionBatchResponse.data.pages) {
-      if (page.done) {
+      if (page.assistantResponse === null) {
+        needsRefresh = true
+      } else {
         for (const exercise of page.exercises) {
           if (extractionBatchResponse.data.runClassification && exercise.exerciseClass === null) {
             needsRefresh = true
@@ -46,8 +48,6 @@ async function refresh() {
             break
           }
         }
-      } else {
-        needsRefresh = true
       }
       if (needsRefresh) {
         break

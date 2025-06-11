@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
+
 import { type ExtractionBatch } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from './WhiteSpace.vue'
@@ -58,26 +60,45 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       <template v-for="page in extractionBatch.pages" :key="page.pageNumber">
         <h2>
           Page {{ page.pageNumber
-          }}<template v-if="!page.done"
+          }}<template v-if="page.assistantResponse === null"
             ><WhiteSpace /><span class="inProgress">(in progress, will refresh when done)</span></template
           >
         </h2>
-        <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
-          <EditClassificationBatchFormExercisePreview
-            header="h3"
-            :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
-            :exercise
-            :index
-          >
-            <h3>
-              Exercise {{ exercise.exerciseNumber
-              }}<template v-if="extractionBatch.runClassification"
-                ><span v-if="exercise.exerciseClass === null" class="inProgress">
-                  (in progress, will refresh when done) </span
-                ><template v-else>: {{ exercise.exerciseClass }} </template></template
+        <template v-if="page.assistantResponse !== null">
+          <template v-if="page.assistantResponse.kind === 'success'">
+            <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
+              <EditClassificationBatchFormExercisePreview
+                header="h3"
+                :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
+                :exercise
+                :index
               >
-            </h3>
-          </EditClassificationBatchFormExercisePreview>
+                <h3>
+                  Exercise {{ exercise.exerciseNumber
+                  }}<template v-if="extractionBatch.runClassification"
+                    ><span v-if="exercise.exerciseClass === null" class="inProgress">
+                      (in progress, will refresh when done) </span
+                    ><template v-else>: {{ exercise.exerciseClass }} </template></template
+                  >
+                </h3>
+              </EditClassificationBatchFormExercisePreview>
+            </template>
+          </template>
+          <template v-else-if="page.assistantResponse.kind === 'error'">
+            <template v-if="page.assistantResponse.error === 'not-json'">
+              <p>The LLM returned a response that is not correct JSON.</p>
+              <pre>{{ page.assistantResponse.text }}</pre>
+            </template>
+            <template v-else-if="page.assistantResponse.error === 'invalid-json'">
+              <p>
+                The LLM returned a JSON response that does not validate against the extracted exercises list schema.
+              </p>
+              <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
+            </template>
+            <p v-else-if="page.assistantResponse.error === 'unknown'">The LLM caused an unknown error.</p>
+            <p v-else>Unexpected assistant error response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
+          </template>
+          <p v-else>Unexpected assistant response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
         </template>
       </template>
     </template>

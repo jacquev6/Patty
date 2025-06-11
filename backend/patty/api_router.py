@@ -16,12 +16,12 @@ import sqlalchemy as sql
 from . import authentication
 from . import database_utils
 from . import extracted
+from . import orm_models as db
 from . import settings
 from .adaptation import llm as adaptation_llm
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
-from . import orm_models as db
 from .adaptation.adaptation import (
     Adjustment,
     AssistantInvalidJsonError,
@@ -32,6 +32,7 @@ from .adaptation.adaptation import (
 from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 from .adaptation.submission import LlmMessage
 from .extraction import llm as extraction_llm
+from .extraction import assistant_responses as extraction_responses
 
 __all__ = ["router"]
 
@@ -559,7 +560,7 @@ def create_extraction_batch(
             created_at=now,
             extraction_batch=extraction_batch,
             page_number=page_number,
-            status="pending",
+            assistant_response=None,
         )
         session.add(page)
 
@@ -577,7 +578,7 @@ class GetExtractionBatchResponse(ApiModel):
 
     class Page(ApiModel):
         page_number: int
-        done: bool
+        assistant_response: extraction_responses.AssistantResponse | None
 
         class Exercise(ApiModel):
             page_number: int | None
@@ -598,7 +599,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
     pages = [
         GetExtractionBatchResponse.Page(
             page_number=page_extraction.page_number,
-            done=page_extraction.status != "pending",
+            assistant_response=page_extraction.assistant_response,
             exercises=[
                 GetExtractionBatchResponse.Page.Exercise(
                     page_number=exercise.page_number,
