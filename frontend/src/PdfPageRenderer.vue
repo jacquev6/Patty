@@ -23,10 +23,7 @@ const renderedPage = ref<number | null>(null)
 let renderTask: RenderTask | null = null
 const busy = ref(false)
 async function draw() {
-  assert(props.page !== null)
-  assert(canvas.value !== null)
-
-  if (containerWidth.value > 0) {
+  if (canvas.value !== null && containerWidth.value > 0) {
     const startTime = performance.now()
 
     busy.value = true
