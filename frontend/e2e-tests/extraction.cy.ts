@@ -1,4 +1,4 @@
-import { ignoreResizeObserverLoopError, visit } from './utils'
+import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
 
 describe('The extraction batch creation page', () => {
   beforeEach(() => {
@@ -10,9 +10,16 @@ describe('The extraction batch creation page', () => {
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
-  // @todo it('looks like this', () => {
-  //   screenshot('extraction-batch-creation-page')
-  // })
+  it('looks like this', () => {
+    screenshot('extraction-batch-creation-page')
+  })
+
+  it('looks like this after selecting a PDF', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("PDF file:")').should('contain.text', '(uploaded)', { timeout: 10000 })
+    cy.get('div.busy').should('not.exist')
+    screenshot('extraction-batch-creation-page-with-pdf')
+  })
 
   it('creates an extraction batch without classification or adaptation', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
