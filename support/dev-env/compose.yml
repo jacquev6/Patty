@@ -185,7 +185,7 @@ services:
       - backend/secrets.env
     init: true
     command: [
-      "watchmedo", "auto-restart", "--directory", "/app", "--pattern", "*.py", "--recursive", "--",
+      "watchmedo", "auto-restart", "--pattern", "*.py", "--recursive", "--",
       "python", "-m", "patty", "run-submission-daemon"
     ]
     depends_on:
