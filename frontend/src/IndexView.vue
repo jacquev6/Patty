@@ -82,6 +82,12 @@ async function loadNextAdaptationBatchesChunk() {
   adaptationBatches.push(...response.data.adaptationBatches)
   nextAdaptationBatchesChunkId.value = response.data.nextChunkId
 }
+
+function textbookSummary(textbook: Textbooks['textbooks'][number]) {
+  return [textbook.title, textbook.editor, textbook.year ? textbook.year.toString() : null]
+    .filter((part) => part !== null && part !== undefined)
+    .join(', ')
+}
 </script>
 
 <template>
@@ -156,7 +162,9 @@ async function loadNextAdaptationBatchesChunk() {
         <h2>Existing textbooks</h2>
         <ul>
           <li v-for="textbook in textbooks">
-            <RouterLink :to="{ name: 'textbook', params: { id: textbook.id } }">{{ textbook.title }}</RouterLink>
+            <RouterLink :to="{ name: 'textbook', params: { id: textbook.id } }">{{
+              textbookSummary(textbook)
+            }}</RouterLink>
             (created by {{ textbook.createdBy }} on {{ new Date(textbook.createdAt).toLocaleString() }})
           </li>
         </ul>

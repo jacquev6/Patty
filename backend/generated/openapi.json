@@ -2037,6 +2037,39 @@
             "type": "string",
             "title": "Title"
           },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "isbn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isbn"
+          },
           "adaptationBatches": {
             "items": {
               "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
@@ -2058,6 +2091,9 @@
           "id",
           "createdBy",
           "title",
+          "editor",
+          "year",
+          "isbn",
           "adaptationBatches",
           "externalExercises"
         ],
@@ -3993,13 +4029,49 @@
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "isbn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isbn"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "creator",
-          "title"
+          "title",
+          "editor",
+          "year",
+          "isbn"
         ],
         "title": "PostTextbookRequest"
       },
@@ -4351,6 +4423,28 @@
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
           }
         },
         "additionalProperties": false,
@@ -4359,7 +4453,9 @@
           "id",
           "createdBy",
           "createdAt",
-          "title"
+          "title",
+          "editor",
+          "year"
         ],
         "title": "Textbook"
       },

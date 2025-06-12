@@ -705,6 +705,9 @@ async def get_extraction_batches(
 class PostTextbookRequest(ApiModel):
     creator: str
     title: str
+    editor: str | None
+    year: int | None
+    isbn: str | None
 
 
 class PostTextbookResponse(ApiModel):
@@ -716,7 +719,12 @@ def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
     textbook = db.Textbook(
-        title=req.title, created_by_username=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc)
+        created_by_username=req.creator,
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        title=req.title,
+        editor=req.editor,
+        year=req.year,
+        isbn=req.isbn,
     )
     session.add(textbook)
     session.flush()
@@ -727,6 +735,9 @@ class ApiTextbook(ApiModel):
     id: str
     created_by: str
     title: str
+    editor: str | None
+    year: int | None
+    isbn: str | None
 
     class AdaptationBatch(ApiModel):
         id: str
@@ -769,6 +780,8 @@ class GetTextbooksResponse(ApiModel):
         created_by: str
         created_at: datetime.datetime
         title: str
+        editor: str | None
+        year: int | None
 
     textbooks: list[Textbook]
 
@@ -783,6 +796,8 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
                 created_by=textbook.created_by_username,
                 created_at=textbook.created_at,
                 title=textbook.title,
+                editor=textbook.editor,
+                year=textbook.year,
             )
             for textbook in textbooks
         ]
@@ -1098,6 +1113,9 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         id=str(textbook.id),
         created_by=textbook.created_by_username,
         title=textbook.title,
+        editor=textbook.editor,
+        year=textbook.year,
+        isbn=textbook.isbn,
         adaptation_batches=[
             ApiTextbook.AdaptationBatch(
                 id=str(adaptation_batch.id),

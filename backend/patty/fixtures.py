@@ -286,6 +286,7 @@ class FixturesCreator:
         return self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             model=adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
             settings=strategy_settings,
@@ -331,6 +332,7 @@ class FixturesCreator:
         return self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=settings,
@@ -340,6 +342,7 @@ class FixturesCreator:
         return self.make(
             db.AdaptableExercise,
             created_by_username="Patty",
+            created_by_page_extraction=None,
             created_at=created_at,
             page_number=42,
             exercise_number="5",
@@ -632,6 +635,7 @@ class FixturesCreator:
         exercise_class = self.make(
             db.ExerciseClass,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             name=name,
             latest_strategy_settings=settings,
@@ -641,13 +645,20 @@ class FixturesCreator:
 
     def create_dummy_textbook(self) -> None:
         textbook = self.make(
-            db.Textbook, created_by_username="Patty", created_at=created_at, title="Dummy Textbook Title"
+            db.Textbook,
+            created_by_username="Patty",
+            created_at=created_at,
+            title="Dummy Textbook Title",
+            editor=None,
+            year=None,
+            isbn=None,
         )
 
         success_branch_1 = self.create_dummy_branch(name="Branch with successes 1", system_prompt="Thou shall succeed.")
         success_strategy_1 = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_1.latest_strategy_settings,
@@ -666,6 +677,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=42,
                 exercise_number="5",
@@ -692,6 +704,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=40,
                 exercise_number="6",
@@ -718,6 +731,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=40,
                 exercise_number="4",
@@ -745,6 +759,7 @@ class FixturesCreator:
         success_strategy_2 = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_2.latest_strategy_settings,
@@ -763,6 +778,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=42,
                 exercise_number="6",
@@ -789,6 +805,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=40,
                 exercise_number="30",
@@ -815,6 +832,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=40,
                 exercise_number="8",
@@ -841,6 +859,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=40,
                 exercise_number="Removed",
@@ -876,6 +895,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=47,
                 exercise_number="Removed",
@@ -901,6 +921,7 @@ class FixturesCreator:
         errors_strategy = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
+            created_by_classification_batch=None,
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=errors_branch.latest_strategy_settings,
@@ -919,6 +940,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=142,
                 exercise_number="4",
@@ -939,6 +961,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=140,
                 exercise_number="4",
@@ -968,6 +991,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=42,
                 exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
@@ -995,6 +1019,7 @@ class FixturesCreator:
             exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
+                created_by_page_extraction=None,
                 created_at=created_at,
                 page_number=42,
                 exercise_number="Auto-dictée",

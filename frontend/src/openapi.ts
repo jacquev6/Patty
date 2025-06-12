@@ -647,6 +647,12 @@ export interface components {
       createdBy: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
+      /** Isbn */
+      isbn: string | null
       /** Adaptationbatches */
       adaptationBatches: components['schemas']['patty__api_router__ApiTextbook__AdaptationBatch'][]
       /** Externalexercises */
@@ -1382,6 +1388,12 @@ export interface components {
       creator: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
+      /** Isbn */
+      isbn: string | null
     }
     /** PostTextbookResponse */
     PostTextbookResponse: {
@@ -1556,6 +1568,10 @@ export interface components {
       createdAt: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
     }
     /** ValidationError */
     ValidationError: {

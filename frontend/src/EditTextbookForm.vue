@@ -130,7 +130,11 @@ async function removeExternalExercise(id: string, removed: boolean) {
 </script>
 
 <template>
-  <h1>{{ textbook.title }}</h1>
+  <h1>
+    {{ textbook.title }}<template v-if="textbook.editor !== null">, {{ textbook.editor }}</template
+    ><template v-if="textbook.year !== null">, {{ textbook.year }}</template>
+    <template v-if="textbook.isbn !== null"> (ISBN: {{ textbook.isbn }})</template>
+  </h1>
   <p>
     <a :href="`/api/export/textbook/${textbook.id}.html?token=${authenticationTokenStore.token}`">
       Download standalone HTML
