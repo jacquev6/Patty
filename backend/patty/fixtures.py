@@ -245,14 +245,14 @@ class FixturesCreator:
 
     Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
 
-    def create(self, __model: type[Model], **kwargs: Any) -> Model:
+    def make(self, __model: type[Model], **kwargs: Any) -> Model:
         instance = __model(**kwargs)
         self.__session.add(instance)
         self.__session.flush()
         return instance
 
     def create_default_adaptation_strategy(self) -> db.AdaptationStrategy:
-        strategy_settings = self.create(
+        strategy_settings = self.make(
             db.AdaptationStrategySettings,
             created_by_username="Patty",
             created_at=created_at,
@@ -283,7 +283,7 @@ class FixturesCreator:
             exercise_class=None,
             parent=None,
         )
-        return self.create(
+        return self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
@@ -291,10 +291,10 @@ class FixturesCreator:
             settings=strategy_settings,
         )
 
-    def create_dummy_adaptation_strategy_settings(
+    def make_dummy_adaptation_strategy_settings(
         self, system_prompt: str = "Blah blah blah."
     ) -> db.AdaptationStrategySettings:
-        return self.create(
+        return self.make(
             db.AdaptationStrategySettings,
             created_by_username="Patty",
             created_at=created_at,
@@ -327,8 +327,8 @@ class FixturesCreator:
         )
 
     def create_dummy_adaptation_strategy(self) -> db.AdaptationStrategy:
-        settings = self.create_dummy_adaptation_strategy_settings()
-        return self.create(
+        settings = self.make_dummy_adaptation_strategy_settings()
+        return self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
@@ -337,7 +337,7 @@ class FixturesCreator:
         )
 
     def create_default_adaptation_input(self) -> db.AdaptableExercise:
-        return self.create(
+        return self.make(
             db.AdaptableExercise,
             created_by_username="Patty",
             created_at=created_at,
@@ -360,14 +360,14 @@ class FixturesCreator:
             exercise_class=None,
         )
 
-    def create_successful_adaptation(
+    def make_successful_adaptation(
         self,
         *,
         adaptation_batch: db.AdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
-        return self.create(
+        return self.make(
             db.Adaptation,
             created_by_username="Patty",
             created_at=created_at,
@@ -504,14 +504,14 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_in_progress_adaptation(
+    def make_in_progress_adaptation(
         self,
         *,
         adaptation_batch: db.AdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
-        return self.create(
+        return self.make(
             db.Adaptation,
             created_by_username="Patty",
             created_at=created_at,
@@ -527,14 +527,14 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_invalid_json_adaptation(
+    def make_invalid_json_adaptation(
         self,
         *,
         adaptation_batch: db.AdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
-        return self.create(
+        return self.make(
             db.Adaptation,
             created_by_username="Patty",
             created_at=created_at,
@@ -550,14 +550,14 @@ class FixturesCreator:
             manual_edit=None,
         )
 
-    def create_not_json_adaptation(
+    def make_not_json_adaptation(
         self,
         *,
         adaptation_batch: db.AdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
-        return self.create(
+        return self.make(
             db.Adaptation,
             created_by_username="Patty",
             created_at=created_at,
@@ -575,7 +575,7 @@ class FixturesCreator:
 
     def create_seed_data(self) -> None:
         strategy = self.create_default_adaptation_strategy()
-        batch = self.create(
+        batch = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -583,14 +583,14 @@ class FixturesCreator:
             removed_from_textbook=False,
             strategy=strategy,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
         self.create_default_extraction_strategy()
 
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
-        batch = self.create(
+        batch = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -598,13 +598,13 @@ class FixturesCreator:
             removed_from_textbook=False,
             strategy=strategy,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
 
     def create_mixed_dummy_adaptation_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
-        batch = self.create(
+        batch = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -612,24 +612,24 @@ class FixturesCreator:
             removed_from_textbook=False,
             strategy=strategy,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
-        self.create_in_progress_adaptation(
+        self.make_in_progress_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
-        self.create_invalid_json_adaptation(
+        self.make_invalid_json_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
-        self.create_not_json_adaptation(
+        self.make_not_json_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
         )
 
     def create_dummy_branch(
         self, *, name: str = "Branchy McBranchFace", system_prompt: str = "Blah blah blah."
     ) -> db.ExerciseClass:
-        settings = self.create_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
-        exercise_class = self.create(
+        settings = self.make_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
+        exercise_class = self.make(
             db.ExerciseClass,
             created_by_username="Patty",
             created_at=created_at,
@@ -640,19 +640,19 @@ class FixturesCreator:
         return exercise_class
 
     def create_dummy_textbook(self) -> None:
-        textbook = self.create(
+        textbook = self.make(
             db.Textbook, created_by_username="Patty", created_at=created_at, title="Dummy Textbook Title"
         )
 
         success_branch_1 = self.create_dummy_branch(name="Branch with successes 1", system_prompt="Thou shall succeed.")
-        success_strategy_1 = self.create(
+        success_strategy_1 = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_1.latest_strategy_settings,
         )
-        success_adaptation_batch_1 = self.create(
+        success_adaptation_batch_1 = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -660,10 +660,10 @@ class FixturesCreator:
             textbook=textbook,
             removed_from_textbook=False,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -686,10 +686,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -712,10 +712,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
             strategy=success_strategy_1,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -742,14 +742,14 @@ class FixturesCreator:
         success_branch_2 = self.create_dummy_branch(
             name="Branch with successes 2", system_prompt="Thou shall succeed as well."
         )
-        success_strategy_2 = self.create(
+        success_strategy_2 = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=success_branch_2.latest_strategy_settings,
         )
-        success_adaptation_batch_2 = self.create(
+        success_adaptation_batch_2 = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -757,10 +757,10 @@ class FixturesCreator:
             textbook=textbook,
             removed_from_textbook=False,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -783,10 +783,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -809,10 +809,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -835,10 +835,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
             strategy=success_strategy_2,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -862,7 +862,7 @@ class FixturesCreator:
             ),
         )
 
-        removed_adaptation_batch = self.create(
+        removed_adaptation_batch = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -870,10 +870,10 @@ class FixturesCreator:
             textbook=textbook,
             removed_from_textbook=True,
         )
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=removed_adaptation_batch,
             strategy=success_strategy_2,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -898,14 +898,14 @@ class FixturesCreator:
         )
 
         errors_branch = self.create_dummy_branch(name="Branch with errors", system_prompt="Thou shall fail.")
-        errors_strategy = self.create(
+        errors_strategy = self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
             created_at=created_at,
             model=adaptation_llm.DummyModel(name="dummy-1"),
             settings=errors_branch.latest_strategy_settings,
         )
-        errors_adaptation_batch = self.create(
+        errors_adaptation_batch = self.make(
             db.AdaptationBatch,
             created_by_username="Patty",
             created_at=created_at,
@@ -913,10 +913,10 @@ class FixturesCreator:
             textbook=textbook,
             removed_from_textbook=False,
         )
-        self.create_not_json_adaptation(
+        self.make_not_json_adaptation(
             adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -933,10 +933,10 @@ class FixturesCreator:
                 exercise_class=None,
             ),
         )
-        self.create_invalid_json_adaptation(
+        self.make_invalid_json_adaptation(
             adaptation_batch=errors_adaptation_batch,
             strategy=errors_strategy,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -962,10 +962,10 @@ class FixturesCreator:
         batch = self.__session.get(db.AdaptationBatch, 1)
         assert batch is not None
 
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=batch,
             strategy=strategy,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -989,10 +989,10 @@ class FixturesCreator:
             ),
         )
 
-        self.create_successful_adaptation(
+        self.make_successful_adaptation(
             adaptation_batch=batch,
             strategy=strategy,
-            exercise=self.create(
+            exercise=self.make(
                 db.AdaptableExercise,
                 created_by_username="Patty",
                 created_at=created_at,
@@ -1021,7 +1021,7 @@ class FixturesCreator:
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
 
     def create_default_extraction_strategy(self) -> None:
-        self.create(
+        self.make(
             db.ExtractionStrategy,
             created_by_username="Patty",
             created_at=created_at,
@@ -1030,7 +1030,7 @@ class FixturesCreator:
         )
 
     def create_dummy_extraction_strategy(self) -> None:
-        self.create(
+        self.make(
             db.ExtractionStrategy,
             created_by_username="Patty",
             created_at=created_at,
@@ -1038,26 +1038,33 @@ class FixturesCreator:
             prompt="Blah blah blah.",
         )
 
+    def make_adaptation_batches(self, count: int) -> None:
+        strategy = self.create_dummy_adaptation_strategy()
+        for i in range(count):
+            self.make(
+                db.AdaptationBatch,
+                created_by_username="Patty",
+                created_at=created_at,
+                textbook=None,
+                removed_from_textbook=False,
+                strategy=strategy,
+            )
+
+    def create_20_adaptation_batches(self) -> None:
+        self.make_adaptation_batches(20)
+
+    def create_21_adaptation_batches(self) -> None:
+        self.make_adaptation_batches(21)
+
+    def create_70_adaptation_batches(self) -> None:
+        self.make_adaptation_batches(70)
+
 
 def load(session: database_utils.Session, truncate: bool, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)
 
     available_fixtures = {
-        "-".join(f.__name__.split("_")[1:]): f
-        for f in (
-            creator.create_default_adaptation_input,
-            creator.create_default_adaptation_strategy,
-            creator.create_default_extraction_strategy,
-            creator.create_dummy_adaptation_strategy,
-            creator.create_dummy_adaptation,
-            creator.create_dummy_branch,
-            creator.create_dummy_coche_exercise_classes,
-            creator.create_dummy_extraction_strategy,
-            creator.create_dummy_textbook_with_text_exercise_numbers,
-            creator.create_dummy_textbook,
-            creator.create_mixed_dummy_adaptation_batch,
-            creator.create_seed_data,
-        )
+        "-".join(name.split("_")[1:]): getattr(creator, name) for name in dir(creator) if name.startswith("create_")
     }
 
     if truncate:

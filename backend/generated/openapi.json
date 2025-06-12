@@ -173,39 +173,23 @@
       }
     },
     "/api/adaptation-batches": {
-      "get": {
-        "summary": "Get Adaptation Batches",
-        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
-                }
-              }
-            }
-          }
-        },
+      "post": {
+        "summary": "Post Adaptation Batch",
+        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Post Adaptation Batch",
-        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostAdaptationBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -228,12 +212,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Adaptation Batches",
+        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/adaptation-batches/{id}": {
@@ -281,39 +309,23 @@
       }
     },
     "/api/classification-batches": {
-      "get": {
-        "summary": "Get Classification Batches",
-        "operationId": "get_classification_batches_api_classification_batches_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
-                }
-              }
-            }
-          }
-        },
+      "post": {
+        "summary": "Create Classification Batch",
+        "operationId": "create_classification_batch_api_classification_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Create Classification Batch",
-        "operationId": "create_classification_batch_api_classification_batches_post",
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostClassificationBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -336,12 +348,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Classification Batches",
+        "operationId": "get_classification_batches_api_classification_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/classification-batches/{id}": {
@@ -513,39 +569,23 @@
       }
     },
     "/api/extraction-batches": {
-      "get": {
-        "summary": "Get Extraction Batches",
-        "operationId": "get_extraction_batches_api_extraction_batches_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
-                }
-              }
-            }
-          }
-        },
+      "post": {
+        "summary": "Create Extraction Batch",
+        "operationId": "create_extraction_batch_api_extraction_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Create Extraction Batch",
-        "operationId": "create_extraction_batch_api_extraction_batches_post",
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostExtractionBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -568,12 +608,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Extraction Batches",
+        "operationId": "get_extraction_batches_api_extraction_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/extraction-batches/{id}": {
@@ -2734,12 +2818,24 @@
             },
             "type": "array",
             "title": "Adaptationbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "adaptationBatches"
+          "adaptationBatches",
+          "nextChunkId"
         ],
         "title": "GetAdaptationBatchesResponse"
       },
@@ -2803,12 +2899,24 @@
             },
             "type": "array",
             "title": "Classificationbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "classificationBatches"
+          "classificationBatches",
+          "nextChunkId"
         ],
         "title": "GetClassificationBatchesResponse"
       },
@@ -2874,12 +2982,24 @@
             },
             "type": "array",
             "title": "Extractionbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "extractionBatches"
+          "extractionBatches",
+          "nextChunkId"
         ],
         "title": "GetExtractionBatchesResponse"
       },

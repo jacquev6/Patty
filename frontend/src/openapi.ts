@@ -955,6 +955,8 @@ export interface components {
     GetAdaptationBatchesResponse: {
       /** Adaptationbatches */
       adaptationBatches: components['schemas']['patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetClassificationBatchResponse */
     GetClassificationBatchResponse: {
@@ -975,6 +977,8 @@ export interface components {
     GetClassificationBatchesResponse: {
       /** Classificationbatches */
       classificationBatches: components['schemas']['ClassificationBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -998,6 +1002,8 @@ export interface components {
     GetExtractionBatchesResponse: {
       /** Extractionbatches */
       extractionBatches: components['schemas']['ExtractionBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1820,7 +1826,9 @@ export interface operations {
   }
   get_adaptation_batches_api_adaptation_batches_get: {
     parameters: {
-      query?: never
+      query?: {
+        chunkId?: string | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -1834,6 +1842,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetAdaptationBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -1904,7 +1921,9 @@ export interface operations {
   }
   get_classification_batches_api_classification_batches_get: {
     parameters: {
-      query?: never
+      query?: {
+        chunkId?: string | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -1918,6 +1937,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetClassificationBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -2081,7 +2109,9 @@ export interface operations {
   }
   get_extraction_batches_api_extraction_batches_get: {
     parameters: {
-      query?: never
+      query?: {
+        chunkId?: string | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -2095,6 +2125,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetExtractionBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

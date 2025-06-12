@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import json
 import os
+import typing
 import urllib.parse
 
 import boto3
@@ -285,16 +286,46 @@ class GetAdaptationBatchesResponse(ApiModel):
         strategy_settings_name: str | None
 
     adaptation_batches: list[AdaptationBatch]
+    next_chunk_id: str | None
+
+
+T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.ExtractionBatch)
+
+
+def paginate(
+    model: type[T], request: sql.Select[tuple[T]], session: database_utils.SessionDependable, chunk_id: str | None
+) -> tuple[list[T], str | None]:
+    chunk_size = 20
+    request = request.order_by(-model.id).limit(chunk_size + 1)
+
+    if chunk_id is not None:
+        try:
+            numerical_chunk_id = int(chunk_id)
+        except ValueError:
+            raise fastapi.HTTPException(status_code=400, detail="Invalid chunk ID")
+        request = request.filter(model.id < numerical_chunk_id)
+
+    batches = list(session.execute(request).scalars().all())
+
+    if len(batches) <= chunk_size:
+        next_chunk_id = None
+    else:
+        next_chunk_id = str(batches[-2].id)
+
+    return batches[:chunk_size], next_chunk_id
 
 
 @api_router.get("/adaptation-batches")
-async def get_adaptation_batches(session: database_utils.SessionDependable) -> GetAdaptationBatchesResponse:
-    adaptation_batches = (
-        session.query(db.AdaptationBatch)
-        .filter(db.AdaptationBatch.textbook_id == sql.null())
-        .order_by(-db.AdaptationBatch.id)
-        .all()
+async def get_adaptation_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetAdaptationBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.AdaptationBatch,
+        sql.select(db.AdaptationBatch).filter(db.AdaptationBatch.textbook_id == sql.null()),
+        session,
+        chunkId,
     )
+
     return GetAdaptationBatchesResponse(
         adaptation_batches=[
             GetAdaptationBatchesResponse.AdaptationBatch(
@@ -304,8 +335,9 @@ async def get_adaptation_batches(session: database_utils.SessionDependable) -> G
                 model=adaptation_batch.strategy.model,
                 strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.strategy.settings),
             )
-            for adaptation_batch in adaptation_batches
-        ]
+            for adaptation_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 
@@ -411,15 +443,20 @@ class GetClassificationBatchesResponse(ApiModel):
         created_at: datetime.datetime
 
     classification_batches: list[ClassificationBatch]
+    next_chunk_id: str | None
 
 
 @api_router.get("/classification-batches")
-async def get_classification_batches(session: database_utils.SessionDependable) -> GetClassificationBatchesResponse:
-    request = (
-        sql.select(db.ClassificationBatch)
-        .filter(db.ClassificationBatch.created_by_username != sql.null())
-        .order_by(-db.ClassificationBatch.id)
+async def get_classification_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetClassificationBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.ClassificationBatch,
+        sql.select(db.ClassificationBatch).filter(db.ClassificationBatch.created_by_username != sql.null()),
+        session,
+        chunkId,
     )
+
     return GetClassificationBatchesResponse(
         classification_batches=[
             GetClassificationBatchesResponse.ClassificationBatch(
@@ -427,8 +464,9 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
                 created_by=classification_batch.created_by_username,
                 created_at=classification_batch.created_at,
             )
-            for classification_batch in session.execute(request).scalars().all()
-        ]
+            for classification_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 
@@ -638,11 +676,19 @@ class GetExtractionBatchesResponse(ApiModel):
         created_at: datetime.datetime
 
     extraction_batches: list[ExtractionBatch]
+    next_chunk_id: str | None
 
 
 @api_router.get("/extraction-batches")
-async def get_extraction_batches(session: database_utils.SessionDependable) -> GetExtractionBatchesResponse:
-    extraction_batches = session.query(db.ExtractionBatch).order_by(-db.ExtractionBatch.id).all()
+async def get_extraction_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetExtractionBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.ExtractionBatch,
+        sql.select(db.ExtractionBatch).filter(db.ExtractionBatch.created_by_username != sql.null()),
+        session,
+        chunkId,
+    )
     return GetExtractionBatchesResponse(
         extraction_batches=[
             GetExtractionBatchesResponse.ExtractionBatch(
@@ -650,8 +696,9 @@ async def get_extraction_batches(session: database_utils.SessionDependable) -> G
                 created_by=extraction_batch.created_by_username,
                 created_at=extraction_batch.created_at,
             )
-            for extraction_batch in extraction_batches
-        ]
+            for extraction_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 

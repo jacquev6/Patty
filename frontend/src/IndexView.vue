@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 import {
   type ExtractionBatches,
@@ -16,8 +16,11 @@ import CreateTextbookForm from './CreateTextbookForm.vue'
 const client = useAuthenticatedClient()
 
 const extractionBatches = reactive<ExtractionBatches['extractionBatches']>([])
+const nextExtractionBatchesChunkId = ref<string | null>(null)
 const classificationBatches = reactive<ClassificationBatches['classificationBatches']>([])
+const nextClassificationBatchesChunkId = ref<string | null>(null)
 const adaptationBatches = reactive<AdaptationBatches['adaptationBatches']>([])
+const nextAdaptationBatchesChunkId = ref<string | null>(null)
 const textbooks = reactive<Textbooks['textbooks']>([])
 
 onMounted(async () => {
@@ -29,6 +32,7 @@ onMounted(async () => {
   const extractionBatchesResponse = await extractionBatchesPromise
   assert(extractionBatchesResponse.data !== undefined)
   extractionBatches.splice(0, extractionBatches.length, ...extractionBatchesResponse.data.extractionBatches)
+  nextExtractionBatchesChunkId.value = extractionBatchesResponse.data.nextChunkId
 
   const classificationBatchesResponse = await classificationBatchesPromise
   assert(classificationBatchesResponse.data !== undefined)
@@ -37,15 +41,47 @@ onMounted(async () => {
     classificationBatches.length,
     ...classificationBatchesResponse.data.classificationBatches,
   )
+  nextClassificationBatchesChunkId.value = classificationBatchesResponse.data.nextChunkId
 
   const adaptationBatchesResponse = await adaptationBatchesPromise
   assert(adaptationBatchesResponse.data !== undefined)
   adaptationBatches.splice(0, adaptationBatches.length, ...adaptationBatchesResponse.data.adaptationBatches)
+  nextAdaptationBatchesChunkId.value = adaptationBatchesResponse.data.nextChunkId
 
   const textbooksResponse = await textbooksPromise
   assert(textbooksResponse.data !== undefined)
   textbooks.splice(0, textbooks.length, ...textbooksResponse.data.textbooks)
 })
+
+async function loadNextExtractionBatchesChunk() {
+  assert(nextExtractionBatchesChunkId.value !== null)
+  const response = await client.GET('/api/extraction-batches', {
+    params: { query: { chunkId: nextExtractionBatchesChunkId.value } },
+  })
+  assert(response.data !== undefined)
+  extractionBatches.push(...response.data.extractionBatches)
+  nextExtractionBatchesChunkId.value = response.data.nextChunkId
+}
+
+async function loadNextClassificationBatchesChunk() {
+  assert(nextClassificationBatchesChunkId.value !== null)
+  const response = await client.GET('/api/classification-batches', {
+    params: { query: { chunkId: nextClassificationBatchesChunkId.value } },
+  })
+  assert(response.data !== undefined)
+  classificationBatches.push(...response.data.classificationBatches)
+  nextClassificationBatchesChunkId.value = response.data.nextChunkId
+}
+
+async function loadNextAdaptationBatchesChunk() {
+  assert(nextAdaptationBatchesChunkId.value !== null)
+  const response = await client.GET('/api/adaptation-batches', {
+    params: { query: { chunkId: nextAdaptationBatchesChunkId.value } },
+  })
+  assert(response.data !== undefined)
+  adaptationBatches.push(...response.data.adaptationBatches)
+  nextAdaptationBatchesChunkId.value = response.data.nextChunkId
+}
 </script>
 
 <template>
@@ -72,6 +108,11 @@ onMounted(async () => {
             </RouterLink>
             (created by {{ extractionBatch.createdBy }} on {{ new Date(extractionBatch.createdAt).toLocaleString() }})
           </li>
+          <li>
+            <button :disabled="nextExtractionBatchesChunkId === null" @click="loadNextExtractionBatchesChunk">
+              Load more...
+            </button>
+          </li>
         </ul>
 
         <h2>Existing classification batches</h2>
@@ -82,6 +123,11 @@ onMounted(async () => {
             </RouterLink>
             (created by {{ classificationBatch.createdBy }} on
             {{ new Date(classificationBatch.createdAt).toLocaleString() }})
+          </li>
+          <li>
+            <button :disabled="nextClassificationBatchesChunkId === null" @click="loadNextClassificationBatchesChunk">
+              Load more...
+            </button>
           </li>
         </ul>
 
@@ -95,6 +141,11 @@ onMounted(async () => {
               >{{ adaptationBatch.strategySettingsName }}<WhiteSpace /></template
             >using {{ adaptationBatch.model.provider }}/{{ adaptationBatch.model.name }}, created by
             {{ adaptationBatch.createdBy }} on {{ new Date(adaptationBatch.createdAt).toLocaleString() }})
+          </li>
+          <li>
+            <button :disabled="nextAdaptationBatchesChunkId === null" @click="loadNextAdaptationBatchesChunk">
+              Load more...
+            </button>
           </li>
         </ul>
       </template>
