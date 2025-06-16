@@ -100,25 +100,34 @@ def make_adaptation_llm_response_schema(response_specification: JsonSchemaLlmRes
     return response_specification.make_response_schema()
 
 
-class LatestAdaptationBatch(ApiModel):
+class BaseAdaptationBatch(ApiModel):
     id: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
     available_strategy_settings: list[ApiStrategySettings]
 
 
-@api_router.get("/latest-adaptation-batch")
-def get_latest_adaptation_batch(user: str, session: database_utils.SessionDependable) -> LatestAdaptationBatch:
-    for created_by in [user, "Patty"]:
-        adaptation_batch = (
-            session.query(db.AdaptationBatch)
-            .filter(db.AdaptationBatch.created_by_username == created_by)
-            .order_by(-db.AdaptationBatch.id)
-            .first()
-        )
-        if adaptation_batch is not None:
-            break
-    assert adaptation_batch is not None
+@api_router.get("/base-adaptation-batch")
+def get_base_adaptation_batch(
+    user: str, session: database_utils.SessionDependable, base: str | None = None
+) -> BaseAdaptationBatch:
+    request = sql.select(db.AdaptationBatch)
+    if base is None:
+        request = request.where(
+            (db.AdaptationBatch.created_by_username == user) | (db.AdaptationBatch.id == 1)
+        ).order_by(-db.AdaptationBatch.id)
+    else:
+        try:
+            base_id = int(base)
+        except ValueError:
+            raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
+        else:
+            request = request.where(db.AdaptationBatch.id == base_id)
+
+    adaptation_batch = session.execute(request).scalars().first()
+    if adaptation_batch is None:
+        raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
+
     available_strategy_settings = []
     for exercise_class in (
         session.execute(
@@ -135,7 +144,7 @@ def get_latest_adaptation_batch(user: str, session: database_utils.SessionDepend
             available_strategy_settings.append(
                 make_api_strategy_settings(exercise_class.latest_strategy_settings.parent)
             )
-    return LatestAdaptationBatch(
+    return BaseAdaptationBatch(
         id=str(adaptation_batch.id),
         strategy=make_api_strategy(adaptation_batch.strategy),
         inputs=[make_api_input(adaptation.exercise) for adaptation in adaptation_batch.adaptations],

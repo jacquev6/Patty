@@ -56,15 +56,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/latest-adaptation-batch': {
+  '/api/base-adaptation-batch': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Get Latest Adaptation Batch */
-    get: operations['get_latest_adaptation_batch_api_latest_adaptation_batch_get']
+    /** Get Base Adaptation Batch */
+    get: operations['get_base_adaptation_batch_api_base_adaptation_batch_get']
     put?: never
     post?: never
     delete?: never
@@ -708,6 +708,16 @@ export interface components {
        */
       error: 'unknown'
     }
+    /** BaseAdaptationBatch */
+    BaseAdaptationBatch: {
+      /** Id */
+      id: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
+      /** Availablestrategysettings */
+      availableStrategySettings: components['schemas']['ApiStrategySettings-Output'][]
+    }
     'Choice-Input': {
       /**
        * Kind
@@ -1118,16 +1128,6 @@ export interface components {
       hintComponents: components['schemas']['HintComponents']
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
-    }
-    /** LatestAdaptationBatch */
-    LatestAdaptationBatch: {
-      /** Id */
-      id: string
-      strategy: components['schemas']['ApiStrategy-Output']
-      /** Inputs */
-      inputs: components['schemas']['ApiInput'][]
-      /** Availablestrategysettings */
-      availableStrategySettings: components['schemas']['ApiStrategySettings-Output'][]
     }
     'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Contents */
@@ -1809,10 +1809,11 @@ export interface operations {
       }
     }
   }
-  get_latest_adaptation_batch_api_latest_adaptation_batch_get: {
+  get_base_adaptation_batch_api_base_adaptation_batch_get: {
     parameters: {
       query: {
         user: string
+        base?: string | null
       }
       header?: never
       path?: never
@@ -1826,7 +1827,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['LatestAdaptationBatch']
+          'application/json': components['schemas']['BaseAdaptationBatch']
         }
       }
       /** @description Validation Error */

@@ -29,6 +29,11 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     </template>
     <template #col-2>
       <p>
+        <RouterLink :to="{ name: 'create-adaptation-batch', query: { base: adaptationBatch.id } }"
+          >New batch based on this one</RouterLink
+        >
+      </p>
+      <p>
         <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
           Download standalone HTML
         </a>

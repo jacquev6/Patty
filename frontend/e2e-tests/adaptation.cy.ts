@@ -485,6 +485,16 @@ describe('The adaptation batch creation page', () => {
     cy.get('p:contains("Name:")').should('have.text', 'Name: Alpha')
     cy.get('p:contains("Prompt")').should('have.text', 'Prompt alpha 3ter (good)')
   })
+
+  it('uses its base batch to initialize the form', () => {
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=20-adaptation-batches')
+    cy.visit('/new-adaptation-batch?base=8')
+    cy.get('[data-cy="system-prompt"]').should('have.value', 'Blah blah blah 8.')
+    cy.visit('/new-adaptation-batch?base=14')
+    cy.get('[data-cy="system-prompt"]').should('have.value', 'Blah blah blah 14.')
+    cy.visit('/new-adaptation-batch') // Uses batch 1 because Alice has never created a batch
+    cy.get('[data-cy="system-prompt"]').should('have.value', 'Blah blah blah 1.')
+  })
 })
 
 describe('The adaptation batch edition page', () => {
@@ -528,6 +538,12 @@ describe('The adaptation batch edition page', () => {
 
     cy.visit('/adaptation-batch-1')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
+  })
+
+  it('has a link to create a new batch based on it', () => {
+    visit('/adaptation-batch-1')
+
+    cy.get('a:contains("New batch based on this one")').should('have.attr', 'href', '/new-adaptation-batch?base=1')
   })
 })
 

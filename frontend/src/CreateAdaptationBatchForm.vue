@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
 
-import { type LatestAdaptationBatch, useAuthenticatedClient } from './apiClient'
+import { type BaseAdaptationBatch, useAuthenticatedClient } from './apiClient'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
@@ -13,7 +13,7 @@ import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
-  latestAdaptationBatch: LatestAdaptationBatch
+  baseAdaptationBatch: BaseAdaptationBatch
 }>()
 
 const router = useRouter()
@@ -22,10 +22,10 @@ const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const strategy = reactive(deepCopy(props.latestAdaptationBatch.strategy))
-const inputs = reactive<InputWithFile[]>(deepCopy(props.latestAdaptationBatch.inputs))
+const strategy = reactive(deepCopy(props.baseAdaptationBatch.strategy))
+const inputs = reactive<InputWithFile[]>(deepCopy(props.baseAdaptationBatch.inputs))
 watch(
-  () => props.latestAdaptationBatch,
+  () => props.baseAdaptationBatch,
   (newValue) => {
     Object.assign(strategy, deepCopy(newValue.strategy))
     inputs.splice(0, inputs.length, ...deepCopy(newValue.inputs))
@@ -60,7 +60,7 @@ const disabled = computed(() => {
   return strategy.settings.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
 })
 
-const availableStrategySettings = computed(() => props.latestAdaptationBatch.availableStrategySettings)
+const availableStrategySettings = computed(() => props.baseAdaptationBatch.availableStrategySettings)
 </script>
 
 <template>

@@ -53,6 +53,7 @@ const router = createRouter({
       path: '/new-adaptation-batch',
       name: 'create-adaptation-batch',
       component: CreateAdaptationBatchView,
+      props: (route) => ({ base: route.query.base ?? null }),
     },
     {
       path: '/adaptation-batch-:id',

@@ -128,10 +128,10 @@
         ]
       }
     },
-    "/api/latest-adaptation-batch": {
+    "/api/base-adaptation-batch": {
       "get": {
-        "summary": "Get Latest Adaptation Batch",
-        "operationId": "get_latest_adaptation_batch_api_latest_adaptation_batch_get",
+        "summary": "Get Base Adaptation Batch",
+        "operationId": "get_base_adaptation_batch_api_base_adaptation_batch_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -146,6 +146,22 @@
               "type": "string",
               "title": "User"
             }
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Base"
+            }
           }
         ],
         "responses": {
@@ -154,7 +170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LatestAdaptationBatch"
+                  "$ref": "#/components/schemas/BaseAdaptationBatch"
                 }
               }
             }
@@ -2184,6 +2200,40 @@
         ],
         "title": "AssistantUnknownError"
       },
+      "BaseAdaptationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "availableStrategySettings": {
+            "items": {
+              "$ref": "#/components/schemas/ApiStrategySettings-Output"
+            },
+            "type": "array",
+            "title": "Availablestrategysettings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "inputs",
+          "availableStrategySettings"
+        ],
+        "title": "BaseAdaptationBatch"
+      },
       "Choice-Input": {
         "properties": {
           "kind": {
@@ -3243,40 +3293,6 @@
           "referenceComponents"
         ],
         "title": "JsonSchemaLlmResponseSpecification"
-      },
-      "LatestAdaptationBatch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/ApiStrategy-Output"
-          },
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/ApiInput"
-            },
-            "type": "array",
-            "title": "Inputs"
-          },
-          "availableStrategySettings": {
-            "items": {
-              "$ref": "#/components/schemas/ApiStrategySettings-Output"
-            },
-            "type": "array",
-            "title": "Availablestrategysettings"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "strategy",
-          "inputs",
-          "availableStrategySettings"
-        ],
-        "title": "LatestAdaptationBatch"
       },
       "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {

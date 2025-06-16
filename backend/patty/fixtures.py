@@ -327,8 +327,8 @@ class FixturesCreator:
             parent=None,
         )
 
-    def create_dummy_adaptation_strategy(self) -> db.AdaptationStrategy:
-        settings = self.make_dummy_adaptation_strategy_settings()
+    def create_dummy_adaptation_strategy(self, system_prompt: str = "Blah blah blah.") -> db.AdaptationStrategy:
+        settings = self.make_dummy_adaptation_strategy_settings(system_prompt)
         return self.make(
             db.AdaptationStrategy,
             created_by_username="Patty",
@@ -1064,8 +1064,8 @@ class FixturesCreator:
         )
 
     def make_adaptation_batches(self, count: int) -> None:
-        strategy = self.create_dummy_adaptation_strategy()
         for i in range(count):
+            strategy = self.create_dummy_adaptation_strategy(f"Blah blah blah {i + 1}.")
             self.make(
                 db.AdaptationBatch,
                 created_by_username="Patty",

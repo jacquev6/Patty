@@ -25,10 +25,10 @@ export type ExtractionStrategy =
 
 export type AdaptationLlmModel =
   paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number]
-export type LatestAdaptationBatch =
-  paths['/api/latest-adaptation-batch']['get']['responses']['200']['content']['application/json']
+export type BaseAdaptationBatch =
+  paths['/api/base-adaptation-batch']['get']['responses']['200']['content']['application/json']
 
-export type AdaptationStrategy = LatestAdaptationBatch['strategy']
+export type AdaptationStrategy = BaseAdaptationBatch['strategy']
 
 export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['content']['application/json']
 export type Textbook =
