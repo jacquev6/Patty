@@ -2,15 +2,15 @@
 import { computed, reactive, ref } from 'vue'
 
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
-import { type AdaptationLlmModel, type Textbook, useAuthenticatedClient } from './apiClient'
+import { type Textbook, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
 const props = defineProps<{
   textbookId: string
-  availableAdaptationLlmModels: AdaptationLlmModel[]
   availableStrategySettings: string[]
 }>()
 
@@ -19,10 +19,11 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
+const apiConstantsStore = useApiConstantsStore()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const availableAdaptationLlmModels = computed(() => props.availableAdaptationLlmModels)
+const availableAdaptationLlmModels = computed(() => apiConstantsStore.availableAdaptationLlmModels)
 
 const model = ref(availableAdaptationLlmModels.value[0])
 

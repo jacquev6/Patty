@@ -9,11 +9,13 @@ import LlmModelSelector from './LlmModelSelector.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from './MarkDown.vue'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
 defineProps<{
   extractionBatch: ExtractionBatch
-  extractionLlmResponseSchema: Record<string, never>
 }>()
+
+const apiConstantsStore = useApiConstantsStore()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 </script>
@@ -26,7 +28,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       <h2>LLM model</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
       <h2>Settings</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="extractionLlmResponseSchema" />
+      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
       <h3>Prompt</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
     </template>

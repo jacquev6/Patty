@@ -229,12 +229,7 @@ watch(Escape, () => {
           ></template
         >.
       </p>
-      <AdaptationStrategyEditor
-        :availableAdaptationLlmModels="[]"
-        :availableStrategySettings="[]"
-        :disabled="true"
-        :modelValue="adaptation.strategy"
-      />
+      <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>
       <h1>Input</h1>

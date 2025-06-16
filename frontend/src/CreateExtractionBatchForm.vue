@@ -6,12 +6,7 @@ import { computedAsync } from '@vueuse/core'
 import deepCopy from 'deep-copy'
 
 import pdfjs, { type PDFDocumentProxy } from './pdfjs'
-import {
-  type ExtractionLlmModel,
-  type ExtractionStrategy,
-  type AdaptationLlmModel,
-  useAuthenticatedClient,
-} from './apiClient'
+import { type ExtractionStrategy, useAuthenticatedClient } from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import assert from './assert'
@@ -21,17 +16,16 @@ import LlmModelSelector from './LlmModelSelector.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
 const props = defineProps<{
-  availableExtractionLlmModels: ExtractionLlmModel[]
   latestExtractionStrategy: ExtractionStrategy
-  extractionLlmResponseSchema: Record<string, never>
-  availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
 const router = useRouter()
 
 const client = useAuthenticatedClient()
+const apiConstantsStore = useApiConstantsStore()
 
 const identifiedUser = useIdentifiedUserStore()
 
@@ -47,7 +41,7 @@ const runClassificationAsString = ref('yes')
 const runClassification = computed(() => runClassificationAsString.value === 'yes')
 
 const runAdaptationAsString = ref('yes')
-const modelForAdaptation = ref(props.availableAdaptationLlmModels[0])
+const modelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 const runAdaptation = computed(() => runClassification.value && runAdaptationAsString.value === 'yes')
 
 const uploading = ref(false)
@@ -152,13 +146,13 @@ const lastPage = computedAsync(async () => {
       <h2>LLM model</h2>
       <p>
         <LlmModelSelector
-          :availableLlmModels="availableExtractionLlmModels"
+          :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
           :disabled="false"
           v-model="strategy.model"
         />
       </p>
       <h2>Settings</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="extractionLlmResponseSchema" />
+      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
       <h3>Prompt</h3>
       <TextArea data-cy="prompt" v-model="strategy.prompt"></TextArea>
     </template>
@@ -182,7 +176,7 @@ const lastPage = computedAsync(async () => {
         <template v-if="runAdaptation">
           using
           <LlmModelSelector
-            :availableLlmModels="availableAdaptationLlmModels"
+            :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
             :disabled="false"
             v-model="modelForAdaptation"
           >

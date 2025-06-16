@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 
-import { type Textbook, type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
+import { type Textbook, useAuthenticatedClient } from './apiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from './assert'
 import { preprocess as preprocessAdaptation } from './adaptations'
@@ -15,30 +15,21 @@ const client = useAuthenticatedClient()
 const found = ref<boolean | null>(null)
 const textbook = ref<Textbook | null>(null)
 const availableStrategySettings = ref<string[] | null>(null)
-const availableAdaptationLlmModels = ref<AdaptationLlmModel[] | null>(null)
 
 let refreshes = 0
 
 let refreshTimeoutId: number | null = null
 
 async function refresh() {
-  const availableAdaptationLlmModelsPromise = client.GET('/api/available-adaptation-llm-models')
-  const textbookPromise = client.GET(`/api/textbooks/{id}`, { params: { path: { id: props.id } } })
-
-  const availableAdaptationLlmModelsResponse = await availableAdaptationLlmModelsPromise
-  if (availableAdaptationLlmModelsResponse.data !== undefined) {
-    availableAdaptationLlmModels.value = availableAdaptationLlmModelsResponse.data
-  }
-
-  const textbookResponse = await textbookPromise
-  if (textbookResponse.response.status === 404) {
+  const response = await client.GET(`/api/textbooks/{id}`, { params: { path: { id: props.id } } })
+  if (response.response.status === 404) {
     found.value = false
     textbook.value = null
   } else {
     found.value = true
-    assert(textbookResponse.data !== undefined)
-    textbook.value = textbookResponse.data.textbook
-    availableStrategySettings.value = textbookResponse.data.availableStrategySettings
+    assert(response.data !== undefined)
+    textbook.value = response.data.textbook
+    availableStrategySettings.value = response.data.availableStrategySettings
     refreshIfNeeded()
   }
 }
@@ -85,13 +76,8 @@ function cancelRefresh() {
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <template v-if="availableAdaptationLlmModels !== null && availableStrategySettings !== null && textbook !== null">
-      <EditTextbookForm
-        :availableAdaptationLlmModels
-        :availableStrategySettings
-        :textbook
-        @textbookUpdated="textbookUpdated"
-      />
+    <template v-if="availableStrategySettings !== null && textbook !== null">
+      <EditTextbookForm :availableStrategySettings :textbook @textbookUpdated="textbookUpdated" />
     </template>
     <template v-else-if="found === false">
       <h1>Not found</h1>

@@ -2,6 +2,7 @@ import createClient from 'openapi-fetch'
 
 import type { paths } from './openapi'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import assert from './assert'
 
 export function useAuthenticationClient() {
   return createClient<Pick<paths, '/api/token'>>()
@@ -9,6 +10,8 @@ export function useAuthenticationClient() {
 
 export function useAuthenticatedClient() {
   const authenticationTokenStore = useAuthenticationTokenStore()
+
+  assert(authenticationTokenStore.token !== null)
 
   return createClient<Omit<paths, '/api/token'>>({
     headers: { Authorization: `Bearer ${authenticationTokenStore.token}` },

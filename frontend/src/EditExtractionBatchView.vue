@@ -14,17 +14,15 @@ const client = useAuthenticatedClient()
 
 const found = ref<boolean | null>(null)
 const extractionBatch = ref<ExtractionBatch | null>(null)
-const extractionLlmResponseSchema = ref<Record<string, never>>({})
 
 let refreshes = 0
 
 let refreshTimeoutId: number | null = null
 
 async function refresh() {
-  const extractionBatchPromise = client.GET(`/api/extraction-batches/{id}`, { params: { path: { id: props.id } } })
-  const extractionLlmResponseSchemaPromise = client.GET('/api/extraction-llm-response-schema')
-
-  const extractionBatchResponse = await extractionBatchPromise
+  const extractionBatchResponse = await client.GET(`/api/extraction-batches/{id}`, {
+    params: { path: { id: props.id } },
+  })
   if (extractionBatchResponse.response.status === 404) {
     found.value = false
     extractionBatch.value = null
@@ -61,11 +59,6 @@ async function refresh() {
       refreshes = 0
     }
   }
-
-  const extractionLlmResponseSchemaResponse = await extractionLlmResponseSchemaPromise
-  if (extractionLlmResponseSchemaResponse.data !== undefined) {
-    extractionLlmResponseSchema.value = extractionLlmResponseSchemaResponse.data
-  }
 }
 
 onMounted(refresh)
@@ -82,7 +75,7 @@ onUnmounted(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="extractionBatch !== null">
-      <EditExtractionBatchForm :extractionBatch :extractionLlmResponseSchema />
+      <EditExtractionBatchForm :extractionBatch />
     </template>
     <template v-else-if="found === false">
       <h1>Not found</h1>

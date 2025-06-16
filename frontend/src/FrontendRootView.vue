@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import AuthenticationModal from './AuthenticationModal.vue'
+import FrontendRootViewAuthenticated from './FrontendRootViewAuthenticated.vue'
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 
@@ -46,5 +47,5 @@ const unavailableUntil = forceAvailable ? null : (fromSubstitution ?? fromQuery)
   <template v-else-if="authenticationTokenStore.token === null">
     <AuthenticationModal />
   </template>
-  <RouterView v-else />
+  <FrontendRootViewAuthenticated v-else />
 </template>

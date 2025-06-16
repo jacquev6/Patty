@@ -2,17 +2,15 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
+import { useAuthenticatedClient } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputsEditor from './CreateClassificationBatchFormInputsEditor.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
-const props = defineProps<{
-  availableAdaptationLlmModels: AdaptationLlmModel[]
-}>()
-
+const apiConstantsStore = useApiConstantsStore()
 const router = useRouter()
 
 const client = useAuthenticatedClient()
@@ -21,7 +19,7 @@ const identifiedUser = useIdentifiedUserStore()
 
 const runAdaptationAsString = ref('yes')
 
-const llmModel = ref(props.availableAdaptationLlmModels[0])
+const llmModel = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 
 const runAdaptation = computed(() => runAdaptationAsString.value === 'yes')
 
@@ -75,7 +73,11 @@ async function submit() {
     </select>
     <template v-if="runAdaptation">
       using
-      <LlmModelSelector :availableLlmModels="availableAdaptationLlmModels" :disabled="false" v-model="llmModel">
+      <LlmModelSelector
+        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+        :disabled="false"
+        v-model="llmModel"
+      >
         <template #provider>provider</template>
         <template #model> and model</template>
       </LlmModelSelector>

@@ -22,7 +22,6 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     <template #col-1>
       <p>Created by: {{ adaptationBatch.createdBy }}</p>
       <AdaptationStrategyEditor
-        :availableAdaptationLlmModels="[]"
         :availableStrategySettings="[]"
         :disabled="true"
         :modelValue="adaptationBatch.strategy"
