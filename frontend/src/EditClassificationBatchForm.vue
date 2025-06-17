@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
-import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
+import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 defineProps<{
@@ -49,7 +49,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
   </p>
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
-    <EditClassificationBatchFormExercisePreview
+    <EditClassificationOrExtractionBatchFormExercisePreview
       header="h2"
       :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
       :exercise

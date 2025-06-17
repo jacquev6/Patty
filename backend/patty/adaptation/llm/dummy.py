@@ -45,6 +45,9 @@ class DummyModel(Model):
         def raise_exception() -> str:
             raise Exception("Unknown error from DummyModel")
 
+        if self.name == "dummy-3":
+            MessageTypeFactory.seed_random(42)
+
         response = {
             "Not JSON": lambda: "This is not JSON.",
             "Invalid JSON": lambda: "{}",

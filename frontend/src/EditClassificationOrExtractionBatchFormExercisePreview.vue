@@ -8,7 +8,7 @@ import FixedColumns from './FixedColumns.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
 import BusyBox from './BusyBox.vue'
 import { useAuthenticatedClient, type ClassificationBatch } from './apiClient'
-import EditClassificationBatchFormExercisePreviewClassEditor from './EditClassificationBatchFormExercisePreviewClassEditor.vue'
+import EditClassificationBatchFormExercisePreviewClassEditor from './EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{

@@ -4,7 +4,7 @@ import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
 import { type ExtractionBatch } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from './WhiteSpace.vue'
-import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
+import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
@@ -69,7 +69,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
         <template v-if="page.assistantResponse !== null">
           <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
-              <EditClassificationBatchFormExercisePreview
+              <EditClassificationOrExtractionBatchFormExercisePreview
                 header="h3"
                 :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
                 :exercise
@@ -83,7 +83,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
                     ><template v-else>: {{ exercise.exerciseClass }} </template></template
                   >
                 </h3>
-              </EditClassificationBatchFormExercisePreview>
+              </EditClassificationOrExtractionBatchFormExercisePreview>
             </template>
           </template>
           <template v-else-if="page.assistantResponse.kind === 'error'">

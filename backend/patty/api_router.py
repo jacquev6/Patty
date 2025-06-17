@@ -48,6 +48,7 @@ def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
         return [
             adaptation_llm.DummyModel(name="dummy-1"),
             adaptation_llm.DummyModel(name="dummy-2"),
+            adaptation_llm.DummyModel(name="dummy-3"),
             adaptation_llm.MistralAiModel(name="mistral-large-2411"),
             adaptation_llm.MistralAiModel(name="mistral-small-2501"),
             adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),

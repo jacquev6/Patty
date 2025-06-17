@@ -44,6 +44,7 @@ describe('The extraction batch creation page', () => {
 
   it('creates an extraction batch with classification and adaptation', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="llm-name"]').eq(1).select('dummy-3')
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('eq', '/extraction-batch-1')
     cy.get('h2 span.inProgress:contains("in progress")').should('have.length', 2)
@@ -57,6 +58,7 @@ describe('The extraction batch creation page', () => {
     cy.get('div.busy').should('have.length', 2)
     cy.get('div.busy').should('have.length', 1)
     cy.get('div.busy').should('not.exist')
+    screenshot('extraction-batch-edition-page')
 
     cy.get('a:contains("Download standalone HTML")')
       .should('have.attr', 'href')
