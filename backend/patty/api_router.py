@@ -298,6 +298,67 @@ class GetAdaptationBatchesResponse(ApiModel):
     next_chunk_id: str | None
 
 
+@api_router.get("/exercise-classes")
+def get_exercise_classes(session: database_utils.SessionDependable) -> list[str]:
+    request = sql.select(db.ExerciseClass).order_by(db.ExerciseClass.name)
+    return [exercise_class.name for exercise_class in session.execute(request).scalars().all()]
+
+
+class PutAdaptableExerciseClassRequest(ApiModel):
+    creator: str
+    className: str
+
+
+@api_router.put("/adaptable-exercises/{id}/exercise-class")
+def put_adaptable_exercise_class(
+    id: str, req: PutAdaptableExerciseClassRequest, session: database_utils.SessionDependable
+) -> None:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    exercise = get_by_id(session, db.AdaptableExercise, id)
+    exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == req.className).first()
+    if exercise_class is None:
+        raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
+    if exercise.adaptation is not None:
+        adaptation_model = exercise.adaptation.strategy.model
+    elif (
+        exercise.classified_by_classification_batch is not None
+        and exercise.classified_by_classification_batch.model_for_adaptation is not None
+    ):
+        adaptation_model = exercise.classified_by_classification_batch.model_for_adaptation
+    else:
+        adaptation_model = None
+
+    exercise.exercise_class = exercise_class
+    exercise.classified_at = now
+    # No 'exercise.classified_by_classification_batch = None': that's how we join adaptable exercises to classification batches.
+    exercise.classified_by_username = req.creator
+    if exercise.adaptation is not None:
+        session.delete(exercise.adaptation)
+
+    if adaptation_model is not None and exercise_class.latest_strategy_settings is not None:
+        strategy = db.AdaptationStrategy(
+            created_at=now,
+            created_by_username=req.creator,
+            created_by_classification_batch=None,
+            settings=exercise_class.latest_strategy_settings,
+            model=adaptation_model,
+        )
+        session.add(strategy)
+        adaptation = db.Adaptation(
+            created_by_username=req.creator,
+            created_at=now,
+            classification_batch=None,
+            adaptation_batch=None,
+            strategy=strategy,
+            exercise=exercise,
+            raw_llm_conversations=[],
+            initial_assistant_response=None,
+            adjustments=[],
+            manual_edit=None,
+        )
+        session.add(adaptation)
+
+
 T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.ExtractionBatch)
 
 
@@ -410,10 +471,12 @@ class GetClassificationBatchResponse(ApiModel):
     model_for_adaptation: adaptation_llm.ConcreteModel | None
 
     class Exercise(ApiModel):
+        id: str
         page_number: int | None
         exercise_number: str | None
         full_text: str
         exercise_class: str | None
+        reclassified_by: str | None
         exercise_class_has_settings: bool
         adaptation: ApiAdaptation | None
 
@@ -431,10 +494,12 @@ async def get_classification_batch(
         model_for_adaptation=classification_batch.model_for_adaptation,
         exercises=[
             GetClassificationBatchResponse.Exercise(
+                id=str(exercise.id),
                 page_number=exercise.page_number,
                 exercise_number=exercise.exercise_number,
                 full_text=exercise.full_text,
                 exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                reclassified_by=exercise.classified_by_username,
                 exercise_class_has_settings=(
                     exercise.exercise_class is not None and exercise.exercise_class.latest_strategy_settings is not None
                 ),
@@ -628,10 +693,12 @@ class GetExtractionBatchResponse(ApiModel):
         assistant_response: extraction_responses.AssistantResponse | None
 
         class Exercise(ApiModel):
+            id: str
             page_number: int | None
             exercise_number: str | None
             full_text: str
             exercise_class: str | None
+            reclassified_by: str | None
             exercise_class_has_settings: bool
             adaptation: ApiAdaptation | None
 
@@ -649,10 +716,12 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             assistant_response=page_extraction.assistant_response,
             exercises=[
                 GetExtractionBatchResponse.Page.Exercise(
+                    id=str(exercise.id),
                     page_number=exercise.page_number,
                     exercise_number=exercise.exercise_number,
                     full_text=exercise.full_text,
                     exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                    reclassified_by=exercise.classified_by_username,
                     exercise_class_has_settings=(
                         exercise.exercise_class is not None
                         and exercise.exercise_class.latest_strategy_settings is not None

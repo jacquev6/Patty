@@ -1084,6 +1084,76 @@ class FixturesCreator:
     def create_70_adaptation_batches(self) -> None:
         self.make_adaptation_batches(70)
 
+    def create_dummy_classification_batch(self) -> None:
+        self.create_dummy_coche_exercise_classes()
+        class1 = self.__session.get(db.ExerciseClass, 1)
+        assert class1 is not None
+
+        class2 = self.make(
+            db.ExerciseClass,
+            created_by_username="Patty",
+            created_by_classification_batch=None,
+            created_at=created_at,
+            name="NoSettings",
+            latest_strategy_settings=None,
+        )
+
+        model_for_adaptation = adaptation_llm.DummyModel(name="dummy-1")
+
+        batch = self.make(
+            db.ClassificationBatch,
+            created_by_username="Patty",
+            created_at=created_at,
+            created_by_page_extraction=None,
+            model_for_adaptation=model_for_adaptation,
+        )
+        exe1 = self.make(
+            db.AdaptableExercise,
+            created_by_username="Patty",
+            created_by_page_extraction=None,
+            created_at=created_at,
+            page_number=1,
+            exercise_number="1",
+            textbook=None,
+            removed_from_textbook=False,
+            full_text="Avec adaptation",
+            instruction_hint_example_text=None,
+            statement_text=None,
+            classified_at=created_at,
+            classified_by_classification_batch=batch,
+            classified_by_username=None,
+            exercise_class=class1,
+        )
+        self.make_successful_adaptation(
+            adaptation_batch=None,
+            strategy=self.make(
+                db.AdaptationStrategy,
+                created_at=created_at,
+                created_by_username=None,
+                created_by_classification_batch=batch,
+                model=model_for_adaptation,
+                settings=class1.latest_strategy_settings,
+            ),
+            exercise=exe1,
+        )
+        self.make(
+            db.AdaptableExercise,
+            created_by_username="Patty",
+            created_by_page_extraction=None,
+            created_at=created_at,
+            page_number=1,
+            exercise_number="1",
+            textbook=None,
+            removed_from_textbook=False,
+            full_text="Sans adaptation",
+            instruction_hint_example_text=None,
+            statement_text=None,
+            classified_at=created_at,
+            classified_by_classification_batch=batch,
+            classified_by_username=None,
+            exercise_class=class2,
+        )
+
 
 def load(session: database_utils.Session, truncate: bool, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)

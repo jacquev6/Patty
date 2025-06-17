@@ -108,6 +108,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/exercise-classes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Exercise Classes */
+    get: operations['get_exercise_classes_api_exercise_classes_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptable-exercises/{id}/exercise-class': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Adaptable Exercise Class */
+    put: operations['put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/classification-batches': {
     parameters: {
       query?: never
@@ -1426,6 +1460,13 @@ export interface components {
        */
       tokenType: string
     }
+    /** PutAdaptableExerciseClassRequest */
+    PutAdaptableExerciseClassRequest: {
+      /** Creator */
+      creator: string
+      /** Classname */
+      className: string
+    }
     /** ReferenceComponents */
     ReferenceComponents: {
       /**
@@ -1641,6 +1682,8 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__GetClassificationBatchResponse__Exercise: {
+      /** Id */
+      id: string
       /** Pagenumber */
       pageNumber: number | null
       /** Exercisenumber */
@@ -1649,12 +1692,16 @@ export interface components {
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
     }
     /** Exercise */
     patty__api_router__GetExtractionBatchResponse__Page__Exercise: {
+      /** Id */
+      id: string
       /** Pagenumber */
       pageNumber: number | null
       /** Exercisenumber */
@@ -1663,6 +1710,8 @@ export interface components {
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
@@ -1923,6 +1972,61 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetAdaptationBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_exercise_classes_api_exercise_classes_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': string[]
+        }
+      }
+    }
+  }
+  put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PutAdaptableExerciseClassRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

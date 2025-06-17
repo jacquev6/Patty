@@ -8,6 +8,10 @@ defineProps<{
   classificationBatch: ClassificationBatch
 }>()
 
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
+}>()
+
 const authenticationTokenStore = useAuthenticationTokenStore()
 </script>
 
@@ -50,6 +54,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
       :exercise
       :index
+      @batchUpdated="emit('batch-updated')"
     />
   </template>
 </template>

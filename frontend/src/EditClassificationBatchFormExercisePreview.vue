@@ -7,7 +7,9 @@ import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.v
 import FixedColumns from './FixedColumns.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
 import BusyBox from './BusyBox.vue'
-import type { ClassificationBatch } from './apiClient'
+import { useAuthenticatedClient, type ClassificationBatch } from './apiClient'
+import EditClassificationBatchFormExercisePreviewClassEditor from './EditClassificationBatchFormExercisePreviewClassEditor.vue'
+import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
   header: string
@@ -15,6 +17,13 @@ const props = defineProps<{
   exercise: ClassificationBatch['exercises'][number]
   index: number
 }>()
+
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
+}>()
+
+const client = useAuthenticatedClient()
+const identifiedUser = useIdentifiedUserStore()
 
 const adaptation = computed(() => {
   if (props.exercise.adaptation === null) {
@@ -25,6 +34,20 @@ const adaptation = computed(() => {
 })
 
 const fullScreen = ref(false)
+
+const editingClassification = ref(false)
+
+const exerciseClass = ref<string>(props.exercise.exerciseClass ?? '')
+watch(exerciseClass, async (className) => {
+  if (className !== props.exercise.exerciseClass) {
+    await client.PUT('/api/adaptable-exercises/{id}/exercise-class', {
+      params: { path: { id: props.exercise.id } },
+      body: { creator: identifiedUser.identifier, className },
+    })
+    emit('batch-updated')
+  }
+  editingClassification.value = false
+})
 
 const { Escape } = useMagicKeys()
 
@@ -43,7 +66,24 @@ watch(Escape, () => {
             }}<span v-if="exercise.exerciseClass === null" class="inProgress">
               (in progress, will refresh when done)
             </span>
-            <template v-else>: {{ exercise.exerciseClass }} </template>
+            <template v-else-if="editingClassification"
+              >: <EditClassificationBatchFormExercisePreviewClassEditor v-model="exerciseClass" />
+            </template>
+            <template v-else>
+              <template v-if="exercise.reclassifiedBy === null"
+                >: {{ exercise.exerciseClass }}
+                <span class="discrete"
+                  >(classified by model <span class="edit" @click="editingClassification = true">🖊️</span>)</span
+                ></template
+              >
+              <template v-else
+                >: {{ exercise.exerciseClass }}
+                <span class="discrete"
+                  >(fixed by {{ exercise.reclassifiedBy }}
+                  <span class="edit" @click="editingClassification = true">🖊️</span>)</span
+                ></template
+              >
+            </template>
           </component>
           <p>Page: {{ exercise.pageNumber ?? 'N/A' }}, exercise: {{ exercise.exerciseNumber ?? 'N/A' }}</p>
         </slot>
@@ -113,6 +153,14 @@ watch(Escape, () => {
 span.inProgress {
   color: gray;
   font-size: 70%;
+}
+
+span.discrete {
+  color: gray;
+}
+
+span.edit {
+  cursor: pointer;
 }
 
 button.exitFullScreen {

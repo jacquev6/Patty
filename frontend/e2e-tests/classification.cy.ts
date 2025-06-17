@@ -138,3 +138,40 @@ describe('The classification batch creation page', () => {
     // @todo Submit the adaptation using the new settings.
   })
 })
+
+describe('The classification batch edition page', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation,dummy-classification-batch')
+    ignoreResizeObserverLoopError()
+    visit('/classification-batch-1')
+  })
+
+  it("allows fixing an exercise's class", () => {
+    cy.get('h2:contains("Input 1: CocheMot (classified by model")').should('exist')
+    screenshot('classification-batch-edition-page')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-2')
+    cy.get('span.edit').eq(0).click()
+    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
+    cy.get('[data-cy="identified-user-ok"]').click()
+    cy.get('[data-cy="exercise-class"]').select('CochePhrase')
+    cy.get('h2:contains("Input 1: CochePhrase (fixed by Alice")').should('exist')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-3')
+
+    cy.get('h2:contains("Input 2: NoSettings (classified by model")').should('exist')
+    cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
+    cy.get('span.edit').eq(1).click()
+    cy.get('[data-cy="exercise-class"]').select('CocheMot')
+    cy.get('h2:contains("Input 2: CocheMot (fixed by Alice")').should('exist')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('not.exist')
+    cy.get('a:contains("View details")').eq(1).should('have.attr', 'href', '/adaptation-4')
+    cy.get('span.edit').eq(1).click()
+    cy.get('[data-cy="exercise-class"]').select('NoSettings')
+    cy.get('h2:contains("Input 2: NoSettings (fixed by Alice")').should('exist')
+    cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
+  })
+})

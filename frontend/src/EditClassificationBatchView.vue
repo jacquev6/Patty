@@ -64,7 +64,7 @@ onUnmounted(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="classificationBatch !== null">
-      <EditClassificationBatchForm :classificationBatch />
+      <EditClassificationBatchForm :classificationBatch @batchUpdated="refresh" />
     </template>
     <template v-else-if="found === false">
       <h1>Not found</h1>

@@ -324,6 +324,85 @@
         }
       }
     },
+    "/api/exercise-classes": {
+      "get": {
+        "summary": "Get Exercise Classes",
+        "operationId": "get_exercise_classes_api_exercise_classes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Get Exercise Classes Api Exercise Classes Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/adaptable-exercises/{id}/exercise-class": {
+      "put": {
+        "summary": "Put Adaptable Exercise Class",
+        "operationId": "put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutAdaptableExerciseClassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/classification-batches": {
       "post": {
         "summary": "Create Classification Batch",
@@ -4150,6 +4229,25 @@
         ],
         "title": "PostTokenResponse"
       },
+      "PutAdaptableExerciseClassRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "className": {
+            "type": "string",
+            "title": "Classname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "className"
+        ],
+        "title": "PutAdaptableExerciseClassRequest"
+      },
       "ReferenceComponents": {
         "properties": {
           "text": {
@@ -4679,6 +4777,10 @@
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4716,6 +4818,17 @@
             ],
             "title": "Exerciseclass"
           },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          },
           "exerciseClassHasSettings": {
             "type": "boolean",
             "title": "Exerciseclasshassettings"
@@ -4734,10 +4847,12 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "pageNumber",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
+          "reclassifiedBy",
           "exerciseClassHasSettings",
           "adaptation"
         ],
@@ -4745,6 +4860,10 @@
       },
       "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4782,6 +4901,17 @@
             ],
             "title": "Exerciseclass"
           },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          },
           "exerciseClassHasSettings": {
             "type": "boolean",
             "title": "Exerciseclasshassettings"
@@ -4800,10 +4930,12 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "pageNumber",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
+          "reclassifiedBy",
           "exerciseClassHasSettings",
           "adaptation"
         ],
