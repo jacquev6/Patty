@@ -15,6 +15,10 @@ defineProps<{
   extractionBatch: ExtractionBatch
 }>()
 
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
+}>()
+
 const apiConstantsStore = useApiConstantsStore()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
@@ -70,20 +74,14 @@ const authenticationTokenStore = useAuthenticationTokenStore()
           <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
               <EditClassificationOrExtractionBatchFormExercisePreview
-                header="h3"
+                headerComponent="h3"
+                :headerText="`Exercise ${index + 1}`"
+                :showPageAndExercise="false"
+                :classificationWasRequested="extractionBatch.runClassification"
                 :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
                 :exercise
-                :index
-              >
-                <h3>
-                  Exercise {{ exercise.exerciseNumber
-                  }}<template v-if="extractionBatch.runClassification"
-                    ><span v-if="exercise.exerciseClass === null" class="inProgress">
-                      (in progress, will refresh when done) </span
-                    ><template v-else>: {{ exercise.exerciseClass }} </template></template
-                  >
-                </h3>
-              </EditClassificationOrExtractionBatchFormExercisePreview>
+                @batchUpdated="emit('batch-updated')"
+              />
             </template>
           </template>
           <template v-else-if="page.assistantResponse.kind === 'error'">

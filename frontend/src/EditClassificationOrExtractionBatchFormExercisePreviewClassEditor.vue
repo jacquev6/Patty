@@ -5,7 +5,7 @@ import IdentifiedUser from './IdentifiedUser.vue'
 import WhiteSpace from './WhiteSpace.vue'
 import { useAuthenticatedClient } from './apiClient'
 
-const model = defineModel<string>()
+const model = defineModel<string>({ required: true })
 
 const client = useAuthenticatedClient()
 

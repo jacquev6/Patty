@@ -50,10 +50,12 @@ const authenticationTokenStore = useAuthenticationTokenStore()
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
     <EditClassificationOrExtractionBatchFormExercisePreview
-      header="h2"
+      headerComponent="h2"
+      :headerText="`Input ${index + 1}`"
+      :showPageAndExercise="true"
+      :classificationWasRequested="true"
       :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
       :exercise
-      :index
       @batchUpdated="emit('batch-updated')"
     />
   </template>

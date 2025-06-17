@@ -75,7 +75,7 @@ onUnmounted(() => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="extractionBatch !== null">
-      <EditExtractionBatchForm :extractionBatch />
+      <EditExtractionBatchForm :extractionBatch @batchUpdated="refresh" />
     </template>
     <template v-else-if="found === false">
       <h1>Not found</h1>
