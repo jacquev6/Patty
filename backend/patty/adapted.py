@@ -49,11 +49,13 @@ class Whitespace(BaseModel):
 class Formatted(BaseModel):
     kind: Literal["formatted"]
     contents: list[FormattedText]
-    bold: bool
-    italic: bool
-    underlined: bool
-    highlighted: str | None
-    boxed: bool
+    bold: bool = False
+    italic: bool = False
+    underlined: bool = False
+    highlighted: str | None = None
+    boxed: bool = False
+    superscript: bool = False
+    subscript: bool = False
 
 
 class Arrow(BaseModel):

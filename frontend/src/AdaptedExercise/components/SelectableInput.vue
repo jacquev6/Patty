@@ -43,11 +43,7 @@ const style = computed(() => {
     class="main"
     :style
     :contents
-    :bold="false"
-    :italic="false"
-    :underlined="false"
     :highlighted
-    :boxed="false"
     :tricolorable
     data-cy="selectableInput"
     @click="increment()"

@@ -30,10 +30,6 @@ defineProps<{
     v-else-if="component.kind === 'choice'"
     kind="formatted"
     :contents="component.contents"
-    :bold="false"
-    :italic="false"
-    :underlined="false"
-    :highlighted="null"
     :boxed="true"
     :tricolorable
   />

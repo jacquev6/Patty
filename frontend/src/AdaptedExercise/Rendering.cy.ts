@@ -34,11 +34,6 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: 'text' },
                       { kind: 'text', text: '.' },
                     ],
-                    bold: false,
-                    italic: false,
-                    underlined: false,
-                    highlighted: null,
-                    boxed: false,
                   },
                 ],
               },
@@ -75,10 +70,6 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: '.' },
                     ],
                     bold: true,
-                    italic: false,
-                    underlined: false,
-                    highlighted: null,
-                    boxed: false,
                   },
                 ],
               },
@@ -113,11 +104,7 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: 'text' },
                       { kind: 'text', text: '.' },
                     ],
-                    bold: false,
                     italic: true,
-                    underlined: false,
-                    highlighted: null,
-                    boxed: false,
                   },
                 ],
               },
@@ -152,11 +139,7 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: 'text' },
                       { kind: 'text', text: '.' },
                     ],
-                    bold: false,
-                    italic: false,
                     underlined: true,
-                    highlighted: null,
-                    boxed: false,
                   },
                 ],
               },
@@ -191,11 +174,7 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: 'text' },
                       { kind: 'text', text: '.' },
                     ],
-                    bold: false,
-                    italic: false,
-                    underlined: false,
                     highlighted: 'yellow',
-                    boxed: false,
                   },
                 ],
               },
@@ -230,10 +209,6 @@ describe('FormattedComponent', () => {
                       { kind: 'text', text: 'text' },
                       { kind: 'text', text: '.' },
                     ],
-                    bold: false,
-                    italic: false,
-                    underlined: false,
-                    highlighted: null,
                     boxed: true,
                   },
                 ],
@@ -274,29 +249,79 @@ describe('FormattedComponent', () => {
                           {
                             kind: 'formatted',
                             contents: [{ kind: 'text', text: 'italic' }],
-                            bold: false,
                             italic: true,
-                            underlined: false,
-                            highlighted: null,
-                            boxed: false,
                           },
                           { kind: 'whitespace' },
                           { kind: 'text', text: 'boxed' },
                         ],
-                        bold: false,
-                        italic: false,
-                        underlined: false,
-                        highlighted: null,
                         boxed: true,
                       },
                       { kind: 'whitespace' },
                       { kind: 'text', text: 'bold' },
                     ],
                     bold: true,
-                    italic: false,
-                    underlined: false,
-                    highlighted: null,
-                    boxed: false,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
+      },
+    })
+    screenshot()
+  })
+
+  it('renders superscript', () => {
+    cy.viewport(500, 260)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'Base' },
+                  {
+                    kind: 'formatted',
+                    contents: [{ kind: 'text', text: 'super' }],
+                    superscript: true,
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: { pages: [] },
+          reference: null,
+        },
+      },
+    })
+    screenshot()
+  })
+
+  it('renders subscript', () => {
+    cy.viewport(500, 260)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'Base' },
+                  {
+                    kind: 'formatted',
+                    contents: [{ kind: 'text', text: 'sub' }],
+                    subscript: true,
                   },
                 ],
               },

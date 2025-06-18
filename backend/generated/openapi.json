@@ -2752,15 +2752,18 @@
           },
           "bold": {
             "type": "boolean",
-            "title": "Bold"
+            "title": "Bold",
+            "default": false
           },
           "italic": {
             "type": "boolean",
-            "title": "Italic"
+            "title": "Italic",
+            "default": false
           },
           "underlined": {
             "type": "boolean",
-            "title": "Underlined"
+            "title": "Underlined",
+            "default": false
           },
           "highlighted": {
             "anyOf": [
@@ -2775,18 +2778,24 @@
           },
           "boxed": {
             "type": "boolean",
-            "title": "Boxed"
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
           }
         },
         "type": "object",
         "required": [
           "kind",
-          "contents",
-          "bold",
-          "italic",
-          "underlined",
-          "highlighted",
-          "boxed"
+          "contents"
         ]
       },
       "Formatted-Output": {
@@ -2818,15 +2827,18 @@
           },
           "bold": {
             "type": "boolean",
-            "title": "Bold"
+            "title": "Bold",
+            "default": false
           },
           "italic": {
             "type": "boolean",
-            "title": "Italic"
+            "title": "Italic",
+            "default": false
           },
           "underlined": {
             "type": "boolean",
-            "title": "Underlined"
+            "title": "Underlined",
+            "default": false
           },
           "highlighted": {
             "anyOf": [
@@ -2841,18 +2853,24 @@
           },
           "boxed": {
             "type": "boolean",
-            "title": "Boxed"
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
           }
         },
         "type": "object",
         "required": [
           "kind",
-          "contents",
-          "bold",
-          "italic",
-          "underlined",
-          "highlighted",
-          "boxed"
+          "contents"
         ]
       },
       "FormattedTextContainer-Input": {

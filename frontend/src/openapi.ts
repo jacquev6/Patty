@@ -916,16 +916,38 @@ export interface components {
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
       )[]
-      /** Bold */
-      bold: boolean
-      /** Italic */
-      italic: boolean
-      /** Underlined */
-      underlined: boolean
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
       /** Highlighted */
-      highlighted: string | null
-      /** Boxed */
-      boxed: boolean
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
     }
     'Formatted-Output': {
       /**
@@ -940,16 +962,38 @@ export interface components {
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
       )[]
-      /** Bold */
-      bold: boolean
-      /** Italic */
-      italic: boolean
-      /** Underlined */
-      underlined: boolean
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
       /** Highlighted */
-      highlighted: string | null
-      /** Boxed */
-      boxed: boolean
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
     }
     'FormattedTextContainer-Input': {
       /** Contents */
