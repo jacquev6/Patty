@@ -3,6 +3,117 @@ import ExamplesViewExercise, { type Example } from './ExamplesViewExercise.vue'
 
 const examples: Example[] = [
   {
+    title: 'GenreNombre',
+    description: 'A simple case of ChoixMultiple.',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Pour' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'chaque' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'nom' },
+              { kind: 'text', text: ',' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'écris' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'son' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'genre' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'son' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'nombre' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'flûtes' },
+              { kind: 'whitespace' },
+              { kind: 'arrow' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'féminin' },
+              { kind: 'text', text: ',' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'pluriel' },
+            ],
+          },
+        ],
+      },
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'classe' },
+                  { kind: 'arrow' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'féminin' }] },
+                      { contents: [{ kind: 'text', text: 'masculin' }] },
+                    ],
+                    showChoicesByDefault: false,
+                  },
+                  { kind: 'text', text: ',' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'singulier' }] },
+                      { contents: [{ kind: 'text', text: 'pluriel' }] },
+                    ],
+                    showChoicesByDefault: false,
+                  },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'cachots' },
+                  { kind: 'arrow' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'féminin' }] },
+                      { contents: [{ kind: 'text', text: 'masculin' }] },
+                    ],
+                    showChoicesByDefault: false,
+                  },
+                  { kind: 'text', text: ',' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'singulier' }] },
+                      { contents: [{ kind: 'text', text: 'pluriel' }] },
+                    ],
+                    showChoicesByDefault: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'Vrai/Faux',
     description: 'A simple case of ChoixMultiple.',
     exercise: {
