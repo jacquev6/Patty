@@ -518,14 +518,13 @@ describe('The adaptation batch creation page', () => {
     cy.get('[data-cy="identified-user-ok"]').click()
     cy.get('[data-cy="settings-name"]').should('have.value', 'Blah (older version)') // Because Alice's last batch was submitted with the older version
     cy.get('button:contains("Submit")').click()
-    cy.get('p:contains("Name: Blah (older version)")').should('exist') // Consistent with comment above but problematic
+    cy.get('p:contains("Name: Blah")').should('exist') // Older version became current (similar to how previous version can become current)
 
     cy.visit('/new-adaptation-batch')
     cy.get('[data-cy="settings-name"]').focus()
-    cy.get('.suggestion').should('have.length', 3)
-    cy.get('.suggestion').eq(0).should('have.text', 'Blah (older version)') // Unexpected, should not be here
+    cy.get('.suggestion').should('have.length', 2)
+    cy.get('.suggestion').eq(0).should('have.text', 'Blah')
     cy.get('.suggestion').eq(1).should('have.text', 'Blah (previous version)')
-    cy.get('.suggestion').eq(2).should('have.text', 'Blah')
   })
 })
 

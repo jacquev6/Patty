@@ -176,6 +176,8 @@ async def post_adaptation_batch(
         # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
         if req.strategy.settings.name.endswith(" (previous version)"):
             branch_name = req.strategy.settings.name[:-19]
+        elif req.strategy.settings.name.endswith(" (older version)"):
+            branch_name = req.strategy.settings.name[:-16]
         else:
             branch_name = req.strategy.settings.name
         exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == branch_name).first()
