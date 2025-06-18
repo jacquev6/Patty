@@ -14,7 +14,7 @@ function screenshot() {
 
 describe('FormattedComponent', () => {
   it('renders plain text and whitespace', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -56,7 +56,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders bold', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -95,7 +95,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders italic', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -134,7 +134,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders underlined', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -173,7 +173,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders highlighted', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -212,7 +212,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders boxed', () => {
-    cy.viewport(500, 130)
+    cy.viewport(500, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -251,7 +251,7 @@ describe('FormattedComponent', () => {
   })
 
   it('renders complex nested formatting', () => {
-    cy.viewport(700, 130)
+    cy.viewport(700, 260)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -315,7 +315,7 @@ describe('FormattedComponent', () => {
 
 describe('SelectableInput', () => {
   it('changes color on click', () => {
-    cy.viewport(500, 180)
+    cy.viewport(500, 310)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -368,7 +368,7 @@ describe('SelectableInput', () => {
   })
 
   it('adds padding to single letters and punctuation', () => {
-    cy.viewport(500, 180)
+    cy.viewport(500, 310)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -572,7 +572,7 @@ describe('SelectableInput', () => {
 
 describe('FreeTextInput', () => {
   it('accepts text input', () => {
-    cy.viewport(500, 180)
+    cy.viewport(500, 310)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -720,7 +720,7 @@ describe('MultipleChoicesInput', () => {
   ]
 
   it('selects choices', () => {
-    cy.viewport(500, 330)
+    cy.viewport(500, 500)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -775,7 +775,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('closes choices on click on backdrop', () => {
-    cy.viewport(700, 330)
+    cy.viewport(700, 500)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -859,7 +859,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('moves next lines down', () => {
-    cy.viewport(600, 550)
+    cy.viewport(600, 800)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -908,7 +908,7 @@ describe('MultipleChoicesInput', () => {
   })
 
   it('does not render choices over the page navigation controls', () => {
-    cy.viewport(543, 550)
+    cy.viewport(543, 780)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -1246,7 +1246,7 @@ describe('AdaptedExerciseRenderer', () => {
   })
 
   it('renders the example and hint', () => {
-    cy.viewport(600, 550)
+    cy.viewport(600, 600)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {
@@ -1282,7 +1282,7 @@ describe('AdaptedExerciseRenderer', () => {
   })
 
   it('renders the reference', () => {
-    cy.viewport(600, 550)
+    cy.viewport(600, 600)
 
     cy.mount(AdaptedExerciseRenderer, {
       props: {

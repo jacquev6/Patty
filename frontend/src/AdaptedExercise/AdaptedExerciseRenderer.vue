@@ -222,10 +222,16 @@ div {
 
 .instruction {
   text-align: center;
+  padding-top: 0.5em;
+  padding-bottom: 3em;
 }
 
-.instruction :deep(p:first-child) {
-  margin-top: 11px;
+:deep(p) {
+  line-height: 1.7em;
+}
+
+.instruction :deep(*:first-child) {
+  margin-top: 0;
 }
 
 .statement {
