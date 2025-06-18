@@ -3,6 +3,108 @@ import ExamplesViewExercise, { type Example } from './ExamplesViewExercise.vue'
 
 const examples: Example[] = [
   {
+    title: 'Vrai/Faux',
+    description: 'A simple case of ChoixMultiple.',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Réponds' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'par' },
+              { kind: 'whitespace' },
+              {
+                kind: 'formatted',
+                bold: false,
+                italic: false,
+                underlined: false,
+                boxed: true,
+                highlighted: null,
+                contents: [{ kind: 'text', text: 'vrai' }],
+              },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ou' },
+              { kind: 'whitespace' },
+              {
+                kind: 'formatted',
+                bold: false,
+                italic: false,
+                underlined: false,
+                boxed: true,
+                highlighted: null,
+                contents: [{ kind: 'text', text: 'faux' }],
+              },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'A' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'la' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '2' },
+                  { kind: 'text', text: 'e' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'personne' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'du' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'singulier' },
+                  { kind: 'text', text: ',' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'les' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'verbes' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'aller' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'et' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'venir' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'prennent' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'un' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 's' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'arrow' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'Vrai' }] },
+                      { contents: [{ kind: 'text', text: 'Faux' }] },
+                    ],
+                    showChoicesByDefault: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'TransformePhrase',
     description: 'An alternative is to use "kind": "editableTextInput" as in the "Edit sentence" example below.',
     exercise: {
