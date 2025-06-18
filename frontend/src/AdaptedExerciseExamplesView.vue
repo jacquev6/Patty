@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ExamplesViewExercise, { type Example } from './ExamplesViewExercise.vue'
+import ExamplesViewExercise, { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
 
 const examples: Example[] = [
   {

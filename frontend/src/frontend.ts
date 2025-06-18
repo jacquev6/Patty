@@ -13,7 +13,7 @@ import EditAdaptationView from './EditAdaptationView.vue'
 import EditAdaptationBatchView from './EditAdaptationBatchView.vue'
 import EditExtractionBatchView from './EditExtractionBatchView.vue'
 import FrontendRootView from './FrontendRootView.vue'
-import ExamplesView from './ExamplesView.vue'
+import AdaptedExerciseExamplesView from './AdaptedExerciseExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
 import EditClassificationBatchView from './EditClassificationBatchView.vue'
 
@@ -74,9 +74,9 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/examples',
-      name: 'examples',
-      component: ExamplesView,
+      path: '/adapted-exercice-examples',
+      name: 'adapted-exercice-examples',
+      component: AdaptedExerciseExamplesView,
     },
   ],
 })

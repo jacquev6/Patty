@@ -95,6 +95,11 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
     <FixedColumns :columns="[1, 1]">
       <template #col-1>
         <h1>Sandbox</h1>
+        <p>
+          <RouterLink :to="{ name: 'adapted-exercice-examples' }"
+            >Adapted exercise examples, with their JSON code.</RouterLink
+          >
+        </p>
         <h2>New batch</h2>
         <p><RouterLink :to="{ name: 'create-extraction-batch' }">New extraction batch</RouterLink> (from a PDF)</p>
         <p>
