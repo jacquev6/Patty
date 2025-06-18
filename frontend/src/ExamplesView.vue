@@ -1,21 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import jsonStringify from 'json-stringify-pretty-compact'
-import { useMagicKeys } from '@vueuse/core'
-
-import type { AdaptedExercise } from '@/apiClient'
-import MiniatureScreen from './MiniatureScreen.vue'
-import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
-import FixedColumns from './FixedColumns.vue'
-
-type Example = {
-  title: string
-  exercise: AdaptedExercise
-}
+import ExamplesViewExercise, { type Example } from './ExamplesViewExercise.vue'
 
 const examples: Example[] = [
   {
     title: 'TransformePhrase',
+    description: 'An alternative is to use "kind": "editableTextInput" as in the "Edit sentence" example below.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -158,7 +147,8 @@ const examples: Example[] = [
     },
   },
   {
-    title: 'TransformeMot (sur plusieurs pages)',
+    title: 'TransformeMot',
+    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -266,7 +256,9 @@ const examples: Example[] = [
     },
   },
   {
-    title: 'CocheMot (et ponctuation)',
+    title: 'CocheMot',
+    description:
+      'Note that punctuation is also selectable in this example. If this is not wanted, you should remove the "kind": "selectableInput" around punctuation elements.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -557,6 +549,7 @@ const examples: Example[] = [
   },
   {
     title: 'CochePhrase',
+    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -708,6 +701,7 @@ const examples: Example[] = [
   },
   {
     title: 'Swappable inputs',
+    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -735,6 +729,7 @@ const examples: Example[] = [
   },
   {
     title: 'Edit sentence',
+    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -882,45 +877,15 @@ const examples: Example[] = [
     },
   },
 ]
-
-const fullScreenIndex = ref<number | null>(null)
-const { Escape } = useMagicKeys()
-
-watch(Escape, () => {
-  fullScreenIndex.value = null
-})
 </script>
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <template v-for="(example, exampleIndex) in examples" :key="example.title">
-      <h1>{{ example.title }}</h1>
-      <FixedColumns :columns="[1, 1]">
-        <template #col-1>
-          <pre>{{ jsonStringify(example.exercise) }}</pre>
-        </template>
-        <template #col-2>
-          <MiniatureScreen :fullScreen="fullScreenIndex === exampleIndex">
-            <AdaptedExerciseRenderer
-              :navigateUsingArrowKeys="fullScreenIndex === exampleIndex"
-              :adaptedExercise="example.exercise"
-            />
-            <button v-if="fullScreenIndex === exampleIndex" class="exitFullScreen" @click="fullScreenIndex = null">
-              Exit full screen (Esc)
-            </button>
-          </MiniatureScreen>
-          <button @click="fullScreenIndex = exampleIndex">Full screen</button>
-        </template>
-      </FixedColumns>
+    <h1>Examples</h1>
+    <template v-for="example in examples" :key="example.title">
+      <div style="margin-bottom: 10px">
+        <ExamplesViewExercise :example />
+      </div>
     </template>
   </div>
 </template>
-
-<style scoped>
-button.exitFullScreen {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 0);
-  bottom: 2rem;
-}
-</style>
