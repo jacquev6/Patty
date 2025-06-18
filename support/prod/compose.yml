@@ -22,6 +22,8 @@ services:
   backend:
     image: jacquev6/patty:preview-backend
     pull_policy: never
+    volumes:
+      - ./backend/classification-models:/classification-models
     env_file:
       - backend/env
       - backend/secrets.env
@@ -32,6 +34,8 @@ services:
   submission-daemon:
     image: jacquev6/patty:preview-backend
     pull_policy: never
+    volumes:
+      - ./backend/classification-models:/classification-models
     env_file:
       - backend/env
       - backend/secrets.env

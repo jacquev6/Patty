@@ -29,7 +29,7 @@ class OrmBase(OrmBaseBase):
                 ok = column.name[:-3] in kwargs
             if not ok:
                 for caller_frame in inspect.stack()[1:]:
-                    if caller_frame.filename.startswith("/app") and caller_frame.function != "create":
+                    if caller_frame.filename.startswith("/app") and caller_frame.function != "make":
                         break
                 print(
                     f"WARNING: on {caller_frame.filename}:{caller_frame.lineno}, field '{column.name}' of {cls.__name__} is not set",
@@ -47,6 +47,9 @@ class Textbook(OrmBase):
     created_by_username: orm.Mapped[str]  # All 'Textbook's are created manually
 
     title: orm.Mapped[str]
+    editor: orm.Mapped[str | None]
+    year: orm.Mapped[int | None]
+    isbn: orm.Mapped[str | None]
 
     exercises: orm.Mapped[list[BaseExercise]] = orm.relationship(
         back_populates="textbook", order_by=lambda: [BaseExercise.page_number, BaseExercise.exercise_number]

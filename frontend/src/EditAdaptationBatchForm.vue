@@ -22,13 +22,17 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     <template #col-1>
       <p>Created by: {{ adaptationBatch.createdBy }}</p>
       <AdaptationStrategyEditor
-        :availableAdaptationLlmModels="[]"
         :availableStrategySettings="[]"
         :disabled="true"
         :modelValue="adaptationBatch.strategy"
       />
     </template>
     <template #col-2>
+      <p>
+        <RouterLink :to="{ name: 'create-adaptation-batch', query: { base: adaptationBatch.id } }"
+          >New batch based on this one</RouterLink
+        >
+      </p>
       <p>
         <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
           Download standalone HTML

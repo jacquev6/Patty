@@ -7,14 +7,25 @@ import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.v
 import FixedColumns from './FixedColumns.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
 import BusyBox from './BusyBox.vue'
-import type { ClassificationBatch } from './apiClient'
+import { useAuthenticatedClient, type ClassificationBatch } from './apiClient'
+import EditClassificationBatchFormExercisePreviewClassEditor from './EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
+import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const props = defineProps<{
-  header: string
+  headerComponent: string
+  headerText: string
+  showPageAndExercise: boolean
+  classificationWasRequested: boolean
   adaptationWasRequested: boolean
   exercise: ClassificationBatch['exercises'][number]
-  index: number
 }>()
+
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
+}>()
+
+const client = useAuthenticatedClient()
+const identifiedUser = useIdentifiedUserStore()
 
 const adaptation = computed(() => {
   if (props.exercise.adaptation === null) {
@@ -25,6 +36,22 @@ const adaptation = computed(() => {
 })
 
 const fullScreen = ref(false)
+
+const editingClassification = ref(false)
+
+const exerciseClassProxy = computed({
+  get: () => props.exercise.exerciseClass ?? '',
+  async set(className: string) {
+    if (className !== props.exercise.exerciseClass) {
+      await client.PUT('/api/adaptable-exercises/{id}/exercise-class', {
+        params: { path: { id: props.exercise.id } },
+        body: { creator: identifiedUser.identifier, className },
+      })
+      emit('batch-updated')
+    }
+    editingClassification.value = false
+  },
+})
 
 const { Escape } = useMagicKeys()
 
@@ -37,16 +64,35 @@ watch(Escape, () => {
   <div style="margin-top: 5px">
     <FixedColumns :columns="[1, 1]" :gutters="false">
       <template #col-1>
-        <slot>
-          <component :is="header" style="margin-top: 0">
-            Input {{ index + 1
-            }}<span v-if="exercise.exerciseClass === null" class="inProgress">
+        <component :is="headerComponent" style="margin-top: 0">
+          {{ headerText
+          }}<template v-if="classificationWasRequested">
+            <span v-if="exercise.exerciseClass === null" class="inProgress">
               (in progress, will refresh when done)
             </span>
-            <template v-else>: {{ exercise.exerciseClass }} </template>
-          </component>
-          <p>Page: {{ exercise.pageNumber ?? 'N/A' }}, exercise: {{ exercise.exerciseNumber ?? 'N/A' }}</p>
-        </slot>
+            <template v-else-if="editingClassification"
+              >: <EditClassificationBatchFormExercisePreviewClassEditor v-model="exerciseClassProxy" />
+            </template>
+            <template v-else>
+              <template v-if="exercise.reclassifiedBy === null"
+                >: {{ exercise.exerciseClass }}
+                <span class="discrete"
+                  >(classified by model <span class="edit" @click="editingClassification = true">🖊️</span>)</span
+                ></template
+              >
+              <template v-else
+                >: {{ exercise.exerciseClass }}
+                <span class="discrete"
+                  >(fixed by {{ exercise.reclassifiedBy }}
+                  <span class="edit" @click="editingClassification = true">🖊️</span>)</span
+                ></template
+              >
+            </template>
+          </template>
+        </component>
+        <p v-if="showPageAndExercise">
+          Page: {{ exercise.pageNumber ?? 'N/A' }}, exercise: {{ exercise.exerciseNumber ?? 'N/A' }}
+        </p>
         <p>
           <template v-for="(line, index) in exercise.fullText.split('\n')">
             <br v-if="index !== 0" />
@@ -80,7 +126,7 @@ watch(Escape, () => {
           <BusyBox :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
         </template>
         <template v-else-if="adaptation.status.kind === 'error'">
-          <component :is="header" style="margin-top: 0">Error with the LLM</component>
+          <component :is="headerComponent" style="margin-top: 0">Error with the LLM</component>
           <p>
             <template v-if="adaptation.status.error === 'invalid-json'">
               The LLM returned a JSON response that does not validate against the adapted exercise schema.
@@ -113,6 +159,14 @@ watch(Escape, () => {
 span.inProgress {
   color: gray;
   font-size: 70%;
+}
+
+span.discrete {
+  color: gray;
+}
+
+span.edit {
+  cursor: pointer;
 }
 
 button.exitFullScreen {

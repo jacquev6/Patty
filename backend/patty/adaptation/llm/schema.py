@@ -1,7 +1,6 @@
 from typing import TypeVar
 
 from pydantic import BaseModel
-import mistralai.extra
 import openai.lib._parsing._completions
 
 from ...any_json import JsonDict
@@ -11,11 +10,7 @@ CustomPydanticModel = TypeVar("CustomPydanticModel", bound=BaseModel)
 
 
 def make_schema(model: type[CustomPydanticModel]) -> JsonDict:
-    mistralai_response_format = mistralai.extra.response_format_from_pydantic_model(model)
-    assert isinstance(mistralai_response_format.json_schema, mistralai.models.JSONSchema)
-    schema = mistralai_response_format.json_schema.schema_definition
-    openai_response_format = openai.lib._parsing._completions.type_to_response_format_param(model)
-    assert isinstance(openai_response_format, dict)
-    assert openai_response_format["type"] == "json_schema"
-    assert schema == openai_response_format["json_schema"]["schema"]
-    return schema
+    response_format_param = openai.lib._parsing._completions.type_to_response_format_param(model)
+    assert isinstance(response_format_param, dict)
+    assert response_format_param["type"] == "json_schema"
+    return response_format_param["json_schema"]["schema"]

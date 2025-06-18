@@ -32,7 +32,7 @@ client = openai.AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 class OpenAiModel(Model):
-    provider: Literal["openai"] = "openai"
+    provider: Literal["openai"]
     name: Literal["gpt-4o-2024-08-06", "gpt-4o-mini-2024-07-18"]
 
     async def do_complete(
@@ -146,7 +146,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
             structured: Structured
 
-        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         messages: list[
             SystemMessage
@@ -257,7 +257,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         messages: list[
             SystemMessage
@@ -287,7 +287,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         messages: list[
             SystemMessage
@@ -323,7 +323,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         messages: list[
             SystemMessage
@@ -345,7 +345,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_adaptation_schema(self) -> None:
         from ...adapted import Exercise
 
-        model = OpenAiModel(name="gpt-4o-mini-2024-07-18")
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         response = await model.complete(
             [UserMessage(content="Donne-moi une réponse respectant le schema JSON fourni.")],

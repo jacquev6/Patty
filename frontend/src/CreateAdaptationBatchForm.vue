@@ -3,7 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
 
-import { type LatestAdaptationBatch, type AdaptationLlmModel, useAuthenticatedClient } from './apiClient'
+import { type BaseAdaptationBatch, useAuthenticatedClient } from './apiClient'
 import BusyBox from './BusyBox.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
@@ -13,8 +13,7 @@ import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
-  availableAdaptationLlmModels: AdaptationLlmModel[]
-  latestAdaptationBatch: LatestAdaptationBatch
+  baseAdaptationBatch: BaseAdaptationBatch
 }>()
 
 const router = useRouter()
@@ -23,10 +22,10 @@ const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const strategy = reactive(deepCopy(props.latestAdaptationBatch.strategy))
-const inputs = reactive<InputWithFile[]>(deepCopy(props.latestAdaptationBatch.inputs))
+const strategy = reactive(deepCopy(props.baseAdaptationBatch.strategy))
+const inputs = reactive<InputWithFile[]>(deepCopy(props.baseAdaptationBatch.inputs))
 watch(
-  () => props.latestAdaptationBatch,
+  () => props.baseAdaptationBatch,
   (newValue) => {
     Object.assign(strategy, deepCopy(newValue.strategy))
     inputs.splice(0, inputs.length, ...deepCopy(newValue.inputs))
@@ -61,7 +60,7 @@ const disabled = computed(() => {
   return strategy.settings.systemPrompt.trim() === '' || cleanedUpInputs.value.length === 0
 })
 
-const availableStrategySettings = computed(() => props.latestAdaptationBatch.availableStrategySettings)
+const availableStrategySettings = computed(() => props.baseAdaptationBatch.availableStrategySettings)
 </script>
 
 <template>
@@ -69,12 +68,7 @@ const availableStrategySettings = computed(() => props.latestAdaptationBatch.ava
     <ResizableColumns :columns="[1, 1]">
       <template #col-1>
         <p>Created by: <IdentifiedUser /></p>
-        <AdaptationStrategyEditor
-          :availableAdaptationLlmModels
-          :availableStrategySettings
-          :disabled="false"
-          v-model="strategy"
-        />
+        <AdaptationStrategyEditor :availableStrategySettings :disabled="false" v-model="strategy" />
       </template>
       <template #col-2>
         <h1>Inputs</h1>

@@ -13,7 +13,7 @@ client = google.genai.Client(api_key=os.environ["GEMINIAI_KEY"])
 
 
 class GeminiModel(Model):
-    provider: Literal["gemini"] = "gemini"
+    provider: Literal["gemini"]
     name: Literal["gemini-2.0-flash"]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
@@ -33,7 +33,7 @@ class GeminiModelTestCase(unittest.TestCase):
         from ...fixtures import make_default_extraction_prompt
         from ..submission import pdf_page_as_image
 
-        exercises = GeminiModel(name="gemini-2.0-flash").extract(
+        exercises = GeminiModel(provider="gemini", name="gemini-2.0-flash").extract(
             make_default_extraction_prompt(), pdf_page_as_image(self.pdf_data, 2)
         )
         actual_ids = tuple(exercise.id for exercise in exercises)

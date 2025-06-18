@@ -56,15 +56,15 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/latest-adaptation-batch': {
+  '/api/base-adaptation-batch': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Get Latest Adaptation Batch */
-    get: operations['get_latest_adaptation_batch_api_latest_adaptation_batch_get']
+    /** Get Base Adaptation Batch */
+    get: operations['get_base_adaptation_batch_api_base_adaptation_batch_get']
     put?: never
     post?: never
     delete?: never
@@ -101,6 +101,40 @@ export interface paths {
     /** Get Adaptation Batch */
     get: operations['get_adaptation_batch_api_adaptation_batches__id__get']
     put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/exercise-classes': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Exercise Classes */
+    get: operations['get_exercise_classes_api_exercise_classes_get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/adaptable-exercises/{id}/exercise-class': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Adaptable Exercise Class */
+    put: operations['put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put']
     post?: never
     delete?: never
     options?: never
@@ -647,6 +681,12 @@ export interface components {
       createdBy: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
+      /** Isbn */
+      isbn: string | null
       /** Adaptationbatches */
       adaptationBatches: components['schemas']['patty__api_router__ApiTextbook__AdaptationBatch'][]
       /** Externalexercises */
@@ -701,6 +741,16 @@ export interface components {
        * @constant
        */
       error: 'unknown'
+    }
+    /** BaseAdaptationBatch */
+    BaseAdaptationBatch: {
+      /** Id */
+      id: string
+      strategy: components['schemas']['ApiStrategy-Output']
+      /** Inputs */
+      inputs: components['schemas']['ApiInput'][]
+      /** Availablestrategysettings */
+      availableStrategySettings: components['schemas']['ApiStrategySettings-Output'][]
     }
     'Choice-Input': {
       /**
@@ -775,7 +825,6 @@ export interface components {
     DummyModel: {
       /**
        * Provider
-       * @default dummy
        * @constant
        */
       provider: 'dummy'
@@ -867,16 +916,38 @@ export interface components {
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
       )[]
-      /** Bold */
-      bold: boolean
-      /** Italic */
-      italic: boolean
-      /** Underlined */
-      underlined: boolean
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
       /** Highlighted */
-      highlighted: string | null
-      /** Boxed */
-      boxed: boolean
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
     }
     'Formatted-Output': {
       /**
@@ -891,16 +962,38 @@ export interface components {
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
       )[]
-      /** Bold */
-      bold: boolean
-      /** Italic */
-      italic: boolean
-      /** Underlined */
-      underlined: boolean
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
       /** Highlighted */
-      highlighted: string | null
-      /** Boxed */
-      boxed: boolean
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
     }
     'FormattedTextContainer-Input': {
       /** Contents */
@@ -931,7 +1024,6 @@ export interface components {
     GeminiModel: {
       /**
        * Provider
-       * @default gemini
        * @constant
        */
       provider: 'gemini'
@@ -955,6 +1047,8 @@ export interface components {
     GetAdaptationBatchesResponse: {
       /** Adaptationbatches */
       adaptationBatches: components['schemas']['patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetClassificationBatchResponse */
     GetClassificationBatchResponse: {
@@ -975,6 +1069,8 @@ export interface components {
     GetClassificationBatchesResponse: {
       /** Classificationbatches */
       classificationBatches: components['schemas']['ClassificationBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -998,6 +1094,8 @@ export interface components {
     GetExtractionBatchesResponse: {
       /** Extractionbatches */
       extractionBatches: components['schemas']['ExtractionBatch'][]
+      /** Nextchunkid */
+      nextChunkId: string | null
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1107,16 +1205,6 @@ export interface components {
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
     }
-    /** LatestAdaptationBatch */
-    LatestAdaptationBatch: {
-      /** Id */
-      id: string
-      strategy: components['schemas']['ApiStrategy-Output']
-      /** Inputs */
-      inputs: components['schemas']['ApiInput'][]
-      /** Availablestrategysettings */
-      availableStrategySettings: components['schemas']['ApiStrategySettings-Output'][]
-    }
     'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Contents */
       contents: (
@@ -1187,7 +1275,6 @@ export interface components {
     MistralAiModel: {
       /**
        * Provider
-       * @default mistralai
        * @constant
        */
       provider: 'mistralai'
@@ -1223,7 +1310,6 @@ export interface components {
     OpenAiModel: {
       /**
        * Provider
-       * @default openai
        * @constant
        */
       provider: 'openai'
@@ -1376,6 +1462,12 @@ export interface components {
       creator: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
+      /** Isbn */
+      isbn: string | null
     }
     /** PostTextbookResponse */
     PostTextbookResponse: {
@@ -1391,7 +1483,7 @@ export interface components {
        * Format: duration
        * @default PT3H
        */
-      validity: string
+      validity?: string
     }
     /** PostTokenResponse */
     PostTokenResponse: {
@@ -1406,7 +1498,14 @@ export interface components {
        * Tokentype
        * @default bearer
        */
-      tokenType: string
+      tokenType?: string
+    }
+    /** PutAdaptableExerciseClassRequest */
+    PutAdaptableExerciseClassRequest: {
+      /** Creator */
+      creator: string
+      /** Classname */
+      className: string
     }
     /** ReferenceComponents */
     ReferenceComponents: {
@@ -1550,6 +1649,10 @@ export interface components {
       createdAt: string
       /** Title */
       title: string
+      /** Editor */
+      editor: string | null
+      /** Year */
+      year: number | null
     }
     /** ValidationError */
     ValidationError: {
@@ -1619,6 +1722,8 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__GetClassificationBatchResponse__Exercise: {
+      /** Id */
+      id: string
       /** Pagenumber */
       pageNumber: number | null
       /** Exercisenumber */
@@ -1627,12 +1732,16 @@ export interface components {
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
     }
     /** Exercise */
     patty__api_router__GetExtractionBatchResponse__Page__Exercise: {
+      /** Id */
+      id: string
       /** Pagenumber */
       pageNumber: number | null
       /** Exercisenumber */
@@ -1641,6 +1750,8 @@ export interface components {
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
@@ -1655,7 +1766,7 @@ export interface components {
        * Consignes
        * @default []
        */
-      consignes: string[]
+      consignes?: string[]
       /** Conseil */
       conseil?: string | null
       /** Exemple */
@@ -1787,10 +1898,11 @@ export interface operations {
       }
     }
   }
-  get_latest_adaptation_batch_api_latest_adaptation_batch_get: {
+  get_base_adaptation_batch_api_base_adaptation_batch_get: {
     parameters: {
       query: {
         user: string
+        base?: string | null
       }
       header?: never
       path?: never
@@ -1804,7 +1916,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['LatestAdaptationBatch']
+          'application/json': components['schemas']['BaseAdaptationBatch']
         }
       }
       /** @description Validation Error */
@@ -1820,7 +1932,9 @@ export interface operations {
   }
   get_adaptation_batches_api_adaptation_batches_get: {
     parameters: {
-      query?: never
+      query?: {
+        chunkId?: string | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -1834,6 +1948,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetAdaptationBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -1902,7 +2025,7 @@ export interface operations {
       }
     }
   }
-  get_classification_batches_api_classification_batches_get: {
+  get_exercise_classes_api_exercise_classes_get: {
     parameters: {
       query?: never
       header?: never
@@ -1917,7 +2040,73 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
+          'application/json': string[]
+        }
+      }
+    }
+  }
+  put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PutAdaptableExerciseClassRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_classification_batches_api_classification_batches_get: {
+    parameters: {
+      query?: {
+        chunkId?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
           'application/json': components['schemas']['GetClassificationBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -2081,7 +2270,9 @@ export interface operations {
   }
   get_extraction_batches_api_extraction_batches_get: {
     parameters: {
-      query?: never
+      query?: {
+        chunkId?: string | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -2095,6 +2286,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetExtractionBatchesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

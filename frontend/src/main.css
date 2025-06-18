@@ -6,3 +6,7 @@ code {
 pre {
   font-size: 80%;
 }
+
+* {
+  text-decoration-skip-ink: none;
+}

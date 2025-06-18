@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
-import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
+import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 defineProps<{
   classificationBatch: ClassificationBatch
+}>()
+
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
 }>()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
@@ -45,11 +49,14 @@ const authenticationTokenStore = useAuthenticationTokenStore()
   </p>
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
-    <EditClassificationBatchFormExercisePreview
-      header="h2"
+    <EditClassificationOrExtractionBatchFormExercisePreview
+      headerComponent="h2"
+      :headerText="`Input ${index + 1}`"
+      :showPageAndExercise="true"
+      :classificationWasRequested="true"
       :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
       :exercise
-      :index
+      @batchUpdated="emit('batch-updated')"
     />
   </template>
 </template>

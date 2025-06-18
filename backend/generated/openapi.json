@@ -128,10 +128,10 @@
         ]
       }
     },
-    "/api/latest-adaptation-batch": {
+    "/api/base-adaptation-batch": {
       "get": {
-        "summary": "Get Latest Adaptation Batch",
-        "operationId": "get_latest_adaptation_batch_api_latest_adaptation_batch_get",
+        "summary": "Get Base Adaptation Batch",
+        "operationId": "get_base_adaptation_batch_api_base_adaptation_batch_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -146,6 +146,22 @@
               "type": "string",
               "title": "User"
             }
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Base"
+            }
           }
         ],
         "responses": {
@@ -154,7 +170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LatestAdaptationBatch"
+                  "$ref": "#/components/schemas/BaseAdaptationBatch"
                 }
               }
             }
@@ -173,39 +189,23 @@
       }
     },
     "/api/adaptation-batches": {
-      "get": {
-        "summary": "Get Adaptation Batches",
-        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
-                }
-              }
-            }
-          }
-        },
+      "post": {
+        "summary": "Post Adaptation Batch",
+        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Post Adaptation Batch",
-        "operationId": "post_adaptation_batch_api_adaptation_batches_post",
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostAdaptationBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -228,12 +228,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Adaptation Batches",
+        "operationId": "get_adaptation_batches_api_adaptation_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdaptationBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/adaptation-batches/{id}": {
@@ -280,17 +324,21 @@
         }
       }
     },
-    "/api/classification-batches": {
+    "/api/exercise-classes": {
       "get": {
-        "summary": "Get Classification Batches",
-        "operationId": "get_classification_batches_api_classification_batches_get",
+        "summary": "Get Exercise Classes",
+        "operationId": "get_exercise_classes_api_exercise_classes_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "title": "Response Get Exercise Classes Api Exercise Classes Get"
                 }
               }
             }
@@ -301,19 +349,78 @@
             "OAuth2PasswordBearer": []
           }
         ]
-      },
+      }
+    },
+    "/api/adaptable-exercises/{id}/exercise-class": {
+      "put": {
+        "summary": "Put Adaptable Exercise Class",
+        "operationId": "put_adaptable_exercise_class_api_adaptable_exercises__id__exercise_class_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutAdaptableExerciseClassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/classification-batches": {
       "post": {
         "summary": "Create Classification Batch",
         "operationId": "create_classification_batch_api_classification_batches_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostClassificationBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -336,12 +443,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Classification Batches",
+        "operationId": "get_classification_batches_api_classification_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetClassificationBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/classification-batches/{id}": {
@@ -513,39 +664,23 @@
       }
     },
     "/api/extraction-batches": {
-      "get": {
-        "summary": "Get Extraction Batches",
-        "operationId": "get_extraction_batches_api_extraction_batches_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
-                }
-              }
-            }
-          }
-        },
+      "post": {
+        "summary": "Create Extraction Batch",
+        "operationId": "create_extraction_batch_api_extraction_batches_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Create Extraction Batch",
-        "operationId": "create_extraction_batch_api_extraction_batches_post",
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PostExtractionBatchRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -568,12 +703,56 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Get Extraction Batches",
+        "operationId": "get_extraction_batches_api_extraction_batches_get",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chunkid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExtractionBatchesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/extraction-batches/{id}": {
@@ -1953,6 +2132,39 @@
             "type": "string",
             "title": "Title"
           },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "isbn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isbn"
+          },
           "adaptationBatches": {
             "items": {
               "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
@@ -1974,6 +2186,9 @@
           "id",
           "createdBy",
           "title",
+          "editor",
+          "year",
+          "isbn",
           "adaptationBatches",
           "externalExercises"
         ],
@@ -2063,6 +2278,40 @@
           "error"
         ],
         "title": "AssistantUnknownError"
+      },
+      "BaseAdaptationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ApiInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          },
+          "availableStrategySettings": {
+            "items": {
+              "$ref": "#/components/schemas/ApiStrategySettings-Output"
+            },
+            "type": "array",
+            "title": "Availablestrategysettings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "strategy",
+          "inputs",
+          "availableStrategySettings"
+        ],
+        "title": "BaseAdaptationBatch"
       },
       "Choice-Input": {
         "properties": {
@@ -2267,8 +2516,7 @@
           "provider": {
             "type": "string",
             "const": "dummy",
-            "title": "Provider",
-            "default": "dummy"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -2282,6 +2530,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "DummyModel"
@@ -2503,15 +2752,18 @@
           },
           "bold": {
             "type": "boolean",
-            "title": "Bold"
+            "title": "Bold",
+            "default": false
           },
           "italic": {
             "type": "boolean",
-            "title": "Italic"
+            "title": "Italic",
+            "default": false
           },
           "underlined": {
             "type": "boolean",
-            "title": "Underlined"
+            "title": "Underlined",
+            "default": false
           },
           "highlighted": {
             "anyOf": [
@@ -2526,18 +2778,24 @@
           },
           "boxed": {
             "type": "boolean",
-            "title": "Boxed"
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
           }
         },
         "type": "object",
         "required": [
           "kind",
-          "contents",
-          "bold",
-          "italic",
-          "underlined",
-          "highlighted",
-          "boxed"
+          "contents"
         ]
       },
       "Formatted-Output": {
@@ -2569,15 +2827,18 @@
           },
           "bold": {
             "type": "boolean",
-            "title": "Bold"
+            "title": "Bold",
+            "default": false
           },
           "italic": {
             "type": "boolean",
-            "title": "Italic"
+            "title": "Italic",
+            "default": false
           },
           "underlined": {
             "type": "boolean",
-            "title": "Underlined"
+            "title": "Underlined",
+            "default": false
           },
           "highlighted": {
             "anyOf": [
@@ -2592,18 +2853,24 @@
           },
           "boxed": {
             "type": "boolean",
-            "title": "Boxed"
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
           }
         },
         "type": "object",
         "required": [
           "kind",
-          "contents",
-          "bold",
-          "italic",
-          "underlined",
-          "highlighted",
-          "boxed"
+          "contents"
         ]
       },
       "FormattedTextContainer-Input": {
@@ -2680,8 +2947,7 @@
           "provider": {
             "type": "string",
             "const": "gemini",
-            "title": "Provider",
-            "default": "gemini"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -2691,6 +2957,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "GeminiModel"
@@ -2734,12 +3001,24 @@
             },
             "type": "array",
             "title": "Adaptationbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "adaptationBatches"
+          "adaptationBatches",
+          "nextChunkId"
         ],
         "title": "GetAdaptationBatchesResponse"
       },
@@ -2803,12 +3082,24 @@
             },
             "type": "array",
             "title": "Classificationbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "classificationBatches"
+          "classificationBatches",
+          "nextChunkId"
         ],
         "title": "GetClassificationBatchesResponse"
       },
@@ -2874,12 +3165,24 @@
             },
             "type": "array",
             "title": "Extractionbatches"
+          },
+          "nextChunkId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextchunkid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "extractionBatches"
+          "extractionBatches",
+          "nextChunkId"
         ],
         "title": "GetExtractionBatchesResponse"
       },
@@ -3087,40 +3390,6 @@
           "referenceComponents"
         ],
         "title": "JsonSchemaLlmResponseSpecification"
-      },
-      "LatestAdaptationBatch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/ApiStrategy-Output"
-          },
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/ApiInput"
-            },
-            "type": "array",
-            "title": "Inputs"
-          },
-          "availableStrategySettings": {
-            "items": {
-              "$ref": "#/components/schemas/ApiStrategySettings-Output"
-            },
-            "type": "array",
-            "title": "Availablestrategysettings"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "strategy",
-          "inputs",
-          "availableStrategySettings"
-        ],
-        "title": "LatestAdaptationBatch"
       },
       "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
@@ -3331,8 +3600,7 @@
           "provider": {
             "type": "string",
             "const": "mistralai",
-            "title": "Provider",
-            "default": "mistralai"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -3345,6 +3613,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "MistralAiModel"
@@ -3406,8 +3675,7 @@
           "provider": {
             "type": "string",
             "const": "openai",
-            "title": "Provider",
-            "default": "openai"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -3420,6 +3688,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "OpenAiModel"
@@ -3873,13 +4142,49 @@
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "isbn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isbn"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "creator",
-          "title"
+          "title",
+          "editor",
+          "year",
+          "isbn"
         ],
         "title": "PostTextbookRequest"
       },
@@ -3941,6 +4246,25 @@
           "validUntil"
         ],
         "title": "PostTokenResponse"
+      },
+      "PutAdaptableExerciseClassRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "className": {
+            "type": "string",
+            "title": "Classname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "className"
+        ],
+        "title": "PutAdaptableExerciseClassRequest"
       },
       "ReferenceComponents": {
         "properties": {
@@ -4231,6 +4555,28 @@
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
           }
         },
         "additionalProperties": false,
@@ -4239,7 +4585,9 @@
           "id",
           "createdBy",
           "createdAt",
-          "title"
+          "title",
+          "editor",
+          "year"
         ],
         "title": "Textbook"
       },
@@ -4447,6 +4795,10 @@
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4484,6 +4836,17 @@
             ],
             "title": "Exerciseclass"
           },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          },
           "exerciseClassHasSettings": {
             "type": "boolean",
             "title": "Exerciseclasshassettings"
@@ -4502,10 +4865,12 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "pageNumber",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
+          "reclassifiedBy",
           "exerciseClassHasSettings",
           "adaptation"
         ],
@@ -4513,6 +4878,10 @@
       },
       "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4550,6 +4919,17 @@
             ],
             "title": "Exerciseclass"
           },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          },
           "exerciseClassHasSettings": {
             "type": "boolean",
             "title": "Exerciseclasshassettings"
@@ -4568,10 +4948,12 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "pageNumber",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
+          "reclassifiedBy",
           "exerciseClassHasSettings",
           "adaptation"
         ],

@@ -4,16 +4,22 @@ import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
 import { type ExtractionBatch } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from './WhiteSpace.vue'
-import EditClassificationBatchFormExercisePreview from './EditClassificationBatchFormExercisePreview.vue'
+import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
 import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from './MarkDown.vue'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
 defineProps<{
   extractionBatch: ExtractionBatch
-  extractionLlmResponseSchema: Record<string, never>
 }>()
+
+const emit = defineEmits<{
+  (e: 'batch-updated'): void
+}>()
+
+const apiConstantsStore = useApiConstantsStore()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 </script>
@@ -26,7 +32,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       <h2>LLM model</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
       <h2>Settings</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="extractionLlmResponseSchema" />
+      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
       <h3>Prompt</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
     </template>
@@ -67,21 +73,15 @@ const authenticationTokenStore = useAuthenticationTokenStore()
         <template v-if="page.assistantResponse !== null">
           <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
-              <EditClassificationBatchFormExercisePreview
-                header="h3"
+              <EditClassificationOrExtractionBatchFormExercisePreview
+                headerComponent="h3"
+                :headerText="`Exercise ${index + 1}`"
+                :showPageAndExercise="false"
+                :classificationWasRequested="extractionBatch.runClassification"
                 :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
                 :exercise
-                :index
-              >
-                <h3>
-                  Exercise {{ exercise.exerciseNumber
-                  }}<template v-if="extractionBatch.runClassification"
-                    ><span v-if="exercise.exerciseClass === null" class="inProgress">
-                      (in progress, will refresh when done) </span
-                    ><template v-else>: {{ exercise.exerciseClass }} </template></template
-                  >
-                </h3>
-              </EditClassificationBatchFormExercisePreview>
+                @batchUpdated="emit('batch-updated')"
+              />
             </template>
           </template>
           <template v-else-if="page.assistantResponse.kind === 'error'">

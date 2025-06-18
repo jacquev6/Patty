@@ -144,7 +144,7 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
 .choices {
   border: 1px dashed green;
   background-color: white;
-  padding: 5px;
+  padding: 5px 10px;
   user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
 }
 

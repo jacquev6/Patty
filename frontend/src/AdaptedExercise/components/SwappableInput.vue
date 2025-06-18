@@ -97,11 +97,7 @@ function handleClick() {
     class="main"
     :class="{ empty: actualContents.length === 0 }"
     :contents="actualContents"
-    :bold="false"
-    :italic="false"
-    :underlined="false"
     :highlighted
-    :boxed="false"
     :tricolorable
     data-cy="swappableInput"
     @click="handleClick"

@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import json
 import os
+import typing
 import urllib.parse
 
 import boto3
@@ -45,21 +46,22 @@ api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth
 def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
     if settings.ENVIRONMENT == "dev":
         return [
-            adaptation_llm.DummyModel(name="dummy-1"),
-            adaptation_llm.DummyModel(name="dummy-2"),
-            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
-            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-3"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
         ]
     else:
         return [
-            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
-            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
-            adaptation_llm.DummyModel(name="dummy-1"),
-            adaptation_llm.DummyModel(name="dummy-2"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
         ]
 
 
@@ -99,25 +101,34 @@ def make_adaptation_llm_response_schema(response_specification: JsonSchemaLlmRes
     return response_specification.make_response_schema()
 
 
-class LatestAdaptationBatch(ApiModel):
+class BaseAdaptationBatch(ApiModel):
     id: str
     strategy: ApiStrategy
     inputs: list[ApiInput]
     available_strategy_settings: list[ApiStrategySettings]
 
 
-@api_router.get("/latest-adaptation-batch")
-def get_latest_adaptation_batch(user: str, session: database_utils.SessionDependable) -> LatestAdaptationBatch:
-    for created_by in [user, "Patty"]:
-        adaptation_batch = (
-            session.query(db.AdaptationBatch)
-            .filter(db.AdaptationBatch.created_by_username == created_by)
-            .order_by(-db.AdaptationBatch.id)
-            .first()
-        )
-        if adaptation_batch is not None:
-            break
-    assert adaptation_batch is not None
+@api_router.get("/base-adaptation-batch")
+def get_base_adaptation_batch(
+    user: str, session: database_utils.SessionDependable, base: str | None = None
+) -> BaseAdaptationBatch:
+    request = sql.select(db.AdaptationBatch)
+    if base is None:
+        request = request.where(
+            (db.AdaptationBatch.created_by_username == user) | (db.AdaptationBatch.id == 1)
+        ).order_by(-db.AdaptationBatch.id)
+    else:
+        try:
+            base_id = int(base)
+        except ValueError:
+            raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
+        else:
+            request = request.where(db.AdaptationBatch.id == base_id)
+
+    adaptation_batch = session.execute(request).scalars().first()
+    if adaptation_batch is None:
+        raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
+
     available_strategy_settings = []
     for exercise_class in (
         session.execute(
@@ -134,7 +145,7 @@ def get_latest_adaptation_batch(user: str, session: database_utils.SessionDepend
             available_strategy_settings.append(
                 make_api_strategy_settings(exercise_class.latest_strategy_settings.parent)
             )
-    return LatestAdaptationBatch(
+    return BaseAdaptationBatch(
         id=str(adaptation_batch.id),
         strategy=make_api_strategy(adaptation_batch.strategy),
         inputs=[make_api_input(adaptation.exercise) for adaptation in adaptation_batch.adaptations],
@@ -165,6 +176,8 @@ async def post_adaptation_batch(
         # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
         if req.strategy.settings.name.endswith(" (previous version)"):
             branch_name = req.strategy.settings.name[:-19]
+        elif req.strategy.settings.name.endswith(" (older version)"):
+            branch_name = req.strategy.settings.name[:-16]
         else:
             branch_name = req.strategy.settings.name
         exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == branch_name).first()
@@ -285,16 +298,107 @@ class GetAdaptationBatchesResponse(ApiModel):
         strategy_settings_name: str | None
 
     adaptation_batches: list[AdaptationBatch]
+    next_chunk_id: str | None
+
+
+@api_router.get("/exercise-classes")
+def get_exercise_classes(session: database_utils.SessionDependable) -> list[str]:
+    request = sql.select(db.ExerciseClass).order_by(db.ExerciseClass.name)
+    return [exercise_class.name for exercise_class in session.execute(request).scalars().all()]
+
+
+class PutAdaptableExerciseClassRequest(ApiModel):
+    creator: str
+    className: str
+
+
+@api_router.put("/adaptable-exercises/{id}/exercise-class")
+def put_adaptable_exercise_class(
+    id: str, req: PutAdaptableExerciseClassRequest, session: database_utils.SessionDependable
+) -> None:
+    now = datetime.datetime.now(datetime.timezone.utc)
+    exercise = get_by_id(session, db.AdaptableExercise, id)
+    exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == req.className).first()
+    if exercise_class is None:
+        raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
+    if exercise.adaptation is not None:
+        adaptation_model = exercise.adaptation.strategy.model
+    elif (
+        exercise.classified_by_classification_batch is not None
+        and exercise.classified_by_classification_batch.model_for_adaptation is not None
+    ):
+        adaptation_model = exercise.classified_by_classification_batch.model_for_adaptation
+    else:
+        adaptation_model = None
+
+    exercise.exercise_class = exercise_class
+    exercise.classified_at = now
+    # No 'exercise.classified_by_classification_batch = None': that's how we join adaptable exercises to classification batches.
+    exercise.classified_by_username = req.creator
+    if exercise.adaptation is not None:
+        session.delete(exercise.adaptation)
+
+    if adaptation_model is not None and exercise_class.latest_strategy_settings is not None:
+        strategy = db.AdaptationStrategy(
+            created_at=now,
+            created_by_username=req.creator,
+            created_by_classification_batch=None,
+            settings=exercise_class.latest_strategy_settings,
+            model=adaptation_model,
+        )
+        session.add(strategy)
+        adaptation = db.Adaptation(
+            created_by_username=req.creator,
+            created_at=now,
+            classification_batch=None,
+            adaptation_batch=None,
+            strategy=strategy,
+            exercise=exercise,
+            raw_llm_conversations=[],
+            initial_assistant_response=None,
+            adjustments=[],
+            manual_edit=None,
+        )
+        session.add(adaptation)
+
+
+T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.ExtractionBatch)
+
+
+def paginate(
+    model: type[T], request: sql.Select[tuple[T]], session: database_utils.SessionDependable, chunk_id: str | None
+) -> tuple[list[T], str | None]:
+    chunk_size = 20
+    request = request.order_by(-model.id).limit(chunk_size + 1)
+
+    if chunk_id is not None:
+        try:
+            numerical_chunk_id = int(chunk_id)
+        except ValueError:
+            raise fastapi.HTTPException(status_code=400, detail="Invalid chunk ID")
+        request = request.filter(model.id < numerical_chunk_id)
+
+    batches = list(session.execute(request).scalars().all())
+
+    if len(batches) <= chunk_size:
+        next_chunk_id = None
+    else:
+        next_chunk_id = str(batches[-2].id)
+
+    return batches[:chunk_size], next_chunk_id
 
 
 @api_router.get("/adaptation-batches")
-async def get_adaptation_batches(session: database_utils.SessionDependable) -> GetAdaptationBatchesResponse:
-    adaptation_batches = (
-        session.query(db.AdaptationBatch)
-        .filter(db.AdaptationBatch.textbook_id == sql.null())
-        .order_by(-db.AdaptationBatch.id)
-        .all()
+async def get_adaptation_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetAdaptationBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.AdaptationBatch,
+        sql.select(db.AdaptationBatch).filter(db.AdaptationBatch.textbook_id == sql.null()),
+        session,
+        chunkId,
     )
+
     return GetAdaptationBatchesResponse(
         adaptation_batches=[
             GetAdaptationBatchesResponse.AdaptationBatch(
@@ -304,8 +408,9 @@ async def get_adaptation_batches(session: database_utils.SessionDependable) -> G
                 model=adaptation_batch.strategy.model,
                 strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.strategy.settings),
             )
-            for adaptation_batch in adaptation_batches
-        ]
+            for adaptation_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 
@@ -369,10 +474,12 @@ class GetClassificationBatchResponse(ApiModel):
     model_for_adaptation: adaptation_llm.ConcreteModel | None
 
     class Exercise(ApiModel):
+        id: str
         page_number: int | None
         exercise_number: str | None
         full_text: str
         exercise_class: str | None
+        reclassified_by: str | None
         exercise_class_has_settings: bool
         adaptation: ApiAdaptation | None
 
@@ -390,10 +497,12 @@ async def get_classification_batch(
         model_for_adaptation=classification_batch.model_for_adaptation,
         exercises=[
             GetClassificationBatchResponse.Exercise(
+                id=str(exercise.id),
                 page_number=exercise.page_number,
                 exercise_number=exercise.exercise_number,
                 full_text=exercise.full_text,
                 exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                reclassified_by=exercise.classified_by_username,
                 exercise_class_has_settings=(
                     exercise.exercise_class is not None and exercise.exercise_class.latest_strategy_settings is not None
                 ),
@@ -411,15 +520,20 @@ class GetClassificationBatchesResponse(ApiModel):
         created_at: datetime.datetime
 
     classification_batches: list[ClassificationBatch]
+    next_chunk_id: str | None
 
 
 @api_router.get("/classification-batches")
-async def get_classification_batches(session: database_utils.SessionDependable) -> GetClassificationBatchesResponse:
-    request = (
-        sql.select(db.ClassificationBatch)
-        .filter(db.ClassificationBatch.created_by_username != sql.null())
-        .order_by(-db.ClassificationBatch.id)
+async def get_classification_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetClassificationBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.ClassificationBatch,
+        sql.select(db.ClassificationBatch).filter(db.ClassificationBatch.created_by_username != sql.null()),
+        session,
+        chunkId,
     )
+
     return GetClassificationBatchesResponse(
         classification_batches=[
             GetClassificationBatchesResponse.ClassificationBatch(
@@ -427,8 +541,9 @@ async def get_classification_batches(session: database_utils.SessionDependable) 
                 created_by=classification_batch.created_by_username,
                 created_at=classification_batch.created_at,
             )
-            for classification_batch in session.execute(request).scalars().all()
-        ]
+            for classification_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 
@@ -487,15 +602,15 @@ def get_extraction_llm_response_schema() -> JsonDict:
 def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
     if settings.ENVIRONMENT == "dev":
         return [
-            extraction_llm.DummyModel(name="dummy-1"),
-            extraction_llm.DummyModel(name="dummy-2"),
-            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-2"),
+            extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
         ]
     else:
         return [
-            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
-            extraction_llm.DummyModel(name="dummy-1"),
-            extraction_llm.DummyModel(name="dummy-2"),
+            extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-2"),
         ]
 
 
@@ -581,10 +696,12 @@ class GetExtractionBatchResponse(ApiModel):
         assistant_response: extraction_responses.AssistantResponse | None
 
         class Exercise(ApiModel):
+            id: str
             page_number: int | None
             exercise_number: str | None
             full_text: str
             exercise_class: str | None
+            reclassified_by: str | None
             exercise_class_has_settings: bool
             adaptation: ApiAdaptation | None
 
@@ -602,10 +719,12 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             assistant_response=page_extraction.assistant_response,
             exercises=[
                 GetExtractionBatchResponse.Page.Exercise(
+                    id=str(exercise.id),
                     page_number=exercise.page_number,
                     exercise_number=exercise.exercise_number,
                     full_text=exercise.full_text,
                     exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
+                    reclassified_by=exercise.classified_by_username,
                     exercise_class_has_settings=(
                         exercise.exercise_class is not None
                         and exercise.exercise_class.latest_strategy_settings is not None
@@ -638,11 +757,19 @@ class GetExtractionBatchesResponse(ApiModel):
         created_at: datetime.datetime
 
     extraction_batches: list[ExtractionBatch]
+    next_chunk_id: str | None
 
 
 @api_router.get("/extraction-batches")
-async def get_extraction_batches(session: database_utils.SessionDependable) -> GetExtractionBatchesResponse:
-    extraction_batches = session.query(db.ExtractionBatch).order_by(-db.ExtractionBatch.id).all()
+async def get_extraction_batches(
+    session: database_utils.SessionDependable, chunkId: str | None = None
+) -> GetExtractionBatchesResponse:
+    (batches, next_chunk_id) = paginate(
+        db.ExtractionBatch,
+        sql.select(db.ExtractionBatch).filter(db.ExtractionBatch.created_by_username != sql.null()),
+        session,
+        chunkId,
+    )
     return GetExtractionBatchesResponse(
         extraction_batches=[
             GetExtractionBatchesResponse.ExtractionBatch(
@@ -650,14 +777,18 @@ async def get_extraction_batches(session: database_utils.SessionDependable) -> G
                 created_by=extraction_batch.created_by_username,
                 created_at=extraction_batch.created_at,
             )
-            for extraction_batch in extraction_batches
-        ]
+            for extraction_batch in batches
+        ],
+        next_chunk_id=next_chunk_id,
     )
 
 
 class PostTextbookRequest(ApiModel):
     creator: str
     title: str
+    editor: str | None
+    year: int | None
+    isbn: str | None
 
 
 class PostTextbookResponse(ApiModel):
@@ -669,7 +800,12 @@ def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
     textbook = db.Textbook(
-        title=req.title, created_by_username=req.creator, created_at=datetime.datetime.now(datetime.timezone.utc)
+        created_by_username=req.creator,
+        created_at=datetime.datetime.now(datetime.timezone.utc),
+        title=req.title,
+        editor=req.editor,
+        year=req.year,
+        isbn=req.isbn,
     )
     session.add(textbook)
     session.flush()
@@ -680,6 +816,9 @@ class ApiTextbook(ApiModel):
     id: str
     created_by: str
     title: str
+    editor: str | None
+    year: int | None
+    isbn: str | None
 
     class AdaptationBatch(ApiModel):
         id: str
@@ -722,6 +861,8 @@ class GetTextbooksResponse(ApiModel):
         created_by: str
         created_at: datetime.datetime
         title: str
+        editor: str | None
+        year: int | None
 
     textbooks: list[Textbook]
 
@@ -736,6 +877,8 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
                 created_by=textbook.created_by_username,
                 created_at=textbook.created_at,
                 title=textbook.title,
+                editor=textbook.editor,
+                year=textbook.year,
             )
             for textbook in textbooks
         ]
@@ -1051,6 +1194,9 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         id=str(textbook.id),
         created_by=textbook.created_by_username,
         title=textbook.title,
+        editor=textbook.editor,
+        year=textbook.year,
+        isbn=textbook.isbn,
         adaptation_batches=[
             ApiTextbook.AdaptationBatch(
                 id=str(adaptation_batch.id),

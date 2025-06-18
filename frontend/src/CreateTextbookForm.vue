@@ -6,6 +6,8 @@ import { useAuthenticatedClient } from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import BusyBox from './BusyBox.vue'
+import InputForNonEmptyStringOrNull from './InputForNonEmptyStringOrNull.vue'
+import InputForNumberOrNull from './InputForNumberOrNull.vue'
 
 const router = useRouter()
 
@@ -14,6 +16,9 @@ const client = useAuthenticatedClient()
 const identifiedUser = useIdentifiedUserStore()
 
 const title = ref('')
+const editor = ref<string | null>(null)
+const year = ref<number | null>(null)
+const isbn = ref<string | null>(null)
 
 const disabled = computed(() => title.value === '')
 
@@ -26,6 +31,9 @@ async function submit() {
     body: {
       creator: identifiedUser.identifier,
       title: title.value,
+      editor: editor.value,
+      year: year.value,
+      isbn: isbn.value,
     },
   })
   busy.value = false
@@ -40,6 +48,15 @@ async function submit() {
     <p>Created by: <IdentifiedUser /></p>
     <p>
       <label>Title: <input v-model="title" data-cy="textbook-title" /></label>
+    </p>
+    <p>
+      <label>Editor: <InputForNonEmptyStringOrNull v-model="editor" data-cy="textbook-editor" /></label>
+    </p>
+    <p>
+      <label>Year: <InputForNumberOrNull v-model="year" data-cy="textbook-year" /></label>
+    </p>
+    <p>
+      <label>ISBN: <InputForNonEmptyStringOrNull v-model="isbn" data-cy="textbook-isbn" /></label>
     </p>
     <p><button @click="submit" :disabled>Submit</button></p>
   </BusyBox>

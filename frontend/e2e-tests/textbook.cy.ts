@@ -10,12 +10,13 @@ describe('The creation form for textbooks', () => {
     cy.get('[data-cy="identified-user-ok"]').click()
   })
 
-  it('creates a textbook with an adaptation batch', () => {
+  it('creates a textbook with only a title, and with an adaptation batch', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
     cy.get('[data-cy="textbook-title"]').type('Dummy title', { delay: 0 })
     cy.get('button:contains("Submit")').should('be.enabled').click()
 
     cy.location('pathname').should('equal', '/textbook-1')
+    cy.get('h1').should('have.text', 'Dummy title')
     cy.get('button:contains("Submit")').should('be.disabled')
     cy.get('[data-cy="strategy-settings"]').should('have.value', '-- choose --').select('Branchy McBranchFace')
     cy.get('button:contains("Submit")').should('be.disabled')
@@ -32,6 +33,24 @@ describe('The creation form for textbooks', () => {
 
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2:contains("Page 42")').should('exist')
+
+    cy.visit('/')
+    cy.get('li:contains("Dummy title")').should('exist').should('contain', 'Dummy title (created by Alice on')
+  })
+
+  it('creates a textbook with all fields', () => {
+    cy.get('[data-cy="textbook-title"]').type('The title', { delay: 0 })
+    cy.get('[data-cy="textbook-editor"]').type('Dummy editor', { delay: 0 })
+    cy.get('[data-cy="textbook-year"]').type('2023', { delay: 0 })
+    cy.get('[data-cy="textbook-isbn"]').type('978-3-16-148410-0', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.enabled').click()
+    cy.location('pathname').should('equal', '/textbook-1')
+    cy.get('h1').should('have.text', 'The title, Dummy editor, 2023 (ISBN: 978-3-16-148410-0)')
+
+    cy.visit('/')
+    cy.get('li:contains("The title")')
+      .should('exist')
+      .should('contain', 'The title, Dummy editor, 2023 (created by Alice on')
   })
 })
 

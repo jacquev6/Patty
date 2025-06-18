@@ -2,31 +2,25 @@
 import { ref, watch } from 'vue'
 
 import CreateAdaptationBatchForm from './CreateAdaptationBatchForm.vue'
-import { type AdaptationLlmModel, type LatestAdaptationBatch, useAuthenticatedClient } from './apiClient'
+import { type BaseAdaptationBatch, useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+
+const props = defineProps<{
+  base: string | null
+}>()
 
 const client = useAuthenticatedClient()
 
-const availableAdaptationLlmModels = ref<AdaptationLlmModel[]>([])
-
 const identifiedUser = useIdentifiedUserStore()
 
-const latestAdaptationBatch = ref<LatestAdaptationBatch | null>(null)
+const baseAdaptationBatch = ref<BaseAdaptationBatch | null>(null)
 
 async function refresh() {
-  const availableAdaptationLlmModelsPromise = client.GET('/api/available-adaptation-llm-models')
-  const latestAdaptationBatchPromise = client.GET('/api/latest-adaptation-batch', {
-    params: { query: { user: identifiedUser.identifier } },
+  const response = await client.GET('/api/base-adaptation-batch', {
+    params: { query: { user: identifiedUser.identifier, base: props.base } },
   })
-
-  const availableAdaptationLlmModelsResponse = await availableAdaptationLlmModelsPromise
-  if (availableAdaptationLlmModelsResponse.data !== undefined) {
-    availableAdaptationLlmModels.value = availableAdaptationLlmModelsResponse.data
-  }
-
-  const latestAdaptationBatchResponse = await latestAdaptationBatchPromise
-  if (latestAdaptationBatchResponse.data !== undefined) {
-    latestAdaptationBatch.value = latestAdaptationBatchResponse.data
+  if (response.data !== undefined) {
+    baseAdaptationBatch.value = response.data
   }
 }
 
@@ -35,10 +29,6 @@ watch(() => identifiedUser.identifier, refresh, { immediate: true })
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <CreateAdaptationBatchForm
-      v-if="availableAdaptationLlmModels.length !== 0 && latestAdaptationBatch !== null"
-      :availableAdaptationLlmModels
-      :latestAdaptationBatch
-    />
+    <CreateAdaptationBatchForm v-if="baseAdaptationBatch !== null" :baseAdaptationBatch />
   </div>
 </template>

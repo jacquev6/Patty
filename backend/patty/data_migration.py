@@ -1,9 +1,52 @@
+import sqlalchemy as sql
+
 from . import database_utils
 from . import orm_models
 
 
 def migrate(session: database_utils.Session) -> None:
+    fix_issue_59(session)
     check_parsed_fields(session)
+
+
+def fix_issue_59(session: database_utils.Session) -> None:
+    for bad_exercise_class in (
+        session.execute(
+            sql.select(orm_models.ExerciseClass).where(orm_models.ExerciseClass.name.endswith(" (older version)"))
+        )
+        .scalars()
+        .all()
+    ):
+        print(f"Fixing ExerciseClass {bad_exercise_class.name}...")
+        good_exercise_class = session.execute(
+            sql.select(orm_models.ExerciseClass).where(orm_models.ExerciseClass.name == bad_exercise_class.name[:-16])
+        ).scalar_one()
+
+        for exercise in (
+            session.execute(
+                sql.select(orm_models.AdaptableExercise).where(
+                    orm_models.AdaptableExercise.exercise_class_id == bad_exercise_class.id
+                )
+            )
+            .scalars()
+            .all()
+        ):
+            exercise.exercise_class = good_exercise_class
+
+        for settings in (
+            session.execute(
+                sql.select(orm_models.AdaptationStrategySettings).where(
+                    orm_models.AdaptationStrategySettings.exercise_class_id == bad_exercise_class.id
+                )
+            )
+            .scalars()
+            .all()
+        ):
+            settings.exercise_class = good_exercise_class
+
+        session.flush()
+
+        session.delete(bad_exercise_class)
 
 
 def check_parsed_fields(session: database_utils.Session) -> None:

@@ -151,14 +151,17 @@
           "type": "array"
         },
         "bold": {
+          "default": false,
           "title": "Bold",
           "type": "boolean"
         },
         "italic": {
+          "default": false,
           "title": "Italic",
           "type": "boolean"
         },
         "underlined": {
+          "default": false,
           "title": "Underlined",
           "type": "boolean"
         },
@@ -174,7 +177,18 @@
           "title": "Highlighted"
         },
         "boxed": {
+          "default": false,
           "title": "Boxed",
+          "type": "boolean"
+        },
+        "superscript": {
+          "default": false,
+          "title": "Superscript",
+          "type": "boolean"
+        },
+        "subscript": {
+          "default": false,
+          "title": "Subscript",
           "type": "boolean"
         }
       },
@@ -185,7 +199,9 @@
         "italic",
         "underlined",
         "highlighted",
-        "boxed"
+        "boxed",
+        "superscript",
+        "subscript"
       ],
       "type": "object",
       "additionalProperties": false

@@ -1,8 +1,11 @@
 import datetime
 import os
 import typing
+import urllib.parse
 
 from sqlalchemy import orm
+import boto3
+import botocore
 import datasets  # type: ignore[import-untyped]
 import numpy as np
 import pandas as pd
@@ -13,6 +16,7 @@ import transformers  # type: ignore[import-untyped]
 
 from .. import database_utils
 from .. import orm_models as db
+from .. import settings
 from .models import SingleBert
 
 
@@ -119,11 +123,14 @@ def classify(dataframe: pd.DataFrame) -> None:
     global model
 
     if model is None:
-        model_: SingleBert = torch.load(
-            os.path.join(os.path.dirname(__file__), "models/classification_camembert.pt"),
-            weights_only=False,
-            map_location=device,
-        )
+        model_url = urllib.parse.urlparse(settings.CLASSIFICATION_CAMEMBERT_2025_05_20_URL)
+        model_path = os.path.join(settings.CLASSIFICATION_MODELS_DIRECTORY_PATH, os.path.basename(model_url.path))
+        if not os.path.isfile(model_path):
+            log(f"Downloading classification model from {model_url.geturl()} to {model_path}")
+            s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
+            s3.download_file(Bucket=model_url.netloc, Key=model_url.path[1:], Filename=model_path)
+        log(f"Loading classification model from {model_path}")
+        model_: SingleBert = torch.load(model_path, weights_only=False, map_location=device)
         model = model_
         model.to(device)
         model.eval()
@@ -131,7 +138,6 @@ def classify(dataframe: pd.DataFrame) -> None:
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         os.path.join(os.path.dirname(__file__), "models/camembert_base"), do_lower_case=True, use_fast=False
     )
-    # End of things to avoid loading on every request.
 
     input_columns = dataframe[["instruction", "statement"]].fillna("")
 
