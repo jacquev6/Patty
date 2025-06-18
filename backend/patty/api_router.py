@@ -46,22 +46,22 @@ api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth
 def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
     if settings.ENVIRONMENT == "dev":
         return [
-            adaptation_llm.DummyModel(name="dummy-1"),
-            adaptation_llm.DummyModel(name="dummy-2"),
-            adaptation_llm.DummyModel(name="dummy-3"),
-            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
-            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-3"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
         ]
     else:
         return [
-            adaptation_llm.MistralAiModel(name="mistral-large-2411"),
-            adaptation_llm.MistralAiModel(name="mistral-small-2501"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
-            adaptation_llm.OpenAiModel(name="gpt-4o-mini-2024-07-18"),
-            adaptation_llm.DummyModel(name="dummy-1"),
-            adaptation_llm.DummyModel(name="dummy-2"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+            adaptation_llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+            adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
+            adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
         ]
 
 
@@ -600,15 +600,15 @@ def get_extraction_llm_response_schema() -> JsonDict:
 def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
     if settings.ENVIRONMENT == "dev":
         return [
-            extraction_llm.DummyModel(name="dummy-1"),
-            extraction_llm.DummyModel(name="dummy-2"),
-            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-2"),
+            extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
         ]
     else:
         return [
-            extraction_llm.GeminiModel(name="gemini-2.0-flash"),
-            extraction_llm.DummyModel(name="dummy-1"),
-            extraction_llm.DummyModel(name="dummy-2"),
+            extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
+            extraction_llm.DummyModel(provider="dummy", name="dummy-2"),
         ]
 
 

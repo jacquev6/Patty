@@ -825,7 +825,6 @@ export interface components {
     DummyModel: {
       /**
        * Provider
-       * @default dummy
        * @constant
        */
       provider: 'dummy'
@@ -981,7 +980,6 @@ export interface components {
     GeminiModel: {
       /**
        * Provider
-       * @default gemini
        * @constant
        */
       provider: 'gemini'
@@ -1233,7 +1231,6 @@ export interface components {
     MistralAiModel: {
       /**
        * Provider
-       * @default mistralai
        * @constant
        */
       provider: 'mistralai'
@@ -1269,7 +1266,6 @@ export interface components {
     OpenAiModel: {
       /**
        * Provider
-       * @default openai
        * @constant
        */
       provider: 'openai'
@@ -1443,7 +1439,7 @@ export interface components {
        * Format: duration
        * @default PT3H
        */
-      validity: string
+      validity?: string
     }
     /** PostTokenResponse */
     PostTokenResponse: {
@@ -1458,7 +1454,7 @@ export interface components {
        * Tokentype
        * @default bearer
        */
-      tokenType: string
+      tokenType?: string
     }
     /** PutAdaptableExerciseClassRequest */
     PutAdaptableExerciseClassRequest: {
@@ -1726,7 +1722,7 @@ export interface components {
        * Consignes
        * @default []
        */
-      consignes: string[]
+      consignes?: string[]
       /** Conseil */
       conseil?: string | null
       /** Exemple */

@@ -9,7 +9,7 @@ from .base import Model
 
 
 class DummyModel(Model):
-    provider: Literal["dummy"] = "dummy"
+    provider: Literal["dummy"]
     name: Literal["dummy-1", "dummy-2", "dummy-3"]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:

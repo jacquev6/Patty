@@ -22,7 +22,7 @@ from .base import (
 
 
 class DummyModel(Model):
-    provider: Literal["dummy"] = "dummy"
+    provider: Literal["dummy"]
     name: Literal["dummy-1", "dummy-2", "dummy-3"]
 
     async def do_complete(
@@ -68,7 +68,7 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
         class Response(pydantic.BaseModel):
             cheese: str
 
-        model = DummyModel(name="dummy-1")
+        model = DummyModel(provider="dummy", name="dummy-1")
         response = await model.complete(
             [UserMessage(content="Blah.")], JsonSchemaResponseFormat(response_type=Response)
         )
@@ -77,7 +77,7 @@ class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_adaptation_schema(self) -> None:
         from ...adapted import Exercise
 
-        model = DummyModel(name="dummy-1")
+        model = DummyModel(provider="dummy", name="dummy-1")
 
         response = await model.complete(
             [UserMessage(content="Donne-moi une réponse respectant le schema JSON fourni.")],

@@ -396,7 +396,7 @@ services:
     working_dir: /app/frontend
     environment:
       SHELL: bash
-    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/src/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
+    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/src/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript --default-non-nullable false ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully

@@ -2516,8 +2516,7 @@
           "provider": {
             "type": "string",
             "const": "dummy",
-            "title": "Provider",
-            "default": "dummy"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -2531,6 +2530,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "DummyModel"
@@ -2929,8 +2929,7 @@
           "provider": {
             "type": "string",
             "const": "gemini",
-            "title": "Provider",
-            "default": "gemini"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -2940,6 +2939,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "GeminiModel"
@@ -3582,8 +3582,7 @@
           "provider": {
             "type": "string",
             "const": "mistralai",
-            "title": "Provider",
-            "default": "mistralai"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -3596,6 +3595,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "MistralAiModel"
@@ -3657,8 +3657,7 @@
           "provider": {
             "type": "string",
             "const": "openai",
-            "title": "Provider",
-            "default": "openai"
+            "title": "Provider"
           },
           "name": {
             "type": "string",
@@ -3671,6 +3670,7 @@
         },
         "type": "object",
         "required": [
+          "provider",
           "name"
         ],
         "title": "OpenAiModel"

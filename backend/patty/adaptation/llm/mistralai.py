@@ -30,7 +30,7 @@ client = mistralai.Mistral(api_key=os.environ["MISTRALAI_API_KEY"])
 
 
 class MistralAiModel(Model):
-    provider: Literal["mistralai"] = "mistralai"
+    provider: Literal["mistralai"]
     name: Literal["mistral-large-2411", "mistral-small-2501"]
 
     async def do_complete(
@@ -113,7 +113,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
             structured: Structured
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         messages: list[
             SystemMessage
@@ -227,7 +227,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         messages: list[
             SystemMessage
@@ -257,7 +257,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: str
             b: str
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         messages: list[
             SystemMessage
@@ -287,7 +287,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         messages: list[
             SystemMessage
@@ -323,7 +323,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             a: int
             b: int
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         messages: list[
             SystemMessage
@@ -345,7 +345,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_adaptation_schema(self) -> None:
         from ...adapted import Exercise
 
-        model = MistralAiModel(name="mistral-small-2501")
+        model = MistralAiModel(provider="mistralai", name="mistral-small-2501")
 
         response = await model.complete(
             [UserMessage(content="Donne-moi une réponse respectant le schema JSON fourni.")],

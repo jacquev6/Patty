@@ -288,7 +288,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_by_classification_batch=None,
             created_at=created_at,
-            model=adaptation_llm.OpenAiModel(name="gpt-4o-2024-08-06"),
+            model=adaptation_llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
             settings=strategy_settings,
         )
 
@@ -334,7 +334,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_by_classification_batch=None,
             created_at=created_at,
-            model=adaptation_llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             settings=settings,
         )
 
@@ -660,7 +660,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_by_classification_batch=None,
             created_at=created_at,
-            model=adaptation_llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             settings=success_branch_1.latest_strategy_settings,
         )
         success_adaptation_batch_1 = self.make(
@@ -761,7 +761,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_by_classification_batch=None,
             created_at=created_at,
-            model=adaptation_llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             settings=success_branch_2.latest_strategy_settings,
         )
         success_adaptation_batch_2 = self.make(
@@ -923,7 +923,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_by_classification_batch=None,
             created_at=created_at,
-            model=adaptation_llm.DummyModel(name="dummy-1"),
+            model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             settings=errors_branch.latest_strategy_settings,
         )
         errors_adaptation_batch = self.make(
@@ -1050,7 +1050,7 @@ class FixturesCreator:
             db.ExtractionStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=extraction_llm.GeminiModel(name="gemini-2.0-flash"),
+            model=extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
             prompt=make_default_extraction_prompt(),
         )
 
@@ -1059,7 +1059,7 @@ class FixturesCreator:
             db.ExtractionStrategy,
             created_by_username="Patty",
             created_at=created_at,
-            model=extraction_llm.DummyModel(name="dummy-1"),
+            model=extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
             prompt="Blah blah blah.",
         )
 
@@ -1098,7 +1098,7 @@ class FixturesCreator:
             latest_strategy_settings=None,
         )
 
-        model_for_adaptation = adaptation_llm.DummyModel(name="dummy-1")
+        model_for_adaptation = adaptation_llm.DummyModel(provider="dummy", name="dummy-1")
 
         batch = self.make(
             db.ClassificationBatch,
