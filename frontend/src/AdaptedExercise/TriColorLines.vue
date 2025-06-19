@@ -1,6 +1,11 @@
+<script lang="ts">
+/* Colors provided by client */
+export const colors: [string, string, string] = ['rgb(0, 0, 255)', 'rgb(255, 0, 0)', 'rgb(0, 204, 0)']
+</script>
+
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
-import { nextTick, onMounted, onUpdated, useTemplateRef, watch } from 'vue'
+import { nextTick, onMounted, onUpdated, provide, ref, useTemplateRef, watch } from 'vue'
 
 const container = useTemplateRef('container')
 const { width } = useElementSize(container)
@@ -13,8 +18,8 @@ onUpdated(recolor)
 // So, better safe than sorry, let's update the colors periodically.
 setInterval(recolor, 1000)
 
-/* Colors provided by client */
-const colors = ['#00F', '#F00', '#0C0']
+const tricolorablesRevisionIndex = ref(0)
+provide('tricolorablesRevisionIndex', tricolorablesRevisionIndex)
 
 function recolor() {
   if (container.value !== null) {
@@ -41,12 +46,19 @@ function recolor() {
 
     lines.sort((a, b) => a.top - b.top)
 
+    let somethingChanged = false
     lines.forEach((line, i) => {
       const color = colors[i % colors.length]
       line.tricolorables.forEach((element) => {
-        element.style.color = color
+        if (element.style.color !== color) {
+          somethingChanged = true
+          element.style.color = color
+        }
       })
     })
+    if (somethingChanged) {
+      tricolorablesRevisionIndex.value += 1
+    }
   }
 }
 
