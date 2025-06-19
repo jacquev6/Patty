@@ -1,40 +1,17 @@
-<script lang="ts">
-export type Exercise =
-  | {
-      exerciseId: string
-      pageNumber: number
-      exerciseNumber: string
-      kind: 'adapted'
-      studentAnswersStorageKey: string
-      adaptedExercise: AdaptedExercise
-    }
-  | {
-      exerciseId: string
-      pageNumber: number
-      exerciseNumber: string
-      kind: 'external'
-      originalFileName: string
-      data: string
-    }
-
-export type Data = {
-  title: string
-  exercises: Exercise[]
-}
-</script>
-
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { match, P } from 'ts-pattern'
 
-import type { AdaptedExercise } from './apiClient'
 import TextbookExportExercisesList from './TextbookExportExercisesList.vue'
 import TriColoredInput from './TriColoredInput.vue'
 import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
 import VirtualEraser from './VirtualEraser.vue'
 import WhiteSpace from './WhiteSpace.vue'
+import type { Data, Exercise } from './TextbookExportRootView.vue'
 
-const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data // @todo Factorize with TextbookExportExerciseView.vue
+const props = defineProps<{
+  data: Data
+}>()
 
 const pageNumberFilter = ref<string>('')
 const exerciseNumberFilter = ref<string>('')
@@ -53,7 +30,7 @@ const filtered = computed(() => {
     })
     .with([P.string, P.string], ([pageString, number]) => {
       const page = parseInt(pageString, 10)
-      const exercises = data.exercises.filter((exercise) => exercise.pageNumber === page)
+      const exercises = props.data.exercises.filter((exercise) => exercise.pageNumber === page)
       if (exercises.length === 0) {
         return { kind: 'message', message: `La page ${page} n'existe pas.` }
       } else if (number === '') {

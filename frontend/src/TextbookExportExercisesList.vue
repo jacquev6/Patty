@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import _ from 'lodash'
 
 import PageNavigationControls from './AdaptedExercise/PageNavigationControls.vue'
-import type { Exercise as FullExercise } from './TextbookExportIndexView.vue'
+import type { Exercise as FullExercise } from './TextbookExportRootView.vue'
 import { match, P } from 'ts-pattern'
 
 type Exercise =

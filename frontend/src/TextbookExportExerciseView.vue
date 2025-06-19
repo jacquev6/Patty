@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { type Data } from './TextbookExportIndexView.vue'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import assert from './assert'
-
-const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data // @todo Factorize with TextbookExportIndexView.vue
+import type { Data } from './TextbookExportRootView.vue'
 
 const props = defineProps<{
   id: string
+  data: Data
 }>()
 
 const exercise = computed(() => {
-  const exercise = data.exercises.find((exercise) => exercise.kind === 'adapted' && exercise.exerciseId === props.id)
+  const exercise = props.data.exercises.find(
+    (exercise) => exercise.kind === 'adapted' && exercise.exerciseId === props.id,
+  )
   if (!exercise) {
     throw new Error('Exercise not found')
   }
