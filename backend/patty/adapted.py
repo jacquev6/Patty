@@ -114,6 +114,7 @@ class SwappableInput(BaseModel):
 
 class EditableTextInput(BaseModel):
     kind: Literal["editableTextInput"]
+    showOriginalText: bool
     contents: list[PlainText]
 
 

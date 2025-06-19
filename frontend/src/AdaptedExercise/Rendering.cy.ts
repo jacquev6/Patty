@@ -1202,6 +1202,7 @@ describe('EditableTextInput', () => {
                       { kind: 'whitespace' },
                       {
                         kind: 'editableTextInput',
+                        showOriginalText: true,
                         contents: [
                           { kind: 'text', text: 'Edit' },
                           { kind: 'whitespace' },
@@ -1218,6 +1219,7 @@ describe('EditableTextInput', () => {
                       { kind: 'whitespace' },
                       {
                         kind: 'editableTextInput',
+                        showOriginalText: true,
                         contents: [
                           { kind: 'text', text: 'And' },
                           { kind: 'whitespace' },

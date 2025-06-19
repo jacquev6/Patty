@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { AdaptedExercise, AnyComponent } from '@/apiClient'
-import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 export type InProgressExercise = {
   exercise: AdaptedExercise
@@ -135,25 +134,15 @@ const statementLines = computed<StatementLine[]>(() => {
   for (const [lineIndex, { contents }] of props.adaptedExercise.statement.pages[pageIndex.value].lines.entries()) {
     lines.push({ lineIndex, contents })
     for (const component of contents) {
-      if (
-        isPassive(component) ||
-        component.kind === 'swappableInput' ||
-        component.kind === 'selectableInput' ||
-        component.kind === 'multipleChoicesInput' ||
-        component.kind === 'freeTextInput'
-      ) {
-        // Nothing to do
-      } else if (component.kind === 'editableTextInput') {
+      if (component.kind === 'editableTextInput' && component.showOriginalText) {
         lines.push({
           lineIndex,
           contents: [
             { kind: 'arrow' },
             { kind: 'whitespace' },
-            { kind: 'activeEditableTextInput', contents: component.contents },
+            { kind: 'editableTextInput', showOriginalText: false, contents: component.contents },
           ],
         })
-      } else {
-        ;((component: never) => console.log(`Unexpected component: ${component}`))(component)
       }
     }
   }

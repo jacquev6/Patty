@@ -840,6 +840,8 @@ export interface components {
        * @constant
        */
       kind: 'editableTextInput'
+      /** Showoriginaltext */
+      showOriginalText: boolean
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
     }

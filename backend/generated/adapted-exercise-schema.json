@@ -56,6 +56,10 @@
           "title": "Kind",
           "type": "string"
         },
+        "showOriginalText": {
+          "title": "Showoriginaltext",
+          "type": "boolean"
+        },
         "contents": {
           "items": {
             "anyOf": [
@@ -73,6 +77,7 @@
       },
       "required": [
         "kind",
+        "showOriginalText",
         "contents"
       ],
       "type": "object",

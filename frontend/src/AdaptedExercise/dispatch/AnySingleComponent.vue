@@ -111,16 +111,18 @@ const answerForSelectableInput = computed<number, number>({
     :tricolorable
   />
   <PassiveSequenceComponent
-    v-else-if="component.kind === 'editableTextInput'"
+    v-else-if="component.kind === 'editableTextInput' && component.showOriginalText"
     :contents="component.contents"
     :tricolorable
   />
   <EditableTextInput
-    v-else-if="component.kind === 'activeEditableTextInput'"
+    v-else-if="component.kind === 'editableTextInput'"
     :pageIndex
     :lineIndex
     :componentIndex
-    v-bind="component"
+    kind="editableTextInput"
+    :contents="component.contents"
+    :showOriginalText="false"
     v-model="studentAnswers"
     :tricolorable
   />

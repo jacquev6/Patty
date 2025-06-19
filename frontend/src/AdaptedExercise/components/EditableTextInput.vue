@@ -7,11 +7,12 @@ import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FreeTextInput from './FreeTextInput.vue'
 
 const props = defineProps<{
-  kind: 'activeEditableTextInput'
+  kind: 'editableTextInput'
   pageIndex: number
   lineIndex: number
   componentIndex: number
   contents: PlainText[]
+  showOriginalText: false
   tricolorable: boolean
 }>()
 

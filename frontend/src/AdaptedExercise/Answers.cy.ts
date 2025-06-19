@@ -761,6 +761,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'a0' }, { kind: 'whitespace' }, { kind: 'text', text: 'a1' }],
                 },
               ],
@@ -771,6 +772,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [
                     { kind: 'text', text: 'b0' },
                     { kind: 'whitespace' },
@@ -791,6 +793,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'c0' }, { kind: 'whitespace' }, { kind: 'text', text: 'c1' }],
                 },
               ],
@@ -801,6 +804,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'd0' }, { kind: 'whitespace' }, { kind: 'text', text: 'd1' }],
                 },
               ],

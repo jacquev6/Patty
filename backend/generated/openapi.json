@@ -2542,6 +2542,10 @@
             "const": "editableTextInput",
             "title": "Kind"
           },
+          "showOriginalText": {
+            "type": "boolean",
+            "title": "Showoriginaltext"
+          },
           "contents": {
             "items": {
               "anyOf": [
@@ -2560,6 +2564,7 @@
         "type": "object",
         "required": [
           "kind",
+          "showOriginalText",
           "contents"
         ]
       },
