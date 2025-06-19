@@ -1403,7 +1403,6 @@ def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonD
     assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
     exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
     target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
-    # @todo Download asynchronously from S3
     object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
     data = base64.b64encode(object["Body"].read()).decode("ascii")
     return {

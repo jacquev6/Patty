@@ -64,7 +64,6 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {extraction.id}")
-        # @todo Use Gemini with an asynchronous client
         extracted_exercises = extraction.extraction_batch.strategy.model.extract(
             extraction.extraction_batch.strategy.prompt, image
         )

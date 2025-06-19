@@ -2,8 +2,8 @@ PATTY_ENVIRONMENT=dev
 
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
 PATTY_DATABASE_BACKUPS_URL=file:///app/support/dev-env/db/backups
-PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/dev/external-exercises  # @todo Use a file:// URL in dev
-PATTY_PDF_FILES_URL=s3://jacquev6/patty/dev/pdf-files  # @todo Use a file:// URL in dev
+PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/dev/external-exercises
+PATTY_PDF_FILES_URL=s3://jacquev6/patty/dev/pdf-files
 PATTY_2025_05_20_CLASSIFICATION_CAMEMBERT_PT_URL=s3://jacquev6/patty/shared/classification-models/2025-05-20-classification_camembert.pt
 PATTY_CLASSIFICATION_MODELS_DIRECTORY_PATH=/app/support/dev-env/backend/classification-models
 PATTY_SECRET_JWT_KEY=not-so-secret

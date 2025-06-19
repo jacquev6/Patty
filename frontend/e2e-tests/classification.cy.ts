@@ -135,7 +135,6 @@ describe('The classification batch creation page', () => {
     cy.get(
       'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
     ).should('exist')
-    // @todo Submit the adaptation using the new settings.
   })
 })
 
