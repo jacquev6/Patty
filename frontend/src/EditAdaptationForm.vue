@@ -17,6 +17,7 @@ import WhiteSpace from './WhiteSpace.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import { type PreprocessedAdaptation } from './adaptations'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import { match } from 'ts-pattern'
 
 const props = defineProps<{
   adaptation: PreprocessedAdaptation
@@ -72,18 +73,14 @@ const manualAdaptedExerciseProxy = computed({
   get() {
     if (manualAdaptedExercise.value !== null) {
       return manualAdaptedExercise.value.raw
-    } else if (props.adaptation.llmStatus.kind === 'inProgress') {
-      return ''
-    } else if (props.adaptation.llmStatus.kind === 'success') {
-      return jsonStringify(props.adaptation.llmStatus.adaptedExercise)
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'not-json') {
-      return props.adaptation.llmStatus.text
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'invalid-json') {
-      return jsonStringify(props.adaptation.llmStatus.parsed)
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'unknown') {
-      return ''
     } else {
-      return ((status: never) => status)(props.adaptation.llmStatus)
+      return match(props.adaptation.llmStatus)
+        .with({ kind: 'inProgress' }, () => '')
+        .with({ kind: 'success' }, (status) => jsonStringify(status.adaptedExercise))
+        .with({ kind: 'error', error: 'not-json' }, (status) => status.text)
+        .with({ kind: 'error', error: 'invalid-json' }, (status) => jsonStringify(status.parsed))
+        .with({ kind: 'error', error: 'unknown' }, () => '')
+        .exhaustive()
     }
   },
   set(raw: string) {

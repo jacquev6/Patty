@@ -5,6 +5,7 @@ import assert from '@/assert'
 import type { PlainText } from '@/apiClient'
 import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FreeTextInput from './FreeTextInput.vue'
+import { match, P } from 'ts-pattern'
 
 const props = defineProps<{
   kind: 'editableTextInput'
@@ -20,15 +21,13 @@ const studentAnswers = defineModel<StudentAnswers>({ required: true })
 
 const initialText = computed(() =>
   props.contents
-    .map((c) => {
-      if (c.kind === 'text') {
-        return c.text
-      } else if (c.kind === 'whitespace') {
-        return ' '
-      } else {
-        ;((c: never) => console.log('Unknown content', c))(c)
-      }
-    })
+    .map((c) =>
+      match(c)
+        .returnType<string>()
+        .with({ kind: 'text', text: P.select() }, (text) => text)
+        .with({ kind: 'whitespace' }, () => ' ')
+        .exhaustive(),
+    )
     .join(''),
 )
 

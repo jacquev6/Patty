@@ -11,6 +11,7 @@ import FixedColumns from './FixedColumns.vue'
 import ComboInput from './ComboInput.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
 import { useApiConstantsStore } from './ApiConstantsStore'
+import { match } from 'ts-pattern'
 
 const props = defineProps<{
   availableStrategySettings: AdaptationStrategy['settings'][]
@@ -28,54 +29,56 @@ const llmResponseSpecificationFormalism = computed({
     return strategy.value.settings.responseSpecification.formalism
   },
   set: (value: typeof strategy.value.settings.responseSpecification.formalism) => {
-    if (value === 'json-object') {
-      strategy.value.settings.responseSpecification = { format: 'json', formalism: 'json-object' }
-    } else if (value === 'json-schema') {
-      strategy.value.settings.responseSpecification = {
-        format: 'json',
-        formalism: 'json-schema',
-        instructionComponents: {
-          text: true,
-          whitespace: true,
-          arrow: true,
-          formatted: true,
-          choice: true,
-        },
-        exampleComponents: {
-          text: true,
-          whitespace: true,
-          arrow: true,
-          formatted: true,
-        },
-        hintComponents: {
-          text: true,
-          whitespace: true,
-          arrow: true,
-          formatted: true,
-        },
-        statementComponents: {
-          text: true,
-          whitespace: true,
-          arrow: true,
-          formatted: true,
-          freeTextInput: true,
-          multipleChoicesInput: true,
-          selectableInput: true,
-          swappableInput: true,
-          editableTextInput: false,
-        },
-        referenceComponents: {
-          text: true,
-          whitespace: true,
-          arrow: true,
-          formatted: true,
-        },
-      }
-    } else if (value === 'text') {
-      strategy.value.settings.responseSpecification = { format: 'json', formalism: 'text' }
-    } else {
-      ;((v: never) => console.log(`Unknown response specification formalism: ${v}`))(value)
-    }
+    match(value)
+      .with('json-object', () => {
+        strategy.value.settings.responseSpecification = { format: 'json', formalism: 'json-object' }
+      })
+      .with('json-schema', () => {
+        strategy.value.settings.responseSpecification = {
+          format: 'json',
+          formalism: 'json-schema',
+          instructionComponents: {
+            text: true,
+            whitespace: true,
+            arrow: true,
+            formatted: true,
+            choice: true,
+          },
+          exampleComponents: {
+            text: true,
+            whitespace: true,
+            arrow: true,
+            formatted: true,
+          },
+          hintComponents: {
+            text: true,
+            whitespace: true,
+            arrow: true,
+            formatted: true,
+          },
+          statementComponents: {
+            text: true,
+            whitespace: true,
+            arrow: true,
+            formatted: true,
+            freeTextInput: true,
+            multipleChoicesInput: true,
+            selectableInput: true,
+            swappableInput: true,
+            editableTextInput: false,
+          },
+          referenceComponents: {
+            text: true,
+            whitespace: true,
+            arrow: true,
+            formatted: true,
+          },
+        }
+      })
+      .with('text', () => {
+        strategy.value.settings.responseSpecification = { format: 'json', formalism: 'text' }
+      })
+      .exhaustive()
   },
 })
 

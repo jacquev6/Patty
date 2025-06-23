@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, h, type Ref, type VNode } from 'vue'
 
 import type { AnyComponent } from '@/apiClient'
 import assert from '@/assert'
-import PassiveSingleComponent, { isPassive } from './PassiveSingleComponent.vue'
+import PassiveSingleComponent from './PassiveSingleComponent.vue'
 import FreeTextInput from '../components/FreeTextInput.vue'
 import MultipleChoicesInput from '../components/MultipleChoicesInput.vue'
 import SelectableInput from '../components/SelectableInput.vue'
@@ -11,6 +11,7 @@ import SwappableInput from '../components/SwappableInput.vue'
 import type { StudentAnswers, ComponentAnswer, InProgressExercise } from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from './PassiveSequenceComponent.vue'
 import EditableTextInput from '../components/EditableTextInput.vue'
+import { match, P } from 'ts-pattern'
 
 const props = defineProps<{
   pageIndex: number
@@ -78,53 +79,86 @@ const answerForSelectableInput = computed<number, number>({
     setComponentAnswer({ kind: 'selectableInput', color })
   },
 })
+
+function vModel<T>(r: Ref<T>) {
+  return {
+    modelValue: r.value,
+    'onUpdate:modelValue': (v: T) => {
+      r.value = v
+    },
+  }
+}
+
+function render() {
+  return match(props.component)
+    .returnType<VNode>()
+    .with({ kind: P.union('arrow', 'choice', 'formatted', 'text', 'whitespace') }, (c) =>
+      h(PassiveSingleComponent, {
+        component: c,
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with({ kind: 'freeTextInput' }, (c) =>
+      h(FreeTextInput, {
+        ...c,
+        ...vModel(answerForFreeTextInput),
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with({ kind: 'multipleChoicesInput' }, (c) =>
+      h(MultipleChoicesInput, {
+        ...c,
+        ...vModel(answerForMultipleChoicesInput),
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with({ kind: 'selectableInput' }, (c) =>
+      h(SelectableInput, {
+        ...c,
+        ...vModel(answerForSelectableInput),
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with({ kind: 'swappableInput' }, (c) =>
+      h(SwappableInput, {
+        pageIndex: props.pageIndex,
+        lineIndex: props.lineIndex,
+        componentIndex: props.componentIndex,
+        ...c,
+        inProgress: inProgress.value,
+        'onUpdate:inProgress': (v) => {
+          inProgress.value = v
+        },
+        ...vModel(studentAnswers),
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with(
+      { kind: 'editableTextInput' },
+      (c) => c.showOriginalText,
+      (c) =>
+        h(PassiveSequenceComponent, {
+          contents: c.contents,
+          tricolorable: props.tricolorable,
+        }),
+    )
+    .with({ kind: 'editableTextInput' }, (c) =>
+      h(EditableTextInput, {
+        pageIndex: props.pageIndex,
+        lineIndex: props.lineIndex,
+        componentIndex: props.componentIndex,
+        kind: 'editableTextInput',
+        contents: c.contents,
+        showOriginalText: false,
+        ...vModel(studentAnswers),
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .exhaustive()
+}
 </script>
 
+<!-- This is awkward; I'm sure there is a way to define this component without a template -->
 <template>
-  <PassiveSingleComponent v-if="isPassive(component)" :component="component" :tricolorable="tricolorable" />
-  <FreeTextInput
-    v-else-if="component.kind === 'freeTextInput'"
-    v-bind="component"
-    v-model="answerForFreeTextInput"
-    :tricolorable
-  />
-  <MultipleChoicesInput
-    v-else-if="component.kind === 'multipleChoicesInput'"
-    v-bind="component"
-    v-model="answerForMultipleChoicesInput"
-    :tricolorable
-  />
-  <SelectableInput
-    v-else-if="component.kind === 'selectableInput'"
-    v-bind="component"
-    v-model="answerForSelectableInput"
-    :tricolorable
-  />
-  <SwappableInput
-    v-else-if="component.kind === 'swappableInput'"
-    :pageIndex
-    :lineIndex
-    :componentIndex
-    v-bind="component"
-    v-model="studentAnswers"
-    v-model:inProgress="inProgress"
-    :tricolorable
-  />
-  <PassiveSequenceComponent
-    v-else-if="component.kind === 'editableTextInput' && component.showOriginalText"
-    :contents="component.contents"
-    :tricolorable
-  />
-  <EditableTextInput
-    v-else-if="component.kind === 'editableTextInput'"
-    :pageIndex
-    :lineIndex
-    :componentIndex
-    kind="editableTextInput"
-    :contents="component.contents"
-    :showOriginalText="false"
-    v-model="studentAnswers"
-    :tricolorable
-  />
-  <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>
+  <render />
 </template>
