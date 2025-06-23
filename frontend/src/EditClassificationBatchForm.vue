@@ -41,11 +41,14 @@ const authenticationTokenStore = useAuthenticationTokenStore()
     >
   </p>
   <p>
-    <a
-      :href="`/api/export/classification-batch/${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
+    Download
+    <a :href="`/api/export/classification-batch/${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
+      >standalone HTML</a
     >
-      Download standalone HTML
-    </a>
+    or
+    <a :href="`/api/export/classification-batch/${classificationBatch.id}.json?token=${authenticationTokenStore.token}`"
+      >JSON data</a
+    >
   </p>
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">

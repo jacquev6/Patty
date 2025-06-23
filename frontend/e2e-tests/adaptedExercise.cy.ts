@@ -25,9 +25,9 @@ describe('The autonomous HTML for a single adaptation', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/P42Ex5.html`).should('not.exist')
 
     visit('/adaptation-1')
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/P42Ex5.html`)
   })
 
@@ -194,9 +194,9 @@ describe('The autonomous HTML for an adaptation batch', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`).should('not.exist')
 
     visit('/adaptation-batch-1')
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`)
   })
 
@@ -232,9 +232,9 @@ describe('The autonomous HTML for a textbook', () => {
     visit('/textbook-1')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
     cy.get('[data-cy="identified-user-ok"]').click()
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title.html`)
   })
 

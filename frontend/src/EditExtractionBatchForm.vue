@@ -38,9 +38,14 @@ const authenticationTokenStore = useAuthenticationTokenStore()
     </template>
     <template #col-2>
       <p>
-        <a :href="`/api/export/extraction-batch/${extractionBatch.id}.html?token=${authenticationTokenStore.token}`">
-          Download standalone HTML
-        </a>
+        Download
+        <a :href="`/api/export/extraction-batch/${extractionBatch.id}.html?token=${authenticationTokenStore.token}`"
+          >standalone HTML</a
+        >
+        or
+        <a :href="`/api/export/extraction-batch/${extractionBatch.id}.json?token=${authenticationTokenStore.token}`"
+          >JSON data</a
+        >
       </p>
       <h1>Follow-ups</h1>
       <p>

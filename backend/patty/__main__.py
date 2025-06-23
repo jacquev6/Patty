@@ -7,7 +7,6 @@ import io
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tarfile
@@ -37,9 +36,14 @@ def hash_password(password: str) -> None:
 
 @main.command()
 def openapi() -> None:
+    import fastapi
+
     from . import asgi
 
-    print(json.dumps(asgi.app.openapi(), indent=2))
+    app = fastapi.FastAPI()
+    app.include_router(asgi.openapi_router)
+
+    print(json.dumps(app.openapi(), indent=2))
 
 
 @main.command()
@@ -358,41 +362,6 @@ def migrate_data() -> None:
     with database_utils.make_session(database_engine) as session:
         data_migration.migrate(session)
         session.commit()
-
-
-@main.command()
-@click.argument("directory", type=click.Path(file_okay=False))
-def export_all(directory: str) -> None:
-    import fastapi
-
-    from . import database_utils
-    from .orm_models import Adaptation, AdaptationBatch, Textbook
-    from .api_router import make_adapted_exercise_data, export_adaptation, export_adaptation_batch, export_textbook
-
-    shutil.rmtree(directory, ignore_errors=True)
-    os.makedirs(directory)
-    with open(os.path.join(directory, ".gitignore"), "w") as gitignore:
-        gitignore.write("*\n")
-
-    def save(kind: str, id: int, res: fastapi.responses.HTMLResponse) -> None:
-        filepath = os.path.join(directory, f"{kind}-{id}.html")
-        print(f"Exporting {kind} {id} to {filepath}")
-        with open(filepath, "wb") as file:
-            file.write(res.body)
-
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-    with database_utils.make_session(database_engine) as session:
-        for adaptation in session.query(Adaptation).all():
-            if make_adapted_exercise_data(adaptation) is None:
-                print(f"Skipping adaptation {adaptation.id} because it has no adapted exercise data")
-            else:
-                save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
-
-        for adaptation_batch in session.query(AdaptationBatch).all():
-            save("adaptation-batch", adaptation_batch.id, export_adaptation_batch(str(adaptation_batch.id), session))
-
-        for textbook in session.query(Textbook).all():
-            save("textbook", textbook.id, export_textbook(str(textbook.id), session))
 
 
 if __name__ == "__main__":

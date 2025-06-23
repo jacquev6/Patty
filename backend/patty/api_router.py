@@ -1,4 +1,5 @@
-from typing import Any, TypeVar
+from collections.abc import Iterable
+from typing import Any, Literal, TypeVar
 import base64
 import datetime
 import hashlib
@@ -35,7 +36,7 @@ from .adaptation.submission import LlmMessage
 from .extraction import llm as extraction_llm
 from .extraction import assistant_responses as extraction_responses
 
-__all__ = ["router"]
+__all__ = ["api_router", "export_router"]
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
@@ -1227,75 +1228,106 @@ export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "expor
 
 
 @export_router.get("/extraction-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_extraction_batch(
+def export_extraction_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(exercise.adaptation)
-                for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
-                for exercise in page.exercises
-                if exercise.adaptation is not None
-            ),
-        )
-    )
-
-    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
-
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-extraction-batch-{id}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+    return export_batch_html("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
 
-@export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_adaptation_batch(
+@export_router.get("/extraction-batch/{id}.json")
+def export_extraction_batch_json(
     id: str, session: database_utils.SessionDependable, download: bool = True
-) -> fastapi.responses.HTMLResponse:
-    data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(adaptation)
-                for adaptation in get_by_id(session, db.AdaptationBatch, id).adaptations
-            ),
-        )
-    )
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
-    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-adaptation-batch-{id}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return [
+        exercise.adaptation
+        for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
+        for exercise in page.exercises
+        if exercise.adaptation is not None
+    ]
 
 
 @export_router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_classification_batch(
+def export_classification_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
+    return export_batch_html("classification", id, get_classification_batch_adaptations(session, id), download)
+
+
+@export_router.get("/classification-batch/{id}.json")
+def export_classification_batch_json(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("classification", id, get_classification_batch_adaptations(session, id), download)
+
+
+def get_classification_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return [exercise.adaptation for exercise in get_by_id(session, db.ClassificationBatch, id).exercises]
+
+
+@export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_adaptation_batch_html(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    return export_batch_html("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
+
+
+@export_router.get("/adaptation-batch/{id}.json")
+def export_adaptation_batch_json(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
+
+
+def get_adaptation_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return get_by_id(session, db.AdaptationBatch, id).adaptations
+
+
+def export_batch_html(
+    kind: Literal["extraction", "adaptation", "classification"],
+    id: str,
+    adaptations: Iterable[db.Adaptation | None],
+    download: bool,
+) -> fastapi.responses.HTMLResponse:
     data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(exercise.adaptation)
-                for exercise in get_by_id(session, db.ClassificationBatch, id).exercises
-                if exercise.adaptation is not None
-            ),
+        adapted_exercise_data
+        for adapted_exercise_data in (
+            make_adapted_exercise_data(adaptation) for adaptation in adaptations if adaptation is not None
         )
+        if adapted_exercise_data is not None
     )
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
     headers = {}
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-classification-batch-{id}.html"'
+        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
+def export_batch_json(
+    kind: Literal["extraction", "adaptation", "classification"],
+    id: str,
+    adaptations: Iterable[db.Adaptation | None],
+    download: bool,
+) -> fastapi.responses.JSONResponse:
+    content = list(
+        adapted_exercise_data
+        for adapted_exercise_data in (
+            make_adapted_exercise_data(adaptation) for adaptation in adaptations if adaptation is not None
+        )
+        if adapted_exercise_data is not None
+    )
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.json"'
+
+    return fastapi.responses.JSONResponse(content=content, headers=headers)
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -1415,16 +1447,11 @@ def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonD
     }
 
 
-router = fastapi.APIRouter()
-router.include_router(api_router)
-router.include_router(export_router, prefix="/export")
-
-
 class ApiTestCase(database_utils.TestCaseWithDatabase):
     def setUp(self) -> None:
         super().setUp()
         self.app = fastapi.FastAPI(database_engine=self.engine)
-        self.app.include_router(router)
+        self.app.include_router(api_router)
         access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
         self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
 

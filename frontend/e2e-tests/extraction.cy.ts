@@ -58,7 +58,7 @@ describe('The extraction batch creation page', () => {
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
     screenshot('extraction-batch-edition-page')
 
-    cy.get('a:contains("Download standalone HTML")')
+    cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
       .then((href) => {
         expect(href).to.include('/api/export/extraction-batch/1.html?token=')
