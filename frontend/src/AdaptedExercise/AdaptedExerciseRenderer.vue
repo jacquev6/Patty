@@ -211,12 +211,12 @@ div {
 
 .instruction {
   text-align: center;
-  padding-top: 0.5em;
-  padding-bottom: 3em;
+  padding-top: 0.35em;
+  padding-bottom: 2em;
 }
 
 :deep(p) {
-  line-height: 1.7em;
+  line-height: 2em;
 }
 
 .instruction :deep(*:first-child) {

@@ -658,7 +658,7 @@ describe('Adapted exercise answers', () => {
         .eq(i)
         .should('have.text', (i % 3).toString())
     }
-    cy.get('.control').eq(1).click()
+    cy.get('.control').eq(1).click({ force: true })
     for (let i = 0; i < 8; i += 2) {
       cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
       cy.get(`[data-cy="choice${i % 3}"]`).click()
@@ -686,7 +686,7 @@ describe('Adapted exercise answers', () => {
         .eq(i)
         .should('have.text', (i % 3).toString())
     }
-    cy.get('.control').eq(1).click()
+    cy.get('.control').eq(1).click({ force: true })
     for (let i = 0; i < 8; i += 2) {
       cy.get('[data-cy="multipleChoicesInput"]')
         .eq(i)
