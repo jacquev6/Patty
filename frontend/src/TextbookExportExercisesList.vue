@@ -22,34 +22,31 @@ function hasExt(ext: string) {
 }
 
 const columns = computed(() => {
-  const columns: ((Exercise & { title: string }) | null)[][] = _.chunk(
-    props.exercises.map((e) => {
-      const prefix = Number.isNaN(Number.parseInt(e.exerciseNumber)) ? '' : 'Exercice '
-      const suffix = match(e)
-        .returnType<string>()
-        .with({ kind: 'adapted' }, () => '')
-        .with({ kind: 'external', originalFileName: P.select() }, (originalFileName) =>
-          match(originalFileName)
-            .returnType<string>()
-            .with(P.string, hasExt('.pdf'), () => ` - PDF`)
-            .with(P.string, hasExt('.docx'), () => ` - Word`)
-            .with(P.string, hasExt('.odt'), () => ` - LibreOffice Writer`)
-            .with(P.string, hasExt('.xlsx'), () => ` - Excel`)
-            .with(P.string, hasExt('.ods'), () => ` - LibreOffice Calc`)
-            .with(P.string, hasExt('.ggb'), () => ` - GeoGebra`)
-            .otherwise(() => ' - Logiciel externe'),
-        )
-        .exhaustive()
-      return { title: prefix + e.exerciseNumber + suffix, ...e }
-    }),
-    4,
-  ).slice(pageIndex.value)
+  const columns: (Exercise | null)[][] = _.chunk(props.exercises, 4).slice(pageIndex.value)
   const missing = 4 - columns[columns.length - 1]!.length
   for (let i = 0; i < missing; i++) {
     columns[columns.length - 1]!.push(null)
   }
   return columns
 })
+
+function makeExerciseTitle(exercise: Exercise) {
+  const prefix = Number.isNaN(Number.parseInt(exercise.exerciseNumber)) ? '' : 'Exercice '
+  return match(exercise)
+    .with({ kind: 'adapted' }, () => prefix + exercise.exerciseNumber)
+    .with({ kind: 'external', originalFileName: P.select() }, (originalFileName) => {
+      const suffix = match(originalFileName)
+        .with(P.string, hasExt('.pdf'), () => 'PDF')
+        .with(P.string, hasExt('.docx'), () => 'Word')
+        .with(P.string, hasExt('.odt'), () => 'LibreOffice Writer')
+        .with(P.string, hasExt('.xlsx'), () => 'Excel')
+        .with(P.string, hasExt('.ods'), () => 'LibreOffice Calc')
+        .with(P.string, hasExt('.ggb'), () => 'GeoGebra')
+        .otherwise(() => 'Logiciel externe')
+      return `${prefix}${exercise.exerciseNumber} - ${suffix}`
+    })
+    .exhaustive()
+}
 
 // Until https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
 // is widely available:
@@ -77,14 +74,14 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
           <template v-else-if="exercise.kind === 'adapted'">
             <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }" target="_blank">
               <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
-                <p>{{ exercise.title }}</p>
+                <p>{{ makeExerciseTitle(exercise) }}</p>
               </div>
             </RouterLink>
           </template>
           <template v-else-if="exercise.kind === 'external'">
             <a @click="openExternalExercise(exercise)">
               <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
-                <p>{{ exercise.title }}</p>
+                <p>{{ makeExerciseTitle(exercise) }}</p>
               </div>
             </a>
           </template>
