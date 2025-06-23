@@ -75,6 +75,9 @@ class DevelopmentCycle:
                 if not self.do_migration:
                     env["PATTY_TESTS_SKIP_MIGRATIONS"] = "true"
 
+                run_in_backend_container(
+                    ["python", "-m", "doctest", "--option", "ELLIPSIS", "generated/patty_json_to_html.py"], env=env
+                )
                 run_in_backend_container(["python", "-m", "unittest", "discover", "--pattern", "*.py"], env=env)
 
         if self.do_frontend:

@@ -1,3 +1,4 @@
+import textwrap
 import time
 import traceback
 from typing import Iterable
@@ -138,6 +139,131 @@ def default_extraction_prompt() -> None:
     from . import fixtures
 
     print(fixtures.make_default_extraction_prompt())
+
+
+@main.command()
+def json_to_html_script() -> None:
+    # This is pretty hacky, but it avoids the complexity of versioning and packaging Patty,
+    # and allows @eliselinc to download a single file and add it to her source tree.
+
+    from . import adapted
+
+    example_exercise = adapted.Exercise(
+        format="v1",
+        instruction=adapted.InstructionPage(
+            lines=[
+                adapted.InstructionLine(
+                    contents=[
+                        adapted.Text(kind="text", text="Example"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="exercise"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="instruction"),
+                        adapted.Text(kind="text", text="."),
+                    ]
+                )
+            ]
+        ),
+        example=None,
+        hint=None,
+        statement=adapted.StatementPages(
+            pages=[
+                adapted.StatementPage(
+                    lines=[
+                        adapted.StatementLine(
+                            contents=[
+                                adapted.Text(kind="text", text="Example"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="exercise"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="statement"),
+                                adapted.Text(kind="text", text="."),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+        reference=None,
+    )
+    usage = subprocess.run(
+        ["black", "--line-length", "116", "--skip-magic-trailing-comma", "-"],
+        input=textwrap.dedent(
+            f"""\
+        from patty_json_to_html import json_to_html
+
+        exercise = {example_exercise.model_dump()!r}
+
+        print(json_to_html(exercise))
+        """
+        ),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+    def gen() -> typing.Iterable[str]:
+        yield "# This file is *generated* by Patty. Do not edit it directly."
+        yield ""
+        yield '"""'
+        yield "Example usage (note that `json_to_html` also accepts an instance of `Exercise`):"
+        yield ""
+        for line in usage.splitlines():
+            line = line.rstrip()
+            if line == "":
+                yield ""
+            elif any(line.startswith(prefix) for prefix in ("from", "exercise", "print")):
+                yield f">>> {line}"
+            else:
+                yield f"... {line}"
+        yield "<!DOCTYPE html>"
+        yield '<html lang="">'
+        yield "  ..."
+        yield "</html>"
+        yield '"""'
+        yield ""
+        yield ""
+        yield "from __future__ import annotations"
+        yield "from typing import Any, Literal"
+        yield "import hashlib"
+        yield "import json"
+        yield ""
+        yield "import pydantic"
+        yield ""
+        with open("patty/adapted.py") as f:
+            for line in f:
+                if line.rstrip() == "# patty_json_to_html.py begin":
+                    break
+            for line in f:
+                if line.rstrip() == "# patty_json_to_html.py end":
+                    break
+                if line.strip().startswith("# WARNING:"):
+                    continue
+                yield line.rstrip()
+        yield "def json_to_html(exercise: Exercise | dict[str, Any]) -> str:"
+        yield "    if not isinstance(exercise, Exercise):"
+        yield "        exercise = Exercise.model_validate(exercise)"
+        yield ""
+        with open("patty/export/templates/adaptation/index.html") as f:
+            yield f"    template = {f.read().strip()!r}"
+        yield ""
+        yield "    exercise_dump = exercise.model_dump()"
+        yield "    data = {"
+        yield '        "studentAnswersStorageKey": hashlib.md5(json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()).hexdigest(),'
+        yield '        "adaptedExercise": exercise_dump,'
+        yield "    }"
+        yield ""
+        yield "    return template.replace("
+        yield '        "##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##",'
+        yield "        json.dumps(data).replace('\\\\', '\\\\\\\\').replace('\\\"', '\\\\\"'),"
+        yield "    )"
+
+    subprocess.run(
+        ["black", "--line-length", "120", "--skip-magic-trailing-comma", "-"],
+        input="\n".join(gen()),
+        text=True,
+        check=True,
+    )
 
 
 @main.command()

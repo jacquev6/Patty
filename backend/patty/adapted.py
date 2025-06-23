@@ -8,6 +8,9 @@ import pydantic
 from .api_utils import ApiModel
 
 
+# patty_json_to_html.py begin
+
+
 class BaseModel(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="ignore", json_schema_extra=lambda schema: schema.pop("title"))
 
@@ -73,19 +76,6 @@ PlainText = Text | Whitespace
 FormattedText = PlainText | Arrow | Formatted
 
 
-class FormattedTextComponents(ApiModel):
-    text: Literal[True]
-    whitespace: Literal[True]
-    arrow: Literal[True]
-    formatted: Literal[True]
-
-    def gather(self) -> Iterable[type]:
-        yield Text
-        yield Whitespace
-        yield Arrow
-        yield Formatted
-
-
 class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
@@ -122,6 +112,53 @@ class EditableTextInput(BaseModel):
 InstructionComponent = FormattedText | Choice
 
 
+# WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
+ExampleComponent = FormattedText
+
+
+# WARNING: keep 'HintComponent' and 'HintComponents' consistent
+HintComponent = FormattedText
+
+
+# WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
+StatementComponent = (
+    FormattedText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
+)
+
+
+# WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent
+ReferenceComponent = FormattedText
+
+
+InstructionLine = Line[InstructionComponent]
+ExampleLine = Line[ExampleComponent]
+HintLine = Line[HintComponent]
+StatementLine = Line[StatementComponent]
+ReferenceLine = Line[ReferenceComponent]
+
+InstructionPage = Page[InstructionComponent]
+ExamplePage = Page[ExampleComponent]
+HintPage = Page[HintComponent]
+StatementPage = Page[StatementComponent]
+
+StatementPages = Pages[StatementComponent]
+
+# patty_json_to_html.py end
+
+
+class FormattedTextComponents(ApiModel):
+    text: Literal[True]
+    whitespace: Literal[True]
+    arrow: Literal[True]
+    formatted: Literal[True]
+
+    def gather(self) -> Iterable[type]:
+        yield Text
+        yield Whitespace
+        yield Arrow
+        yield Formatted
+
+
 class InstructionComponents(FormattedTextComponents):
     choice: bool
 
@@ -131,26 +168,12 @@ class InstructionComponents(FormattedTextComponents):
             yield Choice
 
 
-# WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
-ExampleComponent = FormattedText
-
-
 class ExampleComponents(FormattedTextComponents):
     pass
 
 
-# WARNING: keep 'HintComponent' and 'HintComponents' consistent
-HintComponent = FormattedText
-
-
 class HintComponents(FormattedTextComponents):
     pass
-
-
-# WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
-StatementComponent = (
-    FormattedText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
-)
 
 
 class StatementComponents(FormattedTextComponents):
@@ -174,26 +197,8 @@ class StatementComponents(FormattedTextComponents):
             yield EditableTextInput
 
 
-# WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent
-ReferenceComponent = FormattedText
-
-
 class ReferenceComponents(FormattedTextComponents):
     pass
-
-
-InstructionLine = Line[InstructionComponent]
-ExampleLine = Line[ExampleComponent]
-HintLine = Line[HintComponent]
-StatementLine = Line[StatementComponent]
-ReferenceLine = Line[ReferenceComponent]
-
-InstructionPage = Page[InstructionComponent]
-ExamplePage = Page[ExampleComponent]
-HintPage = Page[HintComponent]
-StatementPage = Page[StatementComponent]
-
-StatementPages = Pages[StatementComponent]
 
 
 def make_exercise_type(
