@@ -153,7 +153,7 @@ const statementLines = computed<StatementLine[]>(() => {
 
 <template>
   <PageNavigationControls :navigateUsingArrowKeys :pagesCount="totalPagesCount" v-model="pageIndex">
-    <div ref="container" class="container">
+    <div ref="container" class="container" spellcheck="false">
       <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">
           <p v-for="{ contents } in adaptedExercise.instruction.lines">
