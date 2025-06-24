@@ -3,8 +3,10 @@ import { ref, onMounted } from 'vue'
 
 import CreateExtractionBatchForm from './CreateExtractionBatchForm.vue'
 import { type ExtractionStrategy, useAuthenticatedClient } from './apiClient'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const latestExtractionStrategy = ref<ExtractionStrategy | null>(null)
 
@@ -13,6 +15,8 @@ onMounted(async () => {
   if (response.data !== undefined) {
     latestExtractionStrategy.value = response.data
   }
+
+  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'New extraction batch', to: {} }])
 })
 </script>
 

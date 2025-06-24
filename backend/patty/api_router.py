@@ -86,6 +86,7 @@ class ApiInput(ApiModel):
 class ApiAdaptation(ApiModel):
     id: str
     created_by: str | None
+    extraction_batch_id: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
     strategy: ApiStrategy
@@ -1146,6 +1147,11 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         created_by=adaptation.created_by_username,
+        extraction_batch_id=(
+            None
+            if adaptation.exercise.created_by_page_extraction is None
+            else str(adaptation.exercise.created_by_page_extraction.extraction_batch_id)
+        ),
         classification_batch_id=(
             None if adaptation.classification_batch_id is None else str(adaptation.classification_batch_id)
         ),

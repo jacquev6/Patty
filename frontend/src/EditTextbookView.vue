@@ -5,12 +5,14 @@ import { type Textbook, useAuthenticatedClient } from './apiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from './assert'
 import { preprocess as preprocessAdaptation } from './adaptations'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const props = defineProps<{
   id: string
 }>()
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
 const textbook = ref<Textbook | null>(null)
@@ -30,6 +32,7 @@ async function refresh() {
     assert(response.data !== undefined)
     textbook.value = response.data.textbook
     availableStrategySettings.value = response.data.availableStrategySettings
+    breadcrumbsStore.set([{ text: 'Textbooks' }, { text: textbook.value.title, to: {} }])
     refreshIfNeeded()
   }
 }

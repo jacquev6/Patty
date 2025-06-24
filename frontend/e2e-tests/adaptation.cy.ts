@@ -600,7 +600,7 @@ describe('The adaptation edition page', () => {
   it('has a link to its adaptation batch', () => {
     visit('/adaptation-1')
 
-    cy.get('a:contains("this batch")').should('have.attr', 'href', '/adaptation-batch-1')
+    cy.get('a:contains("Adaptation batch 1")').should('have.attr', 'href', '/adaptation-batch-1')
   })
 })
 
@@ -634,16 +634,18 @@ const validExercise = {
 
 function fixJsonManually() {
   cy.get('@manual-edition')
-    .type('{selectAll}')
-    .type(validExercise.unformattedJson, { delay: 0, parseSpecialCharSequences: false })
+    .type('{selectAll}', { force: true })
+    .type(validExercise.unformattedJson, { delay: 0, parseSpecialCharSequences: false, force: true })
 }
 
 function invalidateJsonManually() {
-  cy.get('@manual-edition').type('{selectAll}').type('{}', { delay: 0, parseSpecialCharSequences: false })
+  cy.get('@manual-edition')
+    .type('{selectAll}', { force: true })
+    .type('{}', { delay: 0, parseSpecialCharSequences: false, force: true })
 }
 
 function breakJsonManually() {
-  cy.get('@manual-edition').type('{selectAll}Not JSON.', { delay: 0 })
+  cy.get('@manual-edition').type('{selectAll}Not JSON.', { delay: 0, force: true })
 }
 
 function shouldBeSuccess() {

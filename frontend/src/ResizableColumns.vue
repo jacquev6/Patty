@@ -58,7 +58,7 @@ function makeInitialGridTemplateColumns() {
 <style scoped>
 .columns {
   display: grid;
-  height: 100vh;
+  height: 100%;
   overflow-y: hidden;
 }
 
@@ -72,6 +72,6 @@ function makeInitialGridTemplateColumns() {
 .column {
   padding-left: 5px;
   padding-right: 5px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 </style>

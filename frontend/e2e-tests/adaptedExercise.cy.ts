@@ -1,4 +1,4 @@
-import { visit } from './utils'
+import { ignoreResizeObserverLoopError, visit } from './utils'
 
 let token = ''
 
@@ -18,6 +18,7 @@ describe('The autonomous HTML for a single adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    ignoreResizeObserverLoopError()
   })
 
   it('is downloadable', () => {
@@ -51,7 +52,7 @@ describe('The autonomous HTML for a single adaptation', () => {
 
     visit('/adaptation-1')
     cy.get('[data-cy="manual-edition"]')
-      .type('{selectall}{backspace}', { delay: 0 })
+      .type('{selectall}{backspace}', { delay: 0, force: true })
       .type(
         `{
           "format": "v1",

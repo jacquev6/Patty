@@ -16,6 +16,7 @@ import FrontendRootView from './FrontendRootView.vue'
 import AdaptedExerciseExamplesView from './AdaptedExerciseExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
 import EditClassificationBatchView from './EditClassificationBatchView.vue'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
@@ -85,5 +86,12 @@ const app = createApp(FrontendRootView)
 
 app.use(router)
 app.use(createPinia())
+
+const breadcrumbsStore = useBreadcrumbsStore()
+
+router.beforeEach(() => {
+  breadcrumbsStore.set([])
+  return true
+})
 
 app.mount('#app')

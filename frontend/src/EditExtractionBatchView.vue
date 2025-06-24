@@ -5,12 +5,14 @@ import EditExtractionBatchForm from './EditExtractionBatchForm.vue'
 import { type ExtractionBatch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import { preprocess as preprocessAdaptation } from './adaptations'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const props = defineProps<{
   id: string
 }>()
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
 const extractionBatch = ref<ExtractionBatch | null>(null)
@@ -58,6 +60,8 @@ async function refresh() {
       refreshTimeoutId = null
       refreshes = 0
     }
+
+    breadcrumbsStore.set([{ text: 'Sandbox' }, { text: `Extraction batch ${extractionBatch.value.id}`, to: {} }])
   }
 }
 

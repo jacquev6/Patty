@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import ExamplesViewExercise, { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
+
+const breadcrumbsStore = useBreadcrumbsStore()
+
+onMounted(() => {
+  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'Examples', to: {} }])
+})
 
 const yellow = '#ffff00'
 const orange = '#ffcf4c'

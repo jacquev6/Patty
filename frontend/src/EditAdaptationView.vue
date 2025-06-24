@@ -5,12 +5,14 @@ import { useAuthenticatedClient, type Adaptation } from './apiClient'
 import assert from './assert'
 import EditAdaptationForm from './EditAdaptationForm.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
+import { useBreadcrumbsStore, type Breadcrumbs } from './BreadcrumbsStore'
 
 const props = defineProps<{
   id: string
 }>()
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
 const apiAdaptation = ref<Adaptation | null>(null)
@@ -33,6 +35,28 @@ onMounted(async () => {
     found.value = true
     assert(response.data !== undefined)
     apiAdaptation.value = response.data
+
+    const breadcrumbs: Breadcrumbs = [{ text: 'Sandbox' }]
+    if (apiAdaptation.value.extractionBatchId !== null) {
+      breadcrumbs.push({
+        text: `Extraction batch ${apiAdaptation.value.extractionBatchId}`,
+        to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
+      })
+    } else if (apiAdaptation.value.classificationBatchId !== null) {
+      breadcrumbs.push({
+        text: `Classification batch ${apiAdaptation.value.classificationBatchId}`,
+        to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
+      })
+    } else if (apiAdaptation.value.adaptationBatchId !== null) {
+      breadcrumbs.push({
+        text: `Adaptation batch ${apiAdaptation.value.adaptationBatchId}`,
+        to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
+      })
+    }
+
+    breadcrumbs.push({ text: `Adaptation ${apiAdaptation.value.id}`, to: {} })
+
+    breadcrumbsStore.set(breadcrumbs)
   }
 })
 </script>

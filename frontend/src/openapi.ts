@@ -489,6 +489,8 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string | null
+      /** Extractionbatchid */
+      extractionBatchId: string | null
       /** Classificationbatchid */
       classificationBatchId: string | null
       /** Adaptationbatchid */

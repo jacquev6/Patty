@@ -212,20 +212,8 @@ watch(Escape, () => {
 <template>
   <ResizableColumns :columns="[1, 1, 1]">
     <template #col-1>
-      <p>
-        Created by: {{ adaptation.createdBy
-        }}<template v-if="adaptation.classificationBatchId !== null"
-          >, part of
-          <RouterLink :to="{ name: 'classification-batch', params: { id: adaptation.classificationBatchId } }"
-            >this batch</RouterLink
-          ></template
-        ><template v-if="adaptation.adaptationBatchId !== null"
-          >, part of
-          <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptation.adaptationBatchId } }"
-            >this batch</RouterLink
-          ></template
-        >.
-      </p>
+      <p v-if="adaptation.createdBy === null">Created automatically</p>
+      <p v-else>Created by: {{ adaptation.createdBy }}</p>
       <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>

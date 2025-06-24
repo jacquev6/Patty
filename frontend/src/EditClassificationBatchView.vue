@@ -5,12 +5,14 @@ import { type ClassificationBatch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
 import EditClassificationBatchForm from './EditClassificationBatchForm.vue'
 import { preprocess as preprocessAdaptation } from './adaptations'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const props = defineProps<{
   id: string
 }>()
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
 const classificationBatch = ref<ClassificationBatch | null>(null)
@@ -47,6 +49,11 @@ async function refresh() {
       refreshTimeoutId = null
       refreshes = 0
     }
+
+    breadcrumbsStore.set([
+      { text: 'Sandbox' },
+      { text: `Classification batch ${classificationBatch.value.id}`, to: {} },
+    ])
   }
 }
 

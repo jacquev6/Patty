@@ -1487,6 +1487,17 @@
             ],
             "title": "Createdby"
           },
+          "extractionBatchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extractionbatchid"
+          },
           "classificationBatchId": {
             "anyOf": [
               {
@@ -1567,6 +1578,7 @@
         "required": [
           "id",
           "createdBy",
+          "extractionBatchId",
           "classificationBatchId",
           "adaptationBatchId",
           "strategy",
