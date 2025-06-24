@@ -399,7 +399,7 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250619-041608.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250625-041603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -480,14 +480,16 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 
 
 @main.command()
-def migrate_data() -> None:
+@click.option("--dry-run", is_flag=True)
+def migrate_data(dry_run: bool) -> None:
     from . import database_utils
     from . import data_migration
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         data_migration.migrate(session)
-        session.commit()
+        if not dry_run:
+            session.commit()
 
 
 if __name__ == "__main__":
