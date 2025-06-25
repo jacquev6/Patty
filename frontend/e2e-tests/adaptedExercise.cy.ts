@@ -1,4 +1,4 @@
-import { ignoreResizeObserverLoopError, visit } from './utils'
+import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
 
 let token = ''
 
@@ -179,6 +179,14 @@ describe('The autonomous HTML for a single adaptation', () => {
 
     visitExport('/api/export/adaptation/1.html')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', '....')
+  })
+
+  it('has a vertical scrollbar when required', () => {
+    cy.viewport(1600, 1000)
+    visitExport('/api/export/adaptation/1.html')
+    screenshot('adapted-exercise-without-scrollbar')
+    cy.viewport(1600, 400)
+    screenshot('adapted-exercise-with-scrollbar')
   })
 })
 

@@ -204,7 +204,8 @@ div {
 
 .container {
   /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   transform: scale(1);
   height: 100%;
 }
