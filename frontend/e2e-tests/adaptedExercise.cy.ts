@@ -1,4 +1,4 @@
-import { visit } from './utils'
+import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
 
 let token = ''
 
@@ -18,6 +18,7 @@ describe('The autonomous HTML for a single adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    ignoreResizeObserverLoopError()
   })
 
   it('is downloadable', () => {
@@ -25,9 +26,9 @@ describe('The autonomous HTML for a single adaptation', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/P42Ex5.html`).should('not.exist')
 
     visit('/adaptation-1')
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/P42Ex5.html`)
   })
 
@@ -51,7 +52,7 @@ describe('The autonomous HTML for a single adaptation', () => {
 
     visit('/adaptation-1')
     cy.get('[data-cy="manual-edition"]')
-      .type('{selectall}{backspace}', { delay: 0 })
+      .type('{selectall}{backspace}', { delay: 0, force: true })
       .type(
         `{
           "format": "v1",
@@ -179,6 +180,14 @@ describe('The autonomous HTML for a single adaptation', () => {
     visitExport('/api/export/adaptation/1.html')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', '....')
   })
+
+  it('has a vertical scrollbar when required', () => {
+    cy.viewport(1600, 1000)
+    visitExport('/api/export/adaptation/1.html')
+    screenshot('adapted-exercise-without-scrollbar')
+    cy.viewport(1600, 400)
+    screenshot('adapted-exercise-with-scrollbar')
+  })
 })
 
 describe('The autonomous HTML for an adaptation batch', () => {
@@ -194,9 +203,9 @@ describe('The autonomous HTML for an adaptation batch', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`).should('not.exist')
 
     visit('/adaptation-batch-1')
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`)
   })
 
@@ -232,9 +241,9 @@ describe('The autonomous HTML for a textbook', () => {
     visit('/textbook-1')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
     cy.get('[data-cy="identified-user-ok"]').click()
-    cy.get('a:contains("Download standalone HTML")').click()
+    cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
-    cy.get('a:contains("Download standalone HTML")').should('exist')
+    cy.get('a:contains("standalone HTML")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title.html`)
   })
 

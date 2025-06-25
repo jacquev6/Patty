@@ -63,6 +63,8 @@ COPY --from=frontend-builder /app/dist /usr/share/nginx/templates/frontend
 FROM backend-dependencies AS final-backend
 
 ADD backend .
+ARG PATTY_VERSION
+RUN echo "PATTY_VERSION = \"${PATTY_VERSION}\"" >patty/version.py
 
 COPY --from=adaptation-export-template-builder /app/dist/index.html /app/patty/export/templates/adaptation/index.html
 COPY --from=batch-export-template-builder /app/dist/index.html /app/patty/export/templates/batch/index.html

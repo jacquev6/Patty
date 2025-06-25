@@ -34,9 +34,14 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
         >
       </p>
       <p>
-        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
-          Download standalone HTML
-        </a>
+        Download
+        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`"
+          >standalone HTML</a
+        >
+        or
+        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.json?token=${authenticationTokenStore.token}`"
+          >JSON data</a
+        >
       </p>
       <h1>Inputs</h1>
       <AdaptationPreview v-for="(adaptation, index) in adaptations" header="h2" :index :adaptation />

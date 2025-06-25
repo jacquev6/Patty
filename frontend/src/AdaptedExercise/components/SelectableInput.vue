@@ -55,4 +55,8 @@ const style = computed(() => {
   cursor: pointer;
   user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
 }
+
+.main:hover {
+  outline: 1px dashed green;
+}
 </style>

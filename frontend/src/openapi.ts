@@ -4,21 +4,21 @@
  */
 
 export interface paths {
-  '/api/health': {
+  '/api/errors-caught-by-frontend': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    /** Get Health */
-    get: operations['get_health_api_health_get']
+    /** Get Errors Caught By Frontend */
+    get: operations['get_errors_caught_by_frontend_api_errors_caught_by_frontend_get']
     put?: never
-    post?: never
+    /** Post Errors Caught By Frontend */
+    post: operations['post_errors_caught_by_frontend_api_errors_caught_by_frontend_post']
     delete?: never
     options?: never
-    /** Get Health */
-    head: operations['get_health_api_health_head']
+    head?: never
     patch?: never
     trace?: never
   }
@@ -469,91 +469,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/export/extraction-batch/{id}.html': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Export Extraction Batch */
-    get: operations['export_extraction_batch_api_export_extraction_batch__id__html_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/export/adaptation-batch/{id}.html': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Export Adaptation Batch */
-    get: operations['export_adaptation_batch_api_export_adaptation_batch__id__html_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/export/classification-batch/{id}.html': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Export Classification Batch */
-    get: operations['export_classification_batch_api_export_classification_batch__id__html_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/export/adaptation/{id}.html': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Export Adaptation */
-    get: operations['export_adaptation_api_export_adaptation__id__html_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/api/export/textbook/{id}.html': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    /** Export Textbook */
-    get: operations['export_textbook_api_export_textbook__id__html_get']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/api/token': {
     parameters: {
       query?: never
@@ -592,6 +507,8 @@ export interface components {
       id: string
       /** Createdby */
       createdBy: string | null
+      /** Extractionbatchid */
+      extractionBatchId: string | null
       /** Classificationbatchid */
       classificationBatchId: string | null
       /** Adaptationbatchid */
@@ -840,8 +757,36 @@ export interface components {
        * @constant
        */
       kind: 'editableTextInput'
+      /** Showoriginaltext */
+      showOriginalText: boolean
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+    }
+    /** Error */
+    Error: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string | null
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Pattyversion */
+      pattyVersion: string
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
+      /** Url */
+      url: string
+      /** Caughtby */
+      caughtBy: string
+      /** Message */
+      message: string
+      /** Codelocation */
+      codeLocation: string | null
     }
     /** ExampleComponents */
     ExampleComponents: {
@@ -1071,6 +1016,11 @@ export interface components {
       classificationBatches: components['schemas']['ClassificationBatch'][]
       /** Nextchunkid */
       nextChunkId: string | null
+    }
+    /** GetErrorsCaughtByFrontendResponse */
+    GetErrorsCaughtByFrontendResponse: {
+      /** Errors */
+      errors: components['schemas']['Error'][]
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -1401,6 +1351,25 @@ export interface components {
       /** Id */
       id: string
     }
+    /** PostErrorsCaughtByFrontendRequest */
+    PostErrorsCaughtByFrontendRequest: {
+      /** Creator */
+      creator: string | null
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
+      /** Url */
+      url: string
+      /** Caughtby */
+      caughtBy: string
+      /** Message */
+      message: string
+      /** Codelocation */
+      codeLocation: string | null
+    }
+    /** PostErrorsCaughtByFrontendResponse */
+    PostErrorsCaughtByFrontendResponse: Record<string, never>
     /** PostExtractionBatchRequest */
     PostExtractionBatchRequest: {
       /** Creator */
@@ -1797,7 +1766,7 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  get_health_api_health_get: {
+  get_errors_caught_by_frontend_api_errors_caught_by_frontend_get: {
     parameters: {
       query?: never
       header?: never
@@ -1812,21 +1781,23 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            [key: string]: string
-          }
+          'application/json': components['schemas']['GetErrorsCaughtByFrontendResponse']
         }
       }
     }
   }
-  get_health_api_health_head: {
+  post_errors_caught_by_frontend_api_errors_caught_by_frontend_post: {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    requestBody?: never
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostErrorsCaughtByFrontendRequest']
+      }
+    }
     responses: {
       /** @description Successful Response */
       200: {
@@ -1834,9 +1805,16 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            [key: string]: string
-          }
+          'application/json': components['schemas']['PostErrorsCaughtByFrontendResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }
@@ -2769,176 +2747,6 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiAdaptation']
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  export_extraction_batch_api_export_extraction_batch__id__html_get: {
-    parameters: {
-      query: {
-        download?: boolean
-        token: string
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'text/html': string
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  export_adaptation_batch_api_export_adaptation_batch__id__html_get: {
-    parameters: {
-      query: {
-        download?: boolean
-        token: string
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'text/html': string
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  export_classification_batch_api_export_classification_batch__id__html_get: {
-    parameters: {
-      query: {
-        download?: boolean
-        token: string
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'text/html': string
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  export_adaptation_api_export_adaptation__id__html_get: {
-    parameters: {
-      query: {
-        download?: boolean
-        token: string
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'text/html': string
-        }
-      }
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': components['schemas']['HTTPValidationError']
-        }
-      }
-    }
-  }
-  export_textbook_api_export_textbook__id__html_get: {
-    parameters: {
-      query: {
-        download?: boolean
-        token: string
-      }
-      header?: never
-      path: {
-        id: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'text/html': string
         }
       }
       /** @description Validation Error */

@@ -17,6 +17,7 @@ import WhiteSpace from './WhiteSpace.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
 import { type PreprocessedAdaptation } from './adaptations'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import { match } from 'ts-pattern'
 
 const props = defineProps<{
   adaptation: PreprocessedAdaptation
@@ -72,18 +73,14 @@ const manualAdaptedExerciseProxy = computed({
   get() {
     if (manualAdaptedExercise.value !== null) {
       return manualAdaptedExercise.value.raw
-    } else if (props.adaptation.llmStatus.kind === 'inProgress') {
-      return ''
-    } else if (props.adaptation.llmStatus.kind === 'success') {
-      return jsonStringify(props.adaptation.llmStatus.adaptedExercise)
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'not-json') {
-      return props.adaptation.llmStatus.text
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'invalid-json') {
-      return jsonStringify(props.adaptation.llmStatus.parsed)
-    } else if (props.adaptation.llmStatus.kind === 'error' && props.adaptation.llmStatus.error === 'unknown') {
-      return ''
     } else {
-      return ((status: never) => status)(props.adaptation.llmStatus)
+      return match(props.adaptation.llmStatus)
+        .with({ kind: 'inProgress' }, () => '')
+        .with({ kind: 'success' }, (status) => jsonStringify(status.adaptedExercise))
+        .with({ kind: 'error', error: 'not-json' }, (status) => status.text)
+        .with({ kind: 'error', error: 'invalid-json' }, (status) => jsonStringify(status.parsed))
+        .with({ kind: 'error', error: 'unknown' }, () => '')
+        .exhaustive()
     }
   },
   set(raw: string) {
@@ -215,20 +212,8 @@ watch(Escape, () => {
 <template>
   <ResizableColumns :columns="[1, 1, 1]">
     <template #col-1>
-      <p>
-        Created by: {{ adaptation.createdBy
-        }}<template v-if="adaptation.classificationBatchId !== null"
-          >, part of
-          <RouterLink :to="{ name: 'classification-batch', params: { id: adaptation.classificationBatchId } }"
-            >this batch</RouterLink
-          ></template
-        ><template v-if="adaptation.adaptationBatchId !== null"
-          >, part of
-          <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptation.adaptationBatchId } }"
-            >this batch</RouterLink
-          ></template
-        >.
-      </p>
+      <p v-if="adaptation.createdBy === null">Created automatically</p>
+      <p v-else>Created by: {{ adaptation.createdBy }}</p>
       <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>

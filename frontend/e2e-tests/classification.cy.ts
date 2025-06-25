@@ -123,7 +123,7 @@ describe('The classification batch creation page', () => {
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
 
     cy.visit('/adaptation-2')
-    cy.get('a:contains("this batch")').should('have.attr', 'href', '/classification-batch-1')
+    cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1')
 
     cy.visit('/new-adaptation-batch')
     cy.get('[data-cy="settings-name"]').type('VraiFaux', { delay: 0 })
@@ -135,7 +135,6 @@ describe('The classification batch creation page', () => {
     cy.get(
       'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
     ).should('exist')
-    // @todo Submit the adaptation using the new settings.
   })
 })
 

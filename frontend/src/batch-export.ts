@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import 'modern-normalize/modern-normalize.css'
-import { createRouter, createWebHashHistory, RouterView } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
+import BatchExportRootView from './BatchExportRootView.vue'
 import BatchExportIndexView from './BatchExportIndexView.vue'
 import BatchExportExerciseView from './BatchExportExerciseView.vue'
 
@@ -22,7 +23,7 @@ const router = createRouter({
   ],
 })
 
-const app = createApp(RouterView)
+const app = createApp(BatchExportRootView)
 
 app.use(router)
 

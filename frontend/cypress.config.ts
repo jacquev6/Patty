@@ -57,7 +57,7 @@ export default defineConfig({
 
   e2e: {
     baseUrl: 'http://fanout:8080/',
-    specPattern: 'e2e-tests/**/*.cy.ts',  // @todo Move to ../e2e-tests
+    specPattern: 'e2e-tests/**/*.cy.ts',
     setupNodeEvents,
   },
 })

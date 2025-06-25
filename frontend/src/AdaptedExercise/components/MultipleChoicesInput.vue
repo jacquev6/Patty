@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, inject, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, reactive, ref, useTemplateRef, watch, type Ref } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
 import type { FormattedText } from '@/apiClient'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceComponent from './WhitespaceComponent.vue'
+import assert from '@/assert'
+import { colors } from '../TriColorLines.vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -33,8 +35,8 @@ const currentChoice = computed(() => {
   }
 })
 
-const floatingReference = useTemplateRef<HTMLElement>('floatingReference')
-const floatingElement = useTemplateRef<HTMLDivElement>('floatingElement')
+const floatingReference = useTemplateRef('floatingReference')
+const floatingElement = useTemplateRef('floatingElement')
 const { floatingStyles } = useFloating(floatingReference, floatingElement, {
   placement: 'bottom',
   middleware: [flip(), shift({ crossAxis: true })],
@@ -72,6 +74,44 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
   'adaptedExerciseTeleportBackdropTo',
   'body',
 )
+
+const sortedColors = reactive([colors[0], colors[1], colors[2]])
+
+const floatingElementStyle = computed(() => ({
+  ...floatingStyles.value,
+  '--color-0': sortedColors[0],
+  '--color-1': sortedColors[1],
+  '--color-2': sortedColors[2],
+}))
+
+const tricolorablesRevisionIndex = inject<Ref<number>>('tricolorablesRevisionIndex')
+assert(tricolorablesRevisionIndex !== undefined)
+
+function recolor() {
+  if (floatingReference.value !== null) {
+    const innerTricolorables = floatingReference.value.getElementsByClassName(
+      'tricolorable',
+    ) as HTMLCollectionOf<HTMLElement>
+    if (innerTricolorables.length === 0) {
+      sortedColors[0] = colors[0]
+      sortedColors[1] = colors[1]
+      sortedColors[2] = colors[2]
+    } else {
+      const index = colors.indexOf(innerTricolorables[0].style.color)
+      if (index === -1) {
+        sortedColors[0] = colors[0]
+        sortedColors[1] = colors[1]
+        sortedColors[2] = colors[2]
+      } else {
+        sortedColors[0] = colors[(index + 1) % colors.length]
+        sortedColors[1] = colors[(index + 2) % colors.length]
+        sortedColors[2] = colors[index]
+      }
+    }
+  }
+}
+
+watch(tricolorablesRevisionIndex, recolor, { immediate: true })
 </script>
 
 <template>
@@ -93,14 +133,14 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
   </div>
   <Teleport v-if="showChoices && teleportBackdropTo !== null" :to="teleportBackdropTo">
     <div data-cy="backdrop" v-if="showBackdrop" class="backdrop" @click="showChoices = false"></div>
-    <div ref="floatingElement" :style="floatingStyles" class="choices">
+    <div ref="floatingElement" :style="floatingElementStyle" class="choices">
       <p v-for="choicesLine in choicesLines">
         <template v-for="(choice, choiceIndex) in choicesLine">
           <WhitespaceComponent v-if="choiceIndex !== 0" kind="whitespace" />
           <span
             :data-cy="`choice${choice.index}`"
             @click="set(choice.index)"
-            :class="`color-${choice.colorIndex}`"
+            :style="`color: var(--color-${choice.colorIndex})`"
             class="choice"
           >
             <PassiveSequenceComponent :contents="choice.content.contents" :tricolorable="false" />
@@ -165,18 +205,5 @@ const teleportBackdropTo = inject<string /* or anything that can be passed to 'T
   cursor: pointer;
   border: 1px solid black;
   padding: 1px 4px;
-}
-
-/* Colors provided by client */
-.color-0 {
-  color: #00f;
-}
-
-.color-1 {
-  color: #f00;
-}
-
-.color-2 {
-  color: #0c0;
 }
 </style>

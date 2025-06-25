@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import type { AdaptedExercise } from './apiClient'
+import type { Data } from './BatchExportRootView.vue'
 
-type Data = {
-  exerciseId: string
-  studentAnswersStorageKey: string
-  adaptedExercise: AdaptedExercise
-}[]
-
-const data = JSON.parse('##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##') as Data // @todo Factorize with BatchExportExerciseView.vue
+defineProps<{
+  data: Data
+}>()
 </script>
 
 <template>

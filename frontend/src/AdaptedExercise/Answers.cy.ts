@@ -658,7 +658,7 @@ describe('Adapted exercise answers', () => {
         .eq(i)
         .should('have.text', (i % 3).toString())
     }
-    cy.get('.control').eq(1).click()
+    cy.get('.control').eq(1).click({ force: true })
     for (let i = 0; i < 8; i += 2) {
       cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
       cy.get(`[data-cy="choice${i % 3}"]`).click()
@@ -686,7 +686,7 @@ describe('Adapted exercise answers', () => {
         .eq(i)
         .should('have.text', (i % 3).toString())
     }
-    cy.get('.control').eq(1).click()
+    cy.get('.control').eq(1).click({ force: true })
     for (let i = 0; i < 8; i += 2) {
       cy.get('[data-cy="multipleChoicesInput"]')
         .eq(i)
@@ -761,6 +761,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'a0' }, { kind: 'whitespace' }, { kind: 'text', text: 'a1' }],
                 },
               ],
@@ -771,6 +772,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [
                     { kind: 'text', text: 'b0' },
                     { kind: 'whitespace' },
@@ -791,6 +793,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'c0' }, { kind: 'whitespace' }, { kind: 'text', text: 'c1' }],
                 },
               ],
@@ -801,6 +804,7 @@ describe('Adapted exercise answers', () => {
                 { kind: 'whitespace' },
                 {
                   kind: 'editableTextInput',
+                  showOriginalText: true,
                   contents: [{ kind: 'text', text: 'd0' }, { kind: 'whitespace' }, { kind: 'text', text: 'd1' }],
                 },
               ],

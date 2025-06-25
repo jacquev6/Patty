@@ -4,12 +4,14 @@ import { ref, watch } from 'vue'
 import CreateAdaptationBatchForm from './CreateAdaptationBatchForm.vue'
 import { type BaseAdaptationBatch, useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const props = defineProps<{
   base: string | null
 }>()
 
 const client = useAuthenticatedClient()
+const breadcrumbsStore = useBreadcrumbsStore()
 
 const identifiedUser = useIdentifiedUserStore()
 
@@ -22,6 +24,8 @@ async function refresh() {
   if (response.data !== undefined) {
     baseAdaptationBatch.value = response.data
   }
+
+  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'New adaptation batch', to: {} }])
 }
 
 watch(() => identifiedUser.identifier, refresh, { immediate: true })

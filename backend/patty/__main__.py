@@ -1,3 +1,4 @@
+import textwrap
 import time
 import traceback
 from typing import Iterable
@@ -7,7 +8,6 @@ import io
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tarfile
@@ -37,9 +37,14 @@ def hash_password(password: str) -> None:
 
 @main.command()
 def openapi() -> None:
+    import fastapi
+
     from . import asgi
 
-    print(json.dumps(asgi.app.openapi(), indent=2))
+    app = fastapi.FastAPI()
+    app.include_router(asgi.openapi_router)
+
+    print(json.dumps(app.openapi(), indent=2))
 
 
 @main.command()
@@ -134,6 +139,131 @@ def default_extraction_prompt() -> None:
     from . import fixtures
 
     print(fixtures.make_default_extraction_prompt())
+
+
+@main.command()
+def json_to_html_script() -> None:
+    # This is pretty hacky, but it avoids the complexity of versioning and packaging Patty,
+    # and allows @eliselinc to download a single file and add it to her source tree.
+
+    from . import adapted
+
+    example_exercise = adapted.Exercise(
+        format="v1",
+        instruction=adapted.InstructionPage(
+            lines=[
+                adapted.InstructionLine(
+                    contents=[
+                        adapted.Text(kind="text", text="Example"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="exercise"),
+                        adapted.Whitespace(kind="whitespace"),
+                        adapted.Text(kind="text", text="instruction"),
+                        adapted.Text(kind="text", text="."),
+                    ]
+                )
+            ]
+        ),
+        example=None,
+        hint=None,
+        statement=adapted.StatementPages(
+            pages=[
+                adapted.StatementPage(
+                    lines=[
+                        adapted.StatementLine(
+                            contents=[
+                                adapted.Text(kind="text", text="Example"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="exercise"),
+                                adapted.Whitespace(kind="whitespace"),
+                                adapted.Text(kind="text", text="statement"),
+                                adapted.Text(kind="text", text="."),
+                            ]
+                        )
+                    ]
+                )
+            ]
+        ),
+        reference=None,
+    )
+    usage = subprocess.run(
+        ["black", "--line-length", "116", "--skip-magic-trailing-comma", "-"],
+        input=textwrap.dedent(
+            f"""\
+        from patty_json_to_html import json_to_html
+
+        exercise = {example_exercise.model_dump()!r}
+
+        print(json_to_html(exercise))
+        """
+        ),
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+    def gen() -> typing.Iterable[str]:
+        yield "# This file is *generated* by Patty. Do not edit it directly."
+        yield ""
+        yield '"""'
+        yield "Example usage (note that `json_to_html` also accepts an instance of `Exercise`):"
+        yield ""
+        for line in usage.splitlines():
+            line = line.rstrip()
+            if line == "":
+                yield ""
+            elif any(line.startswith(prefix) for prefix in ("from", "exercise", "print")):
+                yield f">>> {line}"
+            else:
+                yield f"... {line}"
+        yield "<!DOCTYPE html>"
+        yield '<html lang="">'
+        yield "  ..."
+        yield "</html>"
+        yield '"""'
+        yield ""
+        yield ""
+        yield "from __future__ import annotations"
+        yield "from typing import Any, Literal"
+        yield "import hashlib"
+        yield "import json"
+        yield ""
+        yield "import pydantic"
+        yield ""
+        with open("patty/adapted.py") as f:
+            for line in f:
+                if line.rstrip() == "# patty_json_to_html.py begin":
+                    break
+            for line in f:
+                if line.rstrip() == "# patty_json_to_html.py end":
+                    break
+                if line.strip().startswith("# WARNING:"):
+                    continue
+                yield line.rstrip()
+        yield "def json_to_html(exercise: Exercise | dict[str, Any]) -> str:"
+        yield "    if not isinstance(exercise, Exercise):"
+        yield "        exercise = Exercise.model_validate(exercise)"
+        yield ""
+        with open("patty/export/templates/adaptation/index.html") as f:
+            yield f"    template = {f.read().strip()!r}"
+        yield ""
+        yield "    exercise_dump = exercise.model_dump()"
+        yield "    data = {"
+        yield '        "studentAnswersStorageKey": hashlib.md5(json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()).hexdigest(),'
+        yield '        "adaptedExercise": exercise_dump,'
+        yield "    }"
+        yield ""
+        yield "    return template.replace("
+        yield '        "##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##",'
+        yield "        json.dumps(data).replace('\\\\', '\\\\\\\\').replace('\\\"', '\\\\\"'),"
+        yield "    )"
+
+    subprocess.run(
+        ["black", "--line-length", "120", "--skip-magic-trailing-comma", "-"],
+        input="\n".join(gen()),
+        text=True,
+        check=True,
+    )
 
 
 @main.command()
@@ -269,7 +399,7 @@ def backup_database() -> None:
 
 
 @main.command()
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250618-121603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250625-041603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -350,73 +480,16 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
 
 
 @main.command()
-def migrate_data() -> None:
+@click.option("--dry-run", is_flag=True)
+def migrate_data(dry_run: bool) -> None:
     from . import database_utils
     from . import data_migration
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         data_migration.migrate(session)
-        session.commit()
-
-
-@main.command()
-def dump_database() -> None:
-    from . import database_utils
-    from . import orm_models  # noqa: F401 to populate the metadata
-
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-    with database_utils.make_session(database_engine) as session:
-        data = database_utils.dump(session)
-    json.dump(data, sys.stdout, indent=2)
-    sys.stdout.write("\n")
-
-
-@main.command()
-def load_database() -> None:
-    from . import database_utils
-    from . import orm_models  # noqa: F401 to populate the metadata
-
-    data = json.load(sys.stdin)
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-    with database_utils.make_session(database_engine) as session:
-        database_utils.load(session, data, {"old_adaptation_strategy_settings_branches": ["head_id"]})
-        session.commit()
-
-
-@main.command()
-@click.argument("directory", type=click.Path(file_okay=False))
-def export_all(directory: str) -> None:
-    import fastapi
-
-    from . import database_utils
-    from .orm_models import Adaptation, AdaptationBatch, Textbook
-    from .api_router import make_adapted_exercise_data, export_adaptation, export_adaptation_batch, export_textbook
-
-    shutil.rmtree(directory, ignore_errors=True)
-    os.makedirs(directory)
-    with open(os.path.join(directory, ".gitignore"), "w") as gitignore:
-        gitignore.write("*\n")
-
-    def save(kind: str, id: int, res: fastapi.responses.HTMLResponse) -> None:
-        filepath = os.path.join(directory, f"{kind}-{id}.html")
-        print(f"Exporting {kind} {id} to {filepath}")
-        with open(filepath, "wb") as file:
-            file.write(res.body)
-
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-    with database_utils.make_session(database_engine) as session:
-        for adaptation in session.query(Adaptation).all():
-            if make_adapted_exercise_data(adaptation) is None:
-                print(f"Skipping adaptation {adaptation.id} because it has no adapted exercise data")
-            else:
-                save("adaptation", adaptation.id, export_adaptation(str(adaptation.id), session))
-
-        for adaptation_batch in session.query(AdaptationBatch).all():
-            save("adaptation-batch", adaptation_batch.id, export_adaptation_batch(str(adaptation_batch.id), session))
-
-        for textbook in session.query(Textbook).all():
-            save("textbook", textbook.id, export_textbook(str(textbook.id), session))
+        if not dry_run:
+            session.commit()
 
 
 if __name__ == "__main__":

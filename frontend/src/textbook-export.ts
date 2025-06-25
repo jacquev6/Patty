@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import 'modern-normalize/modern-normalize.css'
-import { createRouter, createWebHashHistory, RouterView } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
+import TextbookExportRootView from './TextbookExportRootView.vue'
 import TextbookExportIndexView from './TextbookExportIndexView.vue'
 import TextbookExportExerciseView from './TextbookExportExerciseView.vue'
 
@@ -22,7 +23,7 @@ const router = createRouter({
   ],
 })
 
-const app = createApp(RouterView)
+const app = createApp(TextbookExportRootView)
 
 app.use(router)
 

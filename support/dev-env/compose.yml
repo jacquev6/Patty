@@ -33,6 +33,7 @@ services:
       "backend/generated/default-extraction-prompt.md",
       "backend/generated/extracted-exercise-schema.json",
       "backend/generated/openapi.json",
+      "backend/generated/patty_json_to_html.py",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
@@ -306,6 +307,33 @@ services:
         condition: service_completed_successfully
       pip-installer:
         condition: service_completed_successfully
+  json-to-html-script-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-or-templates-change.sh", "patty_json_to_html.py", "python -m patty json-to-html-script"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+      adaptation-export-template-generator:
+        condition: service_healthy
+      batch-export-template-generator:
+        condition: service_healthy
+      textbook-export-template-generator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/patty_json_to_html.py"]
+      interval: 0.5s
+      retries: 12
   fixtures-loader:
     image: patty-dev_backend
     pull_policy: never

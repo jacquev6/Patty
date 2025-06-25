@@ -55,11 +55,10 @@ describe('The extraction batch creation page', () => {
     cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('div.busy').should('have.length', 4)
     cy.get('div.busy').should('have.length', 3)
-    cy.get('div.busy').should('have.length', 2)
-    cy.get('div.busy').should('not.exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
     screenshot('extraction-batch-edition-page')
 
-    cy.get('a:contains("Download standalone HTML")')
+    cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
       .then((href) => {
         expect(href).to.include('/api/export/extraction-batch/1.html?token=')

@@ -65,68 +65,6 @@ def truncate_all_tables(session: Session) -> None:
             pass
 
 
-# @todo Decide the fate of 'dump' and 'load' functions.
-# They may be misguided as they do not handle files for 'pdf-files' and 'external-exercises' tables.
-# (See how these files are deleted in 'load_fixtures')
-
-
-def dump(session: Session) -> dict[str, list[dict[str, Any]]]:
-    data: dict[str, list[dict[str, Any]]] = {}
-
-    for table in OrmBase.metadata.sorted_tables:
-        data[table.name] = []
-        for row in session.execute(table.select()):
-            data[table.name].append({})
-            for column in table.columns:
-                value = getattr(row, column.name)
-                if isinstance(column.type, sql.DateTime) and value is not None:
-                    assert isinstance(value, datetime.datetime)
-                    value = value.isoformat()
-                data[table.name][-1][column.name] = value
-
-    return data
-
-
-def load(session: Session, data: dict[str, list[dict[str, Any]]], deferred: dict[str, list[str]]) -> None:
-    truncate_all_tables(session)
-
-    for table in OrmBase.metadata.sorted_tables:
-        rows = data.get(table.name, [])
-
-        for row in rows:
-            row_data = {}
-            for column in table.columns:
-                value = row.get(column.name, None)
-                if isinstance(column.type, sql.DateTime) and value is not None:
-                    assert isinstance(value, str)
-                    value = datetime.datetime.fromisoformat(value)
-                row_data[column.name] = value
-
-            for column_name in deferred.get(table.name, []):
-                row_data.pop(column_name, None)
-
-            session.execute(table.insert().values(row_data))
-
-        if len(rows) != 0 and "id" in rows[0]:
-            max_id = max(row["id"] for row in rows if "id" in row)
-            try:
-                with session.begin_nested():
-                    session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH {max_id + 1}"))
-            except sqlalchemy.exc.ProgrammingError:
-                # E.g. when the table has no auto-incremented ID
-                pass
-
-    for table_name, field_names in deferred.items():
-        for row in data.get(table_name, []):
-            row_data = {field_name: row[field_name] for field_name in field_names}
-            session.execute(
-                OrmBase.metadata.tables[table_name]
-                .update()
-                .where(OrmBase.metadata.tables[table_name].c.id == row["id"])
-                .values(row_data)
-            )
-
-
 def _db_engine_dependable(request: Request) -> Engine:
     engine = request.app.extra["database_engine"]
     if not isinstance(engine, Engine):

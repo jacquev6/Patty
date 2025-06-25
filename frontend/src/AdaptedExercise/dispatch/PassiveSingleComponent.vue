@@ -1,40 +1,33 @@
-<script lang="ts">
-import type { PassiveComponent, AnyComponent } from '@/apiClient'
-
-export function isPassive(component: AnyComponent): component is PassiveComponent {
-  return (
-    component.kind === 'arrow' ||
-    component.kind === 'choice' ||
-    component.kind === 'formatted' ||
-    component.kind === 'text' ||
-    component.kind === 'whitespace'
-  )
-}
-</script>
-
 <script setup lang="ts">
+import { h, type VNode } from 'vue'
+import { match } from 'ts-pattern'
+
+import type { PassiveComponent } from '@/apiClient'
 import ArrowComponent from '../components/ArrowComponent.vue'
 import FormattedComponent from '../components/FormattedComponent.vue'
 import TextComponent from '../components/TextComponent.vue'
 import WhitespaceComponent from '../components/WhitespaceComponent.vue'
 
-defineProps<{
+const props = defineProps<{
   component: PassiveComponent
   tricolorable: boolean
 }>()
+
+function render() {
+  return match(props.component)
+    .returnType<VNode>()
+    .with({ kind: 'arrow' }, (c) => h(ArrowComponent, { ...c, tricolorable: props.tricolorable }))
+    .with({ kind: 'choice' }, (c) =>
+      h(FormattedComponent, { ...c, kind: 'formatted', boxed: true, tricolorable: props.tricolorable }),
+    )
+    .with({ kind: 'text' }, (c) => h(TextComponent, { ...c, tricolorable: props.tricolorable }))
+    .with({ kind: 'whitespace' }, (c) => h(WhitespaceComponent, c))
+    .with({ kind: 'formatted' }, (c) => h(FormattedComponent, { ...c, tricolorable: props.tricolorable }))
+    .exhaustive()
+}
 </script>
 
+<!-- This is awkward; I'm sure there is a way to define this component without a template -->
 <template>
-  <ArrowComponent v-if="component.kind === 'arrow'" v-bind="component" :tricolorable />
-  <FormattedComponent
-    v-else-if="component.kind === 'choice'"
-    kind="formatted"
-    :contents="component.contents"
-    :boxed="true"
-    :tricolorable
-  />
-  <TextComponent v-else-if="component.kind === 'text'" v-bind="component" :tricolorable />
-  <WhitespaceComponent v-else-if="component.kind === 'whitespace'" v-bind="component" />
-  <FormattedComponent v-else-if="component.kind === 'formatted'" v-bind="component" :tricolorable />
-  <template v-else>BUG (component not handled): {{ ((contents: never) => contents)(component) }}</template>
+  <render />
 </template>

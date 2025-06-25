@@ -1,4 +1,5 @@
-from typing import Any, TypeVar
+from collections.abc import Iterable
+from typing import Any, Literal, TypeVar
 import base64
 import datetime
 import hashlib
@@ -34,17 +35,98 @@ from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlm
 from .adaptation.submission import LlmMessage
 from .extraction import llm as extraction_llm
 from .extraction import assistant_responses as extraction_responses
+from .mailing import send_mail
+from .version import PATTY_VERSION
 
-__all__ = ["router"]
+__all__ = ["api_router", "export_router"]
 
 s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
 
+class PostErrorsCaughtByFrontendRequest(ApiModel):
+    creator: str | None
+    user_agent: str
+    window_size: str
+    url: str
+    caught_by: str
+    message: str
+    code_location: str | None
+
+
+class PostErrorsCaughtByFrontendResponse(ApiModel):
+    pass
+
+
+@api_router.post("/errors-caught-by-frontend")
+def post_errors_caught_by_frontend(
+    req: PostErrorsCaughtByFrontendRequest, session: database_utils.SessionDependable
+) -> PostErrorsCaughtByFrontendResponse:
+    if PATTY_VERSION != "dev":
+        send_mail(
+            to=settings.MAIL_SENDER,
+            subject=f"Patty version {PATTY_VERSION}: error caught by frontend",
+            body=req.model_dump_json(indent=2),
+        )
+    session.add(
+        db.ErrorCaughtByFrontend(
+            created_at=datetime.datetime.now(datetime.timezone.utc),
+            created_by_username=req.creator,
+            patty_version=PATTY_VERSION,
+            user_agent=req.user_agent,
+            window_size=req.window_size,
+            url=req.url,
+            caught_by=req.caught_by,
+            message=req.message,
+            code_location=req.code_location,
+        )
+    )
+    return PostErrorsCaughtByFrontendResponse()
+
+
+class GetErrorsCaughtByFrontendResponse(ApiModel):
+    class Error(ApiModel):
+        id: str
+        created_by: str | None
+        created_at: datetime.datetime
+        patty_version: str
+        user_agent: str
+        window_size: str
+        url: str
+        caught_by: str
+        message: str
+        code_location: str | None
+
+    errors: list[Error]
+
+
+@api_router.get("/errors-caught-by-frontend")
+def get_errors_caught_by_frontend(session: database_utils.SessionDependable) -> GetErrorsCaughtByFrontendResponse:
+    return GetErrorsCaughtByFrontendResponse(
+        errors=[
+            GetErrorsCaughtByFrontendResponse.Error(
+                id=str(error.id),
+                created_by=error.created_by_username,
+                created_at=error.created_at,
+                patty_version=error.patty_version,
+                user_agent=error.user_agent,
+                window_size=error.window_size,
+                url=error.url,
+                caught_by=error.caught_by,
+                message=error.message,
+                code_location=error.code_location,
+            )
+            for error in session.execute(sql.select(db.ErrorCaughtByFrontend).order_by(-db.ErrorCaughtByFrontend.id))
+            .scalars()
+            .all()
+        ]
+    )
+
+
 @api_router.get("/available-adaptation-llm-models")
 def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
-    if settings.ENVIRONMENT == "dev":
+    if PATTY_VERSION == "dev":
         return [
             adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
@@ -85,6 +167,7 @@ class ApiInput(ApiModel):
 class ApiAdaptation(ApiModel):
     id: str
     created_by: str | None
+    extraction_batch_id: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
     strategy: ApiStrategy
@@ -600,7 +683,7 @@ def get_extraction_llm_response_schema() -> JsonDict:
 
 @api_router.get("/available-extraction-llm-models")
 def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
-    if settings.ENVIRONMENT == "dev":
+    if PATTY_VERSION == "dev":
         return [
             extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
             extraction_llm.DummyModel(provider="dummy", name="dummy-2"),
@@ -1145,6 +1228,11 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         created_by=adaptation.created_by_username,
+        extraction_batch_id=(
+            None
+            if adaptation.exercise.created_by_page_extraction is None
+            else str(adaptation.exercise.created_by_page_extraction.extraction_batch_id)
+        ),
         classification_batch_id=(
             None if adaptation.classification_batch_id is None else str(adaptation.classification_batch_id)
         ),
@@ -1227,75 +1315,106 @@ export_batch_template_file_path = os.path.join(os.path.dirname(__file__), "expor
 
 
 @export_router.get("/extraction-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_extraction_batch(
+def export_extraction_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(exercise.adaptation)
-                for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
-                for exercise in page.exercises
-                if exercise.adaptation is not None
-            ),
-        )
-    )
-
-    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
-
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-extraction-batch-{id}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+    return export_batch_html("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
 
-@export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_adaptation_batch(
+@export_router.get("/extraction-batch/{id}.json")
+def export_extraction_batch_json(
     id: str, session: database_utils.SessionDependable, download: bool = True
-) -> fastapi.responses.HTMLResponse:
-    data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(adaptation)
-                for adaptation in get_by_id(session, db.AdaptationBatch, id).adaptations
-            ),
-        )
-    )
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
-    content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-adaptation-batch-{id}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return [
+        exercise.adaptation
+        for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
+        for exercise in page.exercises
+        if exercise.adaptation is not None
+    ]
 
 
 @export_router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
-def export_classification_batch(
+def export_classification_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
+    return export_batch_html("classification", id, get_classification_batch_adaptations(session, id), download)
+
+
+@export_router.get("/classification-batch/{id}.json")
+def export_classification_batch_json(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("classification", id, get_classification_batch_adaptations(session, id), download)
+
+
+def get_classification_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return [exercise.adaptation for exercise in get_by_id(session, db.ClassificationBatch, id).exercises]
+
+
+@export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+def export_adaptation_batch_html(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.HTMLResponse:
+    return export_batch_html("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
+
+
+@export_router.get("/adaptation-batch/{id}.json")
+def export_adaptation_batch_json(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.JSONResponse:
+    return export_batch_json("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
+
+
+def get_adaptation_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+    return get_by_id(session, db.AdaptationBatch, id).adaptations
+
+
+def export_batch_html(
+    kind: Literal["extraction", "adaptation", "classification"],
+    id: str,
+    adaptations: Iterable[db.Adaptation | None],
+    download: bool,
+) -> fastapi.responses.HTMLResponse:
     data = list(
-        filter(
-            None,
-            (
-                make_adapted_exercise_data(exercise.adaptation)
-                for exercise in get_by_id(session, db.ClassificationBatch, id).exercises
-                if exercise.adaptation is not None
-            ),
+        adapted_exercise_data
+        for adapted_exercise_data in (
+            make_adapted_exercise_data(adaptation) for adaptation in adaptations if adaptation is not None
         )
+        if adapted_exercise_data is not None
     )
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
     headers = {}
     if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-classification-batch-{id}.html"'
+        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.html"'
 
     return fastapi.responses.HTMLResponse(content=content, headers=headers)
+
+
+def export_batch_json(
+    kind: Literal["extraction", "adaptation", "classification"],
+    id: str,
+    adaptations: Iterable[db.Adaptation | None],
+    download: bool,
+) -> fastapi.responses.JSONResponse:
+    content = list(
+        adapted_exercise_data
+        for adapted_exercise_data in (
+            make_adapted_exercise_data(adaptation) for adaptation in adaptations if adaptation is not None
+        )
+        if adapted_exercise_data is not None
+    )
+
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.json"'
+
+    return fastapi.responses.JSONResponse(content=content, headers=headers)
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -1403,7 +1522,6 @@ def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonD
     assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
     exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
     target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
-    # @todo Download asynchronously from S3
     object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
     data = base64.b64encode(object["Body"].read()).decode("ascii")
     return {
@@ -1416,16 +1534,11 @@ def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonD
     }
 
 
-router = fastapi.APIRouter()
-router.include_router(api_router)
-router.include_router(export_router, prefix="/export")
-
-
 class ApiTestCase(database_utils.TestCaseWithDatabase):
     def setUp(self) -> None:
         super().setUp()
         self.app = fastapi.FastAPI(database_engine=self.engine)
-        self.app.include_router(router)
+        self.app.include_router(api_router)
         access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
         self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
 

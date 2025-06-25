@@ -732,13 +732,17 @@ describe('FreeTextInput', () => {
 })
 
 describe('MultipleChoicesInput', () => {
-  const choices = [
+  const twoChoices = [
     {
       contents: [{ kind: 'text' as const, text: 'Alpha' }],
     },
     {
       contents: [{ kind: 'text' as const, text: 'Bravo' }],
     },
+  ]
+
+  const choices = [
+    ...twoChoices,
     {
       contents: [{ kind: 'text' as const, text: 'Charlie' }],
     },
@@ -967,6 +971,75 @@ describe('MultipleChoicesInput', () => {
       },
     })
 
+    screenshot()
+  })
+
+  it('chooses the first two colors as complimentary to main color', () => {
+    cy.viewport(500, 1000)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices: twoChoices,
+                        showChoicesByDefault: true,
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices: twoChoices,
+                        showChoicesByDefault: true,
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices: twoChoices,
+                        showChoicesByDefault: true,
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'blah' },
+                      { kind: 'text', text: '.' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
     screenshot()
   })
 })
@@ -1202,6 +1275,7 @@ describe('EditableTextInput', () => {
                       { kind: 'whitespace' },
                       {
                         kind: 'editableTextInput',
+                        showOriginalText: true,
                         contents: [
                           { kind: 'text', text: 'Edit' },
                           { kind: 'whitespace' },
@@ -1218,6 +1292,7 @@ describe('EditableTextInput', () => {
                       { kind: 'whitespace' },
                       {
                         kind: 'editableTextInput',
+                        showOriginalText: true,
                         contents: [
                           { kind: 'text', text: 'And' },
                           { kind: 'whitespace' },

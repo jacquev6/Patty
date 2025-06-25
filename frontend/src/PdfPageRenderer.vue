@@ -41,9 +41,6 @@ async function draw() {
       renderTask?.cancel()
       const canvasContext = canvas.value.getContext('2d')
       assert(canvasContext !== null)
-      // @todo(Project management, later) Disable Chromium's warning:
-      // > Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true.
-      // Unlikely, this seems to originate from canvases internal to PDF.js, not from our canvases.
       renderTask = props.page.render({ canvasContext, viewport })
       try {
         await renderTask.promise

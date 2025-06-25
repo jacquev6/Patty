@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { AdaptedExercise, AnyComponent } from '@/apiClient'
-import { isPassive } from './dispatch/PassiveSingleComponent.vue'
 
 export type InProgressExercise = {
   exercise: AdaptedExercise
@@ -135,25 +134,15 @@ const statementLines = computed<StatementLine[]>(() => {
   for (const [lineIndex, { contents }] of props.adaptedExercise.statement.pages[pageIndex.value].lines.entries()) {
     lines.push({ lineIndex, contents })
     for (const component of contents) {
-      if (
-        isPassive(component) ||
-        component.kind === 'swappableInput' ||
-        component.kind === 'selectableInput' ||
-        component.kind === 'multipleChoicesInput' ||
-        component.kind === 'freeTextInput'
-      ) {
-        // Nothing to do
-      } else if (component.kind === 'editableTextInput') {
+      if (component.kind === 'editableTextInput' && component.showOriginalText) {
         lines.push({
           lineIndex,
           contents: [
             { kind: 'arrow' },
             { kind: 'whitespace' },
-            { kind: 'activeEditableTextInput', contents: component.contents },
+            { kind: 'editableTextInput', showOriginalText: false, contents: component.contents },
           ],
         })
-      } else {
-        ;((component: never) => console.log(`Unexpected component: ${component}`))(component)
       }
     }
   }
@@ -164,7 +153,7 @@ const statementLines = computed<StatementLine[]>(() => {
 
 <template>
   <PageNavigationControls :navigateUsingArrowKeys :pagesCount="totalPagesCount" v-model="pageIndex">
-    <div ref="container" class="container">
+    <div ref="container" class="container" spellcheck="false">
       <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">
           <p v-for="{ contents } in adaptedExercise.instruction.lines">
@@ -215,19 +204,20 @@ div {
 
 .container {
   /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   transform: scale(1);
   height: 100%;
 }
 
 .instruction {
   text-align: center;
-  padding-top: 0.5em;
-  padding-bottom: 3em;
+  padding-top: 0.35em;
+  padding-bottom: 2em;
 }
 
 :deep(p) {
-  line-height: 1.7em;
+  line-height: 2em;
 }
 
 .instruction :deep(*:first-child) {

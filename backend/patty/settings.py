@@ -4,7 +4,6 @@ import os
 import pydantic
 
 
-ENVIRONMENT = os.environ.get("PATTY_ENVIRONMENT")
 DATABASE_URL = os.environ["PATTY_DATABASE_URL"]
 DATABASE_BACKUPS_URL = os.environ["PATTY_DATABASE_BACKUPS_URL"]
 assert not DATABASE_BACKUPS_URL.endswith("/")
@@ -22,3 +21,9 @@ EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
 assert not EXTERNAL_EXERCISES_URL.endswith("/")
 PDF_FILES_URL = os.environ["PATTY_PDF_FILES_URL"]
 assert not PDF_FILES_URL.endswith("/")
+
+MAIL_SENDER = os.environ["PATTY_MAIL_SENDER"]
+SMTP_HOST = os.environ["PATTY_SMTP_HOST"]
+SMTP_PORT = int(os.environ["PATTY_SMTP_PORT"])
+SMTP_USER = os.environ["PATTY_SMTP_USER"]
+SMTP_PASSWORD = os.environ["PATTY_SMTP_PASSWORD"]
