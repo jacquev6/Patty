@@ -126,7 +126,7 @@ def get_errors_caught_by_frontend(session: database_utils.SessionDependable) -> 
 
 @api_router.get("/available-adaptation-llm-models")
 def get_available_adaptation_llm_models() -> list[adaptation_llm.ConcreteModel]:
-    if settings.ENVIRONMENT == "dev":
+    if PATTY_VERSION == "dev":
         return [
             adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
             adaptation_llm.DummyModel(provider="dummy", name="dummy-2"),
@@ -683,7 +683,7 @@ def get_extraction_llm_response_schema() -> JsonDict:
 
 @api_router.get("/available-extraction-llm-models")
 def get_available_extraction_llm_models() -> list[extraction_llm.ConcreteModel]:
-    if settings.ENVIRONMENT == "dev":
+    if PATTY_VERSION == "dev":
         return [
             extraction_llm.DummyModel(provider="dummy", name="dummy-1"),
             extraction_llm.DummyModel(provider="dummy", name="dummy-2"),

@@ -1,5 +1,3 @@
-PATTY_ENVIRONMENT=dev
-
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
 PATTY_DATABASE_BACKUPS_URL=file:///app/support/dev-env/db/backups
 PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/dev/external-exercises
