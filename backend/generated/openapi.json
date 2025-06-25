@@ -5,6 +5,70 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/errors-caught-by-frontend": {
+      "get": {
+        "summary": "Get Errors Caught By Frontend",
+        "operationId": "get_errors_caught_by_frontend_api_errors_caught_by_frontend_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetErrorsCaughtByFrontendResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Post Errors Caught By Frontend",
+        "operationId": "post_errors_caught_by_frontend_api_errors_caught_by_frontend_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostErrorsCaughtByFrontendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostErrorsCaughtByFrontendResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/available-adaptation-llm-models": {
       "get": {
         "summary": "Get Available Adaptation Llm Models",
@@ -2248,6 +2312,80 @@
           "contents"
         ]
       },
+      "Error": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "pattyVersion": {
+            "type": "string",
+            "title": "Pattyversion"
+          },
+          "userAgent": {
+            "type": "string",
+            "title": "Useragent"
+          },
+          "windowSize": {
+            "type": "string",
+            "title": "Windowsize"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "caughtBy": {
+            "type": "string",
+            "title": "Caughtby"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "codeLocation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codelocation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "pattyVersion",
+          "userAgent",
+          "windowSize",
+          "url",
+          "caughtBy",
+          "message",
+          "codeLocation"
+        ],
+        "title": "Error"
+      },
       "ExampleComponents": {
         "properties": {
           "text": {
@@ -2787,6 +2925,23 @@
           "nextChunkId"
         ],
         "title": "GetClassificationBatchesResponse"
+      },
+      "GetErrorsCaughtByFrontendResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "errors"
+        ],
+        "title": "GetErrorsCaughtByFrontendResponse"
       },
       "GetExtractionBatchResponse": {
         "properties": {
@@ -3648,6 +3803,70 @@
           "id"
         ],
         "title": "PostClassificationBatchResponse"
+      },
+      "PostErrorsCaughtByFrontendRequest": {
+        "properties": {
+          "creator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creator"
+          },
+          "userAgent": {
+            "type": "string",
+            "title": "Useragent"
+          },
+          "windowSize": {
+            "type": "string",
+            "title": "Windowsize"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "caughtBy": {
+            "type": "string",
+            "title": "Caughtby"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "codeLocation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codelocation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "userAgent",
+          "windowSize",
+          "url",
+          "caughtBy",
+          "message",
+          "codeLocation"
+        ],
+        "title": "PostErrorsCaughtByFrontendRequest"
+      },
+      "PostErrorsCaughtByFrontendResponse": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PostErrorsCaughtByFrontendResponse"
       },
       "PostExtractionBatchRequest": {
         "properties": {

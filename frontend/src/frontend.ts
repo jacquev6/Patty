@@ -17,6 +17,7 @@ import AdaptedExerciseExamplesView from './AdaptedExerciseExamplesView.vue'
 import EditTextbookView from './EditTextbookView.vue'
 import EditClassificationBatchView from './EditClassificationBatchView.vue'
 import { useBreadcrumbsStore } from './BreadcrumbsStore'
+import ErrorsView from './ErrorsView.vue'
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
@@ -79,10 +80,15 @@ const router = createRouter({
       name: 'adapted-exercice-examples',
       component: AdaptedExerciseExamplesView,
     },
+    {
+      path: '/errors',
+      component: ErrorsView,
+      name: 'errors',
+    },
   ],
 })
 
-const app = createApp(FrontendRootView)
+export const app = createApp(FrontendRootView)
 
 app.use(router)
 app.use(createPinia())

@@ -114,6 +114,18 @@ def read_all_fields(session: database_utils.Session) -> None:
         classification_batch.model_for_adaptation
         classification_batch.adaptations
 
+    for error_caught_by_frontend in session.execute(sql.select(orm_models.ErrorCaughtByFrontend)).scalars().all():
+        error_caught_by_frontend.id
+        error_caught_by_frontend.created_at
+        error_caught_by_frontend.created_by_username
+        error_caught_by_frontend.patty_version
+        error_caught_by_frontend.user_agent
+        error_caught_by_frontend.window_size
+        error_caught_by_frontend.url
+        error_caught_by_frontend.caught_by
+        error_caught_by_frontend.message
+        error_caught_by_frontend.code_location
+
     for exercise_class in session.execute(sql.select(orm_models.ExerciseClass)).scalars().all():
         exercise_class.id
         exercise_class.created_at

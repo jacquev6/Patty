@@ -18,6 +18,9 @@ export function useAuthenticatedClient() {
   })
 }
 
+export type ErrorCaughtByFrontend =
+  paths['/api/errors-caught-by-frontend']['get']['responses']['200']['content']['application/json']['errors'][number]
+
 export type ExtractionLlmModel =
   paths['/api/available-extraction-llm-models']['get']['responses']['200']['content']['application/json'][number]
 export type ExtractionStrategy =

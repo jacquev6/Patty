@@ -1,3 +1,5 @@
-const assert: (condition: boolean) => asserts condition = console.assert
-
-export default assert
+export default function assert(condition: boolean): asserts condition {
+  if (!condition) {
+    throw new Error('Assertion failed')
+  }
+}

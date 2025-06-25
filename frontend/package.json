@@ -45,6 +45,7 @@
     "openapi-typescript": "^7.8.0",
     "prettier": "3.5.3",
     "typescript": "~5.8.3",
+    "user-agent-data-types": "^0.4.2",
     "vite": "^6.3.5",
     "vite-plugin-singlefile": "^2.2.0",
     "vite-plugin-vue-devtools": "^7.7.6",

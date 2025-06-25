@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useApiConstantsStore } from './ApiConstantsStore'
 import FrontendNavbar from './FrontendNavbar.vue'
+import ErrorReportingModal from './ErrorReportingModal.vue'
 
 const apiConstantsStore = useApiConstantsStore()
 </script>
 
 <template>
+  <ErrorReportingModal />
   <div class="container">
     <FrontendNavbar />
     <RouterView class="main" v-if="apiConstantsStore.ready" />

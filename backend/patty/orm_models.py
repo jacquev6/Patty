@@ -465,6 +465,24 @@ class Adaptation(OrmBase):
             self._manual_edit = value.model_dump()
 
 
+class ErrorCaughtByFrontend(OrmBase):
+    __tablename__ = "errors_caught_by_frontend"
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str | None]
+
+    patty_version: orm.Mapped[str]
+    user_agent: orm.Mapped[str]
+    window_size: orm.Mapped[str]
+    url: orm.Mapped[str]
+
+    caught_by: orm.Mapped[str]
+    message: orm.Mapped[str]
+    code_location: orm.Mapped[str | None]
+
+
 all_models: list[type[OrmBase]] = [
     AdaptableExercise,
     Adaptation,
@@ -473,6 +491,7 @@ all_models: list[type[OrmBase]] = [
     AdaptationStrategySettings,
     BaseExercise,
     ClassificationBatch,
+    ErrorCaughtByFrontend,
     ExerciseClass,
     ExternalExercise,
     ExtractionBatch,

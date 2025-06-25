@@ -4,6 +4,24 @@
  */
 
 export interface paths {
+  '/api/errors-caught-by-frontend': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Errors Caught By Frontend */
+    get: operations['get_errors_caught_by_frontend_api_errors_caught_by_frontend_get']
+    put?: never
+    /** Post Errors Caught By Frontend */
+    post: operations['post_errors_caught_by_frontend_api_errors_caught_by_frontend_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/available-adaptation-llm-models': {
     parameters: {
       query?: never
@@ -744,6 +762,32 @@ export interface components {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
     }
+    /** Error */
+    Error: {
+      /** Id */
+      id: string
+      /** Createdby */
+      createdBy: string | null
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Pattyversion */
+      pattyVersion: string
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
+      /** Url */
+      url: string
+      /** Caughtby */
+      caughtBy: string
+      /** Message */
+      message: string
+      /** Codelocation */
+      codeLocation: string | null
+    }
     /** ExampleComponents */
     ExampleComponents: {
       /**
@@ -972,6 +1016,11 @@ export interface components {
       classificationBatches: components['schemas']['ClassificationBatch'][]
       /** Nextchunkid */
       nextChunkId: string | null
+    }
+    /** GetErrorsCaughtByFrontendResponse */
+    GetErrorsCaughtByFrontendResponse: {
+      /** Errors */
+      errors: components['schemas']['Error'][]
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -1302,6 +1351,25 @@ export interface components {
       /** Id */
       id: string
     }
+    /** PostErrorsCaughtByFrontendRequest */
+    PostErrorsCaughtByFrontendRequest: {
+      /** Creator */
+      creator: string | null
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
+      /** Url */
+      url: string
+      /** Caughtby */
+      caughtBy: string
+      /** Message */
+      message: string
+      /** Codelocation */
+      codeLocation: string | null
+    }
+    /** PostErrorsCaughtByFrontendResponse */
+    PostErrorsCaughtByFrontendResponse: Record<string, never>
     /** PostExtractionBatchRequest */
     PostExtractionBatchRequest: {
       /** Creator */
@@ -1698,6 +1766,59 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  get_errors_caught_by_frontend_api_errors_caught_by_frontend_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetErrorsCaughtByFrontendResponse']
+        }
+      }
+    }
+  }
+  post_errors_caught_by_frontend_api_errors_caught_by_frontend_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostErrorsCaughtByFrontendRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostErrorsCaughtByFrontendResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   get_available_adaptation_llm_models_api_available_adaptation_llm_models_get: {
     parameters: {
       query?: never
