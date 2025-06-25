@@ -35,6 +35,7 @@ from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlm
 from .adaptation.submission import LlmMessage
 from .extraction import llm as extraction_llm
 from .extraction import assistant_responses as extraction_responses
+from .mailing import send_mail
 from .version import PATTY_VERSION
 
 __all__ = ["api_router", "export_router"]
@@ -62,6 +63,12 @@ class PostErrorsCaughtByFrontendResponse(ApiModel):
 def post_errors_caught_by_frontend(
     req: PostErrorsCaughtByFrontendRequest, session: database_utils.SessionDependable
 ) -> PostErrorsCaughtByFrontendResponse:
+    if PATTY_VERSION != "dev":
+        send_mail(
+            to=settings.MAIL_SENDER,
+            subject=f"Patty version {PATTY_VERSION}: error caught by frontend",
+            body=req.model_dump_json(indent=2),
+        )
     session.add(
         db.ErrorCaughtByFrontend(
             created_at=datetime.datetime.now(datetime.timezone.utc),

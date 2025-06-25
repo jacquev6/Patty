@@ -8,3 +8,7 @@ PATTY_SECRET_JWT_KEY=not-so-secret
 # Hashed version of: password
 PATTY_HASHED_PASSWORD='$argon2id$v=19$m=65536,t=3,p=4$6i6V3Ldj3HOl5tY334Co3g$C/N8pcUFK9xofd9GkzsQLs/2iY2c7PnXKg2HM105uec'
 PATTY_AUTHENTICATION_MAX_VALIDITY=PT3H
+PATTY_MAIL_SENDER="Vincent Jacques <vincent@vincent-jacques.net>"
+PATTY_SMTP_HOST=smtp.gmail.com
+PATTY_SMTP_PORT=465
+PATTY_SMTP_USER=jacquev6@gmail.com
