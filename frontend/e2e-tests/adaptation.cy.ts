@@ -542,8 +542,8 @@ describe('The adaptation batch creation page', () => {
     cy.get('button:contains("Submit")').click()
 
     cy.visit('/')
-    cy.get(':contains("( (previous version), dummy")').should('exist')
-    cy.get(':contains("( (older version), dummy")').should('exist')
+    cy.get(':contains("previous version")').should('not.exist')
+    cy.get(':contains("older version")').should('not.exist')
   })
 })
 
