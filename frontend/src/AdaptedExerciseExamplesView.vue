@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 import ExamplesViewExercise, { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
 import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const breadcrumbsStore = useBreadcrumbsStore()
+const { t } = useI18n()
 
 onMounted(() => {
-  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'Examples', to: {} }])
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'adaptedExerciseExamples', to: {} }])
 })
 
 const yellow = '#ffff00'
@@ -1968,7 +1971,7 @@ const examples: Example[] = [
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <h1>Examples</h1>
+    <h1>{{ t('examples') }}</h1>
     <template v-for="example in examples" :key="example.title">
       <div style="margin-bottom: 10px">
         <ExamplesViewExercise :example />
@@ -1976,3 +1979,10 @@ const examples: Example[] = [
     </template>
   </div>
 </template>
+
+<i18n>
+en:
+  examples: Examples
+fr:
+  examples: Exemples
+</i18n>

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import shajs from 'sha.js'
 import { computedAsync } from '@vueuse/core'
 import deepCopy from 'deep-copy'
+import { useI18n } from 'vue-i18n'
 
 import pdfjs, { type PDFDocumentProxy } from './pdfjs'
 import { type ExtractionStrategy, useAuthenticatedClient } from './apiClient'
@@ -17,12 +18,14 @@ import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
 import { useApiConstantsStore } from './ApiConstantsStore'
+import WhiteSpace from './WhiteSpace.vue'
 
 const props = defineProps<{
   latestExtractionStrategy: ExtractionStrategy
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 
 const client = useAuthenticatedClient()
 const apiConstantsStore = useApiConstantsStore()
@@ -141,9 +144,9 @@ const lastPage = computedAsync(async () => {
 <template>
   <ResizableColumns :columns="[1, 1]">
     <template #col-1>
-      <p>Created by: <IdentifiedUser /></p>
-      <h1>Strategy</h1>
-      <h2>LLM model</h2>
+      <p>{{ t('createdBy') }} <IdentifiedUser /></p>
+      <h1>{{ t('strategy') }}</h1>
+      <h2>{{ t('llmModel') }}</h2>
       <p>
         <LlmModelSelector
           :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
@@ -151,66 +154,118 @@ const lastPage = computedAsync(async () => {
           v-model="strategy.model"
         />
       </p>
-      <h2>Settings</h2>
+      <h2>{{ t('settings') }}</h2>
       <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
-      <h3>Prompt</h3>
+      <h3>{{ t('prompt') }}</h3>
       <TextArea data-cy="prompt" v-model="strategy.prompt"></TextArea>
     </template>
     <template #col-2>
-      <h1>Follow-ups</h1>
+      <h1>{{ t('followUps') }}</h1>
       <p>
-        Run classification after extraction:
+        {{ t('runClassification') }}
         <select data-cy="run-classification" v-model="runClassificationAsString">
-          <option>yes</option>
-          <option>no</option></select
-        ><template v-if="runClassification">
-          using <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</template
-        >
+          <option value="yes">{{ t('yes') }}</option>
+          <option value="no">{{ t('no') }}</option>
+        </select>
+        <template v-if="runClassification">
+          <WhiteSpace />
+          <I18nT keypath="runClassificationUsing"><code>classification_camembert.pt</code></I18nT>
+        </template>
       </p>
       <p v-if="runClassification">
-        Run adaptations after classification:
+        {{ t('runAdaptation') }}
         <select data-cy="run-adaptation" v-model="runAdaptationAsString">
-          <option>yes</option>
-          <option>no</option>
+          <option value="yes">{{ t('yes') }}</option>
+          <option value="no">{{ t('no') }}</option>
         </select>
         <template v-if="runAdaptation">
-          using
-          <LlmModelSelector
-            :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
-            :disabled="false"
-            v-model="modelForAdaptation"
-          >
-            <template #provider>provider</template>
-            <template #model> and model</template>
-          </LlmModelSelector>
-          with the latest settings for each known exercise class.</template
-        >
+          <WhiteSpace />
+          <I18nT keypath="runAdaptationUsing">
+            <LlmModelSelector
+              :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+              :disabled="false"
+              v-model="modelForAdaptation"
+            >
+              <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
+              <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
+            </LlmModelSelector>
+          </I18nT>
+        </template>
       </p>
-      <h1>Input</h1>
+      <h1>{{ t('input') }}</h1>
       <p>
-        PDF file: <input type="file" @change="openFile" accept=".pdf" :disabled="uploading" />
-        <template v-if="uploading"> (uploading...)</template>
-        <template v-if="uploadedFileSha256 !== null"> (uploaded)</template>
+        {{ t('pdfFile') }} <input type="file" lang="fr" @change="openFile" accept=".pdf" :disabled="uploading" />
+        <template v-if="uploading"> ({{ t('uploading') }})</template>
+        <template v-if="uploadedFileSha256 !== null"> ({{ t('uploaded') }})</template>
       </p>
       <template v-if="document !== null">
-        <p>
-          Pages: from
-          <span class="pagePreview">
-            <PdfNavigationControls v-model:page="firstPageNumber" :pagesCount="document.numPages" />
-            <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
-          </span>
-          to
-          <span class="pagePreview">
-            <PdfNavigationControls v-model:page="lastPageNumber" :pagesCount="document.numPages" />
-            <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
-          </span>
-          (of {{ document.numPages }})
-        </p>
+        <I18nT keypath="pages" tag="p">
+          <template #from>
+            <span class="pagePreview">
+              <PdfNavigationControls v-model:page="firstPageNumber" :pagesCount="document.numPages" />
+              <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
+            </span>
+          </template>
+          <template #to>
+            <span class="pagePreview">
+              <PdfNavigationControls v-model:page="lastPageNumber" :pagesCount="document.numPages" />
+              <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
+            </span>
+          </template>
+          <template #count>{{ document.numPages }}</template>
+        </I18nT>
       </template>
-      <p><button @click="submit" :disabled>Submit</button></p>
+      <p>
+        <button @click="submit" :disabled>{{ t('submit') }}</button>
+      </p>
     </template>
   </ResizableColumns>
 </template>
+
+<i18n>
+en:
+  createdBy: "Created by:"
+  strategy: Strategy
+  llmModel: LLM model
+  settings: Settings
+  prompt: Prompt
+  followUps: Follow-ups
+  runClassification: "Run classification after extraction:"
+  runClassificationUsing: "using {0}, provided by Elise by e-mail on May 20, 2025"
+  runAdaptation: "Run adaptations after classification:"
+  runAdaptationUsing: "using {0} with the latest settings for each known exercise class."
+  runAdaptationUsingProvider: "provider"
+  runAdaptationUsingModel: "and model"
+  yes: yes
+  no: no
+  input: Input
+  pdfFile: "PDF file:"
+  uploading: "uploading..."
+  uploaded: "uploaded"
+  pages: "Pages: from {from} to {to} (of {count})"
+  submit: Submit
+fr:
+  createdBy: "Créé par :"
+  strategy: Stratégie
+  llmModel: Modèle LLM
+  settings: Paramètres
+  prompt: Invite
+  followUps: Étapes suivantes
+  runClassification: "Exécuter la classification après l'extraction :"
+  runClassificationUsing: "avec {0}, fourni par Elise par e-mail le 20 mai 2025"
+  runAdaptation: "Exécuter les adaptations après la classification :"
+  runAdaptationUsing: "avec {0} avec les derniers paramètres pour chaque classe d'exercice connue."
+  runAdaptationUsingProvider: "fournisseur"
+  runAdaptationUsingModel: "et modèle"
+  yes: oui
+  no: non
+  input: Entrée
+  pdfFile: "Fichier PDF :"
+  uploading: "import en cours..."
+  uploaded: "importé"
+  pages: "Pages : de {from} à {to} (sur {count})"
+  submit: Envoyer
+</i18n>
 
 <style scoped>
 .pagePreview {

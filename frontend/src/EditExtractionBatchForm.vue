@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
+import { useI18n } from 'vue-i18n'
 
 import { type ExtractionBatch } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
@@ -19,6 +20,7 @@ const emit = defineEmits<{
   (e: 'batch-updated'): void
 }>()
 
+const { t } = useI18n()
 const apiConstantsStore = useApiConstantsStore()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
@@ -27,51 +29,57 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 <template>
   <ResizableColumns :columns="[1, 2]">
     <template #col-1>
-      <p>Created by: {{ extractionBatch.createdBy }}</p>
-      <h1>Strategy</h1>
-      <h2>LLM model</h2>
+      <p>{{ t('createdBy') }} {{ extractionBatch.createdBy }}</p>
+      <h1>{{ t('strategy') }}</h1>
+      <h2>{{ t('llmModel') }}</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
-      <h2>Settings</h2>
+      <h2>{{ t('settings') }}</h2>
       <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
-      <h3>Prompt</h3>
+      <h3>{{ t('prompt') }}</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
     </template>
     <template #col-2>
       <p>
-        Download
-        <a :href="`/api/export/extraction-batch/${extractionBatch.id}.html?token=${authenticationTokenStore.token}`"
-          >standalone HTML</a
-        >
-        or
-        <a :href="`/api/export/extraction-batch/${extractionBatch.id}.json?token=${authenticationTokenStore.token}`"
-          >JSON data</a
-        >
+        <I18nT keypath="download">
+          <a
+            :href="`/api/export/extraction-batch/${extractionBatch.id}.html?token=${authenticationTokenStore.token}`"
+            >{{ t('standaloneHtml') }}</a
+          >
+          <a
+            :href="`/api/export/extraction-batch/${extractionBatch.id}.json?token=${authenticationTokenStore.token}`"
+            >{{ t('jsonData') }}</a
+          >
+        </I18nT>
       </p>
-      <h1>Follow-ups</h1>
+      <h1>{{ t('followUps') }}</h1>
       <p>
-        Run classification after extraction:
-        <template v-if="extractionBatch.runClassification"
-          >yes, using <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</template
-        >
-        <template v-else>no</template>
+        {{ t('runClassification') }}
+        <template v-if="extractionBatch.runClassification">
+          <I18nT keypath="runClassificationYesUsing"><code>classification_camembert.pt</code></I18nT>
+        </template>
+        <template v-else>{{ t('no') }}</template>
       </p>
       <p v-if="extractionBatch.runClassification">
-        Run adaptations after classification:
-        <template v-if="extractionBatch.modelForAdaptation === null">no</template>
-        <template v-else
-          >yes, using
-          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.modelForAdaptation">
-            <template #provider>provider</template>
-            <template #model> and model</template>
-          </LlmModelSelector>
-          with the latest settings for each known exercise class.</template
-        >
+        {{ t('runAdaptation') }}
+        <template v-if="extractionBatch.modelForAdaptation === null">{{ t('no') }}</template>
+        <template v-else>
+          <I18nT keypath="runAdaptationYesUsing">
+            <LlmModelSelector
+              :availableLlmModels="[]"
+              :disabled="true"
+              :modelValue="extractionBatch.modelForAdaptation"
+            >
+              <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
+              <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
+            </LlmModelSelector>
+          </I18nT>
+        </template>
       </p>
-      <h1>Result</h1>
+      <h1>{{ t('result') }}</h1>
       <template v-for="page in extractionBatch.pages" :key="page.pageNumber">
         <h2>
-          Page {{ page.pageNumber
-          }}<template v-if="page.assistantResponse === null"
+          {{ t('page', page) }}
+          <template v-if="page.assistantResponse === null"
             ><WhiteSpace /><span class="inProgress">(in progress, will refresh when done)</span></template
           >
         </h2>
@@ -91,16 +99,14 @@ const authenticationTokenStore = useAuthenticationTokenStore()
           </template>
           <template v-else-if="page.assistantResponse.kind === 'error'">
             <template v-if="page.assistantResponse.error === 'not-json'">
-              <p>The LLM returned a response that is not correct JSON.</p>
+              <p>{{ t('notJsonError') }}</p>
               <pre>{{ page.assistantResponse.text }}</pre>
             </template>
             <template v-else-if="page.assistantResponse.error === 'invalid-json'">
-              <p>
-                The LLM returned a JSON response that does not validate against the extracted exercises list schema.
-              </p>
+              <p>{{ t('invalidJsonError') }}</p>
               <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
             </template>
-            <p v-else-if="page.assistantResponse.error === 'unknown'">The LLM caused an unknown error.</p>
+            <p v-else-if="page.assistantResponse.error === 'unknown'">{{ t('unknownError') }}</p>
             <p v-else>Unexpected assistant error response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
           </template>
           <p v-else>Unexpected assistant response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
@@ -109,6 +115,55 @@ const authenticationTokenStore = useAuthenticationTokenStore()
     </template>
   </ResizableColumns>
 </template>
+
+<i18n>
+en:
+  createdBy: "Created by:"
+  strategy: Strategy
+  llmModel: LLM model
+  settings: Settings
+  prompt: Prompt
+  download: Download {0} or {1}
+  standaloneHtml: "standalone HTML"
+  jsonData: "JSON data"
+  followUps: Follow-ups
+  runClassification: "Run classification after extraction:"
+  runClassificationYesUsing: "yes, using {0}, provided by Elise by e-mail on May 20, 2025"
+  runAdaptation: "Run adaptations after classification:"
+  runAdaptationYesUsing: "yes, using {0} with the latest settings for each known exercise class."
+  runAdaptationUsingProvider: "provider"
+  runAdaptationUsingModel: "and model"
+  no: no
+  result: Result
+  page: Page {pageNumber}
+  inProgress: "(in progress, will refresh when done)"
+  notJsonError: "The LLM returned a response that is not correct JSON."
+  invalidJsonError: "The LLM returned a JSON response that does not validate against the extracted exercises list schema."
+  unknownError: "The LLM caused an unknown error."
+fr:
+  createdBy: "Créé par :"
+  strategy: Stratégie
+  llmModel: Modèle LLM
+  settings: Paramètres
+  prompt: Invite
+  download: Télécharger le {0} ou les {1}
+  standaloneHtml: "HTML autonome"
+  jsonData: "données JSON"
+  followUps: Étapes suivantes
+  runClassification: "Exécuter la classification après l'extraction :"
+  runClassificationYesUsing: "oui, avec {0}, fourni par Elise par e-mail le 20 mai 2025"
+  runAdaptation: "Exécuter les adaptations après la classification :"
+  runAdaptationYesUsing: "oui, avec {0} avec les derniers paramètres pour chaque classe d'exercice connue."
+  runAdaptationUsingProvider: "fournisseur"
+  runAdaptationUsingModel: "et modèle"
+  no: non
+  result: Résultat
+  page: Page {pageNumber}
+  inProgress: "(en cours, se mettra à jour quand terminé)"
+  notJsonError: "Le LLM a renvoyé une réponse qui n'est pas un JSON correct."
+  invalidJsonError: "Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'une liste d'exercices extraits."
+  unknownError: "Le LLM a causé une erreur inconnue."
+</i18n>
 
 <style scoped>
 span.inProgress {

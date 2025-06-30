@@ -2,6 +2,8 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'
 import { createPinia } from 'pinia'
+import messages from '@intlify/unplugin-vue-i18n/messages'
+import { createI18n } from 'vue-i18n'
 
 import pdfjs from './pdfjs'
 import './main.css'
@@ -92,6 +94,38 @@ export const app = createApp(FrontendRootView)
 
 app.use(router)
 app.use(createPinia())
+app.use(
+  createI18n({
+    legacy: false,
+    locale: 'en',
+    messages,
+    datetimeFormats: {
+      en: {
+        long: {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        },
+      },
+      fr: {
+        long: {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: false,
+        },
+      },
+    },
+    // Avoid using $t by mistake: it does not know about the [local scope](https://vue-i18n.intlify.dev/guide/essentials/scope.html#local-scope)
+    // populated by the i18n tag in [single-file components](https://vue-i18n.intlify.dev/guide/advanced/sfc.html)
+    globalInjection: false,
+  }),
+)
 
 const breadcrumbsStore = useBreadcrumbsStore()
 

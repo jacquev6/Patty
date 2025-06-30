@@ -2,8 +2,9 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
-type Breadcrumb = {
-  text: string
+export type Breadcrumb = {
+  textKey: string
+  textArgs?: Record<string, string>
   to?: RouteLocationRaw
 }
 export type Breadcrumbs = Breadcrumb[]

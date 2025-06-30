@@ -16,7 +16,7 @@ onMounted(async () => {
     latestExtractionStrategy.value = response.data
   }
 
-  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'New extraction batch', to: {} }])
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'newExtractionBatch', to: {} }])
 })
 </script>
 

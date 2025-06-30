@@ -3,6 +3,7 @@
 
 import { ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
 import { app } from './frontend'
 import { useAuthenticatedClient } from './apiClient'
@@ -10,6 +11,7 @@ import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const client = useAuthenticatedClient()
 const identifierUser = useIdentifiedUserStore()
+const { t } = useI18n()
 
 const userAgent = (() => {
   if (window.navigator.userAgentData === undefined) {
@@ -83,9 +85,9 @@ app.config.errorHandler = function (err, _vm, info) {
 <template>
   <div v-if="error !== null" class="backdrop">
     <div>
-      <h1>There was a bug</h1>
-      <p>It's not your fault. I (Vincent Jacques) have been notified and will look into it.</p>
-      <p>Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.</p>
+      <h1>{{ t('title') }}</h1>
+      <p>{{ t('message1') }}</p>
+      <p>{{ t('message2') }}</p>
       <pre>{{ error.message }}</pre>
       <pre>{{ error.codeLocation }}</pre>
     </div>
@@ -114,3 +116,14 @@ app.config.errorHandler = function (err, _vm, info) {
   padding: 1em;
 }
 </style>
+
+<i18n>
+en:
+  title: There was a bug
+  message1: It's not your fault. I (Vincent Jacques) have been notified and will look into it.
+  message2: Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.
+fr:
+  title: Il y a eu un bug
+  message1: Ce n'est pas de votre faute. J'ai (Vincent Jacques) été prévenu et je vais regarder ça.
+  message2: Votre travail non encore soumis est perdu, je suis vraiment désolé. Vous pouvez seulement rafraîchir la page et recommencer.
+</i18n>

@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
 import { useMagicKeys } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
 import type { AdaptedExercise } from '@/apiClient'
 import MiniatureScreen from './MiniatureScreen.vue'
@@ -17,6 +18,8 @@ export type Example = {
 const props = defineProps<{
   example: Example
 }>()
+
+const { t } = useI18n()
 
 const jsonJustCopied = ref(false)
 async function copyJsonAsText() {
@@ -39,21 +42,38 @@ watch(Escape, () => {
     <template #col-1>
       <h2>{{ example.title }}</h2>
       <p v-if="example.description !== null">{{ example.description }}</p>
-      <p><button @click="fullScreen = true">Full screen</button></p>
-      <p><button @click="copyJsonAsText()">Copy JSON code 📋</button> <template v-if="jsonJustCopied">✅</template></p>
+      <p>
+        <button @click="fullScreen = true">{{ t('fullScreen') }}</button>
+      </p>
+      <p>
+        <button @click="copyJsonAsText()">{{ t('copyJson') }}</button> <template v-if="jsonJustCopied">✅</template>
+      </p>
       <details>
-        <summary>See JSON code</summary>
+        <summary>{{ t('seeJson') }}</summary>
         <pre>{{ jsonStringify(example.exercise) }}</pre>
       </details>
     </template>
     <template #col-2>
       <MiniatureScreen :fullScreen>
         <AdaptedExerciseRenderer :navigateUsingArrowKeys="fullScreen" :adaptedExercise="example.exercise" />
-        <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
+        <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
       </MiniatureScreen>
     </template>
   </FixedColumns>
 </template>
+
+<i18n>
+en:
+  fullScreen: Full screen
+  copyJson: Copy JSON code 📋
+  seeJson: See JSON code
+  exitFullScreen: Exit full screen (Esc)
+fr:
+  fullScreen: Plein écran
+  copyJson: Copier le code JSON 📋
+  seeJson: Voir le code JSON
+  exitFullScreen: Quitter le plein écran (Échap)
+</i18n>
 
 <style scoped>
 h2 {

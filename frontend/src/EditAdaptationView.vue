@@ -36,25 +36,28 @@ onMounted(async () => {
     assert(response.data !== undefined)
     apiAdaptation.value = response.data
 
-    const breadcrumbs: Breadcrumbs = [{ text: 'Sandbox' }]
+    const breadcrumbs: Breadcrumbs = [{ textKey: 'sandbox' }]
     if (apiAdaptation.value.extractionBatchId !== null) {
       breadcrumbs.push({
-        text: `Extraction batch ${apiAdaptation.value.extractionBatchId}`,
+        textKey: 'existingExtractionBatch',
+        textArgs: { id: apiAdaptation.value.extractionBatchId },
         to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
       })
     } else if (apiAdaptation.value.classificationBatchId !== null) {
       breadcrumbs.push({
-        text: `Classification batch ${apiAdaptation.value.classificationBatchId}`,
+        textKey: 'existingClassificationBatch',
+        textArgs: { id: apiAdaptation.value.classificationBatchId },
         to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
       })
     } else if (apiAdaptation.value.adaptationBatchId !== null) {
       breadcrumbs.push({
-        text: `Adaptation batch ${apiAdaptation.value.adaptationBatchId}`,
+        textKey: 'existingAdaptationBatch',
+        textArgs: { id: apiAdaptation.value.adaptationBatchId },
         to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
       })
     }
 
-    breadcrumbs.push({ text: `Adaptation ${apiAdaptation.value.id}`, to: {} })
+    breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: apiAdaptation.value.id }, to: {} })
 
     breadcrumbsStore.set(breadcrumbs)
   }

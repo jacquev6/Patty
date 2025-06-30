@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useAuthenticationClient } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from './WhiteSpace.vue'
+import LocaleSelect from './LocaleSelect.vue'
 
 const client = useAuthenticationClient()
 const tokenStore = useAuthenticationTokenStore()
+const { t } = useI18n()
 
 const password = ref('')
-const message = ref('')
+const message = ref<'incorrectPassword' | null>(null)
 
 async function submit() {
-  message.value = ''
+  message.value = null
   const response = await client.POST('/api/token', {
     body: {
       password: password.value,
@@ -22,7 +25,7 @@ async function submit() {
   if (response.response.ok) {
     tokenStore.set(response.data!.accessToken, new Date(response.data!.validUntil))
   } else {
-    message.value = 'Incorrect password.'
+    message.value = 'incorrectPassword'
   }
 }
 </script>
@@ -30,13 +33,18 @@ async function submit() {
 <template>
   <div class="modal">
     <div>
-      <h1>Authentication</h1>
+      <div style="display: flex; flex-direction: row">
+        <div>
+          <h1>{{ t('authentication') }}</h1>
+        </div>
+        <div style="flex: 1; min-width: 12em; text-align: end"><LocaleSelect /></div>
+      </div>
       <p>
-        Password: <input type="password" data-cy="password" v-model="password" />
+        {{ t('password') }} <input type="password" data-cy="password" v-model="password" />
         <WhiteSpace />
-        <button data-cy="submit" @click="submit" :disabled="password === ''">OK</button>
+        <button data-cy="submit" @click="submit" :disabled="password === ''">{{ t('ok') }}</button>
       </p>
-      <p>{{ message }}</p>
+      <p v-if="message !== null">{{ t(message) }}</p>
     </div>
   </div>
 </template>
@@ -60,3 +68,16 @@ async function submit() {
   padding: 20px;
 }
 </style>
+
+<i18n>
+en:
+  authentication: "Authentication"
+  password: "Password:"
+  ok: "OK"
+  incorrectPassword: "Incorrect password."
+fr:
+  authentication: "Authentification"
+  password: "Mot de passe:"
+  ok: "OK"
+  incorrectPassword: "Mot de passe incorrect."
+</i18n>
