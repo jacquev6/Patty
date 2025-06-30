@@ -526,6 +526,25 @@ describe('The adaptation batch creation page', () => {
     cy.get('.suggestion').eq(0).should('have.text', 'Blah')
     cy.get('.suggestion').eq(1).should('have.text', 'Blah (previous version)')
   })
+
+  it('reproduces issue #87', () => {
+    cy.get('[data-cy="settings-name"]').type('Blah')
+    cy.get('[data-cy="settings-name"]').type('{selectAll}{backspace}')
+    cy.get('[data-cy="system-prompt"]').type('{selectAll}Blah 1')
+    cy.get('button:contains("Submit")').click()
+
+    cy.visit('/new-adaptation-batch')
+    cy.get('[data-cy="system-prompt"]').type('{selectAll}Blah 2')
+    cy.get('button:contains("Submit")').click()
+
+    cy.visit('/new-adaptation-batch')
+    cy.get('[data-cy="system-prompt"]').type('{selectAll}Blah 3')
+    cy.get('button:contains("Submit")').click()
+
+    cy.visit('/')
+    cy.get(':contains("( (previous version), dummy")').should('exist')
+    cy.get(':contains("( (older version), dummy")').should('exist')
+  })
 })
 
 describe('The adaptation batch edition page', () => {
