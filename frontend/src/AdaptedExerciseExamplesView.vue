@@ -1,16 +1,5 @@
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-import ExamplesViewExercise, { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
-import { useBreadcrumbsStore } from './BreadcrumbsStore'
-
-const breadcrumbsStore = useBreadcrumbsStore()
-const { t } = useI18n()
-
-onMounted(() => {
-  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'adaptedExerciseExamples', to: {} }])
-})
+<script lang="ts">
+import { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
 
 const yellow = '#ffff00'
 const orange = '#ffcf4c'
@@ -41,7 +30,7 @@ const highlightColors = [
   black,
 ]
 
-const examples: Example[] = [
+export const examples: Example[] = [
   // {
   //   title: '',
   //   description: null,
@@ -2121,6 +2110,21 @@ const examples: Example[] = [
     },
   },
 ]
+</script>
+
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import ExamplesViewExercise from './AdaptedExerciseExamplesViewExercise.vue'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
+
+const breadcrumbsStore = useBreadcrumbsStore()
+const { t } = useI18n()
+
+onMounted(() => {
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'adaptedExerciseExamples', to: {} }])
+})
 </script>
 
 <template>
