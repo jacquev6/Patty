@@ -1,4 +1,3 @@
-from typing import Any
 
 import sqlalchemy as sql
 
@@ -7,32 +6,7 @@ from . import orm_models
 
 
 def migrate(session: database_utils.Session) -> None:
-    for adaptation in session.query(orm_models.Adaptation).all():
-        fixed_manual_edit = fix_editable_text_inputs(adaptation._manual_edit)
-        if fixed_manual_edit != adaptation._manual_edit:
-            adaptation._manual_edit = fixed_manual_edit
-
-        fixed_initial_assistant_response = fix_editable_text_inputs(adaptation._initial_assistant_response)
-        if fixed_initial_assistant_response != adaptation._initial_assistant_response:
-            adaptation._initial_assistant_response = fixed_initial_assistant_response
-
-        fixed_adjustments = fix_editable_text_inputs(adaptation._adjustments)
-        if fixed_adjustments != adaptation._adjustments:
-            adaptation._adjustments = fixed_adjustments
-
     read_all_fields(session)
-
-
-def fix_editable_text_inputs(data: Any) -> Any:
-    if isinstance(data, list):
-        return [fix_editable_text_inputs(item) for item in data]
-    elif isinstance(data, dict):
-        if data.get("kind") == "editableTextInput" and "showOriginalText" not in data:
-            return {**data, "showOriginalText": True}
-        else:
-            return {key: fix_editable_text_inputs(value) for key, value in data.items()}
-    else:
-        return data
 
 
 def read_all_fields(session: database_utils.Session) -> None:
