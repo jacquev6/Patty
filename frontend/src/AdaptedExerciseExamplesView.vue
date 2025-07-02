@@ -1068,7 +1068,9 @@ const examples: Example[] = [
                   { kind: 'text', text: '.' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'classe' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -1092,7 +1094,9 @@ const examples: Example[] = [
               {
                 contents: [
                   { kind: 'text', text: 'cachots' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -1204,7 +1208,9 @@ const examples: Example[] = [
               },
               {
                 contents: [
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -1281,6 +1287,7 @@ const examples: Example[] = [
           {
             contents: [
               { kind: 'arrow' },
+              { kind: 'whitespace' },
               { kind: 'text', text: 'Léa' },
               { kind: 'whitespace' },
               { kind: 'text', text: 'et' },
@@ -1323,7 +1330,7 @@ const examples: Example[] = [
                 ],
               },
               {
-                contents: [{ kind: 'arrow' }, { kind: 'freeTextInput' }],
+                contents: [{ kind: 'arrow' }, { kind: 'whitespace' }, { kind: 'freeTextInput' }],
               },
             ],
           },
@@ -1357,7 +1364,7 @@ const examples: Example[] = [
                 ],
               },
               {
-                contents: [{ kind: 'arrow' }, { kind: 'freeTextInput' }],
+                contents: [{ kind: 'arrow' }, { kind: 'whitespace' }, { kind: 'freeTextInput' }],
               },
             ],
           },
@@ -1403,7 +1410,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'je' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'choisis' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1412,7 +1421,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'il' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'prends' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1421,7 +1432,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'vous' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'salissez' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1437,7 +1450,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'elle' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'pétille' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1446,7 +1461,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'elle' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'voit' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1455,7 +1472,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'il' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'galope' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1464,7 +1483,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'je' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'reçois' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -2006,6 +2027,7 @@ const examples: Example[] = [
           {
             contents: [
               { kind: 'arrow' },
+              { kind: 'whitespace' },
               { kind: 'text', text: 'La' },
               { kind: 'whitespace' },
               { kind: 'text', text: 'nuit' },
