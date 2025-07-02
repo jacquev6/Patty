@@ -52,6 +52,18 @@ type PageAnswers = {
 export type StudentAnswers = {
   pages: Partial<Record<number, PageAnswers>>
 }
+
+export const defaultSpacingVariables = () => ({
+  '--extra-horizontal-space-between-words': 0.26,
+  '--vertical-space-between-top-and-instruction': 0.35,
+  '--vertical-space-between-instruction-lines': 2,
+  '--vertical-space-between-instruction-and-statement': 2.15,
+  '--vertical-space-between-statement-lines': 3.6,
+  '--vertical-space-between-border-and-choices': 1.15,
+  '--vertical-space-between-choices-lines': 3.05,
+})
+
+export type SpacingVariables = ReturnType<typeof defaultSpacingVariables>
 </script>
 
 <script setup lang="ts">
@@ -68,8 +80,9 @@ const props = withDefaults(
     navigateUsingArrowKeys: boolean
     studentAnswersStorageKey?: string | null
     adaptedExercise: AdaptedExercise
+    spacingVariables?: SpacingVariables
   }>(),
-  { studentAnswersStorageKey: null },
+  { studentAnswersStorageKey: null, spacingVariables: defaultSpacingVariables },
 )
 
 provide('adaptedExerciseTeleportBackdropTo', useTemplateRef('container'))
@@ -149,11 +162,15 @@ const statementLines = computed<StatementLine[]>(() => {
 
   return lines
 })
+
+const spacingVariables = computed(() =>
+  Object.fromEntries(Object.entries(props.spacingVariables).map(([key, value]) => [key, `${value}em`])),
+)
 </script>
 
 <template>
   <PageNavigationControls :navigateUsingArrowKeys :pagesCount="totalPagesCount" v-model="pageIndex">
-    <div ref="container" class="container" spellcheck="false">
+    <div ref="container" class="container" spellcheck="false" :style="spacingVariables">
       <template v-if="pageIndex < statementPagesCount">
         <div class="instruction">
           <p v-for="{ contents } in adaptedExercise.instruction.lines">
@@ -195,14 +212,13 @@ const statementLines = computed<StatementLine[]>(() => {
 </template>
 
 <style scoped>
-div {
+div.container {
   font-family: Arial, sans-serif;
   font-size: 32px;
-  word-spacing: 0.26em;
   white-space-collapse: preserve;
-}
-
-.container {
+  word-spacing: var(--extra-horizontal-space-between-words);
+  padding-left: 6px;
+  padding-right: 6px;
   /* Ensure anything 'Teleport'ed to this element is rendered strictly within this element */
   overflow-x: hidden;
   overflow-y: auto;
@@ -210,25 +226,24 @@ div {
   height: 100%;
 }
 
+:deep(*) {
+  margin: 0;
+  padding: 0;
+}
+
 .instruction {
   text-align: center;
-  padding-top: 0.35em;
-  padding-bottom: 2em;
-}
-
-:deep(p) {
-  line-height: 2em;
-}
-
-.instruction :deep(*:first-child) {
-  margin-top: 0;
+  margin-top: calc(
+    var(--vertical-space-between-top-and-instruction) - (var(--vertical-space-between-instruction-lines) - 1em) / 2
+  );
+  line-height: var(--vertical-space-between-instruction-lines);
 }
 
 .statement {
-  padding: 27px 6px;
-}
-
-.statement :deep(*:first-child) {
-  margin-top: 0;
+  margin-top: calc(
+    var(--vertical-space-between-instruction-and-statement) -
+      (var(--vertical-space-between-instruction-lines) - 1em + var(--vertical-space-between-statement-lines) - 1em) / 2
+  );
+  line-height: var(--vertical-space-between-statement-lines);
 }
 </style>

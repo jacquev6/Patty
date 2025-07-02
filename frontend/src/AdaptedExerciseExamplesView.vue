@@ -2113,14 +2113,17 @@ export const examples: Example[] = [
 </script>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { defaultSpacingVariables } from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import ExamplesViewExercise from './AdaptedExerciseExamplesViewExercise.vue'
 import { useBreadcrumbsStore } from './BreadcrumbsStore'
 
 const breadcrumbsStore = useBreadcrumbsStore()
 const { t } = useI18n()
+
+const spacingVariables = reactive(defaultSpacingVariables())
 
 onMounted(() => {
   breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'adaptedExerciseExamples', to: {} }])
@@ -2129,10 +2132,19 @@ onMounted(() => {
 
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
+    <h1>{{ t('spacing') }}</h1>
+    <p>{{ t('changesNotSaved') }}</p>
+    <ul>
+      <li v-for="(variable, key) in spacingVariables" :key="key">
+        <code>{{ key }}</code
+        >: <input type="number" v-model="spacingVariables[key]" />em
+      </li>
+    </ul>
+
     <h1>{{ t('examples') }}</h1>
     <template v-for="example in examples" :key="example.title">
       <div style="margin-bottom: 10px">
-        <ExamplesViewExercise :example />
+        <ExamplesViewExercise :example :spacingVariables />
       </div>
     </template>
   </div>
@@ -2140,7 +2152,11 @@ onMounted(() => {
 
 <i18n>
 en:
+  spacing: Spacing
+  changesNotSaved: Changes made here are not saved, and applied only on this page, temporarily.
   examples: Examples
 fr:
+  spacing: Espacement
+  changesNotSaved: Les modifications effectuées ici ne sont pas enregistrées, et ne s'appliquent qu'à cette page, temporairement.
   examples: Exemples
 </i18n>

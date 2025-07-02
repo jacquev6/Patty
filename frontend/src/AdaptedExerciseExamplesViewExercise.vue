@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 
 import type { AdaptedExercise } from '@/apiClient'
 import MiniatureScreen from './MiniatureScreen.vue'
-import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
+import AdaptedExerciseRenderer, { type SpacingVariables } from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 import FixedColumns from './FixedColumns.vue'
 
 export type Example = {
@@ -17,6 +17,7 @@ export type Example = {
 
 const props = defineProps<{
   example: Example
+  spacingVariables: SpacingVariables
 }>()
 
 const { t } = useI18n()
@@ -55,7 +56,11 @@ watch(Escape, () => {
     </template>
     <template #col-2>
       <MiniatureScreen :fullScreen>
-        <AdaptedExerciseRenderer :navigateUsingArrowKeys="fullScreen" :adaptedExercise="example.exercise" />
+        <AdaptedExerciseRenderer
+          :navigateUsingArrowKeys="fullScreen"
+          :spacingVariables
+          :adaptedExercise="example.exercise"
+        />
         <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
       </MiniatureScreen>
     </template>
