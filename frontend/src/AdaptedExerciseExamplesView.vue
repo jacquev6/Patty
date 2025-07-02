@@ -1,13 +1,5 @@
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import ExamplesViewExercise, { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
-import { useBreadcrumbsStore } from './BreadcrumbsStore'
-
-const breadcrumbsStore = useBreadcrumbsStore()
-
-onMounted(() => {
-  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'Examples', to: {} }])
-})
+<script lang="ts">
+import { type Example } from './AdaptedExerciseExamplesViewExercise.vue'
 
 const yellow = '#ffff00'
 const orange = '#ffcf4c'
@@ -38,7 +30,7 @@ const highlightColors = [
   black,
 ]
 
-const examples: Example[] = [
+export const examples: Example[] = [
   // {
   //   title: '',
   //   description: null,
@@ -77,6 +69,138 @@ const examples: Example[] = [
   //     reference: null,
   //   },
   // },
+  {
+    title: 'RCDouble',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Remplace' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'chaque' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'mot' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'colorié' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'par' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'synonyme' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: "C'" },
+              { kind: 'text', text: 'est' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'film' },
+              { kind: 'whitespace' },
+              { kind: 'formatted', highlighted: yellow, contents: [{ kind: 'text', text: 'comique' }] },
+              { kind: 'text', text: '.' },
+              { kind: 'whitespace' },
+              { kind: 'arrow' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: "C'" },
+              { kind: 'text', text: 'est' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'film' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'drôle' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'Tous' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'ses' },
+                  { kind: 'whitespace' },
+                  { kind: 'formatted', highlighted: yellow, contents: [{ kind: 'text', text: 'vêtements' }] },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'sont' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'sales' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'arrow' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'Tous' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'ses' },
+                  { kind: 'whitespace' },
+                  { kind: 'freeTextInput' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'sont' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'sales' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'b' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'Elle' },
+                  { kind: 'whitespace' },
+                  { kind: 'formatted', highlighted: yellow, contents: [{ kind: 'text', text: 'lance' }] },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'du' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'pain' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'aux' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'canards' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'arrow' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'Elle' },
+                  { kind: 'whitespace' },
+                  { kind: 'freeTextInput' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'du' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'pain' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'aux' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'canards' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
   {
     title: 'EditTexte',
     description: null,
@@ -933,7 +1057,9 @@ const examples: Example[] = [
                   { kind: 'text', text: '.' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'classe' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -957,7 +1083,9 @@ const examples: Example[] = [
               {
                 contents: [
                   { kind: 'text', text: 'cachots' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -1069,7 +1197,9 @@ const examples: Example[] = [
               },
               {
                 contents: [
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   {
                     kind: 'multipleChoicesInput',
                     choices: [
@@ -1146,6 +1276,7 @@ const examples: Example[] = [
           {
             contents: [
               { kind: 'arrow' },
+              { kind: 'whitespace' },
               { kind: 'text', text: 'Léa' },
               { kind: 'whitespace' },
               { kind: 'text', text: 'et' },
@@ -1188,7 +1319,7 @@ const examples: Example[] = [
                 ],
               },
               {
-                contents: [{ kind: 'arrow' }, { kind: 'freeTextInput' }],
+                contents: [{ kind: 'arrow' }, { kind: 'whitespace' }, { kind: 'freeTextInput' }],
               },
             ],
           },
@@ -1222,7 +1353,7 @@ const examples: Example[] = [
                 ],
               },
               {
-                contents: [{ kind: 'arrow' }, { kind: 'freeTextInput' }],
+                contents: [{ kind: 'arrow' }, { kind: 'whitespace' }, { kind: 'freeTextInput' }],
               },
             ],
           },
@@ -1268,7 +1399,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'je' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'choisis' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1277,7 +1410,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'il' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'prends' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1286,7 +1421,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'vous' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'salissez' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1302,7 +1439,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'elle' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'pétille' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1311,7 +1450,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'elle' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'voit' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1320,7 +1461,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'il' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'galope' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1329,7 +1472,9 @@ const examples: Example[] = [
                   { kind: 'text', text: 'je' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'reçois' },
+                  { kind: 'whitespace' },
                   { kind: 'arrow' },
+                  { kind: 'whitespace' },
                   { kind: 'freeTextInput' },
                 ],
               },
@@ -1871,6 +2016,7 @@ const examples: Example[] = [
           {
             contents: [
               { kind: 'arrow' },
+              { kind: 'whitespace' },
               { kind: 'text', text: 'La' },
               { kind: 'whitespace' },
               { kind: 'text', text: 'nuit' },
@@ -1966,13 +2112,51 @@ const examples: Example[] = [
 ]
 </script>
 
+<script setup lang="ts">
+import { onMounted, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import { defaultSpacingVariables } from './AdaptedExercise/AdaptedExerciseRenderer.vue'
+import ExamplesViewExercise from './AdaptedExerciseExamplesViewExercise.vue'
+import { useBreadcrumbsStore } from './BreadcrumbsStore'
+
+const breadcrumbsStore = useBreadcrumbsStore()
+const { t } = useI18n()
+
+const spacingVariables = reactive(defaultSpacingVariables())
+
+onMounted(() => {
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'adaptedExerciseExamples', to: {} }])
+})
+</script>
+
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
-    <h1>Examples</h1>
+    <h1>{{ t('spacing') }}</h1>
+    <p>{{ t('changesNotSaved') }}</p>
+    <ul>
+      <li v-for="(variable, key) in spacingVariables" :key="key">
+        <code>{{ key }}</code
+        >: <input type="number" v-model="spacingVariables[key]" />em
+      </li>
+    </ul>
+
+    <h1>{{ t('examples') }}</h1>
     <template v-for="example in examples" :key="example.title">
       <div style="margin-bottom: 10px">
-        <ExamplesViewExercise :example />
+        <ExamplesViewExercise :example :spacingVariables />
       </div>
     </template>
   </div>
 </template>
+
+<i18n>
+en:
+  spacing: Spacing
+  changesNotSaved: Changes made here are not saved, and applied only on this page, temporarily.
+  examples: Examples
+fr:
+  spacing: Espacement
+  changesNotSaved: Les modifications effectuées ici ne sont pas enregistrées, et ne s'appliquent qu'à cette page, temporairement.
+  examples: Exemples
+</i18n>

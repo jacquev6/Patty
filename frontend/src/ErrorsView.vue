@@ -39,7 +39,7 @@ onMounted(async () => {
     existingErrors.value = response.data.errors
   }
 
-  breadcrumbsStore.set([{ text: 'Errors', to: {} }])
+  breadcrumbsStore.set([{ textKey: 'errors', to: {} }])
 })
 </script>
 

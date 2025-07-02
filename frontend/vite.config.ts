@@ -1,12 +1,15 @@
 import { fileURLToPath, URL } from 'node:url'
 import { promises as fs } from 'fs'
+import path, { dirname } from 'node:path'
 
 import { defineConfig, Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 
 
+// @todo Maybe this whacky plugin could be replaced using the 'build.rollupOptions.input' option of Vite?
 function readOtherIndexHtml(name : string) : Plugin {
   // Warning: this hack breaks the '--watch' option of 'vite build' for the '${name}.html' file (because it still thinks it's reading 'index.html').
   // Accepted for now.
@@ -27,6 +30,10 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
   const plugins: (Plugin | ReturnType<typeof vueDevTools>)[] = [
     readOtherIndexHtml(entryPointName),
     vue(),
+    vueI18n({
+      include: path.resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
+      defaultSFCLang: 'yml',
+    })
   ]
   
   // @todo Find a way to re-enable Vue DevTools for interactive development but not for end-to-end testing: they pollute visual tests.

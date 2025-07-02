@@ -25,7 +25,7 @@ async function refresh() {
     baseAdaptationBatch.value = response.data
   }
 
-  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'New adaptation batch', to: {} }])
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'newAdaptationBatch', to: {} }])
 }
 
 watch(() => identifiedUser.identifier, refresh, { immediate: true })

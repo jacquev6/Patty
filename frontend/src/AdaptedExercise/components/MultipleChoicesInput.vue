@@ -184,21 +184,20 @@ watch(tricolorablesRevisionIndex, recolor, { immediate: true })
 .choices {
   border: 1px dashed green;
   background-color: white;
-  padding: 5px 10px;
   user-select: none; /* Prevent accidental selection. Warning: not tested using Cypress (too difficult). */
-}
-
-.choices p {
-  margin-top: 34px;
-  margin-bottom: 0;
+  padding: 0 10px;
+  line-height: var(--vertical-space-between-choices-lines);
 }
 
 .choices p:first-child {
-  margin-top: 16px;
+  margin-top: calc(
+    var(--vertical-space-between-border-and-choices) - (var(--vertical-space-between-choices-lines) - 1em) / 2
+  );
 }
-
 .choices p:last-child {
-  margin-bottom: 16px;
+  margin-bottom: calc(
+    var(--vertical-space-between-border-and-choices) - (var(--vertical-space-between-choices-lines) - 1em) / 2
+  );
 }
 
 .choice {

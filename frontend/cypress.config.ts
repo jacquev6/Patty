@@ -9,7 +9,7 @@ function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigO
   // Enable high-resolution screenshots (inspired by the contents of 'getCompareSnapshotsPlugin' but fixed for browser.name === 'chromium')
   // Disable spellcheck
   on('before:browser:launch', function (browser, launchOptions) {
-    const width = 1600
+    const width = 2000
     const height = 1200
 
     if (browser.name === 'chromium') {

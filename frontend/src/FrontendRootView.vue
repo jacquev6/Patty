@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import AuthenticationModal from './AuthenticationModal.vue'
 import FrontendRootViewAuthenticated from './FrontendRootViewAuthenticated.vue'
+
+const { t } = useI18n()
+const { d } = useI18n({ useScope: 'global' })
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 
@@ -41,11 +46,20 @@ const unavailableUntil = forceAvailable ? null : (fromSubstitution ?? fromQuery)
 
 <template>
   <template v-if="unavailableUntil !== null">
-    <h1>Unavailable</h1>
-    <p>Patty is undergoing a maintenance operation. It's expected to be back on {{ unavailableUntil }}.</p>
+    <h1>{{ t('unavailable') }}</h1>
+    <p>{{ t('inProgress', { datetime: d(unavailableUntil, 'long') }) }}</p>
   </template>
   <template v-else-if="authenticationTokenStore.token === null">
     <AuthenticationModal />
   </template>
   <FrontendRootViewAuthenticated v-else />
 </template>
+
+<i18n>
+en:
+  unavailable: "Unavailable"
+  inProgress: "A maintenance operation is in in progress. Patty should be available again on {datetime}."
+fr:
+  unavailable: "Indisponible"
+  inProgress: "Une opération de maintenance est en cours. Patty devrait être de nouveau disponible le {datetime}."
+</i18n>

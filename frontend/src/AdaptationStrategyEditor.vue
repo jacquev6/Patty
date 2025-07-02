@@ -106,11 +106,15 @@ const settingsName = computed({
     }
   },
   set: (value: string) => {
-    const found = props.availableStrategySettings.find((s) => s.name === value)
-    if (found === undefined) {
-      strategy.value.settings.name = value
+    if (value.trim() === '') {
+      strategy.value.settings.name = null
     } else {
-      Object.assign(strategy.value.settings, found)
+      const found = props.availableStrategySettings.find((s) => s.name === value)
+      if (found === undefined) {
+        strategy.value.settings.name = value
+      } else {
+        Object.assign(strategy.value.settings, found)
+      }
     }
   },
 })

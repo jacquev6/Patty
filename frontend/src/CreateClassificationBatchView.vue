@@ -6,7 +6,7 @@ import { onMounted } from 'vue'
 const breadcrumbsStore = useBreadcrumbsStore()
 
 onMounted(() => {
-  breadcrumbsStore.set([{ text: 'Sandbox' }, { text: 'New classification batch', to: {} }])
+  breadcrumbsStore.set([{ textKey: 'sandbox' }, { textKey: 'newClassificationBatch', to: {} }])
 })
 </script>
 

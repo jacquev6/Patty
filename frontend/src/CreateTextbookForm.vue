@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { useAuthenticatedClient } from './apiClient'
 import IdentifiedUser from './IdentifiedUser.vue'
@@ -10,6 +11,7 @@ import InputForNonEmptyStringOrNull from './InputForNonEmptyStringOrNull.vue'
 import InputForNumberOrNull from './InputForNumberOrNull.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const client = useAuthenticatedClient()
 
@@ -45,19 +47,34 @@ async function submit() {
 
 <template>
   <BusyBox :busy>
-    <p>Created by: <IdentifiedUser /></p>
+    <p>{{ t('createdBy') }} <IdentifiedUser /></p>
     <p>
-      <label>Title: <input v-model="title" data-cy="textbook-title" /></label>
+      <label>{{ t('title') }} <input v-model="title" data-cy="textbook-title" /></label>
     </p>
     <p>
-      <label>Editor: <InputForNonEmptyStringOrNull v-model="editor" data-cy="textbook-editor" /></label>
+      <label>{{ t('editor') }} <InputForNonEmptyStringOrNull v-model="editor" data-cy="textbook-editor" /></label>
     </p>
     <p>
-      <label>Year: <InputForNumberOrNull v-model="year" data-cy="textbook-year" /></label>
+      <label>{{ t('year') }} <InputForNumberOrNull v-model="year" data-cy="textbook-year" /></label>
     </p>
     <p>
-      <label>ISBN: <InputForNonEmptyStringOrNull v-model="isbn" data-cy="textbook-isbn" /></label>
+      <label>{{ t('isbn') }} <InputForNonEmptyStringOrNull v-model="isbn" data-cy="textbook-isbn" /></label>
     </p>
     <p><button @click="submit" :disabled>Submit</button></p>
   </BusyBox>
 </template>
+
+<i18n>
+en:
+  createdBy: Created by
+  title: "Title:"
+  editor: "Publisher:"
+  year: "Year:"
+  isbn: "ISBN:"
+fr:
+  createdBy: "Créé par"
+  title: "Titre :"
+  editor: "Éditeur :"
+  year: "Année :"
+  isbn: "ISBN :"
+</i18n>

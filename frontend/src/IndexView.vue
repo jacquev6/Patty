@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import {
   type ExtractionBatches,
@@ -14,6 +15,8 @@ import FixedColumns from './FixedColumns.vue'
 import CreateTextbookForm from './CreateTextbookForm.vue'
 
 const client = useAuthenticatedClient()
+const { t } = useI18n()
+const { d } = useI18n({ useScope: 'global' })
 
 const extractionBatches = reactive<ExtractionBatches['extractionBatches']>([])
 const nextExtractionBatchesChunkId = ref<string | null>(null)
@@ -94,86 +97,146 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
   <div style="padding-left: 5px; padding-right: 5px">
     <FixedColumns :columns="[1, 1]">
       <template #col-1>
-        <h1>Sandbox</h1>
+        <h1>{{ t('sandbox') }}</h1>
         <p>
-          <RouterLink :to="{ name: 'adapted-exercice-examples' }"
-            >Adapted exercise examples, with their JSON code.</RouterLink
-          >
+          <RouterLink :to="{ name: 'adapted-exercice-examples' }">{{ t('adaptedExerciseExamples') }}</RouterLink>
         </p>
         <h2>New batch</h2>
-        <p><RouterLink :to="{ name: 'create-extraction-batch' }">New extraction batch</RouterLink> (from a PDF)</p>
         <p>
-          <RouterLink :to="{ name: 'create-classification-batch' }">New classification batch</RouterLink> (for exercises
-          not yet classified)
+          <RouterLink :to="{ name: 'create-extraction-batch' }">{{ t('newExtractionBatch.link') }}</RouterLink> ({{
+            t('newExtractionBatch.comment')
+          }})
         </p>
         <p>
-          <RouterLink :to="{ name: 'create-adaptation-batch' }">New adaptation batch</RouterLink> (for exercises already
-          classified by hand)
+          <RouterLink :to="{ name: 'create-classification-batch' }">{{ t('newClassificationBatch.link') }}</RouterLink>
+          ({{ t('newClassificationBatch.comment') }})
+        </p>
+        <p>
+          <RouterLink :to="{ name: 'create-adaptation-batch' }">{{ t('newAdaptationBatch.link') }}</RouterLink> ({{
+            t('newAdaptationBatch.comment')
+          }})
         </p>
 
-        <h2>Existing extraction batches</h2>
+        <h2>{{ t('existingExtractionBatches') }}</h2>
         <ul>
           <li v-for="extractionBatch in extractionBatches">
             <RouterLink :to="{ name: 'extraction-batch', params: { id: extractionBatch.id } }">
               Batch E{{ extractionBatch.id }}
             </RouterLink>
-            (created by {{ extractionBatch.createdBy }} on {{ new Date(extractionBatch.createdAt).toLocaleString() }})
+            ({{
+              t('createdBy', { name: extractionBatch.createdBy, date: d(new Date(extractionBatch.createdAt), 'long') })
+            }})
           </li>
           <li>
             <button :disabled="nextExtractionBatchesChunkId === null" @click="loadNextExtractionBatchesChunk">
-              Load more...
+              {{ t('loadMore') }}
             </button>
           </li>
         </ul>
 
-        <h2>Existing classification batches</h2>
+        <h2>{{ t('existingClassificationBatches') }}</h2>
         <ul>
           <li v-for="classificationBatch in classificationBatches">
             <RouterLink :to="{ name: 'classification-batch', params: { id: classificationBatch.id } }">
               Batch C{{ classificationBatch.id }}
             </RouterLink>
-            (created by {{ classificationBatch.createdBy }} on
-            {{ new Date(classificationBatch.createdAt).toLocaleString() }})
+            ({{
+              t('createdBy', {
+                name: classificationBatch.createdBy,
+                date: d(new Date(classificationBatch.createdAt), 'long'),
+              })
+            }})
           </li>
           <li>
             <button :disabled="nextClassificationBatchesChunkId === null" @click="loadNextClassificationBatchesChunk">
-              Load more...
+              {{ t('loadMore') }}
             </button>
           </li>
         </ul>
 
-        <h2>Existing adaptation batches</h2>
+        <h2>{{ t('existingAdaptationBatches') }}</h2>
         <ul>
           <li v-for="adaptationBatch in adaptationBatches">
             <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptationBatch.id } }">
               Batch A{{ adaptationBatch.id }}
             </RouterLink>
             (<template v-if="adaptationBatch.strategySettingsName !== null"
-              >{{ adaptationBatch.strategySettingsName }}<WhiteSpace /></template
-            >using {{ adaptationBatch.model.provider }}/{{ adaptationBatch.model.name }}, created by
-            {{ adaptationBatch.createdBy }} on {{ new Date(adaptationBatch.createdAt).toLocaleString() }})
+              >{{ adaptationBatch.strategySettingsName }},<WhiteSpace /></template
+            >{{ adaptationBatch.model.provider }}/{{ adaptationBatch.model.name }},
+            {{
+              t('createdBy', { name: adaptationBatch.createdBy, date: d(new Date(adaptationBatch.createdAt), 'long') })
+            }})
           </li>
           <li>
             <button :disabled="nextAdaptationBatchesChunkId === null" @click="loadNextAdaptationBatchesChunk">
-              Load more...
+              {{ t('loadMore') }}
             </button>
           </li>
         </ul>
       </template>
       <template #col-2>
-        <h1>Textbooks</h1>
-        <h2>New textbook</h2>
+        <h1>{{ t('textbooks') }}</h1>
+        <h2>{{ t('newTextbook') }}</h2>
         <CreateTextbookForm />
-        <h2>Existing textbooks</h2>
+        <h2>{{ t('existingTextbooks') }}</h2>
         <ul>
           <li v-for="textbook in textbooks">
             <RouterLink :to="{ name: 'textbook', params: { id: textbook.id } }">{{
               textbookSummary(textbook)
             }}</RouterLink>
-            (created by {{ textbook.createdBy }} on {{ new Date(textbook.createdAt).toLocaleString() }})
+            ({{ t('createdBy', { name: textbook.createdBy, date: d(new Date(textbook.createdAt), 'long') }) }})
           </li>
         </ul>
       </template>
     </FixedColumns>
   </div>
 </template>
+
+<i18n>
+en:
+  sandbox: Sandbox
+  adaptedExerciseExamples: Adapted exercise examples, with their JSON code.
+  newBatch: New batch
+  newExtractionBatch:
+    link: New extraction batch
+    comment: from a PDF
+  newClassificationBatch:
+    link: New classification batch
+    comment: for exercises not yet classified
+  newAdaptationBatch:
+    link: New adaptation batch
+    comment: for exercises already classified by hand
+  existingExtractionBatches: Existing extraction batches
+  existingClassificationBatches: Existing classification batches
+  existingAdaptationBatches: Existing adaptation batches
+
+  textbooks: Textbooks
+  newTextbook: New textbook
+  existingTextbooks: Existing textbooks
+
+  createdBy: "created by {name} on {date}"
+  loadMore: Load more...
+fr:
+  sandbox: Bac à sable
+  adaptedExerciseExamples: Exemples d'exercices adaptés, avec leur code JSON.
+  newBatch: Nouveau batch
+  newExtractionBatch:
+    link: Nouveau batch d'extraction
+    comment: à partir d'un PDF
+  newClassificationBatch:
+    link: Nouveau batch de classification
+    comment: pour les exercices pas encore classés
+  newAdaptationBatch:
+    link: Nouveau batch d'adaptation
+    comment: pour les exercices déjà classés à la main
+  existingExtractionBatches: Batchs d'extraction existants
+  existingClassificationBatches: Batchs de classification existants
+  existingAdaptationBatches: Batchs d'adaptation existants
+
+  textbooks: Manuels
+  newTextbook: Nouveau manuel
+  existingTextbooks: Manuels existants
+
+  createdBy: "créé par {name} le {date}"
+  loadMore: Charger plus...
+</i18n>

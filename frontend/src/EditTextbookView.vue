@@ -32,7 +32,10 @@ async function refresh() {
     assert(response.data !== undefined)
     textbook.value = response.data.textbook
     availableStrategySettings.value = response.data.availableStrategySettings
-    breadcrumbsStore.set([{ text: 'Textbooks' }, { text: textbook.value.title, to: {} }])
+    breadcrumbsStore.set([
+      { textKey: 'textbooks' },
+      { textKey: 'existingTextbook', textArgs: { title: textbook.value.title }, to: {} },
+    ])
     refreshIfNeeded()
   }
 }

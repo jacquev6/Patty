@@ -46,7 +46,10 @@ async function refresh() {
       refreshes = 0
     }
 
-    breadcrumbsStore.set([{ text: 'Sandbox' }, { text: `Adaptation batch ${adaptationBatch.value.id}`, to: {} }])
+    breadcrumbsStore.set([
+      { textKey: 'sandbox' },
+      { textKey: 'existingAdaptationBatch', textArgs: { id: adaptationBatch.value.id }, to: {} },
+    ])
   }
 }
 

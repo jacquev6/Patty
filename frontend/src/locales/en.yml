@@ -1,0 +1,11 @@
+sandbox: Sandbox
+textbooks: Textbooks
+adaptedExerciseExamples: Adapted exercise examples
+newExtractionBatch: New extraction batch
+existingExtractionBatch: Extraction batch {id}
+newClassificationBatch: New classification batch
+existingClassificationBatch: Classification batch {id}
+newAdaptationBatch: New adaptation batch
+existingAdaptationBatch: Adaptation batch {id}
+existingAdaptation: Adaptation {id}
+existingTextbook: '{title}'
