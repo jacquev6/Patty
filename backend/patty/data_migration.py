@@ -1,4 +1,3 @@
-
 import sqlalchemy as sql
 
 from . import database_utils
