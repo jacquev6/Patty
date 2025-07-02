@@ -80,7 +80,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
         <h2>
           {{ t('page', page) }}
           <template v-if="page.assistantResponse === null"
-            ><WhiteSpace /><span class="inProgress">(in progress, will refresh when done)</span></template
+            ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
           >
         </h2>
         <template v-if="page.assistantResponse !== null">

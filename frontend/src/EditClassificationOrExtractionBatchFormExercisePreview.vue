@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useMagicKeys } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
 import MiniatureScreen from './MiniatureScreen.vue'
 import AdaptedExerciseRenderer from './AdaptedExercise/AdaptedExerciseRenderer.vue'
@@ -26,6 +27,7 @@ const emit = defineEmits<{
 
 const client = useAuthenticatedClient()
 const identifiedUser = useIdentifiedUserStore()
+const { t } = useI18n()
 
 const adaptation = computed(() => {
   if (props.exercise.adaptation === null) {
@@ -67,9 +69,7 @@ watch(Escape, () => {
         <component :is="headerComponent" style="margin-top: 0">
           {{ headerText
           }}<template v-if="classificationWasRequested">
-            <span v-if="exercise.exerciseClass === null" class="inProgress">
-              (in progress, will refresh when done)
-            </span>
+            <span v-if="exercise.exerciseClass === null" class="inProgress"> ({{ t('inProgress') }})</span>
             <template v-else-if="editingClassification"
               >: <EditClassificationBatchFormExercisePreviewClassEditor v-model="exerciseClassProxy" />
             </template>
@@ -77,13 +77,14 @@ watch(Escape, () => {
               <template v-if="exercise.reclassifiedBy === null"
                 >: {{ exercise.exerciseClass }}
                 <span class="discrete"
-                  >(classified by model <span class="edit" @click="editingClassification = true">🖊️</span>)</span
+                  >({{ t('classifiedByModel') }}
+                  <span class="edit" @click="editingClassification = true">🖊️</span>)</span
                 ></template
               >
               <template v-else
                 >: {{ exercise.exerciseClass }}
                 <span class="discrete"
-                  >(fixed by {{ exercise.reclassifiedBy }}
+                  >({{ t('fixedBy') }} {{ exercise.reclassifiedBy }}
                   <span class="edit" @click="editingClassification = true">🖊️</span>)</span
                 ></template
               >
@@ -91,7 +92,12 @@ watch(Escape, () => {
           </template>
         </component>
         <p v-if="showPageAndExercise">
-          Page: {{ exercise.pageNumber ?? 'N/A' }}, exercise: {{ exercise.exerciseNumber ?? 'N/A' }}
+          {{
+            t('pageAndExercise', {
+              pageNumber: exercise.pageNumber ?? 'N/A',
+              exerciseNumber: exercise.exerciseNumber ?? 'N/A',
+            })
+          }}
         </p>
         <p>
           <template v-for="(line, index) in exercise.fullText.split('\n')">
@@ -101,40 +107,41 @@ watch(Escape, () => {
         </p>
         <template v-if="adaptation !== null">
           <p>
-            <button :disabled="adaptation.status.kind !== 'success'" @click="fullScreen = true">Full screen</button>
+            <button :disabled="adaptation.status.kind !== 'success'" @click="fullScreen = true">
+              {{ t('fullScreen') }}
+            </button>
           </p>
           <p>
             <RouterLink :to="{ name: 'adaptation', params: { id: adaptation.id } }">
-              <button :disabled="adaptation.status.kind === 'inProgress'">View details and make adjustments</button>
+              <button :disabled="adaptation.status.kind === 'inProgress'">{{ t('viewDetails') }}</button>
             </RouterLink>
           </p>
         </template>
       </template>
       <template #col-2>
         <template v-if="adaptation === null">
-          <p v-if="!adaptationWasRequested">Adaptation was not requested.</p>
+          <p v-if="!adaptationWasRequested">{{ t('adaptationNotRequested') }}</p>
           <BusyBox v-else-if="exercise.exerciseClass == null" :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
           <p v-else-if="!exercise.exerciseClassHasSettings">
-            Exercise class <b>{{ exercise.exerciseClass }}</b> does not have adaptation settings yet.
+            <I18nT keypath="exerciseClassHasNoSettings"
+              ><b>{{ exercise.exerciseClass }}</b></I18nT
+            >
           </p>
           <p v-else>
-            Exercise class <b>{{ exercise.exerciseClass }}</b> did not have adaptation settings when this classification
-            batch was submitted.
+            <I18nT keypath="exerciseClassHadNoSettings"
+              ><b>{{ exercise.exerciseClass }}</b></I18nT
+            >
           </p>
         </template>
         <template v-else-if="adaptation.status.kind === 'inProgress'">
           <BusyBox :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
         </template>
         <template v-else-if="adaptation.status.kind === 'error'">
-          <component :is="headerComponent" style="margin-top: 0">Error with the LLM</component>
+          <component :is="headerComponent" style="margin-top: 0">{{ t('errorWithLLM') }}</component>
           <p>
-            <template v-if="adaptation.status.error === 'invalid-json'">
-              The LLM returned a JSON response that does not validate against the adapted exercise schema.
-            </template>
-            <template v-else-if="adaptation.status.error === 'not-json'">
-              The LLM returned a response that is not correct JSON.
-            </template>
-            <template v-else-if="adaptation.status.error === 'unknown'"> The LLM caused an unknown error. </template>
+            <template v-if="adaptation.status.error === 'invalid-json'">{{ t('llmInvalidJson') }}</template>
+            <template v-else-if="adaptation.status.error === 'not-json'">{{ t('llmNotJson') }}</template>
+            <template v-else-if="adaptation.status.error === 'unknown'">{{ t('llmUnknownError') }}</template>
             <template v-else>BUG: {{ ((status: never) => status)(adaptation.status) }}</template>
           </p>
         </template>
@@ -176,3 +183,41 @@ button.exitFullScreen {
   bottom: 2rem;
 }
 </style>
+
+<i18n>
+en:
+  inProgress: "in progress, will refresh when done"
+  classifiedByModel: classified by model
+  fixedBy: fixed by
+  pageAndExercise: "Page: {pageNumber}, exercise: {exerciseNumber}"
+  fullScreen: Full screen
+  exitFullScreen: Exit full screen (Esc)
+  viewDetails: View details and make adjustments
+  adaptationNotRequested: Adaptation was not requested.
+  exerciseClassHasNoSettings:
+    "Exercise class {0} does not have adaptation settings yet."
+  exerciseClassHadNoSettings:
+    "Exercise class {0} did not have adaptation settings when this classification batch was submitted."
+  errorWithLLM: Error with the LLM
+  llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
+  llmNotJson: The LLM returned a response that is not correct JSON.
+  llmUnknownError: The LLM caused an unknown error.
+fr:
+  inProgress: "en cours, se mettra à jour quand terminé"
+  classifiedByModel: classifié par le modèle
+  fixedBy: corrigé par
+  pageAndExercise: "Page : {pageNumber}, exercice : {exerciseNumber}"
+  fullScreen: Plein écran
+  exitFullScreen: Quitter le plein écran (Échap)
+  viewDetails: Voir les détails et faire des ajustements
+  adaptationNotRequested: L'adaptation n'a pas été demandée.
+  exerciseClassHasNoSettings:
+    "La classe d'exercice {0} n'a pas encore de paramètres d'adaptation."
+  exerciseClassHadNoSettings:
+    "La classe d'exercice {0} n'avait pas de paramètres d'adaptation
+    lorsque ce batch de classification a été soumis."
+  errorWithLLM: Erreur avec le LLM
+  llmInvalidJson: Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'exercice adapté.
+  llmNotJson: Le LLM a renvoyé une réponse qui n'est pas un JSON correct.
+  llmUnknownError: Le LLM a causé une erreur inconnue.
+</i18n>
