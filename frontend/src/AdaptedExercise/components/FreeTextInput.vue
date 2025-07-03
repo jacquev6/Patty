@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
-import { onMounted, onBeforeUpdate } from 'vue'
+import { computed, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
 
 import assert from '@/assert'
 
@@ -10,6 +9,8 @@ defineProps<{
 }>()
 
 const model = defineModel<string>({ required: true })
+
+const empty = computed(() => model.value === '')
 
 const span = useTemplateRef('span')
 
@@ -51,7 +52,7 @@ function filterKeyDown(event: KeyboardEvent) {
     @input="updateModel"
     @keydown="filterKeyDown"
     class="main"
-    :class="{ empty: model === '', tricolorable }"
+    :class="{ empty, tricolorable }"
   ></span>
 </template>
 

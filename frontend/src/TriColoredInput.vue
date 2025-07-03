@@ -118,12 +118,12 @@ function filterKeyDown(event: KeyboardEvent) {
 
 <template>
   <span
-    class="main"
-    :class="{ empty, digits }"
     ref="span"
     contenteditable
-    @keydown="filterKeyDown"
     @input="input"
+    @keydown="filterKeyDown"
+    class="main"
+    :class="{ empty, digits }"
   ></span>
 </template>
 

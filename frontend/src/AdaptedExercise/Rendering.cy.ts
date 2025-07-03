@@ -729,6 +729,42 @@ describe('FreeTextInput', () => {
     pressAndRelease('ArrowLeft')
     cy.get('p').should('contain.text', 'Page 1')
   })
+
+  it('spans several lines', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey: 'answers',
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'a' },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="freeTextInput"]').as('input')
+    cy.get('@input').type('{selectAll}Hello, this is a long free text that spans several lines.')
+    screenshot()
+  })
 })
 
 describe('MultipleChoicesInput', () => {
