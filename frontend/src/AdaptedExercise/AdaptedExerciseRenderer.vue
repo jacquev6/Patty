@@ -71,6 +71,7 @@ import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } fro
 import { useStorage } from '@vueuse/core'
 
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
+import AnySingleComponent from './dispatch/AnySingleComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
@@ -189,16 +190,36 @@ const spacingVariables = computed(() =>
         </div>
         <div class="statement" v-if="pageIndex < props.adaptedExercise.statement.pages.length">
           <TriColorLines ref="tricolor">
-            <p v-for="{ lineIndex, contents } in statementLines">
-              <AnySequenceComponent
-                :pageIndex
-                :lineIndex
-                :contents
-                :tricolorable="true"
-                v-model="studentAnswers"
-                v-model:inProgress="inProgress"
-              />
-            </p>
+            <template v-for="{ lineIndex, contents } in statementLines">
+              <p
+                class="alone"
+                v-if="
+                  contents.length === 1 &&
+                  (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
+                "
+              >
+                <AnySingleComponent
+                  :pageIndex
+                  :lineIndex
+                  :componentIndex="0"
+                  :component="contents[0]"
+                  v-model="studentAnswers"
+                  v-model:inProgress="inProgress"
+                  :tricolorable="true"
+                  :aloneOnLine="true"
+                />
+              </p>
+              <p v-else>
+                <AnySequenceComponent
+                  :pageIndex
+                  :lineIndex
+                  :contents
+                  :tricolorable="true"
+                  v-model="studentAnswers"
+                  v-model:inProgress="inProgress"
+                />
+              </p>
+            </template>
           </TriColorLines>
         </div>
       </template>
@@ -245,5 +266,14 @@ div.container {
       (var(--vertical-space-between-instruction-lines) - 1em + var(--vertical-space-between-statement-lines) - 1em) / 2
   );
   line-height: var(--vertical-space-between-statement-lines);
+}
+
+p.alone {
+  border: 2px outset black;
+  padding: 4px;
+}
+
+p.alone:has(:focus) {
+  background-color: #fffdd4;
 }
 </style>

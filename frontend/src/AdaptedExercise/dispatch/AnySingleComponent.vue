@@ -16,6 +16,7 @@ import { match, P } from 'ts-pattern'
 const props = defineProps<{
   pageIndex: number
   lineIndex: number
+  aloneOnLine: boolean
   componentIndex: number
   component: AnyComponent
   tricolorable: boolean
@@ -103,6 +104,7 @@ function render() {
         ...c,
         ...vModel(answerForFreeTextInput),
         tricolorable: props.tricolorable,
+        aloneOnLine: props.aloneOnLine,
       }),
     )
     .with({ kind: 'multipleChoicesInput' }, (c) =>
@@ -152,6 +154,7 @@ function render() {
         showOriginalText: false,
         ...vModel(studentAnswers),
         tricolorable: props.tricolorable,
+        aloneOnLine: props.aloneOnLine,
       }),
     )
     .exhaustive()

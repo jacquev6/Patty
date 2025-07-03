@@ -15,6 +15,7 @@ const props = defineProps<{
   contents: PlainText[]
   showOriginalText: false
   tricolorable: boolean
+  aloneOnLine: boolean
 }>()
 
 const studentAnswers = defineModel<StudentAnswers>({ required: true })
@@ -53,5 +54,5 @@ const modelProxy = computed<string>({
 </script>
 
 <template>
-  <FreeTextInput kind="freeTextInput" v-model="modelProxy" :tricolorable />
+  <FreeTextInput kind="freeTextInput" v-model="modelProxy" :tricolorable :aloneOnLine />
 </template>

@@ -20,6 +20,7 @@ const inProgress = defineModel<InProgressExercise>('inProgress', { required: tru
     v-for="(component, componentIndex) in props.contents"
     :pageIndex
     :lineIndex
+    :aloneOnLine="false"
     :componentIndex
     :component
     :tricolorable

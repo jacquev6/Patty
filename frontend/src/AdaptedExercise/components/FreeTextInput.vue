@@ -6,6 +6,7 @@ import assert from '@/assert'
 const props = defineProps<{
   kind: 'freeTextInput'
   tricolorable: boolean
+  aloneOnLine: boolean
 }>()
 
 const model = defineModel<string>({ required: true })
@@ -127,7 +128,7 @@ function filterKeyDown(event: KeyboardEvent) {
     @input="input"
     @keydown="filterKeyDown"
     class="main"
-    :class="{ empty }"
+    :class="{ empty, notAlone: !props.aloneOnLine }"
   ></span>
 </template>
 
@@ -135,6 +136,9 @@ function filterKeyDown(event: KeyboardEvent) {
 .main {
   line-height: 1em; /* Fix caret position on Chrome */
   padding: 4px;
+}
+
+.notAlone {
   border: 2px outset black;
 }
 
@@ -144,6 +148,10 @@ function filterKeyDown(event: KeyboardEvent) {
 }
 
 .main:focus {
+  outline: 0;
+}
+
+.notAlone:focus {
   background-color: #fffdd4;
 }
 </style>
