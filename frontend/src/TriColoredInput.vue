@@ -16,12 +16,13 @@ const span = useTemplateRef('span')
 
 async function input() {
   assert(span.value !== null)
+  assert(span.value.textContent !== null)
   let caretPosition = getCaretPosition()
 
-  const filteredText = Array.from(span.value.innerText)
+  const filteredText = Array.from(span.value.textContent)
     .filter((c) => !props.digitsOnly || '0123456789'.includes(c))
     .join('')
-  if (filteredText !== span.value.innerText && caretPosition !== null) {
+  if (filteredText !== span.value.textContent && caretPosition !== null) {
     caretPosition -= 1
   }
 
@@ -51,7 +52,8 @@ function getCaretPosition(): number | null {
       if (prev instanceof Text) {
         offset += prev.length
       } else if (prev instanceof HTMLElement) {
-        offset += prev.innerText.length
+        assert(prev.textContent !== null)
+        offset += prev.textContent.length
       } else {
         return null
       }
@@ -76,7 +78,8 @@ function setCaretPosition(caretPosition: number) {
     if (child instanceof Text) {
       length += child.length
     } else if (child instanceof HTMLElement) {
-      length += child.innerText.length
+      assert(child.textContent !== null)
+      length += child.textContent.length
     } else {
       return
     }

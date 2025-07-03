@@ -7,7 +7,8 @@ function click(n: number) {
   const el = document.activeElement
   if (el instanceof HTMLElement && el.getAttribute('contenteditable') !== null) {
     const [selectionStart, selectionStop] = getSelectionPosition(el)
-    el.innerText = el.innerText.slice(0, selectionStart) + key + el.innerText.slice(selectionStop)
+    assert(el.textContent !== null)
+    el.textContent = el.textContent.slice(0, selectionStart) + key + el.textContent.slice(selectionStop)
     setCaretPosition(el, selectionStart + 1)
     el.dispatchEvent(new InputEvent('input', { inputType: '' }))
   } else {
@@ -27,7 +28,8 @@ function getSelectionPosition(el: HTMLElement): [number, number] {
         if (prev instanceof Text) {
           offset += prev.length
         } else if (prev instanceof HTMLElement) {
-          offset += prev.innerText.length
+          assert(prev.textContent !== null)
+          offset += prev.textContent.length
         }
         prev = prev.previousSibling
       }

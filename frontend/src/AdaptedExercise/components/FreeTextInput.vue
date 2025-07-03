@@ -16,15 +16,16 @@ const span = useTemplateRef('span')
 
 function updateModel() {
   assert(span.value !== null)
-  model.value = span.value.innerText
+  assert(span.value.textContent !== null)
+  model.value = span.value.textContent
 }
 
 function updateContent() {
   assert(span.value !== null)
-  const innerText = model.value ?? ''
+  const textContent = model.value ?? ''
   // Avoid resetting the caret to the beginning in Firefox: change only if necessary
-  if (span.value.innerText !== innerText) {
-    span.value.innerText = innerText
+  if (span.value.textContent !== textContent) {
+    span.value.textContent = textContent
   }
 }
 

@@ -2,7 +2,7 @@
 function click() {
   const el = document.activeElement
   if (el instanceof HTMLElement && el.getAttribute('contenteditable') !== null) {
-    el.innerText = ''
+    el.textContent = ''
     el.dispatchEvent(new InputEvent('input', { inputType: '' }))
   } else {
     console.log('Active element not handled:', el)
