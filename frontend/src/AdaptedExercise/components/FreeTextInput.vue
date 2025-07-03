@@ -56,27 +56,24 @@ function getCaretPosition(): number | null {
 
 function setCaretPosition(caretPosition: number) {
   assert(span.value !== null)
-  let index = 0
-  let length = 0
-  while (length < caretPosition) {
-    const child = span.value.childNodes[index]
-    if (child instanceof Text) {
-      length += child.length
-    } else if (child instanceof HTMLElement) {
-      assert(child.textContent !== null)
-      length += child.textContent.length
-    } else {
-      return
+
+  let currentNode: Node | null = null
+  let currentOffset = 0
+  const treeWalker = document.createTreeWalker(span.value, NodeFilter.SHOW_TEXT)
+  while ((currentNode = treeWalker.nextNode())) {
+    assert(currentNode.nodeValue !== null)
+    const nodeLength = currentNode.nodeValue.length
+    if (currentOffset + nodeLength >= caretPosition) {
+      const sel = document.getSelection()
+      assert(sel !== null)
+      sel.removeAllRanges()
+      const range = document.createRange()
+      range.setStart(currentNode, caretPosition - currentOffset)
+      range.collapse(true)
+      sel.addRange(range)
+      break
     }
-    index += 1
-  }
-  const selection = document.getSelection()
-  if (selection !== null) {
-    const range = document.createRange()
-    range.setStart(span.value, index)
-    range.setEnd(span.value, index)
-    selection.removeAllRanges()
-    selection.addRange(range)
+    currentOffset += nodeLength
   }
 }
 
