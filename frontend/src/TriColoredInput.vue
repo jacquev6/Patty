@@ -14,6 +14,8 @@ const digits = computed(() => Array.from(model.value).every((c) => '0123456789'.
 
 const span = useTemplateRef('span')
 
+// @todo Consider homogenizing with 'FreeTextInput.vue' (not as easy as it sounds, because of interactions with 'VirtualNumericalKeyboard.vue').
+
 async function input() {
   assert(span.value !== null)
   assert(span.value.textContent !== null)
