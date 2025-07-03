@@ -28,31 +28,12 @@ function getCaretPosition(): number | null {
     return null
   }
   const range = selection.getRangeAt(0)
-  assert(range.startContainer === range.endContainer)
-  assert(range.startOffset === range.endOffset)
-  let container = range.startContainer
-  let offset = range.startOffset
-  while (container !== span.value) {
-    let prev = container.previousSibling
-    while (prev !== null) {
-      if (prev instanceof Text) {
-        offset += prev.length
-      } else if (prev instanceof HTMLElement) {
-        assert(prev.textContent !== null)
-        offset += prev.textContent.length
-      } else {
-        return null
-      }
-      prev = prev.previousSibling
-    }
-    const parent = container.parentElement
-    if (parent === null) {
-      return null
-    } else {
-      container = parent
-    }
+  if (span.value.contains(range.startContainer)) {
+    range.setStart(span.value, 0)
+    return range.toString().length
+  } else {
+    return null
   }
-  return offset
 }
 
 function setCaretPosition(caretPosition: number) {
