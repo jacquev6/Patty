@@ -2303,6 +2303,11 @@
             },
             "type": "array",
             "title": "Contents"
+          },
+          "increaseHorizontalSpace": {
+            "type": "boolean",
+            "title": "Increasehorizontalspace",
+            "default": false
           }
         },
         "type": "object",

@@ -55,6 +55,7 @@ export type StudentAnswers = {
 
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
+  '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 0.2,
   '--vertical-space-between-top-and-instruction': 0.35,
   '--vertical-space-between-instruction-lines': 2,
   '--vertical-space-between-instruction-and-statement': 2.15,

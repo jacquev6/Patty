@@ -106,6 +106,7 @@ class EditableTextInput(BaseModel):
     kind: Literal["editableTextInput"]
     showOriginalText: bool
     contents: list[PlainText]
+    increaseHorizontalSpace: bool = False
 
 
 # WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent

@@ -761,6 +761,11 @@ export interface components {
       showOriginalText: boolean
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
+      /**
+       * Increasehorizontalspace
+       * @default false
+       */
+      increaseHorizontalSpace?: boolean
     }
     /** Error */
     Error: {

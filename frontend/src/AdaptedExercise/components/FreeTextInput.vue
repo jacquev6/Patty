@@ -3,11 +3,15 @@ import { computed, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
 
 import assert from '@/assert'
 
-const props = defineProps<{
-  kind: 'freeTextInput'
-  tricolorable: boolean
-  aloneOnLine: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    kind: 'freeTextInput'
+    tricolorable: boolean
+    aloneOnLine: boolean
+    increaseHorizontalSpace?: boolean
+  }>(),
+  { increaseHorizontalSpace: false },
+)
 
 const model = defineModel<string>({ required: true })
 
@@ -109,7 +113,7 @@ function filterKeyDown(event: KeyboardEvent) {
     @input="input"
     @keydown="filterKeyDown"
     class="main"
-    :class="{ empty, notAlone: !props.aloneOnLine }"
+    :class="{ empty, notAlone: !props.aloneOnLine, increaseHorizontalSpace }"
   ></span>
 </template>
 
@@ -117,6 +121,11 @@ function filterKeyDown(event: KeyboardEvent) {
 .main {
   line-height: 1em; /* Fix caret position on Chrome */
   padding: 4px;
+}
+
+.increaseHorizontalSpace {
+  padding-left: calc(4px + var(--optional-extra-horizontal-space-between-letters-in-editable-text-input));
+  letter-spacing: var(--optional-extra-horizontal-space-between-letters-in-editable-text-input);
 }
 
 .notAlone {

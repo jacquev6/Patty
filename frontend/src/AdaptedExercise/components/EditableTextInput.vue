@@ -7,16 +7,20 @@ import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FreeTextInput from './FreeTextInput.vue'
 import { match, P } from 'ts-pattern'
 
-const props = defineProps<{
-  kind: 'editableTextInput'
-  pageIndex: number
-  lineIndex: number
-  componentIndex: number
-  contents: PlainText[]
-  showOriginalText: false
-  tricolorable: boolean
-  aloneOnLine: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    kind: 'editableTextInput'
+    pageIndex: number
+    lineIndex: number
+    componentIndex: number
+    contents: PlainText[]
+    showOriginalText: false
+    tricolorable: boolean
+    aloneOnLine: boolean
+    increaseHorizontalSpace?: boolean
+  }>(),
+  { increaseHorizontalSpace: false },
+)
 
 const studentAnswers = defineModel<StudentAnswers>({ required: true })
 
@@ -54,5 +58,5 @@ const modelProxy = computed<string>({
 </script>
 
 <template>
-  <FreeTextInput kind="freeTextInput" v-model="modelProxy" :tricolorable :aloneOnLine />
+  <FreeTextInput kind="freeTextInput" v-model="modelProxy" :tricolorable :aloneOnLine :increaseHorizontalSpace />
 </template>
