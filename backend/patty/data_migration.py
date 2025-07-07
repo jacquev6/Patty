@@ -5,35 +5,7 @@ from . import orm_models
 
 
 def migrate(session: database_utils.Session) -> None:
-    fix_issue_87(session)
-
     read_all_fields(session)
-
-
-def fix_issue_87(session: database_utils.Session) -> None:
-    for bad_exercise_class in (
-        session.execute(sql.select(orm_models.ExerciseClass).where(sql.func.trim(orm_models.ExerciseClass.name) == ""))
-        .scalars()
-        .all()
-    ):
-        print(f"Fixing ExerciseClass with ID {bad_exercise_class.id} (name was empty)")
-        settings = bad_exercise_class.latest_strategy_settings
-        while settings is not None:
-            settings.exercise_class = None
-            settings = settings.parent
-
-        for exercise in (
-            session.execute(
-                sql.select(orm_models.AdaptableExercise).where(
-                    orm_models.AdaptableExercise.exercise_class_id == bad_exercise_class.id
-                )
-            )
-            .scalars()
-            .all()
-        ):
-            exercise.exercise_class = None
-
-        session.delete(bad_exercise_class)
 
 
 def read_all_fields(session: database_utils.Session) -> None:
