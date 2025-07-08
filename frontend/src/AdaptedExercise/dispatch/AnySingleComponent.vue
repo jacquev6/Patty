@@ -81,10 +81,14 @@ function render() {
     .with({ kind: 'selectableLettersInput' }, ({ contents, colors, boxed }) =>
       h(SelectableLettersInputRenderer, {
         pageIndex: props.pageIndex,
+        lineIndex: props.lineIndex,
+        componentIndex: props.componentIndex,
         contents,
         colors,
         boxed,
         tricolorable: props.tricolorable,
+        getComponentAnswer,
+        setComponentAnswer,
       }),
     )
     .with({ kind: 'swappableInput' }, ({ contents }) =>

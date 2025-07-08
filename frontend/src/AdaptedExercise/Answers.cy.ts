@@ -891,5 +891,148 @@ describe('Adapted exercise answers', () => {
     cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'd0 d1')
   })
 
-  // @todo are saved and are loaded for selectable letters inputs
+  const exerciseWithSelectableLettersInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'a' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'b' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'c' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'd' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'e' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+          ],
+        },
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'f' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'g' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'h' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'i' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'j' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'k' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'l' }], colors, boxed: false },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForSelectableLettersInputs: StudentAnswers = {
+    pages: {
+      '0': {
+        lines: {
+          '0': {
+            components: {
+              '2': {
+                kind: 'highlights',
+                highlights: [1, 2, 0],
+              },
+              '6': {
+                kind: 'highlights',
+                highlights: [1, 2],
+              },
+            },
+          },
+        },
+      },
+      '1': {
+        lines: {
+          '0': {
+            components: {
+              '4': {
+                kind: 'highlights',
+                highlights: [3, 2],
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+
+  it('are saved for selectable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableLettersInputs,
+      },
+      attrs: {
+        style: `min-height: 450px;`,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    for (let i = 0; i < 2; i++) {
+      cy.get('[data-cy="selectableInput"]').eq(i).click()
+      cy.get('.picker>div>p:first-child>span').as('letter')
+      cy.get('@letter').eq(0).click()
+      cy.get('@letter').eq(1).click().click()
+      cy.get('span:contains("✅")').click()
+    }
+    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('.control').eq(1).click()
+    for (let i = 1; i < 2; i++) {
+      cy.get('[data-cy="selectableInput"]').eq(i).click()
+      cy.get('.picker>div>p:first-child>span').as('letter')
+      cy.get('@letter').eq(0).click().click().click()
+      cy.get('@letter').eq(1).click().click()
+      cy.get('span:contains("✅")').click()
+    }
+    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+
+    getAnswers().should('deep.equal', answersForSelectableLettersInputs)
+  })
+
+  it('are loaded for selectable letters inputs', () => {
+    setAnswers(answersForSelectableLettersInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableLettersInputs,
+      },
+    })
+
+    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('.control').eq(1).click()
+    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+  })
 })

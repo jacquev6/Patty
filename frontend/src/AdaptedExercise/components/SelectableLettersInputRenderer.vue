@@ -2,24 +2,50 @@
 import { computed, inject, reactive, ref, watch, type Ref } from 'vue'
 
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
-import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type { ComponentAnswer, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
   pageIndex: number
+  lineIndex: number
+  componentIndex: number
   contents: string
   colors: string[]
   boxed: boolean
   tricolorable: boolean
+  getComponentAnswer: () => ComponentAnswer | undefined
+  setComponentAnswer: (answer: ComponentAnswer) => void
 }>()
+
+const modelProxy = computed<number[]>({
+  get() {
+    const answer = props.getComponentAnswer()
+    if (answer === undefined) {
+      return Array(props.contents.length).fill(0)
+    } else {
+      assert(answer.kind === 'highlights')
+      return answer.highlights
+    }
+  },
+  set(highlights: number[]) {
+    props.setComponentAnswer({ kind: 'highlights', highlights })
+  },
+})
 
 const highlights: number[] = reactive([])
 watch(
-  () => props.contents,
+  modelProxy,
   () => {
-    highlights.splice(0, highlights.length, ...Array(props.contents.length).fill(0))
+    highlights.splice(0, highlights.length, ...modelProxy.value)
   },
-  { immediate: true },
+  { immediate: true, deep: true },
+)
+watch(
+  highlights,
+  (newHighlights) => {
+    modelProxy.value = newHighlights
+  },
+  { deep: true },
 )
 
 const formattedContents = computed((): PassiveRenderable[] => {
@@ -49,7 +75,6 @@ watch(
 )
 
 function increment(index: number) {
-  console.log('increment', index, highlights[index])
   highlights[index] = (highlights[index] + 1) % (props.colors.length + 1)
 }
 </script>
@@ -73,21 +98,17 @@ function increment(index: number) {
     <Teleport :to="teleportPickerTo">
       <div class="picker">
         <div>
-          <div>
-            <p>
-              <span
-                class="letter"
-                v-for="(letter, index) in contents"
-                @click="increment(index)"
-                :style="{ backgroundColor: colors[highlights[index] - 1] }"
-              >
-                {{ letter }}
-              </span>
-            </p>
-          </div>
-          <div>
-            <p><span style="cursor: pointer" @click="showPicker = false">✅</span></p>
-          </div>
+          <p>
+            <span
+              class="letter"
+              v-for="(letter, index) in contents"
+              @click="increment(index)"
+              :style="{ backgroundColor: colors[highlights[index] - 1] }"
+            >
+              {{ letter }}
+            </span>
+          </p>
+          <p><span style="cursor: pointer" @click="showPicker = false">✅</span></p>
         </div>
       </div>
     </Teleport>

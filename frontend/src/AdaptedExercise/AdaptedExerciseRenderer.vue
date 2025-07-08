@@ -43,6 +43,10 @@ export type ComponentAnswer =
         componentIndex: number
       }
     }
+  | {
+      kind: 'highlights'
+      highlights: number[]
+    }
 
 type LineAnswers = {
   components: Partial<Record<number, ComponentAnswer>>
