@@ -596,6 +596,85 @@ describe('SelectableInput', () => {
   })
 })
 
+describe('SelectableLettersInputRenderer', () => {
+  it('picks colors', () => {
+    cy.viewport(700, 500)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [{ contents: [{ kind: 'text', text: 'Select' }] }] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'a' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'b' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'c' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'd' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'e' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'f' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+      attrs: {
+        style: `min-height: 450px;`,
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="selectableInput"]').eq(0).click()
+    cy.get('span:contains("a")').last().click().should('have.css', 'background-color', 'rgb(255, 0, 0)')
+    cy.get('span:contains("b")').last().click().click().should('have.css', 'background-color', 'rgb(0, 128, 0)')
+    cy.get('span:contains("✅")').click()
+    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', 'rgb(255, 0, 0)')
+    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', 'rgb(0, 128, 0)')
+  })
+
+  // @todo it('hides picker when changing page'
+})
+
 describe('FreeTextInput', () => {
   it('accepts text input', () => {
     cy.viewport(500, 310)

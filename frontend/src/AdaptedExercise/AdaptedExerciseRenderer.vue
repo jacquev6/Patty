@@ -6,6 +6,7 @@ import type {
   PassiveExerciseComponent,
 } from '@/apiClient'
 import { match, P } from 'ts-pattern'
+import deepEqual from 'deep-equal'
 
 export type InProgressExercise = {
   exercise: RenderableExercise
@@ -115,6 +116,13 @@ type SelectableInputRenderable = {
   boxed: boolean
 }
 
+type SelectableLettersInputRenderable = {
+  kind: 'selectableLettersInput'
+  contents: string
+  colors: string[]
+  boxed: boolean
+}
+
 type SwappableInputRenderable = {
   kind: 'swappableInput'
   contents: PassiveRenderable[]
@@ -124,6 +132,7 @@ type ActiveRenderable =
   | TextInputRenderable
   | MultipleChoicesInputRenderable
   | SelectableInputRenderable
+  | SelectableLettersInputRenderable
   | SwappableInputRenderable
 
 export type AnyRenderable = PassiveRenderable | ActiveRenderable
@@ -250,6 +259,55 @@ function makeRenderableFromEditableTextInput({
   }
 }
 
+function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
+  const ret: AnyRenderable[] = []
+  const group: SelectableInputRenderable[] = []
+
+  function mustRegroup(content: SelectableInputRenderable): boolean {
+    if (group.length !== 0) {
+      if (content.boxed !== group[0].boxed) return false
+      if (!deepEqual(content.colors, group[0].colors)) return false
+    }
+    if (content.contents.length !== 1) return false
+    if (content.contents[0].kind !== 'text') return false
+    if (content.contents[0].text.length !== 1) return false
+    return true
+  }
+
+  function pushGroup(): void {
+    if (group.length > 1) {
+      ret.push({
+        kind: 'selectableLettersInput',
+        contents: group
+          .flatMap((g) => g.contents)
+          .map((c) => (c.kind === 'text' ? c.text : ''))
+          .join(''),
+        colors: group[0].colors,
+        boxed: group[0].boxed,
+      })
+    } else if (group.length === 1) {
+      ret.push(group[0])
+    }
+    group.splice(0, group.length)
+  }
+
+  for (const content of contents) {
+    if (content.kind === 'selectableInput' && mustRegroup(content)) {
+      group.push(content)
+    } else {
+      pushGroup()
+      if (content.kind === 'selectableInput' && mustRegroup(content)) {
+        group.push(content)
+      } else {
+        ret.push(content)
+      }
+    }
+  }
+  pushGroup()
+
+  return ret
+}
+
 function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   const pages: RenderablePage[] = []
 
@@ -270,8 +328,10 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
       for (const { contents } of page.lines) {
         const alone =
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
-        // @todo Detect strides of single-letter selectableInputs, and merge them into a new Renderer for selecting letters
-        statement.push({ contents: contents.flatMap(makeRenderableFromAnyExerciseComponent), alone })
+        statement.push({
+          contents: regroupSelectableInputs(contents.flatMap(makeRenderableFromAnyExerciseComponent)),
+          alone,
+        })
         for (const component of contents) {
           if (component.kind === 'editableTextInput' && component.showOriginalText) {
             statement.push({
@@ -321,6 +381,7 @@ const props = withDefaults(
 )
 
 provide('adaptedExerciseContainerDiv', useTemplateRef('container'))
+provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
 
 const renderableExercise = computed(() => makeRenderableExercise(props.adaptedExercise))
 
@@ -375,7 +436,7 @@ const spacingVariables = computed(() =>
             <PassiveSequenceComponent :contents :tricolorable="false" />
           </p>
         </div>
-        <div class="statement" v-if="page.statement.length !== 0">
+        <div ref="statement" class="statement" v-if="page.statement.length !== 0">
           <TriColorLines ref="tricolor">
             <template v-for="({ contents, alone }, lineIndex) in page.statement">
               <p :class="{ alone }">

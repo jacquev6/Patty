@@ -890,4 +890,6 @@ describe('Adapted exercise answers', () => {
     cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'CCC CCC')
     cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'd0 d1')
   })
+
+  // @todo are saved and are loaded for selectable letters inputs
 })

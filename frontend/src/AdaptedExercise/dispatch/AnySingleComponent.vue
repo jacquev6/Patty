@@ -9,6 +9,7 @@ import SelectableInputRenderer from '../components/SelectableInputRenderer.vue'
 import SwappableInputRenderer from '../components/SwappableInputRenderer.vue'
 import type { StudentAnswers, ComponentAnswer, InProgressExercise } from '../AdaptedExerciseRenderer.vue'
 import { match, P } from 'ts-pattern'
+import SelectableLettersInputRenderer from '../components/SelectableLettersInputRenderer.vue'
 
 const props = defineProps<{
   pageIndex: number
@@ -75,6 +76,14 @@ function render() {
         tricolorable: props.tricolorable,
         getComponentAnswer,
         setComponentAnswer,
+      }),
+    )
+    .with({ kind: 'selectableLettersInput' }, ({ contents, colors, boxed }) =>
+      h(SelectableLettersInputRenderer, {
+        contents,
+        colors,
+        boxed,
+        tricolorable: props.tricolorable,
       }),
     )
     .with({ kind: 'swappableInput' }, ({ contents }) =>
