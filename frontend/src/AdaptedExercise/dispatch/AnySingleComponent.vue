@@ -80,6 +80,7 @@ function render() {
     )
     .with({ kind: 'selectableLettersInput' }, ({ contents, colors, boxed }) =>
       h(SelectableLettersInputRenderer, {
+        pageIndex: props.pageIndex,
         contents,
         colors,
         boxed,

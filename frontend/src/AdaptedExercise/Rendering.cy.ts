@@ -667,12 +667,93 @@ describe('SelectableLettersInputRenderer', () => {
     cy.get('[data-cy="selectableInput"]').eq(0).click()
     cy.get('span:contains("a")').last().click().should('have.css', 'background-color', 'rgb(255, 0, 0)')
     cy.get('span:contains("b")').last().click().click().should('have.css', 'background-color', 'rgb(0, 128, 0)')
+    screenshot()
     cy.get('span:contains("✅")').click()
     cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', 'rgb(255, 0, 0)')
     cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', 'rgb(0, 128, 0)')
+    screenshot()
   })
 
-  // @todo it('hides picker when changing page'
+  it('hides picker when changing page', () => {
+    cy.viewport(700, 500)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [{ contents: [{ kind: 'text', text: 'Select' }] }] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'a' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'b' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'c' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'd' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'e' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'f' }],
+                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+      attrs: {
+        style: `min-height: 450px;`,
+      },
+    })
+
+    cy.get('[data-cy="selectableInput"]').click()
+    cy.get('div.picker').should('exist')
+
+    cy.get('div.control').eq(1).click()
+    cy.get('div.picker').should('not.exist')
+  })
 })
 
 describe('FreeTextInput', () => {
@@ -1115,6 +1196,60 @@ describe('MultipleChoicesInput', () => {
     cy.get('[data-cy="backdrop"]').should('not.exist')
     cy.get('@input').click()
     cy.get('@input').should('have.text', '....')
+    cy.get('[data-cy="choice0"]').should('not.exist')
+  })
+
+  it('closes choices when changing page', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices,
+                        showChoicesByDefault: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'multipleChoicesInput',
+                        choices: twoChoices,
+                        showChoicesByDefault: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    cy.get('[data-cy="multipleChoicesInput"]').as('input')
+    cy.get('@input').click()
+    cy.get('[data-cy="choice0"]').should('exist')
+
+    cy.get('div.control').eq(1).click()
     cy.get('[data-cy="choice0"]').should('not.exist')
   })
 

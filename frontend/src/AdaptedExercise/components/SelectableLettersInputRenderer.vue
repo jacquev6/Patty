@@ -6,6 +6,7 @@ import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
+  pageIndex: number
   contents: string
   colors: string[]
   boxed: boolean
@@ -39,6 +40,13 @@ const teleportPickerTo = inject<Ref<HTMLDivElement> | null>('adaptedExerciseStat
 assert(teleportPickerTo !== undefined)
 
 const showPicker = ref(false)
+watch(
+  () => props.pageIndex,
+  () => {
+    showPicker.value = false
+  },
+  { immediate: true },
+)
 
 function increment(index: number) {
   console.log('increment', index, highlights[index])

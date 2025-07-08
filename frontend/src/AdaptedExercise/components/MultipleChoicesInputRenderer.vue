@@ -17,6 +17,7 @@ type FormattedTextContainer = {
 }
 
 const props = defineProps<{
+  pageIndex: number
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
@@ -60,7 +61,7 @@ const { floatingStyles } = useFloating(floatingReference, floatingElement, {
 const showBackdrop = computed(() => !props.showChoicesByDefault)
 const showChoices = ref(false)
 watch(
-  [() => props.showChoicesByDefault, choiceProxy],
+  [() => props.showChoicesByDefault, choiceProxy, () => props.pageIndex],
   ([showChoicesByDefault, model]) => {
     if (model === null) {
       showChoices.value = showChoicesByDefault
