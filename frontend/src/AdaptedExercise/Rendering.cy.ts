@@ -735,7 +735,7 @@ describe('FreeTextInput', () => {
     cy.getAllLocalStorage()
       .then(Object.values)
       .its(0)
-      .its('patty/student-answers/v2/exercise-answers')
+      .its('patty/student-answers/v3/exercise-answers')
       .then(JSON.parse)
       .its('pages.0.lines.0.components.3.text')
       .should('equal', v)

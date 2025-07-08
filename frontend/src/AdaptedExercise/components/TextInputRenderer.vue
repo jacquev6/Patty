@@ -2,27 +2,44 @@
 import { computed, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
 
 import assert from '@/assert'
+import type { ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
 
-const props = withDefaults(
-  defineProps<{
-    kind: 'freeTextInput'
-    tricolorable: boolean
-    aloneOnLine: boolean
-    increaseHorizontalSpace?: boolean
-  }>(),
-  { increaseHorizontalSpace: false },
-)
+const props = defineProps<{
+  pageIndex: number
+  lineIndex: number
+  componentIndex: number
+  initialText: string
+  increaseHorizontalSpace: boolean
+  tricolorable: boolean
+  aloneOnLine: boolean
+  getComponentAnswer: () => ComponentAnswer | undefined
+  setComponentAnswer: (answer: ComponentAnswer) => void
+}>()
 
-const model = defineModel<string>({ required: true })
+const modelProxy = computed<string>({
+  get() {
+    const answer = props.getComponentAnswer()
+    if (answer === undefined) {
+      return props.initialText
+    } else {
+      assert(answer.kind === 'text')
+      return answer.text
+    }
+  },
+  set(value: string) {
+    props.setComponentAnswer({ kind: 'text', text: value })
+  },
+})
 
-const empty = computed(() => model.value === '')
+const empty = computed(() => modelProxy.value === '')
 
 const span = useTemplateRef('span')
 
 function input() {
   assert(span.value !== null)
   assert(span.value.textContent !== null)
-  model.value = span.value.textContent
+  modelProxy.value = span.value.textContent
+  updateContent()
 }
 
 function getCaretPosition(): number | null {
@@ -69,7 +86,7 @@ function updateContent() {
   const caretPosition = getCaretPosition()
 
   if (props.tricolorable) {
-    span.value.innerHTML = model.value
+    span.value.innerHTML = modelProxy.value
       .split(/(\s+)/)
       .map((part) => {
         if (part.trim() === '') {
@@ -80,9 +97,9 @@ function updateContent() {
       })
       .join('')
   } else {
-    span.value.textContent = model.value
+    span.value.textContent = modelProxy.value
   }
-  assert(span.value.textContent === model.value)
+  assert(span.value.textContent === modelProxy.value)
 
   if (caretPosition !== null) {
     setCaretPosition(caretPosition)

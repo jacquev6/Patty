@@ -2,27 +2,34 @@
 import { h, type VNode } from 'vue'
 import { match } from 'ts-pattern'
 
-import type { PassiveComponent } from '@/apiClient'
-import ArrowComponent from '../components/ArrowComponent.vue'
-import FormattedComponent from '../components/FormattedComponent.vue'
-import TextComponent from '../components/TextComponent.vue'
-import WhitespaceComponent from '../components/WhitespaceComponent.vue'
+import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import FormattedRenderer from '../components/FormattedTextRenderer.vue'
+import TextRenderer from '../components/TextRenderer.vue'
+import WhitespaceRenderer from '../components/WhitespaceRenderer.vue'
 
 const props = defineProps<{
-  component: PassiveComponent
+  component: PassiveRenderable
   tricolorable: boolean
 }>()
 
 function render() {
   return match(props.component)
     .returnType<VNode>()
-    .with({ kind: 'arrow' }, (c) => h(ArrowComponent, { ...c, tricolorable: props.tricolorable }))
-    .with({ kind: 'choice' }, (c) =>
-      h(FormattedComponent, { ...c, kind: 'formatted', boxed: true, tricolorable: props.tricolorable }),
+    .with({ kind: 'text' }, ({ text }) => h(TextRenderer, { text, tricolorable: props.tricolorable }))
+    .with({ kind: 'whitespace' }, () => h(WhitespaceRenderer))
+    .with({ kind: 'formatted' }, ({ contents, bold, boxed, highlighted, italic, subscript, superscript, underlined }) =>
+      h(FormattedRenderer, {
+        contents,
+        bold,
+        boxed,
+        highlighted,
+        italic,
+        subscript,
+        superscript,
+        underlined,
+        tricolorable: props.tricolorable,
+      }),
     )
-    .with({ kind: 'text' }, (c) => h(TextComponent, { ...c, tricolorable: props.tricolorable }))
-    .with({ kind: 'whitespace' }, (c) => h(WhitespaceComponent, c))
-    .with({ kind: 'formatted' }, (c) => h(FormattedComponent, { ...c, tricolorable: props.tricolorable }))
     .exhaustive()
 }
 </script>

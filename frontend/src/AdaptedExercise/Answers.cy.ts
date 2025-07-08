@@ -3,7 +3,7 @@ import AdaptedExerciseRenderer, { type StudentAnswers } from './AdaptedExerciseR
 
 describe('Adapted exercise answers', () => {
   const studentAnswersStorageKey = '1'
-  const answersKey = `patty/student-answers/v2/exercise-${studentAnswersStorageKey}`
+  const answersKey = `patty/student-answers/v3/exercise-${studentAnswersStorageKey}`
 
   const emptyAnswers: StudentAnswers = {
     pages: {},
@@ -111,27 +111,27 @@ describe('Adapted exercise answers', () => {
     pages: {
       '0': {
         lines: {
-          '0': { components: { '2': { kind: 'freeTextInput', text: '0' }, '6': { kind: 'freeTextInput', text: '1' } } },
+          '0': { components: { '2': { kind: 'text', text: '0' }, '6': { kind: 'text', text: '1' } } },
           '1': {
             components: {
-              '0': { kind: 'freeTextInput', text: '2' },
-              '4': { kind: 'freeTextInput', text: '3' },
-              '8': { kind: 'freeTextInput', text: '4' },
+              '0': { kind: 'text', text: '2' },
+              '4': { kind: 'text', text: '3' },
+              '8': { kind: 'text', text: '4' },
             },
           },
-          '2': { components: { '2': { kind: 'freeTextInput', text: '5' }, '6': { kind: 'freeTextInput', text: '6' } } },
+          '2': { components: { '2': { kind: 'text', text: '5' }, '6': { kind: 'text', text: '6' } } },
         },
       },
       '1': {
         lines: {
           '0': {
-            components: { '0': { kind: 'freeTextInput', text: '7' }, '8': { kind: 'freeTextInput', text: '9' } },
+            components: { '0': { kind: 'text', text: '7' }, '8': { kind: 'text', text: '9' } },
           },
           '1': {
-            components: { '6': { kind: 'freeTextInput', text: '11' } },
+            components: { '6': { kind: 'text', text: '11' } },
           },
           '2': {
-            components: { '4': { kind: 'freeTextInput', text: '13' } },
+            components: { '4': { kind: 'text', text: '13' } },
           },
         },
       },
@@ -244,21 +244,21 @@ describe('Adapted exercise answers', () => {
         lines: {
           '0': {
             components: {
-              '2': { kind: 'selectableInput', color: 1 },
-              '6': { kind: 'selectableInput', color: 2 },
+              '2': { kind: 'selectable', color: 1 },
+              '6': { kind: 'selectable', color: 2 },
             },
           },
           '1': {
             components: {
-              '0': { kind: 'selectableInput', color: 3 },
-              '4': { kind: 'selectableInput', color: 4 },
-              '8': { kind: 'selectableInput', color: 1 },
+              '0': { kind: 'selectable', color: 3 },
+              '4': { kind: 'selectable', color: 4 },
+              '8': { kind: 'selectable', color: 1 },
             },
           },
           '2': {
             components: {
-              '2': { kind: 'selectableInput', color: 2 },
-              '6': { kind: 'selectableInput', color: 3 },
+              '2': { kind: 'selectable', color: 2 },
+              '6': { kind: 'selectable', color: 3 },
             },
           },
         },
@@ -267,18 +267,18 @@ describe('Adapted exercise answers', () => {
         lines: {
           '0': {
             components: {
-              '0': { kind: 'selectableInput', color: 1 },
-              '8': { kind: 'selectableInput', color: 3 },
+              '0': { kind: 'selectable', color: 1 },
+              '8': { kind: 'selectable', color: 3 },
             },
           },
           '1': {
             components: {
-              '6': { kind: 'selectableInput', color: 2 },
+              '6': { kind: 'selectable', color: 2 },
             },
           },
           '2': {
             components: {
-              '4': { kind: 'selectableInput', color: 1 },
+              '4': { kind: 'selectable', color: 1 },
             },
           },
         },
@@ -396,21 +396,21 @@ describe('Adapted exercise answers', () => {
         lines: {
           '0': {
             components: {
-              '2': { kind: 'multipleChoicesInput', choice: 0 },
-              '6': { kind: 'multipleChoicesInput', choice: 1 },
+              '2': { kind: 'choice', choice: 0 },
+              '6': { kind: 'choice', choice: 1 },
             },
           },
           '1': {
             components: {
-              '0': { kind: 'multipleChoicesInput', choice: 2 },
-              '4': { kind: 'multipleChoicesInput', choice: 0 },
-              '8': { kind: 'multipleChoicesInput', choice: 1 },
+              '0': { kind: 'choice', choice: 2 },
+              '4': { kind: 'choice', choice: 0 },
+              '8': { kind: 'choice', choice: 1 },
             },
           },
           '2': {
             components: {
-              '2': { kind: 'multipleChoicesInput', choice: 2 },
-              '6': { kind: 'multipleChoicesInput', choice: 0 },
+              '2': { kind: 'choice', choice: 2 },
+              '6': { kind: 'choice', choice: 0 },
             },
           },
         },
@@ -419,18 +419,18 @@ describe('Adapted exercise answers', () => {
         lines: {
           '0': {
             components: {
-              '0': { kind: 'multipleChoicesInput', choice: 0 },
-              '8': { kind: 'multipleChoicesInput', choice: 2 },
+              '0': { kind: 'choice', choice: 0 },
+              '8': { kind: 'choice', choice: 2 },
             },
           },
           '1': {
             components: {
-              '6': { kind: 'multipleChoicesInput', choice: 1 },
+              '6': { kind: 'choice', choice: 1 },
             },
           },
           '2': {
             components: {
-              '4': { kind: 'multipleChoicesInput', choice: 0 },
+              '4': { kind: 'choice', choice: 0 },
             },
           },
         },
@@ -499,18 +499,18 @@ describe('Adapted exercise answers', () => {
         lines: {
           '0': {
             components: {
-              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
+              '2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
             },
           },
           '1': {
             components: {
-              '4': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
+              '4': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
             },
           },
           '2': {
             components: {
-              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
-              '6': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
+              '2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
+              '6': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
             },
           },
         },
@@ -820,23 +820,32 @@ describe('Adapted exercise answers', () => {
     pages: {
       '0': {
         lines: {
-          '0': {
-            components: {
-              '2': { kind: 'editableTextInput', text: 'AAA AAA' },
-            },
-          },
           '1': {
             components: {
-              '2': { kind: 'editableTextInput', text: 'BBB BBB' },
+              '2': {
+                kind: 'text',
+                text: 'AAA AAA',
+              },
+            },
+          },
+          '3': {
+            components: {
+              '2': {
+                kind: 'text',
+                text: 'BBB BBB',
+              },
             },
           },
         },
       },
       '1': {
         lines: {
-          '0': {
+          '1': {
             components: {
-              '2': { kind: 'editableTextInput', text: 'CCC CCC' },
+              '2': {
+                kind: 'text',
+                text: 'CCC CCC',
+              },
             },
           },
         },

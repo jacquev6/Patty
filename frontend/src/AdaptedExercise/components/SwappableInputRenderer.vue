@@ -2,16 +2,15 @@
 import { computed } from 'vue'
 
 import assert from '@/assert'
-import type { FormattedText } from '@/apiClient'
-import FormattedComponent from './FormattedComponent.vue'
+import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import FormattedTextRenderer from './FormattedTextRenderer.vue'
 import type { InProgressExercise, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
-  kind: 'swappableInput'
   pageIndex: number
   lineIndex: number
   componentIndex: number
-  contents: FormattedText[]
+  contents: PassiveRenderable[]
   tricolorable: boolean
 }>()
 
@@ -32,14 +31,16 @@ const contentsFrom = computed(() => {
   if (answer === undefined) {
     return { pageIndex: props.pageIndex, lineIndex: props.lineIndex, componentIndex: props.componentIndex }
   } else {
-    assert(answer.kind === 'swappableInput')
+    assert(answer.kind === 'swappable')
     return answer.contentsFrom
   }
 })
 
 const actualContents = computed(() => {
   const { pageIndex, lineIndex, componentIndex } = contentsFrom.value
-  const component = inProgress.value.exercise.statement.pages[pageIndex].lines[lineIndex].contents[componentIndex]
+  const page = inProgress.value.exercise.pages[pageIndex]
+  assert(page.kind === 'statement')
+  const component = page.statement[lineIndex].contents[componentIndex]
   assert(component.kind === 'swappableInput')
   return component.contents
 })
@@ -57,9 +58,10 @@ function setAnswer(
   },
 ) {
   studentAnswers.value.pages[pageIndex] ??= { lines: {} }
+  studentAnswers.value.pages[pageIndex]!.lines ??= {}
   studentAnswers.value.pages[pageIndex]!.lines[lineIndex] ??= { components: {} }
   studentAnswers.value.pages[pageIndex]!.lines[lineIndex]!.components[componentIndex] = {
-    kind: 'swappableInput',
+    kind: 'swappable',
     contentsFrom,
   }
 }
@@ -92,11 +94,16 @@ function handleClick() {
 </script>
 
 <template>
-  <FormattedComponent
-    kind="formatted"
+  <FormattedTextRenderer
     class="main"
     :class="{ empty: actualContents.length === 0 }"
     :contents="actualContents"
+    :bold="false"
+    :italic="false"
+    :underlined="false"
+    :boxed="false"
+    :superscript="false"
+    :subscript="false"
     :highlighted
     :tricolorable
     data-cy="swappableInput"
