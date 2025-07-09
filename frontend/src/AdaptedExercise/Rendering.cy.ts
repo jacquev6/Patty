@@ -897,7 +897,7 @@ describe('FreeTextInput', () => {
       .its(0)
       .its('patty/student-answers/v3/exercise-answers')
       .then(JSON.parse)
-      .its('pages.0.lines.0.components.3.text')
+      .its('stmt-pg0-ln0-ct3.text')
       .should('equal', v)
     cy.get('@input').should('have.text', v)
   }

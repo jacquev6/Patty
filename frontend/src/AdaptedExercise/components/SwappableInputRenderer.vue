@@ -7,6 +7,7 @@ import FormattedTextRenderer from './FormattedTextRenderer.vue'
 import type { InProgressExercise, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
+  path: string
   pageIndex: number
   lineIndex: number
   componentIndex: number
@@ -29,7 +30,7 @@ const selected = computed(
 )
 
 const contentsFrom = computed(() => {
-  const answer = studentAnswers.pages[props.pageIndex]?.lines[props.lineIndex]?.components[props.componentIndex]
+  const answer = studentAnswers[props.path]
   if (answer === undefined) {
     return { pageIndex: props.pageIndex, lineIndex: props.lineIndex, componentIndex: props.componentIndex }
   } else {
@@ -60,13 +61,8 @@ function setAnswer(
   },
 ) {
   assert(studentAnswers !== undefined)
-  studentAnswers.pages[pageIndex] ??= { lines: {} }
-  studentAnswers.pages[pageIndex]!.lines ??= {}
-  studentAnswers.pages[pageIndex]!.lines[lineIndex] ??= { components: {} }
-  studentAnswers.pages[pageIndex]!.lines[lineIndex]!.components[componentIndex] = {
-    kind: 'swappable',
-    contentsFrom,
-  }
+  const path = `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}` // @todo Deduplicate this path construction logic.
+  studentAnswers[path] = { kind: 'swappable', contentsFrom }
 }
 
 function handleClick() {

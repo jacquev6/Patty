@@ -71,18 +71,7 @@ export type ComponentAnswer =
       highlights: number[]
     }
 
-type LineAnswers = {
-  components: Partial<Record<number, ComponentAnswer>>
-}
-
-type PageAnswers = {
-  lines: Partial<Record<number, LineAnswers>>
-}
-
-export type StudentAnswers = {
-  pages: Partial<Record<number, PageAnswers>>
-  // @todo Factorize accessors. Probably using a Pinia store.
-}
+export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
 
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
@@ -429,12 +418,10 @@ provide('adaptedExerciseInProgress', inProgress)
 
 const page = computed(() => renderableExercise.value.pages[pageIndex.value])
 
-const defaultStudentAnswers = { pages: {} }
-
 const studentAnswers =
   props.studentAnswersStorageKey === null
-    ? ref(defaultStudentAnswers)
-    : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, defaultStudentAnswers)
+    ? ref({})
+    : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
 provide('adaptedExerciseStudentAnswers', studentAnswers.value)
 
 const triColorLines = useTemplateRef('tricolor')
@@ -467,7 +454,14 @@ const spacingVariables = computed(() =>
           <TriColorLines ref="tricolor">
             <template v-for="({ contents, alone }, lineIndex) in page.statement">
               <p :class="{ alone }">
-                <AnySequenceComponent :pageIndex :lineIndex :contents :aloneOnLine="alone" :tricolorable="true" />
+                <AnySequenceComponent
+                  :path="`stmt-pg${pageIndex}-ln${lineIndex}`"
+                  :pageIndex
+                  :lineIndex
+                  :contents
+                  :aloneOnLine="alone"
+                  :tricolorable="true"
+                />
               </p>
             </template>
           </TriColorLines>

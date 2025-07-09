@@ -12,6 +12,7 @@ import { match, P } from 'ts-pattern'
 import SelectableLettersInputRenderer from '../components/SelectableLettersInputRenderer.vue'
 
 const props = defineProps<{
+  path: string
   pageIndex: number
   lineIndex: number
   aloneOnLine: boolean
@@ -21,13 +22,11 @@ const props = defineProps<{
 }>()
 
 function getComponentAnswer(studentAnswers: StudentAnswers) {
-  return studentAnswers.pages[props.pageIndex]?.lines?.[props.lineIndex]?.components[props.componentIndex]
+  return studentAnswers[props.path]
 }
 
 function setComponentAnswer(studentAnswers: StudentAnswers, answer: ComponentAnswer) {
-  studentAnswers.pages[props.pageIndex] ??= { lines: {} }
-  studentAnswers.pages[props.pageIndex]!.lines[props.lineIndex] ??= { components: {} }
-  studentAnswers.pages[props.pageIndex]!.lines[props.lineIndex]!.components[props.componentIndex] = answer
+  studentAnswers[props.path] = answer
 }
 
 function render() {
@@ -89,6 +88,7 @@ function render() {
     )
     .with({ kind: 'swappableInput' }, ({ contents }) =>
       h(SwappableInputRenderer, {
+        path: props.path,
         pageIndex: props.pageIndex,
         lineIndex: props.lineIndex,
         componentIndex: props.componentIndex,

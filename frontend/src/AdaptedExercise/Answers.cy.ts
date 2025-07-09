@@ -5,9 +5,7 @@ describe('Adapted exercise answers', () => {
   const studentAnswersStorageKey = '1'
   const answersKey = `patty/student-answers/v3/exercise-${studentAnswersStorageKey}`
 
-  const emptyAnswers: StudentAnswers = {
-    pages: {},
-  }
+  const emptyAnswers: StudentAnswers = {}
 
   const exerciseWithFreeTextInputs: AdaptedExercise = {
     format: 'v1',
@@ -108,34 +106,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForFreeTextInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': { components: { '2': { kind: 'text', text: '0' }, '6': { kind: 'text', text: '1' } } },
-          '1': {
-            components: {
-              '0': { kind: 'text', text: '2' },
-              '4': { kind: 'text', text: '3' },
-              '8': { kind: 'text', text: '4' },
-            },
-          },
-          '2': { components: { '2': { kind: 'text', text: '5' }, '6': { kind: 'text', text: '6' } } },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: { '0': { kind: 'text', text: '7' }, '8': { kind: 'text', text: '9' } },
-          },
-          '1': {
-            components: { '6': { kind: 'text', text: '11' } },
-          },
-          '2': {
-            components: { '4': { kind: 'text', text: '13' } },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'text', text: '0' },
+    'stmt-pg0-ln0-ct6': { kind: 'text', text: '1' },
+    'stmt-pg0-ln1-ct0': { kind: 'text', text: '2' },
+    'stmt-pg0-ln1-ct4': { kind: 'text', text: '3' },
+    'stmt-pg0-ln1-ct8': { kind: 'text', text: '4' },
+    'stmt-pg0-ln2-ct2': { kind: 'text', text: '5' },
+    'stmt-pg0-ln2-ct6': { kind: 'text', text: '6' },
+    'stmt-pg1-ln0-ct0': { kind: 'text', text: '7' },
+    'stmt-pg1-ln0-ct8': { kind: 'text', text: '9' },
+    'stmt-pg1-ln1-ct6': { kind: 'text', text: '11' },
+    'stmt-pg1-ln2-ct4': { kind: 'text', text: '13' },
   }
 
   const colors = ['rgb(128, 0, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 128)', 'rgba(0, 0, 0, 0)']
@@ -239,51 +220,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'selectable', color: 1 },
-              '6': { kind: 'selectable', color: 2 },
-            },
-          },
-          '1': {
-            components: {
-              '0': { kind: 'selectable', color: 3 },
-              '4': { kind: 'selectable', color: 4 },
-              '8': { kind: 'selectable', color: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'selectable', color: 2 },
-              '6': { kind: 'selectable', color: 3 },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '0': { kind: 'selectable', color: 1 },
-              '8': { kind: 'selectable', color: 3 },
-            },
-          },
-          '1': {
-            components: {
-              '6': { kind: 'selectable', color: 2 },
-            },
-          },
-          '2': {
-            components: {
-              '4': { kind: 'selectable', color: 1 },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct6': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln1-ct0': { kind: 'selectable', color: 3 },
+    'stmt-pg0-ln1-ct4': { kind: 'selectable', color: 4 },
+    'stmt-pg0-ln1-ct8': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln2-ct2': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln2-ct6': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct0': { kind: 'selectable', color: 1 },
+    'stmt-pg1-ln0-ct8': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln1-ct6': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln2-ct4': { kind: 'selectable', color: 1 },
   }
 
   const choices = [
@@ -391,51 +338,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForMultipleChoicesInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'choice', choice: 0 },
-              '6': { kind: 'choice', choice: 1 },
-            },
-          },
-          '1': {
-            components: {
-              '0': { kind: 'choice', choice: 2 },
-              '4': { kind: 'choice', choice: 0 },
-              '8': { kind: 'choice', choice: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'choice', choice: 2 },
-              '6': { kind: 'choice', choice: 0 },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '0': { kind: 'choice', choice: 0 },
-              '8': { kind: 'choice', choice: 2 },
-            },
-          },
-          '1': {
-            components: {
-              '6': { kind: 'choice', choice: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '4': { kind: 'choice', choice: 0 },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'choice', choice: 0 },
+    'stmt-pg0-ln0-ct6': { kind: 'choice', choice: 1 },
+    'stmt-pg0-ln1-ct0': { kind: 'choice', choice: 2 },
+    'stmt-pg0-ln1-ct4': { kind: 'choice', choice: 0 },
+    'stmt-pg0-ln1-ct8': { kind: 'choice', choice: 1 },
+    'stmt-pg0-ln2-ct2': { kind: 'choice', choice: 2 },
+    'stmt-pg0-ln2-ct6': { kind: 'choice', choice: 0 },
+    'stmt-pg1-ln0-ct0': { kind: 'choice', choice: 0 },
+    'stmt-pg1-ln0-ct8': { kind: 'choice', choice: 2 },
+    'stmt-pg1-ln1-ct6': { kind: 'choice', choice: 1 },
+    'stmt-pg1-ln2-ct4': { kind: 'choice', choice: 0 },
   }
 
   const exerciseWithSwappableInputs: AdaptedExercise = {
@@ -494,28 +407,10 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSwappableInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
-            },
-          },
-          '1': {
-            components: {
-              '4': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
-              '6': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
+    'stmt-pg0-ln1-ct4': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
+    'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
+    'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
   }
 
   function getAnswers(): Cypress.Chainable<StudentAnswers> {
@@ -817,40 +712,9 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForEditableTextInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '1': {
-            components: {
-              '2': {
-                kind: 'text',
-                text: 'AAA AAA',
-              },
-            },
-          },
-          '3': {
-            components: {
-              '2': {
-                kind: 'text',
-                text: 'BBB BBB',
-              },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '1': {
-            components: {
-              '2': {
-                kind: 'text',
-                text: 'CCC CCC',
-              },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln1-ct2': { kind: 'text', text: 'AAA AAA' },
+    'stmt-pg0-ln3-ct2': { kind: 'text', text: 'BBB BBB' },
+    'stmt-pg1-ln1-ct2': { kind: 'text', text: 'CCC CCC' },
   }
 
   it('are saved for editable text inputs', () => {
@@ -945,36 +809,9 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableLettersInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': {
-                kind: 'highlights',
-                highlights: [1, 2, 0],
-              },
-              '6': {
-                kind: 'highlights',
-                highlights: [1, 2],
-              },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '4': {
-                kind: 'highlights',
-                highlights: [3, 2],
-              },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'highlights', highlights: [1, 2, 0] },
+    'stmt-pg0-ln0-ct6': { kind: 'highlights', highlights: [1, 2] },
+    'stmt-pg1-ln0-ct4': { kind: 'highlights', highlights: [3, 2] },
   }
 
   it('are saved for selectable inputs', () => {
