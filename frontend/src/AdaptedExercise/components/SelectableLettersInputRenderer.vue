@@ -2,7 +2,12 @@
 import { computed, inject, reactive, watch, type Ref } from 'vue'
 
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
-import type { ComponentAnswer, InProgressExercise, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type {
+  ComponentAnswer,
+  InProgressExercise,
+  PassiveRenderable,
+  StudentAnswers,
+} from '../AdaptedExerciseRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
@@ -13,15 +18,19 @@ const props = defineProps<{
   colors: string[]
   boxed: boolean
   tricolorable: boolean
-  getComponentAnswer: () => ComponentAnswer | undefined
-  setComponentAnswer: (answer: ComponentAnswer) => void
+  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
+  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
 
-const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
+
+const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
+assert(inProgress !== undefined)
 
 const modelProxy = computed<number[]>({
   get() {
-    const answer = props.getComponentAnswer()
+    const answer = props.getComponentAnswer(studentAnswers)
     if (answer === undefined) {
       return Array(props.contents.length).fill(0)
     } else {
@@ -30,7 +39,7 @@ const modelProxy = computed<number[]>({
     }
   },
   set(highlights: number[]) {
-    props.setComponentAnswer({ kind: 'highlights', highlights })
+    props.setComponentAnswer(studentAnswers, { kind: 'highlights', highlights })
   },
 })
 
@@ -70,15 +79,15 @@ assert(teleportPickerTo !== undefined)
 const showPicker = computed({
   get() {
     return (
-      inProgress.value.p.kind === 'solvingSelectableLetters' &&
-      inProgress.value.p.selectable.pageIndex === props.pageIndex &&
-      inProgress.value.p.selectable.lineIndex === props.lineIndex &&
-      inProgress.value.p.selectable.componentIndex === props.componentIndex
+      inProgress.p.kind === 'solvingSelectableLetters' &&
+      inProgress.p.selectable.pageIndex === props.pageIndex &&
+      inProgress.p.selectable.lineIndex === props.lineIndex &&
+      inProgress.p.selectable.componentIndex === props.componentIndex
     )
   },
   set(value: boolean) {
     if (value) {
-      inProgress.value.p = {
+      inProgress.p = {
         kind: 'solvingSelectableLetters',
         selectable: {
           pageIndex: props.pageIndex,
@@ -87,7 +96,7 @@ const showPicker = computed({
         },
       }
     } else {
-      inProgress.value.p = { kind: 'none' }
+      inProgress.p = { kind: 'none' }
     }
   },
 })

@@ -7,7 +7,7 @@ import TextInputRenderer from '../components/TextInputRenderer.vue'
 import MultipleChoicesInputRenderer from '../components/MultipleChoicesInputRenderer.vue'
 import SelectableInputRenderer from '../components/SelectableInputRenderer.vue'
 import SwappableInputRenderer from '../components/SwappableInputRenderer.vue'
-import type { StudentAnswers, ComponentAnswer, InProgressExercise } from '../AdaptedExerciseRenderer.vue'
+import type { StudentAnswers, ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
 import { match, P } from 'ts-pattern'
 import SelectableLettersInputRenderer from '../components/SelectableLettersInputRenderer.vue'
 
@@ -20,18 +20,14 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
-const studentAnswers = defineModel<StudentAnswers>({ required: true })
-
-const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
-
-function getComponentAnswer() {
-  return studentAnswers.value.pages[props.pageIndex]?.lines?.[props.lineIndex]?.components[props.componentIndex]
+function getComponentAnswer(studentAnswers: StudentAnswers) {
+  return studentAnswers.pages[props.pageIndex]?.lines?.[props.lineIndex]?.components[props.componentIndex]
 }
 
-function setComponentAnswer(answer: ComponentAnswer) {
-  studentAnswers.value.pages[props.pageIndex] ??= { lines: {} }
-  studentAnswers.value.pages[props.pageIndex]!.lines[props.lineIndex] ??= { components: {} }
-  studentAnswers.value.pages[props.pageIndex]!.lines[props.lineIndex]!.components[props.componentIndex] = answer
+function setComponentAnswer(studentAnswers: StudentAnswers, answer: ComponentAnswer) {
+  studentAnswers.pages[props.pageIndex] ??= { lines: {} }
+  studentAnswers.pages[props.pageIndex]!.lines[props.lineIndex] ??= { components: {} }
+  studentAnswers.pages[props.pageIndex]!.lines[props.lineIndex]!.components[props.componentIndex] = answer
 }
 
 function render() {
@@ -64,10 +60,6 @@ function render() {
         choices,
         showChoicesByDefault,
         tricolorable: props.tricolorable,
-        inProgress: inProgress.value,
-        'onUpdate:inProgress': (v) => {
-          inProgress.value = v
-        },
         getComponentAnswer,
         setComponentAnswer,
       }),
@@ -91,10 +83,6 @@ function render() {
         colors,
         boxed,
         tricolorable: props.tricolorable,
-        inProgress: inProgress.value,
-        'onUpdate:inProgress': (v) => {
-          inProgress.value = v
-        },
         getComponentAnswer,
         setComponentAnswer,
       }),
@@ -105,14 +93,6 @@ function render() {
         lineIndex: props.lineIndex,
         componentIndex: props.componentIndex,
         contents,
-        inProgress: inProgress.value,
-        'onUpdate:inProgress': (v) => {
-          inProgress.value = v
-        },
-        modelValue: studentAnswers.value,
-        'onUpdate:modelValue': (v) => {
-          studentAnswers.value = v
-        },
         tricolorable: props.tricolorable,
       }),
     )

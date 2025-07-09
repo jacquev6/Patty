@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
+import { computed, inject, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
 
 import assert from '@/assert'
-import type { ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
+import type { ComponentAnswer, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
   pageIndex: number
@@ -12,13 +12,16 @@ const props = defineProps<{
   increaseHorizontalSpace: boolean
   tricolorable: boolean
   aloneOnLine: boolean
-  getComponentAnswer: () => ComponentAnswer | undefined
-  setComponentAnswer: (answer: ComponentAnswer) => void
+  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
+  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
+
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
 
 const modelProxy = computed<string>({
   get() {
-    const answer = props.getComponentAnswer()
+    const answer = props.getComponentAnswer(studentAnswers)
     if (answer === undefined) {
       return props.initialText
     } else {
@@ -27,7 +30,7 @@ const modelProxy = computed<string>({
     }
   },
   set(value: string) {
-    props.setComponentAnswer({ kind: 'text', text: value })
+    props.setComponentAnswer(studentAnswers, { kind: 'text', text: value })
   },
 })
 

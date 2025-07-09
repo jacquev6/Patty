@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
 import assert from '@/assert'
 import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
@@ -14,20 +14,22 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
+
+const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
+assert(inProgress !== undefined)
+
 const selected = computed(
   () =>
-    inProgress.value.p.kind === 'movingSwappable' &&
-    inProgress.value.p.swappable.pageIndex === props.pageIndex &&
-    inProgress.value.p.swappable.lineIndex === props.lineIndex &&
-    inProgress.value.p.swappable.componentIndex === props.componentIndex,
+    inProgress.p.kind === 'movingSwappable' &&
+    inProgress.p.swappable.pageIndex === props.pageIndex &&
+    inProgress.p.swappable.lineIndex === props.lineIndex &&
+    inProgress.p.swappable.componentIndex === props.componentIndex,
 )
 
-const studentAnswers = defineModel<StudentAnswers>({ required: true })
-
-const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
-
 const contentsFrom = computed(() => {
-  const answer = studentAnswers.value.pages[props.pageIndex]?.lines[props.lineIndex]?.components[props.componentIndex]
+  const answer = studentAnswers.pages[props.pageIndex]?.lines[props.lineIndex]?.components[props.componentIndex]
   if (answer === undefined) {
     return { pageIndex: props.pageIndex, lineIndex: props.lineIndex, componentIndex: props.componentIndex }
   } else {
@@ -38,7 +40,7 @@ const contentsFrom = computed(() => {
 
 const actualContents = computed(() => {
   const { pageIndex, lineIndex, componentIndex } = contentsFrom.value
-  const page = inProgress.value.exercise.pages[pageIndex]
+  const page = inProgress.exercise.pages[pageIndex]
   assert(page.kind === 'statement')
   const component = page.statement[lineIndex].contents[componentIndex]
   assert(component.kind === 'swappableInput')
@@ -57,33 +59,35 @@ function setAnswer(
     componentIndex: number
   },
 ) {
-  studentAnswers.value.pages[pageIndex] ??= { lines: {} }
-  studentAnswers.value.pages[pageIndex]!.lines ??= {}
-  studentAnswers.value.pages[pageIndex]!.lines[lineIndex] ??= { components: {} }
-  studentAnswers.value.pages[pageIndex]!.lines[lineIndex]!.components[componentIndex] = {
+  assert(studentAnswers !== undefined)
+  studentAnswers.pages[pageIndex] ??= { lines: {} }
+  studentAnswers.pages[pageIndex]!.lines ??= {}
+  studentAnswers.pages[pageIndex]!.lines[lineIndex] ??= { components: {} }
+  studentAnswers.pages[pageIndex]!.lines[lineIndex]!.components[componentIndex] = {
     kind: 'swappable',
     contentsFrom,
   }
 }
 
 function handleClick() {
-  if (inProgress.value.p.kind === 'movingSwappable' && inProgress.value.p.swappable.pageIndex === props.pageIndex) {
+  assert(inProgress !== undefined)
+  if (inProgress.p.kind === 'movingSwappable' && inProgress.p.swappable.pageIndex === props.pageIndex) {
     if (
-      inProgress.value.p.swappable.lineIndex !== props.lineIndex ||
-      inProgress.value.p.swappable.componentIndex !== props.componentIndex
+      inProgress.p.swappable.lineIndex !== props.lineIndex ||
+      inProgress.p.swappable.componentIndex !== props.componentIndex
     ) {
       const contentsFromBefore = contentsFrom.value
-      setAnswer(props.pageIndex, props.lineIndex, props.componentIndex, inProgress.value.p.swappable.contentsFrom)
+      setAnswer(props.pageIndex, props.lineIndex, props.componentIndex, inProgress.p.swappable.contentsFrom)
       setAnswer(
-        inProgress.value.p.swappable.pageIndex,
-        inProgress.value.p.swappable.lineIndex,
-        inProgress.value.p.swappable.componentIndex,
+        inProgress.p.swappable.pageIndex,
+        inProgress.p.swappable.lineIndex,
+        inProgress.p.swappable.componentIndex,
         contentsFromBefore,
       )
     }
-    inProgress.value.p = { kind: 'none' }
+    inProgress.p = { kind: 'none' }
   } else {
-    inProgress.value.p = {
+    inProgress.p = {
       kind: 'movingSwappable',
       swappable: {
         pageIndex: props.pageIndex,

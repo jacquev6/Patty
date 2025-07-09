@@ -425,6 +425,7 @@ watch(renderableExercise, (exercise) => {
 watch(pageIndex, () => {
   inProgress.p = { kind: 'none' }
 })
+provide('adaptedExerciseInProgress', inProgress)
 
 const page = computed(() => renderableExercise.value.pages[pageIndex.value])
 
@@ -434,6 +435,7 @@ const studentAnswers =
   props.studentAnswersStorageKey === null
     ? ref(defaultStudentAnswers)
     : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, defaultStudentAnswers)
+provide('adaptedExerciseStudentAnswers', studentAnswers.value)
 
 const triColorLines = useTemplateRef('tricolor')
 watch(
@@ -465,15 +467,7 @@ const spacingVariables = computed(() =>
           <TriColorLines ref="tricolor">
             <template v-for="({ contents, alone }, lineIndex) in page.statement">
               <p :class="{ alone }">
-                <AnySequenceComponent
-                  :pageIndex
-                  :lineIndex
-                  :contents
-                  :aloneOnLine="alone"
-                  :tricolorable="true"
-                  v-model="studentAnswers"
-                  v-model:inProgress="inProgress"
-                />
+                <AnySequenceComponent :pageIndex :lineIndex :contents :aloneOnLine="alone" :tricolorable="true" />
               </p>
             </template>
           </TriColorLines>

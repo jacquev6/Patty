@@ -2,7 +2,12 @@
 import { computed, inject, reactive, useTemplateRef, watch, type Ref } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type { ComponentAnswer, InProgressExercise, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type {
+  ComponentAnswer,
+  InProgressExercise,
+  PassiveRenderable,
+  StudentAnswers,
+} from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceRenderer from './WhitespaceRenderer.vue'
 import assert from '@/assert'
@@ -23,15 +28,19 @@ const props = defineProps<{
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
-  getComponentAnswer: () => ComponentAnswer | undefined
-  setComponentAnswer: (answer: ComponentAnswer) => void
+  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
+  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
 
-const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
+
+const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
+assert(inProgress !== undefined)
 
 const choiceProxy = computed({
   get() {
-    const answer = props.getComponentAnswer()
+    const answer = props.getComponentAnswer(studentAnswers)
     if (answer === undefined) {
       return undefined
     } else {
@@ -40,7 +49,7 @@ const choiceProxy = computed({
     }
   },
   set(choice: number | null) {
-    props.setComponentAnswer({ kind: 'choice', choice })
+    props.setComponentAnswer(studentAnswers, { kind: 'choice', choice })
   },
 })
 
@@ -67,15 +76,15 @@ const showChoices = computed({
   get() {
     return (
       (choiceProxy.value === undefined && props.showChoicesByDefault) ||
-      (inProgress.value.p.kind === 'solvingMultipleChoices' &&
-        inProgress.value.p.multipleChoices.pageIndex === props.pageIndex &&
-        inProgress.value.p.multipleChoices.lineIndex === props.lineIndex &&
-        inProgress.value.p.multipleChoices.componentIndex === props.componentIndex)
+      (inProgress.p.kind === 'solvingMultipleChoices' &&
+        inProgress.p.multipleChoices.pageIndex === props.pageIndex &&
+        inProgress.p.multipleChoices.lineIndex === props.lineIndex &&
+        inProgress.p.multipleChoices.componentIndex === props.componentIndex)
     )
   },
   set(value: boolean) {
     if (value) {
-      inProgress.value.p = {
+      inProgress.p = {
         kind: 'solvingMultipleChoices',
         multipleChoices: {
           pageIndex: props.pageIndex,
@@ -84,7 +93,7 @@ const showChoices = computed({
         },
       }
     } else {
-      inProgress.value.p = { kind: 'none' }
+      inProgress.p = { kind: 'none' }
       if (choiceProxy.value === undefined) {
         choiceProxy.value = null
       }

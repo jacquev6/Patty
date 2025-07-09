@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
-import type { ComponentAnswer, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type { ComponentAnswer, PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
 import assert from '@/assert'
 
@@ -10,13 +10,16 @@ const props = defineProps<{
   colors: string[]
   boxed: boolean
   tricolorable: boolean
-  getComponentAnswer: () => ComponentAnswer | undefined
-  setComponentAnswer: (answer: ComponentAnswer) => void
+  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
+  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
+
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
 
 const colorIndexProxy = computed<number, number>({
   get() {
-    const answer = props.getComponentAnswer()
+    const answer = props.getComponentAnswer(studentAnswers)
     if (answer === undefined) {
       return 0
     } else {
@@ -25,7 +28,7 @@ const colorIndexProxy = computed<number, number>({
     }
   },
   set: (color: number) => {
-    props.setComponentAnswer({ kind: 'selectable', color })
+    props.setComponentAnswer(studentAnswers, { kind: 'selectable', color })
   },
 })
 
