@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import WhiteSpace from './WhiteSpace.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 
 const identifiedUser = useIdentifiedUserStore()
+const { t } = useI18n()
 
 const showEditor = ref(identifiedUser.identifier === '')
 </script>
@@ -12,21 +14,21 @@ const showEditor = ref(identifiedUser.identifier === '')
 <template>
   <span
     >{{ identifiedUser.identifier }}
-    <span data-cy="edit-identified-user" class="edit" @click="showEditor = true">(🖊️ change)</span></span
+    <span data-cy="edit-identified-user" class="edit" @click="showEditor = true">({{ t('change') }})</span></span
   >
   <Teleport to="body" v-if="showEditor">
     <div class="editor">
       <div>
-        <h1>Identification</h1>
+        <h1>{{ t('identification') }}</h1>
         <p>
-          Your first name:
+          {{ t('firstName') }}
           <input data-cy="identified-user" v-model="identifiedUser.identifier" />
           <WhiteSpace />
           <button data-cy="identified-user-ok" @click="showEditor = false" :disabled="identifiedUser.identifier === ''">
-            OK
+            {{ t('ok') }}
           </button>
         </p>
-        <p>(Nothing is checked, this is used only to record who created what.)</p>
+        <p>({{ t('message') }})</p>
       </div>
     </div>
   </Teleport>
@@ -57,3 +59,18 @@ const showEditor = ref(identifiedUser.identifier === '')
   padding: 20px;
 }
 </style>
+
+<i18n>
+en:
+  change: 🖊️ change
+  identification: Identification
+  firstName: "Your first name:"
+  ok: OK
+  message: "Nothing is checked, this is used only to record who created what."
+fr:
+  change: 🖊️ modifier
+  identification: Identification
+  firstName: "Votre prénom :"
+  ok: OK
+  message: "Rien n'est vérifié, ceci sert uniquement à enregistrer qui a créé quoi."
+</i18n>

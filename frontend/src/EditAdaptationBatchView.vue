@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { type AdaptationBatch, useAuthenticatedClient } from './apiClient'
 import assert from './assert'
@@ -11,6 +12,7 @@ const props = defineProps<{
   id: string
 }>()
 
+const { t } = useI18n()
 const client = useAuthenticatedClient()
 const breadcrumbsStore = useBreadcrumbsStore()
 
@@ -70,7 +72,14 @@ onUnmounted(() => {
       <EditAdaptationBatchForm :adaptationBatch />
     </template>
     <template v-else-if="found === false">
-      <h1>Not found</h1>
+      <h1>{{ t('notFound') }}</h1>
     </template>
   </div>
 </template>
+
+<i18n>
+en:
+  notFound: Not found
+fr:
+  notFound: Non trouvé
+</i18n>

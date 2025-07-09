@@ -480,7 +480,7 @@ const spacingVariables = computed(() =>
           </p>
         </div>
       </template>
-      <p v-else>BUG: unexpected page kind: {{ ((page: never) => page)(page) }}</p>
+      <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
     </div>
   </PageNavigationControls>
 </template>

@@ -151,11 +151,13 @@ watch(Escape, () => {
               :navigateUsingArrowKeys="fullScreen"
               :adaptedExercise="adaptation.status.adaptedExercise"
             />
-            <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
+            <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
+              {{ t('existFullScreen') }}
+            </button>
           </MiniatureScreen>
         </template>
         <template v-else>
-          <p>There was a bug: unexpected status: {{ ((status: never) => status)(adaptation.status) }}</p>
+          <p>BUG: {{ ((status: never) => status)(adaptation.status) }}</p>
         </template>
       </template>
     </FixedColumns>

@@ -19,6 +19,7 @@ import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails
 import TextArea from './TextArea.vue'
 import { useApiConstantsStore } from './ApiConstantsStore'
 import WhiteSpace from './WhiteSpace.vue'
+import classificationCamembert20250520 from './ClassificationCamembert20250520'
 
 const props = defineProps<{
   latestExtractionStrategy: ExtractionStrategy
@@ -26,6 +27,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const { t } = useI18n()
+const { d } = useI18n({ useScope: 'global' })
 
 const client = useAuthenticatedClient()
 const apiConstantsStore = useApiConstantsStore()
@@ -169,7 +171,11 @@ const lastPage = computedAsync(async () => {
         </select>
         <template v-if="runClassification">
           <WhiteSpace />
-          <I18nT keypath="runClassificationUsing"><code>classification_camembert.pt</code></I18nT>
+          <I18nT keypath="runClassificationUsing">
+            <code>{{ classificationCamembert20250520.fileName }}</code>
+            <span>{{ classificationCamembert20250520.providedBy }}</span>
+            <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
+          </I18nT>
         </template>
       </p>
       <p v-if="runClassification">
@@ -231,7 +237,7 @@ en:
   prompt: Prompt
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
-  runClassificationUsing: "using {0}, provided by Elise by e-mail on May 20, 2025"
+  runClassificationUsing: "using {0}, provided by {1} by e-mail on {2}"
   runAdaptation: "Run adaptations after classification:"
   runAdaptationUsing: "using {0} with the latest settings for each known exercise class."
   runAdaptationUsingProvider: "provider"
@@ -252,7 +258,7 @@ fr:
   prompt: Invite
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
-  runClassificationUsing: "avec {0}, fourni par Elise par e-mail le 20 mai 2025"
+  runClassificationUsing: "avec {0}, fourni par {1} par e-mail le {2}"
   runAdaptation: "Exécuter les adaptations après la classification :"
   runAdaptationUsing: "avec {0} avec les derniers paramètres pour chaque classe d'exercice connue."
   runAdaptationUsingProvider: "fournisseur"

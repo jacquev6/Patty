@@ -11,6 +11,7 @@ import ResizableColumns from './ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from './MarkDown.vue'
 import { useApiConstantsStore } from './ApiConstantsStore'
+import classificationCamembert20250520 from './ClassificationCamembert20250520'
 
 defineProps<{
   extractionBatch: ExtractionBatch
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { d } = useI18n({ useScope: 'global' })
 const apiConstantsStore = useApiConstantsStore()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
@@ -55,7 +57,11 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       <p>
         {{ t('runClassification') }}
         <template v-if="extractionBatch.runClassification">
-          <I18nT keypath="runClassificationYesUsing"><code>classification_camembert.pt</code></I18nT>
+          <I18nT keypath="runClassificationYesUsing">
+            <code>{{ classificationCamembert20250520.fileName }}</code>
+            <span>{{ classificationCamembert20250520.providedBy }}</span>
+            <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
+          </I18nT>
         </template>
         <template v-else>{{ t('no') }}</template>
       </p>
@@ -107,9 +113,9 @@ const authenticationTokenStore = useAuthenticationTokenStore()
               <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
             </template>
             <p v-else-if="page.assistantResponse.error === 'unknown'">{{ t('unknownError') }}</p>
-            <p v-else>Unexpected assistant error response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
+            <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
           </template>
-          <p v-else>Unexpected assistant response: {{ ((r: never) => r)(page.assistantResponse) }}</p>
+          <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
         </template>
       </template>
     </template>
@@ -128,7 +134,7 @@ en:
   jsonData: "JSON data"
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
-  runClassificationYesUsing: "yes, using {0}, provided by Elise by e-mail on May 20, 2025"
+  runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
   runAdaptation: "Run adaptations after classification:"
   runAdaptationYesUsing: "yes, using {0} with the latest settings for each known exercise class."
   runAdaptationUsingProvider: "provider"
@@ -151,7 +157,7 @@ fr:
   jsonData: "données JSON"
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
-  runClassificationYesUsing: "oui, avec {0}, fourni par Elise par e-mail le 20 mai 2025"
+  runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"
   runAdaptation: "Exécuter les adaptations après la classification :"
   runAdaptationYesUsing: "oui, avec {0} avec les derniers paramètres pour chaque classe d'exercice connue."
   runAdaptationUsingProvider: "fournisseur"

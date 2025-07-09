@@ -27,6 +27,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@intlify/eslint-plugin-vue-i18n": "^4.0.1",
     "@intlify/unplugin-vue-i18n": "^6.0.8",
     "@tsconfig/node22": "^22.0.2",
     "@types/autosize": "^4.0.3",

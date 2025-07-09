@@ -440,6 +440,7 @@ services:
     volumes:
       - ../..:/app
       - ./frontend/cache:/home/patty/.cache
+      - ./frontend/code:/usr/local/bin/code
     working_dir: /app/frontend
     environment:
       PATTY_ENTRY_POINT_NAME: frontend

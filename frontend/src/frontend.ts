@@ -109,6 +109,11 @@ app.use(
           minute: '2-digit',
           hour12: true,
         },
+        'long-date': {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        },
       },
       fr: {
         long: {
@@ -118,6 +123,11 @@ app.use(
           hour: 'numeric',
           minute: '2-digit',
           hour12: false,
+        },
+        'long-date': {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         },
       },
     },

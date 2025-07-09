@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
 import { type Textbook, useAuthenticatedClient } from './apiClient'
@@ -18,6 +19,7 @@ const emit = defineEmits<{
   (e: 'textbook-updated', textbook: Textbook): void
 }>()
 
+const { t } = useI18n()
 const client = useAuthenticatedClient()
 const apiConstantsStore = useApiConstantsStore()
 
@@ -100,20 +102,39 @@ const disabled = computed(() => {
 </script>
 
 <template>
-  <p>Created by: <IdentifiedUser /></p>
+  <p>{{ t('createdBy') }} <IdentifiedUser /></p>
   <p>
-    LLM provider:
+    {{ t('llmProvider') }}
     <select data-cy="llm-provider" v-model="llmProvider">
       <option v-for="llmProvider in llmProviders">{{ llmProvider }}</option></select
-    >, model:
+    >,
+    {{ t('model') }}
     <select data-cy="llm-name" v-model="llmName">
       <option v-for="name in llmNames">{{ name }}</option></select
-    >, strategy settings:
+    >,
+    {{ t('strategySettings') }}
     <select data-cy="strategy-settings" v-model="strategySettings">
       <option :value="noStrategySettings">{{ noStrategySettings }}</option>
       <option v-for="setting in availableStrategySettings">{{ setting }}</option>
     </select>
   </p>
-  <p><button @click="submit" :disabled>Submit</button></p>
+  <p>
+    <button @click="submit" :disabled>{{ t('submit') }}</button>
+  </p>
   <CreateAdaptationBatchFormInputsEditor headers="h3" v-model="inputs" />
 </template>
+
+<i18n>
+en:
+  createdBy: "Created by:"
+  llmProvider: "LLM provider:"
+  model: "model:"
+  strategySettings: "strategy settings:"
+  submit: Submit
+fr:
+  createdBy: "Créé par :"
+  llmProvider: "Fournisseur LLM :"
+  model: "modèle :"
+  strategySettings: "paramètres de stratégie :"
+  submit: Soumettre
+</i18n>

@@ -2758,7 +2758,9 @@ onMounted(() => {
     <ul>
       <li v-for="(variable, key) in spacingVariables" :key="key">
         <code>{{ key }}</code
-        >: <input type="number" v-model="spacingVariables[key]" />em
+        >:
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <input type="number" v-model="spacingVariables[key]" />em
       </li>
     </ul>
 

@@ -153,7 +153,9 @@ watch(tricolorablesRevisionIndex, recolor, { immediate: true })
     </p>
     <!-- Ensure the floating choices does not cover next line -->
     <div class="hidden choices">
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <p><span class="choice">Alpha</span></p>
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <p><span class="choice">Bravo</span></p>
     </div>
   </div>

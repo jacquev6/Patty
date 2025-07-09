@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import 'modern-normalize/modern-normalize.css'
 import { createRouter, createWebHashHistory } from 'vue-router'
+import messages from '@intlify/unplugin-vue-i18n/messages'
+import { createI18n } from 'vue-i18n'
 
 import TextbookExportRootView from './TextbookExportRootView.vue'
 import TextbookExportIndexView from './TextbookExportIndexView.vue'
@@ -26,5 +28,6 @@ const router = createRouter({
 const app = createApp(TextbookExportRootView)
 
 app.use(router)
+app.use(createI18n({ legacy: false, locale: 'fr', messages, globalInject: false }))
 
 app.mount('#app')

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import IdentifiedUser from './IdentifiedUser.vue'
 import WhiteSpace from './WhiteSpace.vue'
@@ -7,6 +8,7 @@ import { useAuthenticatedClient } from './apiClient'
 
 const model = defineModel<string>({ required: true })
 
+const { t } = useI18n()
 const client = useAuthenticatedClient()
 
 const classNames = reactive<string[]>([])
@@ -24,7 +26,7 @@ onMounted(async () => {
     <option v-for="name in classNames">{{ name }}</option>
   </select>
   <WhiteSpace />
-  <span class="user">(fixed by <IdentifiedUser />)</span>
+  <span class="user">({{ t('fixedBy') }} <IdentifiedUser />)</span>
 </template>
 
 <style scoped>
@@ -32,3 +34,10 @@ span.user {
   color: grey;
 }
 </style>
+
+<i18n>
+en:
+  fixedBy: fixed by
+fr:
+  fixedBy: corrigé par
+</i18n>
