@@ -407,10 +407,10 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSwappableInputs: StudentAnswers = {
-    'stmt-pg0-ln0-ct2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
-    'stmt-pg0-ln1-ct4': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
-    'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
-    'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
+    'stmt-pg0-ln0-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln1-ct4' },
+    'stmt-pg0-ln1-ct4': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct6' },
+    'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
+    'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
   }
 
   function getAnswers(): Cypress.Chainable<StudentAnswers> {
@@ -712,9 +712,9 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForEditableTextInputs: StudentAnswers = {
-    'stmt-pg0-ln1-ct2': { kind: 'text', text: 'AAA AAA' },
-    'stmt-pg0-ln3-ct2': { kind: 'text', text: 'BBB BBB' },
-    'stmt-pg1-ln1-ct2': { kind: 'text', text: 'CCC CCC' },
+    'stmt-pg0-ln0-ct2': { kind: 'text', text: 'AAA AAA' },
+    'stmt-pg0-ln1-ct2': { kind: 'text', text: 'BBB BBB' },
+    'stmt-pg1-ln0-ct2': { kind: 'text', text: 'CCC CCC' },
   }
 
   it('are saved for editable text inputs', () => {
@@ -810,8 +810,8 @@ describe('Adapted exercise answers', () => {
 
   const answersForSelectableLettersInputs: StudentAnswers = {
     'stmt-pg0-ln0-ct2': { kind: 'highlights', highlights: [1, 2, 0] },
-    'stmt-pg0-ln0-ct6': { kind: 'highlights', highlights: [1, 2] },
-    'stmt-pg1-ln0-ct4': { kind: 'highlights', highlights: [3, 2] },
+    'stmt-pg0-ln0-ct8': { kind: 'highlights', highlights: [1, 2] },
+    'stmt-pg1-ln0-ct5': { kind: 'highlights', highlights: [3, 2] },
   }
 
   it('are saved for selectable inputs', () => {

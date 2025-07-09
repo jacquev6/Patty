@@ -8,9 +8,6 @@ import type { InProgressExercise, StudentAnswers } from '../AdaptedExerciseRende
 
 const props = defineProps<{
   path: string
-  pageIndex: number
-  lineIndex: number
-  componentIndex: number
   contents: PassiveRenderable[]
   tricolorable: boolean
 }>()
@@ -21,18 +18,12 @@ assert(studentAnswers !== undefined)
 const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
 assert(inProgress !== undefined)
 
-const selected = computed(
-  () =>
-    inProgress.p.kind === 'movingSwappable' &&
-    inProgress.p.swappable.pageIndex === props.pageIndex &&
-    inProgress.p.swappable.lineIndex === props.lineIndex &&
-    inProgress.p.swappable.componentIndex === props.componentIndex,
-)
+const selected = computed(() => inProgress.p.kind === 'movingSwappable' && inProgress.p.swappable.path === props.path)
 
 const contentsFrom = computed(() => {
   const answer = studentAnswers[props.path]
   if (answer === undefined) {
-    return { pageIndex: props.pageIndex, lineIndex: props.lineIndex, componentIndex: props.componentIndex }
+    return props.path
   } else {
     assert(answer.kind === 'swappable')
     return answer.contentsFrom
@@ -40,55 +31,30 @@ const contentsFrom = computed(() => {
 })
 
 const actualContents = computed(() => {
-  const { pageIndex, lineIndex, componentIndex } = contentsFrom.value
-  const page = inProgress.exercise.pages[pageIndex]
-  assert(page.kind === 'statement')
-  const component = page.statement[lineIndex].contents[componentIndex]
-  assert(component.kind === 'swappableInput')
-  return component.contents
+  return inProgress.swappables[contentsFrom.value].contents
 })
 
 const highlighted = computed(() => (selected.value ? '#FFFDD4' : null))
 
-function setAnswer(
-  pageIndex: number,
-  lineIndex: number,
-  componentIndex: number,
-  contentsFrom: {
-    pageIndex: number
-    lineIndex: number
-    componentIndex: number
-  },
-) {
+function setAnswer(path: string, contentsFrom: string) {
   assert(studentAnswers !== undefined)
-  const path = `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}` // @todo Deduplicate this path construction logic.
   studentAnswers[path] = { kind: 'swappable', contentsFrom }
 }
 
 function handleClick() {
   assert(inProgress !== undefined)
-  if (inProgress.p.kind === 'movingSwappable' && inProgress.p.swappable.pageIndex === props.pageIndex) {
-    if (
-      inProgress.p.swappable.lineIndex !== props.lineIndex ||
-      inProgress.p.swappable.componentIndex !== props.componentIndex
-    ) {
+  if (inProgress.p.kind === 'movingSwappable') {
+    if (inProgress.p.swappable.path !== props.path) {
       const contentsFromBefore = contentsFrom.value
-      setAnswer(props.pageIndex, props.lineIndex, props.componentIndex, inProgress.p.swappable.contentsFrom)
-      setAnswer(
-        inProgress.p.swappable.pageIndex,
-        inProgress.p.swappable.lineIndex,
-        inProgress.p.swappable.componentIndex,
-        contentsFromBefore,
-      )
+      setAnswer(props.path, inProgress.p.swappable.contentsFrom)
+      setAnswer(inProgress.p.swappable.path, contentsFromBefore)
     }
     inProgress.p = { kind: 'none' }
   } else {
     inProgress.p = {
       kind: 'movingSwappable',
       swappable: {
-        pageIndex: props.pageIndex,
-        lineIndex: props.lineIndex,
-        componentIndex: props.componentIndex,
+        path: props.path,
         contentsFrom: contentsFrom.value,
       },
     }

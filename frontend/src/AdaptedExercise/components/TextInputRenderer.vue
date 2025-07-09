@@ -2,18 +2,14 @@
 import { computed, inject, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
 
 import assert from '@/assert'
-import type { ComponentAnswer, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
+import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 
 const props = defineProps<{
-  pageIndex: number
-  lineIndex: number
-  componentIndex: number
+  path: string
   initialText: string
   increaseHorizontalSpace: boolean
   tricolorable: boolean
   aloneOnLine: boolean
-  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
-  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
 
 const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
@@ -21,7 +17,7 @@ assert(studentAnswers !== undefined)
 
 const modelProxy = computed<string>({
   get() {
-    const answer = props.getComponentAnswer(studentAnswers)
+    const answer = studentAnswers[props.path]
     if (answer === undefined) {
       return props.initialText
     } else {
@@ -30,7 +26,7 @@ const modelProxy = computed<string>({
     }
   },
   set(value: string) {
-    props.setComponentAnswer(studentAnswers, { kind: 'text', text: value })
+    studentAnswers[props.path] = { kind: 'text', text: value }
   },
 })
 

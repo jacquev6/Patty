@@ -2,24 +2,15 @@
 import { computed, inject, reactive, watch, type Ref } from 'vue'
 
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
-import type {
-  ComponentAnswer,
-  InProgressExercise,
-  PassiveRenderable,
-  StudentAnswers,
-} from '../AdaptedExerciseRenderer.vue'
+import type { InProgressExercise, PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
-  pageIndex: number
-  lineIndex: number
-  componentIndex: number
+  path: string
   contents: string
   colors: string[]
   boxed: boolean
   tricolorable: boolean
-  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
-  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
 
 const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
@@ -30,7 +21,7 @@ assert(inProgress !== undefined)
 
 const modelProxy = computed<number[]>({
   get() {
-    const answer = props.getComponentAnswer(studentAnswers)
+    const answer = studentAnswers[props.path]
     if (answer === undefined) {
       return Array(props.contents.length).fill(0)
     } else {
@@ -39,7 +30,7 @@ const modelProxy = computed<number[]>({
     }
   },
   set(highlights: number[]) {
-    props.setComponentAnswer(studentAnswers, { kind: 'highlights', highlights })
+    studentAnswers[props.path] = { kind: 'highlights', highlights }
   },
 })
 
@@ -78,22 +69,13 @@ assert(teleportPickerTo !== undefined)
 
 const showPicker = computed({
   get() {
-    return (
-      inProgress.p.kind === 'solvingSelectableLetters' &&
-      inProgress.p.selectable.pageIndex === props.pageIndex &&
-      inProgress.p.selectable.lineIndex === props.lineIndex &&
-      inProgress.p.selectable.componentIndex === props.componentIndex
-    )
+    return inProgress.p.kind === 'solvingSelectableLetters' && inProgress.p.path === props.path
   },
   set(value: boolean) {
     if (value) {
       inProgress.p = {
         kind: 'solvingSelectableLetters',
-        selectable: {
-          pageIndex: props.pageIndex,
-          lineIndex: props.lineIndex,
-          componentIndex: props.componentIndex,
-        },
+        path: props.path,
       }
     } else {
       inProgress.p = { kind: 'none' }

@@ -7,27 +7,14 @@ import TextInputRenderer from '../components/TextInputRenderer.vue'
 import MultipleChoicesInputRenderer from '../components/MultipleChoicesInputRenderer.vue'
 import SelectableInputRenderer from '../components/SelectableInputRenderer.vue'
 import SwappableInputRenderer from '../components/SwappableInputRenderer.vue'
-import type { StudentAnswers, ComponentAnswer } from '../AdaptedExerciseRenderer.vue'
 import { match, P } from 'ts-pattern'
 import SelectableLettersInputRenderer from '../components/SelectableLettersInputRenderer.vue'
 
 const props = defineProps<{
-  path: string
-  pageIndex: number
-  lineIndex: number
   aloneOnLine: boolean
-  componentIndex: number
   component: AnyRenderable
   tricolorable: boolean
 }>()
-
-function getComponentAnswer(studentAnswers: StudentAnswers) {
-  return studentAnswers[props.path]
-}
-
-function setComponentAnswer(studentAnswers: StudentAnswers, answer: ComponentAnswer) {
-  studentAnswers[props.path] = answer
-}
 
 function render() {
   return match(props.component)
@@ -38,60 +25,44 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
-    .with({ kind: 'textInput' }, ({ initialText, increaseHorizontalSpace }) =>
+    .with({ kind: 'textInput' }, ({ path, initialText, increaseHorizontalSpace }) =>
       h(TextInputRenderer, {
-        pageIndex: props.pageIndex,
-        lineIndex: props.lineIndex,
-        componentIndex: props.componentIndex,
+        path,
         initialText,
         increaseHorizontalSpace,
         tricolorable: props.tricolorable,
         aloneOnLine: props.aloneOnLine,
-        getComponentAnswer,
-        setComponentAnswer,
       }),
     )
-    .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault }) =>
+    .with({ kind: 'multipleChoicesInput' }, ({ path, choices, showChoicesByDefault }) =>
       h(MultipleChoicesInputRenderer, {
-        pageIndex: props.pageIndex,
-        lineIndex: props.lineIndex,
-        componentIndex: props.componentIndex,
+        path,
         choices,
         showChoicesByDefault,
         tricolorable: props.tricolorable,
-        getComponentAnswer,
-        setComponentAnswer,
       }),
     )
-    .with({ kind: 'selectableInput' }, ({ contents, colors, boxed }) =>
+    .with({ kind: 'selectableInput' }, ({ path, contents, colors, boxed }) =>
       h(SelectableInputRenderer, {
+        path,
         contents,
         colors,
         boxed,
         tricolorable: props.tricolorable,
-        getComponentAnswer,
-        setComponentAnswer,
       }),
     )
-    .with({ kind: 'selectableLettersInput' }, ({ contents, colors, boxed }) =>
+    .with({ kind: 'selectableLettersInput' }, ({ path, contents, colors, boxed }) =>
       h(SelectableLettersInputRenderer, {
-        pageIndex: props.pageIndex,
-        lineIndex: props.lineIndex,
-        componentIndex: props.componentIndex,
+        path,
         contents,
         colors,
         boxed,
         tricolorable: props.tricolorable,
-        getComponentAnswer,
-        setComponentAnswer,
       }),
     )
-    .with({ kind: 'swappableInput' }, ({ contents }) =>
+    .with({ kind: 'swappableInput' }, ({ path, contents }) =>
       h(SwappableInputRenderer, {
-        path: props.path,
-        pageIndex: props.pageIndex,
-        lineIndex: props.lineIndex,
-        componentIndex: props.componentIndex,
+        path,
         contents,
         tricolorable: props.tricolorable,
       }),

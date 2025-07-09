@@ -9,7 +9,7 @@ import { match, P } from 'ts-pattern'
 import deepEqual from 'deep-equal'
 
 export type InProgressExercise = {
-  exercise: RenderableExercise
+  swappables: { [path: string]: SwappableInputRenderable }
   p:
     | {
         kind: 'none'
@@ -17,31 +17,17 @@ export type InProgressExercise = {
     | {
         kind: 'movingSwappable'
         swappable: {
-          pageIndex: number
-          lineIndex: number
-          componentIndex: number
-          contentsFrom: {
-            pageIndex: number
-            lineIndex: number
-            componentIndex: number
-          }
+          path: string
+          contentsFrom: string
         }
       }
     | {
         kind: 'solvingSelectableLetters'
-        selectable: {
-          pageIndex: number
-          lineIndex: number
-          componentIndex: number
-        }
+        path: string
       }
     | {
         kind: 'solvingMultipleChoices'
-        multipleChoices: {
-          pageIndex: number
-          lineIndex: number
-          componentIndex: number
-        }
+        path: string
       }
 }
 
@@ -60,11 +46,7 @@ export type ComponentAnswer =
     }
   | {
       kind: 'swappable'
-      contentsFrom: {
-        pageIndex: number
-        lineIndex: number
-        componentIndex: number
-      }
+      contentsFrom: string
     }
   | {
       kind: 'highlights'
@@ -113,12 +95,14 @@ export type PassiveRenderable = PlainTextRenderable | FormattedRenderable
 
 type TextInputRenderable = {
   kind: 'textInput'
+  path: string
   initialText: string
   increaseHorizontalSpace: boolean
 }
 
 type MultipleChoicesInputRenderable = {
   kind: 'multipleChoicesInput'
+  path: string
   choices: {
     contents: PassiveRenderable[]
   }[]
@@ -127,6 +111,7 @@ type MultipleChoicesInputRenderable = {
 
 type SelectableInputRenderable = {
   kind: 'selectableInput'
+  path: string
   contents: PassiveRenderable[]
   colors: string[]
   boxed: boolean
@@ -134,6 +119,7 @@ type SelectableInputRenderable = {
 
 type SelectableLettersInputRenderable = {
   kind: 'selectableLettersInput'
+  path: string
   contents: string
   colors: string[]
   boxed: boolean
@@ -141,6 +127,7 @@ type SelectableLettersInputRenderable = {
 
 type SwappableInputRenderable = {
   kind: 'swappableInput'
+  path: string
   contents: PassiveRenderable[]
 }
 
@@ -218,12 +205,13 @@ function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseCo
     .otherwise(makeRenderableFromFormattedTextExerciseComponent)
 }
 
-function makeRenderableFromAnyExerciseComponent(component: AnyExerciseComponent): AnyRenderable[] {
+function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExerciseComponent): AnyRenderable[] {
   return match(component)
     .returnType<AnyRenderable[]>()
     .with({ kind: 'freeTextInput' }, ({}) => [
       {
         kind: 'textInput',
+        path,
         initialText: '',
         increaseHorizontalSpace: false,
       },
@@ -231,6 +219,7 @@ function makeRenderableFromAnyExerciseComponent(component: AnyExerciseComponent)
     .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault }) => [
       {
         kind: 'multipleChoicesInput',
+        path,
         choices: choices.map(({ contents }) => ({
           contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
         })),
@@ -240,6 +229,7 @@ function makeRenderableFromAnyExerciseComponent(component: AnyExerciseComponent)
     .with({ kind: 'selectableInput' }, ({ boxed, colors, contents }) => [
       {
         kind: 'selectableInput',
+        path,
         boxed,
         colors,
         contents: contents.flatMap(makeRenderableFromPassiveExerciseComponent),
@@ -248,20 +238,22 @@ function makeRenderableFromAnyExerciseComponent(component: AnyExerciseComponent)
     .with({ kind: 'swappableInput' }, ({ contents }) => [
       {
         kind: 'swappableInput',
+        path,
         contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
       },
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)
-    .with({ kind: 'editableTextInput' }, (c) => [makeRenderableFromEditableTextInput(c)])
+    .with({ kind: 'editableTextInput' }, (c) => [makeRenderableFromEditableTextInput(path, c)])
     .otherwise(makeRenderableFromPassiveExerciseComponent)
 }
 
-function makeRenderableFromEditableTextInput({
-  contents,
-  increaseHorizontalSpace,
-}: AnyExerciseComponent & { kind: 'editableTextInput' }): AnyRenderable {
+function makeRenderableFromEditableTextInput(
+  path: string,
+  { contents, increaseHorizontalSpace }: AnyExerciseComponent & { kind: 'editableTextInput' },
+): AnyRenderable {
   return {
     kind: 'textInput',
+    path,
     initialText: contents
       .map((c) =>
         match(c)
@@ -275,7 +267,7 @@ function makeRenderableFromEditableTextInput({
   }
 }
 
-function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
+function regroupSelectableInputs(contents: IteratorObject<AnyRenderable>): AnyRenderable[] {
   const ret: AnyRenderable[] = []
   const group: SelectableInputRenderable[] = []
 
@@ -294,6 +286,7 @@ function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
     if (group.length > 1) {
       ret.push({
         kind: 'selectableLettersInput',
+        path: group[0].path,
         contents: group
           .flatMap((g) => g.contents)
           .map((c) => (c.kind === 'text' ? c.text : ''))
@@ -338,23 +331,33 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   if (exercise.statement.pages.length === 0) {
     pages.push({ kind: 'statement', instruction, statement: [] })
   } else {
-    for (const page of exercise.statement.pages) {
+    for (const [pageIndex, page] of exercise.statement.pages.entries()) {
       const statement: { contents: AnyRenderable[]; alone: boolean }[] = []
 
-      for (const { contents } of page.lines) {
+      for (const [lineIndex, { contents }] of page.lines.entries()) {
         const alone =
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
+
+        const components = contents
+          .entries()
+          .flatMap(([componentIndex, c]) =>
+            makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+          )
+
         statement.push({
-          contents: regroupSelectableInputs(contents.flatMap(makeRenderableFromAnyExerciseComponent)),
+          contents: regroupSelectableInputs(components),
           alone,
         })
-        for (const component of contents) {
+        for (const [componentIndex, component] of contents.entries()) {
           if (component.kind === 'editableTextInput' && component.showOriginalText) {
             statement.push({
               contents: [
                 { kind: 'text', text: '→' },
                 { kind: 'whitespace' },
-                makeRenderableFromEditableTextInput(component),
+                makeRenderableFromEditableTextInput(
+                  `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`,
+                  component,
+                ),
               ],
               alone: false,
             })
@@ -401,14 +404,30 @@ provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
 
 const renderableExercise = computed(() => makeRenderableExercise(props.adaptedExercise))
 
+const swappables = computed(() => {
+  const swappables: { [path: string]: SwappableInputRenderable } = {}
+  for (const page of renderableExercise.value.pages) {
+    if (page.kind === 'statement') {
+      for (const line of page.statement) {
+        for (const component of line.contents) {
+          if (component.kind === 'swappableInput') {
+            swappables[component.path] = component
+          }
+        }
+      }
+    }
+  }
+  return swappables
+})
+
 const pageIndex = ref(0)
 
 const inProgress = reactive<InProgressExercise>({
-  exercise: renderableExercise.value,
+  swappables: swappables.value,
   p: { kind: 'none' },
 })
-watch(renderableExercise, (exercise) => {
-  inProgress.exercise = exercise
+watch(swappables, (swappables) => {
+  inProgress.swappables = swappables
   inProgress.p = { kind: 'none' }
 })
 watch(pageIndex, () => {
@@ -452,16 +471,9 @@ const spacingVariables = computed(() =>
         </div>
         <div ref="statement" class="statement" v-if="page.statement.length !== 0">
           <TriColorLines ref="tricolor">
-            <template v-for="({ contents, alone }, lineIndex) in page.statement">
+            <template v-for="{ contents, alone } in page.statement">
               <p :class="{ alone }">
-                <AnySequenceComponent
-                  :path="`stmt-pg${pageIndex}-ln${lineIndex}`"
-                  :pageIndex
-                  :lineIndex
-                  :contents
-                  :aloneOnLine="alone"
-                  :tricolorable="true"
-                />
+                <AnySequenceComponent :contents :aloneOnLine="alone" :tricolorable="true" />
               </p>
             </template>
           </TriColorLines>

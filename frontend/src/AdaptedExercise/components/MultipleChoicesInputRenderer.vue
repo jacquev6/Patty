@@ -2,12 +2,7 @@
 import { computed, inject, reactive, useTemplateRef, watch, type Ref } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type {
-  ComponentAnswer,
-  InProgressExercise,
-  PassiveRenderable,
-  StudentAnswers,
-} from '../AdaptedExerciseRenderer.vue'
+import type { InProgressExercise, PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceRenderer from './WhitespaceRenderer.vue'
 import assert from '@/assert'
@@ -22,14 +17,10 @@ type FormattedTextContainer = {
 }
 
 const props = defineProps<{
-  pageIndex: number
-  lineIndex: number
-  componentIndex: number
+  path: string
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
-  getComponentAnswer: (studentAnswers: StudentAnswers) => ComponentAnswer | undefined
-  setComponentAnswer: (studentAnswers: StudentAnswers, answer: ComponentAnswer) => void
 }>()
 
 const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
@@ -40,7 +31,7 @@ assert(inProgress !== undefined)
 
 const choiceProxy = computed({
   get() {
-    const answer = props.getComponentAnswer(studentAnswers)
+    const answer = studentAnswers[props.path]
     if (answer === undefined) {
       return undefined
     } else {
@@ -49,7 +40,7 @@ const choiceProxy = computed({
     }
   },
   set(choice: number | null) {
-    props.setComponentAnswer(studentAnswers, { kind: 'choice', choice })
+    studentAnswers[props.path] = { kind: 'choice', choice }
   },
 })
 
@@ -76,21 +67,14 @@ const showChoices = computed({
   get() {
     return (
       (choiceProxy.value === undefined && props.showChoicesByDefault) ||
-      (inProgress.p.kind === 'solvingMultipleChoices' &&
-        inProgress.p.multipleChoices.pageIndex === props.pageIndex &&
-        inProgress.p.multipleChoices.lineIndex === props.lineIndex &&
-        inProgress.p.multipleChoices.componentIndex === props.componentIndex)
+      (inProgress.p.kind === 'solvingMultipleChoices' && inProgress.p.path === props.path)
     )
   },
   set(value: boolean) {
     if (value) {
       inProgress.p = {
         kind: 'solvingMultipleChoices',
-        multipleChoices: {
-          pageIndex: props.pageIndex,
-          lineIndex: props.lineIndex,
-          componentIndex: props.componentIndex,
-        },
+        path: props.path,
       }
     } else {
       inProgress.p = { kind: 'none' }
