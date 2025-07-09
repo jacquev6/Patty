@@ -48,10 +48,6 @@ export type ComponentAnswer =
       kind: 'swappable'
       contentsFrom: string
     }
-  | {
-      kind: 'highlights'
-      highlights: number[]
-    }
 
 export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
 

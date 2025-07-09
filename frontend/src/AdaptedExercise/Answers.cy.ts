@@ -809,9 +809,12 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableLettersInputs: StudentAnswers = {
-    'stmt-pg0-ln0-ct2': { kind: 'highlights', highlights: [1, 2, 0] },
-    'stmt-pg0-ln0-ct8': { kind: 'highlights', highlights: [1, 2] },
-    'stmt-pg1-ln0-ct5': { kind: 'highlights', highlights: [3, 2] },
+    'stmt-pg0-ln0-ct2-lt0': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct2-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct8-lt0': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct8-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln0-ct5-lt0': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct5-lt1': { kind: 'selectable', color: 2 },
   }
 
   it('are saved for selectable inputs', () => {

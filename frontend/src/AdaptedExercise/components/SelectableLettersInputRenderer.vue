@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, reactive, watch, type Ref } from 'vue'
+import { computed, inject, type Ref } from 'vue'
 
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
 import type { InProgressExercise, PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
@@ -19,42 +19,37 @@ assert(studentAnswers !== undefined)
 const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
 assert(inProgress !== undefined)
 
-const modelProxy = computed<number[]>({
-  get() {
-    const answer = studentAnswers[props.path]
-    if (answer === undefined) {
-      return Array(props.contents.length).fill(0)
-    } else {
-      assert(answer.kind === 'highlights')
-      return answer.highlights
-    }
-  },
-  set(highlights: number[]) {
-    studentAnswers[props.path] = { kind: 'highlights', highlights }
-  },
-})
+function getHighlighted(index: number): string | null {
+  assert(studentAnswers !== undefined)
 
-const highlights: number[] = reactive([])
-watch(
-  modelProxy,
-  () => {
-    highlights.splice(0, highlights.length, ...modelProxy.value)
-  },
-  { immediate: true, deep: true },
-)
-watch(
-  highlights,
-  (newHighlights) => {
-    modelProxy.value = newHighlights
-  },
-  { deep: true },
-)
+  const path = `${props.path}-lt${index}`
+  if (studentAnswers[path] === undefined) {
+    return null
+  } else {
+    assert(studentAnswers[path].kind === 'selectable')
+    const colorIndex = studentAnswers[path].color
+    if (colorIndex === 0) {
+      return null
+    } else {
+      return props.colors[colorIndex - 1]
+    }
+  }
+}
+
+function getHighlightedStyle(index: number) {
+  const highlighted = getHighlighted(index)
+  if (highlighted === null) {
+    return {}
+  } else {
+    return { backgroundColor: highlighted }
+  }
+}
 
 const formattedContents = computed((): PassiveRenderable[] => {
   return Array.from(props.contents).map((c, index) => ({
     kind: 'formatted',
     contents: [{ kind: 'text', text: c }],
-    highlighted: highlights[index] === 0 ? null : props.colors[highlights[index] - 1],
+    highlighted: getHighlighted(index),
     bold: false,
     italic: false,
     underlined: false,
@@ -84,7 +79,13 @@ const showPicker = computed({
 })
 
 function increment(index: number) {
-  highlights[index] = (highlights[index] + 1) % (props.colors.length + 1)
+  assert(studentAnswers !== undefined)
+  const path = `${props.path}-lt${index}`
+  if (studentAnswers[path] === undefined) {
+    studentAnswers[path] = { kind: 'selectable', color: 0 }
+  }
+  assert(studentAnswers[path].kind === 'selectable')
+  studentAnswers[path].color = (studentAnswers[path].color + 1) % (props.colors.length + 1)
 }
 </script>
 
@@ -112,7 +113,7 @@ function increment(index: number) {
               class="letter"
               v-for="(letter, index) in contents"
               @click="increment(index)"
-              :style="{ backgroundColor: colors[highlights[index] - 1] }"
+              :style="getHighlightedStyle(index)"
             >
               {{ letter }}
             </span>
