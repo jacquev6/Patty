@@ -64,6 +64,10 @@ function render() {
         choices,
         showChoicesByDefault,
         tricolorable: props.tricolorable,
+        inProgress: inProgress.value,
+        'onUpdate:inProgress': (v) => {
+          inProgress.value = v
+        },
         getComponentAnswer,
         setComponentAnswer,
       }),
@@ -87,6 +91,10 @@ function render() {
         colors,
         boxed,
         tricolorable: props.tricolorable,
+        inProgress: inProgress.value,
+        'onUpdate:inProgress': (v) => {
+          inProgress.value = v
+        },
         getComponentAnswer,
         setComponentAnswer,
       }),

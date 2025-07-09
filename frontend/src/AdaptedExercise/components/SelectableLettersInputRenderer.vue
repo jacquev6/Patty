@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, reactive, ref, watch, type Ref } from 'vue'
+import { computed, inject, reactive, watch, type Ref } from 'vue'
 
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
-import type { ComponentAnswer, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type { ComponentAnswer, InProgressExercise, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
@@ -16,6 +16,8 @@ const props = defineProps<{
   getComponentAnswer: () => ComponentAnswer | undefined
   setComponentAnswer: (answer: ComponentAnswer) => void
 }>()
+
+const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
 
 const modelProxy = computed<number[]>({
   get() {
@@ -65,14 +67,30 @@ const formattedContents = computed((): PassiveRenderable[] => {
 const teleportPickerTo = inject<Ref<HTMLDivElement> | null>('adaptedExerciseStatementDiv')
 assert(teleportPickerTo !== undefined)
 
-const showPicker = ref(false)
-watch(
-  () => props.pageIndex,
-  () => {
-    showPicker.value = false
+const showPicker = computed({
+  get() {
+    return (
+      inProgress.value.p.kind === 'solvingSelectableLetters' &&
+      inProgress.value.p.selectable.pageIndex === props.pageIndex &&
+      inProgress.value.p.selectable.lineIndex === props.lineIndex &&
+      inProgress.value.p.selectable.componentIndex === props.componentIndex
+    )
   },
-  { immediate: true },
-)
+  set(value: boolean) {
+    if (value) {
+      inProgress.value.p = {
+        kind: 'solvingSelectableLetters',
+        selectable: {
+          pageIndex: props.pageIndex,
+          lineIndex: props.lineIndex,
+          componentIndex: props.componentIndex,
+        },
+      }
+    } else {
+      inProgress.value.p = { kind: 'none' }
+    }
+  },
+})
 
 function increment(index: number) {
   highlights[index] = (highlights[index] + 1) % (props.colors.length + 1)

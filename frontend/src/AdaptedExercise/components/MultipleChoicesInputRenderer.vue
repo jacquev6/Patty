@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, reactive, ref, useTemplateRef, watch, type Ref } from 'vue'
+import { computed, inject, reactive, useTemplateRef, watch, type Ref } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type { ComponentAnswer, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
+import type { ComponentAnswer, InProgressExercise, PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 import WhitespaceRenderer from './WhitespaceRenderer.vue'
 import assert from '@/assert'
@@ -18,6 +18,8 @@ type FormattedTextContainer = {
 
 const props = defineProps<{
   pageIndex: number
+  lineIndex: number
+  componentIndex: number
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
@@ -25,23 +27,25 @@ const props = defineProps<{
   setComponentAnswer: (answer: ComponentAnswer) => void
 }>()
 
+const inProgress = defineModel<InProgressExercise>('inProgress', { required: true })
+
 const choiceProxy = computed({
   get() {
     const answer = props.getComponentAnswer()
     if (answer === undefined) {
-      return null
+      return undefined
     } else {
       assert(answer.kind === 'choice')
       return answer.choice
     }
   },
-  set(choice: number) {
+  set(choice: number | null) {
     props.setComponentAnswer({ kind: 'choice', choice })
   },
 })
 
 const currentChoice = computed(() => {
-  if (choiceProxy.value === null) {
+  if (choiceProxy.value === null || choiceProxy.value === undefined) {
     return {
       contents: [{ kind: 'text' as const, text: '....' }],
     }
@@ -59,18 +63,34 @@ const { floatingStyles } = useFloating(floatingReference, floatingElement, {
 })
 
 const showBackdrop = computed(() => !props.showChoicesByDefault)
-const showChoices = ref(false)
-watch(
-  [() => props.showChoicesByDefault, choiceProxy, () => props.pageIndex],
-  ([showChoicesByDefault, model]) => {
-    if (model === null) {
-      showChoices.value = showChoicesByDefault
+const showChoices = computed({
+  get() {
+    return (
+      (choiceProxy.value === undefined && props.showChoicesByDefault) ||
+      (inProgress.value.p.kind === 'solvingMultipleChoices' &&
+        inProgress.value.p.multipleChoices.pageIndex === props.pageIndex &&
+        inProgress.value.p.multipleChoices.lineIndex === props.lineIndex &&
+        inProgress.value.p.multipleChoices.componentIndex === props.componentIndex)
+    )
+  },
+  set(value: boolean) {
+    if (value) {
+      inProgress.value.p = {
+        kind: 'solvingMultipleChoices',
+        multipleChoices: {
+          pageIndex: props.pageIndex,
+          lineIndex: props.lineIndex,
+          componentIndex: props.componentIndex,
+        },
+      }
     } else {
-      showChoices.value = false
+      inProgress.value.p = { kind: 'none' }
+      if (choiceProxy.value === undefined) {
+        choiceProxy.value = null
+      }
     }
   },
-  { immediate: true },
-)
+})
 
 function set(choice: number) {
   choiceProxy.value = choice

@@ -10,22 +10,45 @@ import deepEqual from 'deep-equal'
 
 export type InProgressExercise = {
   exercise: RenderableExercise
-  selectedSwappable: {
-    pageIndex: number
-    lineIndex: number
-    componentIndex: number
-    contentsFrom: {
-      pageIndex: number
-      lineIndex: number
-      componentIndex: number
-    }
-  } | null
+  p:
+    | {
+        kind: 'none'
+      }
+    | {
+        kind: 'movingSwappable'
+        swappable: {
+          pageIndex: number
+          lineIndex: number
+          componentIndex: number
+          contentsFrom: {
+            pageIndex: number
+            lineIndex: number
+            componentIndex: number
+          }
+        }
+      }
+    | {
+        kind: 'solvingSelectableLetters'
+        selectable: {
+          pageIndex: number
+          lineIndex: number
+          componentIndex: number
+        }
+      }
+    | {
+        kind: 'solvingMultipleChoices'
+        multipleChoices: {
+          pageIndex: number
+          lineIndex: number
+          componentIndex: number
+        }
+      }
 }
 
 export type ComponentAnswer =
   | {
       kind: 'choice'
-      choice: number
+      choice: number | null
     }
   | {
       kind: 'text'
@@ -391,18 +414,16 @@ const renderableExercise = computed(() => makeRenderableExercise(props.adaptedEx
 
 const pageIndex = ref(0)
 
-const inProgress = ref(
-  reactive<InProgressExercise>({
-    exercise: renderableExercise.value,
-    selectedSwappable: null,
-  }),
-)
+const inProgress = reactive<InProgressExercise>({
+  exercise: renderableExercise.value,
+  p: { kind: 'none' },
+})
 watch(renderableExercise, (exercise) => {
-  inProgress.value.exercise = exercise
-  inProgress.value.selectedSwappable = null
+  inProgress.exercise = exercise
+  inProgress.p = { kind: 'none' }
 })
 watch(pageIndex, () => {
-  inProgress.value.selectedSwappable = null
+  inProgress.p = { kind: 'none' }
 })
 
 const page = computed(() => renderableExercise.value.pages[pageIndex.value])

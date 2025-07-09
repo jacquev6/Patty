@@ -16,10 +16,10 @@ const props = defineProps<{
 
 const selected = computed(
   () =>
-    inProgress.value.selectedSwappable !== null &&
-    inProgress.value.selectedSwappable.pageIndex === props.pageIndex &&
-    inProgress.value.selectedSwappable.lineIndex === props.lineIndex &&
-    inProgress.value.selectedSwappable.componentIndex === props.componentIndex,
+    inProgress.value.p.kind === 'movingSwappable' &&
+    inProgress.value.p.swappable.pageIndex === props.pageIndex &&
+    inProgress.value.p.swappable.lineIndex === props.lineIndex &&
+    inProgress.value.p.swappable.componentIndex === props.componentIndex,
 )
 
 const studentAnswers = defineModel<StudentAnswers>({ required: true })
@@ -67,27 +67,30 @@ function setAnswer(
 }
 
 function handleClick() {
-  if (inProgress.value.selectedSwappable !== null && inProgress.value.selectedSwappable.pageIndex === props.pageIndex) {
+  if (inProgress.value.p.kind === 'movingSwappable' && inProgress.value.p.swappable.pageIndex === props.pageIndex) {
     if (
-      inProgress.value.selectedSwappable.lineIndex !== props.lineIndex ||
-      inProgress.value.selectedSwappable.componentIndex !== props.componentIndex
+      inProgress.value.p.swappable.lineIndex !== props.lineIndex ||
+      inProgress.value.p.swappable.componentIndex !== props.componentIndex
     ) {
       const contentsFromBefore = contentsFrom.value
-      setAnswer(props.pageIndex, props.lineIndex, props.componentIndex, inProgress.value.selectedSwappable.contentsFrom)
+      setAnswer(props.pageIndex, props.lineIndex, props.componentIndex, inProgress.value.p.swappable.contentsFrom)
       setAnswer(
-        inProgress.value.selectedSwappable.pageIndex,
-        inProgress.value.selectedSwappable.lineIndex,
-        inProgress.value.selectedSwappable.componentIndex,
+        inProgress.value.p.swappable.pageIndex,
+        inProgress.value.p.swappable.lineIndex,
+        inProgress.value.p.swappable.componentIndex,
         contentsFromBefore,
       )
     }
-    inProgress.value.selectedSwappable = null
+    inProgress.value.p = { kind: 'none' }
   } else {
-    inProgress.value.selectedSwappable = {
-      pageIndex: props.pageIndex,
-      lineIndex: props.lineIndex,
-      componentIndex: props.componentIndex,
-      contentsFrom: contentsFrom.value,
+    inProgress.value.p = {
+      kind: 'movingSwappable',
+      swappable: {
+        pageIndex: props.pageIndex,
+        lineIndex: props.lineIndex,
+        componentIndex: props.componentIndex,
+        contentsFrom: contentsFrom.value,
+      },
     }
   }
 }
