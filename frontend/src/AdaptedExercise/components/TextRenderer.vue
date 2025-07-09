@@ -1,6 +1,5 @@
 <script setup lang="ts">
 defineProps<{
-  kind: 'text'
   text: string
   tricolorable: boolean
 }>()

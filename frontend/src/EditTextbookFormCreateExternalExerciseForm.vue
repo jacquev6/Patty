@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { type Textbook } from './apiClient'
 import BusyBox from './BusyBox.vue'
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   (e: 'textbook-updated', textbook: Textbook): void
 }>()
 
+const { t } = useI18n()
 const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
@@ -71,7 +73,7 @@ async function upload() {
 <template>
   <BusyBox :busy>
     <p>
-      Open one or several Word, Excel, PDF or GeoGebra files:
+      {{ t('open') }}
       <input
         ref="input"
         data-cy="external-files"
@@ -83,3 +85,10 @@ async function upload() {
     </p>
   </BusyBox>
 </template>
+
+<i18n>
+en:
+  open: "Open one or several Word, Excel, PDF or GeoGebra files:"
+fr:
+  open: "Ouvrir un ou plusieurs fichiers Word, Excel, PDF ou GeoGebra :"
+</i18n>

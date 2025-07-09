@@ -101,7 +101,7 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
         <p>
           <RouterLink :to="{ name: 'adapted-exercice-examples' }">{{ t('adaptedExerciseExamples') }}</RouterLink>
         </p>
-        <h2>New batch</h2>
+        <h2>{{ t('newBatch') }}</h2>
         <p>
           <RouterLink :to="{ name: 'create-extraction-batch' }">{{ t('newExtractionBatch.link') }}</RouterLink> ({{
             t('newExtractionBatch.comment')
@@ -121,7 +121,7 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
         <ul>
           <li v-for="extractionBatch in extractionBatches">
             <RouterLink :to="{ name: 'extraction-batch', params: { id: extractionBatch.id } }">
-              Batch E{{ extractionBatch.id }}
+              {{ t('extractionBatch', [extractionBatch.id]) }}
             </RouterLink>
             ({{
               t('createdBy', { name: extractionBatch.createdBy, date: d(new Date(extractionBatch.createdAt), 'long') })
@@ -138,7 +138,7 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
         <ul>
           <li v-for="classificationBatch in classificationBatches">
             <RouterLink :to="{ name: 'classification-batch', params: { id: classificationBatch.id } }">
-              Batch C{{ classificationBatch.id }}
+              {{ t('classificationBatch', [classificationBatch.id]) }}
             </RouterLink>
             ({{
               t('createdBy', {
@@ -158,7 +158,7 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
         <ul>
           <li v-for="adaptationBatch in adaptationBatches">
             <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptationBatch.id } }">
-              Batch A{{ adaptationBatch.id }}
+              {{ t('adaptationBatch', [adaptationBatch.id]) }}
             </RouterLink>
             (<template v-if="adaptationBatch.strategySettingsName !== null"
               >{{ adaptationBatch.strategySettingsName }},<WhiteSpace /></template
@@ -209,6 +209,9 @@ en:
   existingExtractionBatches: Existing extraction batches
   existingClassificationBatches: Existing classification batches
   existingAdaptationBatches: Existing adaptation batches
+  extractionBatch: "Batch E{0}"
+  classificationBatch: "Batch C{0}"
+  adaptationBatch: "Batch A{0}"
 
   textbooks: Textbooks
   newTextbook: New textbook
@@ -232,6 +235,9 @@ fr:
   existingExtractionBatches: Batchs d'extraction existants
   existingClassificationBatches: Batchs de classification existants
   existingAdaptationBatches: Batchs d'adaptation existants
+  extractionBatch: "Batch E{0}"
+  classificationBatch: "Batch C{0}"
+  adaptationBatch: "Batch A{0}"
 
   textbooks: Manuels
   newTextbook: Nouveau manuel

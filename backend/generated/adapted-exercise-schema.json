@@ -73,12 +73,18 @@
           },
           "title": "Contents",
           "type": "array"
+        },
+        "increaseHorizontalSpace": {
+          "default": false,
+          "title": "Increasehorizontalspace",
+          "type": "boolean"
         }
       },
       "required": [
         "kind",
         "showOriginalText",
-        "contents"
+        "contents",
+        "increaseHorizontalSpace"
       ],
       "type": "object",
       "additionalProperties": false

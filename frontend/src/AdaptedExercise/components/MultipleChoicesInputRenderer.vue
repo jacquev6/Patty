@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, inject, reactive, ref, useTemplateRef, watch, type Ref } from 'vue'
+import { computed, inject, reactive, useTemplateRef, watch, type Ref } from 'vue'
 import { useFloating, shift, flip, autoUpdate } from '@floating-ui/vue'
 
-import type { FormattedText } from '@/apiClient'
+import type { InProgressExercise, PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
-import WhitespaceComponent from './WhitespaceComponent.vue'
+import WhitespaceRenderer from './WhitespaceRenderer.vue'
 import assert from '@/assert'
 import { colors } from '../TriColorLines.vue'
 
@@ -13,25 +13,44 @@ defineOptions({
 })
 
 type FormattedTextContainer = {
-  contents: FormattedText[]
+  contents: PassiveRenderable[]
 }
 
 const props = defineProps<{
-  kind: 'multipleChoicesInput'
+  path: string
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
   tricolorable: boolean
 }>()
 
-const model = defineModel<number | null>({ required: true })
+const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+assert(studentAnswers !== undefined)
+
+const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
+assert(inProgress !== undefined)
+
+const choiceProxy = computed({
+  get() {
+    const answer = studentAnswers[props.path]
+    if (answer === undefined) {
+      return undefined
+    } else {
+      assert(answer.kind === 'choice')
+      return answer.choice
+    }
+  },
+  set(choice: number | null) {
+    studentAnswers[props.path] = { kind: 'choice', choice }
+  },
+})
 
 const currentChoice = computed(() => {
-  if (model.value === null) {
+  if (choiceProxy.value === null || choiceProxy.value === undefined) {
     return {
       contents: [{ kind: 'text' as const, text: '....' }],
     }
   } else {
-    return props.choices[model.value]
+    return props.choices[choiceProxy.value]
   }
 })
 
@@ -44,21 +63,30 @@ const { floatingStyles } = useFloating(floatingReference, floatingElement, {
 })
 
 const showBackdrop = computed(() => !props.showChoicesByDefault)
-const showChoices = ref(false)
-watch(
-  [() => props.showChoicesByDefault, model],
-  ([showChoicesByDefault, model]) => {
-    if (model === null) {
-      showChoices.value = showChoicesByDefault
+const showChoices = computed({
+  get() {
+    return (
+      (choiceProxy.value === undefined && props.showChoicesByDefault) ||
+      (inProgress.p.kind === 'solvingMultipleChoices' && inProgress.p.path === props.path)
+    )
+  },
+  set(value: boolean) {
+    if (value) {
+      inProgress.p = {
+        kind: 'solvingMultipleChoices',
+        path: props.path,
+      }
     } else {
-      showChoices.value = false
+      inProgress.p = { kind: 'none' }
+      if (choiceProxy.value === undefined) {
+        choiceProxy.value = null
+      }
     }
   },
-  { immediate: true },
-)
+})
 
 function set(choice: number) {
-  model.value = choice
+  choiceProxy.value = choice
   showChoices.value = false
 }
 
@@ -70,10 +98,8 @@ const choicesLines = computed(() => {
   return lines
 })
 
-const teleportBackdropTo = inject<string /* or anything that can be passed to 'Teleport:to' */>(
-  'adaptedExerciseTeleportBackdropTo',
-  'body',
-)
+const teleportBackdropTo = inject<Ref<HTMLDivElement> | null>('adaptedExerciseContainerDiv')
+assert(teleportBackdropTo !== undefined)
 
 const sortedColors = reactive([colors[0], colors[1], colors[2]])
 
@@ -127,7 +153,9 @@ watch(tricolorablesRevisionIndex, recolor, { immediate: true })
     </p>
     <!-- Ensure the floating choices does not cover next line -->
     <div class="hidden choices">
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <p><span class="choice">Alpha</span></p>
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <p><span class="choice">Bravo</span></p>
     </div>
   </div>
@@ -136,7 +164,7 @@ watch(tricolorablesRevisionIndex, recolor, { immediate: true })
     <div ref="floatingElement" :style="floatingElementStyle" class="choices">
       <p v-for="choicesLine in choicesLines">
         <template v-for="(choice, choiceIndex) in choicesLine">
-          <WhitespaceComponent v-if="choiceIndex !== 0" kind="whitespace" />
+          <WhitespaceRenderer v-if="choiceIndex !== 0" />
           <span
             :data-cy="`choice${choice.index}`"
             @click="set(choice.index)"

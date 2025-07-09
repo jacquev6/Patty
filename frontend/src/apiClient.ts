@@ -55,13 +55,17 @@ export type AdaptationBatch =
 export type Adaptation = paths['/api/adaptations/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
 
-export type AnyComponent =
+export type AnyExerciseComponent =
   | AdaptedExercise['instruction']['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['example'], null>['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['hint'], null>['lines'][number]['contents'][number]
   | AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number]
   | Exclude<AdaptedExercise['reference'], null>['contents'][number]
 
-export type PlainText = AnyComponent & { kind: 'text' | 'whitespace' }
-export type FormattedText = AnyComponent & { kind: 'text' | 'whitespace' | 'arrow' | 'formatted' }
-export type PassiveComponent = AnyComponent & { kind: 'text' | 'whitespace' | 'arrow' | 'formatted' | 'choice' }
+export type PlainTextExerciseComponent = AnyExerciseComponent & { kind: 'text' | 'whitespace' }
+export type FormattedTextExerciseComponent = AnyExerciseComponent & {
+  kind: 'text' | 'whitespace' | 'arrow' | 'formatted'
+}
+export type PassiveExerciseComponent = AnyExerciseComponent & {
+  kind: 'text' | 'whitespace' | 'arrow' | 'formatted' | 'choice'
+}

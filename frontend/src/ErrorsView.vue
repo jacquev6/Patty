@@ -45,6 +45,7 @@ onMounted(async () => {
 
 <template>
   <div>
+    <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
     <h1>Generate synthetic errors</h1>
     <p>
       <template v-for="[title, f] of errors">
@@ -52,6 +53,7 @@ onMounted(async () => {
         <WhiteSpace />
       </template>
     </p>
+    <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
     <h1>Previously caught</h1>
     <pre v-for="error in existingErrors" :key="error.id">{{ error }}</pre>
   </div>

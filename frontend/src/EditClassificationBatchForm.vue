@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 import { type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
 import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
+import classificationCamembert20250520 from './ClassificationCamembert20250520'
 
 defineProps<{
   classificationBatch: ClassificationBatch
@@ -12,21 +15,25 @@ const emit = defineEmits<{
   (e: 'batch-updated'): void
 }>()
 
+const { d } = useI18n({ useScope: 'global' })
+
 const authenticationTokenStore = useAuthenticationTokenStore()
 </script>
 
 <template>
   <h1>Settings</h1>
   <p>Created by: {{ classificationBatch.createdBy }}</p>
-  <p>Classification model: <code>classification_camembert.pt</code>, provided by Elise by e-mail on 2025-05-20</p>
   <p>
-    Class names produced: <code>Associe</code>, <code>AssocieCoche</code>, <code>CM</code>, <code>CacheIntrus</code>,
-    <code>Classe</code>, <code>ClasseCM</code>, <code>CliqueEcrire</code>, <code>CocheGroupeMots</code>,
-    <code>CocheIntrus</code>, <code>CocheLettre</code>, <code>CocheMot</code>, <code>CocheMot*</code>,
-    <code>CochePhrase</code>, <code>Echange</code>, <code>EditPhrase</code>, <code>EditTexte</code>,
-    <code>ExpressionEcrite</code>, <code>GenreNombre</code>, <code>Phrases</code>, <code>Question</code>,
-    <code>RC</code>, <code>RCCadre</code>, <code>RCDouble</code>, <code>RCImage</code>, <code>Texte</code>,
-    <code>Trait</code>, <code>TransformeMot</code>, <code>TransformePhrase</code>, <code>VraiFaux</code>
+    Classification model: <code>{{ classificationCamembert20250520.fileName }}</code
+    >, provided by {{ classificationCamembert20250520.providedBy }} by e-mail on
+    {{ d(classificationCamembert20250520.providedOn, 'long-date') }}
+  </p>
+  <p>
+    Class names produced:
+    <template v-for="(className, index) in classificationCamembert20250520.classesProduced">
+      <template v-if="index !== 0">, </template>
+      <code>{{ className }}</code>
+    </template>
   </p>
   <p>
     Run adaptation after classification:

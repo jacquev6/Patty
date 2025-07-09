@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PassiveComponent } from '@/apiClient'
+import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import PassiveSingleComponent from './PassiveSingleComponent.vue'
 
 const props = defineProps<{
-  contents: PassiveComponent[]
+  contents: PassiveRenderable[]
   tricolorable: boolean
 }>()
 </script>

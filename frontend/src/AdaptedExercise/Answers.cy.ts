@@ -3,11 +3,9 @@ import AdaptedExerciseRenderer, { type StudentAnswers } from './AdaptedExerciseR
 
 describe('Adapted exercise answers', () => {
   const studentAnswersStorageKey = '1'
-  const answersKey = `patty/student-answers/v2/exercise-${studentAnswersStorageKey}`
+  const answersKey = `patty/student-answers/v3/exercise-${studentAnswersStorageKey}`
 
-  const emptyAnswers: StudentAnswers = {
-    pages: {},
-  }
+  const emptyAnswers: StudentAnswers = {}
 
   const exerciseWithFreeTextInputs: AdaptedExercise = {
     format: 'v1',
@@ -108,34 +106,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForFreeTextInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': { components: { '2': { kind: 'freeTextInput', text: '0' }, '6': { kind: 'freeTextInput', text: '1' } } },
-          '1': {
-            components: {
-              '0': { kind: 'freeTextInput', text: '2' },
-              '4': { kind: 'freeTextInput', text: '3' },
-              '8': { kind: 'freeTextInput', text: '4' },
-            },
-          },
-          '2': { components: { '2': { kind: 'freeTextInput', text: '5' }, '6': { kind: 'freeTextInput', text: '6' } } },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: { '0': { kind: 'freeTextInput', text: '7' }, '8': { kind: 'freeTextInput', text: '9' } },
-          },
-          '1': {
-            components: { '6': { kind: 'freeTextInput', text: '11' } },
-          },
-          '2': {
-            components: { '4': { kind: 'freeTextInput', text: '13' } },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'text', text: '0' },
+    'stmt-pg0-ln0-ct6': { kind: 'text', text: '1' },
+    'stmt-pg0-ln1-ct0': { kind: 'text', text: '2' },
+    'stmt-pg0-ln1-ct4': { kind: 'text', text: '3' },
+    'stmt-pg0-ln1-ct8': { kind: 'text', text: '4' },
+    'stmt-pg0-ln2-ct2': { kind: 'text', text: '5' },
+    'stmt-pg0-ln2-ct6': { kind: 'text', text: '6' },
+    'stmt-pg1-ln0-ct0': { kind: 'text', text: '7' },
+    'stmt-pg1-ln0-ct8': { kind: 'text', text: '9' },
+    'stmt-pg1-ln1-ct6': { kind: 'text', text: '11' },
+    'stmt-pg1-ln2-ct4': { kind: 'text', text: '13' },
   }
 
   const colors = ['rgb(128, 0, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 128)', 'rgba(0, 0, 0, 0)']
@@ -239,51 +220,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'selectableInput', color: 1 },
-              '6': { kind: 'selectableInput', color: 2 },
-            },
-          },
-          '1': {
-            components: {
-              '0': { kind: 'selectableInput', color: 3 },
-              '4': { kind: 'selectableInput', color: 4 },
-              '8': { kind: 'selectableInput', color: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'selectableInput', color: 2 },
-              '6': { kind: 'selectableInput', color: 3 },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '0': { kind: 'selectableInput', color: 1 },
-              '8': { kind: 'selectableInput', color: 3 },
-            },
-          },
-          '1': {
-            components: {
-              '6': { kind: 'selectableInput', color: 2 },
-            },
-          },
-          '2': {
-            components: {
-              '4': { kind: 'selectableInput', color: 1 },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct6': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln1-ct0': { kind: 'selectable', color: 3 },
+    'stmt-pg0-ln1-ct4': { kind: 'selectable', color: 4 },
+    'stmt-pg0-ln1-ct8': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln2-ct2': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln2-ct6': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct0': { kind: 'selectable', color: 1 },
+    'stmt-pg1-ln0-ct8': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln1-ct6': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln2-ct4': { kind: 'selectable', color: 1 },
   }
 
   const choices = [
@@ -391,51 +338,17 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForMultipleChoicesInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'multipleChoicesInput', choice: 0 },
-              '6': { kind: 'multipleChoicesInput', choice: 1 },
-            },
-          },
-          '1': {
-            components: {
-              '0': { kind: 'multipleChoicesInput', choice: 2 },
-              '4': { kind: 'multipleChoicesInput', choice: 0 },
-              '8': { kind: 'multipleChoicesInput', choice: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'multipleChoicesInput', choice: 2 },
-              '6': { kind: 'multipleChoicesInput', choice: 0 },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '0': { kind: 'multipleChoicesInput', choice: 0 },
-              '8': { kind: 'multipleChoicesInput', choice: 2 },
-            },
-          },
-          '1': {
-            components: {
-              '6': { kind: 'multipleChoicesInput', choice: 1 },
-            },
-          },
-          '2': {
-            components: {
-              '4': { kind: 'multipleChoicesInput', choice: 0 },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'choice', choice: 0 },
+    'stmt-pg0-ln0-ct6': { kind: 'choice', choice: 1 },
+    'stmt-pg0-ln1-ct0': { kind: 'choice', choice: 2 },
+    'stmt-pg0-ln1-ct4': { kind: 'choice', choice: 0 },
+    'stmt-pg0-ln1-ct8': { kind: 'choice', choice: 1 },
+    'stmt-pg0-ln2-ct2': { kind: 'choice', choice: 2 },
+    'stmt-pg0-ln2-ct6': { kind: 'choice', choice: 0 },
+    'stmt-pg1-ln0-ct0': { kind: 'choice', choice: 0 },
+    'stmt-pg1-ln0-ct8': { kind: 'choice', choice: 2 },
+    'stmt-pg1-ln1-ct6': { kind: 'choice', choice: 1 },
+    'stmt-pg1-ln2-ct4': { kind: 'choice', choice: 0 },
   }
 
   const exerciseWithSwappableInputs: AdaptedExercise = {
@@ -494,28 +407,10 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSwappableInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 1, componentIndex: 4 } },
-            },
-          },
-          '1': {
-            components: {
-              '4': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 6 } },
-            },
-          },
-          '2': {
-            components: {
-              '2': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 0, componentIndex: 2 } },
-              '6': { kind: 'swappableInput', contentsFrom: { pageIndex: 0, lineIndex: 2, componentIndex: 2 } },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln1-ct4' },
+    'stmt-pg0-ln1-ct4': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct6' },
+    'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
+    'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
   }
 
   function getAnswers(): Cypress.Chainable<StudentAnswers> {
@@ -817,31 +712,9 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForEditableTextInputs: StudentAnswers = {
-    pages: {
-      '0': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'editableTextInput', text: 'AAA AAA' },
-            },
-          },
-          '1': {
-            components: {
-              '2': { kind: 'editableTextInput', text: 'BBB BBB' },
-            },
-          },
-        },
-      },
-      '1': {
-        lines: {
-          '0': {
-            components: {
-              '2': { kind: 'editableTextInput', text: 'CCC CCC' },
-            },
-          },
-        },
-      },
-    },
+    'stmt-pg0-ln0-ct2': { kind: 'text', text: 'AAA AAA' },
+    'stmt-pg0-ln1-ct2': { kind: 'text', text: 'BBB BBB' },
+    'stmt-pg1-ln0-ct2': { kind: 'text', text: 'CCC CCC' },
   }
 
   it('are saved for editable text inputs', () => {
@@ -880,5 +753,126 @@ describe('Adapted exercise answers', () => {
     cy.get('.control').eq(1).click()
     cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'CCC CCC')
     cy.get('[data-cy="freeTextInput"]').eq(1).should('have.text', 'd0 d1')
+  })
+
+  const exerciseWithSelectableLettersInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'a' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'b' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'c' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'd' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'e' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+          ],
+        },
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'f' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'g' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'h' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'i' }], colors, boxed: false },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'j' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'k' }], colors, boxed: false },
+                { kind: 'selectableInput', contents: [{ kind: 'text', text: 'l' }], colors, boxed: false },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForSelectableLettersInputs: StudentAnswers = {
+    'stmt-pg0-ln0-ct2-lt0': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct2-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct8-lt0': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct8-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln0-ct5-lt0': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct5-lt1': { kind: 'selectable', color: 2 },
+  }
+
+  it('are saved for selectable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableLettersInputs,
+      },
+      attrs: {
+        style: `min-height: 450px;`,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    for (let i = 0; i < 2; i++) {
+      cy.get('[data-cy="selectableInput"]').eq(i).click()
+      cy.get('.picker>div>p:first-child>span').as('letter')
+      cy.get('@letter').eq(0).click()
+      cy.get('@letter').eq(1).click().click()
+      cy.get('span:contains("✅")').click()
+    }
+    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('.control').eq(1).click()
+    for (let i = 1; i < 2; i++) {
+      cy.get('[data-cy="selectableInput"]').eq(i).click()
+      cy.get('.picker>div>p:first-child>span').as('letter')
+      cy.get('@letter').eq(0).click().click().click()
+      cy.get('@letter').eq(1).click().click()
+      cy.get('span:contains("✅")').click()
+    }
+    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+
+    getAnswers().should('deep.equal', answersForSelectableLettersInputs)
+  })
+
+  it('are loaded for selectable letters inputs', () => {
+    setAnswers(answersForSelectableLettersInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableLettersInputs,
+      },
+    })
+
+    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('.control').eq(1).click()
+    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
   })
 })

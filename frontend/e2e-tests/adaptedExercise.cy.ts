@@ -249,7 +249,7 @@ describe('The autonomous HTML for a textbook', () => {
 
   it('displays the textbook title', () => {
     visitExport('/api/export/textbook/1.html')
-    cy.get('p:contains("Livre")').should('have.text', 'Livre : Dummy Textbook Title')
+    cy.get('p:contains("Livre")').should('have.text', 'Livre : Dummy Textbook Title')
   })
 
   it('displays nothing', () => {

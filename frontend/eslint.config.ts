@@ -1,14 +1,9 @@
 import pluginVue from 'eslint-plugin-vue'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error Not typed
 import pluginCypress from 'eslint-plugin-cypress/flat'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
-
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
+import vueI18n from '@intlify/eslint-plugin-vue-i18n'
 
 export default defineConfigWithVueTs(
   {
@@ -32,10 +27,25 @@ export default defineConfigWithVueTs(
     ],
   },
   skipFormatting,
+  vueI18n.configs.recommended,
   {
     rules: {
       'vue/require-v-for-key': 'off',
       'vue/valid-v-for': 'off',
+      '@intlify/vue-i18n/no-raw-text': [
+        'warn',  // @todo Make it an error
+        {
+          // Use the following comment to ignore this rule in a specific line:
+          // <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          ignoreText: [
+            ',', ':', '.', '(', ')', '/', '<', '>', '✅', '❌', '🌐', '🖊️', 'BUG:',
+          ],
+        },
+      ],
+      // @todo Find how to disable these '@intlify' rules only for .json files
+      '@intlify/vue-i18n/no-deprecated-modulo-syntax': 'off',
+      '@intlify/vue-i18n/no-html-messages': 'off',
+      '@intlify/vue-i18n/valid-message-syntax': 'off',
     },
   },
 )

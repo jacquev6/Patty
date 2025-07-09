@@ -1,32 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { PassiveComponent } from '@/apiClient'
+import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
 import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
 
-const props = withDefaults(
-  defineProps<{
-    kind: 'formatted'
-    contents: PassiveComponent[]
-    bold?: boolean
-    italic?: boolean
-    underlined?: boolean
-    highlighted?: string | null
-    boxed?: boolean
-    subscript?: boolean
-    superscript?: boolean
-    tricolorable: boolean
-  }>(),
-  {
-    bold: false,
-    italic: false,
-    underlined: false,
-    highlighted: null,
-    boxed: false,
-    subscript: false,
-    superscript: false,
-  },
-)
+const props = defineProps<{
+  contents: PassiveRenderable[]
+  bold: boolean
+  italic: boolean
+  underlined: boolean
+  highlighted: string | null
+  boxed: boolean
+  subscript: boolean
+  superscript: boolean
+  tricolorable: boolean
+}>()
 
 const style = computed(() => ({
   backgroundColor: props.highlighted ?? undefined,
