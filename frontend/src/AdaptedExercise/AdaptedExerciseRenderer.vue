@@ -263,7 +263,7 @@ function makeRenderableFromEditableTextInput(
   }
 }
 
-function regroupSelectableInputs(contents: IteratorObject<AnyRenderable>): AnyRenderable[] {
+function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
   const ret: AnyRenderable[] = []
   const group: SelectableInputRenderable[] = []
 
@@ -334,11 +334,9 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
         const alone =
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
 
-        const components = contents
-          .entries()
-          .flatMap(([componentIndex, c]) =>
-            makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
-          )
+        const components = Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
+          makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+        )
 
         statement.push({
           contents: regroupSelectableInputs(components),
