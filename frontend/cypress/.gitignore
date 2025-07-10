@@ -1,3 +1,2 @@
-/screenshots/*.png
-/screenshots/**/* (failed).png
+/screenshots/
 /downloads/
