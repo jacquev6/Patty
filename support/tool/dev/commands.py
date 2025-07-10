@@ -4,7 +4,7 @@ import subprocess
 
 import click
 
-from .cycle import DevelopmentCycle, DevelopmentCycleError
+from .cycle import DevelopmentCycle, DevelopmentCycleError, is_frontend_spec, is_end_to_end_spec
 from . import compose
 from ..main_command import main
 
@@ -92,13 +92,13 @@ def compose_(args: tuple[str, ...]) -> None:
 @dev.command()
 @click.argument("args", nargs=-1)
 def patty(args: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
+    compose.exec_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
 
 
 @dev.command()
 @click.argument("args", nargs=-1)
 def alembic(args: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
+    compose.exec_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
 
 
 @dev.command()
@@ -126,6 +126,7 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--skip-chromium", is_flag=True)
 @click.option("--only-firefox", is_flag=True)
 @click.option("--skip-firefox", is_flag=True)
+@click.option("--accept-visual-diffs", is_flag=True)
 def cycle(
     cost_money: bool,
     only_backend: bool,
@@ -151,6 +152,7 @@ def cycle(
     skip_chromium: bool,
     only_firefox: bool,
     skip_firefox: bool,
+    accept_visual_diffs: bool,
 ) -> None:
     """Run the development cycle."""
 
@@ -205,10 +207,10 @@ def cycle(
     end_to_end_specs: list[str] | None = []
     assert isinstance(end_to_end_specs, list)
     for spec in only_spec:
-        if spec.startswith("frontend/src") and spec.endswith(".cy.ts"):
-            frontend_specs.append(spec[9:])
-        elif spec.startswith("frontend/e2e-tests") and spec.endswith(".cy.ts"):
-            end_to_end_specs.append(spec[9:])
+        if is_frontend_spec(spec):
+            frontend_specs.append(spec)
+        elif is_end_to_end_spec(spec):
+            end_to_end_specs.append(spec)
         else:
             raise ValueError(f"Invalid spec: {spec}")
     if len(frontend_specs) == 0:
@@ -229,6 +231,7 @@ def cycle(
         frontend_specs=frontend_specs,
         end_to_end_specs=end_to_end_specs,
         browsers=browsers,
+        accept_visual_diffs=accept_visual_diffs,
     )
     try:
         cycle.run()
@@ -253,13 +256,13 @@ def gui() -> None:
         env["DISPLAY"] = os.environ["DISPLAY"]
 
     # We may need to run "xhost +" before that
-    compose.run_in_frontend_container(["npx", "cypress", "open"], env=env)
+    compose.exec_in_frontend_container(["npx", "cypress", "open"], env=env)
 
 
 @tests.command()
 def visual_diff() -> None:
     # @todo Use 'webbrowser.open' to open the report at 'http://127.0.0.1:6868'
-    compose.run_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
+    compose.exec_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
 
 
 @tests.command()
@@ -280,4 +283,4 @@ def fanout() -> None:
 def reload() -> None:
     """Reload the fanout."""
 
-    compose.run_in_container("fanout", ["nginx", "-s", "reload"])
+    compose.run_or_exec_in_container("exec", "fanout", ["nginx", "-s", "reload"])

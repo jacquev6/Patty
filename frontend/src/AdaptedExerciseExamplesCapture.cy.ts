@@ -8,7 +8,7 @@ function screenshot(title: string, pageIndex: number) {
     cy.get('.inner-container').then((el) => {
       const width = el[0].clientWidth
       const height = el[0].clientHeight
-      const baseName = `Capture/${width}x${height}/${title.replaceAll('/', '')}-page${pageIndex + 1}`
+      const baseName = `${width}x${height}-${title.replaceAll('/', '')}-page${pageIndex + 1}`
       screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
       cy.compareSnapshot({
         name: `${baseName}-${screenshotsCounts[baseName]}`,

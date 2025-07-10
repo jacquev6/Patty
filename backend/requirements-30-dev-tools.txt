@@ -1,6 +1,8 @@
 black
 graphviz
 httpie
+joblib
+joblib-stubs
 mypy
 pandas-stubs
 ruff

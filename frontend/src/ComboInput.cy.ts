@@ -6,7 +6,7 @@ function screenshot() {
   if (!Cypress.config('isInteractive')) {
     const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
     screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
-    const name = `${baseName}-${screenshotsCounts[baseName]}-${Cypress.browser.name}`
+    const name = `${baseName}-${screenshotsCounts[baseName]}`
     cy.compareSnapshot(name)
   }
 }
