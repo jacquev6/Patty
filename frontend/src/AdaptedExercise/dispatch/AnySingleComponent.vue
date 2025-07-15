@@ -41,12 +41,13 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
-    .with({ kind: 'selectableInput' }, ({ path, contents, colors, boxed }) =>
+    .with({ kind: 'selectableInput' }, ({ path, contents, colors, boxed, mayBeSingleLetter }) =>
       h(SelectableInputRenderer, {
         path,
         contents,
         colors,
         boxed,
+        mayBeSingleLetter,
         tricolorable: props.tricolorable,
       }),
     )

@@ -482,6 +482,18 @@ describe('SelectableInput', () => {
                         colors: ['grey'],
                         boxed: false,
                       },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
                     ],
                   },
                 ],
@@ -492,7 +504,7 @@ describe('SelectableInput', () => {
         },
       },
     })
-    cy.get('@input').click()
+    cy.get('@input').click({ multiple: true })
     screenshot()
 
     cy.mount(AdaptedExerciseRenderer, {
@@ -515,6 +527,18 @@ describe('SelectableInput', () => {
                         colors: ['grey'],
                         boxed: true,
                       },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
                     ],
                   },
                 ],
@@ -525,7 +549,7 @@ describe('SelectableInput', () => {
         },
       },
     })
-    cy.get('@input').click()
+    cy.get('@input').click({ multiple: true })
     screenshot()
 
     cy.mount(AdaptedExerciseRenderer, {

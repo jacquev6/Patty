@@ -2760,11 +2760,16 @@ onMounted(() => {
 
 <i18n>
 en:
-  spacing: Spacing
+  spacing: Spacing and sizes
   changesNotSaved: Changes made here are not saved, and applied only on this page, temporarily.
   variable:
     '--extra-horizontal-space-between-words': 'Horizontal space added to the standard space between words'
     '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 'Horizontal space added between letters when <code>"increaseHorizontalSpace"</code> is <code>true</code> in a <code>"kind": "editableTextInput"</code>'
+    '--font-size-for-single-character-selectable': 'Font size when a <code>"kind": "selectableInput"</code> contains a single character'
+    '--extra-horizontal-space-around-single-letter-selectable': 'Horizontal space added around that single character when it is a letter'
+    '--extra-vertical-space-around-single-letter-selectable': 'Vertical space added around that letter'
+    '--extra-horizontal-space-around-single-punctuation-selectable': 'Horizontal space added around that single character when it is a punctuation mark'
+    '--extra-vertical-space-around-single-punctuation-selectable': 'Vertical space added around that punctuation mark'
     '--vertical-space-between-top-and-instruction': 'Vertical space between the top of the page and the instruction'
     '--vertical-space-between-instruction-lines': 'Vertical space between lines in the instruction'
     '--vertical-space-between-instruction-and-statement': 'Vertical space between the instruction and the statement'
@@ -2773,11 +2778,16 @@ en:
     '--vertical-space-between-choices-lines': 'Vertical space between lines in the choices of a <code>"kind": "multipleChoicesInput"</code>'
   examples: Examples
 fr:
-  spacing: Espacement
+  spacing: Espacement et dimensions
   changesNotSaved: Les modifications effectuées ici ne sont pas enregistrées, et ne s'appliquent qu'à cette page, temporairement.
   variable:
     '--extra-horizontal-space-between-words': 'Espace horizontal ajouté à l’espace standard entre les mots'
     '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 'Espace horizontal ajouté entre les lettres quand <code>"increaseHorizontalSpace"</code> est <code>true</code> dans un <code>"kind": "editableTextInput"</code>'
+    '--font-size-for-single-character-selectable': 'Taille de police quand un <code>"kind": "selectableInput"</code> contient un seul caractère'
+    '--extra-horizontal-space-around-single-letter-selectable': 'Espace horizontal ajouté autour de cet unique caractère quand il s’agit d’une lettre'
+    '--extra-vertical-space-around-single-letter-selectable': 'Espace vertical ajouté autour de cette lettre'
+    '--extra-horizontal-space-around-single-punctuation-selectable': 'Espace horizontal ajouté autour de cet unique caractère quand il s’agit d’un signe de ponctuation'
+    '--extra-vertical-space-around-single-punctuation-selectable': 'Espace vertical ajouté autour de ce signe de ponctuation'
     '--vertical-space-between-top-and-instruction': 'Espace vertical entre le haut de la page et l’instruction'
     '--vertical-space-between-instruction-lines': 'Espace vertical entre les lignes de l’instruction'
     '--vertical-space-between-instruction-and-statement': 'Espace vertical entre l’instruction et l’énoncé'

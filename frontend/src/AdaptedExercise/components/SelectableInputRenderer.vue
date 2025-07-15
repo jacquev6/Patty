@@ -10,6 +10,7 @@ const props = defineProps<{
   contents: PassiveRenderable[]
   colors: string[]
   boxed: boolean
+  mayBeSingleLetter: boolean
   tricolorable: boolean
 }>()
 
@@ -37,20 +38,16 @@ function increment() {
 
 const highlighted = computed(() => (colorIndexProxy.value === 0 ? null : props.colors[colorIndexProxy.value - 1]))
 
-const style = computed(() => {
+const single = computed(() => {
   if (props.contents.length === 1 && props.contents[0].kind === 'text' && props.contents[0].text.length === 1) {
     const c = props.contents[0].text[0]
     if ('.!?,;:'.includes(c)) {
-      return {
-        padding: '16px 3.2px',
-      }
+      return 'punctuation'
     } else {
-      return {
-        padding: '2px 2px',
-      }
+      return props.mayBeSingleLetter ? 'letter' : null
     }
   } else {
-    return {}
+    return null
   }
 })
 </script>
@@ -58,7 +55,10 @@ const style = computed(() => {
 <template>
   <FormattedTextRenderer
     class="main"
-    :style
+    :class="{
+      'single-letter': single === 'letter',
+      'single-punctuation': single === 'punctuation',
+    }"
     :contents
     :bold="false"
     :italic="false"
@@ -81,5 +81,17 @@ const style = computed(() => {
 
 .main:hover {
   outline: 1px dashed green;
+}
+
+.single-letter {
+  padding: var(--extra-vertical-space-around-single-letter-selectable)
+    var(--extra-horizontal-space-around-single-letter-selectable) !important;
+  font-size: var(--font-size-for-single-character-selectable);
+}
+
+.single-punctuation {
+  padding: var(--extra-vertical-space-around-single-punctuation-selectable)
+    var(--extra-horizontal-space-around-single-punctuation-selectable) !important;
+  font-size: var(--font-size-for-single-character-selectable);
 }
 </style>

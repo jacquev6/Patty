@@ -6,6 +6,7 @@ import type {
   PassiveExerciseComponent,
 } from '@/apiClient'
 import { match, P } from 'ts-pattern'
+import deepCopy from 'deep-copy'
 
 export type InProgressExercise = {
   swappables: { [path: string]: SwappableInputRenderable }
@@ -49,6 +50,11 @@ export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
   '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 0.2,
+  '--font-size-for-single-character-selectable': 1.2,
+  '--extra-horizontal-space-around-single-letter-selectable': 0.0625,
+  '--extra-vertical-space-around-single-letter-selectable': 0.0625,
+  '--extra-horizontal-space-around-single-punctuation-selectable': 0.1,
+  '--extra-vertical-space-around-single-punctuation-selectable': 0.5,
   '--vertical-space-between-top-and-instruction': 0.35,
   '--vertical-space-between-instruction-lines': 2,
   '--vertical-space-between-instruction-and-statement': 2.15,
@@ -106,6 +112,7 @@ type SelectableInputRenderable = {
   contents: PassiveRenderable[]
   colors: string[]
   boxed: boolean
+  mayBeSingleLetter: boolean
 }
 
 type SwappableInputRenderable = {
@@ -215,6 +222,7 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
         boxed,
         colors,
         contents: contents.flatMap(makeRenderableFromPassiveExerciseComponent),
+        mayBeSingleLetter: false,
       },
     ])
     .with({ kind: 'swappableInput' }, ({ contents }) => [
@@ -249,6 +257,19 @@ function makeRenderableFromEditableTextInput(
   }
 }
 
+function markConsecutiveSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
+  const ret: AnyRenderable[] = deepCopy(contents)
+  for (let i = 1; i < ret.length; i++) {
+    const a = ret[i - 1]
+    const b = ret[i]
+    if (a.kind === 'selectableInput' && b.kind === 'selectableInput') {
+      a.mayBeSingleLetter = true
+      b.mayBeSingleLetter = true
+    }
+  }
+  return ret
+}
+
 function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   const pages: RenderablePage[] = []
 
@@ -271,8 +292,10 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
 
         statement.push({
-          contents: Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
-            makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+          contents: markConsecutiveSelectableInputs(
+            Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
+              makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+            ),
           ),
           alone,
         })
