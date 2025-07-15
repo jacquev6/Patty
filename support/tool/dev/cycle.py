@@ -191,6 +191,7 @@ class DevelopmentCycle:
 
         if self.do_end_to_end:
             if self.do_test:
+                # @todo Move end-to-end screenshots in a directory named after the spec, like for frontend specs
                 if self.end_to_end_specs is None:
                     specs = []
                 else:

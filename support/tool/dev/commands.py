@@ -120,6 +120,7 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--only-test", is_flag=True)
 @click.option("--skip-test", is_flag=True)
 @click.option("--only-spec", type=str, multiple=True)
+# @todo Add --skip-spec
 @click.option("--only-electron", is_flag=True)
 @click.option("--skip-electron", is_flag=True)
 @click.option("--only-chromium", is_flag=True)
