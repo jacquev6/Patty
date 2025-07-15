@@ -80,6 +80,11 @@ def run_or_exec_in_container(
     mount: dict[str, str] = {},
     quiet: bool = False,
 ) -> subprocess.CompletedProcess[str]:
+    if run_or_exec == "run":
+        rm_options = ["--rm"]
+    else:
+        rm_options = []
+
     if workdir is None:
         workdir_options = []
         workdir_string = ""
@@ -111,7 +116,7 @@ def run_or_exec_in_container(
         )
 
     return subprocess.run(
-        ["docker", "compose", run_or_exec] + env_options + workdir_options + mount_options + [container] + command,
+        ["docker", "compose", run_or_exec] + rm_options + env_options + workdir_options + mount_options + [container] + command,
         cwd="support/dev-env",
         check=check,
         universal_newlines=True,
