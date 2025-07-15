@@ -163,10 +163,10 @@ class DevelopmentCycle:
                     joblib.delayed(run_in_frontend_container)(**job) for job in jobs
                 ):
                     if result.returncode == 0:
-                        print("OK:", result.args[-3], result.args[-1])
+                        print("OK:", result.args[-3], os.path.join("frontend", result.args[-1]))
                     else:
                         failures.append(result)
-                        print("FAILED:", result.args[-3], result.args[-1])
+                        print("FAILED:", result.args[-3], os.path.join("frontend", result.args[-1]))
 
                 for failure in failures:
                     print()
