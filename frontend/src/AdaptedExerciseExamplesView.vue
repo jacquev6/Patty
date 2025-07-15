@@ -2212,12 +2212,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'autres' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ':' }],
-                  },
+                  { kind: 'text', text: ':' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2233,12 +2228,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'turbine' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: '(' }],
-                  },
+                  { kind: 'text', text: '(' },
                   {
                     kind: 'selectableInput',
                     boxed: false,
@@ -2251,12 +2241,7 @@ export const examples: Example[] = [
                     colors: [yellow],
                     contents: [{ kind: 'text', text: 'hélice' }],
                   },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ')' }],
-                  },
+                  { kind: 'text', text: ')' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2307,12 +2292,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'vent' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ';' }],
-                  },
+                  { kind: 'text', text: ';' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2381,14 +2361,15 @@ export const examples: Example[] = [
                     kind: 'selectableInput',
                     boxed: false,
                     colors: [yellow],
-                    contents: [{ kind: 'text', text: 'l’électricité' }],
+                    contents: [{ kind: 'text', text: 'l’' }],
                   },
                   {
                     kind: 'selectableInput',
                     boxed: false,
                     colors: [yellow],
-                    contents: [{ kind: 'text', text: '.' }],
+                    contents: [{ kind: 'text', text: 'électricité' }],
                   },
+                  { kind: 'text', text: '.' },
                 ],
               },
             ],
