@@ -809,12 +809,12 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableLettersInputs: StudentAnswers = {
-    'stmt-pg0-ln0-ct2-lt0': { kind: 'selectable', color: 1 },
-    'stmt-pg0-ln0-ct2-lt1': { kind: 'selectable', color: 2 },
-    'stmt-pg0-ln0-ct8-lt0': { kind: 'selectable', color: 1 },
-    'stmt-pg0-ln0-ct8-lt1': { kind: 'selectable', color: 2 },
-    'stmt-pg1-ln0-ct5-lt0': { kind: 'selectable', color: 3 },
-    'stmt-pg1-ln0-ct5-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct3': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct8': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct9': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln0-ct5': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct6': { kind: 'selectable', color: 2 },
   }
 
   it('are saved for selectable inputs', () => {
@@ -831,27 +831,19 @@ describe('Adapted exercise answers', () => {
 
     getAnswers().should('deep.equal', emptyAnswers)
 
-    for (let i = 0; i < 2; i++) {
-      cy.get('[data-cy="selectableInput"]').eq(i).click()
-      cy.get('.picker>div>p:first-child>span').as('letter')
-      cy.get('@letter').eq(0).click()
-      cy.get('@letter').eq(1).click().click()
-      cy.get('span:contains("✅")').click()
-    }
-    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
-    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('[data-cy="selectableInput"]').eq(0).click()
+    cy.get('[data-cy="selectableInput"]').eq(1).click().click()
+    cy.get('[data-cy="selectableInput"]').eq(3).click()
+    cy.get('[data-cy="selectableInput"]').eq(4).click().click()
+    cy.get('span:contains("a")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(0).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(0).should('have.css', 'background-color', colors[1])
     cy.get('.control').eq(1).click()
-    for (let i = 1; i < 2; i++) {
-      cy.get('[data-cy="selectableInput"]').eq(i).click()
-      cy.get('.picker>div>p:first-child>span').as('letter')
-      cy.get('@letter').eq(0).click().click().click()
-      cy.get('@letter').eq(1).click().click()
-      cy.get('span:contains("✅")').click()
-    }
-    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
-    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('[data-cy="selectableInput"]').eq(2).click().click().click()
+    cy.get('[data-cy="selectableInput"]').eq(3).click().click()
+    cy.get('span:contains("h")').eq(0).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(0).should('have.css', 'background-color', colors[1])
 
     getAnswers().should('deep.equal', answersForSelectableLettersInputs)
   })
@@ -867,12 +859,12 @@ describe('Adapted exercise answers', () => {
       },
     })
 
-    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
-    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("a")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(0).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(0).should('have.css', 'background-color', colors[1])
     cy.get('.control').eq(1).click()
-    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
-    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("h")').eq(0).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(0).should('have.css', 'background-color', colors[1])
   })
 })

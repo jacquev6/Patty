@@ -6,7 +6,6 @@ import type {
   PassiveExerciseComponent,
 } from '@/apiClient'
 import { match, P } from 'ts-pattern'
-import deepEqual from 'deep-equal'
 
 export type InProgressExercise = {
   swappables: { [path: string]: SwappableInputRenderable }
@@ -20,10 +19,6 @@ export type InProgressExercise = {
           path: string
           contentsFrom: string
         }
-      }
-    | {
-        kind: 'solvingSelectableLetters'
-        path: string
       }
     | {
         kind: 'solvingMultipleChoices'
@@ -113,14 +108,6 @@ type SelectableInputRenderable = {
   boxed: boolean
 }
 
-type SelectableLettersInputRenderable = {
-  kind: 'selectableLettersInput'
-  path: string
-  contents: string
-  colors: string[]
-  boxed: boolean
-}
-
 type SwappableInputRenderable = {
   kind: 'swappableInput'
   path: string
@@ -131,7 +118,6 @@ type ActiveRenderable =
   | TextInputRenderable
   | MultipleChoicesInputRenderable
   | SelectableInputRenderable
-  | SelectableLettersInputRenderable
   | SwappableInputRenderable
 
 export type AnyRenderable = PassiveRenderable | ActiveRenderable
@@ -263,56 +249,6 @@ function makeRenderableFromEditableTextInput(
   }
 }
 
-function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
-  const ret: AnyRenderable[] = []
-  const group: SelectableInputRenderable[] = []
-
-  function mustRegroup(content: SelectableInputRenderable): boolean {
-    if (group.length !== 0) {
-      if (content.boxed !== group[0].boxed) return false
-      if (!deepEqual(content.colors, group[0].colors)) return false
-    }
-    if (content.contents.length !== 1) return false
-    if (content.contents[0].kind !== 'text') return false
-    if (content.contents[0].text.length !== 1) return false
-    return true
-  }
-
-  function pushGroup(): void {
-    if (group.length > 1) {
-      ret.push({
-        kind: 'selectableLettersInput',
-        path: group[0].path,
-        contents: group
-          .flatMap((g) => g.contents)
-          .map((c) => (c.kind === 'text' ? c.text : ''))
-          .join(''),
-        colors: group[0].colors,
-        boxed: group[0].boxed,
-      })
-    } else if (group.length === 1) {
-      ret.push(group[0])
-    }
-    group.splice(0, group.length)
-  }
-
-  for (const content of contents) {
-    if (content.kind === 'selectableInput' && mustRegroup(content)) {
-      group.push(content)
-    } else {
-      pushGroup()
-      if (content.kind === 'selectableInput' && mustRegroup(content)) {
-        group.push(content)
-      } else {
-        ret.push(content)
-      }
-    }
-  }
-  pushGroup()
-
-  return ret
-}
-
 function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   const pages: RenderablePage[] = []
 
@@ -334,12 +270,10 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
         const alone =
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
 
-        const components = Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
-          makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
-        )
-
         statement.push({
-          contents: regroupSelectableInputs(components),
+          contents: Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
+            makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+          ),
           alone,
         })
         for (const [componentIndex, component] of contents.entries()) {

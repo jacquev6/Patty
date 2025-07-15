@@ -8,7 +8,6 @@ import MultipleChoicesInputRenderer from '../components/MultipleChoicesInputRend
 import SelectableInputRenderer from '../components/SelectableInputRenderer.vue'
 import SwappableInputRenderer from '../components/SwappableInputRenderer.vue'
 import { match, P } from 'ts-pattern'
-import SelectableLettersInputRenderer from '../components/SelectableLettersInputRenderer.vue'
 
 const props = defineProps<{
   aloneOnLine: boolean
@@ -44,15 +43,6 @@ function render() {
     )
     .with({ kind: 'selectableInput' }, ({ path, contents, colors, boxed }) =>
       h(SelectableInputRenderer, {
-        path,
-        contents,
-        colors,
-        boxed,
-        tricolorable: props.tricolorable,
-      }),
-    )
-    .with({ kind: 'selectableLettersInput' }, ({ path, contents, colors, boxed }) =>
-      h(SelectableLettersInputRenderer, {
         path,
         contents,
         colors,
