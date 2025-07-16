@@ -110,7 +110,7 @@ a {
 }
 
 .exercise {
-  margin: 2px;
+  margin: 2px 8px;
   padding: 0.7em 2em;
   border-width: 2px;
   border-style: solid;
