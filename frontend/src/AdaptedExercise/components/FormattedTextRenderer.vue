@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
-import PassiveSequenceComponent from '../dispatch/PassiveSequenceComponent.vue'
+import type { AnyRenderable } from '../AdaptedExerciseRenderer.vue'
+import AnySequenceComponent from '../dispatch/AnySequenceComponent.vue'
 
 const props = defineProps<{
-  contents: PassiveRenderable[]
+  contents: AnyRenderable[]
   bold: boolean
   italic: boolean
   underlined: boolean
@@ -29,5 +29,5 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <span :style><PassiveSequenceComponent :contents :tricolorable /></span>
+  <span :style><AnySequenceComponent :contents :aloneOnLine="false" :tricolorable /></span>
 </template>

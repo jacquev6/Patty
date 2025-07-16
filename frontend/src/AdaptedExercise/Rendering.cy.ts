@@ -618,6 +618,169 @@ describe('SelectableInput', () => {
     cy.get('@input').click()
     screenshot()
   })
+
+  it('renders nested selectable inputs', () => {
+    cy.viewport(550, 310)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [{ kind: 'text', text: 'in' }],
+                            colors: ['red'],
+                            boxed: false,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [
+                              { kind: 'text', text: 'mid' },
+                              { kind: 'whitespace' },
+                              {
+                                kind: 'selectableInput',
+                                contents: [{ kind: 'text', text: 'inner' }],
+                                colors: ['orange'],
+                                boxed: false,
+                              },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'mid' },
+                            ],
+                            colors: ['grey'],
+                            boxed: false,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [
+                              { kind: 'text', text: 'mid' },
+                              { kind: 'whitespace' },
+                              {
+                                kind: 'selectableInput',
+                                contents: [{ kind: 'text', text: 'inner' }],
+                                colors: ['orange'],
+                                boxed: true,
+                              },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'mid' },
+                            ],
+                            colors: ['grey'],
+                            boxed: true,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
+  })
 })
 
 describe('FreeTextInput', () => {

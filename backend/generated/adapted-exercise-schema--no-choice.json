@@ -392,6 +392,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
               }
             ]
           },

@@ -867,4 +867,89 @@ describe('Adapted exercise answers', () => {
     cy.get('span:contains("h")').eq(0).should('have.css', 'background-color', colors[2])
     cy.get('span:contains("i")').eq(0).should('have.css', 'background-color', colors[1])
   })
+
+  const exerciseWithNestedSelectableInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'selectableInput',
+                  contents: [
+                    { kind: 'text', text: 'B' },
+                    { kind: 'whitespace' },
+                    {
+                      kind: 'selectableInput',
+                      contents: [
+                        { kind: 'text', text: 'C' },
+                        { kind: 'whitespace' },
+                        { kind: 'selectableInput', contents: [{ kind: 'text', text: 'D' }], colors, boxed: false },
+                      ],
+                      colors,
+                      boxed: false,
+                    },
+                  ],
+                  colors,
+                  boxed: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForNestedSelectableInputs: StudentAnswers = {
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct2-ct2': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct2-ct2-ct2': { kind: 'selectable', color: 3 },
+  }
+
+  it('are saved for nested selectable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithNestedSelectableInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="selectableInput"]').eq(0).click('left')
+    cy.get('[data-cy="selectableInput"]').eq(1).click('left').click('left')
+    cy.get('[data-cy="selectableInput"]').eq(2).click().click().click()
+
+    cy.get('span:contains("B")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("C")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("D")').eq(2).should('have.css', 'background-color', colors[2])
+
+    getAnswers().should('deep.equal', answersForNestedSelectableInputs)
+  })
+
+  it('are loaded for nested selectable inputs', () => {
+    setAnswers(answersForNestedSelectableInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithNestedSelectableInputs,
+      },
+    })
+
+    cy.get('span:contains("B")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("C")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("D")').eq(2).should('have.css', 'background-color', colors[2])
+  })
 })

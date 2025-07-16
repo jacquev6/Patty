@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 
-import type { PassiveRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
+import type { PassiveRenderable, SelectableInputRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
 import assert from '@/assert'
 
 const props = defineProps<{
   path: string
-  contents: PassiveRenderable[]
+  contents: (PassiveRenderable | SelectableInputRenderable)[]
   colors: string[]
   boxed: boolean
   mayBeSingleLetter: boolean
@@ -69,7 +69,7 @@ const single = computed(() => {
     :highlighted
     :tricolorable
     data-cy="selectableInput"
-    @click="increment()"
+    @click.stop="increment()"
   />
 </template>
 

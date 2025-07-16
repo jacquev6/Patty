@@ -106,10 +106,10 @@ type MultipleChoicesInputRenderable = {
   showChoicesByDefault: boolean
 }
 
-type SelectableInputRenderable = {
+export type SelectableInputRenderable = {
   kind: 'selectableInput'
   path: string
-  contents: PassiveRenderable[]
+  contents: (PassiveRenderable | SelectableInputRenderable)[]
   colors: string[]
   boxed: boolean
   mayBeSingleLetter: boolean
@@ -194,6 +194,27 @@ function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseCo
     .otherwise(makeRenderableFromFormattedTextExerciseComponent)
 }
 
+function makeRenderableFromSelectableInputContent(
+  basePath: string,
+  component: PassiveExerciseComponent | (AnyExerciseComponent & { kind: 'selectableInput' }),
+  index: number,
+): (PassiveRenderable | SelectableInputRenderable)[] {
+  const path = `${basePath}-ct${index}`
+  return match(component)
+    .returnType<(PassiveRenderable | SelectableInputRenderable)[]>()
+    .with({ kind: 'selectableInput' }, (c) => [
+      {
+        kind: 'selectableInput',
+        path,
+        contents: c.contents.flatMap((x, index) => makeRenderableFromSelectableInputContent(path, x, index)),
+        colors: c.colors,
+        boxed: c.boxed,
+        mayBeSingleLetter: false,
+      },
+    ])
+    .otherwise(makeRenderableFromPassiveExerciseComponent)
+}
+
 function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExerciseComponent): AnyRenderable[] {
   return match(component)
     .returnType<AnyRenderable[]>()
@@ -221,7 +242,7 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
         path,
         boxed,
         colors,
-        contents: contents.flatMap(makeRenderableFromPassiveExerciseComponent),
+        contents: contents.flatMap((c, index) => makeRenderableFromSelectableInputContent(path, c, index)),
         mayBeSingleLetter: false,
       },
     ])

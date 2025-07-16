@@ -1516,6 +1516,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['SelectableInput-Input']
       )[]
       /** Colors */
       colors: string[]
@@ -1534,6 +1535,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['SelectableInput-Output']
       )[]
       /** Colors */
       colors: string[]

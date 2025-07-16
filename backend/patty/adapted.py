@@ -92,7 +92,7 @@ class MultipleChoicesInput(BaseModel):
 
 class SelectableInput(BaseModel):
     kind: Literal["selectableInput"]
-    contents: list[FormattedText]
+    contents: list[FormattedText | SelectableInput]
     colors: list[str]
     boxed: bool
 

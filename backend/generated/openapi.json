@@ -4229,6 +4229,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Input"
                 }
               ]
             },
@@ -4276,6 +4279,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
                 }
               ]
             },
