@@ -116,7 +116,13 @@ def run_or_exec_in_container(
         )
 
     return subprocess.run(
-        ["docker", "compose", run_or_exec] + rm_options + env_options + workdir_options + mount_options + [container] + command,
+        ["docker", "compose", run_or_exec]
+        + rm_options
+        + env_options
+        + workdir_options
+        + mount_options
+        + [container]
+        + command,
         cwd="support/dev-env",
         check=check,
         universal_newlines=True,
