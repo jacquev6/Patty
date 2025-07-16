@@ -372,6 +372,15 @@ const swappables = computed(() => {
 })
 
 const pageIndex = ref(0)
+watch(
+  () => props.adaptedExercise.statement.pages.length,
+  (pagesCount) => {
+    if (pageIndex.value >= pagesCount) {
+      pageIndex.value = Math.max(0, pagesCount - 1)
+    }
+  },
+  { immediate: true },
+)
 
 const inProgress = reactive<InProgressExercise>({
   swappables: swappables.value,

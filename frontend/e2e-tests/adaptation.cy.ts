@@ -824,7 +824,7 @@ describe('The edition page for an initially successful adaptation', () => {
     screenshot('adaptation-edition-page.manual-not-json')
   })
 
-  it('reproduces issue #96', () => {
+  it('does not reproduce issue #96', () => {
     cy.get('@manual-edition').type('{selectAll}', { force: true })
     cy.get('@manual-edition').type('{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"example":null,"hint":null,"statement":{"pages":[{"lines": [{"contents":[{"kind": "text", "text": "Page1"}]}]},', { delay: 0, parseSpecialCharSequences: false, force: true })
     cy.get('@manual-edition').type('{"lines": [{"contents":[{"kind": "text", "text": "Page2"}]}]},{"lines": [{"contents":[{"kind": "text", "text": "Page3"}]}]}]},"reference":null}', { delay: 0, parseSpecialCharSequences: false, force: true })
@@ -832,9 +832,10 @@ describe('The edition page for an initially successful adaptation', () => {
     cy.get('span:contains("Page3")').should('exist')
     cy.get('@manual-edition')
       .type('{selectAll}', { force: true })
-      .type('{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"example":null,"hint":null,"statement":{"pages":[{"lines": [{"contents":[{"kind": "text", "text": "Page1"}]}]}]},"reference":null}', { delay: 0, parseSpecialCharSequences: false, force: true })
-    cy.get('h1:contains("There was a bug")').should('exist')
-    cy.get(':contains("TypeError")').should('contain', 'undefined')
+      .type('{"format":"v1","instruction":{"lines":[{"contents":[{"kind":"text","text":"Blah"}]}]},"example":null,"hint":null,"statement":{"pages":[{"lines": [{"contents":[{"kind": "text", "text": "PageA"}]}]},{"lines": [{"contents":[{"kind": "text", "text": "PageB"}]}]}]},"reference":null}', { delay: 0, parseSpecialCharSequences: false, force: true })
+    cy.get('span:contains("PageB")').should('exist')
+    cy.get('h1:contains("There was a bug")').should('not.exist')
+    cy.get(':contains("TypeError")').should('not.exist')
   })
 })
 
