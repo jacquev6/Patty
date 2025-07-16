@@ -17,43 +17,20 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const pageNumberFilter = ref<string>('')
-const exerciseNumberFilter = ref<string>('')
 
-type Filtered =
-  | { kind: 'nothing' }
-  | { kind: 'message'; message: string }
-  | { kind: 'exercises'; exercises: Exercise[] }
+type Filtered = { kind: 'nothing' } | { kind: 'noSuchPage' } | { kind: 'exercises'; exercises: Exercise[] }
 
 const filtered = computed(() => {
-  return match([pageNumberFilter.value, exerciseNumberFilter.value])
+  return match(pageNumberFilter.value)
     .returnType<Filtered>()
-    .with(['', ''], () => ({ kind: 'nothing' }))
-    .with(['', P.string], () => {
-      return { kind: 'message', message: t('message.noPage') }
-    })
-    .with([P.string, P.string], ([pageString, number]) => {
+    .with('', () => ({ kind: 'nothing' }))
+    .with(P.string, (pageString) => {
       const page = parseInt(pageString, 10)
       const exercises = props.data.exercises.filter((exercise) => exercise.pageNumber === page)
       if (exercises.length === 0) {
-        return { kind: 'message', message: t('message.unexistingPage', { page }) }
-      } else if (number === '') {
-        return { kind: 'exercises', exercises }
-      } else if (Number.isNaN(Number.parseInt(number))) {
-        const exercises2 = exercises.filter((exercise) =>
-          exercise.exerciseNumber.toLowerCase().includes(number.toLowerCase()),
-        )
-        if (exercises2.length === 0) {
-          return { kind: 'message', message: t('message.unexistingExercise1', { number }) }
-        } else {
-          return { kind: 'exercises', exercises: exercises2 }
-        }
+        return { kind: 'noSuchPage' }
       } else {
-        const exercise = exercises.find((exercise) => exercise.exerciseNumber === number)
-        if (exercise === undefined) {
-          return { kind: 'message', message: t('message.unexistingExercise2', { number }) }
-        } else {
-          return { kind: 'exercises', exercises: [exercise] }
-        }
+        return { kind: 'exercises', exercises }
       }
     })
     .exhaustive()
@@ -61,19 +38,12 @@ const filtered = computed(() => {
 </script>
 
 <template>
-  <p class="title">{{ t('title') }} {{ data.title }}</p>
+  <p class="title">{{ data.title }}</p>
   <p>
     {{ t('pageNumberFilter') }} <wbr /><TriColoredInput
       :digitsOnly="true"
       v-model="pageNumberFilter"
       data-cy="page-number-filter"
-    />
-  </p>
-  <p>
-    {{ t('exerciseNumberFilter') }} <wbr /><TriColoredInput
-      :digitsOnly="false"
-      v-model="exerciseNumberFilter"
-      data-cy="exercise-number-filter"
     />
   </p>
   <p>
@@ -83,7 +53,7 @@ const filtered = computed(() => {
   </p>
 
   <template v-if="filtered.kind === 'nothing'"></template>
-  <p class="message" v-else-if="filtered.kind === 'message'">{{ filtered.message }}</p>
+  <p class="message" v-else-if="filtered.kind === 'noSuchPage'">{{ t('noSuchPage', { page: pageNumberFilter }) }}</p>
   <template v-else-if="filtered.kind === 'exercises'">
     <TextbookExportExercisesList :exercises="filtered.exercises" />
   </template>
@@ -106,18 +76,12 @@ const filtered = computed(() => {
 
 .message {
   color: red;
-  font-weight: bold;
 }
 </style>
 
 <i18n>
 fr:
-  title: 'Livre :'
-  pageNumberFilter: 'Quelle page ?'
+  pageNumberFilter: 'Numéro de page :'
   exerciseNumberFilter: 'Quel exercice ?'
-  message:
-    noPage: Indique le numéro de la page.
-    unexistingPage: La page {page} n'existe pas.
-    unexistingExercise1: L'exercice {number} n'existe pas.
-    unexistingExercise2: L'exercice numéro {number} n'existe pas.
+  noSuchPage: La page {page} n'existe pas.
 </i18n>
