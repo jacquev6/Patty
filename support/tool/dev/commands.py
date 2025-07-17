@@ -1,10 +1,11 @@
+import glob
 import os
 import shutil
 import subprocess
 
 import click
 
-from .cycle import DevelopmentCycle, DevelopmentCycleError, is_frontend_spec, is_end_to_end_spec
+from .cycle import DevelopmentCycle, DevelopmentCycleError
 from . import compose
 from ..main_command import main
 
@@ -120,7 +121,7 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--only-test", is_flag=True)
 @click.option("--skip-test", is_flag=True)
 @click.option("--only-spec", type=str, multiple=True)
-# @todo Add --skip-spec
+@click.option("--skip-spec", type=str, multiple=True)
 @click.option("--only-electron", is_flag=True)
 @click.option("--skip-electron", is_flag=True)
 @click.option("--only-chromium", is_flag=True)
@@ -147,6 +148,7 @@ def cycle(
     only_test: bool,
     skip_test: bool,
     only_spec: tuple[str, ...],
+    skip_spec: tuple[str, ...],
     only_electron: bool,
     skip_electron: bool,
     only_chromium: bool,
@@ -203,21 +205,25 @@ def cycle(
     if do_firefox:
         browsers.append("firefox")
 
-    frontend_specs: list[str] | None = []
-    assert isinstance(frontend_specs, list)
-    end_to_end_specs: list[str] | None = []
-    assert isinstance(end_to_end_specs, list)
-    for spec in only_spec:
-        if is_frontend_spec(spec):
-            frontend_specs.append(spec)
-        elif is_end_to_end_spec(spec):
-            end_to_end_specs.append(spec)
-        else:
-            raise ValueError(f"Invalid spec: {spec}")
-    if len(frontend_specs) == 0:
-        frontend_specs = None
-    if len(end_to_end_specs) == 0:
-        end_to_end_specs = None
+    all_frontend_specs = set(glob.glob("frontend/src/**/*.cy.ts", recursive=True))
+    only_frontend_specs = set(only_spec) & all_frontend_specs
+    skip_frontend_specs = set(skip_spec) & all_frontend_specs
+    if only_frontend_specs:
+        frontend_specs = list(only_frontend_specs)
+    else:
+        frontend_specs = list(all_frontend_specs - skip_frontend_specs)
+
+    all_e2e_specs = set(glob.glob("frontend/e2e-tests/**/*.cy.ts", recursive=True))
+    only_e2e_specs = set(only_spec) & all_e2e_specs
+    skip_e2e_specs = set(skip_spec) & all_e2e_specs
+    if only_e2e_specs:
+        end_to_end_specs = list(only_e2e_specs)
+    else:
+        end_to_end_specs = list(all_e2e_specs - skip_e2e_specs)
+
+    unknown_specs = (set(only_spec) | set(skip_spec)) - (all_frontend_specs | all_e2e_specs)
+    for spec in unknown_specs:
+        raise ValueError(f"Invalid spec: {spec}")
 
     cycle = DevelopmentCycle(
         do_migration=do_migration,

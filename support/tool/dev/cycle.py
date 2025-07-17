@@ -14,14 +14,6 @@ class DevelopmentCycleError(Exception):
     pass
 
 
-def is_frontend_spec(spec: str) -> bool:
-    return spec.startswith("frontend/src") and spec.endswith(".cy.ts")
-
-
-def is_end_to_end_spec(spec: str) -> bool:
-    return spec.startswith("frontend/e2e-tests") and spec.endswith(".cy.ts")
-
-
 @dataclasses.dataclass
 class DevelopmentCycle:
     do_migration: bool
@@ -33,8 +25,8 @@ class DevelopmentCycle:
     do_lint: bool
     do_type_check: bool
     do_test: bool
-    frontend_specs: list[str] | None
-    end_to_end_specs: list[str] | None
+    frontend_specs: list[str]
+    end_to_end_specs: list[str]
     browsers: list[str]
     accept_visual_diffs: bool
 
@@ -113,14 +105,9 @@ class DevelopmentCycle:
                 exec_in_frontend_container(["npx", "vue-tsc", "--build"])
 
             if self.do_test:
-                if self.frontend_specs is None:
-                    specs = glob.glob("frontend/src/**/*.cy.ts", recursive=True)
-                else:
-                    specs = self.frontend_specs
-
                 jobs: list[dict[str, typing.Any]] = []
                 for browser in self.browsers:
-                    for spec in specs:
+                    for spec in self.frontend_specs:
                         if not os.path.isfile(spec):
                             continue
                         screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
@@ -176,7 +163,7 @@ class DevelopmentCycle:
                     print(failure.stdout)
                     print(failure.stderr)
 
-                for spec in specs:
+                for spec in self.frontend_specs:
                     for browser in self.browsers:
                         screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
                         shutil.rmtree(os.path.join(screenshots_path, "tmp"))
@@ -192,10 +179,8 @@ class DevelopmentCycle:
         if self.do_end_to_end:
             if self.do_test:
                 # @todo Move end-to-end screenshots in a directory named after the spec, like for frontend specs
-                if self.end_to_end_specs is None:
-                    specs = []
-                else:
-                    specs = ["--spec", ",".join(spec[9:] for spec in self.end_to_end_specs)]
-
                 for browser in self.browsers:
-                    exec_in_frontend_container(["npx", "cypress", "run", "--e2e", "--browser", browser] + specs)
+                    exec_in_frontend_container(
+                        ["npx", "cypress", "run", "--e2e", "--browser", browser]
+                        + ["--spec", ",".join(spec[9:] for spec in self.end_to_end_specs)]
+                    )
