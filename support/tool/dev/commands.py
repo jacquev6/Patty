@@ -205,7 +205,7 @@ def cycle(
     if do_firefox:
         browsers.append("firefox")
 
-    all_frontend_specs = set(glob.glob("frontend/src/**/*.cy.ts", recursive=True))
+    all_frontend_specs = set(filter(os.path.isfile, glob.glob("frontend/src/**/*.cy.ts", recursive=True)))
     only_frontend_specs = set(only_spec) & all_frontend_specs
     skip_frontend_specs = set(skip_spec) & all_frontend_specs
     if only_frontend_specs:
@@ -213,7 +213,7 @@ def cycle(
     else:
         frontend_specs = list(all_frontend_specs - skip_frontend_specs)
 
-    all_e2e_specs = set(glob.glob("frontend/e2e-tests/**/*.cy.ts", recursive=True))
+    all_e2e_specs = set(filter(os.path.isfile, glob.glob("frontend/e2e-tests/**/*.cy.ts", recursive=True)))
     only_e2e_specs = set(only_spec) & all_e2e_specs
     skip_e2e_specs = set(skip_spec) & all_e2e_specs
     if only_e2e_specs:
@@ -264,21 +264,6 @@ def gui() -> None:
 
     # We may need to run "xhost +" before that
     compose.exec_in_frontend_container(["npx", "cypress", "open"], env=env)
-
-
-@tests.command()
-def visual_diff() -> None:
-    # @todo Use 'webbrowser.open' to open the report at 'http://127.0.0.1:6868'
-    compose.exec_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
-
-
-@tests.command()
-def accept_visual_diffs() -> None:
-    for f in os.listdir("frontend/cypress-image-diff-screenshots/comparison"):
-        shutil.move(
-            os.path.join("frontend/cypress-image-diff-screenshots/comparison", f),
-            os.path.join("frontend/cypress-image-diff-screenshots/baseline", f),
-        )
 
 
 @dev.group()

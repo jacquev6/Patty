@@ -108,17 +108,7 @@ class DevelopmentCycle:
                 jobs: list[dict[str, typing.Any]] = []
                 for browser in self.browsers:
                     for spec in self.frontend_specs:
-                        if not os.path.isfile(spec):
-                            continue
-                        screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
-                        if self.accept_visual_diffs:
-                            shutil.rmtree(screenshots_path, ignore_errors=True)
-                        tmp_path = os.path.join(screenshots_path, "tmp")
-                        os.makedirs(tmp_path, exist_ok=True)
-                        html_report_path = os.path.join(screenshots_path, "html-report")
-                        os.makedirs(html_report_path, exist_ok=True)
-                        with open(os.path.join(screenshots_path, ".gitignore"), "w") as f:
-                            f.write("/comparison/\n/diff/\n/html-report/\n/tmp/\n")
+                        mounts = make_screenshots_directory(spec, browser, clear=self.accept_visual_diffs)
                         jobs.append(
                             dict(
                                 command=[
@@ -135,11 +125,7 @@ class DevelopmentCycle:
                                 env={"PATTY_UNIT_TESTING": "true"},
                                 check=False,
                                 capture=True,
-                                mount={
-                                    screenshots_path: "/app/frontend/cypress-image-diff-screenshots",
-                                    html_report_path: "/app/frontend/cypress-image-diff-html-report",
-                                    tmp_path: "/app/frontend/cypress/screenshots",
-                                },
+                                mount=mounts,
                                 quiet=True,
                             )
                         )
@@ -163,24 +149,56 @@ class DevelopmentCycle:
                     print(failure.stdout)
                     print(failure.stderr)
 
-                for spec in self.frontend_specs:
-                    for browser in self.browsers:
-                        screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
-                        shutil.rmtree(os.path.join(screenshots_path, "tmp"))
-                        baseline_path = os.path.join(screenshots_path, "baseline")
-                        if not os.path.isdir(baseline_path) or os.listdir(baseline_path) == []:
-                            shutil.rmtree(screenshots_path)
-                    if os.listdir(spec + ".screenshots") == []:
-                        shutil.rmtree(spec + ".screenshots")
+                maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
 
                 if failures:
                     raise DevelopmentCycleError()
 
         if self.do_end_to_end:
             if self.do_test:
-                # @todo Move end-to-end screenshots in a directory named after the spec, like for frontend specs
-                for browser in self.browsers:
-                    exec_in_frontend_container(
-                        ["npx", "cypress", "run", "--e2e", "--browser", browser]
-                        + ["--spec", ",".join(spec[9:] for spec in self.end_to_end_specs)]
-                    )
+                try:
+                    for browser in self.browsers:
+                        for spec in self.end_to_end_specs:
+                            mounts = make_screenshots_directory(spec, browser, clear=self.accept_visual_diffs)
+
+                            run_in_frontend_container(
+                                command=["npx", "cypress", "run", "--e2e", "--browser", browser, "--spec", spec[9:]],
+                                mount=mounts,
+                            )
+                finally:
+                    maybe_remove_screenshots_directories(self.end_to_end_specs, self.browsers)
+
+
+def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:
+    screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
+    if clear:
+        shutil.rmtree(screenshots_path, ignore_errors=True)
+    tmp_path = os.path.join(screenshots_path, "tmp")
+    os.makedirs(tmp_path, exist_ok=True)
+    html_report_path = os.path.join(screenshots_path, "html-report")
+    os.makedirs(html_report_path, exist_ok=True)
+    with open(os.path.join(screenshots_path, ".gitignore"), "w") as f:
+        f.write("/comparison/\n/diff/\n/html-report/\n/tmp/\n")
+    os.makedirs("frontend/cypress-image-diff-screenshots", exist_ok=True)
+    os.makedirs("frontend/cypress-image-diff-html-report", exist_ok=True)
+    os.makedirs("frontend/cypress/screenshots", exist_ok=True)
+    return {
+        screenshots_path: "/app/frontend/cypress-image-diff-screenshots",
+        html_report_path: "/app/frontend/cypress-image-diff-html-report",
+        tmp_path: "/app/frontend/cypress/screenshots",
+    }
+
+
+def maybe_remove_screenshots_directories(specs: typing.Iterable[str], browsers: typing.Iterable[str]) -> None:
+    for spec in specs:
+        for browser in browsers:
+            screenshots_path = os.path.join(os.path.abspath(spec) + ".screenshots", browser)
+            shutil.rmtree(os.path.join(screenshots_path, "tmp"), ignore_errors=True)
+            baseline_path = os.path.join(screenshots_path, "baseline")
+            if not os.path.isdir(baseline_path) or os.listdir(baseline_path) == []:
+                shutil.rmtree(screenshots_path)
+        if os.listdir(spec + ".screenshots") == []:
+            shutil.rmtree(spec + ".screenshots")
+    os.rmdir("frontend/cypress-image-diff-screenshots")
+    os.rmdir("frontend/cypress-image-diff-html-report")
+    os.rmdir("frontend/cypress/screenshots")

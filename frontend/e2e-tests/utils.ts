@@ -13,7 +13,7 @@ export function ignoreResizeObserverLoopError() {
 export function screenshot(name: string) {
   if (!Cypress.config('isInteractive')) {
     cy.compareSnapshot({
-      name: `${name}.${Cypress.browser.name}`,
+      name,
       cypressScreenshotOptions: { disableTimersAndAnimations: true },
     })
   }
