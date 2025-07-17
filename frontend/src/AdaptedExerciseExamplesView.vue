@@ -70,6 +70,81 @@ export const examples: Example[] = [
   //   },
   // },
   {
+    title: 'freeTextInput in formatted',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Complète' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'groupes' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'nominaux' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'en' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'jaune' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'avec' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'adjectifs' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ton' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'choix' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'J' },
+                  { kind: 'text', text: "'" },
+                  { kind: 'text', text: 'ai' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'visité' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'formatted',
+                    highlighted: yellow,
+                    contents: [
+                      { kind: 'text', text: 'un' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'musée' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'Imbricated selectableInput',
     description: null,
     exercise: {

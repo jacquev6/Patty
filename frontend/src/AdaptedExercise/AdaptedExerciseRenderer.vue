@@ -1,12 +1,49 @@
 <script lang="ts">
-import type {
-  AdaptedExercise,
-  AnyExerciseComponent,
-  FormattedTextExerciseComponent,
-  PassiveExerciseComponent,
-} from '@/apiClient'
+import type { AdaptedExercise } from '@/apiClient'
 import { match, P } from 'ts-pattern'
 import deepCopy from 'deep-copy'
+
+type TextComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'text' }
+type WhitespaceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'whitespace' }
+type FormattedComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'formatted' }
+type ArrowComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'arrow' }
+type ChoiceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'choice' }
+type ActiveFormattedComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'formatted'
+}
+type FreeTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'freeTextInput'
+}
+type MultipleChoicesInputComponent =
+  AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & { kind: 'multipleChoicesInput' }
+type SelectableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'selectableInput'
+}
+type SwappableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'swappableInput'
+}
+type EditableTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'editableTextInput'
+}
+
+type PlainTextComponent = TextComponent | WhitespaceComponent
+type FormattedTextComponent = PlainTextComponent | ArrowComponent | FormattedComponent
+type ActiveFormattedTextComponent =
+  | PlainTextComponent
+  | ArrowComponent
+  | ActiveFormattedComponent
+  | FreeTextInputComponent
+
+export type InstructionComponent = FormattedTextComponent | ChoiceComponent
+export type ExampleComponent = FormattedTextComponent
+export type HintComponent = FormattedTextComponent
+export type StatementComponent =
+  | ActiveFormattedTextComponent
+  | MultipleChoicesInputComponent
+  | SelectableInputComponent
+  | SwappableInputComponent
+  | EditableTextInputComponent
+export type ReferenceComponent = FormattedTextComponent
 
 export type InProgressExercise = {
   swappables: { [path: string]: SwappableInputRenderable }
@@ -78,7 +115,7 @@ export type PlainTextRenderable = TextRenderable | WhitespaceRenderable
 
 type FormattedRenderable = {
   kind: 'formatted'
-  contents: PassiveRenderable[]
+  contents: AnyRenderable[]
   bold: boolean
   italic: boolean
   underlined: boolean
@@ -151,9 +188,7 @@ type RenderableExercise = {
   pages: RenderablePage[]
 }
 
-function makeRenderableFromFormattedTextExerciseComponent(
-  component: FormattedTextExerciseComponent,
-): PassiveRenderable[] {
+function makeRenderableFromFormattedTextComponent(component: FormattedTextComponent): PassiveRenderable[] {
   return match(component)
     .returnType<PassiveRenderable[]>()
     .with({ kind: 'whitespace' }, () => [{ kind: 'whitespace' }])
@@ -162,7 +197,7 @@ function makeRenderableFromFormattedTextExerciseComponent(
     .with({ kind: 'formatted' }, (c) => [
       {
         kind: 'formatted',
-        contents: c.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: c.contents.flatMap(makeRenderableFromFormattedTextComponent),
         bold: c.bold ?? false,
         italic: c.italic ?? false,
         underlined: c.underlined ?? false,
@@ -175,13 +210,13 @@ function makeRenderableFromFormattedTextExerciseComponent(
     .exhaustive()
 }
 
-function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseComponent): PassiveRenderable[] {
+function makeRenderableFromInstructionComponent(component: InstructionComponent): PassiveRenderable[] {
   return match(component)
     .returnType<PassiveRenderable[]>()
     .with({ kind: 'choice' }, (c) => [
       {
         kind: 'formatted',
-        contents: c.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: c.contents.flatMap(makeRenderableFromFormattedTextComponent),
         bold: false,
         italic: false,
         underlined: false,
@@ -191,12 +226,12 @@ function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseCo
         subscript: false,
       },
     ])
-    .otherwise(makeRenderableFromFormattedTextExerciseComponent)
+    .otherwise(makeRenderableFromFormattedTextComponent)
 }
 
 function makeRenderableFromSelectableInputContent(
   basePath: string,
-  component: PassiveExerciseComponent | (AnyExerciseComponent & { kind: 'selectableInput' }),
+  component: SelectableInputComponent['contents'][number],
   index: number,
 ): (PassiveRenderable | SelectableInputRenderable)[] {
   const path = `${basePath}-ct${index}`
@@ -212,12 +247,30 @@ function makeRenderableFromSelectableInputContent(
         mayBeSingleLetter: false,
       },
     ])
-    .otherwise(makeRenderableFromPassiveExerciseComponent)
+    .otherwise(makeRenderableFromInstructionComponent)
 }
 
-function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExerciseComponent): AnyRenderable[] {
+function makeRenderableFromActiveFormattedTextComponent(
+  path: string,
+  component: ActiveFormattedTextComponent,
+): AnyRenderable[] {
   return match(component)
     .returnType<AnyRenderable[]>()
+    .with({ kind: 'formatted' }, (c) => [
+      {
+        kind: 'formatted',
+        contents: c.contents.flatMap((x, index) =>
+          makeRenderableFromActiveFormattedTextComponent(`${path}-ct${index}`, x),
+        ),
+        bold: c.bold ?? false,
+        italic: c.italic ?? false,
+        underlined: c.underlined ?? false,
+        highlighted: c.highlighted ?? null,
+        boxed: c.boxed ?? false,
+        superscript: c.superscript ?? false,
+        subscript: c.subscript ?? false,
+      },
+    ])
     .with({ kind: 'freeTextInput' }, ({}) => [
       {
         kind: 'textInput',
@@ -226,12 +279,18 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
         increaseHorizontalSpace: false,
       },
     ])
+    .otherwise(makeRenderableFromFormattedTextComponent)
+}
+
+function makeRenderableFromStatementComponent(path: string, component: StatementComponent): AnyRenderable[] {
+  return match(component)
+    .returnType<AnyRenderable[]>()
     .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault }) => [
       {
         kind: 'multipleChoicesInput',
         path,
         choices: choices.map(({ contents }) => ({
-          contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+          contents: contents.flatMap(makeRenderableFromFormattedTextComponent),
         })),
         showChoicesByDefault,
       },
@@ -250,17 +309,17 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
       {
         kind: 'swappableInput',
         path,
-        contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: contents.flatMap(makeRenderableFromFormattedTextComponent),
       },
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)
     .with({ kind: 'editableTextInput' }, (c) => [makeRenderableFromEditableTextInput(path, c)])
-    .otherwise(makeRenderableFromPassiveExerciseComponent)
+    .otherwise((c) => makeRenderableFromActiveFormattedTextComponent(path, c))
 }
 
 function makeRenderableFromEditableTextInput(
   path: string,
-  { contents, increaseHorizontalSpace }: AnyExerciseComponent & { kind: 'editableTextInput' },
+  { contents, increaseHorizontalSpace }: EditableTextInputComponent,
 ): AnyRenderable {
   return {
     kind: 'textInput',
@@ -299,7 +358,7 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
     ...(exercise.example ? exercise.example.lines : []),
     ...(exercise.hint ? exercise.hint.lines : []),
   ].map((line) => ({
-    contents: line.contents.flatMap(makeRenderableFromPassiveExerciseComponent),
+    contents: line.contents.flatMap(makeRenderableFromInstructionComponent),
   }))
 
   if (exercise.statement.pages.length === 0) {
@@ -315,7 +374,7 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
         statement.push({
           contents: markConsecutiveSelectableInputs(
             Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
-              makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+              makeRenderableFromStatementComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
             ),
           ),
           alone,
@@ -344,7 +403,7 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   if (exercise.reference !== null) {
     pages.push({
       kind: 'reference',
-      contents: exercise.reference.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+      contents: exercise.reference.contents.flatMap(makeRenderableFromFormattedTextComponent),
     })
   }
 

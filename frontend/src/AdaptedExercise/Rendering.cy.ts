@@ -1068,6 +1068,71 @@ describe('FreeTextInput', () => {
     reset(1, 4).type('{backspace}ORD')
     inputShouldHaveValue('Word1 wORD2 word3.')
   })
+
+  it('renders inside a formatted component', () => {
+    cy.viewport(520, 170)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'A' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'formatted',
+                        highlighted: 'pink',
+                        contents: [
+                          { kind: 'text', text: 'B' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'C' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'formatted',
+                            bold: true,
+                            contents: [
+                              { kind: 'text', text: 'D' },
+                              { kind: 'whitespace' },
+                              { kind: 'freeTextInput' },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'E' },
+                            ],
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'F' },
+                        ],
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'G' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="freeTextInput"]').as('input')
+    cy.get('@input').click()
+    screenshot()
+    cy.get('@input').type('Hello')
+    screenshot()
+    cy.get('@input').blur()
+    screenshot()
+  })
 })
 
 describe('MultipleChoicesInput', () => {

@@ -61,6 +61,18 @@ class Formatted(BaseModel):
     subscript: bool = False
 
 
+class ActiveFormatted(BaseModel):
+    kind: Literal["formatted"]
+    contents: list[ActiveFormattedText]
+    bold: bool = False
+    italic: bool = False
+    underlined: bool = False
+    highlighted: str | None = None
+    boxed: bool = False
+    superscript: bool = False
+    subscript: bool = False
+
+
 class Arrow(BaseModel):
     kind: Literal["arrow"]
 
@@ -78,6 +90,10 @@ FormattedText = PlainText | Arrow | Formatted
 
 class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
+
+
+# WARNING: keep 'ActiveFormattedText' and 'ActiveFormattedTextComponents' consistent
+ActiveFormattedText = PlainText | Arrow | ActiveFormatted | FreeTextInput
 
 
 class FormattedTextContainer(BaseModel):
@@ -122,9 +138,7 @@ HintComponent = FormattedText
 
 
 # WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
-StatementComponent = (
-    FormattedText | FreeTextInput | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
-)
+StatementComponent = ActiveFormattedText | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
 
 
 # WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent
@@ -160,6 +174,24 @@ class FormattedTextComponents(ApiModel):
         yield Formatted
 
 
+class ActiveFormattedTextComponents(ApiModel):
+    text: Literal[True]
+    whitespace: Literal[True]
+    arrow: Literal[True]
+    formatted: Literal[True]
+    free_text_input: bool
+
+    def gather(self) -> Iterable[type]:
+        yield Text
+        yield Whitespace
+        yield Arrow
+        if self.free_text_input:
+            yield ActiveFormatted
+            yield FreeTextInput
+        else:
+            yield Formatted
+
+
 class InstructionComponents(FormattedTextComponents):
     choice: bool
 
@@ -177,8 +209,7 @@ class HintComponents(FormattedTextComponents):
     pass
 
 
-class StatementComponents(FormattedTextComponents):
-    free_text_input: bool
+class StatementComponents(ActiveFormattedTextComponents):
     multiple_choices_input: bool
     selectable_input: bool
     swappable_input: bool
@@ -186,8 +217,6 @@ class StatementComponents(FormattedTextComponents):
 
     def gather(self) -> Iterable[type]:
         yield from super().gather()
-        if self.free_text_input:
-            yield FreeTextInput
         if self.multiple_choices_input:
             yield MultipleChoicesInput
         if self.selectable_input:

@@ -952,4 +952,85 @@ describe('Adapted exercise answers', () => {
     cy.get('span:contains("C")').eq(1).should('have.css', 'background-color', colors[1])
     cy.get('span:contains("D")').eq(2).should('have.css', 'background-color', colors[2])
   })
+
+  const exerciseWithFreeTextInputInFormatted: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'formatted',
+                  highlighted: 'pink',
+                  contents: [
+                    { kind: 'text', text: 'B' },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'C' },
+                    { kind: 'whitespace' },
+                    {
+                      kind: 'formatted',
+                      bold: true,
+                      contents: [
+                        { kind: 'text', text: 'D' },
+                        { kind: 'whitespace' },
+                        { kind: 'freeTextInput' },
+                        { kind: 'whitespace' },
+                        { kind: 'text', text: 'E' },
+                      ],
+                    },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'F' },
+                  ],
+                },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'G' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForFreeTextInputInFormatted: StudentAnswers = {
+    'stmt-pg0-ln0-ct2-ct4-ct2': { kind: 'text', text: 'Test' },
+  }
+
+  it('are saved for free text input in formatted', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputInFormatted,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[contenteditable]').type('Test')
+
+    getAnswers().should('deep.equal', answersForFreeTextInputInFormatted)
+  })
+
+  it('are loaded for free text input in formatted', () => {
+    setAnswers(answersForFreeTextInputInFormatted)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputInFormatted,
+      },
+    })
+
+    cy.get('[contenteditable]').should('have.text', 'Test')
+  })
 })
