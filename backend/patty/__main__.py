@@ -96,12 +96,18 @@ def db_tables_graph() -> None:
 
 
 @main.command()
-def adapted_exercise_schema() -> None:
+@click.option("--choice/--no-choice", default=True, is_flag=True)
+@click.option("--free-text-input/--no-free-text-input", default=True, is_flag=True)
+@click.option("--multiple-choices-input/--no-multiple-choices-input", default=True, is_flag=True)
+@click.option("--selectable-input/--no-selectable-input", default=True, is_flag=True)
+@click.option("--swappable-input/--no-swappable-input", default=True, is_flag=True)
+@click.option("--editable-text-input/--no-editable-text-input", default=True, is_flag=True)
+def adapted_exercise_schema(choice: bool, free_text_input: bool, multiple_choices_input: bool,selectable_input: bool,swappable_input: bool,editable_text_input: bool) -> None:
     from . import adapted
     from .adaptation import llm
 
     exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
+        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
         adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.StatementComponents(
@@ -109,11 +115,11 @@ def adapted_exercise_schema() -> None:
             whitespace=True,
             arrow=True,
             formatted=True,
-            free_text_input=True,
-            multiple_choices_input=True,
-            selectable_input=True,
-            swappable_input=True,
-            editable_text_input=True,
+            free_text_input=free_text_input,
+            multiple_choices_input=multiple_choices_input,
+            selectable_input=selectable_input,
+            swappable_input=swappable_input,
+            editable_text_input=editable_text_input,
         ),
         adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )

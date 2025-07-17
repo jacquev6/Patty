@@ -32,6 +32,13 @@ services:
       "backend/generated/default-adaptation-prompt.md",
       "backend/generated/default-extraction-prompt.md",
       "backend/generated/extracted-exercise-schema.json",
+      "backend/generated/extracted-exercise-schema--no-choice.json",
+      "backend/generated/extracted-exercise-schema--no-free-text-input.json",
+      "backend/generated/extracted-exercise-schema--no-multiple-choices-input.json",
+      "backend/generated/extracted-exercise-schema--no-selectable-input.json",
+      "backend/generated/extracted-exercise-schema--no-swappable-input.json",
+      "backend/generated/extracted-exercise-schema--no-editable-text-input.json",
+      "backend/generated/extracted-exercise-schema--minimal.json",
       "backend/generated/openapi.json",
       "backend/generated/patty_json_to_html.py",
       "backend/patty/export/templates/adaptation/index.html",
@@ -288,6 +295,153 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-choice:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-choice.json", "python -m patty adapted-exercise-schema --no-choice"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-choice.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-free-text-input:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-free-text-input.json", "python -m patty adapted-exercise-schema --no-free-text-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-free-text-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-multiple-choices-input:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-multiple-choices-input.json", "python -m patty adapted-exercise-schema --no-multiple-choices-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-multiple-choices-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-selectable-input:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-selectable-input.json", "python -m patty adapted-exercise-schema --no-selectable-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-selectable-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-swappable-input:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-swappable-input.json", "python -m patty adapted-exercise-schema --no-swappable-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-swappable-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--no-editable-text-input:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-editable-text-input.json", "python -m patty adapted-exercise-schema --no-editable-text-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-editable-text-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--minimal:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--minimal.json", "python -m patty adapted-exercise-schema --no-choice --no-free-text-input --no-multiple-choices-input --no-selectable-input --no-swappable-input --no-editable-text-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--minimal.json"]
       interval: 0.5s
       retries: 12
   db-tables-graph-generator:

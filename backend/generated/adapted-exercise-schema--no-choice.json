@@ -1,0 +1,620 @@
+{
+  "$defs": {
+    "Arrow": {
+      "properties": {
+        "kind": {
+          "const": "arrow",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "EditableTextInput": {
+      "properties": {
+        "kind": {
+          "const": "editableTextInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "showOriginalText": {
+          "title": "Showoriginaltext",
+          "type": "boolean"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "increaseHorizontalSpace": {
+          "default": false,
+          "title": "Increasehorizontalspace",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "showOriginalText",
+        "contents",
+        "increaseHorizontalSpace"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExampleLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExamplePage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/ExampleLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Formatted": {
+      "properties": {
+        "kind": {
+          "const": "formatted",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "bold": {
+          "default": false,
+          "title": "Bold",
+          "type": "boolean"
+        },
+        "italic": {
+          "default": false,
+          "title": "Italic",
+          "type": "boolean"
+        },
+        "underlined": {
+          "default": false,
+          "title": "Underlined",
+          "type": "boolean"
+        },
+        "highlighted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Highlighted"
+        },
+        "boxed": {
+          "default": false,
+          "title": "Boxed",
+          "type": "boolean"
+        },
+        "superscript": {
+          "default": false,
+          "title": "Superscript",
+          "type": "boolean"
+        },
+        "subscript": {
+          "default": false,
+          "title": "Subscript",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "contents",
+        "bold",
+        "italic",
+        "underlined",
+        "highlighted",
+        "boxed",
+        "superscript",
+        "subscript"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FormattedTextContainer": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "FreeTextInput": {
+      "properties": {
+        "kind": {
+          "const": "freeTextInput",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "HintLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "HintPage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/HintLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "InstructionLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "InstructionPage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/InstructionLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "MultipleChoicesInput": {
+      "properties": {
+        "kind": {
+          "const": "multipleChoicesInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "choices": {
+          "items": {
+            "$ref": "#/$defs/FormattedTextContainer"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "showChoicesByDefault": {
+          "title": "Showchoicesbydefault",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "choices",
+        "showChoicesByDefault"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ReferenceLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SelectableInput": {
+      "properties": {
+        "kind": {
+          "const": "selectableInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "colors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Colors",
+          "type": "array"
+        },
+        "boxed": {
+          "title": "Boxed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "contents",
+        "colors",
+        "boxed"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StatementLine": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              },
+              {
+                "$ref": "#/$defs/MultipleChoicesInput"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
+              },
+              {
+                "$ref": "#/$defs/SwappableInput"
+              },
+              {
+                "$ref": "#/$defs/EditableTextInput"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StatementPage": {
+      "properties": {
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/StatementLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "StatementPages": {
+      "properties": {
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/StatementPage"
+          },
+          "title": "Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pages"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SwappableInput": {
+      "properties": {
+        "kind": {
+          "const": "swappableInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/Formatted"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Text": {
+      "properties": {
+        "kind": {
+          "const": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Whitespace": {
+      "properties": {
+        "kind": {
+          "const": "whitespace",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "format": {
+      "const": "v1",
+      "title": "Format",
+      "type": "string"
+    },
+    "instruction": {
+      "$ref": "#/$defs/InstructionPage"
+    },
+    "example": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExamplePage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "hint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HintPage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "statement": {
+      "$ref": "#/$defs/StatementPages"
+    },
+    "reference": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReferenceLine"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "format",
+    "instruction",
+    "example",
+    "hint",
+    "statement",
+    "reference"
+  ],
+  "type": "object",
+  "additionalProperties": false
+}
