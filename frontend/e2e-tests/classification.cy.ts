@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from './utils'
 
 describe('The classification batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation,dummy-coche-exercise-classes')
+    loadFixtures(['dummy-adaptation', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-classification-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -141,7 +141,7 @@ describe('The classification batch creation page', () => {
 describe('The classification batch edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation,dummy-classification-batch')
+    loadFixtures(['dummy-adaptation', 'dummy-classification-batch'])
     ignoreResizeObserverLoopError()
     visit('/classification-batch-1')
   })

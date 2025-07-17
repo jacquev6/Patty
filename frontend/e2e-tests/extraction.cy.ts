@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, visit, screenshot } from './utils'
 
 describe('The extraction batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-extraction-strategy,dummy-coche-exercise-classes')
+    loadFixtures(['dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-extraction-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })

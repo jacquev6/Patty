@@ -209,17 +209,17 @@ def cycle(
     only_frontend_specs = set(only_spec) & all_frontend_specs
     skip_frontend_specs = set(skip_spec) & all_frontend_specs
     if only_frontend_specs:
-        frontend_specs = list(only_frontend_specs)
+        frontend_specs = sorted(only_frontend_specs)
     else:
-        frontend_specs = list(all_frontend_specs - skip_frontend_specs)
+        frontend_specs = sorted(all_frontend_specs - skip_frontend_specs)
 
     all_e2e_specs = set(filter(os.path.isfile, glob.glob("frontend/e2e-tests/**/*.cy.ts", recursive=True)))
     only_e2e_specs = set(only_spec) & all_e2e_specs
     skip_e2e_specs = set(skip_spec) & all_e2e_specs
     if only_e2e_specs:
-        end_to_end_specs = list(only_e2e_specs)
+        end_to_end_specs = sorted(only_e2e_specs)
     else:
-        end_to_end_specs = list(all_e2e_specs - skip_e2e_specs)
+        end_to_end_specs = sorted(all_e2e_specs - skip_e2e_specs)
 
     unknown_specs = (set(only_spec) | set(skip_spec)) - (all_frontend_specs | all_e2e_specs)
     for spec in unknown_specs:

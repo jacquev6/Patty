@@ -1,0 +1,14 @@
+PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db--for-chromium/db
+PATTY_DATABASE_BACKUPS_URL=file:///app/support/dev-env/db/backups--for-chromium
+PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/dev/external-exercises--for-chromium
+PATTY_PDF_FILES_URL=s3://jacquev6/patty/dev/pdf-files--for-chromium
+PATTY_2025_05_20_CLASSIFICATION_CAMEMBERT_PT_URL=s3://jacquev6/patty/shared/classification-models/2025-05-20-classification_camembert.pt
+PATTY_CLASSIFICATION_MODELS_DIRECTORY_PATH=/app/support/dev-env/backend/classification-models--for-chromium
+PATTY_SECRET_JWT_KEY=not-so-secret
+# Hashed version of: password
+PATTY_HASHED_PASSWORD='$argon2id$v=19$m=65536,t=3,p=4$6i6V3Ldj3HOl5tY334Co3g$C/N8pcUFK9xofd9GkzsQLs/2iY2c7PnXKg2HM105uec'
+PATTY_AUTHENTICATION_MAX_VALIDITY=PT3H
+PATTY_MAIL_SENDER="Vincent Jacques <vincent@vincent-jacques.net>"
+PATTY_SMTP_HOST=smtp.gmail.com
+PATTY_SMTP_PORT=465
+PATTY_SMTP_USER=jacquev6@gmail.com

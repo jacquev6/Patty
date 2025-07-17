@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from './utils'
 
 describe('The adaptation batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    loadFixtures(['dummy-adaptation'])
     ignoreResizeObserverLoopError()
     visit('/new-adaptation-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -487,7 +487,7 @@ describe('The adaptation batch creation page', () => {
   })
 
   it('uses its base batch to initialize the form', () => {
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=20-adaptation-batches')
+    loadFixtures(['20-adaptation-batches'])
     cy.visit('/new-adaptation-batch?base=8')
     cy.get('[data-cy="system-prompt"]').should('have.value', 'Blah blah blah 8.')
     cy.visit('/new-adaptation-batch?base=14')
@@ -550,7 +550,7 @@ describe('The adaptation batch creation page', () => {
 describe('The adaptation batch edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
     ignoreResizeObserverLoopError()
   })
 
@@ -600,7 +600,7 @@ describe('The adaptation batch edition page', () => {
 describe('The adaptation edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
     ignoreResizeObserverLoopError()
   })
 
@@ -717,7 +717,7 @@ function shouldForbidAdjustment() {
 describe('The edition page for an initially successful adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
     ignoreResizeObserverLoopError()
     visit('/adaptation-1')
     setUpAliases()
@@ -851,7 +851,7 @@ describe('The edition page for an initially successful adaptation', () => {
 describe('The edition page for an initially invalid-json adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
     ignoreResizeObserverLoopError()
     visit('/adaptation-3')
     setUpAliases()
@@ -912,7 +912,7 @@ describe('The edition page for an initially invalid-json adaptation', () => {
 describe('The edition page for an initially not-json adaptation', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
     ignoreResizeObserverLoopError()
     visit('/adaptation-4')
     setUpAliases()

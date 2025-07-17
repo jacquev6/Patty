@@ -1,4 +1,4 @@
-import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
+import { ignoreResizeObserverLoopError, visit, screenshot, loadFixtures } from './utils'
 
 let token = ''
 
@@ -17,7 +17,7 @@ describe('The autonomous HTML for a single adaptation', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    loadFixtures(['dummy-adaptation'])
     ignoreResizeObserverLoopError()
   })
 
@@ -195,7 +195,7 @@ describe('The autonomous HTML for an adaptation batch', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
   })
 
   it('is downloadable', () => {
@@ -231,7 +231,7 @@ describe('The autonomous HTML for a textbook', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-textbook-with-text-exercise-numbers')
+    loadFixtures(['dummy-textbook-with-text-exercise-numbers'])
   })
 
   it('is downloadable', () => {

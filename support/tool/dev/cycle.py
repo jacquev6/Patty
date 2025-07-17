@@ -1,5 +1,6 @@
 import dataclasses
 import glob
+import itertools
 import os
 import shutil
 import subprocess
@@ -130,43 +131,83 @@ class DevelopmentCycle:
                             )
                         )
 
-                failures: list[subprocess.CompletedProcess[str]] = []
+                component_failures: list[subprocess.CompletedProcess[str]] = []
                 result: subprocess.CompletedProcess[str]
                 for result in joblib.Parallel(n_jobs=5, return_as="generator_unordered")(
                     joblib.delayed(run_in_frontend_container)(**job) for job in jobs
                 ):
                     if result.returncode == 0:
-                        print("OK:", result.args[-3], os.path.join("frontend", result.args[-1]))
+                        print(f"{result.args[-3]} {os.path.join('frontend', result.args[-1])}: OK")
                     else:
-                        failures.append(result)
-                        print("FAILED:", result.args[-3], os.path.join("frontend", result.args[-1]))
+                        component_failures.append(result)
+                        print(f"{result.args[-3]} {os.path.join('frontend', result.args[-1])}: FAILED")
 
-                for failure in failures:
+                for component_failure in component_failures:
                     print()
-                    title = f"FAILED: {failure.args[-3]} {failure.args[-1]}"
+                    title = f"{component_failure.args[-3]} {component_failure.args[-1]}: FAILED"
                     print(title)
                     print("=" * len(title))
-                    print(failure.stdout)
-                    print(failure.stderr)
+                    print(component_failure.stdout)
+                    print(component_failure.stderr)
 
                 maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
 
-                if failures:
+                if component_failures:
                     raise DevelopmentCycleError()
 
         if self.do_end_to_end:
             if self.do_test:
                 try:
-                    for browser in self.browsers:
-                        for spec in self.end_to_end_specs:
-                            mounts = make_screenshots_directory(spec, browser, clear=self.accept_visual_diffs)
-
-                            run_in_frontend_container(
-                                command=["npx", "cypress", "run", "--e2e", "--browser", browser, "--spec", spec[9:]],
-                                mount=mounts,
+                    e2e_failures = list(
+                        itertools.chain.from_iterable(
+                            joblib.Parallel(n_jobs=5, return_as="list")(
+                                joblib.delayed(run_e2e_tests)(
+                                    self.end_to_end_specs, browser, clear=self.accept_visual_diffs
+                                )
+                                for browser in self.browsers
                             )
+                        )
+                    )
+
+                    for e2e_failure in e2e_failures:
+                        print()
+                        print(e2e_failure)
                 finally:
                     maybe_remove_screenshots_directories(self.end_to_end_specs, self.browsers)
+
+                if e2e_failures:
+                    raise DevelopmentCycleError()
+
+
+def run_e2e_tests(specs: list[str], browser: str, clear: bool) -> list[str]:
+    failures: list[str] = []
+    for spec in specs:
+        mounts = make_screenshots_directory(spec, browser, clear=clear)
+        result = run_in_frontend_container(
+            command=[
+                "npx",
+                "cypress",
+                "run",
+                "--e2e",
+                "--browser",
+                browser,
+                "--config",
+                "baseUrl=http://fanout:" + {"chromium": "8081", "electron": "8082", "firefox": "8083"}[browser],
+                "--spec",
+                spec[9:],
+            ],
+            check=False,
+            capture=True,
+            mount=mounts,
+            quiet=True,
+        )
+        if result.returncode == 0:
+            print(f"{spec} {browser}: OK")
+        else:
+            title = f"{spec} {browser}: FAILED"
+            print(title)
+            failures.append(f"{title}\n{'=' * len(title)}\n{result.stdout}\n{result.stderr}")
+    return failures
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:

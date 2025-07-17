@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures } from './utils'
 
 describe("Patty's authentication system", () => {
   beforeEach(() => {
     ignoreResizeObserverLoopError()
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    loadFixtures(['dummy-adaptation'])
   })
 
   it('asks for password, warns if it is incorrect, and stores it', () => {
