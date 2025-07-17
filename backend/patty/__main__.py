@@ -102,7 +102,14 @@ def db_tables_graph() -> None:
 @click.option("--selectable-input/--no-selectable-input", default=True, is_flag=True)
 @click.option("--swappable-input/--no-swappable-input", default=True, is_flag=True)
 @click.option("--editable-text-input/--no-editable-text-input", default=True, is_flag=True)
-def adapted_exercise_schema(choice: bool, free_text_input: bool, multiple_choices_input: bool,selectable_input: bool,swappable_input: bool,editable_text_input: bool) -> None:
+def adapted_exercise_schema(
+    choice: bool,
+    free_text_input: bool,
+    multiple_choices_input: bool,
+    selectable_input: bool,
+    swappable_input: bool,
+    editable_text_input: bool,
+) -> None:
     from . import adapted
     from .adaptation import llm
 
