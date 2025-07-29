@@ -137,14 +137,16 @@ class DevelopmentCycle:
                     joblib.delayed(run_in_frontend_container)(**job) for job in jobs
                 ):
                     if result.returncode == 0:
-                        print(f"{result.args[-3]} {os.path.join('frontend', result.args[-1])}: OK")
+                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
                     else:
                         component_failures.append(result)
-                        print(f"{result.args[-3]} {os.path.join('frontend', result.args[-1])}: FAILED")
+                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
 
                 for component_failure in component_failures:
                     print()
-                    title = f"{component_failure.args[-3]} {component_failure.args[-1]}: FAILED"
+                    title = (
+                        f"{os.path.join('frontend', component_failure.args[-1])} {component_failure.args[-3]}: FAILED"
+                    )
                     print(title)
                     print("=" * len(title))
                     print(component_failure.stdout)
@@ -240,6 +242,6 @@ def maybe_remove_screenshots_directories(specs: typing.Iterable[str], browsers: 
                 shutil.rmtree(screenshots_path)
         if os.listdir(spec + ".screenshots") == []:
             shutil.rmtree(spec + ".screenshots")
-    os.rmdir("frontend/cypress-image-diff-screenshots")
-    os.rmdir("frontend/cypress-image-diff-html-report")
-    os.rmdir("frontend/cypress/screenshots")
+    shutil.rmtree("frontend/cypress-image-diff-screenshots")
+    shutil.rmtree("frontend/cypress-image-diff-html-report")
+    shutil.rmtree("frontend/cypress/screenshots")
