@@ -117,6 +117,12 @@ watch(
     Open a <code>.tsv</code> file:
     <input data-cy="input-files" type="file" @change="openFile" accept=".tsv" />
   </p>
+  <p>
+    Format: the file must be a tab-separated file, with fields <code>page</code>, <code>num</code>,
+    <code>instruction_hint_example</code>, and <code>statement</code>. If fields <code>page</code> and
+    <code>num</code> are not both present, the <code>id</code> field must be present and must be in the format
+    <code>p{page}_ex{num}</code>.
+  </p>
   <template v-for="index in inputs.length">
     <CreateClassificationBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />
   </template>
