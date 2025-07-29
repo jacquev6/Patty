@@ -12,6 +12,7 @@ export function parseExerciseFileName(fileName: string) {
 
 <script setup lang="ts">
 import { useTemplateRef, watch } from 'vue'
+import Papa from 'papaparse'
 
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputEditor from './CreateClassificationBatchFormInputEditor.vue'
@@ -23,58 +24,47 @@ defineProps<{
 
 const inputs = defineModel<InputWithFile[]>({ required: true })
 
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      assert(typeof reader.result === 'string')
-      resolve(reader.result)
-    }
-    reader.onerror = reject
-    reader.readAsText(file)
-  })
-}
-
 async function openFile(event: Event) {
   const files = (event.target as HTMLInputElement).files
   assert(files !== null)
   assert(files.length === 1)
   const file = files.item(0)
   assert(file !== null)
-  assert(file.name.endsWith('.tsv'))
-  const content = await readFile(file)
-  const lines = content
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line !== '')
-  const header = lines.shift()
-  assert(header !== undefined)
-  const fields = header.split('\t').map((field) => field.trim())
-  const idIndex = fields.indexOf('id')
-  assert(idIndex !== -1)
-  const instructionIndex = fields.indexOf('instruction_hint_example')
-  assert(instructionIndex !== -1)
-  const statementIndex = fields.indexOf('statement')
-  assert(statementIndex !== -1)
+  type Record = {
+    id: string
+    instruction_hint_example: string
+    statement: string
+  }
+  const records = await new Promise<Record[]>((resolve) =>
+    Papa.parse<Record>(file, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: function (results) {
+        resolve(results.data)
+      },
+    }),
+  )
 
   const fileInputs: InputWithFile[] = []
-  for (const line of lines) {
-    const values = line.split('\t').map((value) => value.trim())
-    assert(values.length === fields.length)
-    const idParts = values[idIndex].split('_')
+  for (const record of records) {
+    assert('id' in record)
+    assert('instruction_hint_example' in record)
+    assert('statement' in record)
+
+    const idParts = record.id.split('_')
     assert(idParts.length === 2)
     assert(idParts[0].startsWith('p'))
     const pageNumber = Number.parseInt(idParts[0].slice(1))
     assert(idParts[1].startsWith('ex'))
     const exerciseNumber = idParts[1].slice(2)
-    const instructionHintExampleText = values[instructionIndex]
-    const statementText = values[statementIndex]
+
     fileInputs.push({
       inputFile: file.name,
       pageNumber,
       exerciseNumber,
-      instructionHintExampleText,
-      statementText,
+      instructionHintExampleText: record.instruction_hint_example,
+      statementText: record.statement,
     })
   }
 
