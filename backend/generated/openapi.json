@@ -561,6 +561,48 @@
         }
       }
     },
+    "/api/classification-batches/{id}/submit-adaptations-with-recent-settings": {
+      "post": {
+        "summary": "Submit Adaptations With Recent Settings In Classification Batch",
+        "operationId": "submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pdf-files": {
       "post": {
         "summary": "Create Pdf File",
@@ -805,6 +847,48 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetExtractionBatchResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/submit-adaptations-with-recent-settings": {
+      "post": {
+        "summary": "Submit Adaptations With Recent Settings In Extraction Batch",
+        "operationId": "submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },

@@ -94,6 +94,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
               <EditClassificationOrExtractionBatchFormExercisePreview
                 headerComponent="h3"
+                :batch="{ kind: 'extraction', id: extractionBatch.id }"
                 :headerText="`Exercise ${index + 1}`"
                 :showPageAndExercise="false"
                 :classificationWasRequested="extractionBatch.runClassification"

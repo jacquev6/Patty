@@ -3,7 +3,7 @@ import { ignoreResizeObserverLoopError, loadFixtures, visit, screenshot } from '
 describe('The extraction batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-adaptation', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-extraction-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -42,7 +42,7 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("Created by: Alice")').should('exist')
   })
 
-  it('creates an extraction batch with classification and adaptation', () => {
+  it('creates an extraction batch with classification and adaptation, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
     cy.get('[data-cy="llm-name"]').eq(1).select('dummy-3')
     cy.get('button:contains("Submit")').should('be.enabled').click()
@@ -53,9 +53,27 @@ describe('The extraction batch creation page', () => {
     cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 4)
     cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 2)
     cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
-    cy.get('div.busy').should('have.length', 4)
-    cy.get('div.busy').should('have.length', 3)
+    cy.get('div.busy').should('have.length', 2)
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
+    cy.get('button:contains("Full screen")').should('have.length', 2)
+
+    cy.visit('/new-adaptation-batch')
+    cy.get('[data-cy="settings-name"]').type('VraiFaux', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("Created by: Alice")').should('exist')
+    cy.get('div.busy').should('not.exist')
+
+    cy.visit('/extraction-batch-1')
+    cy.get(
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+    ).should('exist')
+    cy.get('button:contains("Submit all adaptations in the same case")').first().click()
+    cy.get('div.busy').should('have.length', 2)
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+
+    cy.visit('/extraction-batch-1')
+    cy.get('p:contains("Created by: Alice")').should('exist')
     screenshot('extraction-batch-edition-page')
 
     cy.get('a:contains("standalone HTML")')

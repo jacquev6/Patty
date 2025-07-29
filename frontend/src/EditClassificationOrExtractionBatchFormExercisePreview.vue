@@ -11,8 +11,15 @@ import BusyBox from './BusyBox.vue'
 import { useAuthenticatedClient, type ClassificationBatch } from './apiClient'
 import EditClassificationBatchFormExercisePreviewClassEditor from './EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
+import { match } from 'ts-pattern'
+
+type BatchId = {
+  kind: 'classification' | 'extraction'
+  id: string
+}
 
 const props = defineProps<{
+  batch: BatchId
   headerComponent: string
   headerText: string
   showPageAndExercise: boolean
@@ -60,6 +67,22 @@ const { Escape } = useMagicKeys()
 watch(Escape, () => {
   fullScreen.value = false
 })
+
+async function submitAdaptationsWithRecentSettings() {
+  await match(props.batch)
+    .with({ kind: 'classification' }, () =>
+      client.POST(`/api/classification-batches/{id}/submit-adaptations-with-recent-settings`, {
+        params: { path: { id: props.batch.id } },
+      }),
+    )
+    .with({ kind: 'extraction' }, () =>
+      client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
+        params: { path: { id: props.batch.id } },
+      }),
+    )
+    .exhaustive()
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -127,11 +150,16 @@ watch(Escape, () => {
               ><b>{{ exercise.exerciseClass }}</b></I18nT
             >
           </p>
-          <p v-else>
-            <I18nT keypath="exerciseClassHadNoSettings"
-              ><b>{{ exercise.exerciseClass }}</b></I18nT
-            >
-          </p>
+          <template v-else>
+            <p>
+              <I18nT keypath="exerciseClassHadNoSettings"
+                ><b>{{ exercise.exerciseClass }}</b></I18nT
+              >
+            </p>
+            <p>
+              <button @click="submitAdaptationsWithRecentSettings">{{ t('submitSimilarAdaptations') }}</button>
+            </p>
+          </template>
         </template>
         <template v-else-if="adaptation.status.kind === 'inProgress'">
           <BusyBox :busy="true"><MiniatureScreen :fullScreen /></BusyBox>
@@ -200,6 +228,7 @@ en:
     "Exercise class {0} does not have adaptation settings yet."
   exerciseClassHadNoSettings:
     "Exercise class {0} did not have adaptation settings when this classification batch was submitted."
+  submitSimilarAdaptations: Submit all adaptations in the same case
   errorWithLLM: Error with the LLM
   llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
   llmNotJson: The LLM returned a response that is not correct JSON.
@@ -218,6 +247,7 @@ fr:
   exerciseClassHadNoSettings:
     "La classe d'exercice {0} n'avait pas de paramètres d'adaptation
     lorsque ce batch de classification a été soumis."
+  submitSimilarAdaptations: Soumettre toutes les adaptations dans le même cas
   errorWithLLM: Erreur avec le LLM
   llmInvalidJson: Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'exercice adapté.
   llmNotJson: Le LLM a renvoyé une réponse qui n'est pas un JSON correct.

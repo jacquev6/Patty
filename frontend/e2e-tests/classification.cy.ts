@@ -88,7 +88,7 @@ describe('The classification batch creation page', () => {
     cy.get('p:contains("Adaptation was not requested.")').should('exist')
   })
 
-  it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class', () => {
+  it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('yes')
     cy.get('[data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="llm-name"]').select('dummy-1')
@@ -137,6 +137,7 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 3: VraiFaux")').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
+    cy.get('button:contains("Full screen")').should('have.length', 2)
 
     cy.visit('/adaptation-2')
     cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1')
@@ -151,6 +152,9 @@ describe('The classification batch creation page', () => {
     cy.get(
       'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
     ).should('exist')
+    cy.get('button:contains("Submit all adaptations in the same case")').click()
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('button:contains("Full screen")').should('have.length', 3)
   })
 })
 

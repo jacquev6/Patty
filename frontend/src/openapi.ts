@@ -177,6 +177,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification-batches/{id}/submit-adaptations-with-recent-settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Submit Adaptations With Recent Settings In Classification Batch */
+    post: operations['submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/pdf-files': {
     parameters: {
       query?: never
@@ -274,6 +291,23 @@ export interface paths {
     get: operations['get_extraction_batch_api_extraction_batches__id__get']
     put?: never
     post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/submit-adaptations-with-recent-settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Submit Adaptations With Recent Settings In Extraction Batch */
+    post: operations['submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post']
     delete?: never
     options?: never
     head?: never
@@ -2254,6 +2288,37 @@ export interface operations {
       }
     }
   }
+  submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   create_pdf_file_api_pdf_files_post: {
     parameters: {
       query?: never
@@ -2429,6 +2494,37 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetExtractionBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

@@ -48,16 +48,13 @@ class DummyModel(Model):
                     Exercise(
                         id=None,
                         numero="2",
-                        consignes=["Recopie uniquement les phrases avec le verbe avoir."],
+                        consignes=["Réponds par vrai ou faux."],
                         conseil=None,
                         exemple=None,
                         enonce=textwrap.dedent(
                             """\
-                            a. Ce chien a mordu son maître*.
-                            b. Je rentre à la maison à midi pour déjeuner en famille.
-                            c. On a froid dans ce sous-bois ombragé.
-                            d. Il pense toujours qu'il a raison.
-                            e. Tu joues à chat avec moi ?
+                            a. Bleu est une couleur
+                            b. Un triangle a quatre côtés
                             """
                         ),
                         references=None,
