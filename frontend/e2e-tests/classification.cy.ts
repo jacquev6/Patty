@@ -49,6 +49,16 @@ describe('The classification batch creation page', () => {
       .should('have.value', 'nager ➞ ... ◆ tracter ➞ ... ◆ manger ➞ ... ◆ inventer ➞ ... ◆ livrer ➞ ...')
   })
 
+  it('opens a .tsv file with line breaks in quoted fields', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-line-breaks.tsv')
+    cy.get('h1:contains("There was a bug")').should('exist')
+  })
+
+  it('opens a .tsv file with quoted headers', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-headers.tsv')
+    cy.get('h1:contains("There was a bug")').should('exist')
+  })
+
   it('creates a new classification batch without adaptation afterwards and refreshes it until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('no')
 
