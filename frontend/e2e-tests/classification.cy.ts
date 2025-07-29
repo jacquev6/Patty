@@ -53,12 +53,16 @@ describe('The classification batch creation page', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-line-breaks.tsv')
     cy.get('h1:contains("There was a bug")').should('not.exist')
     cy.get('[data-cy="input-page-number"]').should('have.length', 4)
+    cy.get('[data-cy="input-page-number"]').eq(0).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '1')
   })
 
   it('opens a .tsv file with quoted headers', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-headers.tsv')
     cy.get('h1:contains("There was a bug")').should('not.exist')
     cy.get('[data-cy="input-page-number"]').should('have.length', 4)
+    cy.get('[data-cy="input-page-number"]').eq(0).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '1')
   })
 
   it('creates a new classification batch without adaptation afterwards and refreshes it until it is done', () => {

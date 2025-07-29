@@ -31,14 +31,16 @@ async function openFile(event: Event) {
   const file = files.item(0)
   assert(file !== null)
   type Record = {
-    id: string
+    id?: string
+    page?: string
+    num?: string
     instruction_hint_example: string
     statement: string
   }
   const records = await new Promise<Record[]>((resolve) =>
     Papa.parse<Record>(file, {
       header: true,
-      dynamicTyping: true,
+      dynamicTyping: false,
       skipEmptyLines: true,
       complete: function (results) {
         resolve(results.data)
@@ -48,16 +50,23 @@ async function openFile(event: Event) {
 
   const fileInputs: InputWithFile[] = []
   for (const record of records) {
-    assert('id' in record)
-    assert('instruction_hint_example' in record)
-    assert('statement' in record)
+    const [pageNumber, exerciseNumber] = (() => {
+      if (record.page !== undefined && record.num !== undefined) {
+        return [Number.parseInt(record.page), record.num]
+      } else {
+        assert(record.id !== undefined)
+        const idParts = record.id.split('_')
+        assert(idParts.length === 2)
+        assert(idParts[0].startsWith('p'))
+        const pageNumber = Number.parseInt(idParts[0].slice(1))
+        assert(idParts[1].startsWith('ex'))
+        const exerciseNumber = idParts[1].slice(2)
+        return [pageNumber, exerciseNumber]
+      }
+    })()
 
-    const idParts = record.id.split('_')
-    assert(idParts.length === 2)
-    assert(idParts[0].startsWith('p'))
-    const pageNumber = Number.parseInt(idParts[0].slice(1))
-    assert(idParts[1].startsWith('ex'))
-    const exerciseNumber = idParts[1].slice(2)
+    assert(record.instruction_hint_example !== undefined)
+    assert(record.statement !== undefined)
 
     fileInputs.push({
       inputFile: file.name,
