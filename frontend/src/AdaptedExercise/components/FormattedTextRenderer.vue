@@ -29,5 +29,5 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <span :style><AnySequenceComponent :contents :aloneOnLine="false" :tricolorable /></span>
+  <span :style><AnySequenceComponent :contents :tricolorable /></span>
 </template>

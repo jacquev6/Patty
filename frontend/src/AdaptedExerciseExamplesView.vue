@@ -70,6 +70,78 @@ export const examples: Example[] = [
   //   },
   // },
   {
+    title: 'ExpressionEcrite',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Rédige' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'menu' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'avec' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'une' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'entrée' },
+              { kind: 'text', text: ',' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'plat' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'dessert' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+          {
+            contents: [
+              { kind: 'text', text: 'Utilise' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'uniquement' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'des' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'mots' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'contenant' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'la' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'lettre' },
+              { kind: 'whitespace' },
+              { kind: 'formatted', italic: true, contents: [{ kind: 'text', text: 'c' }] },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [{ kind: 'freeTextInput' }],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'freeTextInput in formatted',
     description: null,
     exercise: {

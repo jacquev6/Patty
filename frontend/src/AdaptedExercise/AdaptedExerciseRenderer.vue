@@ -127,7 +127,7 @@ type FormattedRenderable = {
 
 export type PassiveRenderable = PlainTextRenderable | FormattedRenderable
 
-type TextInputRenderable = {
+export type TextInputRenderable = {
   kind: 'textInput'
   path: string
   initialText: string
@@ -365,7 +365,7 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
     pages.push({ kind: 'statement', instruction, statement: [] })
   } else {
     for (const [pageIndex, page] of exercise.statement.pages.entries()) {
-      const statement: { contents: AnyRenderable[]; alone: boolean }[] = []
+      const statement: StatementLine[] = []
 
       for (const [lineIndex, { contents }] of page.lines.entries()) {
         const alone =
@@ -416,6 +416,7 @@ import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } fro
 import { useStorage } from '@vueuse/core'
 
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
+import AloneFreeTextInput from './dispatch/AloneFreeTextInput.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
@@ -512,8 +513,13 @@ const spacingVariables = computed(() =>
         <div ref="statement" class="statement" v-if="page.statement.length !== 0">
           <TriColorLines ref="tricolor">
             <template v-for="{ contents, alone } in page.statement">
-              <p :class="{ alone }">
-                <AnySequenceComponent :contents :aloneOnLine="alone" :tricolorable="true" />
+              <AloneFreeTextInput
+                v-if="alone && contents[0].kind === 'textInput'"
+                :component="contents[0]"
+                :tricolorable="true"
+              />
+              <p v-else>
+                <AnySequenceComponent :contents :tricolorable="true" />
               </p>
             </template>
           </TriColorLines>
@@ -576,14 +582,5 @@ div.container {
 .reference {
   padding-left: 6px;
   padding-right: 6px;
-}
-
-p.alone {
-  border: 2px outset black;
-  padding: 4px;
-}
-
-p.alone:has(:focus) {
-  background-color: #fffdd4;
 }
 </style>

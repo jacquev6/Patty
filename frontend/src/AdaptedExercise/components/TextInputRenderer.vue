@@ -119,6 +119,15 @@ function filterKeyDown(event: KeyboardEvent) {
     event.preventDefault()
   }
 }
+
+function focus() {
+  assert(span.value !== null)
+  span.value.focus()
+}
+
+defineExpose({
+  focus,
+})
 </script>
 
 <template>
