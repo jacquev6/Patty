@@ -182,7 +182,11 @@ type ReferenceRenderablePage = {
   contents: PassiveRenderable[]
 }
 
-type RenderablePage = StatementRenderablePage | ReferenceRenderablePage
+type EndRenderablePage = {
+  kind: 'end'
+}
+
+type RenderablePage = StatementRenderablePage | ReferenceRenderablePage | EndRenderablePage
 
 type RenderableExercise = {
   pages: RenderablePage[]
@@ -407,6 +411,10 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
     })
   }
 
+  pages.push({
+    kind: 'end',
+  })
+
   return { pages }
 }
 </script>
@@ -414,6 +422,7 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
 <script setup lang="ts">
 import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
 import AloneFreeTextInput from './dispatch/AloneFreeTextInput.vue'
@@ -433,6 +442,8 @@ const props = withDefaults(
 
 provide('adaptedExerciseContainerDiv', useTemplateRef('container'))
 provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
+
+const route = useRoute()
 
 const renderableExercise = computed(() => makeRenderableExercise(props.adaptedExercise))
 
@@ -484,6 +495,12 @@ const studentAnswers =
     : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
 provide('adaptedExerciseStudentAnswers', studentAnswers.value)
 
+const closable = computed(() => route !== undefined && route.query.closable === 'true')
+
+function close() {
+  window.close()
+}
+
 const triColorLines = useTemplateRef('tricolor')
 watch(
   studentAnswers,
@@ -531,6 +548,9 @@ const spacingVariables = computed(() =>
             <PassiveSequenceComponent :contents="page.contents" :tricolorable="false" />
           </p>
         </div>
+      </template>
+      <template v-else-if="page.kind === 'end'">
+        <p class="reference"><button :disabled="!closable" @click="close">Quitter l'exercice</button></p>
       </template>
       <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
       <p v-if="pageIndex < renderableExercise.pages.length - 1" class="arrow">
@@ -583,6 +603,8 @@ div.container {
 .reference {
   padding-left: 6px;
   padding-right: 6px;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 p.arrow {

@@ -285,7 +285,7 @@ describe('The autonomous HTML for a textbook', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
     cy.get('a').eq(1).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
-    cy.location('hash').should('eq', '#/P42Ex6')
+    cy.location('hash').should('eq', '#/P42Ex6?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })
 
@@ -293,7 +293,7 @@ describe('The autonomous HTML for a textbook', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
     cy.get('a').eq(3).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
-    cy.location('hash').should('eq', '#/P42ExExo%20identifi%C3%A9%20par%20texte%20%2F%205')
+    cy.location('hash').should('eq', '#/P42ExExo%20identifi%C3%A9%20par%20texte%20%2F%205?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })
 

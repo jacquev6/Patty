@@ -20,7 +20,7 @@ function screenshot(title: string, pageIndex: number) {
 
 describe('Adapted exercises examples', () => {
   if (Cypress.browser.name === 'electron') {
-    for (const example of examples) {
+    for (const [exampleIndex, example] of examples.entries()) {
       for (const [width, height] of [
         [800, 600],
         [1920, 1080],
@@ -29,9 +29,12 @@ describe('Adapted exercises examples', () => {
           cy.viewport(width, height)
           cy.mount(AdaptedExerciseExamplesCaptureComponent, { props: { adaptedExercise: example.exercise } })
 
-          let pagesCount = example.exercise.statement.pages.length
+          let pagesCount = Math.max(1, example.exercise.statement.pages.length)
           if (example.exercise.reference !== null) {
             pagesCount += 1
+          }
+          if (exampleIndex == examples.length - 1) {
+            pagesCount += 1 // For the end page, only once per resolution
           }
 
           for (let pageIndex = 0; pageIndex < pagesCount; pageIndex++) {
