@@ -35,6 +35,7 @@ function focus() {
 p {
   border: 2px outset black;
   padding: 4px;
+  margin-bottom: 1em;
 }
 
 p:has(:focus) {

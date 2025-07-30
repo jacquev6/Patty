@@ -533,6 +533,10 @@ const spacingVariables = computed(() =>
         </div>
       </template>
       <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
+      <p v-if="pageIndex < renderableExercise.pages.length - 1" class="arrow">
+        <!-- arrow.png has been provided by the client in https://github.com/jacquev6/Patty/issues/28 -->
+        <img src="./arrow.png" @click="++pageIndex" />
+      </p>
     </div>
   </PageNavigationControls>
 </template>
@@ -548,8 +552,6 @@ div.container {
   overflow-y: auto;
   transform: scale(1);
   height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 :deep(*) {
@@ -568,7 +570,6 @@ div.container {
 }
 
 .statement {
-  flex: 1;
   position: relative;
   padding-left: 6px;
   padding-right: 6px;
@@ -582,5 +583,12 @@ div.container {
 .reference {
   padding-left: 6px;
   padding-right: 6px;
+}
+
+p.arrow {
+  text-align: center;
+}
+p.arrow img {
+  cursor: pointer;
 }
 </style>
