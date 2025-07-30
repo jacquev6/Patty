@@ -162,7 +162,7 @@ class DevelopmentCycle:
                 try:
                     e2e_failures = list(
                         itertools.chain.from_iterable(
-                            joblib.Parallel(n_jobs=5, return_as="list")(
+                            joblib.Parallel(n_jobs=1, return_as="list")(
                                 joblib.delayed(run_e2e_tests)(
                                     self.end_to_end_specs, browser, clear=self.accept_visual_diffs
                                 )
