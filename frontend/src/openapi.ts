@@ -194,6 +194,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification-batches/{id}/model-for-adaptation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Classification Batch Model For Adaptation */
+    put: operations['put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/pdf-files': {
     parameters: {
       query?: never
@@ -308,6 +325,40 @@ export interface paths {
     put?: never
     /** Submit Adaptations With Recent Settings In Extraction Batch */
     post: operations['submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/run-classification': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Extraction Batch Run Classification */
+    put: operations['put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/model-for-adaptation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Extraction Batch Model For Adaptation */
+    put: operations['put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put']
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -2319,6 +2370,44 @@ export interface operations {
       }
     }
   }
+  put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json':
+          | components['schemas']['DummyModel']
+          | components['schemas']['MistralAiModel']
+          | components['schemas']['OpenAiModel']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   create_pdf_file_api_pdf_files_post: {
     parameters: {
       query?: never
@@ -2517,6 +2606,75 @@ export interface operations {
       cookie?: never
     }
     requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json':
+          | components['schemas']['DummyModel']
+          | components['schemas']['MistralAiModel']
+          | components['schemas']['OpenAiModel']
+      }
+    }
     responses: {
       /** @description Successful Response */
       200: {

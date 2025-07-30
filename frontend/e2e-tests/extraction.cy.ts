@@ -21,7 +21,7 @@ describe('The extraction batch creation page', () => {
     screenshot('extraction-batch-creation-page-with-pdf')
   })
 
-  it('creates an extraction batch without classification or adaptation', () => {
+  it('creates an extraction batch without classification or adaptation, then requests them and refreshes until they are done', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
     cy.get('[data-cy="run-classification"]').select('no')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
@@ -40,6 +40,19 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("Run classification after extraction: no")').should('exist')
     cy.get('p:contains("Run adaptations")').should('not.exist')
     cy.get('p:contains("Created by: Alice")').should('exist')
+
+    cy.get('span:contains("(🖊️ change)")').click()
+    cy.get('button:contains("Submit")').click()
+    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 4)
+    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 2)
+    cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get('p:contains("Adaptation was not requested.")').should('exist')
+
+    cy.get('span:contains("(🖊️ change)")').click()
+    cy.get('button:contains("Submit")').click()
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get('p:contains("Adaptation was not requested.")').should('not.exist')
   })
 
   it('creates an extraction batch with classification and adaptation, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {

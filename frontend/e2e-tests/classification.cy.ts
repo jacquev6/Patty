@@ -65,7 +65,7 @@ describe('The classification batch creation page', () => {
     cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '1')
   })
 
-  it('creates a new classification batch without adaptation afterwards and refreshes it until it is done', () => {
+  it('creates a new classification batch without adaptation afterwards and refreshes it until it is done, then requests adaptations and refreshes until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('no')
 
     cy.get('[data-cy="input-page-number"]').eq(0).type('90', { delay: 0 })
@@ -86,6 +86,12 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 1 (in progress, will refresh when done)")').should('exist')
     cy.get('h2:contains("Input 1: CocheMot")').should('exist')
     cy.get('p:contains("Adaptation was not requested.")').should('exist')
+
+    cy.get('span:contains("(🖊️ change)")').click()
+    cy.get('button:contains("Submit")').click()
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get('p:contains("Adaptation was not requested.")').should('not.exist')
   })
 
   it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {

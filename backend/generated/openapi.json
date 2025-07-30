@@ -603,6 +603,69 @@
         }
       }
     },
+    "/api/classification-batches/{id}/model-for-adaptation": {
+      "put": {
+        "summary": "Put Classification Batch Model For Adaptation",
+        "operationId": "put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DummyModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MistralAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OpenAiModel"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pdf-files": {
       "post": {
         "summary": "Create Pdf File",
@@ -883,6 +946,111 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/run-classification": {
+      "put": {
+        "summary": "Put Extraction Batch Run Classification",
+        "operationId": "put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/model-for-adaptation": {
+      "put": {
+        "summary": "Put Extraction Batch Model For Adaptation",
+        "operationId": "put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DummyModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MistralAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OpenAiModel"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",

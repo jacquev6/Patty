@@ -634,6 +634,43 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
             session.add(adaptation)
 
 
+@api_router.put("/classification-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
+def put_classification_batch_model_for_adaptation(
+    id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
+) -> None:
+    classification_batch = get_by_id(session, db.ClassificationBatch, id)
+    assert classification_batch.model_for_adaptation is None
+    classification_batch.model_for_adaptation = req
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for exercise in classification_batch.exercises:
+        if (
+            exercise.adaptation is None
+            and exercise.exercise_class is not None
+            and exercise.exercise_class.latest_strategy_settings is not None
+        ):
+            strategy = db.AdaptationStrategy(
+                created_at=now,
+                created_by_username=None,
+                created_by_classification_batch=classification_batch,
+                settings=exercise.exercise_class.latest_strategy_settings,
+                model=classification_batch.model_for_adaptation,
+            )
+            session.add(strategy)
+            adaptation = db.Adaptation(
+                created_at=now,
+                created_by_username=None,
+                exercise=exercise,
+                strategy=strategy,
+                classification_batch=classification_batch,
+                adaptation_batch=None,
+                raw_llm_conversations=[],
+                initial_assistant_response=None,
+                adjustments=[],
+                manual_edit=None,
+            )
+            session.add(adaptation)
+
+
 class GetClassificationBatchesResponse(ApiModel):
     class ClassificationBatch(ApiModel):
         id: str
@@ -888,6 +925,72 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
         )
         assert classification_batch is not None
         assert classification_batch.model_for_adaptation is not None
+        for exercise in page_extraction.exercises:
+            if (
+                exercise.adaptation is None
+                and exercise.exercise_class is not None
+                and exercise.exercise_class.latest_strategy_settings is not None
+            ):
+                strategy = db.AdaptationStrategy(
+                    created_at=now,
+                    created_by_username=None,
+                    created_by_classification_batch=classification_batch,
+                    settings=exercise.exercise_class.latest_strategy_settings,
+                    model=classification_batch.model_for_adaptation,
+                )
+                session.add(strategy)
+                adaptation = db.Adaptation(
+                    created_at=now,
+                    created_by_username=None,
+                    exercise=exercise,
+                    strategy=strategy,
+                    classification_batch=classification_batch,
+                    adaptation_batch=None,
+                    raw_llm_conversations=[],
+                    initial_assistant_response=None,
+                    adjustments=[],
+                    manual_edit=None,
+                )
+                session.add(adaptation)
+
+
+@api_router.put("/extraction-batches/{id}/run-classification", status_code=fastapi.status.HTTP_200_OK)
+def put_extraction_batch_run_classification(id: str, session: database_utils.SessionDependable) -> None:
+    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    assert not extraction_batch.run_classification
+    extraction_batch.run_classification = True
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    for page_extraction in extraction_batch.page_extractions:
+        classification_batch = db.ClassificationBatch(
+            created_at=now,
+            created_by_username=None,
+            created_by_page_extraction=page_extraction,
+            model_for_adaptation=None,
+        )
+        session.add(classification_batch)
+
+        for exercise in page_extraction.exercises:
+            exercise.classified_by_classification_batch = classification_batch
+
+
+@api_router.put("/extraction-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
+def put_extraction_batch_model_for_adaptation(
+    id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
+) -> None:
+    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    assert extraction_batch.model_for_adaptation is None
+    extraction_batch.model_for_adaptation = req
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for page_extraction in extraction_batch.page_extractions:
+        classification_batch = (
+            session.execute(sql.select(db.ClassificationBatch).filter_by(created_by_page_extraction=page_extraction))
+            .scalars()
+            .first()
+        )
+        assert classification_batch is not None
+        assert classification_batch.model_for_adaptation is None
+        classification_batch.model_for_adaptation = req
         for exercise in page_extraction.exercises:
             if (
                 exercise.adaptation is None
