@@ -3,7 +3,7 @@ argon2-cffi
 boto3
 cachetools
 compact-json
-datasets
+datasets==3.6.0
 fastapi
 google-cloud-aiplatform
 mistralai
