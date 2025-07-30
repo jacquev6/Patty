@@ -1,5 +1,91 @@
 {
   "$defs": {
+    "ActiveFormatted": {
+      "properties": {
+        "kind": {
+          "const": "formatted",
+          "title": "Kind",
+          "type": "string"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/ActiveFormatted"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "bold": {
+          "default": false,
+          "title": "Bold",
+          "type": "boolean"
+        },
+        "italic": {
+          "default": false,
+          "title": "Italic",
+          "type": "boolean"
+        },
+        "underlined": {
+          "default": false,
+          "title": "Underlined",
+          "type": "boolean"
+        },
+        "highlighted": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Highlighted"
+        },
+        "boxed": {
+          "default": false,
+          "title": "Boxed",
+          "type": "boolean"
+        },
+        "superscript": {
+          "default": false,
+          "title": "Superscript",
+          "type": "boolean"
+        },
+        "subscript": {
+          "default": false,
+          "title": "Subscript",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "contents",
+        "bold",
+        "italic",
+        "underlined",
+        "highlighted",
+        "boxed",
+        "superscript",
+        "subscript"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "Arrow": {
       "properties": {
         "kind": {
@@ -430,6 +516,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
               }
             ]
           },
@@ -472,7 +561,7 @@
                 "$ref": "#/$defs/Arrow"
               },
               {
-                "$ref": "#/$defs/Formatted"
+                "$ref": "#/$defs/ActiveFormatted"
               },
               {
                 "$ref": "#/$defs/FreeTextInput"

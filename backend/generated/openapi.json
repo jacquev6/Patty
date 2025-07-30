@@ -561,6 +561,111 @@
         }
       }
     },
+    "/api/classification-batches/{id}/submit-adaptations-with-recent-settings": {
+      "post": {
+        "summary": "Submit Adaptations With Recent Settings In Classification Batch",
+        "operationId": "submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/classification-batches/{id}/model-for-adaptation": {
+      "put": {
+        "summary": "Put Classification Batch Model For Adaptation",
+        "operationId": "put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DummyModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MistralAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OpenAiModel"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pdf-files": {
       "post": {
         "summary": "Create Pdf File",
@@ -805,6 +910,153 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetExtractionBatchResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/submit-adaptations-with-recent-settings": {
+      "post": {
+        "summary": "Submit Adaptations With Recent Settings In Extraction Batch",
+        "operationId": "submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/run-classification": {
+      "put": {
+        "summary": "Put Extraction Batch Run Classification",
+        "operationId": "put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extraction-batches/{id}/model-for-adaptation": {
+      "put": {
+        "summary": "Put Extraction Batch Model For Adaptation",
+        "operationId": "put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DummyModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MistralAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OpenAiModel"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -1502,6 +1754,162 @@
   },
   "components": {
     "schemas": {
+      "ActiveFormatted-Input": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "formatted",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          },
+          "bold": {
+            "type": "boolean",
+            "title": "Bold",
+            "default": false
+          },
+          "italic": {
+            "type": "boolean",
+            "title": "Italic",
+            "default": false
+          },
+          "underlined": {
+            "type": "boolean",
+            "title": "Underlined",
+            "default": false
+          },
+          "highlighted": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highlighted"
+          },
+          "boxed": {
+            "type": "boolean",
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents"
+        ]
+      },
+      "ActiveFormatted-Output": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "formatted",
+            "title": "Kind"
+          },
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          },
+          "bold": {
+            "type": "boolean",
+            "title": "Bold",
+            "default": false
+          },
+          "italic": {
+            "type": "boolean",
+            "title": "Italic",
+            "default": false
+          },
+          "underlined": {
+            "type": "boolean",
+            "title": "Underlined",
+            "default": false
+          },
+          "highlighted": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highlighted"
+          },
+          "boxed": {
+            "type": "boolean",
+            "title": "Boxed",
+            "default": false
+          },
+          "superscript": {
+            "type": "boolean",
+            "title": "Superscript",
+            "default": false
+          },
+          "subscript": {
+            "type": "boolean",
+            "title": "Subscript",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "contents"
+        ]
+      },
       "Adjustment": {
         "properties": {
           "userPrompt": {
@@ -2455,7 +2863,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
           },
           "reference": {
             "anyOf": [
@@ -3236,6 +3644,92 @@
         ],
         "title": "JsonSchemaLlmResponseSpecification"
       },
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
       "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
           "contents": {
@@ -3342,92 +3836,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/Choice-Output"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "type": "object",
-        "required": [
-          "contents"
-        ]
-      },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Formatted-Input"
-                },
-                {
-                  "$ref": "#/components/schemas/FreeTextInput"
-                },
-                {
-                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
-                },
-                {
-                  "$ref": "#/components/schemas/SelectableInput-Input"
-                },
-                {
-                  "$ref": "#/components/schemas/SwappableInput-Input"
-                },
-                {
-                  "$ref": "#/components/schemas/EditableTextInput"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Contents"
-          }
-        },
-        "type": "object",
-        "required": [
-          "contents"
-        ]
-      },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
-        "properties": {
-          "contents": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/Text"
-                },
-                {
-                  "$ref": "#/components/schemas/Whitespace"
-                },
-                {
-                  "$ref": "#/components/schemas/Arrow"
-                },
-                {
-                  "$ref": "#/components/schemas/Formatted-Output"
-                },
-                {
-                  "$ref": "#/components/schemas/FreeTextInput"
-                },
-                {
-                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
-                },
-                {
-                  "$ref": "#/components/schemas/SelectableInput-Output"
-                },
-                {
-                  "$ref": "#/components/schemas/SwappableInput-Output"
-                },
-                {
-                  "$ref": "#/components/schemas/EditableTextInput"
                 }
               ]
             },
@@ -3581,6 +3989,36 @@
         ],
         "title": "Page"
       },
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lines"
+        ]
+      },
       "Page_Union_Text__Whitespace__Arrow__Formatted__-Input": {
         "properties": {
           "lines": {
@@ -3641,41 +4079,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
-        "properties": {
-          "lines": {
-            "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
-            },
-            "type": "array",
-            "title": "Lines"
-          }
-        },
-        "type": "object",
-        "required": [
-          "lines"
-        ]
-      },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
-        "properties": {
-          "lines": {
-            "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-            },
-            "type": "array",
-            "title": "Lines"
-          }
-        },
-        "type": "object",
-        "required": [
-          "lines"
-        ]
-      },
-      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -3686,11 +4094,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
             },
             "type": "array",
             "title": "Pages"
@@ -4229,6 +4637,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Input"
                 }
               ]
             },
@@ -4276,6 +4687,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
                 }
               ]
             },
@@ -4596,7 +5010,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
           },
           "reference": {
             "anyOf": [

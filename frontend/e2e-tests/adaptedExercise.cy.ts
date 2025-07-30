@@ -1,4 +1,4 @@
-import { ignoreResizeObserverLoopError, visit, screenshot } from './utils'
+import { ignoreResizeObserverLoopError, visit, screenshot, loadFixtures } from './utils'
 
 let token = ''
 
@@ -17,7 +17,7 @@ describe('The autonomous HTML for a single adaptation', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation')
+    loadFixtures(['dummy-adaptation'])
     ignoreResizeObserverLoopError()
   })
 
@@ -41,6 +41,11 @@ describe('The autonomous HTML for a single adaptation', () => {
 
     visitExport('/api/export/adaptation/1.html')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+
+    cy.get('.control').eq(1).click()
+    cy.get('button:contains("Effacer mes réponses")').click()
+    cy.get(':contains("Les feuilles sont chahutées par")').should('exist')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
   })
 
   it('forgets student answers when the exercise is modified', () => {
@@ -195,7 +200,7 @@ describe('The autonomous HTML for an adaptation batch', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=mixed-dummy-adaptation-batch')
+    loadFixtures(['mixed-dummy-adaptation-batch'])
   })
 
   it('is downloadable', () => {
@@ -231,7 +236,7 @@ describe('The autonomous HTML for a textbook', () => {
 
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-textbook-with-text-exercise-numbers')
+    loadFixtures(['dummy-textbook-with-text-exercise-numbers'])
   })
 
   it('is downloadable', () => {
@@ -249,7 +254,7 @@ describe('The autonomous HTML for a textbook', () => {
 
   it('displays the textbook title', () => {
     visitExport('/api/export/textbook/1.html')
-    cy.get('p:contains("Livre")').should('have.text', 'Livre : Dummy Textbook Title')
+    cy.get('p:contains("Title")').should('have.text', 'Dummy Textbook Title')
   })
 
   it('displays nothing', () => {
@@ -258,30 +263,10 @@ describe('The autonomous HTML for a textbook', () => {
     cy.get('a').should('have.length', 0)
   })
 
-  it('displays "Indique le numéro de la page."', () => {
-    visitExport('/api/export/textbook/1.html')
-    cy.get('[data-cy="exercise-number-filter"]').type('42')
-    cy.get('p.message').should('exist').should('have.text', 'Indique le numéro de la page.')
-  })
-
   it('displays "La page 27 n\'existe pas."', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('27')
     cy.get('p.message').should('exist').should('have.text', "La page 27 n'existe pas.")
-  })
-
-  it('displays "L\'exercice numéro 12 n\'existe pas."', () => {
-    visitExport('/api/export/textbook/1.html')
-    cy.get('[data-cy="page-number-filter"]').type('40')
-    cy.get('[data-cy="exercise-number-filter"]').type('12')
-    cy.get('p.message').should('exist').should('have.text', "L'exercice numéro 12 n'existe pas.")
-  })
-
-  it('displays "L\'exercice blah n\'existe pas."', () => {
-    visitExport('/api/export/textbook/1.html')
-    cy.get('[data-cy="page-number-filter"]').type('40')
-    cy.get('[data-cy="exercise-number-filter"]').type('blah')
-    cy.get('p.message').should('exist').should('have.text', "L'exercice blah n'existe pas.")
   })
 
   it('filters exercises by page', () => {
@@ -301,41 +286,19 @@ describe('The autonomous HTML for a textbook', () => {
     cy.get('a').eq(3).should('have.text', 'Exercice 30')
   })
 
-  it('filters exercises by page and number', () => {
-    visitExport('/api/export/textbook/1.html')
-    cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('[data-cy="exercise-number-filter"]').type('6')
-    cy.get('a').should('have.length', 1)
-    cy.get('a').eq(0).should('have.text', 'Exercice 6')
-  })
-
-  it('filters exercises by page and textual number', () => {
-    visitExport('/api/export/textbook/1.html')
-    cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('[data-cy="exercise-number-filter"]').type('I')
-    cy.get('a').should('have.length', 2)
-    cy.get('a').eq(0).should('have.text', 'Auto-dictée')
-    cy.get('a').eq(1).should('have.text', 'Exo identifié par texte / 5')
-    cy.get('[data-cy="exercise-number-filter"]').type('c')
-    cy.get('a').should('have.length', 1)
-    cy.get('a').eq(0).should('have.text', 'Auto-dictée')
-  })
-
   it('has working links', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('[data-cy="exercise-number-filter"]').type('6')
-    cy.get('a').should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
-    cy.location('hash').should('eq', '#/P42Ex6')
+    cy.get('a').eq(1).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
+    cy.location('hash').should('eq', '#/P42Ex6?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })
 
   it('has working links - even when the exercice number has URL-incompatible characters', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('[data-cy="exercise-number-filter"]').type('Exo')
-    cy.get('a').should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
-    cy.location('hash').should('eq', '#/P42ExExo%20identifi%C3%A9%20par%20texte%20%2F%205')
+    cy.get('a').eq(3).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
+    cy.location('hash').should('eq', '#/P42ExExo%20identifi%C3%A9%20par%20texte%20%2F%205?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })
 

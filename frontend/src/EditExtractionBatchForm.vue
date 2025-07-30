@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
 import { useI18n } from 'vue-i18n'
+import { ref } from 'vue'
 
-import { type ExtractionBatch } from './apiClient'
+import { useAuthenticatedClient, type ExtractionBatch } from './apiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from './WhiteSpace.vue'
 import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
@@ -13,7 +14,7 @@ import MarkDown from './MarkDown.vue'
 import { useApiConstantsStore } from './ApiConstantsStore'
 import classificationCamembert20250520 from './ClassificationCamembert20250520'
 
-defineProps<{
+const props = defineProps<{
   extractionBatch: ExtractionBatch
 }>()
 
@@ -24,8 +25,29 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { d } = useI18n({ useScope: 'global' })
 const apiConstantsStore = useApiConstantsStore()
+const client = useAuthenticatedClient()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
+
+const editingRunClassification = ref(false)
+async function submitClassification() {
+  editingRunClassification.value = false
+  await client.PUT('/api/extraction-batches/{id}/run-classification', {
+    params: { path: { id: props.extractionBatch.id } },
+  })
+  emit('batch-updated')
+}
+
+const editingModelForAdaptation = ref(false)
+const llmModelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
+async function submitAdaptation() {
+  editingModelForAdaptation.value = false
+  await client.PUT('/api/extraction-batches/{id}/model-for-adaptation', {
+    params: { path: { id: props.extractionBatch.id } },
+    body: llmModelForAdaptation.value,
+  })
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -63,11 +85,40 @@ const authenticationTokenStore = useAuthenticationTokenStore()
             <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
           </I18nT>
         </template>
-        <template v-else>{{ t('no') }}</template>
+        <template v-else>
+          <template v-if="editingRunClassification">
+            <I18nT keypath="runClassificationYesUsing">
+              <code>{{ classificationCamembert20250520.fileName }}</code>
+              <span>{{ classificationCamembert20250520.providedBy }}</span>
+              <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span> </I18nT
+            >: <button @click="submitClassification">Submit</button>
+          </template>
+          <template v-else
+            >{{ t('no') }}
+            <span style="cursor: pointer" @click="editingRunClassification = true">(🖊️ change)</span></template
+          >
+        </template>
       </p>
       <p v-if="extractionBatch.runClassification">
         {{ t('runAdaptation') }}
-        <template v-if="extractionBatch.modelForAdaptation === null">{{ t('no') }}</template>
+        <template v-if="extractionBatch.modelForAdaptation === null">
+          <template v-if="editingModelForAdaptation">
+            <I18nT keypath="runAdaptationYesUsing">
+              <LlmModelSelector
+                :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+                :disabled="false"
+                :modelValue="llmModelForAdaptation"
+              >
+                <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
+                <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
+              </LlmModelSelector> </I18nT
+            >: <button @click="submitAdaptation">Submit</button>
+          </template>
+          <template v-else
+            >{{ t('no') }}
+            <span style="cursor: pointer" @click="editingModelForAdaptation = true">(🖊️ change)</span></template
+          >
+        </template>
         <template v-else>
           <I18nT keypath="runAdaptationYesUsing">
             <LlmModelSelector
@@ -77,8 +128,8 @@ const authenticationTokenStore = useAuthenticationTokenStore()
             >
               <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
               <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
-            </LlmModelSelector>
-          </I18nT>
+            </LlmModelSelector> </I18nT
+          >.
         </template>
       </p>
       <h1>{{ t('result') }}</h1>
@@ -94,6 +145,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
               <EditClassificationOrExtractionBatchFormExercisePreview
                 headerComponent="h3"
+                :batch="{ kind: 'extraction', id: extractionBatch.id }"
                 :headerText="`Exercise ${index + 1}`"
                 :showPageAndExercise="false"
                 :classificationWasRequested="extractionBatch.runClassification"
@@ -136,7 +188,7 @@ en:
   runClassification: "Run classification after extraction:"
   runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
   runAdaptation: "Run adaptations after classification:"
-  runAdaptationYesUsing: "yes, using {0} with the latest settings for each known exercise class."
+  runAdaptationYesUsing: "yes, using {0} with the latest settings for each known exercise class"
   runAdaptationUsingProvider: "provider"
   runAdaptationUsingModel: "and model"
   no: no
@@ -159,7 +211,7 @@ fr:
   runClassification: "Exécuter la classification après l'extraction :"
   runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"
   runAdaptation: "Exécuter les adaptations après la classification :"
-  runAdaptationYesUsing: "oui, avec {0} avec les derniers paramètres pour chaque classe d'exercice connue."
+  runAdaptationYesUsing: "oui, avec {0} avec les derniers paramètres pour chaque classe d'exercice connue"
   runAdaptationUsingProvider: "fournisseur"
   runAdaptationUsingModel: "et modèle"
   no: non

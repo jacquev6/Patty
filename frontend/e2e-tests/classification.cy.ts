@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from './utils'
 
 describe('The classification batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation,dummy-coche-exercise-classes')
+    loadFixtures(['dummy-adaptation', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-classification-batch')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -49,7 +49,23 @@ describe('The classification batch creation page', () => {
       .should('have.value', 'nager ➞ ... ◆ tracter ➞ ... ◆ manger ➞ ... ◆ inventer ➞ ... ◆ livrer ➞ ...')
   })
 
-  it('creates a new classification batch without adaptation afterwards and refreshes it until it is done', () => {
+  it('opens a .tsv file with line breaks in quoted fields', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-line-breaks.tsv')
+    cy.get('h1:contains("There was a bug")').should('not.exist')
+    cy.get('[data-cy="input-page-number"]').should('have.length', 4)
+    cy.get('[data-cy="input-page-number"]').eq(0).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '1')
+  })
+
+  it('opens a .tsv file with quoted headers', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/quoted-headers.tsv')
+    cy.get('h1:contains("There was a bug")').should('not.exist')
+    cy.get('[data-cy="input-page-number"]').should('have.length', 4)
+    cy.get('[data-cy="input-page-number"]').eq(0).should('have.value', '6')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '1')
+  })
+
+  it('creates a new classification batch without adaptation afterwards and refreshes it until it is done, then requests adaptations and refreshes until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('no')
 
     cy.get('[data-cy="input-page-number"]').eq(0).type('90', { delay: 0 })
@@ -70,9 +86,15 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 1 (in progress, will refresh when done)")').should('exist')
     cy.get('h2:contains("Input 1: CocheMot")').should('exist')
     cy.get('p:contains("Adaptation was not requested.")').should('exist')
+
+    cy.get('span:contains("(🖊️ change)")').click()
+    cy.get('button:contains("Submit")').click()
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get('p:contains("Adaptation was not requested.")').should('not.exist')
   })
 
-  it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class', () => {
+  it('creates a new classification batch with adaptation afterwards, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {
     cy.get('[data-cy="run-adaptation"]').select('yes')
     cy.get('[data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="llm-name"]').select('dummy-1')
@@ -121,6 +143,7 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 3: VraiFaux")').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
+    cy.get('button:contains("Full screen")').should('have.length', 2)
 
     cy.visit('/adaptation-2')
     cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1')
@@ -135,13 +158,16 @@ describe('The classification batch creation page', () => {
     cy.get(
       'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
     ).should('exist')
+    cy.get('button:contains("Submit all adaptations in the same case")').click()
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('button:contains("Full screen")').should('have.length', 3)
   })
 })
 
 describe('The classification batch edition page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-adaptation,dummy-classification-batch')
+    loadFixtures(['dummy-adaptation', 'dummy-classification-batch'])
     ignoreResizeObserverLoopError()
     visit('/classification-batch-1')
   })

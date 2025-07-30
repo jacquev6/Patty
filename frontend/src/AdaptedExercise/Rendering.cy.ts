@@ -8,7 +8,7 @@ function screenshot() {
   if (!Cypress.config('isInteractive')) {
     const baseName = Cypress.currentTest.titlePath.join('-').replaceAll(' ', '_')
     screenshotsCounts[baseName] = (screenshotsCounts[baseName] ?? 0) + 1
-    const name = `${baseName}-${screenshotsCounts[baseName]}-${Cypress.browser.name}`
+    const name = `${baseName}-${screenshotsCounts[baseName]}`
     cy.compareSnapshot(name)
   }
 }
@@ -482,6 +482,18 @@ describe('SelectableInput', () => {
                         colors: ['grey'],
                         boxed: false,
                       },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
                     ],
                   },
                 ],
@@ -492,7 +504,7 @@ describe('SelectableInput', () => {
         },
       },
     })
-    cy.get('@input').click()
+    cy.get('@input').click({ multiple: true })
     screenshot()
 
     cy.mount(AdaptedExerciseRenderer, {
@@ -515,6 +527,18 @@ describe('SelectableInput', () => {
                         colors: ['grey'],
                         boxed: true,
                       },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'X' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
                     ],
                   },
                 ],
@@ -525,7 +549,7 @@ describe('SelectableInput', () => {
         },
       },
     })
-    cy.get('@input').click()
+    cy.get('@input').click({ multiple: true })
     screenshot()
 
     cy.mount(AdaptedExerciseRenderer, {
@@ -594,17 +618,15 @@ describe('SelectableInput', () => {
     cy.get('@input').click()
     screenshot()
   })
-})
 
-describe('SelectableLettersInputRenderer', () => {
-  it('picks colors', () => {
-    cy.viewport(700, 500)
+  it('renders nested selectable inputs', () => {
+    cy.viewport(550, 310)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
-          instruction: { lines: [{ contents: [{ kind: 'text', text: 'Select' }] }] },
+          instruction: { lines: [] },
           example: null,
           hint: null,
           statement: {
@@ -615,38 +637,20 @@ describe('SelectableLettersInputRenderer', () => {
                     contents: [
                       {
                         kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'a' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: false,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'b' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: false,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'c' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: false,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'd' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: true,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'e' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: true,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'f' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [{ kind: 'text', text: 'in' }],
+                            colors: ['red'],
+                            boxed: false,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
                         boxed: true,
                       },
                     ],
@@ -658,30 +662,17 @@ describe('SelectableLettersInputRenderer', () => {
           reference: null,
         },
       },
-      attrs: {
-        style: `min-height: 450px;`,
-      },
     })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
 
-    screenshot()
-    cy.get('[data-cy="selectableInput"]').eq(0).click()
-    cy.get('span:contains("a")').last().click().should('have.css', 'background-color', 'rgb(255, 0, 0)')
-    cy.get('span:contains("b")').last().click().click().should('have.css', 'background-color', 'rgb(0, 128, 0)')
-    screenshot()
-    cy.get('span:contains("✅")').click()
-    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', 'rgb(255, 0, 0)')
-    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', 'rgb(0, 128, 0)')
-    screenshot()
-  })
-
-  it('hides picker when changing page', () => {
-    cy.viewport(700, 500)
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
         adaptedExercise: {
           format: 'v1',
-          instruction: { lines: [{ contents: [{ kind: 'text', text: 'Select' }] }] },
+          instruction: { lines: [] },
           example: null,
           hint: null,
           statement: {
@@ -692,46 +683,88 @@ describe('SelectableLettersInputRenderer', () => {
                     contents: [
                       {
                         kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'a' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: false,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'b' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: false,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'c' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [
+                              { kind: 'text', text: 'mid' },
+                              { kind: 'whitespace' },
+                              {
+                                kind: 'selectableInput',
+                                contents: [{ kind: 'text', text: 'inner' }],
+                                colors: ['orange'],
+                                boxed: false,
+                              },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'mid' },
+                            ],
+                            colors: ['grey'],
+                            boxed: false,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
                         boxed: false,
                       },
                     ],
                   },
                 ],
               },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
               {
                 lines: [
                   {
                     contents: [
                       {
                         kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'd' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: true,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'e' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
-                        boxed: true,
-                      },
-                      {
-                        kind: 'selectableInput',
-                        contents: [{ kind: 'text', text: 'f' }],
-                        colors: ['rgb(255, 0, 0)', 'rgb(0, 128, 0)'],
+                        contents: [
+                          { kind: 'text', text: 'Ext' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'selectableInput',
+                            contents: [
+                              { kind: 'text', text: 'mid' },
+                              { kind: 'whitespace' },
+                              {
+                                kind: 'selectableInput',
+                                contents: [{ kind: 'text', text: 'inner' }],
+                                colors: ['orange'],
+                                boxed: true,
+                              },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'mid' },
+                            ],
+                            colors: ['grey'],
+                            boxed: true,
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'ext' },
+                          { kind: 'text', text: '.' },
+                        ],
+                        colors: ['yellow'],
                         boxed: true,
                       },
                     ],
@@ -743,16 +776,10 @@ describe('SelectableLettersInputRenderer', () => {
           reference: null,
         },
       },
-      attrs: {
-        style: `min-height: 450px;`,
-      },
     })
-
-    cy.get('[data-cy="selectableInput"]').click()
-    cy.get('div.picker').should('exist')
-
-    cy.get('div.control').eq(1).click()
-    cy.get('div.picker').should('not.exist')
+    cy.get('[data-cy="selectableInput"]').as('input')
+    cy.get('@input').click('left', { multiple: true })
+    screenshot()
   })
 })
 
@@ -882,6 +909,10 @@ describe('FreeTextInput', () => {
     pressAndRelease('ArrowRight')
     cy.get('p').should('contain.text', 'Page 3')
     pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', "Quitter l'exercice")
+    pressAndRelease('ArrowRight')
+    cy.get('p').should('contain.text', "Quitter l'exercice")
+    pressAndRelease('ArrowLeft')
     cy.get('p').should('contain.text', 'Page 3')
     pressAndRelease('ArrowLeft')
     cy.get('p').should('contain.text', 'Page 2')
@@ -1040,6 +1071,71 @@ describe('FreeTextInput', () => {
     inputShouldHaveValue('Word1 wORD2 word3.')
     reset(1, 4).type('{backspace}ORD')
     inputShouldHaveValue('Word1 wORD2 word3.')
+  })
+
+  it('renders inside a formatted component', () => {
+    cy.viewport(520, 170)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'A' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'formatted',
+                        highlighted: 'pink',
+                        contents: [
+                          { kind: 'text', text: 'B' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'C' },
+                          { kind: 'whitespace' },
+                          {
+                            kind: 'formatted',
+                            bold: true,
+                            contents: [
+                              { kind: 'text', text: 'D' },
+                              { kind: 'whitespace' },
+                              { kind: 'freeTextInput' },
+                              { kind: 'whitespace' },
+                              { kind: 'text', text: 'E' },
+                            ],
+                          },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'F' },
+                        ],
+                      },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'G' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    screenshot()
+    cy.get('[data-cy="freeTextInput"]').as('input')
+    cy.get('@input').click()
+    screenshot()
+    cy.get('@input').type('Hello')
+    screenshot()
+    cy.get('@input').blur()
+    screenshot()
   })
 })
 

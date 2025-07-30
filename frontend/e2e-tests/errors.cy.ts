@@ -1,8 +1,8 @@
-import { visit } from './utils'
+import { visit, loadFixtures } from './utils'
 
 describe("Patty's error catcher", () => {
   beforeEach(() => {
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=')
+    loadFixtures([])
     visit('/errors')
   })
 

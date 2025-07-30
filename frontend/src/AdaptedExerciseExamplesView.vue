@@ -70,6 +70,355 @@ export const examples: Example[] = [
   //   },
   // },
   {
+    title: 'ExpressionEcrite',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Rédige' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'menu' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'avec' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'une' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'entrée' },
+              { kind: 'text', text: ',' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'plat' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'dessert' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+          {
+            contents: [
+              { kind: 'text', text: 'Utilise' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'uniquement' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'des' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'mots' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'contenant' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'la' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'lettre' },
+              { kind: 'whitespace' },
+              { kind: 'formatted', italic: true, contents: [{ kind: 'text', text: 'c' }] },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [{ kind: 'freeTextInput' }],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
+    title: 'freeTextInput in formatted',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Complète' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'groupes' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'nominaux' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'en' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'jaune' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'avec' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'adjectifs' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ton' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'choix' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'J' },
+                  { kind: 'text', text: "'" },
+                  { kind: 'text', text: 'ai' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'visité' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'formatted',
+                    highlighted: yellow,
+                    contents: [
+                      { kind: 'text', text: 'un' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'musée' },
+                      { kind: 'whitespace' },
+                      { kind: 'freeTextInput' },
+                    ],
+                  },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
+    title: 'Imbricated selectableInput',
+    description: null,
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Colorie' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'en' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'jaune' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'uniquement' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'phrases' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'qui' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'sont' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'à' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'la' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'forme' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'négative' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'en' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'rose' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'les' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'marques' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'la' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'négation' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: true,
+                    colors: [yellow],
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'Surtout' }],
+                      },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'ne' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'dis' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'rien' }],
+                      },
+                      { kind: 'text', text: '.' },
+                    ],
+                  },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'b' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: true,
+                    colors: [yellow],
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'Quand' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'reviendrons' }],
+                      },
+                      { kind: 'text', text: '-' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'nous' }],
+                      },
+                      { kind: 'text', text: '?' },
+                    ],
+                  },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'c' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: true,
+                    colors: [yellow],
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'Je' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [
+                          { kind: 'text', text: 'n' },
+                          { kind: 'text', text: "'" },
+                        ],
+                      },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'aime' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'pas' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'les' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [pink],
+                        contents: [{ kind: 'text', text: 'épinards' }],
+                      },
+                      { kind: 'text', text: '.' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'CocheLettres',
     description: null,
     exercise: {
@@ -121,190 +470,190 @@ export const examples: Example[] = [
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'p' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'u' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'r' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'u' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'x' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'p' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'n' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 's' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'f' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'x' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'c' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 's' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 's' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'f' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'm' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'h' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'u' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'r' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'u' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'x' }],
                   },
@@ -317,184 +666,184 @@ export const examples: Example[] = [
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'm' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'n' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'b' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'c' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'r' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'n' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 't' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'f' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 's' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'i' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'b' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'v' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'a' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'b' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'l' }],
                   },
                   {
                     kind: 'selectableInput',
-                    boxed: true,
+                    boxed: false,
                     colors: [yellow, pink],
                     contents: [{ kind: 'text', text: 'e' }],
                   },
@@ -2212,12 +2561,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'autres' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ':' }],
-                  },
+                  { kind: 'text', text: ':' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2233,12 +2577,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'turbine' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: '(' }],
-                  },
+                  { kind: 'text', text: '(' },
                   {
                     kind: 'selectableInput',
                     boxed: false,
@@ -2251,12 +2590,7 @@ export const examples: Example[] = [
                     colors: [yellow],
                     contents: [{ kind: 'text', text: 'hélice' }],
                   },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ')' }],
-                  },
+                  { kind: 'text', text: ')' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2307,12 +2641,7 @@ export const examples: Example[] = [
                     contents: [{ kind: 'text', text: 'vent' }],
                   },
                   { kind: 'whitespace' },
-                  {
-                    kind: 'selectableInput',
-                    boxed: false,
-                    colors: [yellow],
-                    contents: [{ kind: 'text', text: ';' }],
-                  },
+                  { kind: 'text', text: ';' },
                   { kind: 'whitespace' },
                   {
                     kind: 'selectableInput',
@@ -2381,14 +2710,15 @@ export const examples: Example[] = [
                     kind: 'selectableInput',
                     boxed: false,
                     colors: [yellow],
-                    contents: [{ kind: 'text', text: 'l’électricité' }],
+                    contents: [{ kind: 'text', text: 'l’' }],
                   },
                   {
                     kind: 'selectableInput',
                     boxed: false,
                     colors: [yellow],
-                    contents: [{ kind: 'text', text: '.' }],
+                    contents: [{ kind: 'text', text: 'électricité' }],
                   },
+                  { kind: 'text', text: '.' },
                 ],
               },
             ],
@@ -2755,14 +3085,18 @@ onMounted(() => {
   <div style="padding-left: 5px; padding-right: 5px">
     <h1>{{ t('spacing') }}</h1>
     <p>{{ t('changesNotSaved') }}</p>
-    <ul>
-      <li v-for="(variable, key) in spacingVariables" :key="key">
-        <code>{{ key }}</code
-        >:
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <input type="number" v-model="spacingVariables[key]" />em
-      </li>
-    </ul>
+    <dl>
+      <template v-for="(variable, key) in spacingVariables" :key="key">
+        <dt>
+          <b>{{ key }}</b>
+        </dt>
+        <dd>
+          <span v-html="t(`variable.${key}`)"></span> :
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <input type="number" v-model="spacingVariables[key]" />em
+        </dd>
+      </template>
+    </dl>
 
     <h1>{{ t('examples') }}</h1>
     <template v-for="example in examples" :key="example.title">
@@ -2775,11 +3109,39 @@ onMounted(() => {
 
 <i18n>
 en:
-  spacing: Spacing
+  spacing: Spacing and sizes
   changesNotSaved: Changes made here are not saved, and applied only on this page, temporarily.
+  variable:
+    '--extra-horizontal-space-between-words': 'Added to the standard horizontal space between words'
+    '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 'Horizontal space added between letters when a <code>"kind": "editableTextInput" has <code>"increaseHorizontalSpace" : true</code></code>'
+    '--font-size-for-single-character-selectable': 'Font size when a <code>"kind": "selectableInput"</code> contains a single character and is stuck to another <code>"kind": "selectableInput"</code>'
+    '--extra-horizontal-space-around-single-letter-selectable': 'Space added left and right of that single character when it is a letter'
+    '--extra-vertical-space-around-single-letter-selectable': 'Space added above and below that letter'
+    '--extra-horizontal-space-around-single-punctuation-selectable': 'Space added left and right of that single character when it is a punctuation mark'
+    '--extra-vertical-space-around-single-punctuation-selectable': 'Space added above and below that punctuation mark'
+    '--vertical-space-between-top-and-instruction': 'Vertical space between the top of the page and the instruction'
+    '--vertical-space-between-instruction-lines': 'Vertical space between lines in the instruction'
+    '--vertical-space-between-instruction-and-statement': 'Vertical space between the instruction and the statement'
+    '--vertical-space-between-statement-lines': 'Vertical space between lines in the statement'
+    '--vertical-space-between-border-and-choices': 'Vertical space between the border and choices in a <code>"kind": "multipleChoicesInput"</code>'
+    '--vertical-space-between-choices-lines': 'Vertical space between lines in the choices of a <code>"kind": "multipleChoicesInput"</code>'
   examples: Examples
 fr:
-  spacing: Espacement
+  spacing: Espacement et dimensions
   changesNotSaved: Les modifications effectuées ici ne sont pas enregistrées, et ne s'appliquent qu'à cette page, temporairement.
+  variable:
+    '--extra-horizontal-space-between-words': 'Ajouté à l’espace horizontal standard entre les mots'
+    '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 'Espace horizontal ajouté entre les lettres quand un <code>"kind": "editableTextInput"</code> a <code>"increaseHorizontalSpace" : true</code>'
+    '--font-size-for-single-character-selectable': 'Taille de police quand un <code>"kind": "selectableInput"</code> contient un seul caractère et est collé à un autre <code>"kind": "selectableInput"</code>'
+    '--extra-horizontal-space-around-single-letter-selectable': 'Espace ajouté à gauche et à droite de cet unique caractère quand il s’agit d’une lettre'
+    '--extra-vertical-space-around-single-letter-selectable': 'Espace ajouté au dessus et en dessous de cette lettre'
+    '--extra-horizontal-space-around-single-punctuation-selectable': 'Espace ajouté à gauche et à droite de cet unique caractère quand il s’agit d’un signe de ponctuation'
+    '--extra-vertical-space-around-single-punctuation-selectable': 'Espace ajouté au dessus et en dessous de ce signe de ponctuation'
+    '--vertical-space-between-top-and-instruction': 'Espace vertical entre le haut de la page et l’instruction'
+    '--vertical-space-between-instruction-lines': 'Espace vertical entre les lignes de l’instruction'
+    '--vertical-space-between-instruction-and-statement': 'Espace vertical entre l’instruction et l’énoncé'
+    '--vertical-space-between-statement-lines': 'Espace vertical entre les lignes de l’énoncé'
+    '--vertical-space-between-border-and-choices': 'Espace vertical entre le cadre et les choix dans un <code>"kind": "multipleChoicesInput"</code>'
+    '--vertical-space-between-choices-lines': 'Espace vertical entre les lignes des choix dans un <code>"kind": "multipleChoicesInput"</code>'
   examples: Exemples
 </i18n>

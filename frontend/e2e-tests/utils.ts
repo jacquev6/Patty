@@ -13,7 +13,7 @@ export function ignoreResizeObserverLoopError() {
 export function screenshot(name: string) {
   if (!Cypress.config('isInteractive')) {
     cy.compareSnapshot({
-      name: `${name}.${Cypress.browser.name}`,
+      name,
       cypressScreenshotOptions: { disableTimersAndAnimations: true },
     })
   }
@@ -23,4 +23,16 @@ export function visit(url: string) {
   cy.visit(url)
   cy.get('[data-cy="password"]').type('password')
   cy.get('[data-cy="submit"]').click()
+}
+
+export function loadFixtures(fixtures_: string[]) {
+  const fixtures = fixtures_.join(',')
+  const fixturesLoader = (() => {
+    if (Cypress.config('isInteractive')) {
+      return 'fixtures-loader'
+    } else {
+      return `fixtures-loader--for-${Cypress.browser.name}`
+    }
+  })()
+  cy.request('POST', `http://${fixturesLoader}/load?fixtures=${fixtures}`)
 }

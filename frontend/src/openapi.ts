@@ -177,6 +177,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/classification-batches/{id}/submit-adaptations-with-recent-settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Submit Adaptations With Recent Settings In Classification Batch */
+    post: operations['submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/classification-batches/{id}/model-for-adaptation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Classification Batch Model For Adaptation */
+    put: operations['put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/pdf-files': {
     parameters: {
       query?: never
@@ -273,6 +307,57 @@ export interface paths {
     /** Get Extraction Batch */
     get: operations['get_extraction_batch_api_extraction_batches__id__get']
     put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/submit-adaptations-with-recent-settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Submit Adaptations With Recent Settings In Extraction Batch */
+    post: operations['submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/run-classification': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Extraction Batch Run Classification */
+    put: operations['put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/extraction-batches/{id}/model-for-adaptation': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Extraction Batch Model For Adaptation */
+    put: operations['put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put']
     post?: never
     delete?: never
     options?: never
@@ -490,6 +575,100 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    'ActiveFormatted-Input': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'formatted'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['FreeTextInput']
+      )[]
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
+      /** Highlighted */
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
+    }
+    'ActiveFormatted-Output': {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'formatted'
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['FreeTextInput']
+      )[]
+      /**
+       * Bold
+       * @default false
+       */
+      bold?: boolean
+      /**
+       * Italic
+       * @default false
+       */
+      italic?: boolean
+      /**
+       * Underlined
+       * @default false
+       */
+      underlined?: boolean
+      /** Highlighted */
+      highlighted?: string | null
+      /**
+       * Boxed
+       * @default false
+       */
+      boxed?: boolean
+      /**
+       * Superscript
+       * @default false
+       */
+      superscript?: boolean
+      /**
+       * Subscript
+       * @default false
+       */
+      subscript?: boolean
+    }
     /** Adjustment */
     Adjustment: {
       /** Userprompt */
@@ -825,7 +1004,7 @@ export interface components {
       instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
       example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
     }
     /** ExternalExercise */
@@ -1160,6 +1339,34 @@ export interface components {
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
     }
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Input']
+        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['SwappableInput-Input']
+        | components['schemas']['EditableTextInput']
+      )[]
+    }
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Output']
+        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['SwappableInput-Output']
+        | components['schemas']['EditableTextInput']
+      )[]
+    }
     'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Contents */
       contents: (
@@ -1196,34 +1403,6 @@ export interface components {
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
         | components['schemas']['Choice-Output']
-      )[]
-    }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
-      /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Formatted-Input']
-        | components['schemas']['FreeTextInput']
-        | components['schemas']['MultipleChoicesInput-Input']
-        | components['schemas']['SelectableInput-Input']
-        | components['schemas']['SwappableInput-Input']
-        | components['schemas']['EditableTextInput']
-      )[]
-    }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
-      /** Contents */
-      contents: (
-        | components['schemas']['Text']
-        | components['schemas']['Whitespace']
-        | components['schemas']['Arrow']
-        | components['schemas']['Formatted-Output']
-        | components['schemas']['FreeTextInput']
-        | components['schemas']['MultipleChoicesInput-Output']
-        | components['schemas']['SelectableInput-Output']
-        | components['schemas']['SwappableInput-Output']
-        | components['schemas']['EditableTextInput']
       )[]
     }
     /** MistralAiModel */
@@ -1288,6 +1467,14 @@ export interface components {
       /** Exercises */
       exercises: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page__Exercise'][]
     }
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
+    }
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+      /** Lines */
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
+    }
     'Page_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'][]
@@ -1304,21 +1491,13 @@ export interface components {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
-      /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
-    }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
-      /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
-    }
-    'Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
     }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {
@@ -1516,6 +1695,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['SelectableInput-Input']
       )[]
       /** Colors */
       colors: string[]
@@ -1534,6 +1714,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['SelectableInput-Output']
       )[]
       /** Colors */
       colors: string[]
@@ -1662,7 +1843,7 @@ export interface components {
       instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
       example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__Formatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
     /** AdaptationBatch */
@@ -2158,6 +2339,75 @@ export interface operations {
       }
     }
   }
+  submit_adaptations_with_recent_settings_in_classification_batch_api_classification_batches__id__submit_adaptations_with_recent_settings_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_classification_batch_model_for_adaptation_api_classification_batches__id__model_for_adaptation_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json':
+          | components['schemas']['DummyModel']
+          | components['schemas']['MistralAiModel']
+          | components['schemas']['OpenAiModel']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   create_pdf_file_api_pdf_files_post: {
     parameters: {
       query?: never
@@ -2333,6 +2583,106 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['GetExtractionBatchResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  submit_adaptations_with_recent_settings_in_extraction_batch_api_extraction_batches__id__submit_adaptations_with_recent_settings_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_extraction_batch_run_classification_api_extraction_batches__id__run_classification_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_extraction_batch_model_for_adaptation_api_extraction_batches__id__model_for_adaptation_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json':
+          | components['schemas']['DummyModel']
+          | components['schemas']['MistralAiModel']
+          | components['schemas']['OpenAiModel']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

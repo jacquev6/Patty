@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { ref } from 'vue'
 
-import { type ClassificationBatch } from './apiClient'
+import { useAuthenticatedClient, type ClassificationBatch } from './apiClient'
 import LlmModelSelector from './LlmModelSelector.vue'
 import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import classificationCamembert20250520 from './ClassificationCamembert20250520'
+import { useApiConstantsStore } from './ApiConstantsStore'
 
-defineProps<{
+const props = defineProps<{
   classificationBatch: ClassificationBatch
 }>()
 
@@ -15,9 +17,22 @@ const emit = defineEmits<{
   (e: 'batch-updated'): void
 }>()
 
+const client = useAuthenticatedClient()
 const { d } = useI18n({ useScope: 'global' })
 
 const authenticationTokenStore = useAuthenticationTokenStore()
+
+const editingModelForAdaptation = ref(false)
+const apiConstantsStore = useApiConstantsStore()
+const llmModelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
+async function submitAdaptation() {
+  editingModelForAdaptation.value = false
+  await client.PUT('/api/classification-batches/{id}/model-for-adaptation', {
+    params: { path: { id: props.classificationBatch.id } },
+    body: llmModelForAdaptation.value,
+  })
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -37,7 +52,23 @@ const authenticationTokenStore = useAuthenticationTokenStore()
   </p>
   <p>
     Run adaptation after classification:
-    <template v-if="classificationBatch.modelForAdaptation === null">no</template>
+    <template v-if="classificationBatch.modelForAdaptation === null">
+      <template v-if="editingModelForAdaptation">
+        yes, using
+        <LlmModelSelector
+          :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+          :disabled="false"
+          :modelValue="llmModelForAdaptation"
+        >
+          <template #provider>provider</template>
+          <template #model> and model</template>
+        </LlmModelSelector>
+        with the latest settings for each known exercise class: <button @click="submitAdaptation">Submit</button>
+      </template>
+      <template v-else
+        >no <span style="cursor: pointer" @click="editingModelForAdaptation = true">(🖊️ change)</span></template
+      >
+    </template>
     <template v-else
       >yes, using
       <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="classificationBatch.modelForAdaptation">
@@ -61,6 +92,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
   <template v-for="(exercise, index) in classificationBatch.exercises">
     <EditClassificationOrExtractionBatchFormExercisePreview
       headerComponent="h2"
+      :batch="{ kind: 'classification', id: classificationBatch.id }"
       :headerText="`Input ${index + 1}`"
       :showPageAndExercise="true"
       :classificationWasRequested="true"

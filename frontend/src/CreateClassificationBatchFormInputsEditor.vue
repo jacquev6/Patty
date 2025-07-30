@@ -12,6 +12,7 @@ export function parseExerciseFileName(fileName: string) {
 
 <script setup lang="ts">
 import { useTemplateRef, watch } from 'vue'
+import Papa from 'papaparse'
 
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputEditor from './CreateClassificationBatchFormInputEditor.vue'
@@ -23,58 +24,56 @@ defineProps<{
 
 const inputs = defineModel<InputWithFile[]>({ required: true })
 
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      assert(typeof reader.result === 'string')
-      resolve(reader.result)
-    }
-    reader.onerror = reject
-    reader.readAsText(file)
-  })
-}
-
 async function openFile(event: Event) {
   const files = (event.target as HTMLInputElement).files
   assert(files !== null)
   assert(files.length === 1)
   const file = files.item(0)
   assert(file !== null)
-  assert(file.name.endsWith('.tsv'))
-  const content = await readFile(file)
-  const lines = content
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line !== '')
-  const header = lines.shift()
-  assert(header !== undefined)
-  const fields = header.split('\t').map((field) => field.trim())
-  const idIndex = fields.indexOf('id')
-  assert(idIndex !== -1)
-  const instructionIndex = fields.indexOf('instruction_hint_example')
-  assert(instructionIndex !== -1)
-  const statementIndex = fields.indexOf('statement')
-  assert(statementIndex !== -1)
+  type Record = {
+    id?: string
+    page?: string
+    num?: string
+    instruction_hint_example: string
+    statement: string
+  }
+  const records = await new Promise<Record[]>((resolve) =>
+    Papa.parse<Record>(file, {
+      header: true,
+      dynamicTyping: false,
+      skipEmptyLines: true,
+      complete: function (results) {
+        resolve(results.data)
+      },
+    }),
+  )
 
   const fileInputs: InputWithFile[] = []
-  for (const line of lines) {
-    const values = line.split('\t').map((value) => value.trim())
-    assert(values.length === fields.length)
-    const idParts = values[idIndex].split('_')
-    assert(idParts.length === 2)
-    assert(idParts[0].startsWith('p'))
-    const pageNumber = Number.parseInt(idParts[0].slice(1))
-    assert(idParts[1].startsWith('ex'))
-    const exerciseNumber = idParts[1].slice(2)
-    const instructionHintExampleText = values[instructionIndex]
-    const statementText = values[statementIndex]
+  for (const record of records) {
+    const [pageNumber, exerciseNumber] = (() => {
+      if (record.page !== undefined && record.num !== undefined) {
+        return [Number.parseInt(record.page), record.num]
+      } else {
+        assert(record.id !== undefined)
+        const idParts = record.id.split('_')
+        assert(idParts.length === 2)
+        assert(idParts[0].startsWith('p'))
+        const pageNumber = Number.parseInt(idParts[0].slice(1))
+        assert(idParts[1].startsWith('ex'))
+        const exerciseNumber = idParts[1].slice(2)
+        return [pageNumber, exerciseNumber]
+      }
+    })()
+
+    assert(record.instruction_hint_example !== undefined)
+    assert(record.statement !== undefined)
+
     fileInputs.push({
       inputFile: file.name,
       pageNumber,
       exerciseNumber,
-      instructionHintExampleText,
-      statementText,
+      instructionHintExampleText: record.instruction_hint_example,
+      statementText: record.statement,
     })
   }
 
@@ -117,6 +116,12 @@ watch(
   <p>
     Open a <code>.tsv</code> file:
     <input data-cy="input-files" type="file" @change="openFile" accept=".tsv" />
+  </p>
+  <p>
+    Format: the file must be a tab-separated file, with fields <code>page</code>, <code>num</code>,
+    <code>instruction_hint_example</code>, and <code>statement</code>. If fields <code>page</code> and
+    <code>num</code> are not both present, the <code>id</code> field must be present and must be in the format
+    <code>p{page}_ex{num}</code>.
   </p>
   <template v-for="index in inputs.length">
     <CreateClassificationBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />

@@ -96,12 +96,25 @@ def db_tables_graph() -> None:
 
 
 @main.command()
-def adapted_exercise_schema() -> None:
+@click.option("--choice/--no-choice", default=True, is_flag=True)
+@click.option("--free-text-input/--no-free-text-input", default=True, is_flag=True)
+@click.option("--multiple-choices-input/--no-multiple-choices-input", default=True, is_flag=True)
+@click.option("--selectable-input/--no-selectable-input", default=True, is_flag=True)
+@click.option("--swappable-input/--no-swappable-input", default=True, is_flag=True)
+@click.option("--editable-text-input/--no-editable-text-input", default=True, is_flag=True)
+def adapted_exercise_schema(
+    choice: bool,
+    free_text_input: bool,
+    multiple_choices_input: bool,
+    selectable_input: bool,
+    swappable_input: bool,
+    editable_text_input: bool,
+) -> None:
     from . import adapted
     from .adaptation import llm
 
     exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
+        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
         adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
         adapted.StatementComponents(
@@ -109,11 +122,11 @@ def adapted_exercise_schema() -> None:
             whitespace=True,
             arrow=True,
             formatted=True,
-            free_text_input=True,
-            multiple_choices_input=True,
-            selectable_input=True,
-            swappable_input=True,
-            editable_text_input=True,
+            free_text_input=free_text_input,
+            multiple_choices_input=multiple_choices_input,
+            selectable_input=selectable_input,
+            swappable_input=swappable_input,
+            editable_text_input=editable_text_input,
         ),
         adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
@@ -187,14 +200,21 @@ def json_to_html_script() -> None:
         reference=None,
     )
     usage = subprocess.run(
-        ["black", "--line-length", "116", "--skip-magic-trailing-comma", "-"],
+        ["black", "--line-length", "80", "--skip-magic-trailing-comma", "-"],
         input=textwrap.dedent(
             f"""\
-        from patty_json_to_html import json_to_html
+        from patty_json_to_html import exercise_to_html, textbook_to_html
 
         exercise = {example_exercise.model_dump()!r}
 
-        print(json_to_html(exercise))
+        print(exercise_to_html(exercise))
+
+        textbook = {{
+            "title": "Example Textbook",
+            "exercises": [{{"page": 12, "number": "23", "exercise": exercise}}],
+        }}
+
+        print(textbook_to_html(textbook))
         """
         ),
         capture_output=True,
@@ -206,20 +226,24 @@ def json_to_html_script() -> None:
         yield "# This file is *generated* by Patty. Do not edit it directly."
         yield ""
         yield '"""'
-        yield "Example usage (note that `json_to_html` also accepts an instance of `Exercise`):"
+        yield "Example usage (note that `exercise_to_html` also accepts an instance of `Exercise`, and `textbook_to_html` an instance of `Textbook`):"
         yield ""
+        continuation = False
         for line in usage.splitlines():
             line = line.rstrip()
             if line == "":
                 yield ""
-            elif any(line.startswith(prefix) for prefix in ("from", "exercise", "print")):
-                yield f">>> {line}"
-            else:
+                continuation = False
+            elif continuation:
                 yield f"... {line}"
-        yield "<!DOCTYPE html>"
-        yield '<html lang="">'
-        yield "  ..."
-        yield "</html>"
+            else:
+                yield f">>> {line}"
+                continuation = True
+            if line.startswith("print"):
+                yield "<!DOCTYPE html>"
+                yield '<html lang="">'
+                yield "  ..."
+                yield "</html>"
         yield '"""'
         yield ""
         yield ""
@@ -240,7 +264,8 @@ def json_to_html_script() -> None:
                 if line.strip().startswith("# WARNING:"):
                     continue
                 yield line.rstrip()
-        yield "def json_to_html(exercise: Exercise | dict[str, Any]) -> str:"
+        yield ""
+        yield "def exercise_to_html(exercise: Exercise | dict[str, Any]) -> str:"
         yield "    if not isinstance(exercise, Exercise):"
         yield "        exercise = Exercise.model_validate(exercise)"
         yield ""
@@ -255,6 +280,40 @@ def json_to_html_script() -> None:
         yield ""
         yield "    return template.replace("
         yield '        "##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##",'
+        yield "        json.dumps(data).replace('\\\\', '\\\\\\\\').replace('\\\"', '\\\\\"'),"
+        yield "    )"
+        yield ""
+        yield "class TextbookExercise(pydantic.BaseModel):"
+        yield "    page: int"
+        yield "    number: str"
+        yield "    exercise: Exercise"
+        yield ""
+        yield "class Textbook(pydantic.BaseModel):"
+        yield "    title: str"
+        yield "    exercises: list[TextbookExercise]"
+        yield ""
+        yield "def textbook_to_html(textbook: Textbook | dict[str, Any]) -> str:"
+        yield "    if not isinstance(textbook, Textbook):"
+        yield "        textbook = Textbook.model_validate(textbook)"
+        yield ""
+        with open("patty/export/templates/textbook/index.html") as f:
+            yield f"    template = {f.read().strip()!r}"
+        yield ""
+        yield "    exercises = []"
+        yield "    for exercise in textbook.exercises:"
+        yield "        exercise_dump = exercise.exercise.model_dump()"
+        yield "        exercises.append({"
+        yield '            "exerciseId": f"P{exercise.page}Ex{exercise.number}",'
+        yield '            "pageNumber": exercise.page,'
+        yield '            "exerciseNumber": exercise.number,'
+        yield '            "kind": "adapted",'
+        yield '            "studentAnswersStorageKey": hashlib.md5(json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()).hexdigest(),'
+        yield '            "adaptedExercise": exercise_dump,'
+        yield "        })"
+        yield '    data = {"title": textbook.title, "exercises": exercises}'
+        yield ""
+        yield "    return template.replace("
+        yield '        "##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##",'
         yield "        json.dumps(data).replace('\\\\', '\\\\\\\\').replace('\\\"', '\\\\\"'),"
         yield "    )"
 
@@ -400,7 +459,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250707-071603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250716-081603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

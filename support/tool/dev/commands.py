@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 import subprocess
@@ -92,13 +93,13 @@ def compose_(args: tuple[str, ...]) -> None:
 @dev.command()
 @click.argument("args", nargs=-1)
 def patty(args: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
+    compose.exec_in_backend_container(["python", "-m", "patty"] + list(args), check=True)
 
 
 @dev.command()
 @click.argument("args", nargs=-1)
 def alembic(args: tuple[str, ...]) -> None:
-    compose.run_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
+    compose.exec_in_backend_container(["alembic"] + list(args), workdir="/app/backend/patty", check=True)
 
 
 @dev.command()
@@ -120,12 +121,14 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--only-test", is_flag=True)
 @click.option("--skip-test", is_flag=True)
 @click.option("--only-spec", type=str, multiple=True)
+@click.option("--skip-spec", type=str, multiple=True)
 @click.option("--only-electron", is_flag=True)
 @click.option("--skip-electron", is_flag=True)
 @click.option("--only-chromium", is_flag=True)
 @click.option("--skip-chromium", is_flag=True)
 @click.option("--only-firefox", is_flag=True)
 @click.option("--skip-firefox", is_flag=True)
+@click.option("--accept-visual-diffs", is_flag=True)
 def cycle(
     cost_money: bool,
     only_backend: bool,
@@ -145,12 +148,14 @@ def cycle(
     only_test: bool,
     skip_test: bool,
     only_spec: tuple[str, ...],
+    skip_spec: tuple[str, ...],
     only_electron: bool,
     skip_electron: bool,
     only_chromium: bool,
     skip_chromium: bool,
     only_firefox: bool,
     skip_firefox: bool,
+    accept_visual_diffs: bool,
 ) -> None:
     """Run the development cycle."""
 
@@ -200,21 +205,25 @@ def cycle(
     if do_firefox:
         browsers.append("firefox")
 
-    frontend_specs: list[str] | None = []
-    assert isinstance(frontend_specs, list)
-    end_to_end_specs: list[str] | None = []
-    assert isinstance(end_to_end_specs, list)
-    for spec in only_spec:
-        if spec.startswith("frontend/src") and spec.endswith(".cy.ts"):
-            frontend_specs.append(spec[9:])
-        elif spec.startswith("frontend/e2e-tests") and spec.endswith(".cy.ts"):
-            end_to_end_specs.append(spec[9:])
-        else:
-            raise ValueError(f"Invalid spec: {spec}")
-    if len(frontend_specs) == 0:
-        frontend_specs = None
-    if len(end_to_end_specs) == 0:
-        end_to_end_specs = None
+    all_frontend_specs = set(filter(os.path.isfile, glob.glob("frontend/src/**/*.cy.ts", recursive=True)))
+    only_frontend_specs = set(only_spec) & all_frontend_specs
+    skip_frontend_specs = set(skip_spec) & all_frontend_specs
+    if only_frontend_specs:
+        frontend_specs = sorted(only_frontend_specs)
+    else:
+        frontend_specs = sorted(all_frontend_specs - skip_frontend_specs)
+
+    all_e2e_specs = set(filter(os.path.isfile, glob.glob("frontend/e2e-tests/**/*.cy.ts", recursive=True)))
+    only_e2e_specs = set(only_spec) & all_e2e_specs
+    skip_e2e_specs = set(skip_spec) & all_e2e_specs
+    if only_e2e_specs:
+        end_to_end_specs = sorted(only_e2e_specs)
+    else:
+        end_to_end_specs = sorted(all_e2e_specs - skip_e2e_specs)
+
+    unknown_specs = (set(only_spec) | set(skip_spec)) - (all_frontend_specs | all_e2e_specs)
+    for spec in unknown_specs:
+        raise ValueError(f"Invalid spec: {spec}")
 
     cycle = DevelopmentCycle(
         do_migration=do_migration,
@@ -229,6 +238,7 @@ def cycle(
         frontend_specs=frontend_specs,
         end_to_end_specs=end_to_end_specs,
         browsers=browsers,
+        accept_visual_diffs=accept_visual_diffs,
     )
     try:
         cycle.run()
@@ -253,22 +263,7 @@ def gui() -> None:
         env["DISPLAY"] = os.environ["DISPLAY"]
 
     # We may need to run "xhost +" before that
-    compose.run_in_frontend_container(["npx", "cypress", "open"], env=env)
-
-
-@tests.command()
-def visual_diff() -> None:
-    # @todo Use 'webbrowser.open' to open the report at 'http://127.0.0.1:6868'
-    compose.run_in_frontend_container(["npx", "cypress-image-diff-html-report", "start"], check=False)
-
-
-@tests.command()
-def accept_visual_diffs() -> None:
-    for f in os.listdir("frontend/cypress-image-diff-screenshots/comparison"):
-        shutil.move(
-            os.path.join("frontend/cypress-image-diff-screenshots/comparison", f),
-            os.path.join("frontend/cypress-image-diff-screenshots/baseline", f),
-        )
+    compose.exec_in_frontend_container(["npx", "cypress", "open"], env=env)
 
 
 @dev.group()
@@ -280,4 +275,4 @@ def fanout() -> None:
 def reload() -> None:
     """Reload the fanout."""
 
-    compose.run_in_container("fanout", ["nginx", "-s", "reload"])
+    compose.run_or_exec_in_container("exec", "fanout", ["nginx", "-s", "reload"])

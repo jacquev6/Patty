@@ -1,4 +1,4 @@
-import { visit } from './utils'
+import { loadFixtures, visit } from './utils'
 
 describe('The index view', () => {
   beforeEach(() => {
@@ -9,14 +9,14 @@ describe('The index view', () => {
   })
 
   it('paginates the existing adaptation batches', () => {
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=20-adaptation-batches')
+    loadFixtures(['20-adaptation-batches'])
     cy.visit('/')
     cy.get('a:contains("Batch A")').should('have.length', 20)
     cy.get('a:contains("Batch A")').eq(0).should('contain', 'Batch A20')
     cy.get('a:contains("Batch A")').eq(19).should('contain', 'Batch A1')
     cy.get('button:contains("Load more...")').eq(2).should('be.disabled')
 
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=21-adaptation-batches')
+    loadFixtures(['21-adaptation-batches'])
     cy.visit('/')
     cy.get('a:contains("Batch A")').should('have.length', 20)
     cy.get('a:contains("Batch A")').eq(0).should('contain', 'Batch A21')
@@ -28,7 +28,7 @@ describe('The index view', () => {
     cy.get('a:contains("Batch A")').eq(20).should('contain', 'Batch A1')
     cy.get('button:contains("Load more...")').eq(2).should('be.disabled')
 
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=70-adaptation-batches')
+    loadFixtures(['70-adaptation-batches'])
     cy.visit('/')
     cy.get('a:contains("Batch A")').should('have.length', 20)
     cy.get('a:contains("Batch A")').eq(0).should('contain', 'Batch A70')

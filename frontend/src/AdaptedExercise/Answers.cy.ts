@@ -809,12 +809,12 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSelectableLettersInputs: StudentAnswers = {
-    'stmt-pg0-ln0-ct2-lt0': { kind: 'selectable', color: 1 },
-    'stmt-pg0-ln0-ct2-lt1': { kind: 'selectable', color: 2 },
-    'stmt-pg0-ln0-ct8-lt0': { kind: 'selectable', color: 1 },
-    'stmt-pg0-ln0-ct8-lt1': { kind: 'selectable', color: 2 },
-    'stmt-pg1-ln0-ct5-lt0': { kind: 'selectable', color: 3 },
-    'stmt-pg1-ln0-ct5-lt1': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct3': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct8': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct9': { kind: 'selectable', color: 2 },
+    'stmt-pg1-ln0-ct5': { kind: 'selectable', color: 3 },
+    'stmt-pg1-ln0-ct6': { kind: 'selectable', color: 2 },
   }
 
   it('are saved for selectable inputs', () => {
@@ -831,27 +831,19 @@ describe('Adapted exercise answers', () => {
 
     getAnswers().should('deep.equal', emptyAnswers)
 
-    for (let i = 0; i < 2; i++) {
-      cy.get('[data-cy="selectableInput"]').eq(i).click()
-      cy.get('.picker>div>p:first-child>span').as('letter')
-      cy.get('@letter').eq(0).click()
-      cy.get('@letter').eq(1).click().click()
-      cy.get('span:contains("✅")').click()
-    }
-    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
-    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('[data-cy="selectableInput"]').eq(0).click()
+    cy.get('[data-cy="selectableInput"]').eq(1).click().click()
+    cy.get('[data-cy="selectableInput"]').eq(3).click()
+    cy.get('[data-cy="selectableInput"]').eq(4).click().click()
+    cy.get('span:contains("a")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(0).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(0).should('have.css', 'background-color', colors[1])
     cy.get('.control').eq(1).click()
-    for (let i = 1; i < 2; i++) {
-      cy.get('[data-cy="selectableInput"]').eq(i).click()
-      cy.get('.picker>div>p:first-child>span').as('letter')
-      cy.get('@letter').eq(0).click().click().click()
-      cy.get('@letter').eq(1).click().click()
-      cy.get('span:contains("✅")').click()
-    }
-    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
-    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('[data-cy="selectableInput"]').eq(2).click().click().click()
+    cy.get('[data-cy="selectableInput"]').eq(3).click().click()
+    cy.get('span:contains("h")').eq(0).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(0).should('have.css', 'background-color', colors[1])
 
     getAnswers().should('deep.equal', answersForSelectableLettersInputs)
   })
@@ -867,12 +859,178 @@ describe('Adapted exercise answers', () => {
       },
     })
 
-    cy.get('span:contains("a")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("b")').eq(1).should('have.css', 'background-color', colors[1])
-    cy.get('span:contains("d")').eq(1).should('have.css', 'background-color', colors[0])
-    cy.get('span:contains("e")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("a")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("b")').eq(0).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("d")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("e")').eq(0).should('have.css', 'background-color', colors[1])
     cy.get('.control').eq(1).click()
-    cy.get('span:contains("h")').eq(1).should('have.css', 'background-color', colors[2])
-    cy.get('span:contains("i")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("h")').eq(0).should('have.css', 'background-color', colors[2])
+    cy.get('span:contains("i")').eq(0).should('have.css', 'background-color', colors[1])
+  })
+
+  const exerciseWithNestedSelectableInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'selectableInput',
+                  contents: [
+                    { kind: 'text', text: 'B' },
+                    { kind: 'whitespace' },
+                    {
+                      kind: 'selectableInput',
+                      contents: [
+                        { kind: 'text', text: 'C' },
+                        { kind: 'whitespace' },
+                        { kind: 'selectableInput', contents: [{ kind: 'text', text: 'D' }], colors, boxed: false },
+                      ],
+                      colors,
+                      boxed: false,
+                    },
+                  ],
+                  colors,
+                  boxed: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForNestedSelectableInputs: StudentAnswers = {
+    'stmt-pg0-ln0-ct2': { kind: 'selectable', color: 1 },
+    'stmt-pg0-ln0-ct2-ct2': { kind: 'selectable', color: 2 },
+    'stmt-pg0-ln0-ct2-ct2-ct2': { kind: 'selectable', color: 3 },
+  }
+
+  it('are saved for nested selectable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithNestedSelectableInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="selectableInput"]').eq(0).click('left')
+    cy.get('[data-cy="selectableInput"]').eq(1).click('left').click('left')
+    cy.get('[data-cy="selectableInput"]').eq(2).click().click().click()
+
+    cy.get('span:contains("B")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("C")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("D")').eq(2).should('have.css', 'background-color', colors[2])
+
+    getAnswers().should('deep.equal', answersForNestedSelectableInputs)
+  })
+
+  it('are loaded for nested selectable inputs', () => {
+    setAnswers(answersForNestedSelectableInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithNestedSelectableInputs,
+      },
+    })
+
+    cy.get('span:contains("B")').eq(0).should('have.css', 'background-color', colors[0])
+    cy.get('span:contains("C")').eq(1).should('have.css', 'background-color', colors[1])
+    cy.get('span:contains("D")').eq(2).should('have.css', 'background-color', colors[2])
+  })
+
+  const exerciseWithFreeTextInputInFormatted: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                {
+                  kind: 'formatted',
+                  highlighted: 'pink',
+                  contents: [
+                    { kind: 'text', text: 'B' },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'C' },
+                    { kind: 'whitespace' },
+                    {
+                      kind: 'formatted',
+                      bold: true,
+                      contents: [
+                        { kind: 'text', text: 'D' },
+                        { kind: 'whitespace' },
+                        { kind: 'freeTextInput' },
+                        { kind: 'whitespace' },
+                        { kind: 'text', text: 'E' },
+                      ],
+                    },
+                    { kind: 'whitespace' },
+                    { kind: 'text', text: 'F' },
+                  ],
+                },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'G' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForFreeTextInputInFormatted: StudentAnswers = {
+    'stmt-pg0-ln0-ct2-ct4-ct2': { kind: 'text', text: 'Test' },
+  }
+
+  it('are saved for free text input in formatted', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputInFormatted,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[contenteditable]').type('Test')
+
+    getAnswers().should('deep.equal', answersForFreeTextInputInFormatted)
+  })
+
+  it('are loaded for free text input in formatted', () => {
+    setAnswers(answersForFreeTextInputInFormatted)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputInFormatted,
+      },
+    })
+
+    cy.get('[contenteditable]').should('have.text', 'Test')
   })
 })

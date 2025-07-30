@@ -1,12 +1,49 @@
 <script lang="ts">
-import type {
-  AdaptedExercise,
-  AnyExerciseComponent,
-  FormattedTextExerciseComponent,
-  PassiveExerciseComponent,
-} from '@/apiClient'
+import type { AdaptedExercise } from '@/apiClient'
 import { match, P } from 'ts-pattern'
-import deepEqual from 'deep-equal'
+import deepCopy from 'deep-copy'
+
+type TextComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'text' }
+type WhitespaceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'whitespace' }
+type FormattedComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'formatted' }
+type ArrowComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'arrow' }
+type ChoiceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'choice' }
+type ActiveFormattedComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'formatted'
+}
+type FreeTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'freeTextInput'
+}
+type MultipleChoicesInputComponent =
+  AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & { kind: 'multipleChoicesInput' }
+type SelectableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'selectableInput'
+}
+type SwappableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'swappableInput'
+}
+type EditableTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
+  kind: 'editableTextInput'
+}
+
+type PlainTextComponent = TextComponent | WhitespaceComponent
+type FormattedTextComponent = PlainTextComponent | ArrowComponent | FormattedComponent
+type ActiveFormattedTextComponent =
+  | PlainTextComponent
+  | ArrowComponent
+  | ActiveFormattedComponent
+  | FreeTextInputComponent
+
+export type InstructionComponent = FormattedTextComponent | ChoiceComponent
+export type ExampleComponent = FormattedTextComponent
+export type HintComponent = FormattedTextComponent
+export type StatementComponent =
+  | ActiveFormattedTextComponent
+  | MultipleChoicesInputComponent
+  | SelectableInputComponent
+  | SwappableInputComponent
+  | EditableTextInputComponent
+export type ReferenceComponent = FormattedTextComponent
 
 export type InProgressExercise = {
   swappables: { [path: string]: SwappableInputRenderable }
@@ -20,10 +57,6 @@ export type InProgressExercise = {
           path: string
           contentsFrom: string
         }
-      }
-    | {
-        kind: 'solvingSelectableLetters'
-        path: string
       }
     | {
         kind: 'solvingMultipleChoices'
@@ -54,6 +87,11 @@ export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
   '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 0.2,
+  '--font-size-for-single-character-selectable': 1.2,
+  '--extra-horizontal-space-around-single-letter-selectable': 0.0625,
+  '--extra-vertical-space-around-single-letter-selectable': 0.0625,
+  '--extra-horizontal-space-around-single-punctuation-selectable': 0.1,
+  '--extra-vertical-space-around-single-punctuation-selectable': 0.5,
   '--vertical-space-between-top-and-instruction': 0.35,
   '--vertical-space-between-instruction-lines': 2,
   '--vertical-space-between-instruction-and-statement': 2.15,
@@ -77,7 +115,7 @@ export type PlainTextRenderable = TextRenderable | WhitespaceRenderable
 
 type FormattedRenderable = {
   kind: 'formatted'
-  contents: PassiveRenderable[]
+  contents: AnyRenderable[]
   bold: boolean
   italic: boolean
   underlined: boolean
@@ -89,7 +127,7 @@ type FormattedRenderable = {
 
 export type PassiveRenderable = PlainTextRenderable | FormattedRenderable
 
-type TextInputRenderable = {
+export type TextInputRenderable = {
   kind: 'textInput'
   path: string
   initialText: string
@@ -105,20 +143,13 @@ type MultipleChoicesInputRenderable = {
   showChoicesByDefault: boolean
 }
 
-type SelectableInputRenderable = {
+export type SelectableInputRenderable = {
   kind: 'selectableInput'
   path: string
-  contents: PassiveRenderable[]
+  contents: (PassiveRenderable | SelectableInputRenderable)[]
   colors: string[]
   boxed: boolean
-}
-
-type SelectableLettersInputRenderable = {
-  kind: 'selectableLettersInput'
-  path: string
-  contents: string
-  colors: string[]
-  boxed: boolean
+  mayBeSingleLetter: boolean
 }
 
 type SwappableInputRenderable = {
@@ -131,7 +162,6 @@ type ActiveRenderable =
   | TextInputRenderable
   | MultipleChoicesInputRenderable
   | SelectableInputRenderable
-  | SelectableLettersInputRenderable
   | SwappableInputRenderable
 
 export type AnyRenderable = PassiveRenderable | ActiveRenderable
@@ -152,15 +182,17 @@ type ReferenceRenderablePage = {
   contents: PassiveRenderable[]
 }
 
-type RenderablePage = StatementRenderablePage | ReferenceRenderablePage
+type EndRenderablePage = {
+  kind: 'end'
+}
+
+type RenderablePage = StatementRenderablePage | ReferenceRenderablePage | EndRenderablePage
 
 type RenderableExercise = {
   pages: RenderablePage[]
 }
 
-function makeRenderableFromFormattedTextExerciseComponent(
-  component: FormattedTextExerciseComponent,
-): PassiveRenderable[] {
+function makeRenderableFromFormattedTextComponent(component: FormattedTextComponent): PassiveRenderable[] {
   return match(component)
     .returnType<PassiveRenderable[]>()
     .with({ kind: 'whitespace' }, () => [{ kind: 'whitespace' }])
@@ -169,7 +201,7 @@ function makeRenderableFromFormattedTextExerciseComponent(
     .with({ kind: 'formatted' }, (c) => [
       {
         kind: 'formatted',
-        contents: c.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: c.contents.flatMap(makeRenderableFromFormattedTextComponent),
         bold: c.bold ?? false,
         italic: c.italic ?? false,
         underlined: c.underlined ?? false,
@@ -182,13 +214,13 @@ function makeRenderableFromFormattedTextExerciseComponent(
     .exhaustive()
 }
 
-function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseComponent): PassiveRenderable[] {
+function makeRenderableFromInstructionComponent(component: InstructionComponent): PassiveRenderable[] {
   return match(component)
     .returnType<PassiveRenderable[]>()
     .with({ kind: 'choice' }, (c) => [
       {
         kind: 'formatted',
-        contents: c.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: c.contents.flatMap(makeRenderableFromFormattedTextComponent),
         bold: false,
         italic: false,
         underlined: false,
@@ -198,12 +230,51 @@ function makeRenderableFromPassiveExerciseComponent(component: PassiveExerciseCo
         subscript: false,
       },
     ])
-    .otherwise(makeRenderableFromFormattedTextExerciseComponent)
+    .otherwise(makeRenderableFromFormattedTextComponent)
 }
 
-function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExerciseComponent): AnyRenderable[] {
+function makeRenderableFromSelectableInputContent(
+  basePath: string,
+  component: SelectableInputComponent['contents'][number],
+  index: number,
+): (PassiveRenderable | SelectableInputRenderable)[] {
+  const path = `${basePath}-ct${index}`
+  return match(component)
+    .returnType<(PassiveRenderable | SelectableInputRenderable)[]>()
+    .with({ kind: 'selectableInput' }, (c) => [
+      {
+        kind: 'selectableInput',
+        path,
+        contents: c.contents.flatMap((x, index) => makeRenderableFromSelectableInputContent(path, x, index)),
+        colors: c.colors,
+        boxed: c.boxed,
+        mayBeSingleLetter: false,
+      },
+    ])
+    .otherwise(makeRenderableFromInstructionComponent)
+}
+
+function makeRenderableFromActiveFormattedTextComponent(
+  path: string,
+  component: ActiveFormattedTextComponent,
+): AnyRenderable[] {
   return match(component)
     .returnType<AnyRenderable[]>()
+    .with({ kind: 'formatted' }, (c) => [
+      {
+        kind: 'formatted',
+        contents: c.contents.flatMap((x, index) =>
+          makeRenderableFromActiveFormattedTextComponent(`${path}-ct${index}`, x),
+        ),
+        bold: c.bold ?? false,
+        italic: c.italic ?? false,
+        underlined: c.underlined ?? false,
+        highlighted: c.highlighted ?? null,
+        boxed: c.boxed ?? false,
+        superscript: c.superscript ?? false,
+        subscript: c.subscript ?? false,
+      },
+    ])
     .with({ kind: 'freeTextInput' }, ({}) => [
       {
         kind: 'textInput',
@@ -212,12 +283,18 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
         increaseHorizontalSpace: false,
       },
     ])
+    .otherwise(makeRenderableFromFormattedTextComponent)
+}
+
+function makeRenderableFromStatementComponent(path: string, component: StatementComponent): AnyRenderable[] {
+  return match(component)
+    .returnType<AnyRenderable[]>()
     .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault }) => [
       {
         kind: 'multipleChoicesInput',
         path,
         choices: choices.map(({ contents }) => ({
-          contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+          contents: contents.flatMap(makeRenderableFromFormattedTextComponent),
         })),
         showChoicesByDefault,
       },
@@ -228,24 +305,25 @@ function makeRenderableFromAnyExerciseComponent(path: string, component: AnyExer
         path,
         boxed,
         colors,
-        contents: contents.flatMap(makeRenderableFromPassiveExerciseComponent),
+        contents: contents.flatMap((c, index) => makeRenderableFromSelectableInputContent(path, c, index)),
+        mayBeSingleLetter: false,
       },
     ])
     .with({ kind: 'swappableInput' }, ({ contents }) => [
       {
         kind: 'swappableInput',
         path,
-        contents: contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+        contents: contents.flatMap(makeRenderableFromFormattedTextComponent),
       },
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)
     .with({ kind: 'editableTextInput' }, (c) => [makeRenderableFromEditableTextInput(path, c)])
-    .otherwise(makeRenderableFromPassiveExerciseComponent)
+    .otherwise((c) => makeRenderableFromActiveFormattedTextComponent(path, c))
 }
 
 function makeRenderableFromEditableTextInput(
   path: string,
-  { contents, increaseHorizontalSpace }: AnyExerciseComponent & { kind: 'editableTextInput' },
+  { contents, increaseHorizontalSpace }: EditableTextInputComponent,
 ): AnyRenderable {
   return {
     kind: 'textInput',
@@ -263,53 +341,16 @@ function makeRenderableFromEditableTextInput(
   }
 }
 
-function regroupSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
-  const ret: AnyRenderable[] = []
-  const group: SelectableInputRenderable[] = []
-
-  function mustRegroup(content: SelectableInputRenderable): boolean {
-    if (group.length !== 0) {
-      if (content.boxed !== group[0].boxed) return false
-      if (!deepEqual(content.colors, group[0].colors)) return false
-    }
-    if (content.contents.length !== 1) return false
-    if (content.contents[0].kind !== 'text') return false
-    if (content.contents[0].text.length !== 1) return false
-    return true
-  }
-
-  function pushGroup(): void {
-    if (group.length > 1) {
-      ret.push({
-        kind: 'selectableLettersInput',
-        path: group[0].path,
-        contents: group
-          .flatMap((g) => g.contents)
-          .map((c) => (c.kind === 'text' ? c.text : ''))
-          .join(''),
-        colors: group[0].colors,
-        boxed: group[0].boxed,
-      })
-    } else if (group.length === 1) {
-      ret.push(group[0])
-    }
-    group.splice(0, group.length)
-  }
-
-  for (const content of contents) {
-    if (content.kind === 'selectableInput' && mustRegroup(content)) {
-      group.push(content)
-    } else {
-      pushGroup()
-      if (content.kind === 'selectableInput' && mustRegroup(content)) {
-        group.push(content)
-      } else {
-        ret.push(content)
-      }
+function markConsecutiveSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
+  const ret: AnyRenderable[] = deepCopy(contents)
+  for (let i = 1; i < ret.length; i++) {
+    const a = ret[i - 1]
+    const b = ret[i]
+    if (a.kind === 'selectableInput' && b.kind === 'selectableInput') {
+      a.mayBeSingleLetter = true
+      b.mayBeSingleLetter = true
     }
   }
-  pushGroup()
-
   return ret
 }
 
@@ -321,25 +362,25 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
     ...(exercise.example ? exercise.example.lines : []),
     ...(exercise.hint ? exercise.hint.lines : []),
   ].map((line) => ({
-    contents: line.contents.flatMap(makeRenderableFromPassiveExerciseComponent),
+    contents: line.contents.flatMap(makeRenderableFromInstructionComponent),
   }))
 
   if (exercise.statement.pages.length === 0) {
     pages.push({ kind: 'statement', instruction, statement: [] })
   } else {
     for (const [pageIndex, page] of exercise.statement.pages.entries()) {
-      const statement: { contents: AnyRenderable[]; alone: boolean }[] = []
+      const statement: StatementLine[] = []
 
       for (const [lineIndex, { contents }] of page.lines.entries()) {
         const alone =
           contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
 
-        const components = Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
-          makeRenderableFromAnyExerciseComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
-        )
-
         statement.push({
-          contents: regroupSelectableInputs(components),
+          contents: markConsecutiveSelectableInputs(
+            Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
+              makeRenderableFromStatementComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
+            ),
+          ),
           alone,
         })
         for (const [componentIndex, component] of contents.entries()) {
@@ -366,9 +407,13 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
   if (exercise.reference !== null) {
     pages.push({
       kind: 'reference',
-      contents: exercise.reference.contents.flatMap(makeRenderableFromFormattedTextExerciseComponent),
+      contents: exercise.reference.contents.flatMap(makeRenderableFromFormattedTextComponent),
     })
   }
+
+  pages.push({
+    kind: 'end',
+  })
 
   return { pages }
 }
@@ -377,8 +422,10 @@ function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
 <script setup lang="ts">
 import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
+import AloneFreeTextInput from './dispatch/AloneFreeTextInput.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
@@ -395,6 +442,8 @@ const props = withDefaults(
 
 provide('adaptedExerciseContainerDiv', useTemplateRef('container'))
 provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
+
+const route = useRoute()
 
 const renderableExercise = computed(() => makeRenderableExercise(props.adaptedExercise))
 
@@ -415,6 +464,15 @@ const swappables = computed(() => {
 })
 
 const pageIndex = ref(0)
+watch(
+  () => props.adaptedExercise.statement.pages.length,
+  (pagesCount) => {
+    if (pageIndex.value >= pagesCount) {
+      pageIndex.value = Math.max(0, pagesCount - 1)
+    }
+  },
+  { immediate: true },
+)
 
 const inProgress = reactive<InProgressExercise>({
   swappables: swappables.value,
@@ -435,7 +493,19 @@ const studentAnswers =
   props.studentAnswersStorageKey === null
     ? ref({})
     : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
-provide('adaptedExerciseStudentAnswers', studentAnswers.value)
+provide('adaptedExerciseStudentAnswers', studentAnswers)
+
+function reset() {
+  studentAnswers.value = {}
+  inProgress.p = { kind: 'none' }
+  pageIndex.value = 0
+}
+
+const closable = computed(() => route !== undefined && route.query.closable === 'true')
+
+function close() {
+  window.close()
+}
 
 const triColorLines = useTemplateRef('tricolor')
 watch(
@@ -466,8 +536,13 @@ const spacingVariables = computed(() =>
         <div ref="statement" class="statement" v-if="page.statement.length !== 0">
           <TriColorLines ref="tricolor">
             <template v-for="{ contents, alone } in page.statement">
-              <p :class="{ alone }">
-                <AnySequenceComponent :contents :aloneOnLine="alone" :tricolorable="true" />
+              <AloneFreeTextInput
+                v-if="alone && contents[0].kind === 'textInput'"
+                :component="contents[0]"
+                :tricolorable="true"
+              />
+              <p v-else>
+                <AnySequenceComponent :contents :tricolorable="true" />
               </p>
             </template>
           </TriColorLines>
@@ -480,7 +555,16 @@ const spacingVariables = computed(() =>
           </p>
         </div>
       </template>
+      <template v-else-if="page.kind === 'end'">
+        <p class="reference"><button :disabled="!closable" @click="close">Quitter l'exercice</button></p>
+        <p class="reference"><button @click="pageIndex = 0">Revenir au début de l'exercice</button></p>
+        <p class="reference"><button @click="reset">Effacer mes réponses</button></p>
+      </template>
       <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
+      <p v-if="pageIndex < renderableExercise.pages.length - 1" class="arrow">
+        <!-- arrow.png has been provided by the client in https://github.com/jacquev6/Patty/issues/28 -->
+        <img src="./arrow.png" @click="++pageIndex" />
+      </p>
     </div>
   </PageNavigationControls>
 </template>
@@ -496,8 +580,6 @@ div.container {
   overflow-y: auto;
   transform: scale(1);
   height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 :deep(*) {
@@ -516,7 +598,6 @@ div.container {
 }
 
 .statement {
-  flex: 1;
   position: relative;
   padding-left: 6px;
   padding-right: 6px;
@@ -530,14 +611,14 @@ div.container {
 .reference {
   padding-left: 6px;
   padding-right: 6px;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
-p.alone {
-  border: 2px outset black;
-  padding: 4px;
+p.arrow {
+  text-align: center;
 }
-
-p.alone:has(:focus) {
-  background-color: #fffdd4;
+p.arrow img {
+  cursor: pointer;
 }
 </style>

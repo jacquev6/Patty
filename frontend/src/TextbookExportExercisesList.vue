@@ -72,7 +72,10 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
             <div class="exercise" style="visibility: hidden"><p>&nbsp;</p></div>
           </template>
           <template v-else-if="exercise.kind === 'adapted'">
-            <RouterLink :to="{ name: 'exercise', params: { id: exercise.exerciseId } }" target="_blank">
+            <RouterLink
+              :to="{ name: 'exercise', params: { id: exercise.exerciseId }, query: { closable: 'true' } }"
+              target="_blank"
+            >
               <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
                 <p>{{ makeExerciseTitle(exercise) }}</p>
               </div>
@@ -110,7 +113,7 @@ a {
 }
 
 .exercise {
-  margin: 2px;
+  margin: 2px 8px;
   padding: 0.7em 2em;
   border-width: 2px;
   border-style: solid;

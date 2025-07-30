@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
+import VirtualKeyboardButton from './VirtualKeyboardButton.vue'
 
 function click(n: number) {
   const key = String.fromCharCode('0'.charCodeAt(0) + n)
@@ -59,6 +60,6 @@ function setCaretPosition(el: HTMLElement, caretPosition: number) {
 <template>
   <template v-for="n in 10">
     <WhiteSpace />
-    <button @pointerdown.prevent="click(n - 1)">{{ n - 1 }}</button>
+    <VirtualKeyboardButton @click="click(n - 1)">{{ n - 1 }}</VirtualKeyboardButton>
   </template>
 </template>

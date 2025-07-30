@@ -1,9 +1,9 @@
-import { ignoreResizeObserverLoopError, screenshot, visit } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from './utils'
 
 describe('The creation form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-branch')
+    loadFixtures(['dummy-branch'])
     ignoreResizeObserverLoopError()
     visit('/')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
@@ -57,7 +57,7 @@ describe('The creation form for textbooks', () => {
 describe('The edition form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    cy.request('POST', 'http://fixtures-loader/load?fixtures=dummy-textbook')
+    loadFixtures(['dummy-textbook'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })

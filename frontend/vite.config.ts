@@ -33,6 +33,7 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
     vueI18n({
       include: path.resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
       defaultSFCLang: 'yml',
+      strictMessage: false,
     })
   ]
   
