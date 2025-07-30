@@ -493,7 +493,13 @@ const studentAnswers =
   props.studentAnswersStorageKey === null
     ? ref({})
     : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
-provide('adaptedExerciseStudentAnswers', studentAnswers.value)
+provide('adaptedExerciseStudentAnswers', studentAnswers)
+
+function reset() {
+  studentAnswers.value = {}
+  inProgress.p = { kind: 'none' }
+  pageIndex.value = 0
+}
 
 const closable = computed(() => route !== undefined && route.query.closable === 'true')
 
@@ -551,6 +557,8 @@ const spacingVariables = computed(() =>
       </template>
       <template v-else-if="page.kind === 'end'">
         <p class="reference"><button :disabled="!closable" @click="close">Quitter l'exercice</button></p>
+        <p class="reference"><button @click="pageIndex = 0">Revenir au début de l'exercice</button></p>
+        <p class="reference"><button @click="reset">Effacer mes réponses</button></p>
       </template>
       <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
       <p v-if="pageIndex < renderableExercise.pages.length - 1" class="arrow">

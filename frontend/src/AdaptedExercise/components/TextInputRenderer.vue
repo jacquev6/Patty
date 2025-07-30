@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onBeforeUpdate, onMounted, useTemplateRef } from 'vue'
+import { computed, inject, onBeforeUpdate, onMounted, useTemplateRef, type Ref } from 'vue'
 
 import assert from '@/assert'
 import type { StudentAnswers } from '../AdaptedExerciseRenderer.vue'
@@ -12,12 +12,12 @@ const props = defineProps<{
   aloneOnLine: boolean
 }>()
 
-const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+const studentAnswers = inject<Ref<StudentAnswers>>('adaptedExerciseStudentAnswers')
 assert(studentAnswers !== undefined)
 
 const modelProxy = computed<string>({
   get() {
-    const answer = studentAnswers[props.path]
+    const answer = studentAnswers.value[props.path]
     if (answer === undefined) {
       return props.initialText
     } else {
@@ -26,7 +26,7 @@ const modelProxy = computed<string>({
     }
   },
   set(value: string) {
-    studentAnswers[props.path] = { kind: 'text', text: value }
+    studentAnswers.value[props.path] = { kind: 'text', text: value }
   },
 })
 

@@ -23,7 +23,7 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
-const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+const studentAnswers = inject<Ref<StudentAnswers>>('adaptedExerciseStudentAnswers')
 assert(studentAnswers !== undefined)
 
 const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
@@ -31,7 +31,7 @@ assert(inProgress !== undefined)
 
 const choiceProxy = computed({
   get() {
-    const answer = studentAnswers[props.path]
+    const answer = studentAnswers.value[props.path]
     if (answer === undefined) {
       return undefined
     } else {
@@ -40,7 +40,7 @@ const choiceProxy = computed({
     }
   },
   set(choice: number | null) {
-    studentAnswers[props.path] = { kind: 'choice', choice }
+    studentAnswers.value[props.path] = { kind: 'choice', choice }
   },
 })
 

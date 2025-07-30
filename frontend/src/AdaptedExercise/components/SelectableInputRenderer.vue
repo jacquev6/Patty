@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type Ref } from 'vue'
 
 import type { PassiveRenderable, SelectableInputRenderable, StudentAnswers } from '../AdaptedExerciseRenderer.vue'
 import FormattedTextRenderer from './FormattedTextRenderer.vue'
@@ -14,12 +14,12 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
-const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+const studentAnswers = inject<Ref<StudentAnswers>>('adaptedExerciseStudentAnswers')
 assert(studentAnswers !== undefined)
 
 const colorIndexProxy = computed<number, number>({
   get() {
-    const answer = studentAnswers[props.path]
+    const answer = studentAnswers.value[props.path]
     if (answer === undefined) {
       return 0
     } else {
@@ -28,7 +28,7 @@ const colorIndexProxy = computed<number, number>({
     }
   },
   set: (color: number) => {
-    studentAnswers[props.path] = { kind: 'selectable', color }
+    studentAnswers.value[props.path] = { kind: 'selectable', color }
   },
 })
 

@@ -41,6 +41,11 @@ describe('The autonomous HTML for a single adaptation', () => {
 
     visitExport('/api/export/adaptation/1.html')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+
+    cy.get('.control').eq(1).click()
+    cy.get('button:contains("Effacer mes réponses")').click()
+    cy.get(':contains("Les feuilles sont chahutées par")').should('exist')
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
   })
 
   it('forgets student answers when the exercise is modified', () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { computed, inject, type Ref } from 'vue'
 
 import assert from '@/assert'
 import type { PassiveRenderable } from '../AdaptedExerciseRenderer.vue'
@@ -12,7 +12,7 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
-const studentAnswers = inject<StudentAnswers>('adaptedExerciseStudentAnswers')
+const studentAnswers = inject<Ref<StudentAnswers>>('adaptedExerciseStudentAnswers')
 assert(studentAnswers !== undefined)
 
 const inProgress = inject<InProgressExercise>('adaptedExerciseInProgress')
@@ -21,7 +21,7 @@ assert(inProgress !== undefined)
 const selected = computed(() => inProgress.p.kind === 'movingSwappable' && inProgress.p.swappable.path === props.path)
 
 const contentsFrom = computed(() => {
-  const answer = studentAnswers[props.path]
+  const answer = studentAnswers.value[props.path]
   if (answer === undefined) {
     return props.path
   } else {
@@ -38,7 +38,7 @@ const highlighted = computed(() => (selected.value ? '#FFFDD4' : null))
 
 function setAnswer(path: string, contentsFrom: string) {
   assert(studentAnswers !== undefined)
-  studentAnswers[path] = { kind: 'swappable', contentsFrom }
+  studentAnswers.value[path] = { kind: 'swappable', contentsFrom }
 }
 
 function handleClick() {
