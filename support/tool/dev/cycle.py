@@ -1,6 +1,5 @@
 import dataclasses
 import glob
-import itertools
 import os
 import shutil
 import subprocess
@@ -159,57 +158,36 @@ class DevelopmentCycle:
 
         if self.do_end_to_end:
             if self.do_test:
+                e2e_failures: list[subprocess.CompletedProcess[str]] = []
                 try:
-                    e2e_failures = list(
-                        itertools.chain.from_iterable(
-                            joblib.Parallel(n_jobs=1, return_as="list")(
-                                joblib.delayed(run_e2e_tests)(
-                                    self.end_to_end_specs, browser, clear=self.accept_visual_diffs
-                                )
-                                for browser in self.browsers
-                            )
-                        )
-                    )
+                    for browser in self.browsers:
+                        for spec in self.end_to_end_specs:
+                            mounts = make_screenshots_directory(spec, browser, clear=self.accept_visual_diffs)
 
-                    for e2e_failure in e2e_failures:
-                        print()
-                        print(e2e_failure)
+                            result = run_in_frontend_container(
+                                command=["npx", "cypress", "run", "--e2e", "--browser", browser, "--spec", spec[9:]],
+                                check=False,
+                                capture=True,
+                                mount=mounts,
+                                quiet=True,
+                            )
+                            if result.returncode == 0:
+                                print(f"{spec} {browser}: OK")
+                            else:
+                                print(f"{spec} {browser}: FAILED")
+                                e2e_failures.append(result)
                 finally:
                     maybe_remove_screenshots_directories(self.end_to_end_specs, self.browsers)
 
-                if e2e_failures:
-                    raise DevelopmentCycleError()
-
-
-def run_e2e_tests(specs: list[str], browser: str, clear: bool) -> list[str]:
-    failures: list[str] = []
-    for spec in specs:
-        mounts = make_screenshots_directory(spec, browser, clear=clear)
-        result = run_in_frontend_container(
-            command=[
-                "npx",
-                "cypress",
-                "run",
-                "--e2e",
-                "--browser",
-                browser,
-                "--config",
-                "baseUrl=http://fanout:" + {"chromium": "8081", "electron": "8082", "firefox": "8083"}[browser],
-                "--spec",
-                spec[9:],
-            ],
-            check=False,
-            capture=True,
-            mount=mounts,
-            quiet=True,
-        )
-        if result.returncode == 0:
-            print(f"{spec} {browser}: OK")
-        else:
-            title = f"{spec} {browser}: FAILED"
-            print(title)
-            failures.append(f"{title}\n{'=' * len(title)}\n{result.stdout}\n{result.stderr}")
-    return failures
+                for e2e_failure in e2e_failures:
+                    print()
+                    title = (
+                        f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
+                    )
+                    print(title)
+                    print("=" * len(title))
+                    print(e2e_failure.stdout)
+                    print(e2e_failure.stderr)
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:
