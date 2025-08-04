@@ -132,7 +132,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
 
 <template>
   <h1>
-    {{ textbook.title }}<template v-if="textbook.editor !== null">, {{ textbook.editor }}</template
+    {{ textbook.title }}<template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template
     ><template v-if="textbook.year !== null">, {{ textbook.year }}</template>
     <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
   </h1>

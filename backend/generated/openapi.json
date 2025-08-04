@@ -2284,7 +2284,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -2293,7 +2293,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -2338,7 +2338,7 @@
           "id",
           "createdBy",
           "title",
-          "editor",
+          "publisher",
           "year",
           "isbn",
           "adaptationBatches",
@@ -4460,7 +4460,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -4469,7 +4469,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -4499,7 +4499,7 @@
         "required": [
           "creator",
           "title",
-          "editor",
+          "publisher",
           "year",
           "isbn"
         ],
@@ -4879,7 +4879,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -4888,7 +4888,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -4909,7 +4909,7 @@
           "createdBy",
           "createdAt",
           "title",
-          "editor",
+          "publisher",
           "year"
         ],
         "title": "Textbook"

@@ -162,7 +162,7 @@ def read_all_fields(session: database_utils.Session) -> None:
         textbook.created_at
         textbook.created_by_username
         textbook.title
-        textbook.editor
+        textbook.publisher
         textbook.year
         textbook.isbn
         textbook.exercises

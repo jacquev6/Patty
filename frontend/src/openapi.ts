@@ -777,8 +777,8 @@ export interface components {
       createdBy: string
       /** Title */
       title: string
-      /** Editor */
-      editor: string | null
+      /** Publisher */
+      publisher: string | null
       /** Year */
       year: number | null
       /** Isbn */
@@ -1615,8 +1615,8 @@ export interface components {
       creator: string
       /** Title */
       title: string
-      /** Editor */
-      editor: string | null
+      /** Publisher */
+      publisher: string | null
       /** Year */
       year: number | null
       /** Isbn */
@@ -1804,8 +1804,8 @@ export interface components {
       createdAt: string
       /** Title */
       title: string
-      /** Editor */
-      editor: string | null
+      /** Publisher */
+      publisher: string | null
       /** Year */
       year: number | null
     }

@@ -47,7 +47,7 @@ class Textbook(OrmBase):
     created_by_username: orm.Mapped[str]  # All 'Textbook's are created manually
 
     title: orm.Mapped[str]
-    editor: orm.Mapped[str | None]  # @todo Rename to 'publisher'. Everywhere. Sic.
+    publisher: orm.Mapped[str | None]
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
 

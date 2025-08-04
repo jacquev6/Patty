@@ -649,7 +649,7 @@ class FixturesCreator:
             created_by_username="Patty",
             created_at=created_at,
             title="Dummy Textbook Title",
-            editor=None,
+            publisher=None,
             year=None,
             isbn=None,
         )

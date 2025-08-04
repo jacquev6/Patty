@@ -181,9 +181,7 @@ class DevelopmentCycle:
 
                 for e2e_failure in e2e_failures:
                     print()
-                    title = (
-                        f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
-                    )
+                    title = f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
                     print(title)
                     print("=" * len(title))
                     print(e2e_failure.stdout)

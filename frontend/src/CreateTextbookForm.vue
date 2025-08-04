@@ -18,7 +18,7 @@ const client = useAuthenticatedClient()
 const identifiedUser = useIdentifiedUserStore()
 
 const title = ref('')
-const editor = ref<string | null>(null)
+const publisher = ref<string | null>(null)
 const year = ref<number | null>(null)
 const isbn = ref<string | null>(null)
 
@@ -33,7 +33,7 @@ async function submit() {
     body: {
       creator: identifiedUser.identifier,
       title: title.value,
-      editor: editor.value,
+      publisher: publisher.value,
       year: year.value,
       isbn: isbn.value,
     },
@@ -52,7 +52,9 @@ async function submit() {
       <label>{{ t('title') }} <input v-model="title" data-cy="textbook-title" /></label>
     </p>
     <p>
-      <label>{{ t('editor') }} <InputForNonEmptyStringOrNull v-model="editor" data-cy="textbook-editor" /></label>
+      <label
+        >{{ t('publisher') }} <InputForNonEmptyStringOrNull v-model="publisher" data-cy="textbook-publisher"
+      /></label>
     </p>
     <p>
       <label>{{ t('year') }} <InputForNumberOrNull v-model="year" data-cy="textbook-year" /></label>
@@ -68,13 +70,13 @@ async function submit() {
 en:
   createdBy: Created by
   title: "Title:"
-  editor: "Publisher:"
+  publisher: "Publisher:"
   year: "Year:"
   isbn: "ISBN:"
 fr:
   createdBy: "Créé par"
   title: "Titre :"
-  editor: "Éditeur :"
+  publisher: "Éditeur :"
   year: "Année :"
   isbn: "ISBN :"
 </i18n>
