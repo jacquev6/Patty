@@ -13,7 +13,7 @@ import urllib.parse
 
 from .. import database_utils
 from .. import settings
-from ..orm_models import PageExtraction, AdaptableExercise, ClassificationBatch
+from .. import orm_models as db
 from .assistant_responses import (
     AssistantSuccess,
     AssistantUnknownError,
@@ -36,7 +36,7 @@ pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     extractions = (
         session.execute(
-            sql.select(PageExtraction).where(PageExtraction._assistant_response == sql.null()).limit(parallelism)
+            sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()).limit(parallelism)
         )
         .scalars()
         .all()
@@ -48,7 +48,7 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
-async def submit_extraction(session: database_utils.Session, extraction: PageExtraction) -> None:
+async def submit_extraction(session: database_utils.Session, extraction: db.PageExtraction) -> None:
     sha256 = extraction.extraction_batch.range.pdf_file.sha256
     if sha256 in pdf_data_cache:
         log(f"Found PDF data for page extraction {extraction.id} in cache")
@@ -85,7 +85,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if extraction.extraction_batch.run_classification:
-            classification_batch = ClassificationBatch(
+            classification_batch = db.ClassificationBatch(
                 created_at=created_at,
                 created_by_username=None,
                 created_by_page_extraction=extraction,
@@ -110,7 +110,7 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
                     ],
                 )
             )
-            exercise = AdaptableExercise(
+            exercise = db.AdaptableExercise(
                 created_at=created_at,
                 created_by_username=None,
                 textbook=None,

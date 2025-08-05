@@ -8,7 +8,7 @@ from .. import database_utils
 from . import llm
 from ..adapted import Exercise
 from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
-from ..orm_models import Adaptation
+from .. import orm_models as db
 
 
 def log(message: str) -> None:
@@ -27,7 +27,10 @@ LlmMessage = (
 
 def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     adaptations = (
-        session.query(Adaptation).filter(Adaptation._initial_assistant_response == sql.null()).limit(parallelism).all()
+        session.query(db.Adaptation)
+        .filter(db.Adaptation._initial_assistant_response == sql.null())
+        .limit(parallelism)
+        .all()
     )
     if len(adaptations) > 0:
         log(
@@ -36,7 +39,7 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
     return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 
-async def submit_adaptation(adaptation: Adaptation) -> None:
+async def submit_adaptation(adaptation: db.Adaptation) -> None:
     response_format = adaptation.strategy.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [
