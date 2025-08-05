@@ -566,5 +566,15 @@ def migrate_data(dry_run: bool) -> None:
             session.commit()
 
 
+@main.command()
+def dump_data() -> None:
+    from . import database_utils
+    from . import data_migration
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        json.dump(data_migration.dump(session), sys.stdout, indent=2, sort_keys=True, default=str)
+
+
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import glob
 import os
 import shutil
@@ -17,6 +18,7 @@ class DevelopmentCycleError(Exception):
 @dataclasses.dataclass
 class DevelopmentCycle:
     do_migration: bool
+    do_schema_revision: bool
     cost_money: bool
     do_backend: bool
     do_frontend: bool
@@ -42,24 +44,27 @@ class DevelopmentCycle:
                 exec_in_backend_container(
                     ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
-                existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
-                assert len(existing) <= 1
-                if len(existing) == 1:
-                    rev_id_options = ["--rev-id", os.path.basename(existing[0])[:-7]]
-                    os.unlink(existing[0])
-                else:
-                    rev_id_options = []
-                current = exec_alembic(["current"], capture=True).stdout.split(" ")[0]
-                expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1]
-                if current != expected:
-                    print(
-                        f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup?"
-                    )
-                    raise DevelopmentCycleError()
-                exec_alembic(["revision", "--autogenerate", "-m", "dev"] + rev_id_options)
-                input("Check (and fix) the generated migration file. Press enter to continue")
+                if self.do_schema_revision:
+                    existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
+                    assert len(existing) <= 1
+                    if len(existing) == 1:
+                        rev_id_options = ["--rev-id", os.path.basename(existing[0])[:-7]]
+                        os.unlink(existing[0])
+                    else:
+                        rev_id_options = []
+                    current = exec_alembic(["current"], capture=True).stdout.split(" ")[0]
+                    expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1]
+                    if current != expected:
+                        print(
+                            f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup?"
+                        )
+                        raise DevelopmentCycleError()
+                    exec_alembic(["revision", "--autogenerate", "-m", "dev"] + rev_id_options)
+                    input("Check (and fix) the generated migration file. Press enter to continue")
                 exec_alembic(["upgrade", "head"])
                 exec_in_backend_container(["python", "-m", "patty", "migrate-data"])
+                with open(datetime.datetime.now().strftime("support/dev-env/db/dumps/%Y%m%d-%H%M%S.json"), "w") as f:
+                    f.write(exec_in_backend_container(["python", "-m", "patty", "dump-data"], capture=True).stdout)
 
             if self.do_format:
                 exec_in_backend_container(
