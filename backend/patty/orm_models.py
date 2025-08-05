@@ -38,6 +38,16 @@ class OrmBase(OrmBaseBase):
         super().__init__(**kwargs)
 
 
+table_annotations: dict[str, frozenset[str]] = {}
+
+
+def annotate_new_tables(*annotations: str) -> None:
+    global table_annotations
+    for table in OrmBase.metadata.sorted_tables:
+        if table.name not in table_annotations:
+            table_annotations[table.name] = frozenset(annotations)
+
+
 class Textbook(OrmBase):
     __tablename__ = "textbooks"
 
@@ -80,6 +90,9 @@ class BaseExercise(OrmBase):
     exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
 
 
+annotate_new_tables("fundamentals")
+
+
 class ExternalExercise(BaseExercise):
     __tablename__ = "external_exercises"
 
@@ -88,6 +101,9 @@ class ExternalExercise(BaseExercise):
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
 
     original_file_name: orm.Mapped[str]
+
+
+annotate_new_tables("external")
 
 
 class PdfFile(OrmBase):
@@ -137,6 +153,9 @@ class ExtractionStrategy(OrmBase):
     prompt: orm.Mapped[str]
 
 
+annotate_new_tables("extraction")
+
+
 class ExtractionBatch(OrmBase):
     __tablename__ = "extraction_batches"
 
@@ -176,6 +195,9 @@ class ExtractionBatch(OrmBase):
             self._model_for_adaptation = value.model_dump()
 
 
+annotate_new_tables("extraction", "sandbox")
+
+
 class PageExtraction(OrmBase):
     __tablename__ = "page_extractions"
 
@@ -210,6 +232,9 @@ class PageExtraction(OrmBase):
     exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
         back_populates="created_by_page_extraction", order_by=[BaseExercise.page_number, BaseExercise.exercise_number]
     )
+
+
+annotate_new_tables("extraction")
 
 
 class ClassificationBatch(OrmBase):
@@ -247,6 +272,9 @@ class ClassificationBatch(OrmBase):
     adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
         back_populates="classification_batch", order_by="Adaptation.id"
     )
+
+
+annotate_new_tables("classification")
 
 
 class ExerciseClass(OrmBase):
@@ -367,6 +395,9 @@ class AdaptationStrategy(OrmBase):
         self._model = value.model_dump()
 
 
+annotate_new_tables("adaptation")
+
+
 class AdaptationBatch(OrmBase):
     __tablename__ = "adaptation_batches"
 
@@ -389,6 +420,9 @@ class AdaptationBatch(OrmBase):
     adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(
         back_populates="adaptation_batch", order_by="Adaptation.id"
     )
+
+
+annotate_new_tables("adaptation", "sandbox")
 
 
 class Adaptation(OrmBase):
@@ -465,6 +499,9 @@ class Adaptation(OrmBase):
             self._manual_edit = value.model_dump()
 
 
+annotate_new_tables("adaptation")
+
+
 class ErrorCaughtByFrontend(OrmBase):
     __tablename__ = "errors_caught_by_frontend"
 
@@ -483,21 +520,4 @@ class ErrorCaughtByFrontend(OrmBase):
     code_location: orm.Mapped[str | None]
 
 
-all_models: list[type[OrmBase]] = [
-    AdaptableExercise,
-    Adaptation,
-    AdaptationBatch,
-    AdaptationStrategy,
-    AdaptationStrategySettings,
-    BaseExercise,
-    ClassificationBatch,
-    ErrorCaughtByFrontend,
-    ExerciseClass,
-    ExternalExercise,
-    ExtractionBatch,
-    ExtractionStrategy,
-    PageExtraction,
-    PdfFile,
-    PdfFileRange,
-    Textbook,
-]
+annotate_new_tables("fundamentals")

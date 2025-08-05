@@ -1,6 +1,3 @@
-import textwrap
-import time
-import traceback
 from typing import Iterable
 import asyncio
 import datetime
@@ -11,6 +8,9 @@ import re
 import subprocess
 import sys
 import tarfile
+import textwrap
+import time
+import traceback
 import typing
 import urllib.parse
 
@@ -50,15 +50,27 @@ def openapi() -> None:
 @main.command()
 def db_tables_graph() -> None:
     import graphviz  # type: ignore[import-untyped]
-    import sqlalchemy
 
     from . import orm_models
 
-    models = orm_models.all_models
-    tables = [typing.cast(sqlalchemy.Table, model.__table__) for model in models]
+    colors_by_annotation: dict[frozenset[str], str] = {
+        frozenset({"fundamentals"}): "#000000",
+        frozenset({"external"}): "#FF55FF",
+        frozenset({"adaptation"}): "#FF0000",
+        frozenset({"adaptation", "sandbox"}): "#FF8888",
+        frozenset({"classification"}): "#008800",
+        frozenset({"classification", "sandbox"}): "#60AD60",
+        frozenset({"extraction"}): "#0000FF",
+        frozenset({"extraction", "sandbox"}): "#5555FF",
+    }
+
+    tables = orm_models.OrmBase.metadata.sorted_tables
+    table_annotations = orm_models.table_annotations
+
     known_table_names = set(table.name for table in tables)
 
     graph = graphviz.Digraph(node_attr={"shape": "none"})
+    graph.attr(rankdir="BT")
     for table in tables:
         foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
 
@@ -84,6 +96,7 @@ def db_tables_graph() -> None:
         graph.node(
             table.name,
             label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+            color=colors_by_annotation[table_annotations[table.name]],
         )
 
         for foreign_key_index, foreign_key in enumerate(foreign_keys):
