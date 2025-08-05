@@ -318,9 +318,7 @@ async def post_adaptation_batch(
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
-            created_by_username=req.creator,
-            created_by_page_extraction=None,
-            created_at=now,
+            created=db.ExerciseCreationByUser(at=now, by=req.creator),
             textbook=None,
             removed_from_textbook=False,
             page_number=req_input.page_number,
@@ -529,9 +527,7 @@ def create_classification_batch(
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
-            created_by_username=req.creator,
-            created_by_page_extraction=None,
-            created_at=now,
+            created=db.ExerciseCreationByUser(at=now, by=req.creator),
             textbook=None,
             removed_from_textbook=False,
             page_number=req_input.page_number,
@@ -889,7 +885,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                     ),
                     adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
                 )
-                for exercise in page_extraction.exercises
+                for exercise in query_ordered_exercises(session, page_extraction)
             ],
         )
         for page_extraction in extraction_batch.page_extractions
@@ -925,7 +921,9 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
         )
         assert classification_batch is not None
         assert classification_batch.model_for_adaptation is not None
-        for exercise in page_extraction.exercises:
+        for creation in page_extraction.exercise_creations__unordered:
+            exercise = creation.exercise
+            assert isinstance(exercise, db.AdaptableExercise)
             if (
                 exercise.adaptation is None
                 and exercise.exercise_class is not None
@@ -970,7 +968,9 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
         )
         session.add(classification_batch)
 
-        for exercise in page_extraction.exercises:
+        for creation in page_extraction.exercise_creations__unordered:
+            exercise = creation.exercise
+            assert isinstance(exercise, db.AdaptableExercise)
             exercise.classified_by_classification_batch = classification_batch
 
 
@@ -991,7 +991,9 @@ def put_extraction_batch_model_for_adaptation(
         assert classification_batch is not None
         assert classification_batch.model_for_adaptation is None
         classification_batch.model_for_adaptation = req
-        for exercise in page_extraction.exercises:
+        for creation in page_extraction.exercise_creations__unordered:
+            exercise = creation.exercise
+            assert isinstance(exercise, db.AdaptableExercise)
             if (
                 exercise.adaptation is None
                 and exercise.exercise_class is not None
@@ -1197,9 +1199,7 @@ def post_textbook_adaptation_batch(
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
-            created_by_username=req.creator,
-            created_by_page_extraction=None,
-            created_at=now,
+            created=db.ExerciseCreationByUser(at=now, by=req.creator),
             textbook=textbook,
             removed_from_textbook=False,
             page_number=req_input.page_number,
@@ -1272,9 +1272,9 @@ def post_textbook_external_exercises(
     textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
 ) -> PostTextbookExternalExercisesResponse:
     textbook = get_by_id(session, db.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
     external_exercise = db.ExternalExercise(
-        created_at=datetime.datetime.now(datetime.timezone.utc),
-        created_by_username=req.creator,
+        created=db.ExerciseCreationByUser(at=now, by=req.creator),
         textbook=textbook,
         removed_from_textbook=False,
         page_number=req.page_number,
@@ -1416,9 +1416,9 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
         id=str(adaptation.id),
         created_by=adaptation.created_by_username,
         extraction_batch_id=(
-            None
-            if adaptation.exercise.created_by_page_extraction is None
-            else str(adaptation.exercise.created_by_page_extraction.extraction_batch_id)
+            str(adaptation.exercise.created.by.extraction_batch_id)
+            if isinstance(adaptation.exercise.created, db.ExerciseCreationByPageExtraction)
+            else None
         ),
         classification_batch_id=(
             None if adaptation.classification_batch_id is None else str(adaptation.classification_batch_id)
@@ -1519,9 +1519,18 @@ def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -
     return [
         exercise.adaptation
         for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
-        for exercise in page.exercises
-        if exercise.adaptation is not None
+        for exercise in query_ordered_exercises(session, page)
     ]
+
+
+def query_ordered_exercises(session: database_utils.Session, page: db.PageExtraction) -> Iterable[db.AdaptableExercise]:
+    request = (
+        sql.select(db.AdaptableExercise)
+        .join(db.ExerciseCreationByPageExtraction)
+        .where(db.ExerciseCreationByPageExtraction.page_extraction_id == page.id)
+        .order_by(db.AdaptableExercise.page_number, db.AdaptableExercise.exercise_number)
+    )
+    return session.execute(request).scalars().all()
 
 
 @export_router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)

@@ -348,9 +348,7 @@ class FixturesCreator:
     def create_default_adaptation_input(self) -> db.AdaptableExercise:
         return self.add(
             db.AdaptableExercise(
-                created_by_username="Patty",
-                created_by_page_extraction=None,
-                created_at=created_at,
+                created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                 page_number=42,
                 exercise_number="5",
                 textbook=None,
@@ -698,9 +696,7 @@ class FixturesCreator:
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=42,
                     exercise_number="5",
                     textbook=textbook,
@@ -726,9 +722,7 @@ class FixturesCreator:
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=40,
                     exercise_number="6",
                     textbook=textbook,
@@ -754,9 +748,7 @@ class FixturesCreator:
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=40,
                     exercise_number="4",
                     textbook=textbook,
@@ -805,9 +797,7 @@ class FixturesCreator:
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=42,
                     exercise_number="6",
                     textbook=textbook,
@@ -833,9 +823,7 @@ class FixturesCreator:
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=40,
                     exercise_number="30",
                     textbook=textbook,
@@ -861,9 +849,7 @@ class FixturesCreator:
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=40,
                     exercise_number="8",
                     textbook=textbook,
@@ -889,9 +875,7 @@ class FixturesCreator:
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=40,
                     exercise_number="Removed",
                     textbook=textbook,
@@ -927,9 +911,7 @@ class FixturesCreator:
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=47,
                     exercise_number="Removed",
                     textbook=textbook,
@@ -976,9 +958,7 @@ class FixturesCreator:
             strategy=errors_strategy,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=142,
                     exercise_number="4",
                     textbook=textbook,
@@ -998,9 +978,7 @@ class FixturesCreator:
             strategy=errors_strategy,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=140,
                     exercise_number="4",
                     textbook=textbook,
@@ -1029,9 +1007,7 @@ class FixturesCreator:
             strategy=strategy,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=42,
                     exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
                     textbook=batch.textbook,
@@ -1058,9 +1034,7 @@ class FixturesCreator:
             strategy=strategy,
             exercise=self.add(
                 db.AdaptableExercise(
-                    created_by_username="Patty",
-                    created_by_page_extraction=None,
-                    created_at=created_at,
+                    created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                     page_number=42,
                     exercise_number="Auto-dictée",
                     textbook=batch.textbook,
@@ -1156,9 +1130,7 @@ class FixturesCreator:
         )
         exe1 = self.add(
             db.AdaptableExercise(
-                created_by_username="Patty",
-                created_by_page_extraction=None,
-                created_at=created_at,
+                created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                 page_number=1,
                 exercise_number="1",
                 textbook=None,
@@ -1187,9 +1159,7 @@ class FixturesCreator:
         )
         self.add(
             db.AdaptableExercise(
-                created_by_username="Patty",
-                created_by_page_extraction=None,
-                created_at=created_at,
+                created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
                 page_number=1,
                 exercise_number="1",
                 textbook=None,

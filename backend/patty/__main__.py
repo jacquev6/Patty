@@ -56,6 +56,7 @@ def db_tables_graph() -> None:
 
     colors_by_annotation: dict[frozenset[str], str] = {
         frozenset({"fundamentals"}): "#000000",
+        frozenset({"exercises"}): "#000000",
         frozenset({"external"}): "#FF55FF",
         frozenset({"adaptation"}): "#FF0000",
         frozenset({"adaptation", "sandbox"}): "#FF8888",
@@ -63,6 +64,7 @@ def db_tables_graph() -> None:
         frozenset({"classification", "sandbox"}): "#60AD60",
         frozenset({"extraction"}): "#0000FF",
         frozenset({"extraction", "sandbox"}): "#5555FF",
+        frozenset({"textbooks"}): "#FFFF00",
     }
 
     tables = database_utils.OrmBase.metadata.sorted_tables

@@ -26,6 +26,9 @@ def annotate_new_tables(*annotations: str) -> None:
             table_annotations[table.name] = frozenset(annotations)
 
 
+# @todo(After schema migration d710f60075da and data migration) Remove attributes suffixed '__to_be_deleted'
+
+
 class Textbook(OrmBase):
     __tablename__ = "textbooks"
 
@@ -66,6 +69,36 @@ class Textbook(OrmBase):
     )
 
 
+annotate_new_tables("textbooks")
+
+
+class ExerciseCreation(OrmBase):
+    __tablename__ = "exercise_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    exercise: orm.Mapped[BaseExercise] = orm.relationship(back_populates="created")
+
+
+class ExerciseCreationByUser(ExerciseCreation):
+    __tablename__ = "exercise_creations__by_user"
+    __mapper_args__ = {"polymorphic_identity": "by_user"}
+
+    def __init__(self, *, at: datetime.datetime, by: str) -> None:
+        super().__init__(at=at)
+        self.by = by
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
+    by: orm.Mapped[str] = orm.mapped_column("username")
+
+
 class BaseExercise(OrmBase):
     __tablename__ = "exercises"
     __mapper_args__ = {"polymorphic_on": "kind"}
@@ -73,26 +106,27 @@ class BaseExercise(OrmBase):
     def __init__(
         self,
         *,
-        created_at: datetime.datetime,
-        created_by_username: str | None,
         textbook: Textbook | None,
         removed_from_textbook: bool,
         page_number: int | None,
         exercise_number: str | None,
+        created: ExerciseCreation,
     ) -> None:
         super().__init__()
-        self.created_at = created_at
-        self.created_by_username = created_by_username
+        self.created_at__to_be_deleted = created.at
         self.textbook = textbook
         self.removed_from_textbook = removed_from_textbook
         self.page_number = page_number
         self.exercise_number = exercise_number
+        self.created = created
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
 
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]  # Some 'AdaptableExercise's are created by a 'PageExtraction'
+    created_at__to_be_deleted: orm.Mapped[datetime.datetime] = orm.mapped_column(
+        "created_at", sql.DateTime(timezone=True)
+    )
+    created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
 
     textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
     textbook: orm.Mapped[Textbook | None] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
@@ -101,8 +135,14 @@ class BaseExercise(OrmBase):
     # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
     exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
 
+    # @todo(After schema migration d710f60075da and data migration) Make 'created' non-nullable
+    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id))
+    created: orm.Mapped[ExerciseCreation | None] = orm.relationship(
+        foreign_keys=[created_id], remote_side=[ExerciseCreation.id], back_populates="exercise"
+    )
 
-annotate_new_tables("fundamentals")
+
+annotate_new_tables("exercises")
 
 
 class ExternalExercise(BaseExercise):
@@ -112,21 +152,19 @@ class ExternalExercise(BaseExercise):
     def __init__(
         self,
         *,
-        created_at: datetime.datetime,
-        created_by_username: str | None,
         textbook: Textbook | None,
         removed_from_textbook: bool,
         page_number: int | None,
         exercise_number: str | None,
         original_file_name: str,
+        created: ExerciseCreation,
     ) -> None:
         super().__init__(
-            created_at=created_at,
-            created_by_username=created_by_username,
             textbook=textbook,
             removed_from_textbook=removed_from_textbook,
             page_number=page_number,
             exercise_number=exercise_number,
+            created=created,
         )
         self.original_file_name = original_file_name
 
@@ -343,8 +381,25 @@ class PageExtraction(OrmBase):
         else:
             self._assistant_response = value.model_dump()
 
-    exercises: orm.Mapped[list[AdaptableExercise]] = orm.relationship(
-        back_populates="created_by_page_extraction", order_by=[BaseExercise.page_number, BaseExercise.exercise_number]
+    exercise_creations__unordered: orm.Mapped[list[ExerciseCreationByPageExtraction]] = orm.relationship(
+        back_populates="by"
+    )
+
+
+class ExerciseCreationByPageExtraction(ExerciseCreation):
+    __tablename__ = "exercise_creations__by_page_extraction"
+    __mapper_args__ = {"polymorphic_identity": "by_page_extraction"}
+
+    def __init__(self, *, at: datetime.datetime, by: PageExtraction) -> None:
+        super().__init__(at=at)
+        self.by = by
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
+    page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
+    by: orm.Mapped[PageExtraction] = orm.relationship(
+        foreign_keys=[page_extraction_id],
+        remote_side=[PageExtraction.id],
+        back_populates="exercise_creations__unordered",
     )
 
 
@@ -451,13 +506,10 @@ class AdaptableExercise(BaseExercise):
 
     def __init__(
         self,
-        created_at: datetime.datetime,
-        created_by_username: str | None,
         textbook: Textbook | None,
         removed_from_textbook: bool,
         page_number: int | None,
         exercise_number: str | None,
-        created_by_page_extraction: PageExtraction | None,
         full_text: str,
         instruction_hint_example_text: str | None,
         statement_text: str | None,
@@ -465,16 +517,15 @@ class AdaptableExercise(BaseExercise):
         classified_by_classification_batch: ClassificationBatch | None,
         classified_by_username: str | None,
         exercise_class: ExerciseClass | None,
+        created: ExerciseCreation,
     ):
         super().__init__(
-            created_at=created_at,
-            created_by_username=created_by_username,
             textbook=textbook,
             removed_from_textbook=removed_from_textbook,
             page_number=page_number,
             exercise_number=exercise_number,
+            created=created,
         )
-        self.created_by_page_extraction = created_by_page_extraction
         self.full_text = full_text
         self.instruction_hint_example_text = instruction_hint_example_text
         self.statement_text = statement_text
@@ -485,9 +536,11 @@ class AdaptableExercise(BaseExercise):
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
 
-    created_by_page_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
-    created_by_page_extraction: orm.Mapped[PageExtraction | None] = orm.relationship(
-        foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id], back_populates="exercises"
+    created_by_page_extraction_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column(
+        "created_by_page_extraction_id", sql.ForeignKey(PageExtraction.id)
+    )
+    created_by_page_extraction__to_be_deleted: orm.Mapped[PageExtraction | None] = orm.relationship(
+        foreign_keys=[created_by_page_extraction_id__to_be_deleted], remote_side=[PageExtraction.id]
     )
 
     full_text: orm.Mapped[str]

@@ -111,13 +111,11 @@ async def submit_extraction(session: database_utils.Session, extraction: db.Page
                 )
             )
             exercise = db.AdaptableExercise(
-                created_at=created_at,
-                created_by_username=None,
+                created=db.ExerciseCreationByPageExtraction(at=created_at, by=extraction),
                 textbook=None,
                 removed_from_textbook=False,
                 page_number=extraction.page_number,
                 exercise_number=extracted_exercise.numero,
-                created_by_page_extraction=extraction,
                 full_text=full_text,
                 instruction_hint_example_text=instruction_hint_example_text,
                 statement_text=extracted_exercise.enonce,
