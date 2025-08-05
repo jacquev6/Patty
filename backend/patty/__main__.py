@@ -51,6 +51,7 @@ def openapi() -> None:
 def db_tables_graph() -> None:
     import graphviz  # type: ignore[import-untyped]
 
+    from . import database_utils
     from . import orm_models
 
     colors_by_annotation: dict[frozenset[str], str] = {
@@ -64,7 +65,7 @@ def db_tables_graph() -> None:
         frozenset({"extraction", "sandbox"}): "#5555FF",
     }
 
-    tables = orm_models.OrmBase.metadata.sorted_tables
+    tables = database_utils.OrmBase.metadata.sorted_tables
     table_annotations = orm_models.table_annotations
 
     known_table_names = set(table.name for table in tables)

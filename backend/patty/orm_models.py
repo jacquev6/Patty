@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import inspect
-import typing
 
 from sqlalchemy import orm
 import sqlalchemy as sql
@@ -14,28 +12,8 @@ from .adaptation import llm as adaptation_llm
 from .adaptation.strategy import ConcreteLlmResponseSpecification
 from .adapted import Exercise as AdaptedExercise
 from .any_json import JsonDict, JsonList
-from .database_utils import OrmBase as OrmBaseBase
+from .database_utils import OrmBase
 from .extraction import llm as extraction_llm
-
-
-class OrmBase(OrmBaseBase):
-    __abstract__ = True
-
-    def __init__(self, **kwargs: typing.Any) -> None:
-        cls = type(self)
-        for column in typing.cast(sql.Table, cls.__table__).columns:
-            ok = column.name == "id" or column.name in kwargs
-            if not ok and column.name.endswith("_id"):
-                ok = column.name[:-3] in kwargs
-            if not ok:
-                for caller_frame in inspect.stack()[1:]:
-                    if caller_frame.filename.startswith("/app") and caller_frame.function != "make":
-                        break
-                print(
-                    f"WARNING: on {caller_frame.filename}:{caller_frame.lineno}, field '{column.name}' of {cls.__name__} is not set",
-                    flush=True,
-                )
-        super().__init__(**kwargs)
 
 
 table_annotations: dict[str, frozenset[str]] = {}
@@ -50,6 +28,24 @@ def annotate_new_tables(*annotations: str) -> None:
 
 class Textbook(OrmBase):
     __tablename__ = "textbooks"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        title: str,
+        publisher: str | None,
+        year: int | None,
+        isbn: str | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.isbn = isbn
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -72,9 +68,25 @@ class Textbook(OrmBase):
 
 class BaseExercise(OrmBase):
     __tablename__ = "exercises"
-    # __abstract__ = True
-
     __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        textbook: Textbook | None,
+        removed_from_textbook: bool,
+        page_number: int | None,
+        exercise_number: str | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.textbook = textbook
+        self.removed_from_textbook = removed_from_textbook
+        self.page_number = page_number
+        self.exercise_number = exercise_number
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
@@ -95,8 +107,28 @@ annotate_new_tables("fundamentals")
 
 class ExternalExercise(BaseExercise):
     __tablename__ = "external_exercises"
-
     __mapper_args__ = {"polymorphic_identity": "external"}
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        textbook: Textbook | None,
+        removed_from_textbook: bool,
+        page_number: int | None,
+        exercise_number: str | None,
+        original_file_name: str,
+    ) -> None:
+        super().__init__(
+            created_at=created_at,
+            created_by_username=created_by_username,
+            textbook=textbook,
+            removed_from_textbook=removed_from_textbook,
+            page_number=page_number,
+            exercise_number=exercise_number,
+        )
+        self.original_file_name = original_file_name
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
 
@@ -109,6 +141,24 @@ annotate_new_tables("external")
 class PdfFile(OrmBase):
     __tablename__ = "pdf_files"
 
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        sha256: str,
+        bytes_count: int,
+        pages_count: int,
+        known_file_names: list[str],
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.sha256 = sha256
+        self.bytes_count = bytes_count
+        self.pages_count = pages_count
+        self.known_file_names = known_file_names
+
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
     created_by_username: orm.Mapped[str]  # All 'PdfFile's are created manually
 
@@ -120,6 +170,22 @@ class PdfFile(OrmBase):
 
 class PdfFileRange(OrmBase):
     __tablename__ = "pdf_file_ranges"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        pdf_file_sha256: str,
+        pdf_file_first_page_number: int,
+        pages_count: int,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.pdf_file_sha256 = pdf_file_sha256
+        self.pdf_file_first_page_number = pdf_file_first_page_number
+        self.pages_count = pages_count
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -134,6 +200,20 @@ class PdfFileRange(OrmBase):
 
 class ExtractionStrategy(OrmBase):
     __tablename__ = "extraction_strategies"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        model: extraction_llm.ConcreteModel,
+        prompt: str,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.model = model
+        self.prompt = prompt
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -158,6 +238,24 @@ annotate_new_tables("extraction")
 
 class ExtractionBatch(OrmBase):
     __tablename__ = "extraction_batches"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        strategy: ExtractionStrategy,
+        range: PdfFileRange,
+        run_classification: bool,
+        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.strategy = strategy
+        self.range = range
+        self.run_classification = run_classification
+        self.model_for_adaptation = model_for_adaptation
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -201,6 +299,22 @@ annotate_new_tables("extraction", "sandbox")
 class PageExtraction(OrmBase):
     __tablename__ = "page_extractions"
 
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        extraction_batch: ExtractionBatch,
+        page_number: int,
+        assistant_response: extraction_responses.AssistantResponse | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.extraction_batch = extraction_batch
+        self.page_number = page_number
+        self.assistant_response = assistant_response
+
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
@@ -239,6 +353,20 @@ annotate_new_tables("extraction")
 
 class ClassificationBatch(OrmBase):
     __tablename__ = "classification_batches"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        created_by_page_extraction: PageExtraction | None,
+        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.created_by_page_extraction = created_by_page_extraction
+        self.model_for_adaptation = model_for_adaptation
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -280,6 +408,22 @@ annotate_new_tables("classification")
 class ExerciseClass(OrmBase):
     __tablename__ = "exercise_classes"
 
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        created_by_classification_batch: ClassificationBatch | None,
+        name: str,
+        latest_strategy_settings: AdaptationStrategySettings | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.created_by_classification_batch = created_by_classification_batch
+        self.name = name
+        self.latest_strategy_settings = latest_strategy_settings
+
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
@@ -303,8 +447,41 @@ class ExerciseClass(OrmBase):
 
 class AdaptableExercise(BaseExercise):
     __tablename__ = "adaptable_exercises"
-
     __mapper_args__ = {"polymorphic_identity": "adaptable"}
+
+    def __init__(
+        self,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        textbook: Textbook | None,
+        removed_from_textbook: bool,
+        page_number: int | None,
+        exercise_number: str | None,
+        created_by_page_extraction: PageExtraction | None,
+        full_text: str,
+        instruction_hint_example_text: str | None,
+        statement_text: str | None,
+        classified_at: datetime.datetime | None,
+        classified_by_classification_batch: ClassificationBatch | None,
+        classified_by_username: str | None,
+        exercise_class: ExerciseClass | None,
+    ):
+        super().__init__(
+            created_at=created_at,
+            created_by_username=created_by_username,
+            textbook=textbook,
+            removed_from_textbook=removed_from_textbook,
+            page_number=page_number,
+            exercise_number=exercise_number,
+        )
+        self.created_by_page_extraction = created_by_page_extraction
+        self.full_text = full_text
+        self.instruction_hint_example_text = instruction_hint_example_text
+        self.statement_text = statement_text
+        self.classified_at = classified_at
+        self.classified_by_classification_batch = classified_by_classification_batch
+        self.classified_by_username = classified_by_username
+        self.exercise_class = exercise_class
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
 
@@ -338,6 +515,24 @@ class AdaptableExercise(BaseExercise):
 class AdaptationStrategySettings(OrmBase):
     __tablename__ = "adaptation_strategy_settings"
 
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        exercise_class: ExerciseClass | None,
+        parent: AdaptationStrategySettings | None,
+        system_prompt: str,
+        response_specification: ConcreteLlmResponseSpecification,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.exercise_class = exercise_class
+        self.parent = parent
+        self.system_prompt = system_prompt
+        self.response_specification = response_specification
+
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
@@ -367,6 +562,22 @@ class AdaptationStrategySettings(OrmBase):
 
 class AdaptationStrategy(OrmBase):
     __tablename__ = "adaptation_strategies"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        created_by_classification_batch: ClassificationBatch | None,
+        settings: AdaptationStrategySettings,
+        model: adaptation_llm.ConcreteModel,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.created_by_classification_batch = created_by_classification_batch
+        self.settings = settings
+        self.model = model
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -401,6 +612,22 @@ annotate_new_tables("adaptation")
 class AdaptationBatch(OrmBase):
     __tablename__ = "adaptation_batches"
 
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        strategy: AdaptationStrategy,
+        textbook: Textbook | None,
+        removed_from_textbook: bool,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.strategy = strategy
+        self.textbook = textbook
+        self.removed_from_textbook = removed_from_textbook
+
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
@@ -427,6 +654,32 @@ annotate_new_tables("adaptation", "sandbox")
 
 class Adaptation(OrmBase):
     __tablename__ = "adaptations"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        exercise: AdaptableExercise,
+        strategy: AdaptationStrategy,
+        classification_batch: ClassificationBatch | None,
+        adaptation_batch: AdaptationBatch | None,
+        raw_llm_conversations: JsonList,
+        initial_assistant_response: adaptation_responses.AssistantResponse | None,
+        adjustments: list[adaptation_responses.Adjustment],
+        manual_edit: AdaptedExercise | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.exercise = exercise
+        self.strategy = strategy
+        self.classification_batch = classification_batch
+        self.adaptation_batch = adaptation_batch
+        self.raw_llm_conversations = raw_llm_conversations
+        self.initial_assistant_response = initial_assistant_response
+        self.adjustments = adjustments
+        self.manual_edit = manual_edit
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -504,6 +757,30 @@ annotate_new_tables("adaptation")
 
 class ErrorCaughtByFrontend(OrmBase):
     __tablename__ = "errors_caught_by_frontend"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str | None,
+        patty_version: str,
+        user_agent: str,
+        window_size: str,
+        url: str,
+        caught_by: str,
+        message: str,
+        code_location: str | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.patty_version = patty_version
+        self.user_agent = user_agent
+        self.window_size = window_size
+        self.url = url
+        self.caught_by = caught_by
+        self.message = message
+        self.code_location = code_location
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
