@@ -40,17 +40,17 @@ describe('The creation form for textbooks', () => {
 
   it('creates a textbook with all fields', () => {
     cy.get('[data-cy="textbook-title"]').type('The title', { delay: 0 })
-    cy.get('[data-cy="textbook-editor"]').type('Dummy editor', { delay: 0 })
+    cy.get('[data-cy="textbook-publisher"]').type('Dummy publisher', { delay: 0 })
     cy.get('[data-cy="textbook-year"]').type('2023', { delay: 0 })
     cy.get('[data-cy="textbook-isbn"]').type('978-3-16-148410-0', { delay: 0 })
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'The title, Dummy editor, 2023 (ISBN: 978-3-16-148410-0)')
+    cy.get('h1').should('have.text', 'The title, Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
 
     cy.visit('/')
     cy.get('li:contains("The title")')
       .should('exist')
-      .should('contain', 'The title, Dummy editor, 2023 (created by Alice on')
+      .should('contain', 'The title, Dummy publisher, 2023 (created by Alice on')
   })
 })
 
