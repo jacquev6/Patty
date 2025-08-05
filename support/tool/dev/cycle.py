@@ -131,27 +131,26 @@ class DevelopmentCycle:
                         )
 
                 component_failures: list[subprocess.CompletedProcess[str]] = []
-                result: subprocess.CompletedProcess[str]
-                for result in joblib.Parallel(n_jobs=5, return_as="generator_unordered")(
-                    joblib.delayed(run_in_frontend_container)(**job) for job in jobs
-                ):
-                    if result.returncode == 0:
-                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
-                    else:
-                        component_failures.append(result)
-                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
+                try:
+                    result: subprocess.CompletedProcess[str]
+                    for result in joblib.Parallel(n_jobs=5, return_as="generator_unordered")(
+                        joblib.delayed(run_in_frontend_container)(**job) for job in jobs
+                    ):
+                        if result.returncode == 0:
+                            print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
+                        else:
+                            component_failures.append(result)
+                            print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
+                finally:
+                    for component_failure in component_failures:
+                        print()
+                        title = f"{os.path.join('frontend', component_failure.args[-1])} {component_failure.args[-3]}: FAILED"
+                        print(title)
+                        print("=" * len(title))
+                        print(component_failure.stdout)
+                        print(component_failure.stderr)
 
-                for component_failure in component_failures:
-                    print()
-                    title = (
-                        f"{os.path.join('frontend', component_failure.args[-1])} {component_failure.args[-3]}: FAILED"
-                    )
-                    print(title)
-                    print("=" * len(title))
-                    print(component_failure.stdout)
-                    print(component_failure.stderr)
-
-                maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
+                    maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
 
                 if component_failures:
                     raise DevelopmentCycleError()
@@ -177,15 +176,18 @@ class DevelopmentCycle:
                                 print(f"{spec} {browser}: FAILED")
                                 e2e_failures.append(result)
                 finally:
+                    for e2e_failure in e2e_failures:
+                        print()
+                        title = f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
+                        print(title)
+                        print("=" * len(title))
+                        print(e2e_failure.stdout)
+                        print(e2e_failure.stderr)
+
                     maybe_remove_screenshots_directories(self.end_to_end_specs, self.browsers)
 
-                for e2e_failure in e2e_failures:
-                    print()
-                    title = f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
-                    print(title)
-                    print("=" * len(title))
-                    print(e2e_failure.stdout)
-                    print(e2e_failure.stderr)
+                if e2e_failures:
+                    raise DevelopmentCycleError()
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:
@@ -215,9 +217,9 @@ def maybe_remove_screenshots_directories(specs: typing.Iterable[str], browsers: 
             shutil.rmtree(os.path.join(screenshots_path, "tmp"), ignore_errors=True)
             baseline_path = os.path.join(screenshots_path, "baseline")
             if not os.path.isdir(baseline_path) or os.listdir(baseline_path) == []:
-                shutil.rmtree(screenshots_path)
+                shutil.rmtree(screenshots_path, ignore_errors=True)
         if os.listdir(spec + ".screenshots") == []:
-            shutil.rmtree(spec + ".screenshots")
-    shutil.rmtree("frontend/cypress-image-diff-screenshots")
-    shutil.rmtree("frontend/cypress-image-diff-html-report")
-    shutil.rmtree("frontend/cypress/screenshots")
+            shutil.rmtree(spec + ".screenshots", ignore_errors=True)
+    shutil.rmtree("frontend/cypress-image-diff-screenshots", ignore_errors=True)
+    shutil.rmtree("frontend/cypress-image-diff-html-report", ignore_errors=True)
+    shutil.rmtree("frontend/cypress/screenshots", ignore_errors=True)
