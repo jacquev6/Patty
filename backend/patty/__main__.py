@@ -52,7 +52,7 @@ def db_tables_graph() -> None:
     import graphviz  # type: ignore[import-untyped]
 
     from . import database_utils
-    from . import orm_models
+    from . import orm_models  # noqa: F401 to populate the metadata
 
     colors_by_annotation: dict[frozenset[str], str] = {
         frozenset({"fundamentals"}): "#000000",
@@ -68,7 +68,7 @@ def db_tables_graph() -> None:
     }
 
     tables = database_utils.OrmBase.metadata.sorted_tables
-    table_annotations = orm_models.table_annotations
+    table_annotations = database_utils.table_annotations
 
     known_table_names = set(table.name for table in tables)
 

@@ -46,6 +46,16 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
     )
 
 
+table_annotations: dict[str, frozenset[str]] = {}
+
+
+def annotate_new_tables(*annotations: str) -> None:
+    global table_annotations
+    for table in OrmBase.metadata.sorted_tables:
+        if table.name not in table_annotations:
+            table_annotations[table.name] = frozenset(annotations)
+
+
 def truncate_all_tables(session: Session) -> None:
     session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 

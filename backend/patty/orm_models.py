@@ -12,18 +12,8 @@ from .adaptation import llm as adaptation_llm
 from .adaptation.strategy import ConcreteLlmResponseSpecification
 from .adapted import Exercise as AdaptedExercise
 from .any_json import JsonDict, JsonList
-from .database_utils import OrmBase
+from .database_utils import OrmBase, annotate_new_tables
 from .extraction import llm as extraction_llm
-
-
-table_annotations: dict[str, frozenset[str]] = {}
-
-
-def annotate_new_tables(*annotations: str) -> None:
-    global table_annotations
-    for table in OrmBase.metadata.sorted_tables:
-        if table.name not in table_annotations:
-            table_annotations[table.name] = frozenset(annotations)
 
 
 # @todo(After schema migration d710f60075da and data migration) Remove attributes suffixed '__to_be_deleted'
