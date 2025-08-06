@@ -246,7 +246,8 @@ def cycle(
     )
     try:
         cycle.run()
-    except DevelopmentCycleError:
+    except DevelopmentCycleError as e:
+        print(f"Development cycle failed: {e}")
         raise click.Abort()
 
 

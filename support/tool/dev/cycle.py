@@ -44,6 +44,10 @@ class DevelopmentCycle:
                 exec_in_backend_container(
                     ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
+                try:
+                    os.unlink("backend/patty/migrations/versions/check_check.py")
+                except FileNotFoundError:
+                    pass
                 if self.do_schema_revision:
                     existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
                     assert len(existing) <= 1
@@ -59,9 +63,15 @@ class DevelopmentCycle:
                             f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup?"
                         )
                         raise DevelopmentCycleError()
-                    exec_alembic(["revision", "--autogenerate", "-m", "dev"] + rev_id_options)
+                    exec_alembic(["revision", "--autogenerate", "--message", "dev"] + rev_id_options)
                     input("Check (and fix) the generated migration file. Press enter to continue")
                 exec_alembic(["upgrade", "head"])
+                exec_alembic(["revision", "--autogenerate", "--message", "check", "--rev-id", "check"])
+                with open("backend/patty/migrations/versions/check_check.py", "r") as f:
+                    content = f.read()
+                    if "pass" not in content:
+                        raise DevelopmentCycleError("The check migration should not do anything\n" + content)
+                os.unlink("backend/patty/migrations/versions/check_check.py")
                 exec_in_backend_container(["python", "-m", "patty", "migrate-data"])
                 with open(datetime.datetime.now().strftime("support/dev-env/db/dumps/%Y%m%d-%H%M%S.json"), "w") as f:
                     f.write(exec_in_backend_container(["python", "-m", "patty", "dump-data"], capture=True).stdout)
