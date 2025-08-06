@@ -15,23 +15,25 @@ def migrate(session: database_utils.Session) -> None:
         if exercise.created is None:
             if exercise.created_by_username__to_be_deleted is None:
                 assert isinstance(exercise, db.AdaptableExercise)
-                assert exercise.created_by_page_extraction__to_be_deleted is not None
+                assert exercise.created_by_page_extraction_id__to_be_deleted is not None
+                page_extraction = session.get(db.PageExtraction, exercise.created_by_page_extraction_id__to_be_deleted)
+                assert page_extraction is not None
                 exercise.created = db.ExerciseCreationByPageExtraction(
-                    at=exercise.created_at__to_be_deleted, by=exercise.created_by_page_extraction__to_be_deleted
+                    at=exercise.created_at__to_be_deleted, by=page_extraction
                 )
             else:
                 exercise.created = db.ExerciseCreationByUser(
                     at=exercise.created_at__to_be_deleted, by=exercise.created_by_username__to_be_deleted
                 )
                 if isinstance(exercise, db.AdaptableExercise):
-                    assert exercise.created_by_page_extraction__to_be_deleted is None
+                    assert exercise.created_by_page_extraction_id__to_be_deleted is None
         exercise.created_at__to_be_deleted = epoch
         exercise.created_by_username__to_be_deleted = None
         if isinstance(exercise, db.AdaptableExercise):
-            exercise.created_by_page_extraction__to_be_deleted = None
+            exercise.created_by_page_extraction_id__to_be_deleted = None
 
         if exercise.location is None:
-            if exercise.textbook__to_be_deleted is None:
+            if exercise.textbook_id__to_be_deleted is None:
                 exercise.location = db.ExerciseLocationMaybePageAndNumber(
                     page_number=exercise.page_number__to_be_deleted,
                     exercise_number=exercise.exercise_number__to_be_deleted,
@@ -39,12 +41,14 @@ def migrate(session: database_utils.Session) -> None:
             else:
                 assert exercise.page_number__to_be_deleted is not None
                 assert exercise.exercise_number__to_be_deleted is not None
+                textbook = session.get(db.Textbook, exercise.textbook_id__to_be_deleted)
+                assert textbook is not None
                 exercise.location = db.ExerciseLocationTextbook(
-                    textbook=exercise.textbook__to_be_deleted,
+                    textbook=textbook,
                     page_number=exercise.page_number__to_be_deleted,
                     exercise_number=exercise.exercise_number__to_be_deleted,
                 )
-        exercise.textbook__to_be_deleted = None
+        exercise.textbook_id__to_be_deleted = None
         exercise.page_number__to_be_deleted = None
         exercise.exercise_number__to_be_deleted = None
 

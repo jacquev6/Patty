@@ -171,10 +171,7 @@ class BaseExercise(OrmBase):
     )
     created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
 
-    textbook_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("textbook_id", sql.ForeignKey(Textbook.id))
-    textbook__to_be_deleted: orm.Mapped[Textbook | None] = orm.relationship(
-        foreign_keys=[textbook_id__to_be_deleted], remote_side=[Textbook.id]
-    )
+    textbook_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("textbook_id")
     removed_from_textbook: orm.Mapped[bool]
     page_number__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("page_number")
     exercise_number__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column(
@@ -608,10 +605,7 @@ class AdaptableExercise(BaseExercise):
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
 
     created_by_page_extraction_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column(
-        "created_by_page_extraction_id", sql.ForeignKey(PageExtraction.id)
-    )
-    created_by_page_extraction__to_be_deleted: orm.Mapped[PageExtraction | None] = orm.relationship(
-        foreign_keys=[created_by_page_extraction_id__to_be_deleted], remote_side=[PageExtraction.id]
+        "created_by_page_extraction_id"
     )
 
     full_text: orm.Mapped[str]

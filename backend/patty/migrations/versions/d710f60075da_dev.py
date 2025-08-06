@@ -77,8 +77,12 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_creations__by_page_extraction")),
     )
+    op.drop_constraint(
+        op.f("fk_adaptable_exercises_created_by_page_extraction_id_pa_8c42"), "adaptable_exercises", type_="foreignkey"
+    )
     op.add_column("exercises", sa.Column("created_id", sa.Integer(), nullable=True))
     op.add_column("exercises", sa.Column("location_id", sa.Integer(), nullable=True))
+    op.drop_constraint(op.f("fk_exercises_textbook_id_textbooks"), "exercises", type_="foreignkey")
     op.create_foreign_key(
         op.f("fk_exercises_created_id_exercise_creations"), "exercises", "exercise_creations", ["created_id"], ["id"]
     )
