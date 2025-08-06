@@ -18,6 +18,7 @@ class DevelopmentCycleError(Exception):
 @dataclasses.dataclass
 class DevelopmentCycle:
     do_migration: bool
+    allow_outdated_database: bool
     do_schema_revision: bool
     cost_money: bool
     do_backend: bool
@@ -56,13 +57,15 @@ class DevelopmentCycle:
                         os.unlink(existing[0])
                     else:
                         rev_id_options = []
-                    current = exec_alembic(["current"], capture=True).stdout.split(" ")[0]
-                    expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1]
+                    current = exec_alembic(["current"], capture=True).stdout.split(" ")[0].strip()
+                    expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1].strip()
                     if current != expected:
-                        print(
-                            f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup?"
-                        )
-                        raise DevelopmentCycleError()
+                        if self.allow_outdated_database:
+                            exec_alembic(["upgrade", "head"])
+                        else:
+                            raise DevelopmentCycleError(
+                                f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup? Or use option --allow-outdated-database."
+                            )
                     exec_alembic(["revision", "--autogenerate", "--message", "dev"] + rev_id_options)
                     input("Check (and fix) the generated migration file. Press enter to continue")
                 exec_alembic(["upgrade", "head"])

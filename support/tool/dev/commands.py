@@ -110,6 +110,7 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--skip-frontend", is_flag=True)
 @click.option("--only-e2e", is_flag=True)
 @click.option("--skip-e2e", is_flag=True)
+@click.option("--allow-outdated-database", is_flag=True)
 @click.option("--only-migration", is_flag=True)
 @click.option("--skip-migration", is_flag=True)
 @click.option("--skip-schema-revision", is_flag=True)
@@ -138,6 +139,7 @@ def cycle(
     skip_frontend: bool,
     only_e2e: bool,
     skip_e2e: bool,
+    allow_outdated_database: bool,
     only_migration: bool,
     skip_migration: bool,
     skip_schema_revision: bool,
@@ -230,6 +232,7 @@ def cycle(
 
     cycle = DevelopmentCycle(
         do_migration=do_migration,
+        allow_outdated_database=allow_outdated_database,
         do_schema_revision=do_schema_revision,
         cost_money=cost_money,
         do_backend=do_backend,
