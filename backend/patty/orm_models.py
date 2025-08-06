@@ -26,63 +26,6 @@ class CreatedByUserMixin:
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
 
-# Textbooks
-# #########
-
-
-class Textbook(OrmBase):
-    __tablename__ = "textbooks"
-
-    def __init__(
-        self,
-        *,
-        created_at: datetime.datetime,
-        created_by_username: str,
-        title: str,
-        publisher: str | None,
-        year: int | None,
-        isbn: str | None,
-    ) -> None:
-        super().__init__()
-        self.created_at = created_at
-        self.created_by_username = created_by_username
-        self.title = title
-        self.publisher = publisher
-        self.year = year
-        self.isbn = isbn
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'Textbook's are created manually
-
-    title: orm.Mapped[str]
-    publisher: orm.Mapped[str | None]
-    year: orm.Mapped[int | None]
-    isbn: orm.Mapped[str | None]
-
-    adaptation_batches: orm.Mapped[list[AdaptationBatch]] = orm.relationship(
-        back_populates="textbook", order_by=lambda: [AdaptationBatch.id]
-    )
-
-    @staticmethod
-    def make_ordered_exercises_request(id: int) -> sql.Select[tuple[BaseExercise]]:
-        return (
-            sql.select(BaseExercise)
-            .join(ExerciseLocationTextbook)
-            .where(ExerciseLocationTextbook.textbook_id == id)
-            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
-        )
-
-    def fetch_ordered_exercises(self) -> Iterable[BaseExercise]:
-        session = orm.object_session(self)
-        assert session is not None
-        return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
-
-
-annotate_new_tables("textbooks")
-
-
 # Base exercises
 # ##############
 
@@ -140,38 +83,6 @@ class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
     page_number: orm.Mapped[int | None]
     # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
     exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
-
-
-annotate_new_tables("exercises")
-
-
-# Textbooks
-# #########
-
-
-class ExerciseLocationTextbook(ExerciseLocation):
-    __tablename__ = "exercise_locations__textbook"
-    __mapper_args__ = {"polymorphic_identity": "textbook"}
-
-    def __init__(self, textbook: Textbook, page_number: int, exercise_number: str) -> None:
-        super().__init__()
-        self.textbook = textbook
-        self.page_number = page_number
-        self.exercise_number = exercise_number
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
-    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
-    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
-    page_number: orm.Mapped[int]
-    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
-    exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
-
-
-annotate_new_tables("textbooks")
-
-
-# Base exercises
-# ##############
 
 
 class BaseExercise(OrmBase):
@@ -555,6 +466,81 @@ class ClassificationBatch(OrmBase):
 
 
 annotate_new_tables("classification")
+
+
+# Textbooks
+# #########
+
+
+class Textbook(OrmBase):
+    __tablename__ = "textbooks"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        title: str,
+        publisher: str | None,
+        year: int | None,
+        isbn: str | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.title = title
+        self.publisher = publisher
+        self.year = year
+        self.isbn = isbn
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+    created_by_username: orm.Mapped[str]  # All 'Textbook's are created manually
+
+    title: orm.Mapped[str]
+    publisher: orm.Mapped[str | None]
+    year: orm.Mapped[int | None]
+    isbn: orm.Mapped[str | None]
+
+    adaptation_batches: orm.Mapped[list[AdaptationBatch]] = orm.relationship(
+        back_populates="textbook", order_by=lambda: [AdaptationBatch.id]
+    )
+
+    @staticmethod
+    def make_ordered_exercises_request(id: int) -> sql.Select[tuple[BaseExercise]]:
+        return (
+            sql.select(BaseExercise)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseLocationTextbook.textbook_id == id)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_exercises(self) -> Iterable[BaseExercise]:
+        session = orm.object_session(self)
+        assert session is not None
+        return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
+
+
+class ExerciseLocationTextbook(ExerciseLocation):
+    __tablename__ = "exercise_locations__textbook"
+    __mapper_args__ = {"polymorphic_identity": "textbook"}
+
+    def __init__(self, textbook: Textbook, page_number: int, exercise_number: str) -> None:
+        super().__init__()
+        self.textbook = textbook
+        self.page_number = page_number
+        self.exercise_number = exercise_number
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
+    page_number: orm.Mapped[int]
+    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
+    exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
+
+
+annotate_new_tables("textbooks")
 
 
 # Adaptation
