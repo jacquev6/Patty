@@ -242,66 +242,6 @@ class ExtractionStrategy(OrmBase, CreatedByUserMixin):
     prompt: orm.Mapped[str]
 
 
-annotate_new_tables("extraction")
-
-
-class SandboxExtractionBatch(OrmBase, CreatedByUserMixin):
-    __tablename__ = "sandbox_extraction_batches"
-
-    def __init__(
-        self,
-        *,
-        created_at: datetime.datetime,
-        created_by_username: str,
-        strategy: ExtractionStrategy,
-        range: PdfFileRange,
-        run_classification: bool,
-        model_for_adaptation: adaptation_llm.ConcreteModel | None,
-    ) -> None:
-        super().__init__()
-        self.created_at = created_at
-        self.created_by_username = created_by_username
-        self.strategy = strategy
-        self.range = range
-        self.run_classification = run_classification
-        self.model_for_adaptation = model_for_adaptation
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
-    strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
-        foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
-    )
-
-    range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
-    range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
-
-    run_classification: orm.Mapped[bool]
-
-    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
-
-    @property
-    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
-        if self._model_for_adaptation is None:
-            return None
-        else:
-            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
-
-    @model_for_adaptation.setter
-    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
-        if value is None:
-            self._model_for_adaptation = sql.null()
-        else:
-            self._model_for_adaptation = value.model_dump()
-
-    page_extraction_creations: orm.Mapped[list[PageExtractionCreationBySandboxExtractionBatch]] = orm.relationship(
-        back_populates="extraction_batch"
-    )
-
-
-annotate_new_tables("extraction", "sandbox")
-
-
 class PageExtractionCreation(OrmBase):
     __tablename__ = "page_extraction_creations"
     __mapper_args__ = {"polymorphic_on": "kind"}
@@ -458,6 +398,60 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
 
 
 annotate_new_tables("extraction")
+
+
+class SandboxExtractionBatch(OrmBase, CreatedByUserMixin):
+    __tablename__ = "sandbox_extraction_batches"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        strategy: ExtractionStrategy,
+        range: PdfFileRange,
+        run_classification: bool,
+        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.strategy = strategy
+        self.range = range
+        self.run_classification = run_classification
+        self.model_for_adaptation = model_for_adaptation
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
+    strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
+        foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
+    )
+
+    range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
+
+    run_classification: orm.Mapped[bool]
+
+    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
+        if self._model_for_adaptation is None:
+            return None
+        else:
+            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
+        if value is None:
+            self._model_for_adaptation = sql.null()
+        else:
+            self._model_for_adaptation = value.model_dump()
+
+    page_extraction_creations: orm.Mapped[list[PageExtractionCreationBySandboxExtractionBatch]] = orm.relationship(
+        back_populates="extraction_batch"
+    )
 
 
 class PageExtractionCreationBySandboxExtractionBatch(PageExtractionCreation):
