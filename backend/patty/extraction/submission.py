@@ -48,48 +48,48 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
-async def submit_extraction(session: database_utils.Session, extraction: db.PageExtraction) -> None:
-    sha256 = extraction.extraction_batch.range.pdf_file.sha256
+async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
+    assert page_extraction.range is not None
+    sha256 = page_extraction.range.pdf_file.sha256
     if sha256 in pdf_data_cache:
-        log(f"Found PDF data for page extraction {extraction.id} in cache")
+        log(f"Found PDF data for page extraction {page_extraction.id} in cache")
         pdf_data = pdf_data_cache[sha256]
     else:
         target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{sha256}")
-        log(f"Fetching PDF data for page extraction {extraction.id} from {target.geturl()}")
+        log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
         pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
         pdf_data_cache[sha256] = pdf_data
-    image = pdf_page_as_image(pdf_data, extraction.page_number)
+    image = pdf_page_as_image(pdf_data, page_extraction.page_number)
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
-        log(f"Submitting page extraction {extraction.id}")
-        extracted_exercises = extraction.extraction_batch.strategy.model.extract(
-            extraction.extraction_batch.strategy.prompt, image
-        )
+        log(f"Submitting page extraction {page_extraction.id}")
+        assert page_extraction.strategy is not None
+        extracted_exercises = page_extraction.strategy.model.extract(page_extraction.strategy.prompt, image)
     except InvalidJsonLlmException as error:
-        log(f"Error 'invalid JSON' on page extraction {extraction.id}")
-        extraction.assistant_response = AssistantInvalidJsonError(
+        log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
+        page_extraction.assistant_response = AssistantInvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except NotJsonLlmException as error:
-        log(f"Error 'not JSON' on page extraction {extraction.id}")
-        extraction.assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        log(f"Error 'not JSON' on page extraction {page_extraction.id}")
+        page_extraction.assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
     except Exception:
-        log(f"UNEXPECTED ERROR on page extraction {extraction.id}")
+        log(f"UNEXPECTED ERROR on page extraction {page_extraction.id}")
         traceback.print_exc()
-        extraction.assistant_response = AssistantUnknownError(kind="error", error="unknown")
+        page_extraction.assistant_response = AssistantUnknownError(kind="error", error="unknown")
     else:
-        log(f"Success on page extraction {extraction.id}")
+        log(f"Success on page extraction {page_extraction.id}")
 
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
-        if extraction.extraction_batch.run_classification:
+        if page_extraction.run_classification:
             classification_batch = db.ClassificationBatch(
                 created_at=created_at,
                 created_by_username=None,
-                created_by_page_extraction=extraction,
-                model_for_adaptation=extraction.extraction_batch.model_for_adaptation,
+                created_by_page_extraction=page_extraction,
+                model_for_adaptation=page_extraction.model_for_adaptation,
             )
             session.add(classification_batch)
         else:
@@ -111,9 +111,9 @@ async def submit_extraction(session: database_utils.Session, extraction: db.Page
                 )
             )
             exercise = db.AdaptableExercise(
-                created=db.ExerciseCreationByPageExtraction(at=created_at, by=extraction),
+                created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
                 location=db.ExerciseLocationMaybePageAndNumber(
-                    page_number=extraction.page_number, exercise_number=extracted_exercise.numero
+                    page_number=page_extraction.page_number, exercise_number=extracted_exercise.numero
                 ),
                 removed_from_textbook=False,
                 full_text=full_text,
@@ -125,7 +125,7 @@ async def submit_extraction(session: database_utils.Session, extraction: db.Page
                 exercise_class=None,
             )
             session.add(exercise)
-        extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
+        page_extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

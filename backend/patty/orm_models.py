@@ -276,10 +276,6 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
     range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
     range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
 
-    page_extractions: orm.Mapped[list[PageExtraction]] = orm.relationship(
-        back_populates="extraction_batch", order_by=lambda: [PageExtraction.page_number]
-    )
-
     run_classification: orm.Mapped[bool]
 
     _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
@@ -298,8 +294,27 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
         else:
             self._model_for_adaptation = value.model_dump()
 
+    page_extraction_creations: orm.Mapped[list[PageExtractionCreationBySandboxExtractionBatch]] = orm.relationship(
+        back_populates="extraction_batch"
+    )
+
 
 annotate_new_tables("extraction", "sandbox")
+
+
+class PageExtractionCreation(OrmBase):
+    __tablename__ = "page_extraction_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(back_populates="created")
 
 
 class PageExtraction(OrmBase):
@@ -308,30 +323,65 @@ class PageExtraction(OrmBase):
     def __init__(
         self,
         *,
-        created_at: datetime.datetime,
-        created_by_username: str,
-        extraction_batch: ExtractionBatch,
+        created: PageExtractionCreation,
         page_number: int,
+        range: PdfFileRange,
+        strategy: ExtractionStrategy,
+        run_classification: bool,
+        model_for_adaptation: adaptation_llm.ConcreteModel | None,
         assistant_response: extraction_responses.AssistantResponse | None,
     ) -> None:
         super().__init__()
-        self.created_at = created_at
-        self.created_by_username = created_by_username
-        self.extraction_batch = extraction_batch
+        self.created = created
         self.page_number = page_number
+        self.range = range
+        self.strategy = strategy
+        self.run_classification = run_classification
+        self.model_for_adaptation = model_for_adaptation
         self.assistant_response = assistant_response
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'PageExtraction's are created manually
-
-    extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
-    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
-        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id], back_populates="page_extractions"
+    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id))
+    created: orm.Mapped[PageExtractionCreation | None] = orm.relationship(
+        foreign_keys=[created_id], remote_side=[PageExtractionCreation.id], back_populates="page_extraction"
     )
+    created_at__to_be_deleted: orm.Mapped[datetime.datetime | None] = orm.mapped_column(
+        "created_at", sql.DateTime(timezone=True)
+    )
+    created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
+    extraction_batch_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("extraction_batch_id")
 
     page_number: orm.Mapped[int]
+
+    # @todo(After schema migration d710f60075da and data migration) Make 'range_id' non-nullable
+    range_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    range: orm.Mapped[PdfFileRange | None] = orm.relationship(foreign_keys=[range_id], remote_side=[PdfFileRange.id])
+
+    # @todo(After schema migration d710f60075da and data migration) Make 'strategy_id' non-nullable
+    strategy_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
+    strategy: orm.Mapped[ExtractionStrategy | None] = orm.relationship(
+        foreign_keys=[strategy_id], remote_side=[ExtractionStrategy.id]
+    )
+
+    # @todo(After schema migration d710f60075da and data migration) Make 'run_classification' non-nullable
+    run_classification: orm.Mapped[bool | None]
+
+    _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
+        if self._model_for_adaptation is None:
+            return None
+        else:
+            return pydantic.RootModel[adaptation_llm.ConcreteModel](self._model_for_adaptation).root  # type: ignore[arg-type]
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
+        if value is None:
+            self._model_for_adaptation = sql.null()
+        else:
+            self._model_for_adaptation = value.model_dump()
 
     _assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("assistant_response", sql.JSON)
 
@@ -350,7 +400,7 @@ class PageExtraction(OrmBase):
             self._assistant_response = value.model_dump()
 
     exercise_creations__unordered: orm.Mapped[list[ExerciseCreationByPageExtraction]] = orm.relationship(
-        back_populates="by"
+        back_populates="page_extraction"
     )
 
     @staticmethod
@@ -394,13 +444,13 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
     __tablename__ = "exercise_creations__by_page_extraction"
     __mapper_args__ = {"polymorphic_identity": "by_page_extraction"}
 
-    def __init__(self, *, at: datetime.datetime, by: PageExtraction) -> None:
+    def __init__(self, *, at: datetime.datetime, page_extraction: PageExtraction) -> None:
         super().__init__(at=at)
-        self.by = by
+        self.page_extraction = page_extraction
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
     page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
-    by: orm.Mapped[PageExtraction] = orm.relationship(
+    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
         foreign_keys=[page_extraction_id],
         remote_side=[PageExtraction.id],
         back_populates="exercise_creations__unordered",
@@ -408,6 +458,26 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
 
 
 annotate_new_tables("extraction")
+
+
+class PageExtractionCreationBySandboxExtractionBatch(PageExtractionCreation):
+    __tablename__ = "page_extraction_creations__by_sandbox_extraction_batch"
+    __mapper_args__ = {"polymorphic_identity": "by_sandbox_extraction_batch"}
+
+    def __init__(self, *, at: datetime.datetime, extraction_batch: ExtractionBatch):
+        super().__init__(at=at)
+        self.extraction_batch = extraction_batch
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
+    sandbox_extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
+    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
+        foreign_keys=[sandbox_extraction_batch_id],
+        remote_side=[ExtractionBatch.id],
+        back_populates="page_extraction_creations",
+    )
+
+
+annotate_new_tables("extraction", "sandbox")
 
 
 # Classification

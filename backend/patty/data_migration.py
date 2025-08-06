@@ -15,7 +15,7 @@ def migrate(session: database_utils.Session) -> None:
                 page_extraction = session.get(db.PageExtraction, exercise.created_by_page_extraction_id__to_be_deleted)
                 assert page_extraction is not None
                 exercise.created = db.ExerciseCreationByPageExtraction(
-                    at=exercise.created_at__to_be_deleted, by=page_extraction
+                    at=exercise.created_at__to_be_deleted, page_extraction=page_extraction
                 )
             else:
                 exercise.created = db.ExerciseCreationByUser(
@@ -48,6 +48,21 @@ def migrate(session: database_utils.Session) -> None:
         exercise.page_number__to_be_deleted = None
         exercise.exercise_number__to_be_deleted = None
 
+    for page_extraction in session.execute(sql.select(db.PageExtraction)).scalars().all():
+        if page_extraction.created is None:
+            assert page_extraction.created_at__to_be_deleted is not None
+            assert page_extraction.extraction_batch_id__to_be_deleted is not None
+            assert page_extraction.created_by_username__to_be_deleted is not None
+            extraction_batch = session.get(db.ExtractionBatch, page_extraction.extraction_batch_id__to_be_deleted)
+            assert extraction_batch is not None
+            assert page_extraction.created_by_username__to_be_deleted == extraction_batch.created_by_username
+            page_extraction.created = db.PageExtractionCreationBySandboxExtractionBatch(
+                at=page_extraction.created_at__to_be_deleted, extraction_batch=extraction_batch
+            )
+        page_extraction.created_at__to_be_deleted = None
+        page_extraction.extraction_batch_id__to_be_deleted = None
+        page_extraction.created_by_username__to_be_deleted = None
+
 
 def dump(session: database_utils.Session) -> JsonDict:
     data = {
@@ -66,14 +81,15 @@ def dump(session: database_utils.Session) -> JsonDict:
 
     exercise_data_by_id = {exercise["id"]: exercise for exercise in data["exercises"]}
     adaptable_exercise_data_by_id = {exercise["id"]: exercise for exercise in data["adaptable_exercises"]}
-
     for exercise in session.execute(sql.select(db.BaseExercise)).scalars().all():
         assert exercise.created is not None
         exercise_data_by_id[exercise.id]["created_at"] = exercise.created.at
         if isinstance(exercise.created, db.ExerciseCreationByUser):
             exercise_data_by_id[exercise.id]["created_by_username"] = exercise.created.by
         elif isinstance(exercise.created, db.ExerciseCreationByPageExtraction):
-            adaptable_exercise_data_by_id[exercise.id]["created_by_page_extraction_id"] = exercise.created.by.id
+            adaptable_exercise_data_by_id[exercise.id][
+                "created_by_page_extraction_id"
+            ] = exercise.created.page_extraction.id
         else:
             assert False
 
@@ -86,6 +102,22 @@ def dump(session: database_utils.Session) -> JsonDict:
             exercise_data_by_id[exercise.id]["page_number"] = exercise.location.page_number
             exercise_data_by_id[exercise.id]["exercise_number"] = exercise.location.exercise_number
             exercise_data_by_id[exercise.id]["textbook_id"] = exercise.location.textbook_id
+        else:
+            assert False
+
+    page_extraction_data_by_id = {
+        page_extraction["id"]: page_extraction for page_extraction in data["page_extractions"]
+    }
+    for page_extraction in session.execute(sql.select(db.PageExtraction)).scalars().all():
+        assert page_extraction.created is not None
+        page_extraction_data_by_id[page_extraction.id]["created_at"] = page_extraction.created.at
+        if isinstance(page_extraction.created, db.PageExtractionCreationBySandboxExtractionBatch):
+            page_extraction_data_by_id[page_extraction.id][
+                "extraction_batch_id"
+            ] = page_extraction.created.extraction_batch.id
+            page_extraction_data_by_id[page_extraction.id][
+                "created_by_username"
+            ] = page_extraction.created.extraction_batch.created_by_username
         else:
             assert False
 

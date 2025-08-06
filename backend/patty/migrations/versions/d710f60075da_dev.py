@@ -27,6 +27,13 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_locations")),
     )
     op.create_table(
+        "page_extraction_creations",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("kind", sa.String(), nullable=False),
+        sa.Column("at", sa.DateTime(timezone=True), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_page_extraction_creations")),
+    )
+    op.create_table(
         "exercise_creations__by_user",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("username", sa.String(), nullable=False),
@@ -77,6 +84,24 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_creations__by_page_extraction")),
     )
+    op.create_table(
+        "page_extraction_creations__by_sandbox_extraction_batch",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("sandbox_extraction_batch_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["page_extraction_creations.id"],
+            name=op.f("fk_page_extraction_creations__by_sandbox_extraction_batch_id_page_extraction_creations"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["sandbox_extraction_batch_id"],
+            ["extraction_batches.id"],
+            name=op.f(
+                "fk_page_extraction_creations__by_sandbox_extraction_batch_sandbox_extraction_batch_id_extraction_batches"
+            ),
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_page_extraction_creations__by_sandbox_extraction_batch")),
+    )
     op.drop_constraint(
         op.f("fk_adaptable_exercises_created_by_page_extraction_id_pa_8c42"), "adaptable_exercises", type_="foreignkey"
     )
@@ -85,9 +110,41 @@ def upgrade() -> None:
     op.alter_column("exercises", "created_at", existing_type=postgresql.TIMESTAMP(timezone=True), nullable=True)
     op.drop_constraint(op.f("fk_exercises_textbook_id_textbooks"), "exercises", type_="foreignkey")
     op.create_foreign_key(
-        op.f("fk_exercises_created_id_exercise_creations"), "exercises", "exercise_creations", ["created_id"], ["id"]
+        op.f("fk_exercises_location_id_exercise_locations"), "exercises", "exercise_locations", ["location_id"], ["id"]
     )
     op.create_foreign_key(
-        op.f("fk_exercises_location_id_exercise_locations"), "exercises", "exercise_locations", ["location_id"], ["id"]
+        op.f("fk_exercises_created_id_exercise_creations"), "exercises", "exercise_creations", ["created_id"], ["id"]
+    )
+    op.add_column("page_extractions", sa.Column("created_id", sa.Integer(), nullable=True))
+    op.add_column("page_extractions", sa.Column("range_id", sa.Integer(), nullable=True))
+    op.add_column("page_extractions", sa.Column("strategy_id", sa.Integer(), nullable=True))
+    op.add_column("page_extractions", sa.Column("run_classification", sa.Boolean(), nullable=True))
+    op.add_column("page_extractions", sa.Column("model_for_adaptation", sa.JSON(), nullable=True))
+    op.alter_column("page_extractions", "created_at", existing_type=postgresql.TIMESTAMP(timezone=True), nullable=True)
+    op.alter_column("page_extractions", "created_by_username", existing_type=sa.VARCHAR(), nullable=True)
+    op.alter_column("page_extractions", "extraction_batch_id", existing_type=sa.INTEGER(), nullable=True)
+    op.drop_constraint(
+        op.f("fk_page_extractions_extraction_batch_id_extraction_batches"), "page_extractions", type_="foreignkey"
+    )
+    op.create_foreign_key(
+        op.f("fk_page_extractions_range_id_pdf_file_ranges"),
+        "page_extractions",
+        "pdf_file_ranges",
+        ["range_id"],
+        ["id"],
+    )
+    op.create_foreign_key(
+        op.f("fk_page_extractions_created_id_page_extraction_creations"),
+        "page_extractions",
+        "page_extraction_creations",
+        ["created_id"],
+        ["id"],
+    )
+    op.create_foreign_key(
+        op.f("fk_page_extractions_strategy_id_extraction_strategies"),
+        "page_extractions",
+        "extraction_strategies",
+        ["strategy_id"],
+        ["id"],
     )
     # ### end Alembic commands ###
