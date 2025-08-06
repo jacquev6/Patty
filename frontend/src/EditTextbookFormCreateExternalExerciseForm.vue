@@ -34,6 +34,8 @@ async function upload() {
     const file = input.value.files.item(index)
     assert(file !== null)
     const { pageNumber, exerciseNumber } = parseExerciseFileName(file.name)
+    assert(pageNumber !== null)
+    assert(exerciseNumber !== null)
     const response = await client.POST('/api/textbooks/{textbook_id}/external-exercises', {
       params: {
         path: {

@@ -21,6 +21,12 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_creations")),
     )
     op.create_table(
+        "exercise_locations",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("kind", sa.String(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_locations")),
+    )
+    op.create_table(
         "exercise_creations__by_user",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("username", sa.String(), nullable=False),
@@ -28,6 +34,32 @@ def upgrade() -> None:
             ["id"], ["exercise_creations.id"], name=op.f("fk_exercise_creations__by_user_id_exercise_creations")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_creations__by_user")),
+    )
+    op.create_table(
+        "exercise_locations__maybe_page_and_number",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("page_number", sa.Integer(), nullable=True),
+        sa.Column("exercise_number", sa.String(collation="exercise_number"), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["exercise_locations.id"],
+            name=op.f("fk_exercise_locations__maybe_page_and_number_id_exercise_locations"),
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_locations__maybe_page_and_number")),
+    )
+    op.create_table(
+        "exercise_locations__textbook",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("textbook_id", sa.Integer(), nullable=False),
+        sa.Column("page_number", sa.Integer(), nullable=False),
+        sa.Column("exercise_number", sa.String(collation="exercise_number"), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"], ["exercise_locations.id"], name=op.f("fk_exercise_locations__textbook_id_exercise_locations")
+        ),
+        sa.ForeignKeyConstraint(
+            ["textbook_id"], ["textbooks.id"], name=op.f("fk_exercise_locations__textbook_textbook_id_textbooks")
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_locations__textbook")),
     )
     op.create_table(
         "exercise_creations__by_page_extraction",
@@ -46,7 +78,11 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_creations__by_page_extraction")),
     )
     op.add_column("exercises", sa.Column("created_id", sa.Integer(), nullable=True))
+    op.add_column("exercises", sa.Column("location_id", sa.Integer(), nullable=True))
     op.create_foreign_key(
         op.f("fk_exercises_created_id_exercise_creations"), "exercises", "exercise_creations", ["created_id"], ["id"]
+    )
+    op.create_foreign_key(
+        op.f("fk_exercises_location_id_exercise_locations"), "exercises", "exercise_locations", ["location_id"], ["id"]
     )
     # ### end Alembic commands ###

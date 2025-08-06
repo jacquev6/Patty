@@ -30,6 +30,24 @@ def migrate(session: database_utils.Session) -> None:
         if isinstance(exercise, db.AdaptableExercise):
             exercise.created_by_page_extraction__to_be_deleted = None
 
+        if exercise.location is None:
+            if exercise.textbook__to_be_deleted is None:
+                exercise.location = db.ExerciseLocationMaybePageAndNumber(
+                    page_number=exercise.page_number__to_be_deleted,
+                    exercise_number=exercise.exercise_number__to_be_deleted,
+                )
+            else:
+                assert exercise.page_number__to_be_deleted is not None
+                assert exercise.exercise_number__to_be_deleted is not None
+                exercise.location = db.ExerciseLocationTextbook(
+                    textbook=exercise.textbook__to_be_deleted,
+                    page_number=exercise.page_number__to_be_deleted,
+                    exercise_number=exercise.exercise_number__to_be_deleted,
+                )
+        exercise.textbook__to_be_deleted = None
+        exercise.page_number__to_be_deleted = None
+        exercise.exercise_number__to_be_deleted = None
+
 
 def dump(session: database_utils.Session) -> JsonDict:
     data = {
@@ -56,6 +74,18 @@ def dump(session: database_utils.Session) -> JsonDict:
             exercise_data_by_id[exercise.id]["created_by_username"] = exercise.created.by
         elif isinstance(exercise.created, db.ExerciseCreationByPageExtraction):
             adaptable_exercise_data_by_id[exercise.id]["created_by_page_extraction_id"] = exercise.created.by.id
+        else:
+            assert False
+
+        assert exercise.location is not None
+        if isinstance(exercise.location, db.ExerciseLocationMaybePageAndNumber):
+            exercise_data_by_id[exercise.id]["page_number"] = exercise.location.page_number
+            exercise_data_by_id[exercise.id]["exercise_number"] = exercise.location.exercise_number
+            exercise_data_by_id[exercise.id]["textbook_id"] = None
+        elif isinstance(exercise.location, db.ExerciseLocationTextbook):
+            exercise_data_by_id[exercise.id]["page_number"] = exercise.location.page_number
+            exercise_data_by_id[exercise.id]["exercise_number"] = exercise.location.exercise_number
+            exercise_data_by_id[exercise.id]["textbook_id"] = exercise.location.textbook_id
         else:
             assert False
 

@@ -1,0 +1,81 @@
+Textbook.fetch_ordered_exercises:
+================================
+SELECT exercises.id,
+       exercises.kind,
+       exercises.created_at,
+       exercises.created_by_username,
+       exercises.textbook_id,
+       exercises.removed_from_textbook,
+       exercises.page_number,
+       exercises.exercise_number,
+       exercises.created_id,
+       exercises.location_id
+FROM exercises
+JOIN (exercise_locations
+      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercise_locations.id = exercises.location_id
+WHERE exercise_locations__textbook.textbook_id = 42
+ORDER BY exercise_locations__textbook.page_number,
+         exercise_locations__textbook.exercise_number
+
+PageExtraction.fetch_ordered_exercises (page and number):
+========================================================
+SELECT adaptable_exercises.id,
+       exercises.id AS id_1,
+       exercises.kind,
+       exercises.created_at,
+       exercises.created_by_username,
+       exercises.textbook_id,
+       exercises.removed_from_textbook,
+       exercises.page_number,
+       exercises.exercise_number,
+       exercises.created_id,
+       exercises.location_id,
+       adaptable_exercises.created_by_page_extraction_id,
+       adaptable_exercises.full_text,
+       adaptable_exercises.instruction_hint_example_text,
+       adaptable_exercises.statement_text,
+       adaptable_exercises.classified_at,
+       adaptable_exercises.classified_by_classification_batch_id,
+       adaptable_exercises.classified_by_username,
+       adaptable_exercises.exercise_class_id
+FROM exercises
+JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
+JOIN (exercise_creations
+      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercise_creations.id = exercises.created_id
+JOIN (exercise_locations
+      JOIN exercise_locations__maybe_page_and_number ON exercise_locations.id = exercise_locations__maybe_page_and_number.id) ON exercise_locations.id = exercises.location_id
+WHERE exercise_creations__by_page_extraction.page_extraction_id = 42
+ORDER BY exercise_locations__maybe_page_and_number.page_number,
+         exercise_locations__maybe_page_and_number.exercise_number
+
+PageExtraction.fetch_ordered_exercises (textbook):
+=================================================
+SELECT adaptable_exercises.id,
+       exercises.id AS id_1,
+       exercises.kind,
+       exercises.created_at,
+       exercises.created_by_username,
+       exercises.textbook_id,
+       exercises.removed_from_textbook,
+       exercises.page_number,
+       exercises.exercise_number,
+       exercises.created_id,
+       exercises.location_id,
+       adaptable_exercises.created_by_page_extraction_id,
+       adaptable_exercises.full_text,
+       adaptable_exercises.instruction_hint_example_text,
+       adaptable_exercises.statement_text,
+       adaptable_exercises.classified_at,
+       adaptable_exercises.classified_by_classification_batch_id,
+       adaptable_exercises.classified_by_username,
+       adaptable_exercises.exercise_class_id
+FROM exercises
+JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
+JOIN (exercise_creations
+      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercise_creations.id = exercises.created_id
+JOIN (exercise_locations
+      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercise_locations.id = exercises.location_id
+WHERE exercise_creations__by_page_extraction.page_extraction_id = 42
+ORDER BY exercise_locations__textbook.page_number,
+         exercise_locations__textbook.exercise_number
+

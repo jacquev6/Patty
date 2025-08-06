@@ -349,16 +349,14 @@ class FixturesCreator:
         return self.add(
             db.AdaptableExercise(
                 created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                page_number=42,
-                exercise_number="5",
-                textbook=None,
+                location=db.ExerciseLocationMaybePageAndNumber(page_number=42, exercise_number="5"),
                 removed_from_textbook=False,
                 full_text=textwrap.dedent(
                     """\
-                Complète avec "le vent" ou "la pluie"
-                a. Les feuilles sont chahutées par ...
-                b. Les vitres sont mouillées par ...
-                """
+                    Complète avec "le vent" ou "la pluie"
+                    a. Les feuilles sont chahutées par ...
+                    b. Les vitres sont mouillées par ...
+                    """
                 ),
                 instruction_hint_example_text=None,
                 statement_text=None,
@@ -697,16 +695,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=42,
-                    exercise_number="5",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="5"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -723,16 +719,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=40,
-                    exercise_number="6",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="6"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -749,16 +743,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=40,
-                    exercise_number="4",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="4"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -798,16 +790,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=42,
-                    exercise_number="6",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="6"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -824,16 +814,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=40,
-                    exercise_number="30",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="30"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -850,16 +838,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=40,
-                    exercise_number="8",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="8"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -876,16 +862,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=40,
-                    exercise_number="Removed",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="Removed"),
                     removed_from_textbook=True,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -912,16 +896,14 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=47,
-                    exercise_number="Removed",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=47, exercise_number="Removed"),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -959,9 +941,7 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=142,
-                    exercise_number="4",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=142, exercise_number="4"),
                     removed_from_textbook=False,
                     full_text="Not JSON",
                     instruction_hint_example_text=None,
@@ -979,9 +959,7 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=140,
-                    exercise_number="4",
-                    textbook=textbook,
+                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=140, exercise_number="4"),
                     removed_from_textbook=False,
                     full_text="Invalid JSON",
                     instruction_hint_example_text=None,
@@ -1001,6 +979,7 @@ class FixturesCreator:
         assert strategy is not None
         batch = self.__session.get(db.AdaptationBatch, 1)
         assert batch is not None
+        assert batch.textbook is not None
 
         self.make_successful_adaptation(
             adaptation_batch=batch,
@@ -1008,16 +987,18 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=42,
-                    exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
-                    textbook=batch.textbook,
+                    location=db.ExerciseLocationTextbook(
+                        textbook=batch.textbook,
+                        page_number=42,
+                        exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
+                    ),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -1035,16 +1016,16 @@ class FixturesCreator:
             exercise=self.add(
                 db.AdaptableExercise(
                     created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                    page_number=42,
-                    exercise_number="Auto-dictée",
-                    textbook=batch.textbook,
+                    location=db.ExerciseLocationTextbook(
+                        textbook=batch.textbook, page_number=42, exercise_number="Auto-dictée"
+                    ),
                     removed_from_textbook=False,
                     full_text=textwrap.dedent(
                         """\
-                    Complète avec "le vent" ou "la pluie"
-                    a. Les feuilles sont chahutées par ...
-                    b. Les vitres sont mouillées par ...
-                    """
+                        Complète avec "le vent" ou "la pluie"
+                        a. Les feuilles sont chahutées par ...
+                        b. Les vitres sont mouillées par ...
+                        """
                     ),
                     instruction_hint_example_text=None,
                     statement_text=None,
@@ -1131,9 +1112,7 @@ class FixturesCreator:
         exe1 = self.add(
             db.AdaptableExercise(
                 created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                page_number=1,
-                exercise_number="1",
-                textbook=None,
+                location=db.ExerciseLocationMaybePageAndNumber(page_number=1, exercise_number="1"),
                 removed_from_textbook=False,
                 full_text="Avec adaptation",
                 instruction_hint_example_text=None,
@@ -1160,9 +1139,7 @@ class FixturesCreator:
         self.add(
             db.AdaptableExercise(
                 created=db.ExerciseCreationByUser(at=created_at, by="Patty"),
-                page_number=1,
-                exercise_number="1",
-                textbook=None,
+                location=db.ExerciseLocationMaybePageAndNumber(page_number=1, exercise_number="1"),
                 removed_from_textbook=False,
                 full_text="Sans adaptation",
                 instruction_hint_example_text=None,

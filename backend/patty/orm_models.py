@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from typing import Iterable
 
 from sqlalchemy import orm
 import sqlalchemy as sql
@@ -50,13 +51,23 @@ class Textbook(OrmBase):
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
 
-    exercises: orm.Mapped[list[BaseExercise]] = orm.relationship(
-        back_populates="textbook", order_by=lambda: [BaseExercise.page_number, BaseExercise.exercise_number]
-    )
-
     adaptation_batches: orm.Mapped[list[AdaptationBatch]] = orm.relationship(
         back_populates="textbook", order_by=lambda: [AdaptationBatch.id]
     )
+
+    @staticmethod
+    def make_ordered_exercises_request(id: int) -> sql.Select[tuple[BaseExercise]]:
+        return (
+            sql.select(BaseExercise)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseLocationTextbook.textbook_id == id)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_exercises(self) -> Iterable[BaseExercise]:
+        session = orm.object_session(self)
+        assert session is not None
+        return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
 
 
 annotate_new_tables("textbooks")
@@ -89,26 +100,68 @@ class ExerciseCreationByUser(ExerciseCreation):
     by: orm.Mapped[str] = orm.mapped_column("username")
 
 
+class ExerciseLocation(OrmBase):
+    __tablename__ = "exercise_locations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    kind: orm.Mapped[str]
+
+    exercise: orm.Mapped[BaseExercise] = orm.relationship(back_populates="location")
+
+
+class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
+    __tablename__ = "exercise_locations__maybe_page_and_number"
+    __mapper_args__ = {"polymorphic_identity": "maybe_page_and_number"}
+
+    def __init__(self, page_number: int | None, exercise_number: str | None) -> None:
+        super().__init__()
+        self.page_number = page_number
+        self.exercise_number = exercise_number
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
+    page_number: orm.Mapped[int | None]
+    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
+    exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
+
+
+annotate_new_tables("exercises")
+
+
+class ExerciseLocationTextbook(ExerciseLocation):
+    __tablename__ = "exercise_locations__textbook"
+    __mapper_args__ = {"polymorphic_identity": "textbook"}
+
+    def __init__(self, textbook: Textbook, page_number: int, exercise_number: str) -> None:
+        super().__init__()
+        self.textbook = textbook
+        self.page_number = page_number
+        self.exercise_number = exercise_number
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
+    page_number: orm.Mapped[int]
+    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
+    exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
+
+
+annotate_new_tables("textbooks")
+
+
 class BaseExercise(OrmBase):
     __tablename__ = "exercises"
     __mapper_args__ = {"polymorphic_on": "kind"}
 
-    def __init__(
-        self,
-        *,
-        textbook: Textbook | None,
-        removed_from_textbook: bool,
-        page_number: int | None,
-        exercise_number: str | None,
-        created: ExerciseCreation,
-    ) -> None:
+    def __init__(self, *, created: ExerciseCreation, location: ExerciseLocation, removed_from_textbook: bool) -> None:
         super().__init__()
-        self.created_at__to_be_deleted = created.at
-        self.textbook = textbook
-        self.removed_from_textbook = removed_from_textbook
-        self.page_number = page_number
-        self.exercise_number = exercise_number
         self.created = created
+        self.location = location
+        self.removed_from_textbook = removed_from_textbook
+        self.created_at__to_be_deleted = created.at
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
@@ -118,17 +171,25 @@ class BaseExercise(OrmBase):
     )
     created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
 
-    textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
-    textbook: orm.Mapped[Textbook | None] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
+    textbook_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("textbook_id", sql.ForeignKey(Textbook.id))
+    textbook__to_be_deleted: orm.Mapped[Textbook | None] = orm.relationship(
+        foreign_keys=[textbook_id__to_be_deleted], remote_side=[Textbook.id]
+    )
     removed_from_textbook: orm.Mapped[bool]
-    page_number: orm.Mapped[int | None] = orm.mapped_column()
-    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
-    exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
+    page_number__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("page_number")
+    exercise_number__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column(
+        "exercise_number", sql.String(collation="exercise_number")
+    )
 
-    # @todo(After schema migration d710f60075da and data migration) Make 'created' non-nullable
+    # @todo(After schema migration d710f60075da and data migration) Make 'created_id' non-nullable
     created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id))
     created: orm.Mapped[ExerciseCreation | None] = orm.relationship(
         foreign_keys=[created_id], remote_side=[ExerciseCreation.id], back_populates="exercise"
+    )
+    # @todo(After schema migration d710f60075da and data migration) Make 'location_id' non-nullable
+    location_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id))
+    location: orm.Mapped[ExerciseLocation | None] = orm.relationship(
+        foreign_keys=[location_id], remote_side=[ExerciseLocation.id], back_populates="exercise"
     )
 
 
@@ -142,20 +203,12 @@ class ExternalExercise(BaseExercise):
     def __init__(
         self,
         *,
-        textbook: Textbook | None,
-        removed_from_textbook: bool,
-        page_number: int | None,
-        exercise_number: str | None,
-        original_file_name: str,
         created: ExerciseCreation,
+        location: ExerciseLocation,
+        removed_from_textbook: bool,
+        original_file_name: str,
     ) -> None:
-        super().__init__(
-            textbook=textbook,
-            removed_from_textbook=removed_from_textbook,
-            page_number=page_number,
-            exercise_number=exercise_number,
-            created=created,
-        )
+        super().__init__(created=created, location=location, removed_from_textbook=removed_from_textbook)
         self.original_file_name = original_file_name
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
@@ -375,6 +428,42 @@ class PageExtraction(OrmBase):
         back_populates="by"
     )
 
+    @staticmethod
+    def make_ordered_exercises_request__maybe_page_and_number(id: int) -> sql.Select[tuple[AdaptableExercise]]:
+        return (
+            sql.select(AdaptableExercise)
+            .join(ExerciseCreationByPageExtraction)
+            .join(ExerciseLocationMaybePageAndNumber)
+            .where(ExerciseCreationByPageExtraction.page_extraction_id == id)
+            .order_by(
+                ExerciseLocationMaybePageAndNumber.page_number, ExerciseLocationMaybePageAndNumber.exercise_number
+            )
+        )
+
+    @staticmethod
+    def make_ordered_exercises_request__textbook(id: int) -> sql.Select[tuple[AdaptableExercise]]:
+        return (
+            sql.select(AdaptableExercise)
+            .join(ExerciseCreationByPageExtraction)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseCreationByPageExtraction.page_extraction_id == id)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_exercises(self) -> Iterable[AdaptableExercise]:
+        if len(self.exercise_creations__unordered) == 0:
+            return []
+        else:
+            first_location = self.exercise_creations__unordered[0].exercise.location
+            # A page extraction creates all its exercises with the same type of ExerciseLocation
+            if isinstance(first_location, ExerciseLocationMaybePageAndNumber):
+                request = self.make_ordered_exercises_request__maybe_page_and_number(self.id)
+            else:
+                request = self.make_ordered_exercises_request__textbook(self.id)
+            session = orm.object_session(self)
+            assert session is not None
+            return session.execute(request).scalars().all()
+
 
 class ExerciseCreationByPageExtraction(ExerciseCreation):
     __tablename__ = "exercise_creations__by_page_extraction"
@@ -496,10 +585,9 @@ class AdaptableExercise(BaseExercise):
 
     def __init__(
         self,
-        textbook: Textbook | None,
+        created: ExerciseCreation,
+        location: ExerciseLocation,
         removed_from_textbook: bool,
-        page_number: int | None,
-        exercise_number: str | None,
         full_text: str,
         instruction_hint_example_text: str | None,
         statement_text: str | None,
@@ -507,15 +595,8 @@ class AdaptableExercise(BaseExercise):
         classified_by_classification_batch: ClassificationBatch | None,
         classified_by_username: str | None,
         exercise_class: ExerciseClass | None,
-        created: ExerciseCreation,
     ):
-        super().__init__(
-            textbook=textbook,
-            removed_from_textbook=removed_from_textbook,
-            page_number=page_number,
-            exercise_number=exercise_number,
-            created=created,
-        )
+        super().__init__(created=created, location=location, removed_from_textbook=removed_from_textbook)
         self.full_text = full_text
         self.instruction_hint_example_text = instruction_hint_example_text
         self.statement_text = statement_text

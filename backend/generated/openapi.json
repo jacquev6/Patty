@@ -4400,25 +4400,11 @@
             "title": "Creator"
           },
           "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "integer",
             "title": "Pagenumber"
           },
           "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Exercisenumber"
           },
           "originalFileName": {

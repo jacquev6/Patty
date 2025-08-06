@@ -1598,9 +1598,9 @@ export interface components {
       /** Creator */
       creator: string
       /** Pagenumber */
-      pageNumber: number | null
+      pageNumber: number
       /** Exercisenumber */
-      exerciseNumber: string | null
+      exerciseNumber: string
       /** Originalfilename */
       originalFileName: string
     }

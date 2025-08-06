@@ -45,6 +45,14 @@ s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", s
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
 
+T1 = TypeVar("T1")
+
+
+def assert_isinstance(value: Any, type_: type[T1]) -> T1:
+    assert isinstance(value, type_)
+    return value
+
+
 class PostErrorsCaughtByFrontendRequest(ApiModel):
     creator: str | None
     user_agent: str
@@ -319,10 +327,10 @@ async def post_adaptation_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created=db.ExerciseCreationByUser(at=now, by=req.creator),
-            textbook=None,
+            location=db.ExerciseLocationMaybePageAndNumber(
+                page_number=req_input.page_number, exercise_number=req_input.exercise_number
+            ),
             removed_from_textbook=False,
-            page_number=req_input.page_number,
-            exercise_number=req_input.exercise_number,
             full_text=req_input.text,
             instruction_hint_example_text=None,
             statement_text=None,
@@ -528,10 +536,10 @@ def create_classification_batch(
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
             created=db.ExerciseCreationByUser(at=now, by=req.creator),
-            textbook=None,
+            location=db.ExerciseLocationMaybePageAndNumber(
+                page_number=req_input.page_number, exercise_number=req_input.exercise_number
+            ),
             removed_from_textbook=False,
-            page_number=req_input.page_number,
-            exercise_number=req_input.exercise_number,
             full_text=req_input.instruction_hint_example_text + "\n" + req_input.statement_text,
             instruction_hint_example_text=req_input.instruction_hint_example_text,
             statement_text=req_input.statement_text,
@@ -577,8 +585,10 @@ async def get_classification_batch(
         exercises=[
             GetClassificationBatchResponse.Exercise(
                 id=str(exercise.id),
-                page_number=exercise.page_number,
-                exercise_number=exercise.exercise_number,
+                page_number=assert_isinstance(exercise.location, db.ExerciseLocationMaybePageAndNumber).page_number,
+                exercise_number=assert_isinstance(
+                    exercise.location, db.ExerciseLocationMaybePageAndNumber
+                ).exercise_number,
                 full_text=exercise.full_text,
                 exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
                 reclassified_by=exercise.classified_by_username,
@@ -874,8 +884,10 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             exercises=[
                 GetExtractionBatchResponse.Page.Exercise(
                     id=str(exercise.id),
-                    page_number=exercise.page_number,
-                    exercise_number=exercise.exercise_number,
+                    page_number=assert_isinstance(exercise.location, db.ExerciseLocationMaybePageAndNumber).page_number,
+                    exercise_number=assert_isinstance(
+                        exercise.location, db.ExerciseLocationMaybePageAndNumber
+                    ).exercise_number,
                     full_text=exercise.full_text,
                     exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
                     reclassified_by=exercise.classified_by_username,
@@ -885,7 +897,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                     ),
                     adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
                 )
-                for exercise in query_ordered_exercises(session, page_extraction)
+                for exercise in page_extraction.fetch_ordered_exercises()
             ],
         )
         for page_extraction in extraction_batch.page_extractions
@@ -1198,12 +1210,15 @@ def post_textbook_adaptation_batch(
     session.add(adaptation_batch)
 
     for req_input in req.inputs:
+        assert req_input.page_number is not None
+        assert req_input.exercise_number is not None
+
         exercise = db.AdaptableExercise(
             created=db.ExerciseCreationByUser(at=now, by=req.creator),
-            textbook=textbook,
+            location=db.ExerciseLocationTextbook(
+                textbook=textbook, page_number=req_input.page_number, exercise_number=req_input.exercise_number
+            ),
             removed_from_textbook=False,
-            page_number=req_input.page_number,
-            exercise_number=req_input.exercise_number,
             full_text=req_input.text,
             instruction_hint_example_text=None,
             statement_text=None,
@@ -1258,8 +1273,8 @@ def put_textbook_adaptation_removed(
 
 class PostTextbookExternalExercisesRequest(ApiModel):
     creator: str
-    page_number: int | None
-    exercise_number: str | None
+    page_number: int
+    exercise_number: str
     original_file_name: str
 
 
@@ -1275,10 +1290,10 @@ def post_textbook_external_exercises(
     now = datetime.datetime.now(datetime.timezone.utc)
     external_exercise = db.ExternalExercise(
         created=db.ExerciseCreationByUser(at=now, by=req.creator),
-        textbook=textbook,
+        location=db.ExerciseLocationTextbook(
+            textbook=textbook, page_number=req.page_number, exercise_number=req.exercise_number
+        ),
         removed_from_textbook=False,
-        page_number=req.page_number,
-        exercise_number=req.exercise_number,
         original_file_name=req.original_file_name,
     )
     session.add(external_exercise)
@@ -1297,7 +1312,8 @@ def put_textbook_external_exercises_removed(
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
     external_exercise = get_by_id(session, db.ExternalExercise, external_exercise_id)
-    assert external_exercise.textbook == textbook
+    assert isinstance(external_exercise.location, db.ExerciseLocationTextbook)
+    assert external_exercise.location.textbook == textbook
     external_exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
@@ -1461,7 +1477,12 @@ def make_api_strategy_settings_name(settings: db.AdaptationStrategySettings) -> 
 
 
 def make_api_input(exercise: db.AdaptableExercise) -> ApiInput:
-    return ApiInput(page_number=exercise.page_number, exercise_number=exercise.exercise_number, text=exercise.full_text)
+    assert isinstance(exercise.location, (db.ExerciseLocationTextbook, db.ExerciseLocationMaybePageAndNumber))
+    return ApiInput(
+        page_number=exercise.location.page_number,
+        exercise_number=exercise.location.exercise_number,
+        text=exercise.full_text,
+    )
 
 
 def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
@@ -1484,12 +1505,14 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         external_exercises=[
             ApiTextbook.ExternalExercise(
                 id=str(external_exercise.id),
-                page_number=external_exercise.page_number,
-                exercise_number=external_exercise.exercise_number,
+                page_number=assert_isinstance(external_exercise.location, db.ExerciseLocationTextbook).page_number,
+                exercise_number=assert_isinstance(
+                    external_exercise.location, db.ExerciseLocationTextbook
+                ).exercise_number,
                 original_file_name=external_exercise.original_file_name,
                 removed_from_textbook=external_exercise.removed_from_textbook,
             )
-            for external_exercise in textbook.exercises
+            for external_exercise in textbook.fetch_ordered_exercises()
             if isinstance(external_exercise, db.ExternalExercise)
         ],
     )
@@ -1516,21 +1539,8 @@ def export_extraction_batch_json(
 
 
 def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    return [
-        exercise.adaptation
-        for page in get_by_id(session, db.ExtractionBatch, id).page_extractions
-        for exercise in query_ordered_exercises(session, page)
-    ]
-
-
-def query_ordered_exercises(session: database_utils.Session, page: db.PageExtraction) -> Iterable[db.AdaptableExercise]:
-    request = (
-        sql.select(db.AdaptableExercise)
-        .join(db.ExerciseCreationByPageExtraction)
-        .where(db.ExerciseCreationByPageExtraction.page_extraction_id == page.id)
-        .order_by(db.AdaptableExercise.page_number, db.AdaptableExercise.exercise_number)
-    )
-    return session.execute(request).scalars().all()
+    batch = get_by_id(session, db.ExtractionBatch, id)
+    return [exercise.adaptation for page in batch.page_extractions for exercise in page.fetch_ordered_exercises()]
 
 
 @export_router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -1645,7 +1655,7 @@ def export_textbook(
     textbook = get_by_id(session, db.Textbook, id)
 
     exercises: list[JsonDict] = []
-    for exercise in textbook.exercises:
+    for exercise in textbook.fetch_ordered_exercises():
         if not exercise.removed_from_textbook:
             if isinstance(exercise, db.AdaptableExercise):
                 if exercise.adaptation is not None:
@@ -1683,8 +1693,10 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
 
 
 def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
-    if adaptation.exercise.page_number is not None and adaptation.exercise.exercise_number is not None:
-        exercise_id = f"P{adaptation.exercise.page_number}Ex{adaptation.exercise.exercise_number}"
+    location = adaptation.exercise.location
+    assert isinstance(location, (db.ExerciseLocationMaybePageAndNumber, db.ExerciseLocationTextbook))
+    if location.page_number is not None and location.exercise_number is not None:
+        exercise_id = f"P{location.page_number}Ex{location.exercise_number}"
     else:
         exercise_id = f"exercice-{adaptation.id}"
 
@@ -1704,8 +1716,8 @@ def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
     adapted_exercise_dump = adapted_exercise.model_dump()
     return {
         "exerciseId": exercise_id,
-        "pageNumber": adaptation.exercise.page_number,
-        "exerciseNumber": adaptation.exercise.exercise_number,
+        "pageNumber": location.page_number,
+        "exerciseNumber": location.exercise_number,
         "kind": "adapted",
         "studentAnswersStorageKey": hashlib.md5(
             json.dumps(adapted_exercise_dump, separators=(",", ":"), indent=None).encode()
@@ -1715,15 +1727,16 @@ def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
 
 
 def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonDict:
-    assert external_exercise.page_number is not None and external_exercise.exercise_number is not None
-    exercise_id = f"P{external_exercise.page_number}Ex{external_exercise.exercise_number}"
+    location = external_exercise.location
+    assert isinstance(location, db.ExerciseLocationTextbook)
+    exercise_id = f"P{location.page_number}Ex{location.exercise_number}"
     target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
     object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
     data = base64.b64encode(object["Body"].read()).decode("ascii")
     return {
         "exerciseId": exercise_id,
-        "pageNumber": external_exercise.page_number,
-        "exerciseNumber": external_exercise.exercise_number,
+        "pageNumber": location.page_number,
+        "exerciseNumber": location.exercise_number,
         "kind": "external",
         "originalFileName": external_exercise.original_file_name,
         "data": data,

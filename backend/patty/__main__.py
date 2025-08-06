@@ -112,6 +112,41 @@ def db_tables_graph() -> None:
 
 
 @main.command()
+def tricky_sql_requests() -> None:
+    import sqlparse  # type: ignore[import-untyped]
+
+    from . import orm_models as db
+    from . import database_utils
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    request: typing.Any
+    for title, request in [
+        ("Textbook.fetch_ordered_exercises", db.Textbook.make_ordered_exercises_request(42)),
+        (
+            "PageExtraction.fetch_ordered_exercises (page and number)",
+            db.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
+        ),
+        (
+            "PageExtraction.fetch_ordered_exercises (textbook)",
+            db.PageExtraction.make_ordered_exercises_request__textbook(42),
+        ),
+    ]:
+        print(f"{title}:")
+        print("=" * len(title))
+        print(
+            sqlparse.format(
+                str(request.compile(database_engine, compile_kwargs={"literal_binds": True})),
+                reindent=True,
+                compact=False,
+                keyword_case="upper",
+                wrap_after=1,
+            )
+        )
+        print()
+
+
+@main.command()
 @click.option("--choice/--no-choice", default=True, is_flag=True)
 @click.option("--free-text-input/--no-free-text-input", default=True, is_flag=True)
 @click.option("--multiple-choices-input/--no-multiple-choices-input", default=True, is_flag=True)

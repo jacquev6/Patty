@@ -31,16 +31,17 @@ services:
       "backend/generated/db-tables-graph.png",
       "backend/generated/default-adaptation-prompt.md",
       "backend/generated/default-extraction-prompt.md",
-      "backend/generated/extracted-exercise-schema.json",
+      "backend/generated/extracted-exercise-schema--minimal.json",
       "backend/generated/extracted-exercise-schema--no-choice.json",
+      "backend/generated/extracted-exercise-schema--no-editable-text-input.json",
       "backend/generated/extracted-exercise-schema--no-free-text-input.json",
       "backend/generated/extracted-exercise-schema--no-multiple-choices-input.json",
       "backend/generated/extracted-exercise-schema--no-selectable-input.json",
       "backend/generated/extracted-exercise-schema--no-swappable-input.json",
-      "backend/generated/extracted-exercise-schema--no-editable-text-input.json",
-      "backend/generated/extracted-exercise-schema--minimal.json",
+      "backend/generated/extracted-exercise-schema.json",
       "backend/generated/openapi.json",
       "backend/generated/patty_json_to_html.py",
+      "backend/generated/tricky-sql-requests.txt",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
@@ -456,6 +457,23 @@ services:
       - backend/secrets.env
     init: true
     command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph.png", "python -m patty db-tables-graph"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  tricky-sql-requests-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "tricky-sql-requests.txt", "python -m patty tricky-sql-requests"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
