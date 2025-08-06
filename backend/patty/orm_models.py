@@ -49,12 +49,12 @@ class ExerciseCreationByUser(ExerciseCreation):
     __tablename__ = "exercise_creations__by_user"
     __mapper_args__ = {"polymorphic_identity": "by_user"}
 
-    def __init__(self, *, at: datetime.datetime, by: str) -> None:
+    def __init__(self, *, at: datetime.datetime, username: str) -> None:
         super().__init__(at=at)
-        self.by = by
+        self.username = username
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
-    by: orm.Mapped[str] = orm.mapped_column("username")
+    username: orm.Mapped[str] = orm.mapped_column()
 
 
 class ExerciseLocation(OrmBase):
@@ -245,8 +245,8 @@ class ExtractionStrategy(OrmBase, CreatedByUserMixin):
 annotate_new_tables("extraction")
 
 
-class ExtractionBatch(OrmBase, CreatedByUserMixin):
-    __tablename__ = "extraction_batches"
+class SandboxExtractionBatch(OrmBase, CreatedByUserMixin):
+    __tablename__ = "sandbox_extraction_batches"
 
     def __init__(
         self,
@@ -464,15 +464,15 @@ class PageExtractionCreationBySandboxExtractionBatch(PageExtractionCreation):
     __tablename__ = "page_extraction_creations__by_sandbox_extraction_batch"
     __mapper_args__ = {"polymorphic_identity": "by_sandbox_extraction_batch"}
 
-    def __init__(self, *, at: datetime.datetime, extraction_batch: ExtractionBatch):
+    def __init__(self, *, at: datetime.datetime, extraction_batch: SandboxExtractionBatch):
         super().__init__(at=at)
         self.extraction_batch = extraction_batch
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
-    sandbox_extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
-    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
+    sandbox_extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxExtractionBatch.id))
+    extraction_batch: orm.Mapped[SandboxExtractionBatch] = orm.relationship(
         foreign_keys=[sandbox_extraction_batch_id],
-        remote_side=[ExtractionBatch.id],
+        remote_side=[SandboxExtractionBatch.id],
         back_populates="page_extraction_creations",
     )
 

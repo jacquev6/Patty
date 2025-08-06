@@ -326,7 +326,7 @@ async def post_adaptation_batch(
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, by=req.creator),
+            created=db.ExerciseCreationByUser(at=now, username=req.creator),
             location=db.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
@@ -451,7 +451,7 @@ def put_adaptable_exercise_class(
         session.add(adaptation)
 
 
-T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.ExtractionBatch)
+T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.SandboxExtractionBatch)
 
 
 def paginate(
@@ -535,7 +535,7 @@ def create_classification_batch(
 
     for req_input in req.inputs:
         exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, by=req.creator),
+            created=db.ExerciseCreationByUser(at=now, username=req.creator),
             location=db.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
@@ -824,7 +824,7 @@ def create_extraction_batch(
             created_by_username=req.creator, created_at=now, model=req.strategy.model, prompt=req.strategy.prompt
         )
         session.add(strategy)
-    extraction_batch = db.ExtractionBatch(
+    extraction_batch = db.SandboxExtractionBatch(
         created_by_username=req.creator,
         created_at=now,
         strategy=strategy,
@@ -878,7 +878,7 @@ class GetExtractionBatchResponse(ApiModel):
 
 @api_router.get("/extraction-batches/{id}")
 async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
-    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
     pages = [
         GetExtractionBatchResponse.Page(
             page_number=creation.page_extraction.page_number,
@@ -924,7 +924,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
 def submit_adaptations_with_recent_settings_in_extraction_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
-    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
     assert extraction_batch.model_for_adaptation is not None
     now = datetime.datetime.now(datetime.timezone.utc)
     for page_extraction_creation in extraction_batch.page_extraction_creations:
@@ -969,7 +969,7 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
 
 @api_router.put("/extraction-batches/{id}/run-classification", status_code=fastapi.status.HTTP_200_OK)
 def put_extraction_batch_run_classification(id: str, session: database_utils.SessionDependable) -> None:
-    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
     assert not extraction_batch.run_classification
     extraction_batch.run_classification = True
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -994,7 +994,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
 def put_extraction_batch_model_for_adaptation(
     id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:
-    extraction_batch = get_by_id(session, db.ExtractionBatch, id)
+    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
     assert extraction_batch.model_for_adaptation is None
     extraction_batch.model_for_adaptation = req
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -1054,8 +1054,8 @@ async def get_extraction_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetExtractionBatchesResponse:
     (batches, next_chunk_id) = paginate(
-        db.ExtractionBatch,
-        sql.select(db.ExtractionBatch).filter(db.ExtractionBatch.created_by_username != sql.null()),
+        db.SandboxExtractionBatch,
+        sql.select(db.SandboxExtractionBatch).filter(db.SandboxExtractionBatch.created_by_username != sql.null()),
         session,
         chunkId,
     )
@@ -1219,7 +1219,7 @@ def post_textbook_adaptation_batch(
         assert req_input.exercise_number is not None
 
         exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, by=req.creator),
+            created=db.ExerciseCreationByUser(at=now, username=req.creator),
             location=db.ExerciseLocationTextbook(
                 textbook=textbook, page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
@@ -1294,7 +1294,7 @@ def post_textbook_external_exercises(
     textbook = get_by_id(session, db.Textbook, textbook_id)
     now = datetime.datetime.now(datetime.timezone.utc)
     external_exercise = db.ExternalExercise(
-        created=db.ExerciseCreationByUser(at=now, by=req.creator),
+        created=db.ExerciseCreationByUser(at=now, username=req.creator),
         location=db.ExerciseLocationTextbook(
             textbook=textbook, page_number=req.page_number, exercise_number=req.exercise_number
         ),
@@ -1547,7 +1547,7 @@ def export_extraction_batch_json(
 
 
 def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    batch = get_by_id(session, db.ExtractionBatch, id)
+    batch = get_by_id(session, db.SandboxExtractionBatch, id)
     return [
         exercise.adaptation
         for creation in batch.page_extraction_creations

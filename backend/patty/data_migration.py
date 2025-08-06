@@ -19,7 +19,7 @@ def migrate(session: database_utils.Session) -> None:
                 )
             else:
                 exercise.created = db.ExerciseCreationByUser(
-                    at=exercise.created_at__to_be_deleted, by=exercise.created_by_username__to_be_deleted
+                    at=exercise.created_at__to_be_deleted, username=exercise.created_by_username__to_be_deleted
                 )
                 if isinstance(exercise, db.AdaptableExercise):
                     assert exercise.created_by_page_extraction_id__to_be_deleted is None
@@ -53,7 +53,9 @@ def migrate(session: database_utils.Session) -> None:
             assert page_extraction.created_at__to_be_deleted is not None
             assert page_extraction.extraction_batch_id__to_be_deleted is not None
             assert page_extraction.created_by_username__to_be_deleted is not None
-            extraction_batch = session.get(db.ExtractionBatch, page_extraction.extraction_batch_id__to_be_deleted)
+            extraction_batch = session.get(
+                db.SandboxExtractionBatch, page_extraction.extraction_batch_id__to_be_deleted
+            )
             assert extraction_batch is not None
             assert page_extraction.created_by_username__to_be_deleted == extraction_batch.created_by_username
             page_extraction.created = db.PageExtractionCreationBySandboxExtractionBatch(
@@ -85,7 +87,7 @@ def dump(session: database_utils.Session) -> JsonDict:
         assert exercise.created is not None
         exercise_data_by_id[exercise.id]["created_at"] = exercise.created.at
         if isinstance(exercise.created, db.ExerciseCreationByUser):
-            exercise_data_by_id[exercise.id]["created_by_username"] = exercise.created.by
+            exercise_data_by_id[exercise.id]["created_by_username"] = exercise.created.username
         elif isinstance(exercise.created, db.ExerciseCreationByPageExtraction):
             adaptable_exercise_data_by_id[exercise.id][
                 "created_by_page_extraction_id"
