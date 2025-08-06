@@ -2,7 +2,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
 
 revision: str = "d710f60075da"
 down_revision: Union[str, None] = "496af6d75cf6"
@@ -82,6 +82,7 @@ def upgrade() -> None:
     )
     op.add_column("exercises", sa.Column("created_id", sa.Integer(), nullable=True))
     op.add_column("exercises", sa.Column("location_id", sa.Integer(), nullable=True))
+    op.alter_column("exercises", "created_at", existing_type=postgresql.TIMESTAMP(timezone=True), nullable=True)
     op.drop_constraint(op.f("fk_exercises_textbook_id_textbooks"), "exercises", type_="foreignkey")
     op.create_foreign_key(
         op.f("fk_exercises_created_id_exercise_creations"), "exercises", "exercise_creations", ["created_id"], ["id"]

@@ -1,5 +1,3 @@
-import datetime
-
 import sqlalchemy as sql
 
 from . import database_utils
@@ -7,12 +5,10 @@ from . import orm_models as db
 from .any_json import JsonDict
 
 
-epoch = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
-
-
 def migrate(session: database_utils.Session) -> None:
     for exercise in session.execute(sql.select(db.BaseExercise)).scalars().all():
         if exercise.created is None:
+            assert exercise.created_at__to_be_deleted is not None
             if exercise.created_by_username__to_be_deleted is None:
                 assert isinstance(exercise, db.AdaptableExercise)
                 assert exercise.created_by_page_extraction_id__to_be_deleted is not None
@@ -27,7 +23,7 @@ def migrate(session: database_utils.Session) -> None:
                 )
                 if isinstance(exercise, db.AdaptableExercise):
                     assert exercise.created_by_page_extraction_id__to_be_deleted is None
-        exercise.created_at__to_be_deleted = epoch
+        exercise.created_at__to_be_deleted = None
         exercise.created_by_username__to_be_deleted = None
         if isinstance(exercise, db.AdaptableExercise):
             exercise.created_by_page_extraction_id__to_be_deleted = None

@@ -161,12 +161,11 @@ class BaseExercise(OrmBase):
         self.created = created
         self.location = location
         self.removed_from_textbook = removed_from_textbook
-        self.created_at__to_be_deleted = created.at
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
 
-    created_at__to_be_deleted: orm.Mapped[datetime.datetime] = orm.mapped_column(
+    created_at__to_be_deleted: orm.Mapped[datetime.datetime | None] = orm.mapped_column(
         "created_at", sql.DateTime(timezone=True)
     )
     created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
