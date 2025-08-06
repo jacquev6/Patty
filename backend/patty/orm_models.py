@@ -20,6 +20,16 @@ from .extraction import llm as extraction_llm
 # @todo(After schema migration d710f60075da and data migration) Remove attributes suffixed '__to_be_deleted'
 
 
+class CreatedByUserMixin:
+    # @todo Rename "created_by_username" to "created_by"
+    created_by_username: orm.Mapped[str] = orm.mapped_column()
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+
+# Textbooks
+# #########
+
+
 class Textbook(OrmBase):
     __tablename__ = "textbooks"
 
@@ -71,6 +81,10 @@ class Textbook(OrmBase):
 
 
 annotate_new_tables("textbooks")
+
+
+# Base exercises
+# ##############
 
 
 class ExerciseCreation(OrmBase):
@@ -131,6 +145,10 @@ class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
 annotate_new_tables("exercises")
 
 
+# Textbooks
+# #########
+
+
 class ExerciseLocationTextbook(ExerciseLocation):
     __tablename__ = "exercise_locations__textbook"
     __mapper_args__ = {"polymorphic_identity": "textbook"}
@@ -150,6 +168,10 @@ class ExerciseLocationTextbook(ExerciseLocation):
 
 
 annotate_new_tables("textbooks")
+
+
+# Base exercises
+# ##############
 
 
 class BaseExercise(OrmBase):
@@ -192,6 +214,10 @@ class BaseExercise(OrmBase):
 annotate_new_tables("exercises")
 
 
+# External exercises
+# ##################
+
+
 class ExternalExercise(BaseExercise):
     __tablename__ = "external_exercises"
     __mapper_args__ = {"polymorphic_identity": "external"}
@@ -215,7 +241,11 @@ class ExternalExercise(BaseExercise):
 annotate_new_tables("external")
 
 
-class PdfFile(OrmBase):
+# Extraction
+# ##########
+
+
+class PdfFile(OrmBase, CreatedByUserMixin):
     __tablename__ = "pdf_files"
 
     def __init__(
@@ -236,16 +266,13 @@ class PdfFile(OrmBase):
         self.pages_count = pages_count
         self.known_file_names = known_file_names
 
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'PdfFile's are created manually
-
     sha256: orm.Mapped[str] = orm.mapped_column(primary_key=True)
     bytes_count: orm.Mapped[int]
     pages_count: orm.Mapped[int]
     known_file_names: orm.Mapped[list[str]] = orm.mapped_column(sql.JSON)
 
 
-class PdfFileRange(OrmBase):
+class PdfFileRange(OrmBase, CreatedByUserMixin):
     __tablename__ = "pdf_file_ranges"
 
     def __init__(
@@ -266,16 +293,13 @@ class PdfFileRange(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'PdfFileRange's are created manually
-
     pdf_file_sha256: orm.Mapped[str] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
     pdf_file: orm.Mapped[PdfFile] = orm.relationship(foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256])
     pdf_file_first_page_number: orm.Mapped[int]
     pages_count: orm.Mapped[int]
 
 
-class ExtractionStrategy(OrmBase):
+class ExtractionStrategy(OrmBase, CreatedByUserMixin):
     __tablename__ = "extraction_strategies"
 
     def __init__(
@@ -294,9 +318,6 @@ class ExtractionStrategy(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'ExtractionStrategy's are created manually
-
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
 
     @property
@@ -313,7 +334,7 @@ class ExtractionStrategy(OrmBase):
 annotate_new_tables("extraction")
 
 
-class ExtractionBatch(OrmBase):
+class ExtractionBatch(OrmBase, CreatedByUserMixin):
     __tablename__ = "extraction_batches"
 
     def __init__(
@@ -335,9 +356,6 @@ class ExtractionBatch(OrmBase):
         self.model_for_adaptation = model_for_adaptation
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str]  # All 'ExtractionBatch's are created manually
 
     strategy_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionStrategy.id))
     strategy: orm.Mapped[ExtractionStrategy] = orm.relationship(
@@ -481,6 +499,10 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
 annotate_new_tables("extraction")
 
 
+# Classification
+# ##############
+
+
 class ClassificationBatch(OrmBase):
     __tablename__ = "classification_batches"
 
@@ -533,6 +555,10 @@ class ClassificationBatch(OrmBase):
 
 
 annotate_new_tables("classification")
+
+
+# Adaptation
+# ##########
 
 
 class ExerciseClass(OrmBase):
@@ -870,6 +896,10 @@ class Adaptation(OrmBase):
 
 
 annotate_new_tables("adaptation")
+
+
+# Fundamentals
+# ############
 
 
 class ErrorCaughtByFrontend(OrmBase):
