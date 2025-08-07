@@ -203,18 +203,18 @@ class BaseAdaptationBatch(ApiModel):
 def get_base_adaptation_batch(
     user: str, session: database_utils.SessionDependable, base: str | None = None
 ) -> BaseAdaptationBatch:
-    request = sql.select(db.AdaptationBatch)
+    request = sql.select(db.SandboxAdaptationBatch)
     if base is None:
         request = request.where(
-            (db.AdaptationBatch.created_by_username == user) | (db.AdaptationBatch.id == 1)
-        ).order_by(-db.AdaptationBatch.id)
+            (db.SandboxAdaptationBatch.created_by_username == user) | (db.SandboxAdaptationBatch.id == 1)
+        ).order_by(-db.SandboxAdaptationBatch.id)
     else:
         try:
             base_id = int(base)
         except ValueError:
             raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
         else:
-            request = request.where(db.AdaptationBatch.id == base_id)
+            request = request.where(db.SandboxAdaptationBatch.id == base_id)
 
     adaptation_batch = session.execute(request).scalars().first()
     if adaptation_batch is None:
@@ -319,7 +319,7 @@ async def post_adaptation_batch(
     )
     session.add(strategy)
 
-    adaptation_batch = db.AdaptationBatch(
+    adaptation_batch = db.SandboxAdaptationBatch(
         created_by_username=req.creator, created_at=now, strategy=strategy, textbook=None, removed_from_textbook=False
     )
     session.add(adaptation_batch)
@@ -369,7 +369,7 @@ class GetAdaptationBatchResponse(ApiModel):
 
 @api_router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
-    adaptation_batch = get_by_id(session, db.AdaptationBatch, id)
+    adaptation_batch = get_by_id(session, db.SandboxAdaptationBatch, id)
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
         created_by=adaptation_batch.created_by_username,
@@ -451,7 +451,7 @@ def put_adaptable_exercise_class(
         session.add(adaptation)
 
 
-T = typing.TypeVar("T", bound=db.AdaptationBatch | db.SandboxClassificationBatch | db.SandboxExtractionBatch)
+T = typing.TypeVar("T", bound=db.SandboxAdaptationBatch | db.SandboxClassificationBatch | db.SandboxExtractionBatch)
 
 
 def paginate(
@@ -482,8 +482,8 @@ async def get_adaptation_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetAdaptationBatchesResponse:
     (batches, next_chunk_id) = paginate(
-        db.AdaptationBatch,
-        sql.select(db.AdaptationBatch).filter(db.AdaptationBatch.textbook_id == sql.null()),
+        db.SandboxAdaptationBatch,
+        sql.select(db.SandboxAdaptationBatch).filter(db.SandboxAdaptationBatch.textbook_id == sql.null()),
         session,
         chunkId,
     )
@@ -1211,7 +1211,7 @@ def post_textbook_adaptation_batch(
     )
     session.add(strategy)
 
-    adaptation_batch = db.AdaptationBatch(
+    adaptation_batch = db.SandboxAdaptationBatch(
         textbook=textbook,
         removed_from_textbook=False,
         created_by_username=req.creator,
@@ -1264,7 +1264,7 @@ def put_textbook_adaptation_batch_removed(
     textbook_id: str, adaptation_batch_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
-    adaptation_batch = get_by_id(session, db.AdaptationBatch, adaptation_batch_id)
+    adaptation_batch = get_by_id(session, db.SandboxAdaptationBatch, adaptation_batch_id)
     assert adaptation_batch.textbook == textbook
     adaptation_batch.removed_from_textbook = removed
     return make_api_textbook(textbook)
@@ -1594,7 +1594,7 @@ def export_adaptation_batch_json(
 
 
 def get_adaptation_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    return get_by_id(session, db.AdaptationBatch, id).adaptations
+    return get_by_id(session, db.SandboxAdaptationBatch, id).adaptations
 
 
 def export_batch_html(

@@ -370,7 +370,7 @@ class FixturesCreator:
     def make_successful_adaptation(
         self,
         *,
-        adaptation_batch: db.AdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
@@ -515,7 +515,7 @@ class FixturesCreator:
     def make_in_progress_adaptation(
         self,
         *,
-        adaptation_batch: db.AdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
@@ -541,7 +541,7 @@ class FixturesCreator:
     def make_invalid_json_adaptation(
         self,
         *,
-        adaptation_batch: db.AdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
@@ -565,7 +565,7 @@ class FixturesCreator:
     def make_not_json_adaptation(
         self,
         *,
-        adaptation_batch: db.AdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
@@ -589,7 +589,7 @@ class FixturesCreator:
     def create_seed_data(self) -> None:
         strategy = self.create_default_adaptation_strategy()
         batch = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 textbook=None,
@@ -605,7 +605,7 @@ class FixturesCreator:
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         batch = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 textbook=None,
@@ -620,7 +620,7 @@ class FixturesCreator:
     def create_mixed_dummy_adaptation_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         batch = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 textbook=None,
@@ -681,7 +681,7 @@ class FixturesCreator:
             )
         )
         success_adaptation_batch_1 = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 strategy=success_strategy_1,
@@ -776,7 +776,7 @@ class FixturesCreator:
             )
         )
         success_adaptation_batch_2 = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 strategy=success_strategy_2,
@@ -882,7 +882,7 @@ class FixturesCreator:
         )
 
         removed_adaptation_batch = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 strategy=success_strategy_2,
@@ -927,7 +927,7 @@ class FixturesCreator:
             )
         )
         errors_adaptation_batch = self.add(
-            db.AdaptationBatch(
+            db.SandboxAdaptationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 strategy=errors_strategy,
@@ -977,7 +977,7 @@ class FixturesCreator:
 
         strategy = self.__session.get(db.AdaptationStrategy, 1)
         assert strategy is not None
-        batch = self.__session.get(db.AdaptationBatch, 1)
+        batch = self.__session.get(db.SandboxAdaptationBatch, 1)
         assert batch is not None
         assert batch.textbook is not None
 
@@ -1065,7 +1065,7 @@ class FixturesCreator:
         for i in range(count):
             strategy = self.create_dummy_adaptation_strategy(f"Blah blah blah {i + 1}.")
             self.add(
-                db.AdaptationBatch(
+                db.SandboxAdaptationBatch(
                     created_by_username="Patty",
                     created_at=created_at,
                     textbook=None,
