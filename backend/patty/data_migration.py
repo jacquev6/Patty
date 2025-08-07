@@ -23,6 +23,7 @@ def migrate(session: database_utils.Session) -> None:
                 )
                 if isinstance(exercise, db.AdaptableExercise):
                     assert exercise.created_by_page_extraction_id__to_be_deleted is None
+        assert exercise.created is not None
         exercise.created_at__to_be_deleted = None
         exercise.created_by_username__to_be_deleted = None
         if isinstance(exercise, db.AdaptableExercise):
@@ -44,6 +45,7 @@ def migrate(session: database_utils.Session) -> None:
                     page_number=exercise.page_number__to_be_deleted,
                     exercise_number=exercise.exercise_number__to_be_deleted,
                 )
+        assert exercise.location is not None
         exercise.textbook_id__to_be_deleted = None
         exercise.page_number__to_be_deleted = None
         exercise.exercise_number__to_be_deleted = None
@@ -64,6 +66,61 @@ def migrate(session: database_utils.Session) -> None:
         page_extraction.created_at__to_be_deleted = None
         page_extraction.extraction_batch_id__to_be_deleted = None
         page_extraction.created_by_username__to_be_deleted = None
+
+    for exercise_class in session.execute(sql.select(db.ExerciseClass)).scalars().all():
+        if exercise_class.created is None:
+            assert exercise_class.created_at__to_be_deleted is not None
+            if exercise_class.created_by_username__to_be_deleted is not None:
+                assert exercise_class.created_by_classification_batch_id__to_be_deleted is None
+                exercise_class.created = db.ExerciseClassCreationByUser(
+                    at=exercise_class.created_at__to_be_deleted,
+                    username=exercise_class.created_by_username__to_be_deleted,
+                )
+            else:
+                assert exercise_class.created_by_classification_batch_id__to_be_deleted is not None
+                classification_batch = session.get(
+                    db.SandboxClassificationBatch, exercise_class.created_by_classification_batch_id__to_be_deleted
+                )
+                assert classification_batch is not None
+                exercise_class.created = db.ExerciseClassCreationBySandboxClassificationBatch(
+                    at=exercise_class.created_at__to_be_deleted, sandbox_classification_batch=classification_batch
+                )
+        assert exercise_class.created is not None
+        exercise_class.created_at__to_be_deleted = None
+        exercise_class.created_by_username__to_be_deleted = None
+        exercise_class.created_by_classification_batch_id__to_be_deleted = None
+
+    for exercise_adaptation in session.execute(sql.select(db.Adaptation)).scalars().all():
+        if exercise_adaptation.created is None:
+            assert exercise_adaptation.created_at__to_be_deleted is not None
+            if exercise_adaptation.adaptation_batch_id__to_be_deleted is not None:
+                assert exercise_adaptation.classification_batch_id__to_be_deleted is None
+                adaptation_batch = session.get(
+                    db.SandboxAdaptationBatch, exercise_adaptation.adaptation_batch_id__to_be_deleted
+                )
+                assert adaptation_batch is not None
+                exercise_adaptation.created = db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                    at=exercise_adaptation.created_at__to_be_deleted, sandbox_adaptation_batch=adaptation_batch
+                )
+            elif exercise_adaptation.classification_batch_id__to_be_deleted is not None:
+                classification_batch = session.get(
+                    db.SandboxClassificationBatch, exercise_adaptation.classification_batch_id__to_be_deleted
+                )
+                assert classification_batch is not None
+                exercise_adaptation.created = db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                    at=exercise_adaptation.created_at__to_be_deleted, sandbox_classification_batch=classification_batch
+                )
+            else:
+                assert exercise_adaptation.created_by_username__to_be_deleted is not None
+                exercise_adaptation.created = db.ExerciseAdaptationCreationByUser(
+                    at=exercise_adaptation.created_at__to_be_deleted,
+                    username=exercise_adaptation.created_by_username__to_be_deleted,
+                )
+        assert exercise_adaptation.created is not None
+        exercise_adaptation.created_at__to_be_deleted = None
+        exercise_adaptation.created_by_username__to_be_deleted = None
+        exercise_adaptation.adaptation_batch_id__to_be_deleted = None
+        exercise_adaptation.classification_batch_id__to_be_deleted = None
 
 
 def dump(session: database_utils.Session) -> JsonDict:

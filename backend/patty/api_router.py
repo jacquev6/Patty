@@ -174,7 +174,6 @@ class ApiInput(ApiModel):
 
 class ApiAdaptation(ApiModel):
     id: str
-    created_by: str | None
     extraction_batch_id: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
@@ -239,7 +238,10 @@ def get_base_adaptation_batch(
     return BaseAdaptationBatch(
         id=str(adaptation_batch.id),
         strategy=make_api_strategy(adaptation_batch.strategy),
-        inputs=[make_api_input(adaptation.exercise) for adaptation in adaptation_batch.adaptations],
+        inputs=[
+            make_api_input(adaptation_creation.adaptation.exercise)
+            for adaptation_creation in adaptation_batch.adaptation_creations
+        ],
         available_strategy_settings=available_strategy_settings,
     )
 
@@ -276,10 +278,8 @@ async def post_adaptation_batch(
             assert branch_name == req.strategy.settings.name
             base_settings = None
             exercise_class = db.ExerciseClass(
+                created=db.ExerciseClassCreationByUser(at=now, username=req.creator),
                 name=branch_name,
-                created_by_username=req.creator,
-                created_by_classification_batch=None,
-                created_at=now,
                 latest_strategy_settings=None,
             )
             session.add(exercise_class)
@@ -342,10 +342,9 @@ async def post_adaptation_batch(
         session.add(exercise)
 
         adaptation = db.Adaptation(
-            created_by_username=req.creator,
-            created_at=now,
-            classification_batch=None,
-            adaptation_batch=adaptation_batch,
+            created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                at=now, sandbox_adaptation_batch=adaptation_batch
+            ),
             strategy=strategy,
             exercise=exercise,
             raw_llm_conversations=[],
@@ -374,7 +373,10 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
         id=str(adaptation_batch.id),
         created_by=adaptation_batch.created_by_username,
         strategy=make_api_strategy(adaptation_batch.strategy),
-        adaptations=[make_api_adaptation(adaptation) for adaptation in adaptation_batch.adaptations],
+        adaptations=[
+            make_api_adaptation(adaptation_creation.adaptation)
+            for adaptation_creation in adaptation_batch.adaptation_creations
+        ],
     )
 
 
@@ -436,11 +438,9 @@ def put_adaptable_exercise_class(
             model=adaptation_model,
         )
         session.add(strategy)
+        assert exercise.classified_by_classification_batch is not None
         adaptation = db.Adaptation(
-            created_by_username=req.creator,
-            created_at=now,
-            classification_batch=None,
-            adaptation_batch=None,
+            created=db.ExerciseAdaptationCreationByUser(at=now, username=req.creator),
             strategy=strategy,
             exercise=exercise,
             raw_llm_conversations=[],
@@ -626,12 +626,11 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
             )
             session.add(strategy)
             adaptation = db.Adaptation(
-                created_at=now,
-                created_by_username=None,
+                created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                    at=now, sandbox_classification_batch=classification_batch
+                ),
                 exercise=exercise,
                 strategy=strategy,
-                classification_batch=classification_batch,
-                adaptation_batch=None,
                 raw_llm_conversations=[],
                 initial_assistant_response=None,
                 adjustments=[],
@@ -663,12 +662,11 @@ def put_classification_batch_model_for_adaptation(
             )
             session.add(strategy)
             adaptation = db.Adaptation(
-                created_at=now,
-                created_by_username=None,
+                created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                    at=now, sandbox_classification_batch=classification_batch
+                ),
                 exercise=exercise,
                 strategy=strategy,
-                classification_batch=classification_batch,
-                adaptation_batch=None,
                 raw_llm_conversations=[],
                 initial_assistant_response=None,
                 adjustments=[],
@@ -957,12 +955,11 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                 )
                 session.add(strategy)
                 adaptation = db.Adaptation(
-                    created_at=now,
-                    created_by_username=None,
+                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                        at=now, sandbox_classification_batch=classification_batch
+                    ),
                     exercise=exercise,
                     strategy=strategy,
-                    classification_batch=classification_batch,
-                    adaptation_batch=None,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
                     adjustments=[],
@@ -1031,12 +1028,11 @@ def put_extraction_batch_model_for_adaptation(
                 )
                 session.add(strategy)
                 adaptation = db.Adaptation(
-                    created_at=now,
-                    created_by_username=None,
+                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                        at=now, sandbox_classification_batch=classification_batch
+                    ),
                     exercise=exercise,
                     strategy=strategy,
-                    classification_batch=classification_batch,
-                    adaptation_batch=None,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
                     adjustments=[],
@@ -1241,10 +1237,9 @@ def post_textbook_adaptation_batch(
         session.add(exercise)
 
         adaptation = db.Adaptation(
-            created_by_username=req.creator,
-            created_at=now,
-            classification_batch=None,
-            adaptation_batch=adaptation_batch,
+            created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                at=now, sandbox_adaptation_batch=adaptation_batch
+            ),
             strategy=strategy,
             exercise=exercise,
             raw_llm_conversations=[],
@@ -1276,8 +1271,8 @@ def put_textbook_adaptation_removed(
 ) -> ApiTextbook:
     textbook = get_by_id(session, db.Textbook, textbook_id)
     adaptation = get_by_id(session, db.Adaptation, adaptation_id)
-    assert adaptation.adaptation_batch is not None
-    assert adaptation.adaptation_batch.textbook == textbook
+    assert isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
+    assert adaptation.created.sandbox_adaptation_batch.textbook == textbook
     adaptation.exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
@@ -1441,7 +1436,6 @@ def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> M
 def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
-        created_by=adaptation.created_by_username,
         extraction_batch_id=(
             str(adaptation.exercise.created.page_extraction.created.extraction_batch.id)
             if isinstance(adaptation.exercise.created, db.ExerciseCreationByPageExtraction)
@@ -1451,9 +1445,15 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
             else None
         ),
         classification_batch_id=(
-            None if adaptation.classification_batch_id is None else str(adaptation.classification_batch_id)
+            str(adaptation.created.sandbox_classification_batch.id)
+            if isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxClassificationBatch)
+            else None
         ),
-        adaptation_batch_id=None if adaptation.adaptation_batch_id is None else str(adaptation.adaptation_batch_id),
+        adaptation_batch_id=(
+            str(adaptation.created.sandbox_adaptation_batch.id)
+            if isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
+            else None
+        ),
         strategy=make_api_strategy(adaptation.strategy),
         input=make_api_input(adaptation.exercise),
         raw_llm_conversations=adaptation.raw_llm_conversations,
@@ -1511,7 +1511,10 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
             ApiTextbook.AdaptationBatch(
                 id=str(adaptation_batch.id),
                 strategy=make_api_strategy(adaptation_batch.strategy),
-                adaptations=[make_api_adaptation(adaptation) for adaptation in adaptation_batch.adaptations],
+                adaptations=[
+                    make_api_adaptation(adaptation_creation.adaptation)
+                    for adaptation_creation in adaptation_batch.adaptation_creations
+                ],
                 removed_from_textbook=adaptation_batch.removed_from_textbook,
             )
             for adaptation_batch in textbook.adaptation_batches
@@ -1594,7 +1597,10 @@ def export_adaptation_batch_json(
 
 
 def get_adaptation_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    return get_by_id(session, db.SandboxAdaptationBatch, id).adaptations
+    return [
+        adaptation_creation.adaptation
+        for adaptation_creation in get_by_id(session, db.SandboxAdaptationBatch, id).adaptation_creations
+    ]
 
 
 def export_batch_html(
@@ -1678,8 +1684,8 @@ def export_textbook(
             if isinstance(exercise, db.AdaptableExercise):
                 if exercise.adaptation is not None:
                     if (
-                        exercise.adaptation.adaptation_batch is not None
-                        and exercise.adaptation.adaptation_batch.removed_from_textbook
+                        isinstance(exercise.adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
+                        and exercise.adaptation.created.sandbox_adaptation_batch.removed_from_textbook
                     ):
                         adapted_exercise_data = None
                     else:

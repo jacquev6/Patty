@@ -684,8 +684,6 @@ export interface components {
     ApiAdaptation: {
       /** Id */
       id: string
-      /** Createdby */
-      createdBy: string | null
       /** Extractionbatchid */
       extractionBatchId: string | null
       /** Classificationbatchid */

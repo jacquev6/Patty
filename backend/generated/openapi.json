@@ -1948,17 +1948,6 @@
             "type": "string",
             "title": "Id"
           },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
           "extractionBatchId": {
             "anyOf": [
               {
@@ -2049,7 +2038,6 @@
         "type": "object",
         "required": [
           "id",
-          "createdBy",
           "extractionBatchId",
           "classificationBatchId",
           "adaptationBatchId",

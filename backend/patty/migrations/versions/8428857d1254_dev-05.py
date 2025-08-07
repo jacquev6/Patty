@@ -19,4 +19,5 @@ def upgrade() -> None:
         ["adaptation_batch_id"],
         ["id"],
     )
+    op.execute("ALTER SEQUENCE adaptation_batches_id_seq RENAME TO sandbox_adaptation_batches_id_seq")
     # ### end Alembic commands ###

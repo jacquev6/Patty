@@ -80,9 +80,9 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             exercise_class = exercise_classes_by_name.get(exercise_class_name, None)
             if exercise_class is None:
                 exercise_class = db.ExerciseClass(
-                    created_at=now,
-                    created_by_username=None,
-                    created_by_classification_batch=batch,
+                    created=db.ExerciseClassCreationBySandboxClassificationBatch(
+                        at=now, sandbox_classification_batch=batch
+                    ),
                     name=exercise_class_name,
                     latest_strategy_settings=None,
                 )
@@ -100,12 +100,11 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                 )
                 session.add(adaptation_strategy)
                 adaptation = db.Adaptation(
-                    created_at=now,
-                    created_by_username=None,
+                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                        at=now, sandbox_classification_batch=batch
+                    ),
                     exercise=exercise,
                     strategy=adaptation_strategy,
-                    classification_batch=batch,
-                    adaptation_batch=None,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
                     adjustments=[],

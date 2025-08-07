@@ -371,15 +371,23 @@ class FixturesCreator:
         self,
         *,
         adaptation_batch: db.SandboxAdaptationBatch | None,
+        classification_batch: db.SandboxClassificationBatch | None,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
+        if adaptation_batch is not None:
+            created: db.ExerciseAdaptationCreation = db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                at=created_at, sandbox_adaptation_batch=adaptation_batch
+            )
+        elif classification_batch is not None:
+            created = db.ExerciseAdaptationCreationBySandboxClassificationBatch(
+                at=created_at, sandbox_classification_batch=classification_batch
+            )
+        else:
+            assert False
         return self.add(
             db.Adaptation(
-                created_by_username="Patty",
-                created_at=created_at,
-                adaptation_batch=adaptation_batch,
-                classification_batch=None,
+                created=created,
                 strategy=strategy,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
@@ -515,16 +523,15 @@ class FixturesCreator:
     def make_in_progress_adaptation(
         self,
         *,
-        adaptation_batch: db.SandboxAdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
         adaptation = self.add(
             db.Adaptation(
-                created_by_username="Patty",
-                created_at=created_at,
-                adaptation_batch=adaptation_batch,
-                classification_batch=None,
+                created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                    at=created_at, sandbox_adaptation_batch=adaptation_batch
+                ),
                 strategy=strategy,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
@@ -541,16 +548,15 @@ class FixturesCreator:
     def make_invalid_json_adaptation(
         self,
         *,
-        adaptation_batch: db.SandboxAdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
         return self.add(
             db.Adaptation(
-                created_by_username="Patty",
-                created_at=created_at,
-                adaptation_batch=adaptation_batch,
-                classification_batch=None,
+                created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                    at=created_at, sandbox_adaptation_batch=adaptation_batch
+                ),
                 strategy=strategy,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
@@ -565,16 +571,15 @@ class FixturesCreator:
     def make_not_json_adaptation(
         self,
         *,
-        adaptation_batch: db.SandboxAdaptationBatch | None,
+        adaptation_batch: db.SandboxAdaptationBatch,
         strategy: db.AdaptationStrategy,
         exercise: db.AdaptableExercise,
     ) -> db.Adaptation:
         return self.add(
             db.Adaptation(
-                created_by_username="Patty",
-                created_at=created_at,
-                adaptation_batch=adaptation_batch,
-                classification_batch=None,
+                created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                    at=created_at, sandbox_adaptation_batch=adaptation_batch
+                ),
                 strategy=strategy,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
@@ -598,7 +603,10 @@ class FixturesCreator:
             )
         )
         self.make_successful_adaptation(
-            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+            adaptation_batch=batch,
+            classification_batch=None,
+            strategy=strategy,
+            exercise=self.create_default_adaptation_input(),
         )
         self.create_default_extraction_strategy()
 
@@ -614,7 +622,10 @@ class FixturesCreator:
             )
         )
         self.make_successful_adaptation(
-            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+            adaptation_batch=batch,
+            classification_batch=None,
+            strategy=strategy,
+            exercise=self.create_default_adaptation_input(),
         )
 
     def create_mixed_dummy_adaptation_batch(self) -> None:
@@ -629,7 +640,10 @@ class FixturesCreator:
             )
         )
         self.make_successful_adaptation(
-            adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
+            adaptation_batch=batch,
+            classification_batch=None,
+            strategy=strategy,
+            exercise=self.create_default_adaptation_input(),
         )
         self.make_in_progress_adaptation(
             adaptation_batch=batch, strategy=strategy, exercise=self.create_default_adaptation_input()
@@ -647,9 +661,7 @@ class FixturesCreator:
         settings = self.make_dummy_adaptation_strategy_settings(system_prompt=system_prompt)
         exercise_class = self.add(
             db.ExerciseClass(
-                created_by_username="Patty",
-                created_by_classification_batch=None,
-                created_at=created_at,
+                created=db.ExerciseClassCreationByUser(at=created_at, username="Patty"),
                 name=name,
                 latest_strategy_settings=settings,
             )
@@ -691,6 +703,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
+            classification_batch=None,
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -715,6 +728,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
+            classification_batch=None,
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -739,6 +753,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_1,
+            classification_batch=None,
             strategy=success_strategy_1,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -786,6 +801,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
+            classification_batch=None,
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -810,6 +826,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
+            classification_batch=None,
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -834,6 +851,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
+            classification_batch=None,
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -858,6 +876,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=success_adaptation_batch_2,
+            classification_batch=None,
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -892,6 +911,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=removed_adaptation_batch,
+            classification_batch=None,
             strategy=success_strategy_2,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -983,6 +1003,7 @@ class FixturesCreator:
 
         self.make_successful_adaptation(
             adaptation_batch=batch,
+            classification_batch=None,
             strategy=strategy,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -1012,6 +1033,7 @@ class FixturesCreator:
 
         self.make_successful_adaptation(
             adaptation_batch=batch,
+            classification_batch=None,
             strategy=strategy,
             exercise=self.add(
                 db.AdaptableExercise(
@@ -1091,9 +1113,7 @@ class FixturesCreator:
 
         class2 = self.add(
             db.ExerciseClass(
-                created_by_username="Patty",
-                created_by_classification_batch=None,
-                created_at=created_at,
+                created=db.ExerciseClassCreationByUser(at=created_at, username="Patty"),
                 name="NoSettings",
                 latest_strategy_settings=None,
             )
@@ -1125,6 +1145,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             adaptation_batch=None,
+            classification_batch=batch,
             strategy=self.add(
                 db.AdaptationStrategy(
                     created_at=created_at,
