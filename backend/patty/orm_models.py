@@ -604,6 +604,62 @@ class ExerciseLocationTextbook(ExerciseLocation):
     exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
 
 
+class TextbookStartingPoint(OrmBase, CreatedByUserMixin):
+    __tablename__ = "textbook_starting_points"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        textbook_id: int | None,
+        textbook_first_page_number: int | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.textbook_id = textbook_id
+        self.textbook_first_page_number = textbook_first_page_number
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook_first_page_number: orm.Mapped[int | None]
+
+
+class PdfFileTextbookMapping(OrmBase, CreatedByUserMixin):
+    __tablename__ = "pdf_file_textbook_mappings"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by_username: str,
+        pdf_file_range_id: int,
+        textbook_starting_point_id: int | None,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by_username = created_by_username
+        self.pdf_file_range_id = pdf_file_range_id
+        self.textbook_starting_point_id = textbook_starting_point_id
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    pdf_file_range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    textbook_starting_point_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(TextbookStartingPoint.id))
+
+
+class PageExtractionCreationByPdfFileTextbookMapping(PageExtractionCreation):
+    __tablename__ = "page_extraction_creations__by_pdf_file_textbook_mapping"
+    __mapper_args__ = {"polymorphic_identity": "by_pdf_file_textbook_mapping"}
+
+    def __init__(self, *, at: datetime.datetime, pdf_file_textbook_mapping: PdfFileTextbookMapping) -> None:
+        super().__init__(at=at)
+        self.pdf_file_textbook_mapping = pdf_file_textbook_mapping
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
+    pdf_file_textbook_mapping_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileTextbookMapping.id))
+
+
 annotate_new_tables("textbooks")
 
 
