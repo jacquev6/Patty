@@ -478,8 +478,8 @@ annotate_new_tables("extraction", "sandbox")
 # ##############
 
 
-class ClassificationBatch(OrmBase):
-    __tablename__ = "classification_batches"
+class SandboxClassificationBatch(OrmBase):
+    __tablename__ = "sandbox_classification_batches"
 
     def __init__(
         self,
@@ -498,7 +498,7 @@ class ClassificationBatch(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]  # Some 'ClassificationBatch's are created by a 'PageExtraction'
+    created_by_username: orm.Mapped[str | None]  # Some 'SandboxClassificationBatch's are created by a 'PageExtraction'
     created_by_page_extraction_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
     created_by_page_extraction: orm.Mapped[PageExtraction | None] = orm.relationship(
         foreign_keys=[created_by_page_extraction_id], remote_side=[PageExtraction.id]
@@ -529,7 +529,7 @@ class ClassificationBatch(OrmBase):
     )
 
 
-annotate_new_tables("classification")
+annotate_new_tables("classification", "sandbox")
 
 
 # Textbooks
@@ -675,7 +675,7 @@ class ExerciseClass(OrmBase):
         *,
         created_at: datetime.datetime,
         created_by_username: str | None,
-        created_by_classification_batch: ClassificationBatch | None,
+        created_by_classification_batch: SandboxClassificationBatch | None,
         name: str,
         latest_strategy_settings: AdaptationStrategySettings | None,
     ) -> None:
@@ -689,12 +689,12 @@ class ExerciseClass(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]  # Some 'ExerciseClass's are created by a 'ClassificationBatch'
+    created_by_username: orm.Mapped[str | None]  # Some 'ExerciseClass's are created by a 'SandboxClassificationBatch'
     created_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey(ClassificationBatch.id)
+        sql.ForeignKey(SandboxClassificationBatch.id)
     )
-    created_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
-        foreign_keys=[created_by_classification_batch_id], remote_side=[ClassificationBatch.id]
+    created_by_classification_batch: orm.Mapped[SandboxClassificationBatch | None] = orm.relationship(
+        foreign_keys=[created_by_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
     )
 
     name: orm.Mapped[str]
@@ -720,7 +720,7 @@ class AdaptableExercise(BaseExercise):
         instruction_hint_example_text: str | None,
         statement_text: str | None,
         classified_at: datetime.datetime | None,
-        classified_by_classification_batch: ClassificationBatch | None,
+        classified_by_classification_batch: SandboxClassificationBatch | None,
         classified_by_username: str | None,
         exercise_class: ExerciseClass | None,
     ):
@@ -745,11 +745,11 @@ class AdaptableExercise(BaseExercise):
 
     classified_at: orm.Mapped[datetime.datetime | None] = orm.mapped_column(sql.DateTime(timezone=True))
     classified_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey(ClassificationBatch.id)
+        sql.ForeignKey(SandboxClassificationBatch.id)
     )
-    classified_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
+    classified_by_classification_batch: orm.Mapped[SandboxClassificationBatch | None] = orm.relationship(
         foreign_keys=[classified_by_classification_batch_id],
-        remote_side=[ClassificationBatch.id],
+        remote_side=[SandboxClassificationBatch.id],
         back_populates="exercises",
     )
     classified_by_username: orm.Mapped[str | None]
@@ -817,7 +817,7 @@ class AdaptationStrategy(OrmBase):
         *,
         created_at: datetime.datetime,
         created_by_username: str | None,
-        created_by_classification_batch: ClassificationBatch | None,
+        created_by_classification_batch: SandboxClassificationBatch | None,
         settings: AdaptationStrategySettings,
         model: adaptation_llm.ConcreteModel,
     ) -> None:
@@ -831,12 +831,14 @@ class AdaptationStrategy(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]  # Some 'AdaptationStrategy's are created by a 'ClassificationBatch'
+    created_by_username: orm.Mapped[
+        str | None
+    ]  # Some 'AdaptationStrategy's are created by a 'SandboxClassificationBatch'
     created_by_classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey(ClassificationBatch.id)
+        sql.ForeignKey(SandboxClassificationBatch.id)
     )
-    created_by_classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
-        foreign_keys=[created_by_classification_batch_id], remote_side=[ClassificationBatch.id]
+    created_by_classification_batch: orm.Mapped[SandboxClassificationBatch | None] = orm.relationship(
+        foreign_keys=[created_by_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
     )
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationStrategySettings.id))
@@ -911,7 +913,7 @@ class Adaptation(OrmBase):
         created_by_username: str | None,
         exercise: AdaptableExercise,
         strategy: AdaptationStrategy,
-        classification_batch: ClassificationBatch | None,
+        classification_batch: SandboxClassificationBatch | None,
         adaptation_batch: AdaptationBatch | None,
         raw_llm_conversations: JsonList,
         initial_assistant_response: adaptation_responses.AssistantResponse | None,
@@ -933,7 +935,7 @@ class Adaptation(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-    created_by_username: orm.Mapped[str | None]  # Some 'Adaptation's are created by a 'ClassificationBatch'
+    created_by_username: orm.Mapped[str | None]  # Some 'Adaptation's are created by a 'SandboxClassificationBatch'
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(
@@ -945,9 +947,11 @@ class Adaptation(OrmBase):
         foreign_keys=[strategy_id], remote_side=[AdaptationStrategy.id]
     )
 
-    classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ClassificationBatch.id))
-    classification_batch: orm.Mapped[ClassificationBatch | None] = orm.relationship(
-        foreign_keys=[classification_batch_id], remote_side=[ClassificationBatch.id], back_populates="adaptations"
+    classification_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))
+    classification_batch: orm.Mapped[SandboxClassificationBatch | None] = orm.relationship(
+        foreign_keys=[classification_batch_id],
+        remote_side=[SandboxClassificationBatch.id],
+        back_populates="adaptations",
     )
 
     adaptation_batch_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(AdaptationBatch.id))

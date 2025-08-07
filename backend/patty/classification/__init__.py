@@ -36,8 +36,8 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
 
     batch = (
         session.execute(
-            sql.select(db.ClassificationBatch)
-            .options(orm.load_only(db.ClassificationBatch.id))
+            sql.select(db.SandboxClassificationBatch)
+            .options(orm.load_only(db.SandboxClassificationBatch.id))
             .join(db.AdaptableExercise)
             .where(db.AdaptableExercise.classified_at == sql.null())
             .distinct()

@@ -1102,7 +1102,7 @@ class FixturesCreator:
         model_for_adaptation = adaptation_llm.DummyModel(provider="dummy", name="dummy-1")
 
         batch = self.add(
-            db.ClassificationBatch(
+            db.SandboxClassificationBatch(
                 created_by_username="Patty",
                 created_at=created_at,
                 created_by_page_extraction=None,

@@ -451,7 +451,7 @@ def put_adaptable_exercise_class(
         session.add(adaptation)
 
 
-T = typing.TypeVar("T", bound=db.AdaptationBatch | db.ClassificationBatch | db.SandboxExtractionBatch)
+T = typing.TypeVar("T", bound=db.AdaptationBatch | db.SandboxClassificationBatch | db.SandboxExtractionBatch)
 
 
 def paginate(
@@ -525,7 +525,7 @@ def create_classification_batch(
     req: PostClassificationBatchRequest, session: database_utils.SessionDependable
 ) -> PostClassificationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    classification_batch = db.ClassificationBatch(
+    classification_batch = db.SandboxClassificationBatch(
         created_by_username=req.creator,
         created_by_page_extraction=None,
         created_at=now,
@@ -577,7 +577,7 @@ class GetClassificationBatchResponse(ApiModel):
 async def get_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> GetClassificationBatchResponse:
-    classification_batch = get_by_id(session, db.ClassificationBatch, id)
+    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
     return GetClassificationBatchResponse(
         id=str(classification_batch.id),
         created_by=classification_batch.created_by_username,
@@ -608,7 +608,7 @@ async def get_classification_batch(
 def submit_adaptations_with_recent_settings_in_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
-    classification_batch = get_by_id(session, db.ClassificationBatch, id)
+    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
     assert classification_batch.model_for_adaptation is not None
     now = datetime.datetime.now(datetime.timezone.utc)
     for exercise in classification_batch.exercises:
@@ -644,7 +644,7 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
 def put_classification_batch_model_for_adaptation(
     id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:
-    classification_batch = get_by_id(session, db.ClassificationBatch, id)
+    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
     assert classification_batch.model_for_adaptation is None
     classification_batch.model_for_adaptation = req
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -692,8 +692,10 @@ async def get_classification_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetClassificationBatchesResponse:
     (batches, next_chunk_id) = paginate(
-        db.ClassificationBatch,
-        sql.select(db.ClassificationBatch).filter(db.ClassificationBatch.created_by_username != sql.null()),
+        db.SandboxClassificationBatch,
+        sql.select(db.SandboxClassificationBatch).filter(
+            db.SandboxClassificationBatch.created_by_username != sql.null()
+        ),
         session,
         chunkId,
     )
@@ -930,7 +932,9 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
         classification_batch = (
-            session.execute(sql.select(db.ClassificationBatch).filter_by(created_by_page_extraction=page_extraction))
+            session.execute(
+                sql.select(db.SandboxClassificationBatch).filter_by(created_by_page_extraction=page_extraction)
+            )
             .scalars()
             .first()
         )
@@ -976,7 +980,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
 
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
-        classification_batch = db.ClassificationBatch(
+        classification_batch = db.SandboxClassificationBatch(
             created_at=now,
             created_by_username=None,
             created_by_page_extraction=page_extraction,
@@ -1001,7 +1005,9 @@ def put_extraction_batch_model_for_adaptation(
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
         classification_batch = (
-            session.execute(sql.select(db.ClassificationBatch).filter_by(created_by_page_extraction=page_extraction))
+            session.execute(
+                sql.select(db.SandboxClassificationBatch).filter_by(created_by_page_extraction=page_extraction)
+            )
             .scalars()
             .first()
         )
@@ -1570,7 +1576,7 @@ def export_classification_batch_json(
 
 
 def get_classification_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    return [exercise.adaptation for exercise in get_by_id(session, db.ClassificationBatch, id).exercises]
+    return [exercise.adaptation for exercise in get_by_id(session, db.SandboxClassificationBatch, id).exercises]
 
 
 @export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)

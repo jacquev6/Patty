@@ -85,7 +85,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if page_extraction.run_classification:
-            classification_batch = db.ClassificationBatch(
+            classification_batch = db.SandboxClassificationBatch(
                 created_at=created_at,
                 created_by_username=None,
                 created_by_page_extraction=page_extraction,
