@@ -427,6 +427,7 @@ def put_adaptable_exercise_class(
     # No 'exercise.classified_by_classification_batch = None': that's how we join adaptable exercises to classification batches.
     exercise.classified_by_username = req.creator
     if exercise.adaptation is not None:
+        session.delete(exercise.adaptation.created)
         session.delete(exercise.adaptation)
 
     if adaptation_model is not None and exercise_class.latest_strategy_settings is not None:

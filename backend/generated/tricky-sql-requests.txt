@@ -7,12 +7,10 @@ SELECT exercises.id,
        exercises.textbook_id,
        exercises.removed_from_textbook,
        exercises.page_number,
-       exercises.exercise_number,
-       exercises.created_id,
-       exercises.location_id
+       exercises.exercise_number
 FROM exercises
 JOIN (exercise_locations
-      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercise_locations.id = exercises.location_id
+      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercises.id = exercise_locations.id
 WHERE exercise_locations__textbook.textbook_id = 42
 ORDER BY exercise_locations__textbook.page_number,
          exercise_locations__textbook.exercise_number
@@ -28,8 +26,6 @@ SELECT adaptable_exercises.id,
        exercises.removed_from_textbook,
        exercises.page_number,
        exercises.exercise_number,
-       exercises.created_id,
-       exercises.location_id,
        adaptable_exercises.created_by_page_extraction_id,
        adaptable_exercises.full_text,
        adaptable_exercises.instruction_hint_example_text,
@@ -41,9 +37,9 @@ SELECT adaptable_exercises.id,
 FROM exercises
 JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
 JOIN (exercise_creations
-      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercise_creations.id = exercises.created_id
+      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercises.id = exercise_creations.id
 JOIN (exercise_locations
-      JOIN exercise_locations__maybe_page_and_number ON exercise_locations.id = exercise_locations__maybe_page_and_number.id) ON exercise_locations.id = exercises.location_id
+      JOIN exercise_locations__maybe_page_and_number ON exercise_locations.id = exercise_locations__maybe_page_and_number.id) ON exercises.id = exercise_locations.id
 WHERE exercise_creations__by_page_extraction.page_extraction_id = 42
 ORDER BY exercise_locations__maybe_page_and_number.page_number,
          exercise_locations__maybe_page_and_number.exercise_number
@@ -59,8 +55,6 @@ SELECT adaptable_exercises.id,
        exercises.removed_from_textbook,
        exercises.page_number,
        exercises.exercise_number,
-       exercises.created_id,
-       exercises.location_id,
        adaptable_exercises.created_by_page_extraction_id,
        adaptable_exercises.full_text,
        adaptable_exercises.instruction_hint_example_text,
@@ -72,9 +66,9 @@ SELECT adaptable_exercises.id,
 FROM exercises
 JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
 JOIN (exercise_creations
-      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercise_creations.id = exercises.created_id
+      JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercises.id = exercise_creations.id
 JOIN (exercise_locations
-      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercise_locations.id = exercises.location_id
+      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercises.id = exercise_locations.id
 WHERE exercise_creations__by_page_extraction.page_extraction_id = 42
 ORDER BY exercise_locations__textbook.page_number,
          exercise_locations__textbook.exercise_number

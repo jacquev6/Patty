@@ -30,61 +30,6 @@ class CreatedByUserMixin:
 # ##############
 
 
-class ExerciseCreation(OrmBase):
-    __tablename__ = "exercise_creations"
-    __mapper_args__ = {"polymorphic_on": "kind"}
-
-    def __init__(self, *, at: datetime.datetime) -> None:
-        super().__init__()
-        self.at = at
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-    kind: orm.Mapped[str]
-    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-
-    exercise: orm.Mapped[BaseExercise] = orm.relationship(back_populates="created")
-
-
-class ExerciseCreationByUser(ExerciseCreation):
-    __tablename__ = "exercise_creations__by_user"
-    __mapper_args__ = {"polymorphic_identity": "by_user"}
-
-    def __init__(self, *, at: datetime.datetime, username: str) -> None:
-        super().__init__(at=at)
-        self.username = username
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
-    username: orm.Mapped[str] = orm.mapped_column()
-
-
-class ExerciseLocation(OrmBase):
-    __tablename__ = "exercise_locations"
-    __mapper_args__ = {"polymorphic_on": "kind"}
-
-    def __init__(self) -> None:
-        super().__init__()
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-    kind: orm.Mapped[str]
-
-    exercise: orm.Mapped[BaseExercise] = orm.relationship(back_populates="location")
-
-
-class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
-    __tablename__ = "exercise_locations__maybe_page_and_number"
-    __mapper_args__ = {"polymorphic_identity": "maybe_page_and_number"}
-
-    def __init__(self, page_number: int | None, exercise_number: str | None) -> None:
-        super().__init__()
-        self.page_number = page_number
-        self.exercise_number = exercise_number
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
-    page_number: orm.Mapped[int | None]
-    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
-    exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
-
-
 class BaseExercise(OrmBase):
     __tablename__ = "exercises"
     __mapper_args__ = {"polymorphic_on": "kind"}
@@ -110,16 +55,67 @@ class BaseExercise(OrmBase):
         "exercise_number", sql.String(collation="exercise_number")
     )
 
-    # @todo(After schema migration d710f60075da and data migration) Make 'created_id' non-nullable
-    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id))
-    created: orm.Mapped[ExerciseCreation | None] = orm.relationship(
-        foreign_keys=[created_id], remote_side=[ExerciseCreation.id], back_populates="exercise"
+    created: orm.Mapped[ExerciseCreation | None] = orm.relationship(back_populates="exercise")
+    location: orm.Mapped[ExerciseLocation] = orm.relationship(back_populates="exercise")
+
+
+class ExerciseCreation(OrmBase):
+    __tablename__ = "exercise_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    exercise: orm.Mapped[BaseExercise] = orm.relationship(
+        foreign_keys=[id], remote_side=[BaseExercise.id], back_populates="created"
     )
-    # @todo(After schema migration d710f60075da and data migration) Make 'location_id' non-nullable
-    location_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id))
-    location: orm.Mapped[ExerciseLocation | None] = orm.relationship(
-        foreign_keys=[location_id], remote_side=[ExerciseLocation.id], back_populates="exercise"
+
+
+class ExerciseCreationByUser(ExerciseCreation):
+    __tablename__ = "exercise_creations__by_user"
+    __mapper_args__ = {"polymorphic_identity": "by_user"}
+
+    def __init__(self, *, at: datetime.datetime, username: str) -> None:
+        super().__init__(at=at)
+        self.username = username
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseCreation.id), primary_key=True)
+    username: orm.Mapped[str] = orm.mapped_column()
+
+
+class ExerciseLocation(OrmBase):
+    __tablename__ = "exercise_locations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(BaseExercise.id), primary_key=True)
+    kind: orm.Mapped[str]
+
+    exercise: orm.Mapped[BaseExercise] = orm.relationship(
+        foreign_keys=[id], remote_side=[BaseExercise.id], back_populates="location"
     )
+
+
+class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
+    __tablename__ = "exercise_locations__maybe_page_and_number"
+    __mapper_args__ = {"polymorphic_identity": "maybe_page_and_number"}
+
+    def __init__(self, page_number: int | None, exercise_number: str | None) -> None:
+        super().__init__()
+        self.page_number = page_number
+        self.exercise_number = exercise_number
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
+    page_number: orm.Mapped[int | None]
+    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
+    exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
 
 
 annotate_new_tables("exercises")
@@ -242,21 +238,6 @@ class ExtractionStrategy(OrmBase, CreatedByUserMixin):
     prompt: orm.Mapped[str]
 
 
-class PageExtractionCreation(OrmBase):
-    __tablename__ = "page_extraction_creations"
-    __mapper_args__ = {"polymorphic_on": "kind"}
-
-    def __init__(self, *, at: datetime.datetime) -> None:
-        super().__init__()
-        self.at = at
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-    kind: orm.Mapped[str]
-    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-
-    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(back_populates="created")
-
-
 class PageExtraction(OrmBase):
     __tablename__ = "page_extractions"
 
@@ -282,10 +263,7 @@ class PageExtraction(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id))
-    created: orm.Mapped[PageExtractionCreation | None] = orm.relationship(
-        foreign_keys=[created_id], remote_side=[PageExtractionCreation.id], back_populates="page_extraction"
-    )
+    created: orm.Mapped[PageExtractionCreation | None] = orm.relationship(back_populates="page_extraction")
     created_at__to_be_deleted: orm.Mapped[datetime.datetime | None] = orm.mapped_column(
         "created_at", sql.DateTime(timezone=True)
     )
@@ -378,6 +356,23 @@ class PageExtraction(OrmBase):
             session = orm.object_session(self)
             assert session is not None
             return session.execute(request).scalars().all()
+
+
+class PageExtractionCreation(OrmBase):
+    __tablename__ = "page_extraction_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id), primary_key=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
+        foreign_keys=[id], remote_side=[PageExtraction.id], back_populates="created"
+    )
 
 
 class ExerciseCreationByPageExtraction(ExerciseCreation):
@@ -663,99 +658,6 @@ annotate_new_tables("textbooks")
 # ##########
 
 
-class ExerciseClassCreation(OrmBase):
-    __tablename__ = "exercise_class_creations"
-    __mapper_args__ = {"polymorphic_on": "kind"}
-
-    def __init__(self, *, at: datetime.datetime) -> None:
-        super().__init__()
-        self.at = at
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-    kind: orm.Mapped[str] = orm.mapped_column()
-    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-
-    exercise_class: orm.Mapped[ExerciseClass] = orm.relationship(back_populates="created")
-
-
-class ExerciseClassCreationByUser(ExerciseClassCreation):
-    __tablename__ = "exercise_class_creations__by_user"
-    __mapper_args__ = {"polymorphic_identity": "by_user"}
-
-    def __init__(self, *, at: datetime.datetime, username: str) -> None:
-        super().__init__(at=at)
-        self.username = username
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id), primary_key=True)
-    username: orm.Mapped[str] = orm.mapped_column()
-
-
-class ExerciseAdaptationCreation(OrmBase):
-    __tablename__ = "exercise_adaptation_creations"
-    __mapper_args__ = {"polymorphic_on": "kind"}
-
-    def __init__(self, *, at: datetime.datetime) -> None:
-        super().__init__()
-        self.at = at
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-    kind: orm.Mapped[str]
-    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
-
-    adaptation: orm.Mapped[Adaptation] = orm.relationship(back_populates="created")
-
-
-class ExerciseAdaptationCreationByUser(ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_user"
-    __mapper_args__ = {"polymorphic_identity": "by_user"}
-
-    def __init__(self, *, at: datetime.datetime, username: str) -> None:
-        super().__init__(at=at)
-        self.username = username
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
-    username: orm.Mapped[str] = orm.mapped_column()
-
-
-annotate_new_tables("adaptation")
-
-
-class ExerciseAdaptationCreationBySandboxClassificationBatch(ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_sandbox_classification_batch"
-    __mapper_args__ = {"polymorphic_identity": "by_sandbox_classification_batch"}
-
-    def __init__(self, *, at: datetime.datetime, sandbox_classification_batch: SandboxClassificationBatch) -> None:
-        super().__init__(at=at)
-        self.sandbox_classification_batch = sandbox_classification_batch
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
-    sandbox_classification_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))
-    sandbox_classification_batch: orm.Mapped[SandboxClassificationBatch] = orm.relationship(
-        foreign_keys=[sandbox_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
-    )
-
-
-annotate_new_tables("classification", "sandbox")
-
-
-class ExerciseClassCreationBySandboxClassificationBatch(ExerciseClassCreation):
-    __tablename__ = "exercise_class_creations__by_sandbox_classification_batch"
-    __mapper_args__ = {"polymorphic_identity": "by_sandbox_classification_batch"}
-
-    def __init__(self, *, at: datetime.datetime, sandbox_classification_batch: SandboxClassificationBatch) -> None:
-        super().__init__(at=at)
-        self.sandbox_classification_batch = sandbox_classification_batch
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id), primary_key=True)
-    sandbox_classification_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))
-    sandbox_classification_batch: orm.Mapped[SandboxClassificationBatch] = orm.relationship(
-        foreign_keys=[sandbox_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
-    )
-
-
-annotate_new_tables("classification", "sandbox")
-
-
 class ExerciseClass(OrmBase):
     __tablename__ = "exercise_classes"
 
@@ -776,11 +678,7 @@ class ExerciseClass(OrmBase):
     created_by_classification_batch_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column(
         "created_by_classification_batch_id"
     )
-    # @todo(After schema migration d710f60075da and data migration) Make 'created_id' non-nullable
-    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id))
-    created: orm.Mapped[ExerciseClassCreation | None] = orm.relationship(
-        foreign_keys=[created_id], remote_side=[ExerciseClassCreation.id], back_populates="exercise_class"
-    )
+    created: orm.Mapped[ExerciseClassCreation] = orm.relationship(back_populates="exercise_class")
 
     name: orm.Mapped[str]
 
@@ -790,6 +688,35 @@ class ExerciseClass(OrmBase):
     latest_strategy_settings: orm.Mapped[AdaptationStrategySettings | None] = orm.relationship(
         foreign_keys=[latest_strategy_settings_id], remote_side=lambda: [AdaptationStrategySettings.id]
     )
+
+
+class ExerciseClassCreation(OrmBase):
+    __tablename__ = "exercise_class_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClass.id), primary_key=True)
+    kind: orm.Mapped[str] = orm.mapped_column()
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    exercise_class: orm.Mapped[ExerciseClass] = orm.relationship(
+        foreign_keys=[id], remote_side=[ExerciseClass.id], back_populates="created"
+    )
+
+
+class ExerciseClassCreationByUser(ExerciseClassCreation):
+    __tablename__ = "exercise_class_creations__by_user"
+    __mapper_args__ = {"polymorphic_identity": "by_user"}
+
+    def __init__(self, *, at: datetime.datetime, username: str) -> None:
+        super().__init__(at=at)
+        self.username = username
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id), primary_key=True)
+    username: orm.Mapped[str] = orm.mapped_column()
 
 
 class AdaptableExercise(BaseExercise):
@@ -985,23 +912,6 @@ class SandboxAdaptationBatch(OrmBase):
     )
 
 
-class ExerciseAdaptationCreationBySandboxAdaptationBatch(ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_sandbox_adaptation_batch"
-    __mapper_args__ = {"polymorphic_identity": "by_sandbox_adaptation_batch"}
-
-    def __init__(self, *, at: datetime.datetime, sandbox_adaptation_batch: SandboxAdaptationBatch) -> None:
-        super().__init__(at=at)
-        self.sandbox_adaptation_batch = sandbox_adaptation_batch
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
-    sandbox_adaptation_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxAdaptationBatch.id))
-    sandbox_adaptation_batch: orm.Mapped[SandboxAdaptationBatch] = orm.relationship(
-        foreign_keys=[sandbox_adaptation_batch_id],
-        remote_side=[SandboxAdaptationBatch.id],
-        back_populates="adaptation_creations",
-    )
-
-
 annotate_new_tables("adaptation", "sandbox")
 
 
@@ -1034,11 +944,7 @@ class Adaptation(OrmBase):
         "created_at", sql.DateTime(timezone=True)
     )
     created_by_username__to_be_deleted: orm.Mapped[str | None] = orm.mapped_column("created_by_username")
-    # @todo(After schema migration d710f60075da and data migration) Make 'created_id' non-nullable
-    created_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id))
-    created: orm.Mapped[ExerciseAdaptationCreation | None] = orm.relationship(
-        foreign_keys=[created_id], remote_side=[ExerciseAdaptationCreation.id], back_populates="adaptation"
-    )
+    created: orm.Mapped[ExerciseAdaptationCreation] = orm.relationship(back_populates="adaptation")
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(
@@ -1100,7 +1006,89 @@ class Adaptation(OrmBase):
             self._manual_edit = value.model_dump()
 
 
+class ExerciseAdaptationCreation(OrmBase):
+    __tablename__ = "exercise_adaptation_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Adaptation.id), primary_key=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    adaptation: orm.Mapped[Adaptation] = orm.relationship(
+        foreign_keys=[id], remote_side=[Adaptation.id], back_populates="created"
+    )
+
+
+class ExerciseAdaptationCreationByUser(ExerciseAdaptationCreation):
+    __tablename__ = "exercise_adaptation_creations__by_user"
+    __mapper_args__ = {"polymorphic_identity": "by_user"}
+
+    def __init__(self, *, at: datetime.datetime, username: str) -> None:
+        super().__init__(at=at)
+        self.username = username
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
+    username: orm.Mapped[str] = orm.mapped_column()
+
+
 annotate_new_tables("adaptation")
+
+
+class ExerciseAdaptationCreationBySandboxClassificationBatch(ExerciseAdaptationCreation):
+    __tablename__ = "exercise_adaptation_creations__by_sandbox_classification_batch"
+    __mapper_args__ = {"polymorphic_identity": "by_sandbox_classification_batch"}
+
+    def __init__(self, *, at: datetime.datetime, sandbox_classification_batch: SandboxClassificationBatch) -> None:
+        super().__init__(at=at)
+        self.sandbox_classification_batch = sandbox_classification_batch
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
+    sandbox_classification_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))
+    sandbox_classification_batch: orm.Mapped[SandboxClassificationBatch] = orm.relationship(
+        foreign_keys=[sandbox_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
+    )
+
+
+class ExerciseClassCreationBySandboxClassificationBatch(ExerciseClassCreation):
+    __tablename__ = "exercise_class_creations__by_sandbox_classification_batch"
+    __mapper_args__ = {"polymorphic_identity": "by_sandbox_classification_batch"}
+
+    def __init__(self, *, at: datetime.datetime, sandbox_classification_batch: SandboxClassificationBatch) -> None:
+        super().__init__(at=at)
+        self.sandbox_classification_batch = sandbox_classification_batch
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id), primary_key=True)
+    sandbox_classification_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))
+    sandbox_classification_batch: orm.Mapped[SandboxClassificationBatch] = orm.relationship(
+        foreign_keys=[sandbox_classification_batch_id], remote_side=[SandboxClassificationBatch.id]
+    )
+
+
+annotate_new_tables("classification", "sandbox")
+
+
+class ExerciseAdaptationCreationBySandboxAdaptationBatch(ExerciseAdaptationCreation):
+    __tablename__ = "exercise_adaptation_creations__by_sandbox_adaptation_batch"
+    __mapper_args__ = {"polymorphic_identity": "by_sandbox_adaptation_batch"}
+
+    def __init__(self, *, at: datetime.datetime, sandbox_adaptation_batch: SandboxAdaptationBatch) -> None:
+        super().__init__(at=at)
+        self.sandbox_adaptation_batch = sandbox_adaptation_batch
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
+    sandbox_adaptation_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxAdaptationBatch.id))
+    sandbox_adaptation_batch: orm.Mapped[SandboxAdaptationBatch] = orm.relationship(
+        foreign_keys=[sandbox_adaptation_batch_id],
+        remote_side=[SandboxAdaptationBatch.id],
+        back_populates="adaptation_creations",
+    )
+
+
+annotate_new_tables("adaptation", "sandbox")
 
 
 # Fundamentals
