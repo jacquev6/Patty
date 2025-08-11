@@ -33,6 +33,7 @@ def clean(force: bool) -> None:
                 "frontend/",
                 "support/dev-env/backend/pip-packages/",
                 "support/dev-env/db/backups/",
+                "support/dev-env/db/dumps/",
                 "support/dev-env/frontend/cache/",
             ]
         ):
