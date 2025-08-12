@@ -6,18 +6,18 @@ import typing
 import unittest
 
 from fastapi import Depends, Request
+from sqlalchemy import orm
 import alembic.command
 import alembic.config
 import psycopg2
 import sqlalchemy as sql
 import sqlalchemy.exc
-import sqlalchemy.orm
 
 from . import settings
 
 Engine = sqlalchemy.Engine
 
-Session = sqlalchemy.orm.Session
+Session = orm.Session
 
 
 def create_engine(url: str, echo: bool = False) -> Engine:
@@ -34,7 +34,7 @@ create_exercise_number_collation = sql.text(
 )
 
 
-class OrmBase(sqlalchemy.orm.DeclarativeBase):
+class OrmBase(orm.DeclarativeBase):
     metadata = sqlalchemy.MetaData(
         naming_convention=dict(
             ix="ix_%(column_0_N_label)s",
@@ -44,6 +44,14 @@ class OrmBase(sqlalchemy.orm.DeclarativeBase):
             pk="pk_%(table_name)s",
         )
     )
+
+
+class CreatedByUserMixin:
+    created_by: orm.Mapped[str] = orm.mapped_column()
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+
+OrderBy = list[sql.sql._typing._ColumnExpressionArgument[typing.Any]]
 
 
 table_annotations: dict[str, frozenset[str]] = {}
@@ -100,7 +108,7 @@ SessionDependable = Annotated[Session, Depends(_session_dependable)]
 
 
 class TestCaseWithDatabase(unittest.TestCase):
-    Model = TypeVar("Model", bound=sqlalchemy.orm.DeclarativeBase)
+    Model = TypeVar("Model", bound=orm.DeclarativeBase)
 
     __database_url: str
     engine: Engine

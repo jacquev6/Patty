@@ -1793,7 +1793,7 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__responses__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -1869,7 +1869,7 @@
           "initialAssistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__responses__AssistantSuccess"
               },
               {
                 "$ref": "#/components/schemas/AssistantInvalidJsonError"
@@ -4758,7 +4758,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__adaptation__AssistantSuccess": {
+      "patty__adaptation__responses__AssistantSuccess": {
         "properties": {
           "kind": {
             "type": "string",

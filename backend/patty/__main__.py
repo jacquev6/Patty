@@ -54,7 +54,7 @@ def db_tables_graph() -> None:
     from . import database_utils
     from . import orm_models  # noqa: F401 to populate the metadata
 
-    colors_by_annotation: dict[frozenset[str], str] = {
+    colors_by_annotation: dict[frozenset[str], str | None] = {
         frozenset({"fundamentals"}): "#000000",
         frozenset({"exercises"}): "#000000",
         frozenset({"external"}): "#FF55FF",
@@ -65,6 +65,7 @@ def db_tables_graph() -> None:
         frozenset({"extraction"}): "#0000FF",
         frozenset({"extraction", "sandbox"}): "#5555FF",
         frozenset({"textbooks"}): "#FFFF00",
+        frozenset({"old"}): None,
     }
 
     tables = database_utils.OrmBase.metadata.sorted_tables
@@ -75,38 +76,40 @@ def db_tables_graph() -> None:
     graph = graphviz.Digraph(node_attr={"shape": "none"})
     graph.attr(rankdir="BT")
     for table in tables:
-        foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
+        node_color = colors_by_annotation[table_annotations[table.name]]
+        if node_color is not None:
+            foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
 
-        foreign_keys_by_field: dict[str, list[str]] = {}
-        for foreign_key_index, foreign_key in enumerate(foreign_keys):
-            for column in foreign_key.columns:
-                foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
+            foreign_keys_by_field: dict[str, list[str]] = {}
+            for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                for column in foreign_key.columns:
+                    foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
 
-        fields = []
-        for column_index, column in enumerate(table.columns):
-            color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
-            type = str(column.type)
-            if " " in type:
-                type = "<BR/>".join(type.split(" ", 1))
-            pk_status = "PK" if column.primary_key else ""
-            null_status = "nullable" if column.nullable else ""
-            status = ", ".join(
-                filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
+            fields = []
+            for column_index, column in enumerate(table.columns):
+                color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
+                type = str(column.type)
+                if " " in type:
+                    type = "<BR/>".join(type.split(" ", 1))
+                pk_status = "PK" if column.primary_key else ""
+                null_status = "nullable" if column.nullable else ""
+                status = ", ".join(
+                    filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
+                )
+                fields.append(
+                    f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
+                )
+            graph.node(
+                table.name,
+                label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+                color=node_color,
             )
-            fields.append(
-                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
-            )
-        graph.node(
-            table.name,
-            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
-            color=colors_by_annotation[table_annotations[table.name]],
-        )
 
-        for foreign_key_index, foreign_key in enumerate(foreign_keys):
-            target_table = foreign_key.elements[0].column.table.name
-            if target_table in known_table_names:
-                label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
-                graph.edge(table.name, target_table, label=label)
+            for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                target_table = foreign_key.elements[0].column.table.name
+                if target_table in known_table_names:
+                    label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
+                    graph.edge(table.name, target_table, label=label)
 
     sys.stdout.buffer.write(graph.pipe(format="png"))
 
@@ -115,21 +118,22 @@ def db_tables_graph() -> None:
 def tricky_sql_requests() -> None:
     import sqlparse  # type: ignore[import-untyped]
 
-    from . import orm_models as db
+    from .extraction import orm_models as extraction_orm_models
+    from .textbooks import orm_models as textbooks_orm_models
     from . import database_utils
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
 
     request: typing.Any
     for title, request in [
-        ("Textbook.fetch_ordered_exercises", db.Textbook.make_ordered_exercises_request(42)),
+        ("Textbook.fetch_ordered_exercises", textbooks_orm_models.Textbook.make_ordered_exercises_request(42)),
         (
             "PageExtraction.fetch_ordered_exercises (page and number)",
-            db.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
+            extraction_orm_models.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
         ),
         (
             "PageExtraction.fetch_ordered_exercises (textbook)",
-            db.PageExtraction.make_ordered_exercises_request__textbook(42),
+            extraction_orm_models.PageExtraction.make_ordered_exercises_request__textbook(42),
         ),
     ]:
         print(f"{title}:")

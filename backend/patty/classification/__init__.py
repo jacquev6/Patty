@@ -15,9 +15,10 @@ import torch.utils.data
 import transformers  # type: ignore[import-untyped]
 
 from .. import database_utils
-from .. import orm_models as db
+from . import orm_models as db
 from .. import settings
 from .models import SingleBert
+from ..adaptation import orm_models as adaptation_orm_models
 
 
 MAX_SEQUENCE_LENGTH = 256
@@ -31,80 +32,57 @@ def log(message: str) -> None:
 def submit_classifications(session: database_utils.Session, parallelism: int) -> bool:
     exercise_classes_by_name = {
         exercise_class.name: exercise_class
-        for exercise_class in session.execute(sql.select(db.ExerciseClass)).scalars().all()
+        for exercise_class in session.execute(sql.select(adaptation_orm_models.ExerciseClass)).scalars().all()
     }
 
-    batch = (
+    chunk = (
         session.execute(
-            sql.select(db.SandboxClassificationBatch)
-            .options(orm.load_only(db.SandboxClassificationBatch.id))
-            .join(db.AdaptableExercise)
-            .where(db.AdaptableExercise.classified_at == sql.null())
+            sql.select(db.ExerciseClassificationChunk)
+            .options(orm.load_only(db.ExerciseClassificationChunk.id))
+            .join(db.ExerciseClassificationByClassificationChunk)
+            .where(db.ExerciseClassificationByClassificationChunk.exercise_class == sql.null())
             .distinct()
         )
         .scalars()
         .first()
     )
-    if batch is None:
+    if chunk is None:
         return False
     else:
-        exercises = list(
-            session.execute(
-                sql.select(db.AdaptableExercise)
-                .where(
-                    db.AdaptableExercise.classified_by_classification_batch == batch,
-                    db.AdaptableExercise.classified_at == sql.null(),
-                )
-                .limit(parallelism)
-            )
-            .scalars()
-            .all()
-        )
         log(
-            f"Classifying {len(exercises)} exercises from batch {batch.id}: {' '.join(str(exercise.id) for exercise in exercises)}"
+            f"Classifying {len(chunk.classifications)} exercises from chunk {chunk.id}: {' '.join(str(classification.exercise.id) for classification in chunk.classifications)}"
         )
         dataframe = pd.DataFrame(
             {
-                "id": exercise.id,
-                "instruction": exercise.instruction_hint_example_text,
-                "statement": exercise.statement_text,
+                "id": classification.exercise.id,
+                "instruction": classification.exercise.instruction_hint_example_text,
+                "statement": classification.exercise.statement_text,
             }
-            for exercise in exercises
+            for classification in chunk.classifications
         )
         classify(dataframe)
         now = datetime.datetime.now(tz=datetime.timezone.utc)
-        for exercise, (_, row) in zip(exercises, dataframe.iterrows()):
-            exercise.classified_at = now
+        for classification, (_, row) in zip(chunk.classifications, dataframe.iterrows()):
             exercise_class_name = row["predicted_label"]
-            log(f"Classified exercise {exercise.id}: {exercise_class_name}")
+            log(f"Classified exercise {classification.exercise.id}: {exercise_class_name}")
             exercise_class = exercise_classes_by_name.get(exercise_class_name, None)
             if exercise_class is None:
-                exercise_class = db.ExerciseClass(
-                    created=db.ExerciseClassCreationBySandboxClassificationBatch(
-                        at=now, sandbox_classification_batch=batch
-                    ),
+                exercise_class = adaptation_orm_models.ExerciseClass(
+                    created=db.ExerciseClassCreationByClassificationChunk(at=now, classification_chunk=chunk),
                     name=exercise_class_name,
                     latest_strategy_settings=None,
                 )
                 session.add(exercise_class)
                 exercise_classes_by_name[exercise_class_name] = exercise_class
-            exercise.exercise_class = exercise_class
+            classification.exercise_class = exercise_class
+            classification.at = now
 
-            if batch.model_for_adaptation is not None and exercise_class.latest_strategy_settings is not None:
-                adaptation_strategy = db.AdaptationStrategy(
-                    created_at=now,
-                    created_by_username=None,
-                    created_by_classification_batch=batch,
-                    model=batch.model_for_adaptation,
+            if chunk.model_for_adaptation is not None and exercise_class.latest_strategy_settings is not None:
+                adaptation = adaptation_orm_models.ExerciseAdaptation(
+                    created=db.ExerciseAdaptationCreationByClassificationChunk(at=now, classification_chunk=chunk),
+                    exercise=classification.exercise,
                     settings=exercise_class.latest_strategy_settings,
-                )
-                session.add(adaptation_strategy)
-                adaptation = db.Adaptation(
-                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
-                        at=now, sandbox_classification_batch=batch
-                    ),
-                    exercise=exercise,
-                    strategy=adaptation_strategy,
+                    model=chunk.model_for_adaptation,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
                     adjustments=[],

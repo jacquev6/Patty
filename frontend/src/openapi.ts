@@ -643,7 +643,7 @@ export interface components {
       userPrompt: string
       /** Assistantresponse */
       assistantResponse:
-        | components['schemas']['patty__adaptation__adaptation__AssistantSuccess']
+        | components['schemas']['patty__adaptation__responses__AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
         | components['schemas']['AssistantUnknownError']
@@ -664,7 +664,7 @@ export interface components {
       rawLlmConversations: unknown[]
       /** Initialassistantresponse */
       initialAssistantResponse:
-        | components['schemas']['patty__adaptation__adaptation__AssistantSuccess']
+        | components['schemas']['patty__adaptation__responses__AssistantSuccess']
         | components['schemas']['AssistantInvalidJsonError']
         | components['schemas']['AssistantNotJsonError']
         | components['schemas']['AssistantUnknownError']
@@ -1776,7 +1776,7 @@ export interface components {
       kind: 'whitespace'
     }
     /** AssistantSuccess */
-    patty__adaptation__adaptation__AssistantSuccess: {
+    patty__adaptation__responses__AssistantSuccess: {
       /**
        * Kind
        * @constant

@@ -11,9 +11,7 @@ import PIL.Image
 import sqlalchemy as sql
 import urllib.parse
 
-from .. import database_utils
-from .. import settings
-from .. import orm_models as db
+from . import orm_models as extraction_orm_models
 from .assistant_responses import (
     AssistantSuccess,
     AssistantUnknownError,
@@ -21,6 +19,11 @@ from .assistant_responses import (
     AssistantNotJsonError,
 )
 from .llm import InvalidJsonLlmException, NotJsonLlmException
+from .. import database_utils
+from .. import settings
+from ..adaptation import orm_models as adaptation_orm_models
+from ..classification import orm_models as classification_orm_models
+from ..exercises import orm_models as exercises_orm_models
 
 
 def log(message: str) -> None:
@@ -36,7 +39,9 @@ pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     extractions = (
         session.execute(
-            sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()).limit(parallelism)
+            sql.select(extraction_orm_models.PageExtraction)
+            .where(extraction_orm_models.PageExtraction._assistant_response == sql.null())
+            .limit(parallelism)
         )
         .scalars()
         .all()
@@ -48,9 +53,11 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
-async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
-    assert page_extraction.range is not None
-    sha256 = page_extraction.range.pdf_file.sha256
+async def submit_extraction(
+    session: database_utils.Session, page_extraction: extraction_orm_models.PageExtraction
+) -> None:
+    assert page_extraction.pdf_range is not None
+    sha256 = page_extraction.pdf_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
         log(f"Found PDF data for page extraction {page_extraction.id} in cache")
         pdf_data = pdf_data_cache[sha256]
@@ -59,14 +66,13 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
         pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
         pdf_data_cache[sha256] = pdf_data
-    image = pdf_page_as_image(pdf_data, page_extraction.page_number)
+    image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {page_extraction.id}")
-        assert page_extraction.strategy is not None
-        extracted_exercises = page_extraction.strategy.model.extract(page_extraction.strategy.prompt, image)
+        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, image)
     except InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
         page_extraction.assistant_response = AssistantInvalidJsonError(
@@ -85,15 +91,15 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if page_extraction.run_classification:
-            classification_batch = db.SandboxClassificationBatch(
-                created_at=created_at,
-                created_by_username=None,
-                created_by_page_extraction=page_extraction,
+            classification_chunk = classification_orm_models.ExerciseClassificationChunk(
+                created=extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction(
+                    at=created_at, page_extraction=page_extraction
+                ),
                 model_for_adaptation=page_extraction.model_for_adaptation,
             )
-            session.add(classification_batch)
+            session.add(classification_chunk)
         else:
-            classification_batch = None
+            classification_chunk = None
 
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
@@ -110,21 +116,27 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     ],
                 )
             )
-            exercise = db.AdaptableExercise(
-                created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
-                location=db.ExerciseLocationMaybePageAndNumber(
-                    page_number=page_extraction.page_number, exercise_number=extracted_exercise.numero
+            exercise = adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_extraction
+                ),
+                location=exercises_orm_models.ExerciseLocationMaybePageAndNumber(
+                    page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
                 ),
                 removed_from_textbook=False,
                 full_text=full_text,
                 instruction_hint_example_text=instruction_hint_example_text,
                 statement_text=extracted_exercise.enonce,
-                classified_at=None,
-                classified_by_classification_batch=classification_batch,
-                classified_by_username=None,
-                exercise_class=None,
             )
             session.add(exercise)
+
+            if classification_chunk is not None:
+                session.add(
+                    classification_orm_models.ExerciseClassificationByClassificationChunk(
+                        exercise=exercise, at=created_at, classification_chunk=classification_chunk, exercise_class=None
+                    )
+                )
+
         page_extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
 
 

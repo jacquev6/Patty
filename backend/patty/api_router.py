@@ -18,25 +18,31 @@ import sqlalchemy as sql
 from . import authentication
 from . import database_utils
 from . import extracted
-from . import orm_models as db
 from . import settings
 from .adaptation import llm as adaptation_llm
+from .adaptation import orm_models as adaptation_orm_models
+from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
-from .adaptation.adaptation import (
+from .adaptation.responses import (
     Adjustment,
     AssistantInvalidJsonError,
     AssistantNotJsonError,
     AssistantResponse,
     AssistantSuccess,
 )
-from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
 from .adaptation.submission import LlmMessage
-from .extraction import llm as extraction_llm
+from .classification import orm_models as classification_orm_models
+from .errors import orm_models as errors_orm_models
+from .exercises import orm_models as exercises_orm_models
+from .external_exercises import orm_models as external_exercises_orm_models
 from .extraction import assistant_responses as extraction_responses
+from .extraction import llm as extraction_llm
+from .extraction import orm_models as extraction_orm_models
 from .mailing import send_mail
 from .version import PATTY_VERSION
+from .textbooks import orm_models as textbooks_orm_models
 
 __all__ = ["api_router", "export_router"]
 
@@ -78,7 +84,7 @@ def post_errors_caught_by_frontend(
             body=req.model_dump_json(indent=2),
         )
     session.add(
-        db.ErrorCaughtByFrontend(
+        errors_orm_models.ErrorCaughtByFrontend(
             created_at=datetime.datetime.now(datetime.timezone.utc),
             created_by_username=req.creator,
             patty_version=PATTY_VERSION,
@@ -125,7 +131,11 @@ def get_errors_caught_by_frontend(session: database_utils.SessionDependable) -> 
                 message=error.message,
                 code_location=error.code_location,
             )
-            for error in session.execute(sql.select(db.ErrorCaughtByFrontend).order_by(-db.ErrorCaughtByFrontend.id))
+            for error in session.execute(
+                sql.select(errors_orm_models.ErrorCaughtByFrontend).order_by(
+                    -errors_orm_models.ErrorCaughtByFrontend.id
+                )
+            )
             .scalars()
             .all()
         ]
@@ -202,18 +212,19 @@ class BaseAdaptationBatch(ApiModel):
 def get_base_adaptation_batch(
     user: str, session: database_utils.SessionDependable, base: str | None = None
 ) -> BaseAdaptationBatch:
-    request = sql.select(db.SandboxAdaptationBatch)
+    request = sql.select(adaptation_orm_models.SandboxAdaptationBatch)
     if base is None:
         request = request.where(
-            (db.SandboxAdaptationBatch.created_by_username == user) | (db.SandboxAdaptationBatch.id == 1)
-        ).order_by(-db.SandboxAdaptationBatch.id)
+            (adaptation_orm_models.SandboxAdaptationBatch.created_by == user)
+            | (adaptation_orm_models.SandboxAdaptationBatch.id == 1)
+        ).order_by(-adaptation_orm_models.SandboxAdaptationBatch.id)
     else:
         try:
             base_id = int(base)
         except ValueError:
             raise fastapi.HTTPException(status_code=404, detail="Base adaptation batch not found")
         else:
-            request = request.where(db.SandboxAdaptationBatch.id == base_id)
+            request = request.where(adaptation_orm_models.SandboxAdaptationBatch.id == base_id)
 
     adaptation_batch = session.execute(request).scalars().first()
     if adaptation_batch is None:
@@ -222,9 +233,9 @@ def get_base_adaptation_batch(
     available_strategy_settings = []
     for exercise_class in (
         session.execute(
-            sql.select(db.ExerciseClass)
-            .where(db.ExerciseClass.latest_strategy_settings != sql.null())
-            .order_by(db.ExerciseClass.name)
+            sql.select(adaptation_orm_models.ExerciseClass)
+            .where(adaptation_orm_models.ExerciseClass.latest_strategy_settings != sql.null())
+            .order_by(adaptation_orm_models.ExerciseClass.name)
         )
         .scalars()
         .all()
@@ -237,9 +248,9 @@ def get_base_adaptation_batch(
             )
     return BaseAdaptationBatch(
         id=str(adaptation_batch.id),
-        strategy=make_api_strategy(adaptation_batch.strategy),
+        strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
         inputs=[
-            make_api_input(adaptation_creation.adaptation.exercise)
+            make_api_input(adaptation_creation.exercise_adaptation.exercise)
             for adaptation_creation in adaptation_batch.adaptation_creations
         ],
         available_strategy_settings=available_strategy_settings,
@@ -273,12 +284,16 @@ async def post_adaptation_batch(
             branch_name = req.strategy.settings.name[:-16]
         else:
             branch_name = req.strategy.settings.name
-        exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == branch_name).first()
+        exercise_class = (
+            session.query(adaptation_orm_models.ExerciseClass)
+            .filter(adaptation_orm_models.ExerciseClass.name == branch_name)
+            .first()
+        )
         if exercise_class is None:
             assert branch_name == req.strategy.settings.name
             base_settings = None
-            exercise_class = db.ExerciseClass(
-                created=db.ExerciseClassCreationByUser(at=now, username=req.creator),
+            exercise_class = adaptation_orm_models.ExerciseClass(
+                created=classification_orm_models.ExerciseClassCreationByUser(at=now, username=req.creator),
                 name=branch_name,
                 latest_strategy_settings=None,
             )
@@ -296,10 +311,10 @@ async def post_adaptation_batch(
         or base_settings.system_prompt != req.strategy.settings.system_prompt
         or base_settings.response_specification != req.strategy.settings.response_specification
     ):
-        settings = db.AdaptationStrategySettings(
+        settings = adaptation_orm_models.ExerciseAdaptationSettings(
             exercise_class=exercise_class,
             parent=base_settings,
-            created_by_username=req.creator,
+            created_by=req.creator,
             created_at=now,
             system_prompt=req.strategy.settings.system_prompt,
             response_specification=req.strategy.settings.response_specification,
@@ -310,40 +325,38 @@ async def post_adaptation_batch(
     if exercise_class is not None:
         session.flush()
         exercise_class.latest_strategy_settings = settings
-    strategy = db.AdaptationStrategy(
-        created_by_username=req.creator,
-        created_by_classification_batch=None,
-        created_at=now,
-        model=req.strategy.model,
-        settings=settings,
-    )
-    session.add(strategy)
 
-    adaptation_batch = db.SandboxAdaptationBatch(created_by_username=req.creator, created_at=now, strategy=strategy)
+    adaptation_batch = adaptation_orm_models.SandboxAdaptationBatch(
+        created_by=req.creator, created_at=now, settings=settings, model=req.strategy.model
+    )
     session.add(adaptation_batch)
 
     for req_input in req.inputs:
-        exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, username=req.creator),
-            location=db.ExerciseLocationMaybePageAndNumber(
+        exercise = adaptation_orm_models.AdaptableExercise(
+            created=exercises_orm_models.ExerciseCreationByUser(at=now, username=req.creator),
+            location=exercises_orm_models.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
             removed_from_textbook=False,
             full_text=req_input.text,
             instruction_hint_example_text=None,
             statement_text=None,
-            classified_at=now,
-            classified_by_username=req.creator,
-            classified_by_classification_batch=None,
-            exercise_class=exercise_class,
         )
         session.add(exercise)
 
-        adaptation = db.Adaptation(
-            created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+        if exercise_class is not None:
+            session.add(
+                classification_orm_models.ExerciseClassificationByUser(
+                    exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
+                )
+            )
+
+        adaptation = adaptation_orm_models.ExerciseAdaptation(
+            created=adaptation_orm_models.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                 at=now, sandbox_adaptation_batch=adaptation_batch
             ),
-            strategy=strategy,
+            settings=settings,
+            model=req.strategy.model,
             exercise=exercise,
             raw_llm_conversations=[],
             initial_assistant_response=None,
@@ -366,13 +379,13 @@ class GetAdaptationBatchResponse(ApiModel):
 
 @api_router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
-    adaptation_batch = get_by_id(session, db.SandboxAdaptationBatch, id)
+    adaptation_batch = get_by_id(session, adaptation_orm_models.SandboxAdaptationBatch, id)
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
-        created_by=adaptation_batch.created_by_username,
-        strategy=make_api_strategy(adaptation_batch.strategy),
+        created_by=adaptation_batch.created_by,
+        strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
         adaptations=[
-            make_api_adaptation(adaptation_creation.adaptation)
+            make_api_adaptation(adaptation_creation.exercise_adaptation)
             for adaptation_creation in adaptation_batch.adaptation_creations
         ],
     )
@@ -392,7 +405,7 @@ class GetAdaptationBatchesResponse(ApiModel):
 
 @api_router.get("/exercise-classes")
 def get_exercise_classes(session: database_utils.SessionDependable) -> list[str]:
-    request = sql.select(db.ExerciseClass).order_by(db.ExerciseClass.name)
+    request = sql.select(adaptation_orm_models.ExerciseClass).order_by(adaptation_orm_models.ExerciseClass.name)
     return [exercise_class.name for exercise_class in session.execute(request).scalars().all()]
 
 
@@ -406,58 +419,58 @@ def put_adaptable_exercise_class(
     id: str, req: PutAdaptableExerciseClassRequest, session: database_utils.SessionDependable
 ) -> None:
     now = datetime.datetime.now(datetime.timezone.utc)
-    exercise = get_by_id(session, db.AdaptableExercise, id)
-    exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == req.className).first()
+    exercise = get_by_id(session, adaptation_orm_models.AdaptableExercise, id)
+    exercise_class = (
+        session.query(adaptation_orm_models.ExerciseClass)
+        .filter(adaptation_orm_models.ExerciseClass.name == req.className)
+        .first()
+    )
     if exercise_class is None:
         raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
-    if exercise.adaptation is not None:
-        adaptation_model = exercise.adaptation.strategy.model
-    elif (
-        exercise.classified_by_classification_batch is not None
-        and exercise.classified_by_classification_batch.model_for_adaptation is not None
+
+    if len(exercise.adaptations) != 0:
+        adaptation_model: adaptation_llm.ConcreteModel | None = exercise.adaptations[-1].model
+    elif len(exercise.classifications) != 0 and isinstance(
+        exercise.classifications[-1], classification_orm_models.ExerciseClassificationByClassificationChunk
     ):
-        adaptation_model = exercise.classified_by_classification_batch.model_for_adaptation
+        adaptation_model = exercise.classifications[-1].classification_chunk.model_for_adaptation
     else:
         adaptation_model = None
 
-    exercise.exercise_class = exercise_class
-    exercise.classified_at = now
-    # No 'exercise.classified_by_classification_batch = None': that's how we join adaptable exercises to classification batches.
-    exercise.classified_by_username = req.creator
-    if exercise.adaptation is not None:
-        session.delete(exercise.adaptation.created)
-        session.delete(exercise.adaptation)
+    session.add(
+        classification_orm_models.ExerciseClassificationByUser(
+            exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
+        )
+    )
 
     if adaptation_model is not None and exercise_class.latest_strategy_settings is not None:
-        strategy = db.AdaptationStrategy(
-            created_at=now,
-            created_by_username=req.creator,
-            created_by_classification_batch=None,
-            settings=exercise_class.latest_strategy_settings,
-            model=adaptation_model,
+        session.add(
+            adaptation_orm_models.ExerciseAdaptation(
+                created=adaptation_orm_models.ExerciseAdaptationCreationByUser(at=now, username=req.creator),
+                settings=exercise_class.latest_strategy_settings,
+                model=adaptation_model,
+                exercise=exercise,
+                raw_llm_conversations=[],
+                initial_assistant_response=None,
+                adjustments=[],
+                manual_edit=None,
+            )
         )
-        session.add(strategy)
-        assert exercise.classified_by_classification_batch is not None
-        adaptation = db.Adaptation(
-            created=db.ExerciseAdaptationCreationByUser(at=now, username=req.creator),
-            strategy=strategy,
-            exercise=exercise,
-            raw_llm_conversations=[],
-            initial_assistant_response=None,
-            adjustments=[],
-            manual_edit=None,
-        )
-        session.add(adaptation)
 
 
-T = typing.TypeVar("T", bound=db.SandboxAdaptationBatch | db.SandboxClassificationBatch | db.SandboxExtractionBatch)
+T = typing.TypeVar(
+    "T",
+    bound=adaptation_orm_models.SandboxAdaptationBatch
+    | classification_orm_models.SandboxClassificationBatch
+    | extraction_orm_models.SandboxExtractionBatch,
+)
 
 
 def paginate(
-    model: type[T], request: sql.Select[tuple[T]], session: database_utils.SessionDependable, chunk_id: str | None
+    model: type[T], session: database_utils.SessionDependable, chunk_id: str | None
 ) -> tuple[list[T], str | None]:
     chunk_size = 20
-    request = request.order_by(-model.id).limit(chunk_size + 1)
+    request = sql.select(model).order_by(-model.id).limit(chunk_size + 1)
 
     if chunk_id is not None:
         try:
@@ -480,23 +493,16 @@ def paginate(
 async def get_adaptation_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetAdaptationBatchesResponse:
-    (batches, next_chunk_id) = paginate(
-        db.SandboxAdaptationBatch,
-        sql.select(db.SandboxAdaptationBatch).filter(
-            db.SandboxAdaptationBatch.textbook_id__to_be_deleted == sql.null()
-        ),
-        session,
-        chunkId,
-    )
+    (batches, next_chunk_id) = paginate(adaptation_orm_models.SandboxAdaptationBatch, session, chunkId)
 
     return GetAdaptationBatchesResponse(
         adaptation_batches=[
             GetAdaptationBatchesResponse.AdaptationBatch(
                 id=str(adaptation_batch.id),
-                created_by=adaptation_batch.created_by_username,
+                created_by=adaptation_batch.created_by,
                 created_at=adaptation_batch.created_at,
-                model=adaptation_batch.strategy.model,
-                strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.strategy.settings),
+                model=adaptation_batch.model,
+                strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.settings),
             )
             for adaptation_batch in batches
         ],
@@ -526,30 +532,36 @@ def create_classification_batch(
     req: PostClassificationBatchRequest, session: database_utils.SessionDependable
 ) -> PostClassificationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    classification_batch = db.SandboxClassificationBatch(
-        created_by_username=req.creator,
-        created_by_page_extraction=None,
-        created_at=now,
-        model_for_adaptation=req.model_for_adaptation,
+    classification_batch = classification_orm_models.SandboxClassificationBatch(
+        created_by=req.creator, created_at=now, model_for_adaptation=req.model_for_adaptation
     )
     session.add(classification_batch)
 
+    classification_chunk = classification_orm_models.ExerciseClassificationChunk(
+        created=classification_orm_models.ExerciseClassificationChunkCreationBySandboxClassificationBatch(
+            at=now, sandbox_classification_batch=classification_batch
+        ),
+        model_for_adaptation=req.model_for_adaptation,
+    )
+    session.add(classification_chunk)
+
     for req_input in req.inputs:
-        exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, username=req.creator),
-            location=db.ExerciseLocationMaybePageAndNumber(
+        exercise = adaptation_orm_models.AdaptableExercise(
+            created=exercises_orm_models.ExerciseCreationByUser(at=now, username=req.creator),
+            location=exercises_orm_models.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
             removed_from_textbook=False,
             full_text=req_input.instruction_hint_example_text + "\n" + req_input.statement_text,
             instruction_hint_example_text=req_input.instruction_hint_example_text,
             statement_text=req_input.statement_text,
-            classified_at=None,
-            classified_by_username=None,
-            classified_by_classification_batch=classification_batch,
-            exercise_class=None,
         )
         session.add(exercise)
+        session.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                at=now, exercise=exercise, classification_chunk=classification_chunk, exercise_class=None
+            )
+        )
 
     session.flush()
 
@@ -578,27 +590,60 @@ class GetClassificationBatchResponse(ApiModel):
 async def get_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> GetClassificationBatchResponse:
-    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
+    classification_batch = get_by_id(session, classification_orm_models.SandboxClassificationBatch, id)
+
+    exercises = [
+        classification.exercise
+        for classification in classification_batch.classification_chunk_creation.classification_chunk.classifications
+    ]
+
+    latest_classifications = [
+        exercise.classifications[-1] if exercise.classifications else None for exercise in exercises
+    ]
+
+    latest_adaptations = [
+        (
+            None
+            if latest_classification is None or latest_classification.exercise_class is None
+            else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
+        )
+        for (exercise, latest_classification) in zip(exercises, latest_classifications)
+    ]
+
     return GetClassificationBatchResponse(
         id=str(classification_batch.id),
-        created_by=classification_batch.created_by_username,
+        created_by=classification_batch.created_by,
         model_for_adaptation=classification_batch.model_for_adaptation,
         exercises=[
             GetClassificationBatchResponse.Exercise(
                 id=str(exercise.id),
-                page_number=assert_isinstance(exercise.location, db.ExerciseLocationMaybePageAndNumber).page_number,
+                page_number=assert_isinstance(
+                    exercise.location, exercises_orm_models.ExerciseLocationMaybePageAndNumber
+                ).page_number,
                 exercise_number=assert_isinstance(
-                    exercise.location, db.ExerciseLocationMaybePageAndNumber
+                    exercise.location, exercises_orm_models.ExerciseLocationMaybePageAndNumber
                 ).exercise_number,
                 full_text=exercise.full_text,
-                exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
-                reclassified_by=exercise.classified_by_username,
-                exercise_class_has_settings=(
-                    exercise.exercise_class is not None and exercise.exercise_class.latest_strategy_settings is not None
+                exercise_class=(
+                    latest_classification.exercise_class.name
+                    if latest_classification is not None and latest_classification.exercise_class is not None
+                    else None
                 ),
-                adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
+                reclassified_by=(
+                    latest_classification.username
+                    if isinstance(latest_classification, classification_orm_models.ExerciseClassificationByUser)
+                    else None
+                ),
+                exercise_class_has_settings=(
+                    latest_classification is not None
+                    and latest_classification.exercise_class is not None
+                    and latest_classification.exercise_class.latest_strategy_settings is not None
+                ),
+                adaptation=None if latest_adaptation is None else make_api_adaptation(latest_adaptation),
             )
-            for exercise in classification_batch.exercises
+            for (exercise, latest_classification, latest_adaptation) in zip(
+                exercises, latest_classifications, latest_adaptations
+            )
         ],
     )
 
@@ -609,71 +654,64 @@ async def get_classification_batch(
 def submit_adaptations_with_recent_settings_in_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
-    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
+    classification_batch = get_by_id(session, classification_orm_models.SandboxClassificationBatch, id)
     assert classification_batch.model_for_adaptation is not None
     now = datetime.datetime.now(datetime.timezone.utc)
-    for exercise in classification_batch.exercises:
+    classification_chunk = classification_batch.classification_chunk_creation.classification_chunk
+    for classification in classification_chunk.classifications:
+        exercise = classification.exercise
         if (
-            exercise.adaptation is None
-            and exercise.exercise_class is not None
-            and exercise.exercise_class.latest_strategy_settings is not None
+            len(exercise.adaptations) == 0
+            and classification.exercise_class is not None
+            and classification.exercise_class.latest_strategy_settings is not None
         ):
-            strategy = db.AdaptationStrategy(
-                created_at=now,
-                created_by_username=None,
-                created_by_classification_batch=classification_batch,
-                settings=exercise.exercise_class.latest_strategy_settings,
-                model=classification_batch.model_for_adaptation,
+            session.add(
+                adaptation_orm_models.ExerciseAdaptation(
+                    created=classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                        at=now, classification_chunk=classification_chunk
+                    ),
+                    exercise=exercise,
+                    settings=classification.exercise_class.latest_strategy_settings,
+                    model=classification_batch.model_for_adaptation,
+                    raw_llm_conversations=[],
+                    initial_assistant_response=None,
+                    adjustments=[],
+                    manual_edit=None,
+                )
             )
-            session.add(strategy)
-            adaptation = db.Adaptation(
-                created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
-                    at=now, sandbox_classification_batch=classification_batch
-                ),
-                exercise=exercise,
-                strategy=strategy,
-                raw_llm_conversations=[],
-                initial_assistant_response=None,
-                adjustments=[],
-                manual_edit=None,
-            )
-            session.add(adaptation)
 
 
 @api_router.put("/classification-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
 def put_classification_batch_model_for_adaptation(
     id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:
-    classification_batch = get_by_id(session, db.SandboxClassificationBatch, id)
+    classification_batch = get_by_id(session, classification_orm_models.SandboxClassificationBatch, id)
     assert classification_batch.model_for_adaptation is None
     classification_batch.model_for_adaptation = req
     now = datetime.datetime.now(datetime.timezone.utc)
-    for exercise in classification_batch.exercises:
+    classification_chunk = classification_batch.classification_chunk_creation.classification_chunk
+    classification_chunk.model_for_adaptation = req
+    for classification in classification_chunk.classifications:
+        exercise = classification.exercise
         if (
-            exercise.adaptation is None
-            and exercise.exercise_class is not None
-            and exercise.exercise_class.latest_strategy_settings is not None
+            len(exercise.adaptations) == 0
+            and classification.exercise_class is not None
+            and classification.exercise_class.latest_strategy_settings is not None
         ):
-            strategy = db.AdaptationStrategy(
-                created_at=now,
-                created_by_username=None,
-                created_by_classification_batch=classification_batch,
-                settings=exercise.exercise_class.latest_strategy_settings,
-                model=classification_batch.model_for_adaptation,
+            session.add(
+                adaptation_orm_models.ExerciseAdaptation(
+                    created=classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                        at=now, classification_chunk=classification_chunk
+                    ),
+                    exercise=exercise,
+                    settings=classification.exercise_class.latest_strategy_settings,
+                    model=classification_batch.model_for_adaptation,
+                    raw_llm_conversations=[],
+                    initial_assistant_response=None,
+                    adjustments=[],
+                    manual_edit=None,
+                )
             )
-            session.add(strategy)
-            adaptation = db.Adaptation(
-                created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
-                    at=now, sandbox_classification_batch=classification_batch
-                ),
-                exercise=exercise,
-                strategy=strategy,
-                raw_llm_conversations=[],
-                initial_assistant_response=None,
-                adjustments=[],
-                manual_edit=None,
-            )
-            session.add(adaptation)
 
 
 class GetClassificationBatchesResponse(ApiModel):
@@ -690,20 +728,13 @@ class GetClassificationBatchesResponse(ApiModel):
 async def get_classification_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetClassificationBatchesResponse:
-    (batches, next_chunk_id) = paginate(
-        db.SandboxClassificationBatch,
-        sql.select(db.SandboxClassificationBatch).filter(
-            db.SandboxClassificationBatch.created_by_username != sql.null()
-        ),
-        session,
-        chunkId,
-    )
+    (batches, next_chunk_id) = paginate(classification_orm_models.SandboxClassificationBatch, session, chunkId)
 
     return GetClassificationBatchesResponse(
         classification_batches=[
             GetClassificationBatchesResponse.ClassificationBatch(
                 id=str(classification_batch.id),
-                created_by=classification_batch.created_by_username,
+                created_by=classification_batch.created_by,
                 created_at=classification_batch.created_at,
             )
             for classification_batch in batches
@@ -727,11 +758,11 @@ class CreatePdfFileResponse(ApiModel):
 @api_router.post("/pdf-files")
 def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDependable) -> CreatePdfFileResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    pdf_file = session.get(db.PdfFile, req.sha256)
+    pdf_file = session.get(extraction_orm_models.PdfFile, req.sha256)
     if pdf_file is None:
-        pdf_file = db.PdfFile(
+        pdf_file = extraction_orm_models.PdfFile(
             sha256=req.sha256,
-            created_by_username=req.creator,
+            created_by=req.creator,
             created_at=now,
             bytes_count=req.bytes_count,
             pages_count=req.pages_count,
@@ -787,9 +818,19 @@ class ApiExtractionStrategy(ApiModel):
 
 @api_router.get("/latest-extraction-strategy")
 def get_latest_extraction_strategy(session: database_utils.SessionDependable) -> ApiExtractionStrategy:
-    strategy = session.execute(sql.select(db.ExtractionStrategy).order_by(-db.ExtractionStrategy.id)).scalars().first()
-    assert strategy is not None
-    return ApiExtractionStrategy(id=str(strategy.id), model=strategy.model, prompt=strategy.prompt)
+    settings = (
+        session.execute(
+            sql.select(extraction_orm_models.ExtractionSettings).order_by(-extraction_orm_models.ExtractionSettings.id)
+        )
+        .scalars()
+        .first()
+    )
+    assert settings is not None
+    if PATTY_VERSION == "dev":
+        model: extraction_llm.ConcreteModel = extraction_llm.DummyModel(provider="dummy", name="dummy-1")
+    else:
+        model = extraction_llm.GeminiModel(provider="gemini", name="gemini-2.0-flash")
+    return ApiExtractionStrategy(id=str(settings.id), model=model, prompt=settings.prompt)
 
 
 class PostExtractionBatchRequest(ApiModel):
@@ -811,35 +852,43 @@ def create_extraction_batch(
     req: PostExtractionBatchRequest, session: database_utils.SessionDependable
 ) -> PostExtractionBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
-    pdf_file_range = db.PdfFileRange(
-        created_by_username=req.creator,
+    pdf_file = session.get(extraction_orm_models.PdfFile, req.pdf_file_sha256)
+    if pdf_file is None:
+        raise fastapi.HTTPException(status_code=404, detail="PDF file not found")
+    pdf_file_range = extraction_orm_models.PdfFileRange(
+        created_by=req.creator,
         created_at=now,
-        pdf_file_sha256=req.pdf_file_sha256,
-        pdf_file_first_page_number=req.first_page,
+        pdf_file=pdf_file,
+        first_page_number=req.first_page,
         pages_count=req.pages_count,
     )
     session.add(pdf_file_range)
-    strategy = session.get(db.ExtractionStrategy, req.strategy.id)
-    if strategy is None or strategy.model != req.strategy.model or strategy.prompt != req.strategy.prompt:
-        strategy = db.ExtractionStrategy(
-            created_by_username=req.creator, created_at=now, model=req.strategy.model, prompt=req.strategy.prompt
+    settings = session.get(extraction_orm_models.ExtractionSettings, req.strategy.id)
+    if settings is None or settings.prompt != req.strategy.prompt:
+        settings = extraction_orm_models.ExtractionSettings(
+            created_by=req.creator, created_at=now, prompt=req.strategy.prompt
         )
-        session.add(strategy)
-    extraction_batch = db.SandboxExtractionBatch(
-        created_by_username=req.creator,
+        session.add(settings)
+    model = req.strategy.model
+    extraction_batch = extraction_orm_models.SandboxExtractionBatch(
+        created_by=req.creator,
         created_at=now,
-        strategy=strategy,
-        range=pdf_file_range,
+        settings=settings,
+        model=model,
+        pdf_range=pdf_file_range,
         run_classification=req.run_classification,
         model_for_adaptation=req.model_for_adaptation,
     )
     session.add(extraction_batch)
     for page_number in range(req.first_page, req.first_page + req.pages_count):
-        page = db.PageExtraction(
-            created=db.PageExtractionCreationBySandboxExtractionBatch(at=now, extraction_batch=extraction_batch),
-            range=pdf_file_range,
-            page_number=page_number,
-            strategy=strategy,
+        page = extraction_orm_models.PageExtraction(
+            created=extraction_orm_models.PageExtractionCreationBySandboxExtractionBatch(
+                at=now, sandbox_extraction_batch=extraction_batch
+            ),
+            pdf_range=pdf_file_range,
+            pdf_page_number=page_number,
+            settings=settings,
+            model=model,
             run_classification=req.run_classification,
             model_for_adaptation=req.model_for_adaptation,
             assistant_response=None,
@@ -879,39 +928,70 @@ class GetExtractionBatchResponse(ApiModel):
 
 @api_router.get("/extraction-batches/{id}")
 async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
-    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
-    pages = [
-        GetExtractionBatchResponse.Page(
-            page_number=creation.page_extraction.page_number,
-            assistant_response=creation.page_extraction.assistant_response,
-            exercises=[
-                GetExtractionBatchResponse.Page.Exercise(
-                    id=str(exercise.id),
-                    page_number=assert_isinstance(exercise.location, db.ExerciseLocationMaybePageAndNumber).page_number,
-                    exercise_number=assert_isinstance(
-                        exercise.location, db.ExerciseLocationMaybePageAndNumber
-                    ).exercise_number,
-                    full_text=exercise.full_text,
-                    exercise_class=None if exercise.exercise_class is None else exercise.exercise_class.name,
-                    reclassified_by=exercise.classified_by_username,
-                    exercise_class_has_settings=(
-                        exercise.exercise_class is not None
-                        and exercise.exercise_class.latest_strategy_settings is not None
-                    ),
-                    adaptation=None if exercise.adaptation is None else make_api_adaptation(exercise.adaptation),
-                )
-                for exercise in creation.page_extraction.fetch_ordered_exercises()
-            ],
+    extraction_batch = get_by_id(session, extraction_orm_models.SandboxExtractionBatch, id)
+    pages: list[GetExtractionBatchResponse.Page] = []
+
+    for page_extraction_creation in extraction_batch.page_extraction_creations:
+        page_extraction = page_extraction_creation.page_extraction
+
+        exercises = list(page_extraction.fetch_ordered_exercises())
+
+        latest_classifications = [
+            exercise.classifications[-1] if exercise.classifications else None for exercise in exercises
+        ]
+
+        latest_adaptations = [
+            (
+                None
+                if latest_classification is None or latest_classification.exercise_class is None
+                else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
+            )
+            for (exercise, latest_classification) in zip(exercises, latest_classifications)
+        ]
+
+        pages.append(
+            GetExtractionBatchResponse.Page(
+                page_number=page_extraction.pdf_page_number,
+                assistant_response=page_extraction.assistant_response,
+                exercises=[
+                    GetExtractionBatchResponse.Page.Exercise(
+                        id=str(exercise.id),
+                        page_number=assert_isinstance(
+                            exercise.location, exercises_orm_models.ExerciseLocationMaybePageAndNumber
+                        ).page_number,
+                        exercise_number=assert_isinstance(
+                            exercise.location, exercises_orm_models.ExerciseLocationMaybePageAndNumber
+                        ).exercise_number,
+                        full_text=exercise.full_text,
+                        exercise_class=(
+                            latest_classification.exercise_class.name
+                            if latest_classification is not None and latest_classification.exercise_class is not None
+                            else None
+                        ),
+                        reclassified_by=(
+                            latest_classification.username
+                            if isinstance(latest_classification, classification_orm_models.ExerciseClassificationByUser)
+                            else None
+                        ),
+                        exercise_class_has_settings=(
+                            latest_classification is not None
+                            and latest_classification.exercise_class is not None
+                            and latest_classification.exercise_class.latest_strategy_settings is not None
+                        ),
+                        adaptation=None if latest_adaptation is None else make_api_adaptation(latest_adaptation),
+                    )
+                    for exercise, latest_classification, latest_adaptation in zip(
+                        exercises, latest_classifications, latest_adaptations
+                    )
+                ],
+            )
         )
-        for creation in extraction_batch.page_extraction_creations
-    ]
+
     return GetExtractionBatchResponse(
         id=str(extraction_batch.id),
-        created_by=extraction_batch.created_by_username,
+        created_by=extraction_batch.created_by,
         strategy=ApiExtractionStrategy(
-            id=str(extraction_batch.strategy.id),
-            model=extraction_batch.strategy.model,
-            prompt=extraction_batch.strategy.prompt,
+            id=str(extraction_batch.settings.id), model=extraction_batch.model, prompt=extraction_batch.settings.prompt
         ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,
@@ -925,121 +1005,135 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
 def submit_adaptations_with_recent_settings_in_extraction_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
-    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
+    extraction_batch = get_by_id(session, extraction_orm_models.SandboxExtractionBatch, id)
     assert extraction_batch.model_for_adaptation is not None
     now = datetime.datetime.now(datetime.timezone.utc)
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
-        classification_batch = (
+        classification_chunk = (
             session.execute(
-                sql.select(db.SandboxClassificationBatch).filter_by(created_by_page_extraction=page_extraction)
+                sql.select(classification_orm_models.ExerciseClassificationChunk)
+                .join(extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction)
+                .where(
+                    extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction.page_extraction
+                    == page_extraction
+                )
             )
             .scalars()
             .first()
         )
-        assert classification_batch is not None
-        assert classification_batch.model_for_adaptation is not None
+        assert classification_chunk is not None
+        assert classification_chunk.model_for_adaptation is not None
         for exercise_creation in page_extraction.exercise_creations__unordered:
             exercise = exercise_creation.exercise
-            assert isinstance(exercise, db.AdaptableExercise)
+            assert isinstance(exercise, adaptation_orm_models.AdaptableExercise)
+
+            classification = exercise.classifications[-1]
+            assert isinstance(classification, classification_orm_models.ExerciseClassificationByClassificationChunk)
+            assert classification.classification_chunk == classification_chunk
+
             if (
-                exercise.adaptation is None
-                and exercise.exercise_class is not None
-                and exercise.exercise_class.latest_strategy_settings is not None
+                len(exercise.adaptations) == 0
+                and classification.exercise_class is not None
+                and classification.exercise_class.latest_strategy_settings is not None
             ):
-                strategy = db.AdaptationStrategy(
-                    created_at=now,
-                    created_by_username=None,
-                    created_by_classification_batch=classification_batch,
-                    settings=exercise.exercise_class.latest_strategy_settings,
-                    model=classification_batch.model_for_adaptation,
+                session.add(
+                    adaptation_orm_models.ExerciseAdaptation(
+                        created=classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                            at=now, classification_chunk=classification_chunk
+                        ),
+                        exercise=exercise,
+                        settings=classification.exercise_class.latest_strategy_settings,
+                        model=classification_chunk.model_for_adaptation,
+                        raw_llm_conversations=[],
+                        initial_assistant_response=None,
+                        adjustments=[],
+                        manual_edit=None,
+                    )
                 )
-                session.add(strategy)
-                adaptation = db.Adaptation(
-                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
-                        at=now, sandbox_classification_batch=classification_batch
-                    ),
-                    exercise=exercise,
-                    strategy=strategy,
-                    raw_llm_conversations=[],
-                    initial_assistant_response=None,
-                    adjustments=[],
-                    manual_edit=None,
-                )
-                session.add(adaptation)
 
 
 @api_router.put("/extraction-batches/{id}/run-classification", status_code=fastapi.status.HTTP_200_OK)
 def put_extraction_batch_run_classification(id: str, session: database_utils.SessionDependable) -> None:
-    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
-    assert not extraction_batch.run_classification
+    extraction_batch = get_by_id(session, extraction_orm_models.SandboxExtractionBatch, id)
+    assert extraction_batch.run_classification is False
     extraction_batch.run_classification = True
     now = datetime.datetime.now(datetime.timezone.utc)
 
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
-        classification_batch = db.SandboxClassificationBatch(
-            created_at=now,
-            created_by_username=None,
-            created_by_page_extraction=page_extraction,
+        assert page_extraction.run_classification is False
+        page_extraction.run_classification = True
+        classification_chunk = classification_orm_models.ExerciseClassificationChunk(
+            created=extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction(
+                at=now, page_extraction=page_extraction
+            ),
             model_for_adaptation=None,
         )
-        session.add(classification_batch)
+        session.add(classification_chunk)
 
         for exercise_creation in page_extraction.exercise_creations__unordered:
             exercise = exercise_creation.exercise
-            assert isinstance(exercise, db.AdaptableExercise)
-            exercise.classified_by_classification_batch = classification_batch
+            assert isinstance(exercise, adaptation_orm_models.AdaptableExercise)
+            session.add(
+                classification_orm_models.ExerciseClassificationByClassificationChunk(
+                    exercise=exercise, at=now, classification_chunk=classification_chunk, exercise_class=None
+                )
+            )
 
 
 @api_router.put("/extraction-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
 def put_extraction_batch_model_for_adaptation(
     id: str, req: adaptation_llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:
-    extraction_batch = get_by_id(session, db.SandboxExtractionBatch, id)
+    extraction_batch = get_by_id(session, extraction_orm_models.SandboxExtractionBatch, id)
     assert extraction_batch.model_for_adaptation is None
     extraction_batch.model_for_adaptation = req
     now = datetime.datetime.now(datetime.timezone.utc)
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
-        classification_batch = (
+        classification_chunk = (
             session.execute(
-                sql.select(db.SandboxClassificationBatch).filter_by(created_by_page_extraction=page_extraction)
+                sql.select(classification_orm_models.ExerciseClassificationChunk)
+                .join(extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction)
+                .where(
+                    extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction.page_extraction
+                    == page_extraction
+                )
             )
             .scalars()
             .first()
         )
-        assert classification_batch is not None
-        assert classification_batch.model_for_adaptation is None
-        classification_batch.model_for_adaptation = req
+        assert classification_chunk is not None
+        assert classification_chunk.model_for_adaptation is None
+        classification_chunk.model_for_adaptation = req
         for exercise_creation in page_extraction.exercise_creations__unordered:
             exercise = exercise_creation.exercise
-            assert isinstance(exercise, db.AdaptableExercise)
+            assert isinstance(exercise, adaptation_orm_models.AdaptableExercise)
+
+            classification = exercise.classifications[-1]
+            assert isinstance(classification, classification_orm_models.ExerciseClassificationByClassificationChunk)
+            assert classification.classification_chunk == classification_chunk
+
             if (
-                exercise.adaptation is None
-                and exercise.exercise_class is not None
-                and exercise.exercise_class.latest_strategy_settings is not None
+                len(exercise.adaptations) == 0
+                and classification.exercise_class is not None
+                and classification.exercise_class.latest_strategy_settings is not None
             ):
-                strategy = db.AdaptationStrategy(
-                    created_at=now,
-                    created_by_username=None,
-                    created_by_classification_batch=classification_batch,
-                    settings=exercise.exercise_class.latest_strategy_settings,
-                    model=classification_batch.model_for_adaptation,
+                session.add(
+                    adaptation_orm_models.ExerciseAdaptation(
+                        created=classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                            at=now, classification_chunk=classification_chunk
+                        ),
+                        exercise=exercise,
+                        settings=classification.exercise_class.latest_strategy_settings,
+                        model=classification_chunk.model_for_adaptation,
+                        raw_llm_conversations=[],
+                        initial_assistant_response=None,
+                        adjustments=[],
+                        manual_edit=None,
+                    )
                 )
-                session.add(strategy)
-                adaptation = db.Adaptation(
-                    created=db.ExerciseAdaptationCreationBySandboxClassificationBatch(
-                        at=now, sandbox_classification_batch=classification_batch
-                    ),
-                    exercise=exercise,
-                    strategy=strategy,
-                    raw_llm_conversations=[],
-                    initial_assistant_response=None,
-                    adjustments=[],
-                    manual_edit=None,
-                )
-                session.add(adaptation)
 
 
 class GetExtractionBatchesResponse(ApiModel):
@@ -1056,17 +1150,12 @@ class GetExtractionBatchesResponse(ApiModel):
 async def get_extraction_batches(
     session: database_utils.SessionDependable, chunkId: str | None = None
 ) -> GetExtractionBatchesResponse:
-    (batches, next_chunk_id) = paginate(
-        db.SandboxExtractionBatch,
-        sql.select(db.SandboxExtractionBatch).filter(db.SandboxExtractionBatch.created_by_username != sql.null()),
-        session,
-        chunkId,
-    )
+    (batches, next_chunk_id) = paginate(extraction_orm_models.SandboxExtractionBatch, session, chunkId)
     return GetExtractionBatchesResponse(
         extraction_batches=[
             GetExtractionBatchesResponse.ExtractionBatch(
                 id=str(extraction_batch.id),
-                created_by=extraction_batch.created_by_username,
+                created_by=extraction_batch.created_by,
                 created_at=extraction_batch.created_at,
             )
             for extraction_batch in batches
@@ -1091,8 +1180,8 @@ class PostTextbookResponse(ApiModel):
 def post_textbook(
     req: PostTextbookRequest, engine: database_utils.EngineDependable, session: database_utils.SessionDependable
 ) -> PostTextbookResponse:
-    textbook = db.Textbook(
-        created_by_username=req.creator,
+    textbook = textbooks_orm_models.Textbook(
+        created_by=req.creator,
         created_at=datetime.datetime.now(datetime.timezone.utc),
         title=req.title,
         publisher=req.publisher,
@@ -1129,12 +1218,14 @@ class GetTextbookResponse(ApiModel):
 
 @api_router.get("/textbooks/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
-    textbook = get_by_id(session, db.Textbook, id)
+    textbook = get_by_id(session, textbooks_orm_models.Textbook, id)
     return GetTextbookResponse(
         textbook=make_api_textbook(textbook),
         available_strategy_settings=[
             exercise_class.name
-            for exercise_class in session.query(db.ExerciseClass).order_by(db.ExerciseClass.name).all()
+            for exercise_class in session.query(adaptation_orm_models.ExerciseClass)
+            .order_by(adaptation_orm_models.ExerciseClass.name)
+            .all()
         ],
     )
 
@@ -1153,12 +1244,12 @@ class GetTextbooksResponse(ApiModel):
 
 @api_router.get("/textbooks")
 async def get_textbooks(session: database_utils.SessionDependable) -> GetTextbooksResponse:
-    textbooks = session.query(db.Textbook).order_by(-db.Textbook.id).all()
+    textbooks = session.query(textbooks_orm_models.Textbook).order_by(-textbooks_orm_models.Textbook.id).all()
     return GetTextbooksResponse(
         textbooks=[
             GetTextbooksResponse.Textbook(
                 id=str(textbook.id),
-                created_by=textbook.created_by_username,
+                created_by=textbook.created_by,
                 created_at=textbook.created_at,
                 title=textbook.title,
                 publisher=textbook.publisher,
@@ -1184,11 +1275,11 @@ class PostTextbookExternalExercisesResponse(ApiModel):
 def post_textbook_external_exercises(
     textbook_id: str, req: PostTextbookExternalExercisesRequest, session: database_utils.SessionDependable
 ) -> PostTextbookExternalExercisesResponse:
-    textbook = get_by_id(session, db.Textbook, textbook_id)
+    textbook = get_by_id(session, textbooks_orm_models.Textbook, textbook_id)
     now = datetime.datetime.now(datetime.timezone.utc)
-    external_exercise = db.ExternalExercise(
-        created=db.ExerciseCreationByUser(at=now, username=req.creator),
-        location=db.ExerciseLocationTextbook(
+    external_exercise = external_exercises_orm_models.ExternalExercise(
+        created=exercises_orm_models.ExerciseCreationByUser(at=now, username=req.creator),
+        location=textbooks_orm_models.ExerciseLocationTextbook(
             textbook=textbook, page_number=req.page_number, exercise_number=req.exercise_number
         ),
         removed_from_textbook=False,
@@ -1208,9 +1299,9 @@ def post_textbook_external_exercises(
 def put_textbook_external_exercises_removed(
     textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
-    textbook = get_by_id(session, db.Textbook, textbook_id)
-    external_exercise = get_by_id(session, db.ExternalExercise, external_exercise_id)
-    assert isinstance(external_exercise.location, db.ExerciseLocationTextbook)
+    textbook = get_by_id(session, textbooks_orm_models.Textbook, textbook_id)
+    external_exercise = get_by_id(session, external_exercises_orm_models.ExternalExercise, external_exercise_id)
+    assert isinstance(external_exercise.location, textbooks_orm_models.ExerciseLocationTextbook)
     assert external_exercise.location.textbook == textbook
     external_exercise.removed_from_textbook = removed
     return make_api_textbook(textbook)
@@ -1218,7 +1309,7 @@ def put_textbook_external_exercises_removed(
 
 @api_router.get("/adaptations/{id}")
 async def get_adaptation(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    return make_api_adaptation(get_by_id(session, db.Adaptation, id))
+    return make_api_adaptation(get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id))
 
 
 class PostAdaptationAdjustmentRequest(ApiModel):
@@ -1229,7 +1320,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
 ) -> ApiAdaptation:
-    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation = get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id)
     assert adaptation.initial_assistant_response is not None
 
     def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
@@ -1243,7 +1334,7 @@ async def post_adaptation_adjustment(
             raise ValueError("Unknown assistant response type")
 
     messages: list[LlmMessage] = [
-        adaptation_llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
+        adaptation_llm.SystemMessage(content=adaptation.settings.system_prompt),
         adaptation_llm.UserMessage(content=adaptation.exercise.full_text),
         make_assistant_message(adaptation.initial_assistant_response),
     ]
@@ -1254,8 +1345,8 @@ async def post_adaptation_adjustment(
     messages.append(adaptation_llm.UserMessage(content=req.adjustment))
 
     try:
-        response = await adaptation.strategy.model.complete(
-            messages, adaptation.strategy.settings.response_specification.make_response_format()
+        response = await adaptation.model.complete(
+            messages, adaptation.settings.response_specification.make_response_format()
         )
     except adaptation_llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
@@ -1284,7 +1375,7 @@ async def post_adaptation_adjustment(
 
 @api_router.delete("/adaptations/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation = get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id)
 
     raw_llm_conversations = list(adaptation.raw_llm_conversations)
     raw_llm_conversations.pop()
@@ -1299,14 +1390,14 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
 
 @api_router.put("/adaptations/{id}/manual-edit")
 def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
-    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation = get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id)
     adaptation.manual_edit = req
     return make_api_adaptation(adaptation)
 
 
 @api_router.delete("/adaptations/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
-    adaptation = get_by_id(session, db.Adaptation, id)
+    adaptation = get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id)
     adaptation.manual_edit = None
     return make_api_adaptation(adaptation)
 
@@ -1325,28 +1416,33 @@ def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> M
     return instance
 
 
-def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
+def make_api_adaptation(adaptation: adaptation_orm_models.ExerciseAdaptation) -> ApiAdaptation:
     return ApiAdaptation(
         id=str(adaptation.id),
         extraction_batch_id=(
-            str(adaptation.exercise.created.page_extraction.created.extraction_batch.id)
-            if isinstance(adaptation.exercise.created, db.ExerciseCreationByPageExtraction)
+            str(adaptation.exercise.created.page_extraction.created.sandbox_extraction_batch.id)
+            if isinstance(adaptation.exercise.created, extraction_orm_models.ExerciseCreationByPageExtraction)
             and isinstance(
-                adaptation.exercise.created.page_extraction.created, db.PageExtractionCreationBySandboxExtractionBatch
+                adaptation.exercise.created.page_extraction.created,
+                extraction_orm_models.PageExtractionCreationBySandboxExtractionBatch,
             )
             else None
         ),
         classification_batch_id=(
-            str(adaptation.created.sandbox_classification_batch.id)
-            if isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxClassificationBatch)
+            str(adaptation.created.classification_chunk.created.sandbox_classification_batch.id)
+            if isinstance(adaptation.created, classification_orm_models.ExerciseAdaptationCreationByClassificationChunk)
+            and isinstance(
+                adaptation.created.classification_chunk.created,
+                classification_orm_models.ExerciseClassificationChunkCreationBySandboxClassificationBatch,
+            )
             else None
         ),
         adaptation_batch_id=(
             str(adaptation.created.sandbox_adaptation_batch.id)
-            if isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
+            if isinstance(adaptation.created, adaptation_orm_models.ExerciseAdaptationCreationBySandboxAdaptationBatch)
             else None
         ),
-        strategy=make_api_strategy(adaptation.strategy),
+        strategy=make_api_strategy(adaptation.settings, adaptation.model),
         input=make_api_input(adaptation.exercise),
         raw_llm_conversations=adaptation.raw_llm_conversations,
         initial_assistant_response=adaptation.initial_assistant_response,
@@ -1356,11 +1452,13 @@ def make_api_adaptation(adaptation: db.Adaptation) -> ApiAdaptation:
     )
 
 
-def make_api_strategy(strategy: db.AdaptationStrategy) -> ApiStrategy:
-    return ApiStrategy(model=strategy.model, settings=make_api_strategy_settings(strategy.settings))
+def make_api_strategy(
+    settings: adaptation_orm_models.ExerciseAdaptationSettings, model: adaptation_llm.ConcreteModel
+) -> ApiStrategy:
+    return ApiStrategy(model=model, settings=make_api_strategy_settings(settings))
 
 
-def make_api_strategy_settings(settings: db.AdaptationStrategySettings) -> ApiStrategySettings:
+def make_api_strategy_settings(settings: adaptation_orm_models.ExerciseAdaptationSettings) -> ApiStrategySettings:
     return ApiStrategySettings(
         name=make_api_strategy_settings_name(settings),
         system_prompt=settings.system_prompt,
@@ -1368,7 +1466,7 @@ def make_api_strategy_settings(settings: db.AdaptationStrategySettings) -> ApiSt
     )
 
 
-def make_api_strategy_settings_name(settings: db.AdaptationStrategySettings) -> str | None:
+def make_api_strategy_settings_name(settings: adaptation_orm_models.ExerciseAdaptationSettings) -> str | None:
     if settings.exercise_class is None:
         return None
     else:
@@ -1382,8 +1480,11 @@ def make_api_strategy_settings_name(settings: db.AdaptationStrategySettings) -> 
             return f"{settings.exercise_class.name} (older version)"
 
 
-def make_api_input(exercise: db.AdaptableExercise) -> ApiInput:
-    assert isinstance(exercise.location, (db.ExerciseLocationTextbook, db.ExerciseLocationMaybePageAndNumber))
+def make_api_input(exercise: adaptation_orm_models.AdaptableExercise) -> ApiInput:
+    assert isinstance(
+        exercise.location,
+        (textbooks_orm_models.ExerciseLocationTextbook, exercises_orm_models.ExerciseLocationMaybePageAndNumber),
+    )
     return ApiInput(
         page_number=exercise.location.page_number,
         exercise_number=exercise.location.exercise_number,
@@ -1391,10 +1492,10 @@ def make_api_input(exercise: db.AdaptableExercise) -> ApiInput:
     )
 
 
-def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
+def make_api_textbook(textbook: textbooks_orm_models.Textbook) -> ApiTextbook:
     return ApiTextbook(
         id=str(textbook.id),
-        created_by=textbook.created_by_username,
+        created_by=textbook.created_by,
         title=textbook.title,
         publisher=textbook.publisher,
         year=textbook.year,
@@ -1402,15 +1503,17 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         external_exercises=[
             ApiTextbook.ExternalExercise(
                 id=str(external_exercise.id),
-                page_number=assert_isinstance(external_exercise.location, db.ExerciseLocationTextbook).page_number,
+                page_number=assert_isinstance(
+                    external_exercise.location, textbooks_orm_models.ExerciseLocationTextbook
+                ).page_number,
                 exercise_number=assert_isinstance(
-                    external_exercise.location, db.ExerciseLocationTextbook
+                    external_exercise.location, textbooks_orm_models.ExerciseLocationTextbook
                 ).exercise_number,
                 original_file_name=external_exercise.original_file_name,
                 removed_from_textbook=external_exercise.removed_from_textbook,
             )
             for external_exercise in textbook.fetch_ordered_exercises()
-            if isinstance(external_exercise, db.ExternalExercise)
+            if isinstance(external_exercise, external_exercises_orm_models.ExternalExercise)
         ],
     )
 
@@ -1435,10 +1538,12 @@ def export_extraction_batch_json(
     return export_batch_json("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
 
-def get_extraction_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    batch = get_by_id(session, db.SandboxExtractionBatch, id)
+def get_extraction_batch_adaptations(
+    session: database_utils.Session, id: str
+) -> Iterable[adaptation_orm_models.ExerciseAdaptation | None]:
+    batch = get_by_id(session, extraction_orm_models.SandboxExtractionBatch, id)
     return [
-        exercise.adaptation
+        exercise.adaptations[-1] if len(exercise.adaptations) > 0 else None
         for creation in batch.page_extraction_creations
         for exercise in creation.page_extraction.fetch_ordered_exercises()
     ]
@@ -1458,8 +1563,15 @@ def export_classification_batch_json(
     return export_batch_json("classification", id, get_classification_batch_adaptations(session, id), download)
 
 
-def get_classification_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
-    return [exercise.adaptation for exercise in get_by_id(session, db.SandboxClassificationBatch, id).exercises]
+def get_classification_batch_adaptations(
+    session: database_utils.Session, id: str
+) -> Iterable[adaptation_orm_models.ExerciseAdaptation | None]:
+    return [
+        classification.exercise.adaptations[-1] if len(classification.exercise.adaptations) > 0 else None
+        for classification in get_by_id(
+            session, classification_orm_models.SandboxClassificationBatch, id
+        ).classification_chunk_creation.classification_chunk.classifications
+    ]
 
 
 @export_router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
@@ -1476,17 +1588,25 @@ def export_adaptation_batch_json(
     return export_batch_json("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
 
 
-def get_adaptation_batch_adaptations(session: database_utils.Session, id: str) -> Iterable[db.Adaptation | None]:
+def get_adaptation_batch_adaptations(
+    session: database_utils.Session, id: str
+) -> Iterable[adaptation_orm_models.ExerciseAdaptation | None]:
     return [
-        adaptation_creation.adaptation
-        for adaptation_creation in get_by_id(session, db.SandboxAdaptationBatch, id).adaptation_creations
+        (
+            adaptation_creation.exercise_adaptation.exercise.adaptations[-1]
+            if len(adaptation_creation.exercise_adaptation.exercise.adaptations) > 0
+            else None
+        )
+        for adaptation_creation in get_by_id(
+            session, adaptation_orm_models.SandboxAdaptationBatch, id
+        ).adaptation_creations
     ]
 
 
 def export_batch_html(
     kind: Literal["extraction", "adaptation", "classification"],
     id: str,
-    adaptations: Iterable[db.Adaptation | None],
+    adaptations: Iterable[adaptation_orm_models.ExerciseAdaptation | None],
     download: bool,
 ) -> fastapi.responses.HTMLResponse:
     data = list(
@@ -1509,7 +1629,7 @@ def export_batch_html(
 def export_batch_json(
     kind: Literal["extraction", "adaptation", "classification"],
     id: str,
-    adaptations: Iterable[db.Adaptation | None],
+    adaptations: Iterable[adaptation_orm_models.ExerciseAdaptation | None],
     download: bool,
 ) -> fastapi.responses.JSONResponse:
     content = list(
@@ -1536,7 +1656,7 @@ export_adaptation_template_file_path = os.path.join(
 def export_adaptation(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    data = make_adapted_exercise_data(get_by_id(session, db.Adaptation, id))
+    data = make_adapted_exercise_data(get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id))
     assert data is not None
     content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
@@ -1556,12 +1676,17 @@ export_textbook_template_file_path = os.path.join(
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
-    textbook = get_by_id(session, db.Textbook, id)
+    textbook = get_by_id(session, textbooks_orm_models.Textbook, id)
 
     exercises: list[JsonDict] = []
     for exercise in textbook.fetch_ordered_exercises():
         if not exercise.removed_from_textbook:
-            if isinstance(exercise, db.ExternalExercise):
+            if isinstance(exercise, adaptation_orm_models.AdaptableExercise):
+                if len(exercise.adaptations) != 0:
+                    adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
+                if adapted_exercise_data is not None:
+                    exercises.append(adapted_exercise_data)
+            elif isinstance(exercise, external_exercises_orm_models.ExternalExercise):
                 exercises.append(make_external_exercise_data(exercise))
             else:
                 assert False
@@ -1585,9 +1710,12 @@ def render_template(template: str, placeholder: str, data: Any) -> str:
     )
 
 
-def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
+def make_adapted_exercise_data(adaptation: adaptation_orm_models.ExerciseAdaptation) -> JsonDict | None:
     location = adaptation.exercise.location
-    assert isinstance(location, (db.ExerciseLocationMaybePageAndNumber, db.ExerciseLocationTextbook))
+    assert isinstance(
+        location,
+        (exercises_orm_models.ExerciseLocationMaybePageAndNumber, textbooks_orm_models.ExerciseLocationTextbook),
+    )
     if location.page_number is not None and location.exercise_number is not None:
         exercise_id = f"P{location.page_number}Ex{location.exercise_number}"
     else:
@@ -1619,9 +1747,9 @@ def make_adapted_exercise_data(adaptation: db.Adaptation) -> JsonDict | None:
     }
 
 
-def make_external_exercise_data(external_exercise: db.ExternalExercise) -> JsonDict:
+def make_external_exercise_data(external_exercise: external_exercises_orm_models.ExternalExercise) -> JsonDict:
     location = external_exercise.location
-    assert isinstance(location, db.ExerciseLocationTextbook)
+    assert isinstance(location, textbooks_orm_models.ExerciseLocationTextbook)
     exercise_id = f"P{location.page_number}Ex{location.exercise_number}"
     target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
     object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
@@ -1658,7 +1786,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         )
         self.assertEqual(r.status_code, 200, r.text)
         self.assertIsNotNone(r.json()["uploadUrl"])
-        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf"])
+        self.assertEqual(self.get_model(extraction_orm_models.PdfFile, sha).known_file_names, ["foo.pdf"])
 
         r = self.client.post(
             "/pdf-files",
@@ -1669,7 +1797,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         self.assertIsNotNone(upload_url)
         requests.put(upload_url, data=b"")
         s3.head_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
-        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
+        self.assertEqual(self.get_model(extraction_orm_models.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
 
         r = self.client.post(
             "/pdf-files",
@@ -1677,4 +1805,4 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         )
         self.assertEqual(r.status_code, 200, r.text)
         self.assertIsNone(r.json()["uploadUrl"])
-        self.assertEqual(self.get_model(db.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
+        self.assertEqual(self.get_model(extraction_orm_models.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])

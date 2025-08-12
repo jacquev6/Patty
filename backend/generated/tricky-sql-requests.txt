@@ -2,12 +2,7 @@ Textbook.fetch_ordered_exercises:
 ================================
 SELECT exercises.id,
        exercises.kind,
-       exercises.created_at,
-       exercises.created_by_username,
-       exercises.textbook_id,
-       exercises.removed_from_textbook,
-       exercises.page_number,
-       exercises.exercise_number
+       exercises.removed_from_textbook
 FROM exercises
 JOIN (exercise_locations
       JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercises.id = exercise_locations.id
@@ -17,25 +12,15 @@ ORDER BY exercise_locations__textbook.page_number,
 
 PageExtraction.fetch_ordered_exercises (page and number):
 ========================================================
-SELECT adaptable_exercises.id,
+SELECT exercises__adaptable.id,
        exercises.id AS id_1,
        exercises.kind,
-       exercises.created_at,
-       exercises.created_by_username,
-       exercises.textbook_id,
        exercises.removed_from_textbook,
-       exercises.page_number,
-       exercises.exercise_number,
-       adaptable_exercises.created_by_page_extraction_id,
-       adaptable_exercises.full_text,
-       adaptable_exercises.instruction_hint_example_text,
-       adaptable_exercises.statement_text,
-       adaptable_exercises.classified_at,
-       adaptable_exercises.classified_by_classification_batch_id,
-       adaptable_exercises.classified_by_username,
-       adaptable_exercises.exercise_class_id
+       exercises__adaptable.full_text,
+       exercises__adaptable.instruction_hint_example_text,
+       exercises__adaptable.statement_text
 FROM exercises
-JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
+JOIN exercises__adaptable ON exercises.id = exercises__adaptable.id
 JOIN (exercise_creations
       JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercises.id = exercise_creations.id
 JOIN (exercise_locations
@@ -46,25 +31,15 @@ ORDER BY exercise_locations__maybe_page_and_number.page_number,
 
 PageExtraction.fetch_ordered_exercises (textbook):
 =================================================
-SELECT adaptable_exercises.id,
+SELECT exercises__adaptable.id,
        exercises.id AS id_1,
        exercises.kind,
-       exercises.created_at,
-       exercises.created_by_username,
-       exercises.textbook_id,
        exercises.removed_from_textbook,
-       exercises.page_number,
-       exercises.exercise_number,
-       adaptable_exercises.created_by_page_extraction_id,
-       adaptable_exercises.full_text,
-       adaptable_exercises.instruction_hint_example_text,
-       adaptable_exercises.statement_text,
-       adaptable_exercises.classified_at,
-       adaptable_exercises.classified_by_classification_batch_id,
-       adaptable_exercises.classified_by_username,
-       adaptable_exercises.exercise_class_id
+       exercises__adaptable.full_text,
+       exercises__adaptable.instruction_hint_example_text,
+       exercises__adaptable.statement_text
 FROM exercises
-JOIN adaptable_exercises ON exercises.id = adaptable_exercises.id
+JOIN exercises__adaptable ON exercises.id = exercises__adaptable.id
 JOIN (exercise_creations
       JOIN exercise_creations__by_page_extraction ON exercise_creations.id = exercise_creations__by_page_extraction.id) ON exercises.id = exercise_creations.id
 JOIN (exercise_locations

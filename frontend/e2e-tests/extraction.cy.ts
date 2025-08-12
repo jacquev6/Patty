@@ -124,7 +124,7 @@ describe('The extraction batch creation page', () => {
     cy.visit('/new-extraction-batch')
     cy.get('[data-cy="run-classification"]').select('no')
     cy.get('[data-cy="llm-name"]').should('have.length', 1)
-    cy.get('[data-cy="llm-name"]').should('have.value', 'dummy-2')
+    cy.get('[data-cy="llm-name"]').should('have.value', 'dummy-1') // Model is not remembered
     cy.get('[data-cy="prompt"]').should('have.value', 'Bleh bleh.')
   })
 
