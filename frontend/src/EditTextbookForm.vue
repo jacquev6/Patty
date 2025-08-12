@@ -5,8 +5,7 @@ import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from './apiClient'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
-import EditTextbookFormCreateAdaptationBatchForm from './EditTextbookFormCreateAdaptationBatchForm.vue'
+import { type PreprocessedAdaptation } from './adaptations'
 import assert from './assert'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
@@ -27,15 +26,6 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-const adaptationBatches = computed(() =>
-  props.textbook.adaptationBatches.map((adaptationBatch) => {
-    return {
-      ...adaptationBatch,
-      adaptations: adaptationBatch.adaptations.map(preprocessAdaptation),
-    }
-  }),
-)
-
 const pages = computed(() => {
   type Exercise =
     | {
@@ -52,20 +42,6 @@ const pages = computed(() => {
       }
 
   const pages: Record<number, Exercise[]> = {}
-  for (const adaptationBatch of adaptationBatches.value) {
-    if (!adaptationBatch.removedFromTextbook) {
-      for (const adaptation of adaptationBatch.adaptations) {
-        if (
-          !adaptation.removedFromTextbook &&
-          adaptation.input.pageNumber !== null &&
-          adaptation.status.kind === 'success'
-        ) {
-          pages[adaptation.input.pageNumber] ??= []
-          pages[adaptation.input.pageNumber].push({ kind: 'adaptation', adaptation })
-        }
-      }
-    }
-  }
   for (const externalExercise of props.textbook.externalExercises) {
     if (!externalExercise.removedFromTextbook && externalExercise.pageNumber !== null) {
       pages[externalExercise.pageNumber] ??= []
@@ -105,22 +81,6 @@ function textbookUpdated(textbook: Textbook) {
   emit('textbook-updated', textbook)
 }
 
-async function removeAdaptationBatch(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, adaptation_batch_id: id }, query: { removed } },
-  })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
-}
-
-async function removeAdaptation(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, adaptation_id: id }, query: { removed } },
-  })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
-}
-
 async function removeExternalExercise(id: string, removed: boolean) {
   const response = await client.PUT('/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
@@ -157,45 +117,6 @@ async function removeExternalExercise(id: string, removed: boolean) {
     </template>
   </p>
   <template v-if="view === 'batch'">
-    <h2>{{ t('newBatch') }}</h2>
-    <EditTextbookFormCreateAdaptationBatchForm
-      :availableStrategySettings
-      :textbookId="textbook.id"
-      @textbookUpdated="textbookUpdated"
-    />
-    <h2>{{ t('existingBatches') }}</h2>
-    <template v-for="adaptationBatch in adaptationBatches">
-      <template v-if="adaptationBatch.removedFromTextbook">
-        <h3>
-          <span class="removed">{{ adaptationBatch.strategy.settings.name }}</span> ({{ t('removed') }})
-          <button @click="removeAdaptationBatch(adaptationBatch.id, false)">{{ t('reAdd') }}</button>
-        </h3>
-      </template>
-      <template v-else>
-        <h3>
-          {{ adaptationBatch.strategy.settings.name }}
-          <button @click="removeAdaptationBatch(adaptationBatch.id, true)">{{ t('remove') }}</button>
-        </h3>
-        <template v-for="(adaptation, index) in adaptationBatch.adaptations">
-          <template v-if="adaptation.removedFromTextbook">
-            <h4 style="margin-top: 0">
-              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span class="removed">P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>
-              ({{ t('input') }} {{ index + 1 }}, {{ t('removed') }})
-              <button @click="removeAdaptation(adaptation.id, false)">{{ t('reAdd') }}</button>
-            </h4>
-          </template>
-          <AdaptationPreview v-else header="h4" :index :adaptation>
-            <h4 style="margin-top: 0">
-              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span>P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>
-              ({{ t('input') }} {{ index + 1 }})
-              <button @click="removeAdaptation(adaptation.id, true)">{{ t('remove') }}</button>
-            </h4>
-          </AdaptationPreview>
-        </template>
-      </template>
-    </template>
     <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>
     <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
     <h2>{{ t('existingExternalExercises') }}</h2>

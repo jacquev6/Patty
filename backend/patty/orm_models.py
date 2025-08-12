@@ -558,10 +558,6 @@ class Textbook(OrmBase):
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
 
-    adaptation_batches: orm.Mapped[list[SandboxAdaptationBatch]] = orm.relationship(
-        back_populates="textbook", order_by=lambda: [SandboxAdaptationBatch.id]
-    )
-
     @staticmethod
     def make_ordered_exercises_request(id: int) -> sql.Select[tuple[BaseExercise]]:
         return (
@@ -876,20 +872,14 @@ class SandboxAdaptationBatch(OrmBase):
     __tablename__ = "sandbox_adaptation_batches"
 
     def __init__(
-        self,
-        *,
-        created_at: datetime.datetime,
-        created_by_username: str,
-        strategy: AdaptationStrategy,
-        textbook: Textbook | None,
-        removed_from_textbook: bool,
+        self, *, created_at: datetime.datetime, created_by_username: str, strategy: AdaptationStrategy
     ) -> None:
         super().__init__()
         self.created_at = created_at
         self.created_by_username = created_by_username
         self.strategy = strategy
-        self.textbook = textbook
-        self.removed_from_textbook = removed_from_textbook
+        self.textbook_id__to_be_deleted = None
+        self.removed_from_textbook__to_be_deleted = False
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -901,11 +891,8 @@ class SandboxAdaptationBatch(OrmBase):
         foreign_keys=[strategy_id], remote_side=[AdaptationStrategy.id]
     )
 
-    textbook_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey(Textbook.id))
-    textbook: orm.Mapped[Textbook | None] = orm.relationship(
-        foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="adaptation_batches"
-    )
-    removed_from_textbook: orm.Mapped[bool]
+    textbook_id__to_be_deleted: orm.Mapped[int | None] = orm.mapped_column("textbook_id", sql.ForeignKey(Textbook.id))
+    removed_from_textbook__to_be_deleted: orm.Mapped[bool] = orm.mapped_column("removed_from_textbook")
 
     adaptation_creations: orm.Mapped[list[ExerciseAdaptationCreationBySandboxAdaptationBatch]] = orm.relationship(
         back_populates="sandbox_adaptation_batch"

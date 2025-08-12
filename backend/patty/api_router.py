@@ -319,9 +319,7 @@ async def post_adaptation_batch(
     )
     session.add(strategy)
 
-    adaptation_batch = db.SandboxAdaptationBatch(
-        created_by_username=req.creator, created_at=now, strategy=strategy, textbook=None, removed_from_textbook=False
-    )
+    adaptation_batch = db.SandboxAdaptationBatch(created_by_username=req.creator, created_at=now, strategy=strategy)
     session.add(adaptation_batch)
 
     for req_input in req.inputs:
@@ -484,7 +482,9 @@ async def get_adaptation_batches(
 ) -> GetAdaptationBatchesResponse:
     (batches, next_chunk_id) = paginate(
         db.SandboxAdaptationBatch,
-        sql.select(db.SandboxAdaptationBatch).filter(db.SandboxAdaptationBatch.textbook_id == sql.null()),
+        sql.select(db.SandboxAdaptationBatch).filter(
+            db.SandboxAdaptationBatch.textbook_id__to_be_deleted == sql.null()
+        ),
         session,
         chunkId,
     )
@@ -1112,14 +1112,6 @@ class ApiTextbook(ApiModel):
     year: int | None
     isbn: str | None
 
-    class AdaptationBatch(ApiModel):
-        id: str
-        strategy: ApiStrategy
-        adaptations: list[ApiAdaptation]
-        removed_from_textbook: bool
-
-    adaptation_batches: list[AdaptationBatch]
-
     class ExternalExercise(ApiModel):
         id: str
         page_number: int | None
@@ -1175,107 +1167,6 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
             for textbook in textbooks
         ]
     )
-
-
-class PostTextbookAdaptationBatchRequest(ApiModel):
-    creator: str
-    model: adaptation_llm.ConcreteModel
-    branch_name: str
-    inputs: list[ApiInput]
-
-
-@api_router.post("/textbooks/{id}/adaptation-batches")
-def post_textbook_adaptation_batch(
-    id: str,
-    req: PostTextbookAdaptationBatchRequest,
-    engine: database_utils.EngineDependable,
-    session: database_utils.SessionDependable,
-) -> ApiTextbook:
-    textbook = get_by_id(session, db.Textbook, id)
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    exercise_class = session.query(db.ExerciseClass).filter(db.ExerciseClass.name == req.branch_name).first()
-    assert exercise_class is not None
-    assert exercise_class.latest_strategy_settings is not None
-
-    strategy = db.AdaptationStrategy(
-        created_by_username=req.creator,
-        created_by_classification_batch=None,
-        created_at=now,
-        model=req.model,
-        settings=exercise_class.latest_strategy_settings,
-    )
-    session.add(strategy)
-
-    adaptation_batch = db.SandboxAdaptationBatch(
-        textbook=textbook,
-        removed_from_textbook=False,
-        created_by_username=req.creator,
-        created_at=now,
-        strategy=strategy,
-    )
-    session.add(adaptation_batch)
-
-    for req_input in req.inputs:
-        assert req_input.page_number is not None
-        assert req_input.exercise_number is not None
-
-        exercise = db.AdaptableExercise(
-            created=db.ExerciseCreationByUser(at=now, username=req.creator),
-            location=db.ExerciseLocationTextbook(
-                textbook=textbook, page_number=req_input.page_number, exercise_number=req_input.exercise_number
-            ),
-            removed_from_textbook=False,
-            full_text=req_input.text,
-            instruction_hint_example_text=None,
-            statement_text=None,
-            classified_at=now,
-            classified_by_username=req.creator,
-            classified_by_classification_batch=None,
-            exercise_class=exercise_class,
-        )
-        session.add(exercise)
-
-        adaptation = db.Adaptation(
-            created=db.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                at=now, sandbox_adaptation_batch=adaptation_batch
-            ),
-            strategy=strategy,
-            exercise=exercise,
-            raw_llm_conversations=[],
-            initial_assistant_response=None,
-            adjustments=[],
-            manual_edit=None,
-        )
-        session.add(adaptation)
-
-    session.flush()
-
-    return make_api_textbook(textbook)
-
-
-@api_router.put("/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed")
-def put_textbook_adaptation_batch_removed(
-    textbook_id: str, adaptation_batch_id: str, removed: bool, session: database_utils.SessionDependable
-) -> ApiTextbook:
-    textbook = get_by_id(session, db.Textbook, textbook_id)
-    adaptation_batch = get_by_id(session, db.SandboxAdaptationBatch, adaptation_batch_id)
-    assert adaptation_batch.textbook == textbook
-    adaptation_batch.removed_from_textbook = removed
-    return make_api_textbook(textbook)
-
-
-@api_router.put("/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed")
-def put_textbook_adaptation_removed(
-    textbook_id: str, adaptation_id: str, removed: bool, session: database_utils.SessionDependable
-) -> ApiTextbook:
-    textbook = get_by_id(session, db.Textbook, textbook_id)
-    adaptation = get_by_id(session, db.Adaptation, adaptation_id)
-    assert isinstance(adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
-    assert adaptation.created.sandbox_adaptation_batch.textbook == textbook
-    adaptation.exercise.removed_from_textbook = removed
-    return make_api_textbook(textbook)
 
 
 class PostTextbookExternalExercisesRequest(ApiModel):
@@ -1508,18 +1399,6 @@ def make_api_textbook(textbook: db.Textbook) -> ApiTextbook:
         publisher=textbook.publisher,
         year=textbook.year,
         isbn=textbook.isbn,
-        adaptation_batches=[
-            ApiTextbook.AdaptationBatch(
-                id=str(adaptation_batch.id),
-                strategy=make_api_strategy(adaptation_batch.strategy),
-                adaptations=[
-                    make_api_adaptation(adaptation_creation.adaptation)
-                    for adaptation_creation in adaptation_batch.adaptation_creations
-                ],
-                removed_from_textbook=adaptation_batch.removed_from_textbook,
-            )
-            for adaptation_batch in textbook.adaptation_batches
-        ],
         external_exercises=[
             ApiTextbook.ExternalExercise(
                 id=str(external_exercise.id),
@@ -1682,18 +1561,7 @@ def export_textbook(
     exercises: list[JsonDict] = []
     for exercise in textbook.fetch_ordered_exercises():
         if not exercise.removed_from_textbook:
-            if isinstance(exercise, db.AdaptableExercise):
-                if exercise.adaptation is not None:
-                    if (
-                        isinstance(exercise.adaptation.created, db.ExerciseAdaptationCreationBySandboxAdaptationBatch)
-                        and exercise.adaptation.created.sandbox_adaptation_batch.removed_from_textbook
-                    ):
-                        adapted_exercise_data = None
-                    else:
-                        adapted_exercise_data = make_adapted_exercise_data(exercise.adaptation)
-                if adapted_exercise_data is not None:
-                    exercises.append(adapted_exercise_data)
-            elif isinstance(exercise, db.ExternalExercise):
+            if isinstance(exercise, db.ExternalExercise):
                 exercises.append(make_external_exercise_data(exercise))
             else:
                 assert False

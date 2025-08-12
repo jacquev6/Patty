@@ -1181,184 +1181,6 @@
         }
       }
     },
-    "/api/textbooks/{id}/adaptation-batches": {
-      "post": {
-        "summary": "Post Textbook Adaptation Batch",
-        "operationId": "post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostTextbookAdaptationBatchRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed": {
-      "put": {
-        "summary": "Put Textbook Adaptation Batch Removed",
-        "operationId": "put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "textbook_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Textbook Id"
-            }
-          },
-          {
-            "name": "adaptation_batch_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Adaptation Batch Id"
-            }
-          },
-          {
-            "name": "removed",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Removed"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed": {
-      "put": {
-        "summary": "Put Textbook Adaptation Removed",
-        "operationId": "put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "textbook_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Textbook Id"
-            }
-          },
-          {
-            "name": "adaptation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Adaptation Id"
-            }
-          },
-          {
-            "name": "removed",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Removed"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/textbooks/{textbook_id}/external-exercises": {
       "post": {
         "summary": "Post Textbook External Exercises",
@@ -1910,6 +1732,58 @@
           "contents"
         ]
       },
+      "AdaptationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "strategySettingsName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategysettingsname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "model",
+          "strategySettingsName"
+        ],
+        "title": "AdaptationBatch"
+      },
       "Adjustment": {
         "properties": {
           "userPrompt": {
@@ -2305,13 +2179,6 @@
             ],
             "title": "Isbn"
           },
-          "adaptationBatches": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
-            },
-            "type": "array",
-            "title": "Adaptationbatches"
-          },
           "externalExercises": {
             "items": {
               "$ref": "#/components/schemas/ExternalExercise"
@@ -2329,7 +2196,6 @@
           "publisher",
           "year",
           "isbn",
-          "adaptationBatches",
           "externalExercises"
         ],
         "title": "ApiTextbook"
@@ -3221,7 +3087,7 @@
         "properties": {
           "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch"
+              "$ref": "#/components/schemas/AdaptationBatch"
             },
             "type": "array",
             "title": "Adaptationbatches"
@@ -4339,48 +4205,6 @@
         ],
         "title": "PostExtractionBatchResponse"
       },
-      "PostTextbookAdaptationBatchRequest": {
-        "properties": {
-          "creator": {
-            "type": "string",
-            "title": "Creator"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "branchName": {
-            "type": "string",
-            "title": "Branchname"
-          },
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/ApiInput"
-            },
-            "type": "array",
-            "title": "Inputs"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "creator",
-          "model",
-          "branchName",
-          "inputs"
-        ],
-        "title": "PostTextbookAdaptationBatchRequest"
-      },
       "PostTextbookExternalExercisesRequest": {
         "properties": {
           "creator": {
@@ -5006,89 +4830,6 @@
           "statement",
           "reference"
         ]
-      },
-      "patty__api_router__ApiTextbook__AdaptationBatch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "strategy": {
-            "$ref": "#/components/schemas/ApiStrategy-Output"
-          },
-          "adaptations": {
-            "items": {
-              "$ref": "#/components/schemas/ApiAdaptation"
-            },
-            "type": "array",
-            "title": "Adaptations"
-          },
-          "removedFromTextbook": {
-            "type": "boolean",
-            "title": "Removedfromtextbook"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "strategy",
-          "adaptations",
-          "removedFromTextbook"
-        ],
-        "title": "AdaptationBatch"
-      },
-      "patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "strategySettingsName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strategysettingsname"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "createdBy",
-          "createdAt",
-          "model",
-          "strategySettingsName"
-        ],
-        "title": "AdaptationBatch"
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
         "properties": {

@@ -594,13 +594,7 @@ class FixturesCreator:
     def create_seed_data(self) -> None:
         strategy = self.create_default_adaptation_strategy()
         batch = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                textbook=None,
-                removed_from_textbook=False,
-                strategy=strategy,
-            )
+            db.SandboxAdaptationBatch(created_by_username="Patty", created_at=created_at, strategy=strategy)
         )
         self.make_successful_adaptation(
             adaptation_batch=batch,
@@ -613,13 +607,7 @@ class FixturesCreator:
     def create_dummy_adaptation(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         batch = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                textbook=None,
-                removed_from_textbook=False,
-                strategy=strategy,
-            )
+            db.SandboxAdaptationBatch(created_by_username="Patty", created_at=created_at, strategy=strategy)
         )
         self.make_successful_adaptation(
             adaptation_batch=batch,
@@ -631,13 +619,7 @@ class FixturesCreator:
     def create_mixed_dummy_adaptation_batch(self) -> None:
         strategy = self.create_dummy_adaptation_strategy()
         batch = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                textbook=None,
-                removed_from_textbook=False,
-                strategy=strategy,
-            )
+            db.SandboxAdaptationBatch(created_by_username="Patty", created_at=created_at, strategy=strategy)
         )
         self.make_successful_adaptation(
             adaptation_batch=batch,
@@ -670,7 +652,7 @@ class FixturesCreator:
         return exercise_class
 
     def create_dummy_textbook(self) -> None:
-        textbook = self.add(
+        self.add(
             db.Textbook(
                 created_by_username="Patty",
                 created_at=created_at,
@@ -681,383 +663,8 @@ class FixturesCreator:
             )
         )
 
-        success_branch_1 = self.create_dummy_branch(name="Branch with successes 1", system_prompt="Thou shall succeed.")
-        assert success_branch_1.latest_strategy_settings is not None
-        success_strategy_1 = self.add(
-            db.AdaptationStrategy(
-                created_by_username="Patty",
-                created_by_classification_batch=None,
-                created_at=created_at,
-                model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
-                settings=success_branch_1.latest_strategy_settings,
-            )
-        )
-        success_adaptation_batch_1 = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                strategy=success_strategy_1,
-                textbook=textbook,
-                removed_from_textbook=False,
-            )
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_1,
-            classification_batch=None,
-            strategy=success_strategy_1,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="5"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_1,
-            classification_batch=None,
-            strategy=success_strategy_1,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="6"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_1,
-            classification_batch=None,
-            strategy=success_strategy_1,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="4"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-
-        success_branch_2 = self.create_dummy_branch(
-            name="Branch with successes 2", system_prompt="Thou shall succeed as well."
-        )
-        assert success_branch_2.latest_strategy_settings is not None
-        success_strategy_2 = self.add(
-            db.AdaptationStrategy(
-                created_by_username="Patty",
-                created_by_classification_batch=None,
-                created_at=created_at,
-                model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
-                settings=success_branch_2.latest_strategy_settings,
-            )
-        )
-        success_adaptation_batch_2 = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                strategy=success_strategy_2,
-                textbook=textbook,
-                removed_from_textbook=False,
-            )
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_2,
-            classification_batch=None,
-            strategy=success_strategy_2,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="6"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_2,
-            classification_batch=None,
-            strategy=success_strategy_2,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="30"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_2,
-            classification_batch=None,
-            strategy=success_strategy_2,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="8"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=success_adaptation_batch_2,
-            classification_batch=None,
-            strategy=success_strategy_2,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="Removed"),
-                    removed_from_textbook=True,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-
-        removed_adaptation_batch = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                strategy=success_strategy_2,
-                textbook=textbook,
-                removed_from_textbook=True,
-            )
-        )
-        self.make_successful_adaptation(
-            adaptation_batch=removed_adaptation_batch,
-            classification_batch=None,
-            strategy=success_strategy_2,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=47, exercise_number="Removed"),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-
-        errors_branch = self.create_dummy_branch(name="Branch with errors", system_prompt="Thou shall fail.")
-        assert errors_branch.latest_strategy_settings is not None
-        errors_strategy = self.add(
-            db.AdaptationStrategy(
-                created_by_username="Patty",
-                created_by_classification_batch=None,
-                created_at=created_at,
-                model=adaptation_llm.DummyModel(provider="dummy", name="dummy-1"),
-                settings=errors_branch.latest_strategy_settings,
-            )
-        )
-        errors_adaptation_batch = self.add(
-            db.SandboxAdaptationBatch(
-                created_by_username="Patty",
-                created_at=created_at,
-                strategy=errors_strategy,
-                textbook=textbook,
-                removed_from_textbook=False,
-            )
-        )
-        self.make_not_json_adaptation(
-            adaptation_batch=errors_adaptation_batch,
-            strategy=errors_strategy,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=142, exercise_number="4"),
-                    removed_from_textbook=False,
-                    full_text="Not JSON",
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-        self.make_invalid_json_adaptation(
-            adaptation_batch=errors_adaptation_batch,
-            strategy=errors_strategy,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(textbook=textbook, page_number=140, exercise_number="4"),
-                    removed_from_textbook=False,
-                    full_text="Invalid JSON",
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-
     def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
         self.create_dummy_textbook()
-
-        strategy = self.__session.get(db.AdaptationStrategy, 1)
-        assert strategy is not None
-        batch = self.__session.get(db.SandboxAdaptationBatch, 1)
-        assert batch is not None
-        assert batch.textbook is not None
-
-        self.make_successful_adaptation(
-            adaptation_batch=batch,
-            classification_batch=None,
-            strategy=strategy,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(
-                        textbook=batch.textbook,
-                        page_number=42,
-                        exercise_number="Exo identifié par texte / 5",  # URL-incompatible characters
-                    ),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
-
-        self.make_successful_adaptation(
-            adaptation_batch=batch,
-            classification_batch=None,
-            strategy=strategy,
-            exercise=self.add(
-                db.AdaptableExercise(
-                    created=db.ExerciseCreationByUser(at=created_at, username="Patty"),
-                    location=db.ExerciseLocationTextbook(
-                        textbook=batch.textbook, page_number=42, exercise_number="Auto-dictée"
-                    ),
-                    removed_from_textbook=False,
-                    full_text=textwrap.dedent(
-                        """\
-                        Complète avec "le vent" ou "la pluie"
-                        a. Les feuilles sont chahutées par ...
-                        b. Les vitres sont mouillées par ...
-                        """
-                    ),
-                    instruction_hint_example_text=None,
-                    statement_text=None,
-                    classified_at=None,
-                    classified_by_classification_batch=None,
-                    classified_by_username=None,
-                    exercise_class=None,
-                )
-            ),
-        )
 
     def create_dummy_coche_exercise_classes(self) -> None:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
@@ -1086,15 +693,7 @@ class FixturesCreator:
     def make_adaptation_batches(self, count: int) -> None:
         for i in range(count):
             strategy = self.create_dummy_adaptation_strategy(f"Blah blah blah {i + 1}.")
-            self.add(
-                db.SandboxAdaptationBatch(
-                    created_by_username="Patty",
-                    created_at=created_at,
-                    textbook=None,
-                    removed_from_textbook=False,
-                    strategy=strategy,
-                )
-            )
+            self.add(db.SandboxAdaptationBatch(created_by_username="Patty", created_at=created_at, strategy=strategy))
 
     def create_20_adaptation_batches(self) -> None:
         self.make_adaptation_batches(20)
