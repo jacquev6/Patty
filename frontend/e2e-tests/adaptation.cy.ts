@@ -183,6 +183,9 @@ describe('The adaptation batch creation page', () => {
     cy.get('p:contains("Created by: Alice")').should('exist')
     cy.get('button:contains("View details")').should('be.disabled')
     cy.get('button:contains("View details")').should('be.enabled')
+
+    cy.visit('/adaptation-1')
+    cy.get('a:contains("Adaptation batch 1")').should('have.attr', 'href', '/adaptation-batch-1')
   })
 
   it('handles non-JSON response from the LLM', () => {

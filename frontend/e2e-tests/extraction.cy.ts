@@ -101,6 +101,9 @@ describe('The extraction batch creation page', () => {
     cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
     cy.get('a:contains("Batch E1")').should('have.attr', 'href', '/extraction-batch-1')
     cy.get('ul:contains("Batch C")').should('not.exist')
+
+    cy.visit('/adaptation-2')
+    cy.get('a:contains("Extraction batch 1")').should('have.attr', 'href', '/extraction-batch-1')
   })
 
   it('remembers the last strategy used', () => {
