@@ -1684,8 +1684,8 @@ def export_textbook(
             if isinstance(exercise, adaptation_orm_models.AdaptableExercise):
                 if len(exercise.adaptations) != 0:
                     adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
-                if adapted_exercise_data is not None:
-                    exercises.append(adapted_exercise_data)
+                    if adapted_exercise_data is not None:
+                        exercises.append(adapted_exercise_data)
             elif isinstance(exercise, external_exercises_orm_models.ExternalExercise):
                 exercises.append(make_external_exercise_data(exercise))
             else:

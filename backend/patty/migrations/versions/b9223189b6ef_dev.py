@@ -324,6 +324,8 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("pdf_file_range_id", sa.Integer(), nullable=False),
         sa.Column("textbook_starting_point_id", sa.Integer(), nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["pdf_file_range_id"],
             ["pdf_file_ranges.id"],

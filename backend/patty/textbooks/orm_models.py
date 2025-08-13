@@ -94,11 +94,20 @@ class TextbookStartingPoint(OrmBase, CreatedByUserMixin):
     first_page_number: orm.Mapped[int]
 
 
-class PdfFileTextbookMapping(OrmBase):
+class PdfFileTextbookMapping(OrmBase, CreatedByUserMixin):
     __tablename__ = "pdf_file_textbook_mappings"
 
-    def __init__(self, *, pdf_file_range: PdfFileRange, textbook_starting_point: TextbookStartingPoint) -> None:
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by: str,
+        pdf_file_range: PdfFileRange,
+        textbook_starting_point: TextbookStartingPoint,
+    ) -> None:
         super().__init__()
+        self.created_at = created_at
+        self.created_by = created_by
         self.pdf_file_range = pdf_file_range
         self.textbook_starting_point = textbook_starting_point
 

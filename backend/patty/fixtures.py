@@ -20,7 +20,9 @@ from .adaptation import strategy as adaptation_strategy
 from .classification import orm_models as classification_orm_models
 from .exercises import orm_models as exercises_orm_models
 from .external_exercises import orm_models as external_exercises_orm_models  # noqa: F401 to populate the metadata
+from .extraction import llm as extraction_llm
 from .extraction import orm_models as extraction_orm_models
+from .extraction import assistant_responses as extraction_responses
 from .textbooks import orm_models as textbooks_orm_models
 
 
@@ -667,8 +669,8 @@ class FixturesCreator:
         settings.exercise_class = exercise_class
         return exercise_class
 
-    def create_dummy_textbook(self) -> None:
-        self.add(
+    def create_dummy_textbook(self) -> textbooks_orm_models.Textbook:
+        return self.add(
             textbooks_orm_models.Textbook(
                 created_by="Patty",
                 created_at=created_at,
@@ -680,7 +682,476 @@ class FixturesCreator:
         )
 
     def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
-        self.create_dummy_textbook()
+        model_for_extraction = extraction_llm.DummyModel(provider="dummy", name="dummy-1")
+        model_for_adaptation = adaptation_llm.DummyModel(provider="dummy", name="dummy-1")
+
+        textbook = self.create_dummy_textbook()
+
+        pdf_file = self.add(
+            extraction_orm_models.PdfFile(
+                created_by="Patty",
+                created_at=created_at,
+                sha256="dummy_sha256",
+                bytes_count=123456,
+                pages_count=30,
+                known_file_names=["dummy_textbook.pdf"],
+            )
+        )
+        pdf_file_range = self.add(
+            extraction_orm_models.PdfFileRange(
+                created_by="Patty", created_at=created_at, pdf_file=pdf_file, first_page_number=10, pages_count=3
+            )
+        )
+        textbook_starting_point = self.add(
+            textbooks_orm_models.TextbookStartingPoint(
+                created_by="Patty", created_at=created_at, textbook=textbook, first_page_number=40
+            )
+        )
+        pdf_file_textbook_mapping = self.add(
+            textbooks_orm_models.PdfFileTextbookMapping(
+                created_by="Patty",
+                created_at=created_at,
+                pdf_file_range=pdf_file_range,
+                textbook_starting_point=textbook_starting_point,
+            )
+        )
+
+        extraction_settings = self.add(
+            extraction_orm_models.ExtractionSettings(
+                created_by="Patty", created_at=created_at, prompt="Blah blah blah."
+            )
+        )
+        page_40_extraction = self.add(
+            extraction_orm_models.PageExtraction(
+                created=textbooks_orm_models.PageExtractionCreationByTextbook(
+                    at=created_at, pdf_file_textbook_mapping=pdf_file_textbook_mapping
+                ),
+                pdf_range=pdf_file_range,
+                pdf_page_number=10,  # Page 40 in the textbook
+                settings=extraction_settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+                assistant_response=extraction_responses.AssistantSuccess(
+                    kind="success",
+                    exercises=[
+                        extracted.Exercise(
+                            id="p40_ex4",
+                            numero="4",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p40_ex6",
+                            numero="6",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p40_ex8",
+                            numero="8",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p40_ex10",
+                            numero="10",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                    ],
+                ),
+            )
+        )
+        exercise_4_page_40 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="4"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_6_page_40 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="6"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_10_page_40 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="10"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_8_page_40 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="8"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        page_42_extraction = self.add(
+            extraction_orm_models.PageExtraction(
+                created=textbooks_orm_models.PageExtractionCreationByTextbook(
+                    at=created_at, pdf_file_textbook_mapping=pdf_file_textbook_mapping
+                ),
+                pdf_range=pdf_file_range,
+                pdf_page_number=12,  # Page 42 in the textbook
+                settings=extraction_settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+                assistant_response=extraction_responses.AssistantSuccess(
+                    kind="success",
+                    exercises=[
+                        extracted.Exercise(
+                            id="p42_ex5",
+                            numero="5",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p42_ex6",
+                            numero="6",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p42_exAutoDictée",
+                            numero="Auto-dictée",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                        extracted.Exercise(
+                            id="p42_ex6Texte",
+                            numero="Exo identifié par texte / 5",
+                            consignes=['Complète avec "le vent" ou "la pluie"'],
+                            conseil=None,
+                            exemple=None,
+                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                            references=None,
+                            autre=None,
+                        ),
+                    ],
+                ),
+            )
+        )
+        exercise_5_page_42 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_42_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="5"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_6_page_42 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_42_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="6"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_auto_dictée_page_42 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_42_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="Auto-dictée"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+        exercise_text_page_42 = self.add(
+            adaptation_orm_models.AdaptableExercise(
+                created=extraction_orm_models.ExerciseCreationByPageExtraction(
+                    at=created_at, page_extraction=page_42_extraction
+                ),
+                location=textbooks_orm_models.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="Exo identifié par texte / 5"
+                ),
+                removed_from_textbook=False,
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+
+        mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
+        page_40_classification_chunk = self.add(
+            classification_orm_models.ExerciseClassificationChunk(
+                created=extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                model_for_adaptation=model_for_adaptation,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_4_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_6_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_8_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_10_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        page_42_classification_chunk = self.add(
+            classification_orm_models.ExerciseClassificationChunk(
+                created=extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction(
+                    at=created_at, page_extraction=page_42_extraction
+                ),
+                model_for_adaptation=model_for_adaptation,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_5_page_42,
+                at=created_at,
+                classification_chunk=page_42_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_6_page_42,
+                at=created_at,
+                classification_chunk=page_42_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_auto_dictée_page_42,
+                at=created_at,
+                classification_chunk=page_42_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification_orm_models.ExerciseClassificationByClassificationChunk(
+                exercise=exercise_text_page_42,
+                at=created_at,
+                classification_chunk=page_42_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+
+        assert mcq_exercise_class.latest_strategy_settings is not None
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_4_page_40,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_6_page_40,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_8_page_40,
+        )
+        # No adaptation for exercise_10_page_40: check that it does not appear in the exported HTML
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_42_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_5_page_42,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_42_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_6_page_42,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_42_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_auto_dictée_page_42,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification_orm_models.ExerciseAdaptationCreationByClassificationChunk(
+                    at=created_at, classification_chunk=page_42_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_text_page_42,
+        )
 
     def create_dummy_coche_exercise_classes(self) -> None:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
