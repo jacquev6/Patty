@@ -1,5 +1,4 @@
 import dataclasses
-import datetime
 import glob
 import os
 import shutil
@@ -76,8 +75,6 @@ class DevelopmentCycle:
                         raise DevelopmentCycleError("The check migration should not do anything\n" + content)
                 os.unlink("backend/patty/migrations/versions/check_check.py")
                 exec_in_backend_container(["python", "-m", "patty", "migrate-data"])
-                with open(datetime.datetime.now().strftime("support/dev-env/db/dumps/%Y%m%d-%H%M%S.json"), "w") as f:
-                    f.write(exec_in_backend_container(["python", "-m", "patty", "dump-data"], capture=True).stdout)
 
             if self.do_format:
                 exec_in_backend_container(
