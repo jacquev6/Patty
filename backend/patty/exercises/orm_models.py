@@ -21,7 +21,7 @@ class Exercise(OrmBase):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
 
-    created: orm.Mapped[ExerciseCreation | None] = orm.relationship(back_populates="exercise")
+    created: orm.Mapped[ExerciseCreation] = orm.relationship(back_populates="exercise")
     location: orm.Mapped[ExerciseLocation] = orm.relationship(back_populates="exercise")
     removed_from_textbook: orm.Mapped[bool]
 

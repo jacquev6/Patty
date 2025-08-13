@@ -92,7 +92,7 @@ class ExerciseClassificationByUser(ExerciseClassification):
     __mapper_args__ = {"polymorphic_identity": "by_user"}
 
     def __init__(
-        self, *, exercise: AdaptableExercise, at: datetime.datetime, username: str, exercise_class: ExerciseClass
+        self, *, exercise: AdaptableExercise, at: datetime.datetime, username: str, exercise_class: ExerciseClass | None
     ) -> None:
         super().__init__(exercise=exercise, at=at, exercise_class=exercise_class)
         self.username = username
