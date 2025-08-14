@@ -50,4 +50,4 @@ class ErrorCaughtByFrontend(OrmBase):
     code_location: orm.Mapped[str | None]
 
 
-annotate_new_tables("fundamentals")
+annotate_new_tables("errors")

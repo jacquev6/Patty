@@ -48,68 +48,112 @@ def openapi() -> None:
 
 
 @main.command()
-def db_tables_graph() -> None:
+@click.argument("kind", type=click.Choice(["full", "modules"]))
+def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
     import graphviz  # type: ignore[import-untyped]
+    import sqlalchemy as sql
 
     from . import database_utils
     from . import orm_models  # noqa: F401 to populate the metadata
 
     colors_by_annotation: dict[frozenset[str], str | None] = {
-        frozenset({"fundamentals"}): "#000000",
-        frozenset({"exercises"}): "#000000",
-        frozenset({"external"}): "#FF55FF",
         frozenset({"adaptation"}): "#FF0000",
         frozenset({"adaptation", "sandbox"}): "#FF8888",
         frozenset({"classification"}): "#008800",
         frozenset({"classification", "sandbox"}): "#60AD60",
+        frozenset({"errors"}): None,
+        frozenset({"exercises"}): "#000000",
+        frozenset({"external"}): "#FF55FF",
         frozenset({"extraction"}): "#0000FF",
         frozenset({"extraction", "sandbox"}): "#5555FF",
-        frozenset({"textbooks"}): "#FFFF00",
         frozenset({"old"}): None,
+        frozenset({"textbooks"}): "#FFFF00",
     }
 
     tables = database_utils.OrmBase.metadata.sorted_tables
     table_annotations = database_utils.table_annotations
 
-    known_table_names = set(table.name for table in tables)
+    for table in tables:
+        assert table_annotations[table.name] in colors_by_annotation
+
+    tables_by_name: dict[str, sql.Table] = {table.name: table for table in tables}
+
+    table_names_by_annotation: dict[frozenset[str], list[str]] = {
+        annotation: sorted(table.name for table in tables if frozenset(table_annotations[table.name]) == annotation)
+        for annotation in colors_by_annotation.keys()
+    }
 
     graph = graphviz.Digraph(node_attr={"shape": "none"})
     graph.attr(rankdir="BT")
-    for table in tables:
-        node_color = colors_by_annotation[table_annotations[table.name]]
-        if node_color is not None:
-            foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
 
-            foreign_keys_by_field: dict[str, list[str]] = {}
-            for foreign_key_index, foreign_key in enumerate(foreign_keys):
-                for column in foreign_key.columns:
-                    foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
+    if kind == "full":
+        for annotation, node_color in colors_by_annotation.items():
+            if node_color is not None:
+                for table_name in table_names_by_annotation[annotation]:
+                    table = tables_by_name[table_name]
+                    foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
 
-            fields = []
-            for column_index, column in enumerate(table.columns):
-                color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
-                type = str(column.type)
-                if " " in type:
-                    type = "<BR/>".join(type.split(" ", 1))
-                pk_status = "PK" if column.primary_key else ""
-                null_status = "nullable" if column.nullable else ""
-                status = ", ".join(
-                    filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
-                )
-                fields.append(
-                    f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
-                )
-            graph.node(
-                table.name,
-                label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
-                color=node_color,
-            )
+                    foreign_keys_by_field: dict[str, list[str]] = {}
+                    for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                        for column in foreign_key.columns:
+                            foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
 
-            for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                    fields = []
+                    for column_index, column in enumerate(table.columns):
+                        color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
+                        type = str(column.type)
+                        if " " in type:
+                            type = "<BR/>".join(type.split(" ", 1))
+                        pk_status = "PK" if column.primary_key else ""
+                        null_status = "nullable" if column.nullable else ""
+                        status = ", ".join(
+                            filter(
+                                lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, [])
+                            )
+                        )
+                        fields.append(
+                            f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
+                        )
+                    graph.node(
+                        table.name,
+                        label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+                        color=node_color,
+                    )
+
+                    for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                        target_table = foreign_key.elements[0].column.table.name
+                        if target_table in tables_by_name:
+                            label = f"FK{foreign_key_index+1} → " + ", ".join(
+                                el.column.name for el in foreign_key.elements
+                            )
+                            graph.edge(table.name, target_table, label=label)
+
+    elif kind == "modules":
+        interesting_tables: set[str] = set()
+
+        for table in tables:
+            for foreign_key in table.foreign_key_constraints:
                 target_table = foreign_key.elements[0].column.table.name
-                if target_table in known_table_names:
-                    label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
-                    graph.edge(table.name, target_table, label=label)
+                if table_annotations[target_table] != table_annotations[table.name]:
+                    interesting_tables.add(table.name)
+                    interesting_tables.add(target_table)
+
+        for annotation, node_color in colors_by_annotation.items():
+            if node_color is not None:
+                cluster = graphviz.Digraph(name=f"cluster_{'_'.join(annotation)}", node_attr={"shape": "box"})
+                cluster.attr(label=" ".join(sorted(annotation)), color=node_color)
+
+                for table_name in table_names_by_annotation[annotation]:
+                    if table_name in interesting_tables:
+                        cluster.node(table_name)
+
+                graph.subgraph(cluster)
+
+        for table in tables:
+            for foreign_key in table.foreign_key_constraints:
+                target_table = foreign_key.elements[0].column.table.name
+                if table_annotations[target_table] != table_annotations[table.name]:
+                    graph.edge(table.name, target_table)
 
     sys.stdout.buffer.write(graph.pipe(format="png"))
 

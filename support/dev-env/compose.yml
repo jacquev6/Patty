@@ -27,17 +27,18 @@ services:
       - backend/secrets.env
     command: [
       "rm", "-f",
+      "backend/generated/adapted-exercise-schema--minimal.json",
+      "backend/generated/adapted-exercise-schema--no-choice.json",
+      "backend/generated/adapted-exercise-schema--no-editable-text-input.json",
+      "backend/generated/adapted-exercise-schema--no-free-text-input.json",
+      "backend/generated/adapted-exercise-schema--no-multiple-choices-input.json",
+      "backend/generated/adapted-exercise-schema--no-selectable-input.json",
+      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema.json",
-      "backend/generated/db-tables-graph.png",
+      "backend/generated/db-tables-graph--full.png",
+      "backend/generated/db-tables-graph--modules.png",
       "backend/generated/default-adaptation-prompt.md",
       "backend/generated/default-extraction-prompt.md",
-      "backend/generated/extracted-exercise-schema--minimal.json",
-      "backend/generated/extracted-exercise-schema--no-choice.json",
-      "backend/generated/extracted-exercise-schema--no-editable-text-input.json",
-      "backend/generated/extracted-exercise-schema--no-free-text-input.json",
-      "backend/generated/extracted-exercise-schema--no-multiple-choices-input.json",
-      "backend/generated/extracted-exercise-schema--no-selectable-input.json",
-      "backend/generated/extracted-exercise-schema--no-swappable-input.json",
       "backend/generated/extracted-exercise-schema.json",
       "backend/generated/openapi.json",
       "backend/generated/patty_json_to_html.py",
@@ -445,7 +446,7 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--minimal.json"]
       interval: 0.5s
       retries: 12
-  db-tables-graph-generator:
+  db-tables-graph-generator--full:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -456,7 +457,24 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph.png", "python -m patty db-tables-graph"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph--full.png", "python -m patty db-tables-graph full"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  db-tables-graph-generator--modules:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph--modules.png", "python -m patty db-tables-graph modules"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
