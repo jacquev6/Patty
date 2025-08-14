@@ -4,7 +4,7 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from ..database_utils import annotate_new_tables
-from ..exercises.orm_models import Exercise, ExerciseCreation, ExerciseLocation
+from ..exercises import Exercise, ExerciseCreation, ExerciseLocation
 
 
 class ExternalExercise(Exercise):

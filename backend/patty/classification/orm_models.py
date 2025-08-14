@@ -5,24 +5,24 @@ import datetime
 from sqlalchemy import orm
 import sqlalchemy as sql
 
-from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..adaptation.orm_models import ExerciseClass, AdaptableExercise, ExerciseAdaptationCreation
-from ..adaptation import llm as adaptation_llm
+from .. import adaptation
+from ..adaptation import ExerciseClass, AdaptableExercise, ExerciseAdaptationCreation
 from ..any_json import JsonDict
+from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 
 
 class ModelForAdaptationMixin:
     _model_for_adaptation: orm.Mapped[JsonDict | None] = orm.mapped_column("model_for_adaptation", sql.JSON)
 
     @property
-    def model_for_adaptation(self) -> adaptation_llm.ConcreteModel | None:
+    def model_for_adaptation(self) -> adaptation.llm.ConcreteModel | None:
         if self._model_for_adaptation is None:
             return None
         else:
-            return adaptation_llm.validate(self._model_for_adaptation)
+            return adaptation.llm.validate(self._model_for_adaptation)
 
     @model_for_adaptation.setter
-    def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:
+    def model_for_adaptation(self, value: adaptation.llm.ConcreteModel | None) -> None:
         if value is None:
             self._model_for_adaptation = sql.null()
         else:
@@ -104,7 +104,7 @@ class ExerciseClassificationChunk(OrmBase, ModelForAdaptationMixin):
     __tablename__ = "exercise_classification_chunks"
 
     def __init__(
-        self, *, created: ExerciseClassificationChunkCreation, model_for_adaptation: adaptation_llm.ConcreteModel | None
+        self, *, created: ExerciseClassificationChunkCreation, model_for_adaptation: adaptation.llm.ConcreteModel | None
     ) -> None:
         super().__init__()
         self.created = created
@@ -204,7 +204,7 @@ class SandboxClassificationBatch(OrmBase, CreatedByUserMixin, ModelForAdaptation
         *,
         created_by: str,
         created_at: datetime.datetime,
-        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+        model_for_adaptation: adaptation.llm.ConcreteModel | None,
     ) -> None:
         super().__init__()
         self.created_by = created_by

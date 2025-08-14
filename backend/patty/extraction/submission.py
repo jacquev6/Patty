@@ -12,12 +12,12 @@ import sqlalchemy as sql
 import urllib.parse
 
 from . import assistant_responses
-from . import orm_models as extraction_orm_models
+from . import orm_models as db
+from .. import adaptation
+from .. import classification
 from .. import database_utils
+from .. import exercises
 from .. import settings
-from ..adaptation import orm_models as adaptation_orm_models
-from ..classification import orm_models as classification_orm_models
-from ..exercises import orm_models as exercises_orm_models
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
@@ -34,9 +34,7 @@ pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     extractions = (
         session.execute(
-            sql.select(extraction_orm_models.PageExtraction)
-            .where(extraction_orm_models.PageExtraction._assistant_response == sql.null())
-            .limit(parallelism)
+            sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()).limit(parallelism)
         )
         .scalars()
         .all()
@@ -48,9 +46,7 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
-async def submit_extraction(
-    session: database_utils.Session, page_extraction: extraction_orm_models.PageExtraction
-) -> None:
+async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
     assert page_extraction.pdf_range is not None
     sha256 = page_extraction.pdf_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
@@ -88,8 +84,8 @@ async def submit_extraction(
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if page_extraction.run_classification:
-            classification_chunk = classification_orm_models.ExerciseClassificationChunk(
-                created=extraction_orm_models.ExerciseClassificationChunkCreationByPageExtraction(
+            classification_chunk = classification.ExerciseClassificationChunk(
+                created=db.ExerciseClassificationChunkCreationByPageExtraction(
                     at=created_at, page_extraction=page_extraction
                 ),
                 model_for_adaptation=page_extraction.model_for_adaptation,
@@ -113,11 +109,9 @@ async def submit_extraction(
                     ],
                 )
             )
-            exercise = adaptation_orm_models.AdaptableExercise(
-                created=extraction_orm_models.ExerciseCreationByPageExtraction(
-                    at=created_at, page_extraction=page_extraction
-                ),
-                location=exercises_orm_models.ExerciseLocationMaybePageAndNumber(
+            exercise = adaptation.AdaptableExercise(
+                created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+                location=exercises.ExerciseLocationMaybePageAndNumber(
                     page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
                 ),
                 removed_from_textbook=False,
@@ -129,7 +123,7 @@ async def submit_extraction(
 
             if classification_chunk is not None:
                 session.add(
-                    classification_orm_models.ExerciseClassificationByClassificationChunk(
+                    classification.ExerciseClassificationByClassificationChunk(
                         exercise=exercise, at=created_at, classification_chunk=classification_chunk, exercise_class=None
                     )
                 )

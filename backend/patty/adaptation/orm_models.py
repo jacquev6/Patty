@@ -10,12 +10,12 @@ from . import llm
 from ..adapted import Exercise as AdaptedExercise
 from ..any_json import JsonDict, JsonList
 from ..database_utils import CreatedByUserMixin, OrmBase, OrderBy, annotate_new_tables
-from ..exercises.orm_models import Exercise, ExerciseCreation, ExerciseLocation
+from ..exercises import Exercise, ExerciseCreation, ExerciseLocation
 from . import assistant_responses
 from . import strategy
 
 if typing.TYPE_CHECKING:
-    from ..classification.orm_models import ExerciseClassCreation, ExerciseClassification
+    from ..classification import ExerciseClassCreation, ExerciseClassification
 
 
 class AdaptableExercise(Exercise):
@@ -56,7 +56,7 @@ class AdaptableExercise(Exercise):
 
     @staticmethod
     def classifications_order_by() -> OrderBy:
-        from ..classification.orm_models import ExerciseClassification
+        from ..classification import ExerciseClassification
 
         return [ExerciseClassification.at]
 

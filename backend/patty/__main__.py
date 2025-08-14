@@ -1,6 +1,10 @@
 from typing import Iterable
+import ast
 import asyncio
+import colorsys
 import datetime
+import glob
+import hashlib
 import io
 import json
 import os
@@ -159,25 +163,147 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
 
 
 @main.command()
+def python_dependency_graph() -> None:
+    import graphviz
+
+    def gather_file_names() -> Iterable[str]:
+        for file_name in glob.glob("patty/**/*.py", recursive=True):
+            if file_name.startswith("patty/migrations/"):
+                continue
+            yield file_name
+
+    def make_module_path(file_name: str) -> tuple[str, ...]:
+        assert file_name.endswith(".py")
+        return tuple(file_name[:-3].split(os.path.sep))
+
+    def gather_dependencies(
+        file_name: str, current_module_path: tuple[str, ...], known_module_paths: set[tuple[str, ...]]
+    ) -> list[tuple[tuple[str, ...], bool]]:
+        with open(file_name, "r") as file:
+            content = file.read()
+        module = ast.parse(content, filename=file_name)
+
+        strong_dependencies: set[tuple[str, ...]] = set()
+        weak_dependencies: set[tuple[str, ...]] = set()
+
+        for nodes, dependencies in ((module.body, strong_dependencies), (ast.walk(module), weak_dependencies)):
+            for node in nodes:
+                if isinstance(node, ast.ImportFrom) and node.level > 0:
+                    if node.module is None:
+                        imported_from = current_module_path[: -node.level]
+                    else:
+                        imported_from = current_module_path[: -node.level] + tuple(node.module.split("."))
+
+                    for name in node.names:
+                        imported_what = name.name
+                        for candidate in ((imported_what,), (imported_what, "__init__"), ("__init__",), ()):
+                            if imported_from + candidate in known_module_paths:
+                                dependencies.add(imported_from + candidate)
+                                break
+                        else:
+                            print("Warning: unhandled import:", ast.unparse(node))
+
+        ret = {}
+        for dep in weak_dependencies:
+            ret[dep] = current_module_path == ("patty", "__main__")
+        for dep in strong_dependencies:
+            ret[dep] = True
+
+        return list(ret.items())
+
+    def make_graph_node(module_path: tuple[str, ...]) -> str:
+        return "_".join(module_path)
+
+    def string_to_color(s: str) -> str:
+        r, g, b = colorsys.hls_to_rgb(
+            h=(int(hashlib.md5(s.encode("utf-8")).hexdigest(), 16) % 360) / 360.0, l=0.5, s=1.0
+        )
+        return "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+
+    file_names = list(gather_file_names())
+    known_module_paths = {make_module_path(file_name) for file_name in file_names}
+    ignored_modules = {
+        # Ubiquitous modules imported so often they clutter the graph
+        ("patty", "any_json"),
+        ("patty", "api_utils"),
+        ("patty", "database_utils"),
+        ("patty", "settings"),
+        ("patty", "version"),
+    }
+
+    modules_dependency_graph = {
+        module_path: set(
+            (d, strong)
+            for (d, strong) in gather_dependencies(file_name, module_path, known_module_paths)
+            if d not in ignored_modules
+        )
+        for file_name in file_names
+        for module_path in [make_module_path(file_name)]
+        if module_path not in ignored_modules
+    }
+
+    clusters_by_package = {
+        module_path[:-1]: graphviz.Digraph(
+            name=f"cluster_{'_'.join(module_path[:-1])}",
+            graph_attr={"label": module_path[-2], "color": string_to_color(".".join((*module_path[:-1], "__init__")))},
+        )
+        for module_path in modules_dependency_graph
+    }
+
+    for module_path in modules_dependency_graph.keys():
+        clusters_by_package[module_path[:-1]].node(
+            make_graph_node(module_path), label=module_path[-1], color=string_to_color(".".join(module_path))
+        )
+
+    for module_path, cluster in reversed(clusters_by_package.items()):
+        if len(module_path) == 1:
+            assert module_path[0] == "patty"
+        else:
+            clusters_by_package[module_path[:-1]].subgraph(cluster)
+
+    graph = graphviz.Digraph(
+        node_attr={"shape": "box"}, graph_attr={"rankdir": "BT", "compound": "true", "nodesep": "0.5", "ranksep": "1"}
+    )
+    graph.subgraph(clusters_by_package[("patty",)])
+
+    for module_path, dependencies in modules_dependency_graph.items():
+        for dependency, strong in dependencies:
+            attrs = {"color": string_to_color(".".join(dependency)), "penwidth": "10"}
+            if strong:
+                attrs["weight"] = "10"
+            else:
+                attrs["weight"] = "1"
+                attrs["style"] = "dashed"
+            if dependency[-1] == "__init__":
+                attrs["lhead"] = f"cluster_{'_'.join(dependency[:-1])}"
+                attrs.pop("penwidth", None)
+            if dependency[:-1] == module_path[: len(dependency) - 1]:
+                attrs.pop("penwidth", None)
+            graph.edge(make_graph_node(module_path), make_graph_node(dependency), **attrs)
+
+    sys.stdout.buffer.write(graph.pipe(format="png"))
+
+
+@main.command()
 def tricky_sql_requests() -> None:
     import sqlparse  # type: ignore[import-untyped]
 
-    from .extraction import orm_models as extraction_orm_models
-    from .textbooks import orm_models as textbooks_orm_models
     from . import database_utils
+    from . import extraction
+    from . import textbooks
 
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
 
     request: typing.Any
     for title, request in [
-        ("Textbook.fetch_ordered_exercises", textbooks_orm_models.Textbook.make_ordered_exercises_request(42)),
+        ("Textbook.fetch_ordered_exercises", textbooks.Textbook.make_ordered_exercises_request(42)),
         (
             "PageExtraction.fetch_ordered_exercises (page and number)",
-            extraction_orm_models.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
+            extraction.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
         ),
         (
             "PageExtraction.fetch_ordered_exercises (textbook)",
-            extraction_orm_models.PageExtraction.make_ordered_exercises_request__textbook(42),
+            extraction.PageExtraction.make_ordered_exercises_request__textbook(42),
         ),
     ]:
         print(f"{title}:")
@@ -210,7 +336,7 @@ def adapted_exercise_schema(
     editable_text_input: bool,
 ) -> None:
     from . import adapted
-    from .adaptation import llm
+    from . import adaptation
 
     exercise_type = adapted.make_exercise_type(
         adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
@@ -229,7 +355,7 @@ def adapted_exercise_schema(
         ),
         adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
-    print(json.dumps(llm.make_schema(exercise_type), indent=2))
+    print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
 
 
 @main.command()
@@ -448,9 +574,9 @@ def run_submission_daemon(
     import requests
 
     from . import database_utils
-    from .adaptation.submission import submit_adaptations
-    from .classification import submit_classifications
-    from .extraction.submission import submit_extractions
+    from . import adaptation
+    from . import classification
+    from . import extraction
 
     def log(message: str) -> None:
         # @todo Use actual logging
@@ -465,11 +591,22 @@ def run_submission_daemon(
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
-                    go_on = len(await asyncio.gather(*submit_extractions(session, extraction_parallelism))) == 0
+                    go_on = (
+                        len(
+                            await asyncio.gather(
+                                *extraction.submission.submit_extractions(session, extraction_parallelism)
+                            )
+                        )
+                        == 0
+                    )
                     if go_on:
-                        go_on = not submit_classifications(session, classification_parallelism)
+                        go_on = not classification.submission.submit_classifications(
+                            session, classification_parallelism
+                        )
                         if go_on:
-                            await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
+                            await asyncio.gather(
+                                *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                            )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
                     log("Calling pulse monitoring URL")

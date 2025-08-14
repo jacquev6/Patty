@@ -7,8 +7,8 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..exercises.orm_models import Exercise, ExerciseLocation
-from ..extraction.orm_models import PdfFileRange, PageExtractionCreation
+from ..exercises import Exercise, ExerciseLocation
+from ..extraction import PdfFileRange, PageExtractionCreation
 
 
 class Textbook(OrmBase, CreatedByUserMixin):

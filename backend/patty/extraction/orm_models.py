@@ -7,12 +7,12 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from . import llm
-from ..adaptation import llm as adaptation_llm
-from ..adaptation.orm_models import AdaptableExercise
+from .. import adaptation
+from ..adaptation import AdaptableExercise
 from ..any_json import JsonDict
-from ..classification.orm_models import ExerciseClassificationChunkCreation, ModelForAdaptationMixin
+from ..classification import ExerciseClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..exercises.orm_models import ExerciseCreation, ExerciseLocationMaybePageAndNumber
+from ..exercises import ExerciseCreation, ExerciseLocationMaybePageAndNumber
 from . import assistant_responses
 
 
@@ -97,7 +97,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         settings: ExtractionSettings,
         model: llm.ConcreteModel,
         run_classification: bool,
-        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+        model_for_adaptation: adaptation.llm.ConcreteModel | None,
         assistant_response: assistant_responses.Response | None,
     ) -> None:
         super().__init__()
@@ -169,7 +169,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
 
     @staticmethod
     def make_ordered_exercises_request__textbook(id: int) -> sql.Select[tuple[AdaptableExercise]]:
-        from ..textbooks.orm_models import ExerciseLocationTextbook
+        from ..textbooks import ExerciseLocationTextbook
 
         return (
             sql.select(AdaptableExercise)
@@ -261,7 +261,7 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
         settings: ExtractionSettings,
         model: llm.ConcreteModel,
         run_classification: bool,
-        model_for_adaptation: adaptation_llm.ConcreteModel | None,
+        model_for_adaptation: adaptation.llm.ConcreteModel | None,
     ) -> None:
         super().__init__()
         self.created_by = created_by
