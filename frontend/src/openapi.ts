@@ -643,10 +643,10 @@ export interface components {
       userPrompt: string
       /** Assistantresponse */
       assistantResponse:
-        | components['schemas']['patty__adaptation__responses__AssistantSuccess']
-        | components['schemas']['AssistantInvalidJsonError']
-        | components['schemas']['AssistantNotJsonError']
-        | components['schemas']['AssistantUnknownError']
+        | components['schemas']['patty__adaptation__assistant_responses__Success']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
     }
     /** ApiAdaptation */
     ApiAdaptation: {
@@ -664,10 +664,10 @@ export interface components {
       rawLlmConversations: unknown[]
       /** Initialassistantresponse */
       initialAssistantResponse:
-        | components['schemas']['patty__adaptation__responses__AssistantSuccess']
-        | components['schemas']['AssistantInvalidJsonError']
-        | components['schemas']['AssistantNotJsonError']
-        | components['schemas']['AssistantUnknownError']
+        | components['schemas']['patty__adaptation__assistant_responses__Success']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
@@ -758,49 +758,6 @@ export interface components {
        * @constant
        */
       kind: 'arrow'
-    }
-    /** AssistantInvalidJsonError */
-    AssistantInvalidJsonError: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'error'
-      /**
-       * Error
-       * @constant
-       */
-      error: 'invalid-json'
-      /** Parsed */
-      parsed: unknown
-    }
-    /** AssistantNotJsonError */
-    AssistantNotJsonError: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'error'
-      /**
-       * Error
-       * @constant
-       */
-      error: 'not-json'
-      /** Text */
-      text: string
-    }
-    /** AssistantUnknownError */
-    AssistantUnknownError: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'error'
-      /**
-       * Error
-       * @constant
-       */
-      error: 'unknown'
     }
     /** BaseAdaptationBatch */
     BaseAdaptationBatch: {
@@ -1259,6 +1216,21 @@ export interface components {
       /** Choice */
       choice: boolean
     }
+    /** InvalidJsonError */
+    InvalidJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /** Parsed */
+      parsed: unknown
+    }
     /** JsonFromTextLlmResponseSpecification */
     JsonFromTextLlmResponseSpecification: {
       /**
@@ -1404,6 +1376,21 @@ export interface components {
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
+    /** NotJsonError */
+    NotJsonError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /** Text */
+      text: string
+    }
     /** OpenAiModel */
     OpenAiModel: {
       /**
@@ -1423,10 +1410,10 @@ export interface components {
       pageNumber: number
       /** Assistantresponse */
       assistantResponse:
-        | components['schemas']['patty__extraction__assistant_responses__AssistantSuccess']
-        | components['schemas']['AssistantInvalidJsonError']
-        | components['schemas']['AssistantNotJsonError']
-        | components['schemas']['AssistantUnknownError']
+        | components['schemas']['patty__extraction__assistant_responses__Success']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
         | null
       /** Exercises */
       exercises: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page__Exercise'][]
@@ -1759,6 +1746,19 @@ export interface components {
       /** Year */
       year: number | null
     }
+    /** UnknownError */
+    UnknownError: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /**
+       * Error
+       * @constant
+       */
+      error: 'unknown'
+    }
     /** ValidationError */
     ValidationError: {
       /** Location */
@@ -1775,8 +1775,8 @@ export interface components {
        */
       kind: 'whitespace'
     }
-    /** AssistantSuccess */
-    patty__adaptation__responses__AssistantSuccess: {
+    /** Success */
+    patty__adaptation__assistant_responses__Success: {
       /**
        * Kind
        * @constant
@@ -1854,8 +1854,8 @@ export interface components {
       /** Autre */
       autre?: string | null
     }
-    /** AssistantSuccess */
-    patty__extraction__assistant_responses__AssistantSuccess: {
+    /** Success */
+    patty__extraction__assistant_responses__Success: {
       /**
        * Kind
        * @constant

@@ -11,19 +11,14 @@ import PIL.Image
 import sqlalchemy as sql
 import urllib.parse
 
+from . import assistant_responses
 from . import orm_models as extraction_orm_models
-from .assistant_responses import (
-    AssistantSuccess,
-    AssistantUnknownError,
-    AssistantInvalidJsonError,
-    AssistantNotJsonError,
-)
-from .llm import InvalidJsonLlmException, NotJsonLlmException
 from .. import database_utils
 from .. import settings
 from ..adaptation import orm_models as adaptation_orm_models
 from ..classification import orm_models as classification_orm_models
 from ..exercises import orm_models as exercises_orm_models
+from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
 def log(message: str) -> None:
@@ -75,16 +70,18 @@ async def submit_extraction(
         extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, image)
     except InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
-        page_extraction.assistant_response = AssistantInvalidJsonError(
+        page_extraction.assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except NotJsonLlmException as error:
         log(f"Error 'not JSON' on page extraction {page_extraction.id}")
-        page_extraction.assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        page_extraction.assistant_response = assistant_responses.NotJsonError(
+            kind="error", error="not-json", text=error.text
+        )
     except Exception:
         log(f"UNEXPECTED ERROR on page extraction {page_extraction.id}")
         traceback.print_exc()
-        page_extraction.assistant_response = AssistantUnknownError(kind="error", error="unknown")
+        page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     else:
         log(f"Success on page extraction {page_extraction.id}")
 
@@ -137,7 +134,7 @@ async def submit_extraction(
                     )
                 )
 
-        page_extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
+        page_extraction.assistant_response = assistant_responses.Success(kind="success", exercises=extracted_exercises)
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

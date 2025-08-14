@@ -1,3 +1,6 @@
+from typing import Any
+
+import pydantic
 from .base import (
     AssistantMessage,
     CompletionResponse,
@@ -40,3 +43,7 @@ __all__ = [
 
 
 ConcreteModel = DummyModel | MistralAiModel | OpenAiModel
+
+
+def validate(obj: Any) -> ConcreteModel:
+    return pydantic.RootModel[ConcreteModel].model_validate(obj).root

@@ -20,28 +20,22 @@ from . import database_utils
 from . import errors
 from . import extracted
 from . import settings
+from .adaptation import assistant_responses as adaptation_responses
 from .adaptation import llm as adaptation_llm
 from .adaptation import orm_models as adaptation_orm_models
 from .adaptation.strategy import ConcreteLlmResponseSpecification, JsonSchemaLlmResponseSpecification
+from .adaptation.submission import LlmMessage
 from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
-from .adaptation.responses import (
-    Adjustment,
-    AssistantInvalidJsonError,
-    AssistantNotJsonError,
-    AssistantResponse,
-    AssistantSuccess,
-)
-from .adaptation.submission import LlmMessage
 from .classification import orm_models as classification_orm_models
 from .exercises import orm_models as exercises_orm_models
 from .external_exercises import orm_models as external_exercises_orm_models
 from .extraction import assistant_responses as extraction_responses
 from .extraction import llm as extraction_llm
 from .extraction import orm_models as extraction_orm_models
-from .version import PATTY_VERSION
 from .textbooks import orm_models as textbooks_orm_models
+from .version import PATTY_VERSION
 
 __all__ = ["api_router", "export_router"]
 
@@ -108,8 +102,8 @@ class ApiAdaptation(ApiModel):
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
-    initial_assistant_response: AssistantResponse | None
-    adjustments: list[Adjustment]
+    initial_assistant_response: adaptation_responses.Response | None
+    adjustments: list[adaptation_responses.Adjustment]
     manual_edit: Exercise | None
     removed_from_textbook: bool
 
@@ -827,7 +821,7 @@ class GetExtractionBatchResponse(ApiModel):
 
     class Page(ApiModel):
         page_number: int
-        assistant_response: extraction_responses.AssistantResponse | None
+        assistant_response: extraction_responses.Response | None
 
         class Exercise(ApiModel):
             id: str
@@ -1241,12 +1235,12 @@ async def post_adaptation_adjustment(
     adaptation = get_by_id(session, adaptation_orm_models.ExerciseAdaptation, id)
     assert adaptation.initial_assistant_response is not None
 
-    def make_assistant_message(assistant_response: AssistantResponse) -> LlmMessage:
-        if isinstance(assistant_response, AssistantSuccess):
+    def make_assistant_message(assistant_response: adaptation_responses.Response) -> LlmMessage:
+        if isinstance(assistant_response, adaptation_responses.Success):
             return adaptation_llm.AssistantMessage[Exercise](content=assistant_response.exercise)
-        elif isinstance(assistant_response, AssistantInvalidJsonError):
+        elif isinstance(assistant_response, adaptation_responses.InvalidJsonError):
             return adaptation_llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
-        elif isinstance(assistant_response, AssistantNotJsonError):
+        elif isinstance(assistant_response, adaptation_responses.NotJsonError):
             return adaptation_llm.NotJsonAssistantMessage(content=assistant_response.text)
         else:
             raise ValueError("Unknown assistant response type")
@@ -1257,7 +1251,7 @@ async def post_adaptation_adjustment(
         make_assistant_message(adaptation.initial_assistant_response),
     ]
     for adjustment in adaptation.adjustments:
-        assert isinstance(adjustment.assistant_response, AssistantSuccess)
+        assert isinstance(adjustment.assistant_response, adaptation_responses.Success)
         messages.append(adaptation_llm.UserMessage(content=adjustment.user_prompt))
         make_assistant_message(adjustment.assistant_response)
     messages.append(adaptation_llm.UserMessage(content=req.adjustment))
@@ -1268,15 +1262,15 @@ async def post_adaptation_adjustment(
         )
     except adaptation_llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
-        assistant_response: AssistantResponse = AssistantInvalidJsonError(
+        assistant_response: adaptation_responses.Response = adaptation_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except adaptation_llm.NotJsonLlmException as error:
         raw_conversation = error.raw_conversation
-        assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        assistant_response = adaptation_responses.NotJsonError(kind="error", error="not-json", text=error.text)
     else:
         raw_conversation = response.raw_conversation
-        assistant_response = AssistantSuccess(
+        assistant_response = adaptation_responses.Success(
             kind="success", exercise=Exercise(**response.message.content.model_dump())
         )
 
@@ -1285,7 +1279,9 @@ async def post_adaptation_adjustment(
     adaptation.raw_llm_conversations = raw_llm_conversations
 
     adjustments = list(adaptation.adjustments)
-    adjustments.append(Adjustment(user_prompt=req.adjustment, assistant_response=assistant_response))
+    adjustments.append(
+        adaptation_responses.Adjustment(user_prompt=req.adjustment, assistant_response=assistant_response)
+    )
     adaptation.adjustments = adjustments
 
     return make_api_adaptation(adaptation)
@@ -1641,12 +1637,12 @@ def make_adapted_exercise_data(adaptation: adaptation_orm_models.ExerciseAdaptat
 
     if adaptation.manual_edit is None:
         if len(adaptation.adjustments) == 0:
-            if not isinstance(adaptation.initial_assistant_response, AssistantSuccess):
+            if not isinstance(adaptation.initial_assistant_response, adaptation_responses.Success):
                 return None
             adapted_exercise = adaptation.initial_assistant_response.exercise
         else:
             last_adjustment = adaptation.adjustments[-1]
-            if not isinstance(last_adjustment.assistant_response, AssistantSuccess):
+            if not isinstance(last_adjustment.assistant_response, adaptation_responses.Success):
                 return None
             adapted_exercise = last_adjustment.assistant_response.exercise
     else:

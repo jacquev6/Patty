@@ -3,7 +3,6 @@ from __future__ import annotations
 import typing
 import datetime
 
-import pydantic
 from sqlalchemy import orm
 import sqlalchemy as sql
 
@@ -12,8 +11,8 @@ from ..adapted import Exercise as AdaptedExercise
 from ..any_json import JsonDict, JsonList
 from ..database_utils import CreatedByUserMixin, OrmBase, OrderBy, annotate_new_tables
 from ..exercises.orm_models import Exercise, ExerciseCreation, ExerciseLocation
-from .responses import AssistantResponse, Adjustment
-from .strategy import ConcreteLlmResponseSpecification
+from . import assistant_responses
+from . import strategy
 
 if typing.TYPE_CHECKING:
     from ..classification.orm_models import ExerciseClassCreation, ExerciseClassification
@@ -103,7 +102,7 @@ class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
         exercise_class: ExerciseClass | None,
         parent: ExerciseAdaptationSettings | None,
         system_prompt: str,
-        response_specification: ConcreteLlmResponseSpecification,
+        response_specification: strategy.ConcreteLlmResponseSpecification,
     ) -> None:
         super().__init__(created_by=created_by, created_at=created_at)
         self.exercise_class = exercise_class
@@ -128,11 +127,11 @@ class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
     _response_specification: orm.Mapped[JsonDict] = orm.mapped_column("response_specification", sql.JSON)
 
     @property
-    def response_specification(self) -> ConcreteLlmResponseSpecification:
-        return pydantic.RootModel[ConcreteLlmResponseSpecification](self._response_specification).root  # type: ignore[arg-type]
+    def response_specification(self) -> strategy.ConcreteLlmResponseSpecification:
+        return strategy.validate(self._response_specification)
 
     @response_specification.setter
-    def response_specification(self, value: ConcreteLlmResponseSpecification) -> None:
+    def response_specification(self, value: strategy.ConcreteLlmResponseSpecification) -> None:
         self._response_specification = value.model_dump()
 
 
@@ -147,8 +146,8 @@ class ExerciseAdaptation(OrmBase):
         model: llm.ConcreteModel,
         settings: ExerciseAdaptationSettings,
         raw_llm_conversations: JsonList,
-        initial_assistant_response: AssistantResponse | None,
-        adjustments: list[Adjustment],
+        initial_assistant_response: assistant_responses.Response | None,
+        adjustments: list[assistant_responses.Adjustment],
         manual_edit: AdaptedExercise | None,
     ) -> None:
         super().__init__()
@@ -179,7 +178,7 @@ class ExerciseAdaptation(OrmBase):
 
     @property
     def model(self) -> llm.ConcreteModel:
-        return pydantic.RootModel[llm.ConcreteModel].model_validate(self._model).root
+        return llm.validate(self._model)
 
     @model.setter
     def model(self, value: llm.ConcreteModel) -> None:
@@ -190,14 +189,14 @@ class ExerciseAdaptation(OrmBase):
     _initial_assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("initial_assistant_response", sql.JSON)
 
     @property
-    def initial_assistant_response(self) -> AssistantResponse | None:
+    def initial_assistant_response(self) -> assistant_responses.Response | None:
         if self._initial_assistant_response is None:
             return None
         else:
-            return pydantic.RootModel[AssistantResponse].model_validate(self._initial_assistant_response).root
+            return assistant_responses.validate(self._initial_assistant_response)
 
     @initial_assistant_response.setter
-    def initial_assistant_response(self, value: AssistantResponse | None) -> None:
+    def initial_assistant_response(self, value: assistant_responses.Response | None) -> None:
         if value is None:
             self._initial_assistant_response = sql.null()
         else:
@@ -206,11 +205,11 @@ class ExerciseAdaptation(OrmBase):
     _adjustments: orm.Mapped[JsonList] = orm.mapped_column("adjustments", sql.JSON)
 
     @property
-    def adjustments(self) -> list[Adjustment]:
-        return [Adjustment.model_validate(adjustment) for adjustment in self._adjustments]
+    def adjustments(self) -> list[assistant_responses.Adjustment]:
+        return [assistant_responses.Adjustment.model_validate(adjustment) for adjustment in self._adjustments]
 
     @adjustments.setter
-    def adjustments(self, value: list[Adjustment]) -> None:
+    def adjustments(self, value: list[assistant_responses.Adjustment]) -> None:
         self._adjustments = [adjustment.model_dump() for adjustment in value]
 
     _manual_edit: orm.Mapped[JsonDict | None] = orm.mapped_column("manual_edit", sql.JSON)
@@ -290,7 +289,7 @@ class SandboxAdaptationBatch(OrmBase, CreatedByUserMixin):
 
     @property
     def model(self) -> llm.ConcreteModel:
-        return pydantic.RootModel[llm.ConcreteModel].model_validate(self._model).root
+        return llm.validate(self._model)
 
     @model.setter
     def model(self, value: llm.ConcreteModel) -> None:

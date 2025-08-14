@@ -1793,16 +1793,16 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__responses__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
               },
               {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
+                "$ref": "#/components/schemas/NotJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantUnknownError"
+                "$ref": "#/components/schemas/UnknownError"
               }
             ],
             "title": "Assistantresponse"
@@ -1869,16 +1869,16 @@
           "initialAssistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__responses__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
               },
               {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
+                "$ref": "#/components/schemas/NotJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantUnknownError"
+                "$ref": "#/components/schemas/UnknownError"
               },
               {
                 "type": "null"
@@ -2212,78 +2212,6 @@
         "required": [
           "kind"
         ]
-      },
-      "AssistantInvalidJsonError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "invalid-json",
-            "title": "Error"
-          },
-          "parsed": {
-            "title": "Parsed"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error",
-          "parsed"
-        ],
-        "title": "AssistantInvalidJsonError"
-      },
-      "AssistantNotJsonError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "not-json",
-            "title": "Error"
-          },
-          "text": {
-            "type": "string",
-            "title": "Text"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error",
-          "text"
-        ],
-        "title": "AssistantNotJsonError"
-      },
-      "AssistantUnknownError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "unknown",
-            "title": "Error"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error"
-        ],
-        "title": "AssistantUnknownError"
       },
       "BaseAdaptationBatch": {
         "properties": {
@@ -3415,6 +3343,31 @@
         ],
         "title": "InstructionComponents"
       },
+      "InvalidJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "invalid-json",
+            "title": "Error"
+          },
+          "parsed": {
+            "title": "Parsed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "parsed"
+        ],
+        "title": "InvalidJsonError"
+      },
       "JsonFromTextLlmResponseSpecification": {
         "properties": {
           "format": {
@@ -3777,6 +3730,32 @@
           "showChoicesByDefault"
         ]
       },
+      "NotJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "not-json",
+            "title": "Error"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "text"
+        ],
+        "title": "NotJsonError"
+      },
       "OpenAiModel": {
         "properties": {
           "provider": {
@@ -3809,16 +3788,16 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__extraction__assistant_responses__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
               },
               {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
+                "$ref": "#/components/schemas/NotJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantUnknownError"
+                "$ref": "#/components/schemas/UnknownError"
               },
               {
                 "type": "null"
@@ -4712,6 +4691,27 @@
         ],
         "title": "Textbook"
       },
+      "UnknownError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "unknown",
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error"
+        ],
+        "title": "UnknownError"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -4758,7 +4758,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__responses__AssistantSuccess": {
+      "patty__adaptation__assistant_responses__Success": {
         "properties": {
           "kind": {
             "type": "string",
@@ -4775,7 +4775,7 @@
           "kind",
           "exercise"
         ],
-        "title": "AssistantSuccess"
+        "title": "Success"
       },
       "patty__adapted__Exercise-Output": {
         "properties": {
@@ -5088,7 +5088,7 @@
         "type": "object",
         "title": "Exercise"
       },
-      "patty__extraction__assistant_responses__AssistantSuccess": {
+      "patty__extraction__assistant_responses__Success": {
         "properties": {
           "kind": {
             "type": "string",
@@ -5109,7 +5109,7 @@
           "kind",
           "exercises"
         ],
-        "title": "AssistantSuccess"
+        "title": "Success"
       }
     },
     "securitySchemes": {

@@ -15,7 +15,7 @@ from . import extracted
 from . import settings
 from .adaptation import llm as adaptation_llm
 from .adaptation import orm_models as adaptation_orm_models
-from .adaptation import responses as adaptation
+from .adaptation import assistant_responses as adaptation_responses
 from .adaptation import strategy as adaptation_strategy
 from .classification import orm_models as classification_orm_models
 from .exercises import orm_models as exercises_orm_models
@@ -183,8 +183,8 @@ def make_default_adaptation_prompt() -> str:
 
 
 def make_default_extraction_prompt() -> str:
-    exercise = extracted.Exercise(
-        **{  # type: ignore[arg-type]
+    exercise = extracted.Exercise.model_validate(
+        {
             "id": "p47_ex4",
             "numero": "1",
             "consignes": [
@@ -386,10 +386,10 @@ class FixturesCreator:
                 model=model,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
-                initial_assistant_response=adaptation.AssistantSuccess(
+                initial_assistant_response=adaptation_responses.Success(
                     kind="success",
-                    exercise=adapted.Exercise(
-                        **{  # type: ignore[arg-type]
+                    exercise=adapted.Exercise.model_validate(
+                        {
                             "format": "v1",
                             "instruction": {
                                 "lines": [
@@ -555,7 +555,7 @@ class FixturesCreator:
                 model=model,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
-                initial_assistant_response=adaptation.AssistantInvalidJsonError(
+                initial_assistant_response=adaptation_responses.InvalidJsonError(
                     kind="error", error="invalid-json", parsed={}
                 ),
                 adjustments=[],
@@ -578,7 +578,7 @@ class FixturesCreator:
                 model=model,
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
-                initial_assistant_response=adaptation.AssistantNotJsonError(
+                initial_assistant_response=adaptation_responses.NotJsonError(
                     kind="error", error="not-json", text="This is not JSON."
                 ),
                 adjustments=[],
@@ -732,7 +732,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction_responses.AssistantSuccess(
+                assistant_response=extraction_responses.Success(
                     kind="success",
                     exercises=[
                         extracted.Exercise(
@@ -870,7 +870,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction_responses.AssistantSuccess(
+                assistant_response=extraction_responses.Success(
                     kind="success",
                     exercises=[
                         extracted.Exercise(

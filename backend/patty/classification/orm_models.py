@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 
-import pydantic
 from sqlalchemy import orm
 import sqlalchemy as sql
 
@@ -20,7 +19,7 @@ class ModelForAdaptationMixin:
         if self._model_for_adaptation is None:
             return None
         else:
-            return pydantic.RootModel[adaptation_llm.ConcreteModel].model_validate(self._model_for_adaptation).root
+            return adaptation_llm.validate(self._model_for_adaptation)
 
     @model_for_adaptation.setter
     def model_for_adaptation(self, value: adaptation_llm.ConcreteModel | None) -> None:

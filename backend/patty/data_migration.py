@@ -4,14 +4,13 @@ import typing
 
 from recursive_diff import recursive_diff
 from sqlalchemy import orm
-import pydantic
 import sqlalchemy as sql
 
 from . import adapted
 from . import database_utils
 from .adaptation import llm as adaptation_llm
 from .adaptation import orm_models as adaptation_orm_models
-from .adaptation import responses as adaptation_responses
+from .adaptation import assistant_responses as adaptation_responses
 from .adaptation import strategy as adaptation_strategy
 from .classification import orm_models as classification_orm_models
 from .exercises import orm_models as exercises_orm_models
@@ -176,9 +175,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     model_for_adaptation=(
                         None
                         if old_extraction_batch.model_for_adaptation is None
-                        else pydantic.RootModel[adaptation_llm.ConcreteModel]
-                        .model_validate(old_extraction_batch.model_for_adaptation)
-                        .root
+                        else adaptation_llm.validate(old_extraction_batch.model_for_adaptation)
                     ),
                 ),
             )
@@ -208,9 +205,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     assistant_response=(
                         None
                         if old_page_extraction.assistant_response is None
-                        else pydantic.RootModel[extraction_responses.AssistantResponse]
-                        .model_validate(old_page_extraction.assistant_response)
-                        .root
+                        else extraction_responses.validate(old_page_extraction.assistant_response)
                     ),
                 ),
             )
@@ -232,9 +227,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
             model_for_adaptation = (
                 None
                 if old_classification_batch.model_for_adaptation is None
-                else pydantic.RootModel[adaptation_llm.ConcreteModel]
-                .model_validate(old_classification_batch.model_for_adaptation)
-                .root
+                else adaptation_llm.validate(old_classification_batch.model_for_adaptation)
             )
 
             classification_chunk_created: classification_orm_models.ExerciseClassificationChunkCreation
@@ -327,9 +320,9 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     exercise_class=exercise_class,
                     parent=parent,
                     system_prompt=old_adaptation_strategy_settings.system_prompt,
-                    response_specification=pydantic.RootModel[adaptation_strategy.ConcreteLlmResponseSpecification]
-                    .model_validate(old_adaptation_strategy_settings.response_specification)
-                    .root,
+                    response_specification=adaptation_strategy.validate(
+                        old_adaptation_strategy_settings.response_specification
+                    ),
                 ),
             )
 
@@ -350,7 +343,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
             )
         ).scalars():
             strategy = session.get_one(to_be_deleted_orm_models.OldAdaptationStrategy, old_adaptation_batch.strategy_id)
-            model = pydantic.RootModel[adaptation_llm.ConcreteModel].model_validate(strategy.model).root
+            model = adaptation_llm.validate(strategy.model)
             adaptation_settings = session.get_one(
                 adaptation_orm_models.ExerciseAdaptationSettings, strategy.settings_id
             )
@@ -482,7 +475,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
         ).scalars():
             exercise = session.get_one(adaptation_orm_models.AdaptableExercise, old_adaptation.exercise_id)
             strategy = session.get_one(to_be_deleted_orm_models.OldAdaptationStrategy, old_adaptation.strategy_id)
-            adaptation_model = pydantic.RootModel[adaptation_llm.ConcreteModel].model_validate(strategy.model).root
+            adaptation_model = adaptation_llm.validate(strategy.model)
             adaptation_settings = session.get_one(
                 adaptation_orm_models.ExerciseAdaptationSettings, strategy.settings_id
             )
@@ -520,17 +513,16 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     initial_assistant_response=(
                         None
                         if old_adaptation.initial_assistant_response is None
-                        else pydantic.RootModel[adaptation_responses.AssistantResponse]
-                        .model_validate(old_adaptation.initial_assistant_response)
-                        .root
+                        else adaptation_responses.validate(old_adaptation.initial_assistant_response)
                     ),
-                    adjustments=pydantic.RootModel[list[adaptation_responses.Adjustment]]
-                    .model_validate(old_adaptation.adjustments)
-                    .root,
+                    adjustments=[
+                        adaptation_responses.Adjustment.model_validate(adjustment)
+                        for adjustment in old_adaptation.adjustments
+                    ],
                     manual_edit=(
                         None
                         if old_adaptation.manual_edit is None
-                        else pydantic.RootModel[adapted.Exercise].model_validate(old_adaptation.manual_edit).root
+                        else adapted.Exercise.model_validate(old_adaptation.manual_edit)
                     ),
                 ),
             )

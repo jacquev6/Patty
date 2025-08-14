@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import typing
 
-import pydantic
 from sqlalchemy import orm
 import sqlalchemy as sql
 
@@ -14,7 +13,7 @@ from ..any_json import JsonDict
 from ..classification.orm_models import ExerciseClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises.orm_models import ExerciseCreation, ExerciseLocationMaybePageAndNumber
-from .assistant_responses import AssistantResponse
+from . import assistant_responses
 
 
 class PdfFile(OrmBase, CreatedByUserMixin):
@@ -99,7 +98,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         model: llm.ConcreteModel,
         run_classification: bool,
         model_for_adaptation: adaptation_llm.ConcreteModel | None,
-        assistant_response: AssistantResponse | None,
+        assistant_response: assistant_responses.Response | None,
     ) -> None:
         super().__init__()
         self.created = created
@@ -128,7 +127,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
 
     @property
     def model(self) -> llm.ConcreteModel:
-        return pydantic.RootModel[llm.ConcreteModel].model_validate(self._model).root
+        return llm.validate(self._model)
 
     @model.setter
     def model(self, value: llm.ConcreteModel) -> None:
@@ -139,14 +138,14 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
     _assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("assistant_response", sql.JSON)
 
     @property
-    def assistant_response(self) -> AssistantResponse | None:
+    def assistant_response(self) -> assistant_responses.Response | None:
         if self._assistant_response is None:
             return None
         else:
-            return pydantic.RootModel[AssistantResponse].model_validate(self._assistant_response).root
+            return assistant_responses.validate(self._assistant_response)
 
     @assistant_response.setter
-    def assistant_response(self, value: AssistantResponse | None) -> None:
+    def assistant_response(self, value: assistant_responses.Response | None) -> None:
         if value is None:
             self._assistant_response = sql.null()
         else:
@@ -287,7 +286,7 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
 
     @property
     def model(self) -> llm.ConcreteModel:
-        return pydantic.RootModel[llm.ConcreteModel].model_validate(self._model).root
+        return llm.validate(self._model)
 
     @model.setter
     def model(self, value: llm.ConcreteModel) -> None:

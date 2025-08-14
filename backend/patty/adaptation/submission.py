@@ -4,11 +4,11 @@ import typing
 
 import sqlalchemy as sql
 
-from .. import database_utils
+from . import assistant_responses
 from . import llm
-from ..adapted import Exercise
-from .responses import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
 from . import orm_models as db
+from .. import database_utils
+from ..adapted import Exercise
 
 
 def log(message: str) -> None:
@@ -55,20 +55,22 @@ async def submit_adaptation(adaptation: db.ExerciseAdaptation) -> None:
     except llm.InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = AssistantInvalidJsonError(
+        adaptation.initial_assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
         log(f"Error 'not JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        adaptation.initial_assistant_response = assistant_responses.NotJsonError(
+            kind="error", error="not-json", text=error.text
+        )
     except Exception:
         log(f"UNEXPECTED ERROR on adaptation {adaptation.id}")
-        adaptation.initial_assistant_response = AssistantUnknownError(kind="error", error="unknown")
+        adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
         traceback.print_exc()
     else:
         log(f"Success on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [response.raw_conversation]
-        adaptation.initial_assistant_response = AssistantSuccess(
+        adaptation.initial_assistant_response = assistant_responses.Success(
             kind="success", exercise=Exercise(**response.message.content.model_dump())
         )
