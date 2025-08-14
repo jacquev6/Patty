@@ -11,11 +11,11 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Get Errors Caught By Frontend */
-    get: operations['get_errors_caught_by_frontend_api_errors_caught_by_frontend_get']
+    /** Retrieve Errors */
+    get: operations['retrieve_errors_api_errors_caught_by_frontend_get']
     put?: never
-    /** Post Errors Caught By Frontend */
-    post: operations['post_errors_caught_by_frontend_api_errors_caught_by_frontend_post']
+    /** Create Error */
+    post: operations['create_error_api_errors_caught_by_frontend_post']
     delete?: never
     options?: never
     head?: never
@@ -1873,7 +1873,7 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-  get_errors_caught_by_frontend_api_errors_caught_by_frontend_get: {
+  retrieve_errors_api_errors_caught_by_frontend_get: {
     parameters: {
       query?: never
       header?: never
@@ -1893,7 +1893,7 @@ export interface operations {
       }
     }
   }
-  post_errors_caught_by_frontend_api_errors_caught_by_frontend_post: {
+  create_error_api_errors_caught_by_frontend_post: {
     parameters: {
       query?: never
       header?: never

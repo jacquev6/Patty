@@ -17,6 +17,7 @@ import sqlalchemy as sql
 
 from . import authentication
 from . import database_utils
+from . import errors
 from . import extracted
 from . import settings
 from .adaptation import llm as adaptation_llm
@@ -34,13 +35,11 @@ from .adaptation.responses import (
 )
 from .adaptation.submission import LlmMessage
 from .classification import orm_models as classification_orm_models
-from .errors import orm_models as errors_orm_models
 from .exercises import orm_models as exercises_orm_models
 from .external_exercises import orm_models as external_exercises_orm_models
 from .extraction import assistant_responses as extraction_responses
 from .extraction import llm as extraction_llm
 from .extraction import orm_models as extraction_orm_models
-from .mailing import send_mail
 from .version import PATTY_VERSION
 from .textbooks import orm_models as textbooks_orm_models
 
@@ -50,6 +49,8 @@ s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", s
 
 api_router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
+api_router.include_router(errors.router, prefix="/errors-caught-by-frontend")
+
 
 T1 = TypeVar("T1")
 
@@ -57,89 +58,6 @@ T1 = TypeVar("T1")
 def assert_isinstance(value: Any, type_: type[T1]) -> T1:
     assert isinstance(value, type_)
     return value
-
-
-class PostErrorsCaughtByFrontendRequest(ApiModel):
-    creator: str | None
-    user_agent: str
-    window_size: str
-    url: str
-    caught_by: str
-    message: str
-    code_location: str | None
-
-
-class PostErrorsCaughtByFrontendResponse(ApiModel):
-    pass
-
-
-@api_router.post("/errors-caught-by-frontend")
-def post_errors_caught_by_frontend(
-    req: PostErrorsCaughtByFrontendRequest, session: database_utils.SessionDependable
-) -> PostErrorsCaughtByFrontendResponse:
-    if PATTY_VERSION != "dev":
-        send_mail(
-            to=settings.MAIL_SENDER,
-            subject=f"Patty version {PATTY_VERSION}: error caught by frontend",
-            body=req.model_dump_json(indent=2),
-        )
-    session.add(
-        errors_orm_models.ErrorCaughtByFrontend(
-            created_at=datetime.datetime.now(datetime.timezone.utc),
-            created_by_username=req.creator,
-            patty_version=PATTY_VERSION,
-            user_agent=req.user_agent,
-            window_size=req.window_size,
-            url=req.url,
-            caught_by=req.caught_by,
-            message=req.message,
-            code_location=req.code_location,
-        )
-    )
-    return PostErrorsCaughtByFrontendResponse()
-
-
-class GetErrorsCaughtByFrontendResponse(ApiModel):
-    class Error(ApiModel):
-        id: str
-        created_by: str | None
-        created_at: datetime.datetime
-        patty_version: str
-        user_agent: str
-        window_size: str
-        url: str
-        caught_by: str
-        message: str
-        code_location: str | None
-
-    errors: list[Error]
-
-
-@api_router.get("/errors-caught-by-frontend")
-def get_errors_caught_by_frontend(session: database_utils.SessionDependable) -> GetErrorsCaughtByFrontendResponse:
-    return GetErrorsCaughtByFrontendResponse(
-        errors=[
-            GetErrorsCaughtByFrontendResponse.Error(
-                id=str(error.id),
-                created_by=error.created_by_username,
-                created_at=error.created_at,
-                patty_version=error.patty_version,
-                user_agent=error.user_agent,
-                window_size=error.window_size,
-                url=error.url,
-                caught_by=error.caught_by,
-                message=error.message,
-                code_location=error.code_location,
-            )
-            for error in session.execute(
-                sql.select(errors_orm_models.ErrorCaughtByFrontend).order_by(
-                    -errors_orm_models.ErrorCaughtByFrontend.id
-                )
-            )
-            .scalars()
-            .all()
-        ]
-    )
 
 
 @api_router.get("/available-adaptation-llm-models")

@@ -7,8 +7,8 @@
   "paths": {
     "/api/errors-caught-by-frontend": {
       "get": {
-        "summary": "Get Errors Caught By Frontend",
-        "operationId": "get_errors_caught_by_frontend_api_errors_caught_by_frontend_get",
+        "summary": "Retrieve Errors",
+        "operationId": "retrieve_errors_api_errors_caught_by_frontend_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -28,8 +28,8 @@
         ]
       },
       "post": {
-        "summary": "Post Errors Caught By Frontend",
-        "operationId": "post_errors_caught_by_frontend_api_errors_caught_by_frontend_post",
+        "summary": "Create Error",
+        "operationId": "create_error_api_errors_caught_by_frontend_post",
         "requestBody": {
           "content": {
             "application/json": {
