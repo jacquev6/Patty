@@ -671,7 +671,7 @@ export interface components {
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
-      manualEdit: components['schemas']['patty__adapted__Exercise-Output'] | null
+      manualEdit: components['schemas']['patty__adaptation__adapted__Exercise-Output'] | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
@@ -1775,16 +1775,7 @@ export interface components {
        */
       kind: 'whitespace'
     }
-    /** Success */
-    patty__adaptation__assistant_responses__Success: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'success'
-      exercise: components['schemas']['patty__adapted__Exercise-Output']
-    }
-    'patty__adapted__Exercise-Output': {
+    'patty__adaptation__adapted__Exercise-Output': {
       /**
        * Format
        * @constant
@@ -1795,6 +1786,15 @@ export interface components {
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+    }
+    /** Success */
+    patty__adaptation__assistant_responses__Success: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      exercise: components['schemas']['patty__adaptation__adapted__Exercise-Output']
     }
     /** Exercise */
     patty__api_router__GetClassificationBatchResponse__Exercise: {
@@ -1832,8 +1832,18 @@ export interface components {
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
     }
+    /** Success */
+    patty__extraction__assistant_responses__Success: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /** Exercises */
+      exercises: components['schemas']['patty__extraction__extracted__Exercise'][]
+    }
     /** Exercise */
-    patty__extracted__Exercise: {
+    patty__extraction__extracted__Exercise: {
       /** Id */
       id?: string | null
       /** Numero */
@@ -1853,16 +1863,6 @@ export interface components {
       references?: string | null
       /** Autre */
       autre?: string | null
-    }
-    /** Success */
-    patty__extraction__assistant_responses__Success: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'success'
-      /** Exercises */
-      exercises: components['schemas']['patty__extracted__Exercise'][]
     }
   }
   responses: never

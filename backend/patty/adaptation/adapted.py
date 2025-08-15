@@ -5,7 +5,7 @@ import typing
 
 import pydantic
 
-from .api_utils import ApiModel
+from ..api_utils import ApiModel
 
 
 # patty_json_to_html.py begin

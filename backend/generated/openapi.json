@@ -1896,7 +1896,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
+                "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
               },
               {
                 "type": "null"
@@ -4758,26 +4758,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__assistant_responses__Success": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercise": {
-            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "Success"
-      },
-      "patty__adapted__Exercise-Output": {
+      "patty__adaptation__adapted__Exercise-Output": {
         "properties": {
           "format": {
             "type": "string",
@@ -4830,6 +4811,25 @@
           "statement",
           "reference"
         ]
+      },
+      "patty__adaptation__assistant_responses__Success": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "Success"
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
         "properties": {
@@ -4997,7 +4997,30 @@
         ],
         "title": "Exercise"
       },
-      "patty__extracted__Exercise": {
+      "patty__extraction__assistant_responses__Success": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__extraction__extracted__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercises"
+        ],
+        "title": "Success"
+      },
+      "patty__extraction__extracted__Exercise": {
         "properties": {
           "id": {
             "anyOf": [
@@ -5087,29 +5110,6 @@
         },
         "type": "object",
         "title": "Exercise"
-      },
-      "patty__extraction__assistant_responses__Success": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercises": {
-            "items": {
-              "$ref": "#/components/schemas/patty__extracted__Exercise"
-            },
-            "type": "array",
-            "title": "Exercises"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercises"
-        ],
-        "title": "Success"
       }
     },
     "securitySchemes": {

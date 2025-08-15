@@ -4,7 +4,7 @@ import textwrap
 
 import PIL.Image
 
-from ...extracted import Exercise
+from ..extracted import Exercise
 from .base import Model
 
 

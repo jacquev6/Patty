@@ -10,12 +10,10 @@ import fastapi
 import sqlalchemy.orm
 
 from . import adaptation
-from . import adapted
 from . import classification
 from . import database_utils
 from . import exercises
 from . import external_exercises  # noqa: F401 to populate the metadata
-from . import extracted
 from . import extraction
 from . import settings
 from . import textbooks
@@ -34,29 +32,32 @@ def make_default_adaptation_prompt() -> str:
         b. Les chiens courent après ..."""
     )
 
-    exercise = adapted.Exercise(
+    exercise = adaptation.adapted.Exercise(
         format="v1",
-        instruction=adapted.InstructionPage(
+        instruction=adaptation.adapted.InstructionPage(
             lines=[
-                adapted.InstructionLine(
+                adaptation.adapted.InstructionLine(
                     contents=[
-                        adapted.Text(kind="text", text="Complète"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="avec"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Choice(
-                            kind="choice",
-                            contents=[adapted.Text(kind="text", text="l'"), adapted.Text(kind="text", text="herbe")],
-                        ),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="ou"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Choice(
+                        adaptation.adapted.Text(kind="text", text="Complète"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="avec"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Choice(
                             kind="choice",
                             contents=[
-                                adapted.Text(kind="text", text="les"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="chats"),
+                                adaptation.adapted.Text(kind="text", text="l'"),
+                                adaptation.adapted.Text(kind="text", text="herbe"),
+                            ],
+                        ),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="ou"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Choice(
+                            kind="choice",
+                            contents=[
+                                adaptation.adapted.Text(kind="text", text="les"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="chats"),
                             ],
                         ),
                     ]
@@ -65,35 +66,35 @@ def make_default_adaptation_prompt() -> str:
         ),
         example=None,
         hint=None,
-        statement=adapted.StatementPages(
+        statement=adaptation.adapted.StatementPages(
             pages=[
-                adapted.StatementPage(
+                adaptation.adapted.StatementPage(
                     lines=[
-                        adapted.StatementLine(
+                        adaptation.adapted.StatementLine(
                             contents=[
-                                adapted.Text(kind="text", text="a"),
-                                adapted.Text(kind="text", text="."),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="Les"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="vaches"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="mangent"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.MultipleChoicesInput(
+                                adaptation.adapted.Text(kind="text", text="a"),
+                                adaptation.adapted.Text(kind="text", text="."),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="Les"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="vaches"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="mangent"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.FormattedTextContainer(
+                                        adaptation.adapted.FormattedTextContainer(
                                             contents=[
-                                                adapted.Text(kind="text", text="l'"),
-                                                adapted.Text(kind="text", text="herbe"),
+                                                adaptation.adapted.Text(kind="text", text="l'"),
+                                                adaptation.adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.FormattedTextContainer(
+                                        adaptation.adapted.FormattedTextContainer(
                                             contents=[
-                                                adapted.Text(kind="text", text="les"),
-                                                adapted.Whitespace(kind="whitespace"),
-                                                adapted.Text(kind="text", text="chats"),
+                                                adaptation.adapted.Text(kind="text", text="les"),
+                                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                                adaptation.adapted.Text(kind="text", text="chats"),
                                             ]
                                         ),
                                     ],
@@ -101,33 +102,33 @@ def make_default_adaptation_prompt() -> str:
                                 ),
                             ]
                         ),
-                        adapted.StatementLine(
+                        adaptation.adapted.StatementLine(
                             contents=[
-                                adapted.Text(kind="text", text="b"),
-                                adapted.Text(kind="text", text="."),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="Les"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="chiens"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="courent"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="après"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.MultipleChoicesInput(
+                                adaptation.adapted.Text(kind="text", text="b"),
+                                adaptation.adapted.Text(kind="text", text="."),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="Les"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="chiens"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="courent"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="après"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.MultipleChoicesInput(
                                     kind="multipleChoicesInput",
                                     choices=[
-                                        adapted.FormattedTextContainer(
+                                        adaptation.adapted.FormattedTextContainer(
                                             contents=[
-                                                adapted.Text(kind="text", text="l'"),
-                                                adapted.Text(kind="text", text="herbe"),
+                                                adaptation.adapted.Text(kind="text", text="l'"),
+                                                adaptation.adapted.Text(kind="text", text="herbe"),
                                             ]
                                         ),
-                                        adapted.FormattedTextContainer(
+                                        adaptation.adapted.FormattedTextContainer(
                                             contents=[
-                                                adapted.Text(kind="text", text="les"),
-                                                adapted.Whitespace(kind="whitespace"),
-                                                adapted.Text(kind="text", text="chats"),
+                                                adaptation.adapted.Text(kind="text", text="les"),
+                                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                                adaptation.adapted.Text(kind="text", text="chats"),
                                             ]
                                         ),
                                     ],
@@ -178,7 +179,7 @@ def make_default_adaptation_prompt() -> str:
 
 
 def make_default_extraction_prompt() -> str:
-    exercise = extracted.Exercise.model_validate(
+    exercise = extraction.extracted.Exercise.model_validate(
         {
             "id": "p47_ex4",
             "numero": "1",
@@ -260,14 +261,16 @@ class FixturesCreator:
                 response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
                     format="json",
                     formalism="json-schema",
-                    instruction_components=adapted.InstructionComponents(
+                    instruction_components=adaptation.adapted.InstructionComponents(
                         text=True, whitespace=True, arrow=True, formatted=True, choice=True
                     ),
-                    example_components=adapted.ExampleComponents(
+                    example_components=adaptation.adapted.ExampleComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
                     ),
-                    hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-                    statement_components=adapted.StatementComponents(
+                    hint_components=adaptation.adapted.HintComponents(
+                        text=True, whitespace=True, arrow=True, formatted=True
+                    ),
+                    statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
@@ -278,7 +281,7 @@ class FixturesCreator:
                         swappable_input=False,
                         editable_text_input=False,
                     ),
-                    reference_components=adapted.ReferenceComponents(
+                    reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
                     ),
                 ),
@@ -319,14 +322,16 @@ class FixturesCreator:
                 response_specification=adaptation.strategy.JsonSchemaLlmResponseSpecification(
                     format="json",
                     formalism="json-schema",
-                    instruction_components=adapted.InstructionComponents(
+                    instruction_components=adaptation.adapted.InstructionComponents(
                         text=True, whitespace=True, arrow=True, formatted=True, choice=True
                     ),
-                    example_components=adapted.ExampleComponents(
+                    example_components=adaptation.adapted.ExampleComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
                     ),
-                    hint_components=adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-                    statement_components=adapted.StatementComponents(
+                    hint_components=adaptation.adapted.HintComponents(
+                        text=True, whitespace=True, arrow=True, formatted=True
+                    ),
+                    statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
@@ -337,7 +342,7 @@ class FixturesCreator:
                         swappable_input=True,
                         editable_text_input=True,
                     ),
-                    reference_components=adapted.ReferenceComponents(
+                    reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
                     ),
                 ),
@@ -381,7 +386,7 @@ class FixturesCreator:
                 raw_llm_conversations=[{"initial": "conversation"}],
                 initial_assistant_response=adaptation.assistant_responses.Success(
                     kind="success",
-                    exercise=adapted.Exercise.model_validate(
+                    exercise=adaptation.adapted.Exercise.model_validate(
                         {
                             "format": "v1",
                             "instruction": {
@@ -724,7 +729,7 @@ class FixturesCreator:
                 assistant_response=extraction.assistant_responses.Success(
                     kind="success",
                     exercises=[
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p40_ex4",
                             numero="4",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -734,7 +739,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p40_ex6",
                             numero="6",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -744,7 +749,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p40_ex8",
                             numero="8",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -754,7 +759,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p40_ex10",
                             numero="10",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -846,7 +851,7 @@ class FixturesCreator:
                 assistant_response=extraction.assistant_responses.Success(
                     kind="success",
                     exercises=[
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p42_ex5",
                             numero="5",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -856,7 +861,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p42_ex6",
                             numero="6",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -866,7 +871,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p42_exAutoDictée",
                             numero="Auto-dictée",
                             consignes=['Complète avec "le vent" ou "la pluie"'],
@@ -876,7 +881,7 @@ class FixturesCreator:
                             references=None,
                             autre=None,
                         ),
-                        extracted.Exercise(
+                        extraction.extracted.Exercise(
                             id="p42_ex6Texte",
                             numero="Exo identifié par texte / 5",
                             consignes=['Complète avec "le vent" ou "la pluie"'],

@@ -353,14 +353,13 @@ def adapted_exercise_schema(
     swappable_input: bool,
     editable_text_input: bool,
 ) -> None:
-    from . import adapted
     from . import adaptation
 
-    exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
-        adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adapted.StatementComponents(
+    exercise_type = adaptation.adapted.make_exercise_type(
+        adaptation.adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
+        adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.StatementComponents(
             text=True,
             whitespace=True,
             arrow=True,
@@ -371,16 +370,16 @@ def adapted_exercise_schema(
             swappable_input=swappable_input,
             editable_text_input=editable_text_input,
         ),
-        adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
     print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
 
 
 @main.command()
 def extracted_exercise_schema() -> None:
-    from . import extracted
+    from . import extraction
 
-    print(json.dumps(extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+    print(json.dumps(extraction.extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
@@ -402,38 +401,38 @@ def json_to_html_script() -> None:
     # This is pretty hacky, but it avoids the complexity of versioning and packaging Patty,
     # and allows @eliselinc to download a single file and add it to her source tree.
 
-    from . import adapted
+    from . import adaptation
 
-    example_exercise = adapted.Exercise(
+    example_exercise = adaptation.adapted.Exercise(
         format="v1",
-        instruction=adapted.InstructionPage(
+        instruction=adaptation.adapted.InstructionPage(
             lines=[
-                adapted.InstructionLine(
+                adaptation.adapted.InstructionLine(
                     contents=[
-                        adapted.Text(kind="text", text="Example"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="exercise"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="instruction"),
-                        adapted.Text(kind="text", text="."),
+                        adaptation.adapted.Text(kind="text", text="Example"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="exercise"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="instruction"),
+                        adaptation.adapted.Text(kind="text", text="."),
                     ]
                 )
             ]
         ),
         example=None,
         hint=None,
-        statement=adapted.StatementPages(
+        statement=adaptation.adapted.StatementPages(
             pages=[
-                adapted.StatementPage(
+                adaptation.adapted.StatementPage(
                     lines=[
-                        adapted.StatementLine(
+                        adaptation.adapted.StatementLine(
                             contents=[
-                                adapted.Text(kind="text", text="Example"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="exercise"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="statement"),
-                                adapted.Text(kind="text", text="."),
+                                adaptation.adapted.Text(kind="text", text="Example"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="exercise"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="statement"),
+                                adaptation.adapted.Text(kind="text", text="."),
                             ]
                         )
                     ]
@@ -497,7 +496,7 @@ def json_to_html_script() -> None:
         yield ""
         yield "import pydantic"
         yield ""
-        with open("patty/adapted.py") as f:
+        with open("patty/adaptation/adapted.py") as f:
             for line in f:
                 if line.rstrip() == "# patty_json_to_html.py begin":
                     break

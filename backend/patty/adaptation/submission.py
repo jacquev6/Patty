@@ -8,7 +8,7 @@ from . import assistant_responses
 from . import llm
 from . import orm_models as db
 from .. import database_utils
-from ..adapted import Exercise
+from .adapted import Exercise
 
 
 def log(message: str) -> None:

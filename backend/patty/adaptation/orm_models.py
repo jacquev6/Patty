@@ -7,7 +7,7 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from . import llm
-from ..adapted import Exercise as AdaptedExercise
+from . import adapted
 from ..any_json import JsonDict, JsonList
 from ..database_utils import CreatedByUserMixin, OrmBase, OrderBy, annotate_new_tables
 from ..exercises import Exercise, ExerciseCreation, ExerciseLocation
@@ -148,7 +148,7 @@ class ExerciseAdaptation(OrmBase):
         raw_llm_conversations: JsonList,
         initial_assistant_response: assistant_responses.Response | None,
         adjustments: list[assistant_responses.Adjustment],
-        manual_edit: AdaptedExercise | None,
+        manual_edit: adapted.Exercise | None,
     ) -> None:
         super().__init__()
         self.created = created
@@ -215,14 +215,14 @@ class ExerciseAdaptation(OrmBase):
     _manual_edit: orm.Mapped[JsonDict | None] = orm.mapped_column("manual_edit", sql.JSON)
 
     @property
-    def manual_edit(self) -> AdaptedExercise | None:
+    def manual_edit(self) -> adapted.Exercise | None:
         if self._manual_edit is None:
             return None
         else:
-            return AdaptedExercise.model_validate(self._manual_edit)
+            return adapted.Exercise.model_validate(self._manual_edit)
 
     @manual_edit.setter
-    def manual_edit(self, value: AdaptedExercise | None) -> None:
+    def manual_edit(self, value: adapted.Exercise | None) -> None:
         if value is None:
             self._manual_edit = sql.null()
         else:

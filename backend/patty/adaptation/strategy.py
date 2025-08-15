@@ -4,7 +4,7 @@ from typing import Any, Literal
 import pydantic
 
 
-from .. import adapted
+from . import adapted
 from . import llm
 from ..any_json import JsonDict
 from ..api_utils import ApiModel

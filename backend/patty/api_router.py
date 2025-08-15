@@ -22,11 +22,9 @@ from . import database_utils
 from . import errors
 from . import exercises
 from . import external_exercises
-from . import extracted
 from . import extraction
 from . import settings
 from . import textbooks
-from .adapted import Exercise
 from .any_json import JsonDict, JsonList
 from .api_utils import ApiModel
 from .version import PATTY_VERSION
@@ -98,7 +96,7 @@ class ApiAdaptation(ApiModel):
     raw_llm_conversations: JsonList
     initial_assistant_response: adaptation.assistant_responses.Response | None
     adjustments: list[adaptation.assistant_responses.Adjustment]
-    manual_edit: Exercise | None
+    manual_edit: adaptation.adapted.Exercise | None
     removed_from_textbook: bool
 
 
@@ -695,7 +693,7 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
 
 @api_router.get("/extraction-llm-response-schema")
 def get_extraction_llm_response_schema() -> JsonDict:
-    return extracted.ExercisesList.model_json_schema()
+    return extraction.extracted.ExercisesList.model_json_schema()
 
 
 @api_router.get("/available-extraction-llm-models")
@@ -1223,7 +1221,7 @@ async def post_adaptation_adjustment(
         assistant_response: adaptation.assistant_responses.Response,
     ) -> adaptation.submission.LlmMessage:
         if isinstance(assistant_response, adaptation.assistant_responses.Success):
-            return adaptation.llm.AssistantMessage[Exercise](content=assistant_response.exercise)
+            return adaptation.llm.AssistantMessage[adaptation.adapted.Exercise](content=assistant_response.exercise)
         elif isinstance(assistant_response, adaptation.assistant_responses.InvalidJsonError):
             return adaptation.llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
         elif isinstance(assistant_response, adaptation.assistant_responses.NotJsonError):
@@ -1259,7 +1257,7 @@ async def post_adaptation_adjustment(
     else:
         raw_conversation = response.raw_conversation
         assistant_response = adaptation.assistant_responses.Success(
-            kind="success", exercise=Exercise(**response.message.content.model_dump())
+            kind="success", exercise=adaptation.adapted.Exercise(**response.message.content.model_dump())
         )
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)
@@ -1291,7 +1289,9 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
 
 
 @api_router.put("/adaptations/{id}/manual-edit")
-def put_adaptation_manual_edit(id: str, req: Exercise, session: database_utils.SessionDependable) -> ApiAdaptation:
+def put_adaptation_manual_edit(
+    id: str, req: adaptation.adapted.Exercise, session: database_utils.SessionDependable
+) -> ApiAdaptation:
     exercise_adaptation = get_by_id(session, adaptation.ExerciseAdaptation, id)
     exercise_adaptation.manual_edit = req
     return make_api_adaptation(exercise_adaptation)

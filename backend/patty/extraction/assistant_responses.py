@@ -2,7 +2,7 @@ from typing import Any, Literal
 
 import pydantic
 
-from ..extracted import Exercise
+from .extracted import Exercise
 from ..api_utils import ApiModel
 
 

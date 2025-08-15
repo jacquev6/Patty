@@ -7,7 +7,6 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from . import adaptation
-from . import adapted
 from . import classification
 from . import database_utils
 from . import exercises
@@ -496,7 +495,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     manual_edit=(
                         None
                         if old_adaptation.manual_edit is None
-                        else adapted.Exercise.model_validate(old_adaptation.manual_edit)
+                        else adaptation.adapted.Exercise.model_validate(old_adaptation.manual_edit)
                     ),
                 ),
             )
