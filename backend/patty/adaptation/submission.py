@@ -16,15 +16,6 @@ def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
 
 
-LlmMessage = (
-    llm.UserMessage
-    | llm.SystemMessage
-    | llm.AssistantMessage[Exercise]
-    | llm.InvalidJsonAssistantMessage
-    | llm.NotJsonAssistantMessage
-)
-
-
 def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     adaptations = (
         session.query(db.ExerciseAdaptation)
@@ -42,7 +33,7 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
 async def submit_adaptation(adaptation: db.ExerciseAdaptation) -> None:
     response_format = adaptation.settings.response_specification.make_response_format()
 
-    messages: list[LlmMessage] = [
+    messages: list[llm.Message] = [
         llm.SystemMessage(content=adaptation.settings.system_prompt),
         llm.UserMessage(content=adaptation.exercise.full_text),
     ]

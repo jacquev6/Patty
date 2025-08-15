@@ -17,14 +17,14 @@ class JsonLlmResponseSpecification(ApiModel):
 class JsonFromTextLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["text"]
 
-    def make_response_format(self) -> llm.JsonFromTextResponseFormat[adapted.Exercise]:
+    def make_response_format(self) -> llm.JsonFromTextResponseFormat:
         return llm.JsonFromTextResponseFormat(response_type=adapted.Exercise)
 
 
 class JsonObjectLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["json-object"]
 
-    def make_response_format(self) -> llm.JsonObjectResponseFormat[adapted.Exercise]:
+    def make_response_format(self) -> llm.JsonObjectResponseFormat:
         return llm.JsonObjectResponseFormat(response_type=adapted.Exercise)
 
 
@@ -36,7 +36,7 @@ class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
     statement_components: adapted.StatementComponents
     reference_components: adapted.ReferenceComponents
 
-    def make_response_format(self) -> llm.JsonSchemaResponseFormat[adapted.Exercise]:
+    def make_response_format(self) -> llm.JsonSchemaResponseFormat:
         return llm.JsonSchemaResponseFormat(response_type=self.make_response_type())
 
     def make_response_type(self) -> type[adapted.Exercise]:

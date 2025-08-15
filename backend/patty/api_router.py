@@ -1219,11 +1219,9 @@ async def post_adaptation_adjustment(
     exercise_adaptation = get_by_id(session, adaptation.ExerciseAdaptation, id)
     assert exercise_adaptation.initial_assistant_response is not None
 
-    def make_assistant_message(
-        assistant_response: adaptation.assistant_responses.Response,
-    ) -> adaptation.submission.LlmMessage:
+    def make_assistant_message(assistant_response: adaptation.assistant_responses.Response) -> adaptation.llm.Message:
         if isinstance(assistant_response, adaptation.assistant_responses.Success):
-            return adaptation.llm.AssistantMessage[adaptation.adapted.Exercise](content=assistant_response.exercise)
+            return adaptation.llm.AssistantMessage(content=assistant_response.exercise)
         elif isinstance(assistant_response, adaptation.assistant_responses.InvalidJsonError):
             return adaptation.llm.InvalidJsonAssistantMessage(content=assistant_response.parsed)
         elif isinstance(assistant_response, adaptation.assistant_responses.NotJsonError):
@@ -1231,7 +1229,7 @@ async def post_adaptation_adjustment(
         else:
             raise ValueError("Unknown assistant response type")
 
-    messages: list[adaptation.submission.LlmMessage] = [
+    messages: list[adaptation.llm.Message] = [
         adaptation.llm.SystemMessage(content=exercise_adaptation.settings.system_prompt),
         adaptation.llm.UserMessage(content=exercise_adaptation.exercise.full_text),
         make_assistant_message(exercise_adaptation.initial_assistant_response),

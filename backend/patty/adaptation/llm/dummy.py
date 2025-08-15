@@ -3,9 +3,9 @@ import asyncio
 import unittest
 
 from polyfactory.factories.pydantic_factory import ModelFactory
-import pydantic
 
 
+from .. import adapted
 from ...any_json import JsonDict
 from .base import (
     AssistantMessage,
@@ -16,7 +16,6 @@ from .base import (
     Model,
     NotJsonAssistantMessage,
     SystemMessage,
-    T,
     UserMessage,
 )
 
@@ -28,11 +27,11 @@ class DummyModel(Model):
     async def do_complete(
         self,
         messages: list[
-            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+            SystemMessage | UserMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
         ],
-        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
+        response_format: JsonFromTextResponseFormat | JsonObjectResponseFormat | JsonSchemaResponseFormat,
     ) -> tuple[JsonDict, str]:
-        class MessageTypeFactory(ModelFactory[T]):
+        class MessageTypeFactory(ModelFactory[adapted.Exercise]):
             __model__ = response_format.response_type
             __randomize_collection_length__ = True
             __min_collection_length__ = 2
@@ -64,16 +63,6 @@ class DummyModel(Model):
 
 
 class DummyModelTestCase(unittest.IsolatedAsyncioTestCase):
-    async def test(self) -> None:
-        class Response(pydantic.BaseModel):
-            cheese: str
-
-        model = DummyModel(provider="dummy", name="dummy-1")
-        response = await model.complete(
-            [UserMessage(content="Blah.")], JsonSchemaResponseFormat(response_type=Response)
-        )
-        self.assertIsInstance(response.message.content, Response)
-
     async def test_adaptation_schema(self) -> None:
         from ..adapted import Exercise
 
