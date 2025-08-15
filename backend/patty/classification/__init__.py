@@ -9,7 +9,5 @@ from .orm_models import (
     ExerciseClassificationByUser as ExerciseClassificationByUser,
     ExerciseClassificationChunk as ExerciseClassificationChunk,
     ExerciseClassificationChunkCreation as ExerciseClassificationChunkCreation,
-    ExerciseClassificationChunkCreationBySandboxClassificationBatch as ExerciseClassificationChunkCreationBySandboxClassificationBatch,
     ModelForAdaptationMixin as ModelForAdaptationMixin,
-    SandboxClassificationBatch as SandboxClassificationBatch,
 )

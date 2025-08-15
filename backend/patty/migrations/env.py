@@ -3,6 +3,7 @@ from alembic import context
 from patty import database_utils
 from patty import errors  # noqa: F401 to populate the metadata
 from patty import external_exercises  # noqa: F401
+from patty import sandbox  # noqa: F401
 from patty import settings
 from patty import textbooks  # noqa: F401
 from patty import to_be_deleted  # noqa: F401

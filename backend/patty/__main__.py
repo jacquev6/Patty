@@ -60,6 +60,7 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
     from . import database_utils
     from . import errors  # noqa: F401 to populate the metadata
     from . import external_exercises  # noqa: F401
+    from . import sandbox  # noqa: F401
     from . import textbooks  # noqa: F401
 
     colors_by_annotation: dict[frozenset[str], str | None] = {

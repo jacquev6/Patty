@@ -15,6 +15,7 @@ from . import database_utils
 from . import exercises
 from . import external_exercises  # noqa: F401 to populate the metadata
 from . import extraction
+from . import sandbox
 from . import settings
 from . import textbooks
 
@@ -291,11 +292,13 @@ class FixturesCreator:
         )
         model = adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06")
         batch = self.add(
-            adaptation.SandboxAdaptationBatch(created_by="Patty", created_at=created_at, settings=settings, model=model)
+            sandbox.adaptation.SandboxAdaptationBatch(
+                created_by="Patty", created_at=created_at, settings=settings, model=model
+            )
         )
         self.make_successful_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at, sandbox_adaptation_batch=batch
                 )
             ),
@@ -589,10 +592,10 @@ class FixturesCreator:
         model = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
         self.make_successful_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at,
                     sandbox_adaptation_batch=self.add(
-                        adaptation.SandboxAdaptationBatch(
+                        sandbox.adaptation.SandboxAdaptationBatch(
                             created_by="Patty", created_at=created_at, settings=settings, model=model
                         )
                     ),
@@ -607,11 +610,13 @@ class FixturesCreator:
         settings = self.make_dummy_adaptation_strategy_settings()
         model = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
         batch = self.add(
-            adaptation.SandboxAdaptationBatch(created_by="Patty", created_at=created_at, settings=settings, model=model)
+            sandbox.adaptation.SandboxAdaptationBatch(
+                created_by="Patty", created_at=created_at, settings=settings, model=model
+            )
         )
         self.make_successful_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at, sandbox_adaptation_batch=batch
                 )
             ),
@@ -621,7 +626,7 @@ class FixturesCreator:
         )
         self.make_in_progress_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at, sandbox_adaptation_batch=batch
                 )
             ),
@@ -631,7 +636,7 @@ class FixturesCreator:
         )
         self.make_invalid_json_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at, sandbox_adaptation_batch=batch
                 )
             ),
@@ -641,7 +646,7 @@ class FixturesCreator:
         )
         self.make_not_json_adaptation(
             created=self.add(
-                adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
                     at=created_at, sandbox_adaptation_batch=batch
                 )
             ),
@@ -1131,7 +1136,7 @@ class FixturesCreator:
         for i in range(count):
             settings = self.make_dummy_adaptation_strategy_settings(f"Blah blah blah {i + 1}.")
             self.add(
-                adaptation.SandboxAdaptationBatch(
+                sandbox.adaptation.SandboxAdaptationBatch(
                     created_by="Patty", created_at=created_at, settings=settings, model=model
                 )
             )
@@ -1162,13 +1167,13 @@ class FixturesCreator:
         model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
 
         batch = self.add(
-            classification.SandboxClassificationBatch(
+            sandbox.classification.SandboxClassificationBatch(
                 created_by="Patty", created_at=created_at, model_for_adaptation=model_for_adaptation
             )
         )
         chunk = self.add(
             classification.ExerciseClassificationChunk(
-                created=classification.ExerciseClassificationChunkCreationBySandboxClassificationBatch(
+                created=sandbox.classification.ExerciseClassificationChunkCreationBySandboxClassificationBatch(
                     at=created_at, sandbox_classification_batch=batch
                 ),
                 model_for_adaptation=model_for_adaptation,

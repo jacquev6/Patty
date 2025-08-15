@@ -8,8 +8,6 @@ from .orm_models import (
     ExtractionSettings as ExtractionSettings,
     PageExtraction as PageExtraction,
     PageExtractionCreation as PageExtractionCreation,
-    PageExtractionCreationBySandboxExtractionBatch as PageExtractionCreationBySandboxExtractionBatch,
     PdfFile as PdfFile,
     PdfFileRange as PdfFileRange,
-    SandboxExtractionBatch as SandboxExtractionBatch,
 )
