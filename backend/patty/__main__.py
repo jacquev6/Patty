@@ -166,11 +166,16 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
 def python_dependency_graph() -> None:
     import graphviz
 
-    def gather_file_names() -> Iterable[str]:
-        for file_name in glob.glob("patty/**/*.py", recursive=True):
-            if file_name.startswith("patty/migrations/"):
-                continue
-            yield file_name
+    ignored_packages = {
+        # Imported many times, clutter the graph
+        ("patty", "any_json"),
+        ("patty", "api_utils"),
+        ("patty", "database_utils"),
+        ("patty", "settings"),
+        ("patty", "version"),
+        # Little interest, decrease readability
+        ("patty", "migrations", "versions"),
+    }
 
     def make_module_path(file_name: str) -> tuple[str, ...]:
         assert file_name.endswith(".py")
@@ -188,20 +193,38 @@ def python_dependency_graph() -> None:
 
         for nodes, dependencies in ((module.body, strong_dependencies), (ast.walk(module), weak_dependencies)):
             for node in nodes:
-                if isinstance(node, ast.ImportFrom) and node.level > 0:
-                    if node.module is None:
-                        imported_from = current_module_path[: -node.level]
+                if isinstance(node, ast.ImportFrom):
+                    if node.level == 0:
+                        # Absolute import
+                        assert node.module is not None
+                        imported_from = tuple(node.module.split("."))
                     else:
-                        imported_from = current_module_path[: -node.level] + tuple(node.module.split("."))
-
-                    for name in node.names:
-                        imported_what = name.name
-                        for candidate in ((imported_what,), (imported_what, "__init__"), ("__init__",), ()):
-                            if imported_from + candidate in known_module_paths:
-                                dependencies.add(imported_from + candidate)
-                                break
+                        # Relative import
+                        if node.module is None:
+                            imported_from = current_module_path[: -node.level]
                         else:
-                            print("Warning: unhandled import:", ast.unparse(node))
+                            imported_from = current_module_path[: -node.level] + tuple(node.module.split("."))
+
+                    if imported_from[0] == "patty":
+                        for name in node.names:
+                            candidate: tuple[str, ...]
+                            for candidate in ((name.name,), (name.name, "__init__"), ("__init__",), ()):
+                                if imported_from + candidate in known_module_paths:
+                                    dependencies.add(imported_from + candidate)
+                                    break
+                            else:
+                                print("WARNING: unhandled import:", ast.unparse(node), file=sys.stderr)
+
+                elif isinstance(node, ast.Import):
+                    for name in node.names:
+                        imported_what = tuple(name.name.split("."))
+                        if imported_what[0] == "patty":
+                            for candidate in (imported_what, imported_what + ("__init__",)):
+                                if candidate in known_module_paths:
+                                    dependencies.add(candidate)
+                                    break
+                            else:
+                                print("WARNING: unhandled import:", ast.unparse(node), file=sys.stderr)
 
         ret = {}
         for dep in weak_dependencies:
@@ -220,26 +243,21 @@ def python_dependency_graph() -> None:
         )
         return "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
 
-    file_names = list(gather_file_names())
+    def ignored(module_path: tuple[str, ...]) -> bool:
+        return any(module_path[: len(ignored_package)] == ignored_package for ignored_package in ignored_packages)
+
+    file_names = glob.glob("patty/**/*.py", recursive=True)
     known_module_paths = {make_module_path(file_name) for file_name in file_names}
-    ignored_modules = {
-        # Ubiquitous modules imported so often they clutter the graph
-        ("patty", "any_json"),
-        ("patty", "api_utils"),
-        ("patty", "database_utils"),
-        ("patty", "settings"),
-        ("patty", "version"),
-    }
 
     modules_dependency_graph = {
         module_path: set(
             (d, strong)
             for (d, strong) in gather_dependencies(file_name, module_path, known_module_paths)
-            if d not in ignored_modules
+            if not ignored(d)
         )
         for file_name in file_names
         for module_path in [make_module_path(file_name)]
-        if module_path not in ignored_modules
+        if not ignored(module_path)
     }
 
     clusters_by_package = {
