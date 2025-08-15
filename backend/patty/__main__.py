@@ -58,7 +58,9 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
     import sqlalchemy as sql
 
     from . import database_utils
-    from . import orm_models  # noqa: F401 to populate the metadata
+    from . import errors  # noqa: F401 to populate the metadata
+    from . import external_exercises  # noqa: F401
+    from . import textbooks  # noqa: F401
 
     colors_by_annotation: dict[frozenset[str], str | None] = {
         frozenset({"adaptation"}): "#FF0000",
@@ -175,6 +177,7 @@ def python_dependency_graph() -> None:
         ("patty", "version"),
         # Little interest, decrease readability
         ("patty", "migrations", "versions"),
+        ("patty", "to_be_deleted"),
     }
 
     def make_module_path(file_name: str) -> tuple[str, ...]:
