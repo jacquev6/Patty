@@ -6,8 +6,8 @@ import unittest
 import openai
 import openai.types.chat
 import openai.types.shared_params
+import pydantic
 
-from .. import adapted
 from ...any_json import JsonDict
 from .base import (
     AssistantMessage,
@@ -15,9 +15,12 @@ from .base import (
     JsonFromTextResponseFormat,
     JsonObjectResponseFormat,
     JsonSchemaResponseFormat,
+    LlmException,
     Model,
     NotJsonAssistantMessage,
     SystemMessage,
+    T,
+    try_hard_to_json_loads,
     UserMessage,
 )
 from .schema import make_schema
@@ -35,9 +38,9 @@ class OpenAiModel(Model):
     async def do_complete(
         self,
         messages_: list[
-            SystemMessage | UserMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
         ],
-        response_format: JsonFromTextResponseFormat | JsonObjectResponseFormat | JsonSchemaResponseFormat,
+        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         messages = list(self.__make_messages(messages_))
         if isinstance(response_format, JsonSchemaResponseFormat):
@@ -46,7 +49,7 @@ class OpenAiModel(Model):
             return await self.__do_complete__generic(messages, response_format)
 
     async def __do_complete__json_schema(
-        self, messages: list[openai.types.chat.ChatCompletionMessageParam], response_format: type[adapted.Exercise]
+        self, messages: list[openai.types.chat.ChatCompletionMessageParam], response_format: type[T]
     ) -> tuple[JsonDict, str]:
         response = await client.beta.chat.completions.parse(
             model=self.name, messages=messages, response_format=response_format
@@ -72,7 +75,7 @@ class OpenAiModel(Model):
     async def __do_complete__generic(
         self,
         messages: list[openai.types.chat.ChatCompletionMessageParam],
-        response_format_: JsonFromTextResponseFormat | JsonObjectResponseFormat,
+        response_format_: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         response_format = self.__make_response_format(response_format_)
         response = await client.chat.completions.create(
@@ -91,7 +94,7 @@ class OpenAiModel(Model):
     def __make_messages(
         self,
         messages: Iterable[
-            SystemMessage | UserMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
         ],
     ) -> Iterable[openai.types.chat.ChatCompletionMessageParam]:
         for message in messages:
@@ -113,7 +116,7 @@ class OpenAiModel(Model):
                 raise ValueError(f"Unknown message type: {message}")
 
     def __make_response_format(
-        self, response_format: JsonFromTextResponseFormat | JsonObjectResponseFormat | JsonSchemaResponseFormat
+        self, response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T]
     ) -> openai.types.chat.completion_create_params.ResponseFormat:
         if isinstance(response_format, JsonFromTextResponseFormat):
             return openai.types.shared_params.response_format_text.ResponseFormatText(type="text")
@@ -134,11 +137,218 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
     maxDiff = None
 
     @costs_money
+    async def test_json_schema(self) -> None:
+        class Response(pydantic.BaseModel):
+            prose: str
+
+            class Structured(pydantic.BaseModel):
+                cheese: str
+
+            structured: Structured
+
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
+
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
+            SystemMessage(
+                content="Utilise le champ `prose` pour tes commentaires, et le champs `structured` pour le contenu de ta réponse. Dans ce champs, donne des réponses aussi concises que possible."
+            ),
+            UserMessage(content="Donne-moi le nom d'un fromage."),
+        ]
+
+        response1 = await model.complete(messages, JsonSchemaResponseFormat(response_type=Response))
+        self.assertEqual(response1.raw_conversation["method"], "openai.AsyncOpenAI.beta.chat.completions.parse")
+        self.assertEqual(
+            response1.raw_conversation["messages"],
+            [
+                {
+                    "content": "Utilise le champ `prose` pour tes commentaires, et le champs `structured` pour le contenu de ta réponse. Dans ce champs, donne des réponses aussi concises que possible.",
+                    "role": "developer",
+                },
+                {"content": "Donne-moi le nom d'un fromage.", "role": "user"},
+            ],
+        )
+        self.assertEqual(
+            response1.raw_conversation["response_format"],
+            {
+                "kind": "type",
+                "name": "Response",
+                "schema": {
+                    "$defs": {
+                        "Structured": {
+                            "additionalProperties": False,
+                            "properties": {"cheese": {"title": "Cheese", "type": "string"}},
+                            "required": ["cheese"],
+                            "title": "Structured",
+                            "type": "object",
+                        }
+                    },
+                    "additionalProperties": False,
+                    "properties": {
+                        "prose": {"title": "Prose", "type": "string"},
+                        "structured": {"$ref": "#/$defs/Structured"},
+                    },
+                    "required": ["prose", "structured"],
+                    "title": "Response",
+                    "type": "object",
+                },
+            },
+        )
+
+        content1 = Response(**json.loads(response1.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        self.assertEqual(response1.message.content, content1)
+
+        messages.append(response1.message)
+        messages.append(UserMessage(content="Un autre."))
+
+        response2 = await model.complete(messages, JsonSchemaResponseFormat(response_type=Response))
+        self.assertEqual(response2.raw_conversation["method"], "openai.AsyncOpenAI.beta.chat.completions.parse")
+        self.assertEqual(
+            response2.raw_conversation["messages"],
+            [
+                {
+                    "content": "Utilise le champ `prose` pour tes commentaires, et le champs `structured` pour le contenu de ta réponse. Dans ce champs, donne des réponses aussi concises que possible.",
+                    "role": "developer",
+                },
+                {"content": "Donne-moi le nom d'un fromage.", "role": "user"},
+                {"content": content1.model_dump_json(), "role": "assistant"},
+                {"content": "Un autre.", "role": "user"},
+            ],
+        )
+        self.assertEqual(
+            response2.raw_conversation["response_format"],
+            {
+                "kind": "type",
+                "name": "Response",
+                "schema": {
+                    "$defs": {
+                        "Structured": {
+                            "additionalProperties": False,
+                            "properties": {"cheese": {"title": "Cheese", "type": "string"}},
+                            "required": ["cheese"],
+                            "title": "Structured",
+                            "type": "object",
+                        }
+                    },
+                    "additionalProperties": False,
+                    "properties": {
+                        "prose": {"title": "Prose", "type": "string"},
+                        "structured": {"$ref": "#/$defs/Structured"},
+                    },
+                    "required": ["prose", "structured"],
+                    "title": "Response",
+                    "type": "object",
+                },
+            },
+        )
+        content2 = Response(**json.loads(response2.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        self.assertEqual(response2.message.content, content2)
+
+        self.assertNotEqual(response1.message.content.structured.cheese, response2.message.content.structured.cheese)
+
+    @costs_money
+    async def test_json_object(self) -> None:
+        class Response(pydantic.BaseModel):
+            a: int
+            b: int
+
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
+
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")]
+        response = await model.complete(messages, JsonObjectResponseFormat(response_type=Response))
+        self.assertEqual(response.raw_conversation["method"], "openai.AsyncOpenAI.chat.completions.create")
+        self.assertEqual(
+            response.raw_conversation["messages"],
+            [
+                {
+                    "content": "Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.",
+                    "role": "user",
+                }
+            ],
+        )
+        self.assertEqual(response.raw_conversation["response_format"], {"type": "json_object"})
+        content = Response(**json.loads(response.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        self.assertEqual(response.message.content, content)
+
+    @costs_money
+    async def test_json_from_text(self) -> None:
+        class Response(pydantic.BaseModel):
+            a: int
+            b: int
+
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
+
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [
+            UserMessage(
+                content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers. Donne-moi uniquement cet objet, sans aucun commentaire."
+            )
+        ]
+        response = await model.complete(messages, JsonFromTextResponseFormat(response_type=Response))
+        self.assertEqual(response.raw_conversation["method"], "openai.AsyncOpenAI.chat.completions.create")
+        self.assertEqual(
+            response.raw_conversation["messages"],
+            [
+                {
+                    "content": "Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers. Donne-moi uniquement cet objet, sans aucun commentaire.",
+                    "role": "user",
+                }
+            ],
+        )
+        self.assertEqual(response.raw_conversation["response_format"], {"type": "text"})
+        content = Response(
+            **try_hard_to_json_loads(response.raw_conversation["response"]["choices"][0]["message"]["content"])
+        )
+        self.assertEqual(response.message.content, content)
+
+    @costs_money
+    async def test_bad_json_from_text(self) -> None:
+        class Response(pydantic.BaseModel):
+            a: int
+            b: int
+
+        model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
+
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Bonjour!")]
+
+        with self.assertRaises(LlmException) as cm:
+            await model.complete(messages, JsonFromTextResponseFormat(response_type=Response))
+        self.assertEqual(cm.exception.args[0], "Failed to parse JSON response")
+        self.assertEqual(cm.exception.raw_conversation["method"], "openai.AsyncOpenAI.chat.completions.create")
+        self.assertEqual(cm.exception.raw_conversation["messages"], [{"content": "Bonjour!", "role": "user"}])
+        self.assertEqual(cm.exception.raw_conversation["response_format"], {"type": "text"})
+        self.assertIn("bonjour", cm.exception.raw_conversation["response"]["choices"][0]["message"]["content"].lower())
+
+    @costs_money
     async def test_adaptation_schema(self) -> None:
+        from ..adapted import Exercise
+
         model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 
         response = await model.complete(
             [UserMessage(content="Donne-moi une réponse respectant le schema JSON fourni.")],
-            JsonSchemaResponseFormat(response_type=adapted.Exercise),
+            JsonSchemaResponseFormat(response_type=Exercise),
         )
-        self.assertIsInstance(response.message.content, adapted.Exercise)
+        self.assertIsInstance(response.message.content, Exercise)

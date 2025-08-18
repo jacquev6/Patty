@@ -10,7 +10,6 @@ from .base import (
     JsonObjectResponseFormat as JsonObjectResponseFormat,
     JsonSchemaResponseFormat as JsonSchemaResponseFormat,
     LlmException as LlmException,
-    Message as Message,
     NotJsonAssistantMessage as NotJsonAssistantMessage,
     NotJsonLlmException as NotJsonLlmException,
     SystemMessage as SystemMessage,

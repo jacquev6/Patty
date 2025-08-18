@@ -1,11 +1,13 @@
 import json
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 import abc
 
 import pydantic
 
 from ...any_json import JsonDict
-from .. import adapted
+
+
+T = TypeVar("T", bound=pydantic.BaseModel)
 
 
 class SystemMessage(pydantic.BaseModel):
@@ -18,9 +20,9 @@ class UserMessage(pydantic.BaseModel):
     content: str
 
 
-class AssistantMessage(pydantic.BaseModel):
+class AssistantMessage[T](pydantic.BaseModel):
     role: Literal["assistant"] = "assistant"
-    content: adapted.Exercise
+    content: T
 
 
 class InvalidJsonAssistantMessage(pydantic.BaseModel):
@@ -33,24 +35,21 @@ class NotJsonAssistantMessage(pydantic.BaseModel):
     content: str
 
 
-Message = UserMessage | SystemMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
-
-
-class CompletionResponse(pydantic.BaseModel):
+class CompletionResponse[T](pydantic.BaseModel):
     raw_conversation: JsonDict
-    message: AssistantMessage
+    message: AssistantMessage[T]
 
 
-class JsonFromTextResponseFormat(pydantic.BaseModel):
-    response_type: type[adapted.Exercise]
+class JsonFromTextResponseFormat[T](pydantic.BaseModel):
+    response_type: type[T]
 
 
-class JsonObjectResponseFormat(pydantic.BaseModel):
-    response_type: type[adapted.Exercise]
+class JsonObjectResponseFormat[T](pydantic.BaseModel):
+    response_type: type[T]
 
 
-class JsonSchemaResponseFormat(pydantic.BaseModel):
-    response_type: type[adapted.Exercise]
+class JsonSchemaResponseFormat[T](pydantic.BaseModel):
+    response_type: type[T]
 
 
 class LlmException(RuntimeError):
@@ -86,10 +85,10 @@ class Model(abc.ABC, pydantic.BaseModel):
         self,
         /,
         messages: list[
-            SystemMessage | UserMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
         ],
-        response_format: JsonFromTextResponseFormat | JsonObjectResponseFormat | JsonSchemaResponseFormat,
-    ) -> CompletionResponse:
+        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
+    ) -> CompletionResponse[T]:
         (raw_conversation, response) = await self.do_complete(messages, response_format)
 
         try:
@@ -110,7 +109,7 @@ class Model(abc.ABC, pydantic.BaseModel):
     async def do_complete(
         self,
         messages: list[
-            SystemMessage | UserMessage | AssistantMessage | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
         ],
-        response_format: JsonFromTextResponseFormat | JsonObjectResponseFormat | JsonSchemaResponseFormat,
+        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> tuple[JsonDict, str]: ...
