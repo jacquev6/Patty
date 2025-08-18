@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
-  pagesCount: number
+  pagesCount: number | null
 }>()
 
 const pageNumber = defineModel<number>('page', { default: 1 })
@@ -16,28 +16,28 @@ watch(pageNumber, resetRequestedPageNumber, { immediate: true })
 
 watch(requestedPageNumber, () => {
   const page = Number.parseInt(requestedPageNumber.value, 10)
-  if (Number.isInteger(page) && page >= 1 && page <= props.pagesCount) {
+  if (Number.isInteger(page) && page >= 1 && (props.pagesCount === null || page <= props.pagesCount)) {
     pageNumber.value = page
   }
 })
 </script>
 
 <template>
-  <p class="text-center">
+  <span>
     <button sm primary :disabled="pageNumber <= 1" @click="--pageNumber">&lt;</button>
     <label>
       <input
         type="number"
         min="1"
-        :max="pagesCount"
+        :max="pagesCount === null ? undefined : pagesCount"
         size="4"
         v-model="requestedPageNumber"
         @blur="resetRequestedPageNumber"
       />
     </label>
-    <button sm primary :disabled="pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>
+    <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>
     <slot></slot>
-  </p>
+  </span>
 </template>
 
 <style scoped>
@@ -45,6 +45,7 @@ watch(requestedPageNumber, () => {
 input {
   -moz-appearance: textfield;
   appearance: textfield;
+  width: 3em;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

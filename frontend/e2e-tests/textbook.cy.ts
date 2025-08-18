@@ -41,21 +41,49 @@ describe('The creation form for textbooks', () => {
 describe('The edition form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-textbook'])
+    loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
+    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
+    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
-  it('looks like this - by batch', () => {
-    cy.get('[data-cy="view-by"]').select('batch')
-    cy.get('p:contains("in creation order")').should('exist')
-    screenshot('textbook-edition-form-by-batch')
-  })
-
-  it('looks like this - by page', () => {
-    cy.get('[data-cy="view-by"]').select('page')
+  function screenshots(slug: string) {
+    cy.get('[data-cy="view-by"]').select('page').blur()
     cy.get('p:contains("sorted by page")').should('exist')
-    screenshot('textbook-edition-form-by-page')
+    cy.get('div.main').scrollTo('top', { ensureScrollable: false })
+    screenshot(`${slug}-edition-form-by-page`)
+    cy.get('[data-cy="view-by"]').select('batch').blur()
+    cy.get('p:contains("in creation order")').should('exist')
+    cy.get('div.main').scrollTo('top', { ensureScrollable: false })
+    screenshot(`${slug}-edition-form-by-batch`)
+  }
+
+  it('adds and removes pdf ranges', () => {
+    screenshots('empty-textbook')
+
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("i.e. 2 in textbook")').should('exist')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}6')
+    cy.get('p:contains("i.e. 7 in textbook")').should('exist')
+    cy.get('[data-cy="extraction"] [data-cy="llm-provider"]').select('dummy')
+    cy.get('[data-cy="extraction"] [data-cy="llm-name"]').select('dummy-1')
+    cy.get('[data-cy="adaptation"] [data-cy="llm-provider"]').select('dummy')
+    cy.get('[data-cy="adaptation"] [data-cy="llm-name"]').select('dummy-3')
+    cy.get('button:contains("Submit")').click()
+    cy.get('input[type="file"]').eq(0).should('have.value', '')
+    cy.get('input[type="number"]').should('not.exist')
+    cy.get('h3:contains("Pages 6 to 7 (from test.pdf pages 1 to 2)")').should('exist')
+    cy.get('h4:contains("Page 6")').should('exist')
+    cy.get('h4:contains("Page 7")').should('exist')
+    cy.get('h4 span.inProgress:contains("in progress")').should('have.length', 2)
+    cy.get('h4 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get('h5 span.inProgress:contains("in progress")').should('have.length', 2)
+    cy.get('h5 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get('div.busy').should('have.length', 2)
+    cy.get('div.busy').should('not.exist')
+
+    screenshots('textbook-with-pdf-ranges')
   })
 
   it('adds and removes external exercises', () => {
@@ -93,5 +121,7 @@ describe('The edition form for textbooks', () => {
     cy.get('h2').should('have.length', 1)
     cy.get('h3').should('have.length', 1)
     cy.get('h3').eq(0).should('have.text', 'Exercise 1')
+
+    screenshots('textbook-with-external-exercises')
   })
 })

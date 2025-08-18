@@ -6,6 +6,9 @@ import typing
 from sqlalchemy import orm
 import sqlalchemy as sql
 
+from .. import adaptation
+from .. import extraction
+from ..any_json import JsonDict
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises import Exercise, ExerciseLocation
 from ..extraction import PdfFileRange, PageExtractionCreation
@@ -53,6 +56,8 @@ class Textbook(OrmBase, CreatedByUserMixin):
         assert session is not None
         return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
 
+    extraction_batches: orm.Mapped[list[ExtractionBatch]] = orm.relationship(back_populates="textbook")
+
 
 class ExerciseLocationTextbook(ExerciseLocation):
     __tablename__ = "exercise_locations__textbook"
@@ -74,28 +79,8 @@ class ExerciseLocationTextbook(ExerciseLocation):
     exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
 
 
-class TextbookStartingPoint(OrmBase, CreatedByUserMixin):
-    __tablename__ = "textbook_starting_points"
-
-    def __init__(
-        self, *, created_at: datetime.datetime, created_by: str, textbook: Textbook, first_page_number: int
-    ) -> None:
-        super().__init__()
-        self.created_at = created_at
-        self.created_by = created_by
-        self.textbook = textbook
-        self.first_page_number = first_page_number
-
-    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
-
-    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
-    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
-
-    first_page_number: orm.Mapped[int]
-
-
-class PdfFileTextbookMapping(OrmBase, CreatedByUserMixin):
-    __tablename__ = "pdf_file_textbook_mappings"
+class ExtractionBatch(OrmBase, CreatedByUserMixin):
+    __tablename__ = "textbook_extraction_batches"
 
     def __init__(
         self,
@@ -103,13 +88,19 @@ class PdfFileTextbookMapping(OrmBase, CreatedByUserMixin):
         created_at: datetime.datetime,
         created_by: str,
         pdf_file_range: PdfFileRange,
-        textbook_starting_point: TextbookStartingPoint,
+        textbook: Textbook,
+        first_textbook_page_number: int,
+        model_for_extraction: extraction.llm.ConcreteModel,
+        model_for_adaptation: adaptation.llm.ConcreteModel,
     ) -> None:
         super().__init__()
         self.created_at = created_at
         self.created_by = created_by
         self.pdf_file_range = pdf_file_range
-        self.textbook_starting_point = textbook_starting_point
+        self.textbook = textbook
+        self.first_textbook_page_number = first_textbook_page_number
+        self.model_for_extraction = model_for_extraction
+        self.model_for_adaptation = model_for_adaptation
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -118,9 +109,35 @@ class PdfFileTextbookMapping(OrmBase, CreatedByUserMixin):
         foreign_keys=[pdf_file_range_id], remote_side=[PdfFileRange.id]
     )
 
-    textbook_starting_point_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(TextbookStartingPoint.id))
-    textbook_starting_point: orm.Mapped[TextbookStartingPoint] = orm.relationship(
-        foreign_keys=[textbook_starting_point_id], remote_side=[TextbookStartingPoint.id]
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(
+        foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="extraction_batches"
+    )
+
+    first_textbook_page_number: orm.Mapped[int]
+
+    _model_for_extraction: orm.Mapped[JsonDict] = orm.mapped_column("model_for_extraction", sql.JSON)
+
+    @property
+    def model_for_extraction(self) -> extraction.llm.ConcreteModel:
+        return extraction.llm.validate(self._model_for_extraction)
+
+    @model_for_extraction.setter
+    def model_for_extraction(self, value: extraction.llm.ConcreteModel) -> None:
+        self._model_for_extraction = value.model_dump()
+
+    _model_for_adaptation: orm.Mapped[JsonDict] = orm.mapped_column("model_for_adaptation", sql.JSON)
+
+    @property
+    def model_for_adaptation(self) -> adaptation.llm.ConcreteModel:
+        return adaptation.llm.validate(self._model_for_adaptation)
+
+    @model_for_adaptation.setter
+    def model_for_adaptation(self, value: adaptation.llm.ConcreteModel) -> None:
+        self._model_for_adaptation = value.model_dump()
+
+    page_extraction_creations: orm.Mapped[list[PageExtractionCreationByTextbook]] = orm.relationship(
+        back_populates="extraction_batch"
     )
 
 
@@ -128,15 +145,15 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
     __tablename__ = "page_extraction_creations__by_textbook"
     __mapper_args__ = {"polymorphic_identity": "by_textbook"}
 
-    def __init__(self, *, at: datetime.datetime, pdf_file_textbook_mapping: PdfFileTextbookMapping) -> None:
+    def __init__(self, *, at: datetime.datetime, extraction_batch: ExtractionBatch) -> None:
         super().__init__(at=at)
-        self.pdf_file_textbook_mapping = pdf_file_textbook_mapping
+        self.extraction_batch = extraction_batch
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
 
-    pdf_file_textbook_mapping_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileTextbookMapping.id))
-    pdf_file_textbook_mapping: orm.Mapped[PdfFileTextbookMapping] = orm.relationship(
-        foreign_keys=[pdf_file_textbook_mapping_id], remote_side=[PdfFileTextbookMapping.id]
+    extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
+    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
+        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id], back_populates="page_extraction_creations"
     )
 
 

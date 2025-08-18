@@ -163,18 +163,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_pdf_file_ranges")),
     )
     op.create_table(
-        "textbook_starting_points",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("textbook_id", sa.Integer(), nullable=False),
-        sa.Column("first_page_number", sa.Integer(), nullable=False),
-        sa.Column("created_by", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["textbook_id"], ["textbooks.id"], name=op.f("fk_textbook_starting_points_textbook_id_textbooks")
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_textbook_starting_points")),
-    )
-    op.create_table(
         "exercise_adaptations",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("exercise_id", sa.Integer(), nullable=False),
@@ -320,25 +308,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_page_extractions")),
     )
     op.create_table(
-        "pdf_file_textbook_mappings",
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("pdf_file_range_id", sa.Integer(), nullable=False),
-        sa.Column("textbook_starting_point_id", sa.Integer(), nullable=False),
-        sa.Column("created_by", sa.String(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["pdf_file_range_id"],
-            ["pdf_file_ranges.id"],
-            name=op.f("fk_pdf_file_textbook_mappings_pdf_file_range_id_pdf_file_ranges"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["textbook_starting_point_id"],
-            ["textbook_starting_points.id"],
-            name=op.f("fk_pdf_file_textbook_mappings_textbook_starting_point_id_textbook_starting_points"),
-        ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_pdf_file_textbook_mappings")),
-    )
-    op.create_table(
         "sandbox_adaptation_batches",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("settings_id", sa.Integer(), nullable=False),
@@ -373,6 +342,26 @@ def upgrade() -> None:
             name=op.f("fk_sandbox_extraction_batches_settings_id_extraction_settings"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_sandbox_extraction_batches")),
+    )
+    op.create_table(
+        "textbook_extraction_batches",
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("pdf_file_range_id", sa.Integer(), nullable=False),
+        sa.Column("textbook_id", sa.Integer(), nullable=False),
+        sa.Column("first_textbook_page_number", sa.Integer(), nullable=False),
+        sa.Column("model_for_extraction", sa.JSON(), nullable=False),
+        sa.Column("model_for_adaptation", sa.JSON(), nullable=False),
+        sa.Column("created_by", sa.String(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["pdf_file_range_id"],
+            ["pdf_file_ranges.id"],
+            name=op.f("fk_textbook_extraction_batches_pdf_file_range_id_pdf_file_ranges"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["textbook_id"], ["textbooks.id"], name=op.f("fk_textbook_extraction_batches_textbook_id_textbooks")
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_textbook_extraction_batches")),
     )
     op.create_table(
         "exercise_adaptation_creations",
@@ -527,18 +516,16 @@ def upgrade() -> None:
     op.create_table(
         "page_extraction_creations__by_textbook",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("pdf_file_textbook_mapping_id", sa.Integer(), nullable=False),
+        sa.Column("extraction_batch_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["extraction_batch_id"],
+            ["textbook_extraction_batches.id"],
+            name=op.f("fk_page_extraction_creations__by_textbook_extraction_batch_id_textbook_extraction_batches"),
+        ),
         sa.ForeignKeyConstraint(
             ["id"],
             ["page_extraction_creations.id"],
             name=op.f("fk_page_extraction_creations__by_textbook_id_page_extraction_creations"),
-        ),
-        sa.ForeignKeyConstraint(
-            ["pdf_file_textbook_mapping_id"],
-            ["pdf_file_textbook_mappings.id"],
-            name=op.f(
-                "fk_page_extraction_creations__by_textbook_pdf_file_textbook_mapping_id_pdf_file_textbook_mappings"
-            ),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_page_extraction_creations__by_textbook")),
     )

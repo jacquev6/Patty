@@ -47,6 +47,8 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
 
 
 async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
+    from .. import textbooks
+
     assert page_extraction.pdf_range is not None
     sha256 = page_extraction.pdf_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
@@ -109,24 +111,42 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     ],
                 )
             )
-            exercise = adaptation.AdaptableExercise(
-                created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
-                location=exercises.ExerciseLocationMaybePageAndNumber(
-                    page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
-                ),
-                removed_from_textbook=False,
-                full_text=full_text,
-                instruction_hint_example_text=instruction_hint_example_text,
-                statement_text=extracted_exercise.enonce,
-            )
-            session.add(exercise)
 
-            if classification_chunk is not None:
-                session.add(
-                    classification.ExerciseClassificationByClassificationChunk(
-                        exercise=exercise, at=created_at, classification_chunk=classification_chunk, exercise_class=None
+            if extracted_exercise.numero is not None:
+                location: exercises.ExerciseLocation
+                if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
+                    extraction_batch = page_extraction.created.extraction_batch
+                    location = textbooks.ExerciseLocationTextbook(
+                        textbook=extraction_batch.textbook,
+                        page_number=extraction_batch.first_textbook_page_number
+                        + page_extraction.pdf_page_number
+                        - extraction_batch.pdf_file_range.first_page_number,
+                        exercise_number=extracted_exercise.numero,
                     )
+                else:
+                    location = exercises.ExerciseLocationMaybePageAndNumber(
+                        page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
+                    )
+
+                exercise = adaptation.AdaptableExercise(
+                    created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+                    location=location,
+                    removed_from_textbook=False,
+                    full_text=full_text,
+                    instruction_hint_example_text=instruction_hint_example_text,
+                    statement_text=extracted_exercise.enonce,
                 )
+                session.add(exercise)
+
+                if classification_chunk is not None:
+                    session.add(
+                        classification.ExerciseClassificationByClassificationChunk(
+                            exercise=exercise,
+                            at=created_at,
+                            classification_chunk=classification_chunk,
+                            exercise_class=None,
+                        )
+                    )
 
         page_extraction.assistant_response = assistant_responses.Success(kind="success", exercises=extracted_exercises)
 

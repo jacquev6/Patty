@@ -703,17 +703,15 @@ class FixturesCreator:
                 created_by="Patty", created_at=created_at, pdf_file=pdf_file, first_page_number=10, pages_count=3
             )
         )
-        textbook_starting_point = self.add(
-            textbooks.TextbookStartingPoint(
-                created_by="Patty", created_at=created_at, textbook=textbook, first_page_number=40
-            )
-        )
-        pdf_file_textbook_mapping = self.add(
-            textbooks.PdfFileTextbookMapping(
+        extraction_batch = self.add(
+            textbooks.ExtractionBatch(
                 created_by="Patty",
                 created_at=created_at,
                 pdf_file_range=pdf_file_range,
-                textbook_starting_point=textbook_starting_point,
+                textbook=textbook,
+                first_textbook_page_number=40,
+                model_for_extraction=model_for_extraction,
+                model_for_adaptation=model_for_adaptation,
             )
         )
 
@@ -722,9 +720,7 @@ class FixturesCreator:
         )
         page_40_extraction = self.add(
             extraction.PageExtraction(
-                created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, pdf_file_textbook_mapping=pdf_file_textbook_mapping
-                ),
+                created=textbooks.PageExtractionCreationByTextbook(at=created_at, extraction_batch=extraction_batch),
                 pdf_range=pdf_file_range,
                 pdf_page_number=10,  # Page 40 in the textbook
                 settings=extraction_settings,
@@ -844,9 +840,7 @@ class FixturesCreator:
         )
         page_42_extraction = self.add(
             extraction.PageExtraction(
-                created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, pdf_file_textbook_mapping=pdf_file_textbook_mapping
-                ),
+                created=textbooks.PageExtractionCreationByTextbook(at=created_at, extraction_batch=extraction_batch),
                 pdf_range=pdf_file_range,
                 pdf_page_number=12,  # Page 42 in the textbook
                 settings=extraction_settings,

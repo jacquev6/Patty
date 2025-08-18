@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import _ from 'lodash'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from './apiClient'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
-import { type PreprocessedAdaptation } from './adaptations'
+import { preprocess } from './adaptations'
 import assert from './assert'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
+import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
+import IdentifiedUser from './IdentifiedUser.vue'
+import LlmModelSelector from './LlmModelSelector.vue'
+import BusyBox from './BusyBox.vue'
+import WhiteSpace from './WhiteSpace.vue'
+import { preprocess as preprocessAdaptation } from './adaptations'
 
 const props = defineProps<{
   textbook: Textbook
@@ -25,57 +30,6 @@ const client = useAuthenticatedClient()
 const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
-
-const pages = computed(() => {
-  type Exercise =
-    | {
-        kind: 'adaptation'
-        adaptation: PreprocessedAdaptation
-      }
-    | {
-        kind: 'externalExercise'
-        externalExercise: {
-          pageNumber: number | null
-          exerciseNumber: string | null
-          originalFileName: string
-        }
-      }
-
-  const pages: Record<number, Exercise[]> = {}
-  for (const externalExercise of props.textbook.externalExercises) {
-    if (!externalExercise.removedFromTextbook && externalExercise.pageNumber !== null) {
-      pages[externalExercise.pageNumber] ??= []
-      pages[externalExercise.pageNumber].push({
-        kind: 'externalExercise',
-        externalExercise,
-      })
-    }
-  }
-
-  for (const pageNumber in pages) {
-    pages[pageNumber] = _.sortBy(pages[pageNumber], [
-      (exercise) => {
-        const exerciseNumber =
-          exercise.kind === 'adaptation'
-            ? exercise.adaptation.input.exerciseNumber
-            : exercise.externalExercise.exerciseNumber
-        if (exerciseNumber === null) {
-          return 0
-        } else {
-          const asNumber = parseInt(exerciseNumber)
-          if (isNaN(asNumber)) {
-            return 0
-          } else {
-            return asNumber
-          }
-        }
-      },
-      'input.exerciseNumber',
-    ])
-  }
-
-  return pages
-})
 
 function textbookUpdated(textbook: Textbook) {
   emit('textbook-updated', textbook)
@@ -116,7 +70,51 @@ async function removeExternalExercise(id: string, removed: boolean) {
       {{ t('viewByPageDescription') }}
     </template>
   </p>
+  <p>{{ t('modifiedBy') }} <IdentifiedUser /></p>
   <template v-if="view === 'batch'">
+    <h2>{{ t('newTextbookPdf') }}</h2>
+    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <h2>{{ t('existingTextbookPdfs') }}</h2>
+    <template v-for="range in textbook.ranges">
+      <h3>
+        Pages {{ range.textbookFirstPageNumber }} to {{ range.textbookFirstPageNumber + range.pagesCount - 1 }} (from
+        {{ range.pdfFileNames[0] }} pages {{ range.pdfFirstPageNumber }} to
+        {{ range.pdfFirstPageNumber + range.pagesCount - 1 }})
+      </h3>
+      <p>
+        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
+          <template #provider>Model provider for extraction:</template>
+        </LlmModelSelector>
+      </p>
+      <p>
+        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
+          <template #provider>Model provider for adaptation:</template>
+        </LlmModelSelector>
+      </p>
+      <template v-for="page in range.pages">
+        <h4>
+          Page {{ page.pageNumber
+          }}<template v-if="page.inProgress"
+            ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
+          >
+        </h4>
+        <template v-for="exercise in page.exercises">
+          <h5>
+            Exercise {{ exercise.exerciseNumber
+            }}<template v-if="exercise.exerciseClass === null"
+              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
+            >
+          </h5>
+          <template v-if="exercise.exerciseClass !== null">
+            <p v-if="exercise.adaptation === null">Adaptation cancelled</p>
+            <BusyBox :busy="true" v-else-if="preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress'"
+              >Adaptation in progress...</BusyBox
+            >
+            <p v-else>Adaptation done</p>
+          </template>
+        </template>
+      </template>
+    </template>
     <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>
     <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
     <h2>{{ t('existingExternalExercises') }}</h2>
@@ -132,17 +130,17 @@ async function removeExternalExercise(id: string, removed: boolean) {
     </template>
   </template>
   <template v-else>
-    <template v-for="(adaptations, pageNumber) in pages">
-      <h2>{{ t('page') }} {{ pageNumber }}</h2>
-      <template v-for="exercise in adaptations">
-        <template v-if="exercise.kind === 'adaptation'">
-          <AdaptationPreview header="h3" :index="0" :adaptation="exercise.adaptation">
-            <h3 style="margin-top: 0">{{ t('exercise') }} {{ exercise.adaptation.input.exerciseNumber }}</h3>
+    <template v-for="page in textbook.pages">
+      <h2>{{ t('page') }} {{ page.number }}</h2>
+      <template v-for="exercise in page.exercises">
+        <template v-if="exercise.kind === 'adaptable'">
+          <AdaptationPreview header="h3" :index="0" :adaptation="preprocess(exercise.adaptation)">
+            <h3 style="margin-top: 0">{{ t('exercise') }} {{ exercise.exerciseNumber }}</h3>
           </AdaptationPreview>
         </template>
-        <template v-else-if="exercise.kind === 'externalExercise'">
-          <h3>{{ t('exercise') }} {{ exercise.externalExercise.exerciseNumber }}</h3>
-          <p>{{ exercise.externalExercise.originalFileName }}</p>
+        <template v-else-if="exercise.kind === 'external'">
+          <h3>{{ t('exercise') }} {{ exercise.exerciseNumber }}</h3>
+          <p>{{ exercise.originalFileName }}</p>
         </template>
       </template>
     </template>
@@ -153,6 +151,11 @@ async function removeExternalExercise(id: string, removed: boolean) {
 .removed {
   text-decoration: line-through;
 }
+
+span.inProgress {
+  color: gray;
+  font-size: 70%;
+}
 </style>
 
 <i18n>
@@ -160,13 +163,15 @@ en:
   isbn: ISBN
   downloadHtml: Download standalone HTML
   viewBy: View by
-  viewByBatch: batch and external exercises
+  viewByBatch: PDFs and external exercises
   viewByPage: page
-  viewByBatchDescription: in creation order, including errors and removed adaptations. Batches first, external exercises
+  viewByBatchDescription: in creation order, including errors and removed adaptations. PDFs first, external exercises
   viewByBatchDescriptionBelow: below
-  viewByPageDescription: sorted by page and exercise number, including only successful not-removed adaptations. Batches and external exercises together.
-  newBatch: New batch
-  existingBatches: Existing batches
+  viewByPageDescription: sorted by page and exercise number, including only successful not-removed adaptations. Adapted PDFs and external exercises together.
+  modifiedBy: Modified by
+  newTextbookPdf: New textbook PDF
+  existingTextbookPdfs: Existing textbook PDFs
+  inProgress: "(in progress, will refresh when done)"
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
   exercise: Exercise
@@ -179,13 +184,15 @@ fr:
   isbn: ISBN
   downloadHtml: Télécharger le HTML autonome
   viewBy: Afficher par
-  viewByBatch: batch et exercices externes
+  viewByBatch: PDFs et exercices externes
   viewByPage: page
-  viewByBatchDescription: dans l'ordre de création, y compris les erreurs et les adaptations supprimées. Batchs d'abord, exercices externes
+  viewByBatchDescription: dans l'ordre de création, y compris les erreurs et les adaptations supprimées. PDFs d'abord, exercices externes
   viewByBatchDescriptionBelow: en dessous
-  viewByPageDescription: trié par page et numéro d'exercice, y compris uniquement les adaptations réussies non supprimées. Batchs et exercices externes ensemble.
-  newBatch: Nouveau batch
-  existingBatches: Batchs existants
+  viewByPageDescription: trié par page et numéro d'exercice, y compris uniquement les adaptations réussies non supprimées. PDFs adaptés et exercices externes ensemble.
+  modifiedBy: Modifié par
+  newTextbookPdf: Nouveau PDF de manuel
+  existingTextbookPdfs: PDF de manuel existants
+  inProgress: "(en cours, se mettra à jour quand terminé)"
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
   exercise: Exercice
