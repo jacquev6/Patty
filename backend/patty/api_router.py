@@ -5,7 +5,6 @@ import datetime
 import hashlib
 import json
 import os
-import typing
 import urllib.parse
 
 import boto3
@@ -27,7 +26,7 @@ from . import sandbox
 from . import settings
 from . import textbooks
 from .any_json import JsonDict, JsonList
-from .api_utils import ApiModel
+from .api_utils import ApiModel, get_by_id, paginate
 from .version import PATTY_VERSION
 
 __all__ = ["api_router", "export_router"]
@@ -360,37 +359,6 @@ def put_adaptable_exercise_class(
                 manual_edit=None,
             )
         )
-
-
-T = typing.TypeVar(
-    "T",
-    bound=sandbox.adaptation.SandboxAdaptationBatch
-    | sandbox.classification.SandboxClassificationBatch
-    | sandbox.extraction.SandboxExtractionBatch,
-)
-
-
-def paginate(
-    model: type[T], session: database_utils.SessionDependable, chunk_id: str | None
-) -> tuple[list[T], str | None]:
-    chunk_size = 20
-    request = sql.select(model).order_by(-model.id).limit(chunk_size + 1)
-
-    if chunk_id is not None:
-        try:
-            numerical_chunk_id = int(chunk_id)
-        except ValueError:
-            raise fastapi.HTTPException(status_code=400, detail="Invalid chunk ID")
-        request = request.filter(model.id < numerical_chunk_id)
-
-    batches = list(session.execute(request).scalars().all())
-
-    if len(batches) <= chunk_size:
-        next_chunk_id = None
-    else:
-        next_chunk_id = str(batches[-2].id)
-
-    return batches[:chunk_size], next_chunk_id
 
 
 @api_router.get("/adaptation-batches")
@@ -1302,20 +1270,6 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
     exercise_adaptation = get_by_id(session, adaptation.ExerciseAdaptation, id)
     exercise_adaptation.manual_edit = None
     return make_api_adaptation(exercise_adaptation)
-
-
-Model = TypeVar("Model", bound=database_utils.OrmBase)
-
-
-def get_by_id(session: database_utils.Session, model: type[Model], id: str) -> Model:
-    try:
-        numerical_id = int(id)
-    except ValueError:
-        raise fastapi.HTTPException(status_code=404, detail=f"{model.__name__} not found")
-    instance = session.get(model, numerical_id)
-    if instance is None:
-        raise fastapi.HTTPException(status_code=404, detail=f"{model.__name__} not found")
-    return instance
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.ExerciseAdaptation) -> ApiAdaptation:
