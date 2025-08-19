@@ -48,6 +48,7 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
 
 async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
     from .. import textbooks
+    from ..sandbox import extraction as sandbox_extraction  # noqa: F401 to populate ORM metadata
 
     assert page_extraction.pdf_range is not None
     sha256 = page_extraction.pdf_range.pdf_file.sha256

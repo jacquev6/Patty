@@ -244,6 +244,8 @@ describe('The autonomous HTML for a textbook', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title.html`).should('not.exist')
 
     visit('/textbook-1')
+    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
+    cy.get('[data-cy="identified-user-ok"]').click()
     cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
     cy.get('a:contains("standalone HTML")').should('exist')
@@ -301,6 +303,8 @@ describe('The autonomous HTML for a textbook', () => {
 
   it('has working links to external exercises', () => {
     visit('/textbook-1')
+    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
+    cy.get('[data-cy="identified-user-ok"]').click()
     cy.get("input[data-cy='external-files']").selectFile([
       'e2e-tests/inputs/P40Ex1.docx',
       'e2e-tests/inputs/P40Ex7.docx',
