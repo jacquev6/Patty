@@ -88,6 +88,10 @@ describe('The edition form for textbooks', () => {
     cy.get('button:contains("View details")').eq(0).click()
     cy.get('h1:contains("Strategy")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').should('exist').should('have.attr', 'href', '/textbook-1')
+
+    cy.visit('/')
+    cy.get('a:contains("Dummy Textbook Title")').should('exist')
+    cy.get('a:contains("Batch")').should('not.exist')
   })
 
   it('adds and removes external exercises', () => {
