@@ -34,9 +34,17 @@ function textbookUpdated(textbook: Textbook) {
   emit('textbook-updated', textbook)
 }
 
-async function removeExternalExercise(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
+async function removeExercise(id: string, removed: boolean) {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, exercise_id: id }, query: { removed } },
+  })
+  assert(response.data !== undefined)
+  emit('textbook-updated', response.data)
+}
+
+async function removeRange(id: string, removed: boolean) {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, range_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
@@ -76,29 +84,49 @@ async function removeExternalExercise(id: string, removed: boolean) {
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
-        Pages {{ range.textbookFirstPageNumber }} to {{ range.textbookFirstPageNumber + range.pagesCount - 1 }} (from
-        {{ range.pdfFileNames[0] }} pages {{ range.pdfFirstPageNumber }} to
-        {{ range.pdfFirstPageNumber + range.pagesCount - 1 }})
+        <span :class="{ removed: range.removedFromTextbook }"
+          >Pages {{ range.textbookFirstPageNumber }} to {{ range.textbookFirstPageNumber + range.pagesCount - 1 }} (from
+          {{ range.pdfFileNames[0] }} pages {{ range.pdfFirstPageNumber }} to
+          {{ range.pdfFirstPageNumber + range.pagesCount - 1 }})</span
+        >
+        <template v-if="range.removedFromTextbook">
+          ({{ t('removed') }})
+          <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
+        </template>
+        <template v-else>
+          <WhiteSpace />
+          <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
+        </template>
       </h3>
-      <p>
-        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
-          <template #provider>Model provider for extraction:</template>
-        </LlmModelSelector>
-      </p>
-      <p>
-        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
-          <template #provider>Model provider for adaptation:</template>
-        </LlmModelSelector>
-      </p>
-      <template v-for="page in range.pages">
-        <h4>
-          Page {{ page.pageNumber
-          }}<template v-if="page.inProgress"
-            ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
-          >
-        </h4>
-        <template v-for="exercise in page.exercises">
-          <EditTextbookFormExercisePreview :exercise />
+      <template v-if="!range.removedFromTextbook">
+        <p>
+          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
+            <template #provider>Model provider for extraction:</template>
+          </LlmModelSelector>
+        </p>
+        <p>
+          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
+            <template #provider>Model provider for adaptation:</template>
+          </LlmModelSelector>
+        </p>
+        <template v-for="page in range.pages">
+          <h4>
+            Page {{ page.pageNumber
+            }}<template v-if="page.inProgress"
+              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
+            >
+          </h4>
+          <template v-for="exercise in page.exercises">
+            <h5 v-if="exercise.removedFromTextbook">
+              <span class="removed">Exercise {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
+              <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
+            </h5>
+            <EditTextbookFormExercisePreview
+              v-else
+              :exercise
+              @exerciseRemoved="() => removeExercise(exercise.id, true)"
+            />
+          </template>
         </template>
       </template>
     </template>
@@ -108,11 +136,11 @@ async function removeExternalExercise(id: string, removed: boolean) {
     <template v-for="externalExercise in textbook.externalExercises">
       <h3 v-if="externalExercise.removedFromTextbook">
         <span class="removed">{{ externalExercise.originalFileName }}</span> ({{ t('removed') }})
-        <button @click="removeExternalExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
+        <button @click="removeExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
       </h3>
       <h3 v-else>
         {{ externalExercise.originalFileName }}
-        <button @click="removeExternalExercise(externalExercise.id, true)">{{ t('remove') }}</button>
+        <button @click="removeExercise(externalExercise.id, true)">{{ t('remove') }}</button>
       </h3>
     </template>
   </template>

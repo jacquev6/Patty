@@ -359,7 +359,6 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=exercises.ExerciseCreationByUser(at=created_at, username="Patty"),
                 location=exercises.ExerciseLocationMaybePageAndNumber(page_number=42, exercise_number="5"),
-                removed_from_textbook=False,
                 full_text=textwrap.dedent(
                     """\
                     Complète avec "le vent" ou "la pluie"
@@ -712,6 +711,7 @@ class FixturesCreator:
                 first_textbook_page_number=40,
                 model_for_extraction=model_for_extraction,
                 model_for_adaptation=model_for_adaptation,
+                removed_from_textbook=False,
             )
         )
 
@@ -777,8 +777,9 @@ class FixturesCreator:
         exercise_4_page_40 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="4"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="4", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -793,8 +794,9 @@ class FixturesCreator:
         exercise_6_page_40 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="6"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="6", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -809,8 +811,9 @@ class FixturesCreator:
         exercise_10_page_40 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="10"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="10", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -825,8 +828,9 @@ class FixturesCreator:
         exercise_8_page_40 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=40, exercise_number="8"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="8", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -897,8 +901,9 @@ class FixturesCreator:
         exercise_5_page_42 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="5"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="5", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -913,8 +918,9 @@ class FixturesCreator:
         exercise_6_page_42 = self.add(
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
-                location=textbooks.ExerciseLocationTextbook(textbook=textbook, page_number=42, exercise_number="6"),
-                removed_from_textbook=False,
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=42, exercise_number="6", removed_from_textbook=False
+                ),
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -930,9 +936,8 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=42, exercise_number="Auto-dictée"
+                    textbook=textbook, page_number=42, exercise_number="Auto-dictée", removed_from_textbook=False
                 ),
-                removed_from_textbook=False,
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -948,9 +953,11 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=42, exercise_number="Exo identifié par texte / 5"
+                    textbook=textbook,
+                    page_number=42,
+                    exercise_number="Exo identifié par texte / 5",
+                    removed_from_textbook=False,
                 ),
-                removed_from_textbook=False,
                 full_text=textwrap.dedent(
                     """\
                 Complète avec "le vent" ou "la pluie"
@@ -1177,7 +1184,6 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=exercises.ExerciseCreationByUser(at=created_at, username="Patty"),
                 location=exercises.ExerciseLocationMaybePageAndNumber(page_number=1, exercise_number="1"),
-                removed_from_textbook=False,
                 full_text="Avec adaptation",
                 instruction_hint_example_text=None,
                 statement_text=None,
@@ -1202,7 +1208,6 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=exercises.ExerciseCreationByUser(at=created_at, username="Patty"),
                 location=exercises.ExerciseLocationMaybePageAndNumber(page_number=1, exercise_number="1"),
-                removed_from_textbook=False,
                 full_text="Sans adaptation",
                 instruction_hint_example_text=None,
                 statement_text=None,

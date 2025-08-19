@@ -35,7 +35,6 @@ def upgrade() -> None:
         "exercises",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("kind", sa.String(), nullable=False),
-        sa.Column("removed_from_textbook", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercises")),
     )
     op.create_table(
@@ -279,6 +278,7 @@ def upgrade() -> None:
         sa.Column("textbook_id", sa.Integer(), nullable=False),
         sa.Column("page_number", sa.Integer(), nullable=False),
         sa.Column("exercise_number", sa.String(collation="exercise_number"), nullable=False),
+        sa.Column("removed_from_textbook", sa.Boolean(), nullable=False),
         sa.ForeignKeyConstraint(
             ["id"], ["exercise_locations.id"], name=op.f("fk_exercise_locations__textbook_id_exercise_locations")
         ),
@@ -348,6 +348,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("pdf_file_range_id", sa.Integer(), nullable=False),
         sa.Column("textbook_id", sa.Integer(), nullable=False),
+        sa.Column("removed_from_textbook", sa.Boolean(), nullable=False),
         sa.Column("first_textbook_page_number", sa.Integer(), nullable=False),
         sa.Column("model_for_extraction", sa.JSON(), nullable=False),
         sa.Column("model_for_adaptation", sa.JSON(), nullable=False),

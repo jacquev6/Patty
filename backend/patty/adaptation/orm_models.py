@@ -27,12 +27,11 @@ class AdaptableExercise(Exercise):
         *,
         created: ExerciseCreation,
         location: ExerciseLocation,
-        removed_from_textbook: bool,
         full_text: str,
         instruction_hint_example_text: str | None,
         statement_text: str | None,
     ) -> None:
-        super().__init__(created=created, location=location, removed_from_textbook=removed_from_textbook)
+        super().__init__(created=created, location=location)
         self.full_text = full_text
         self.instruction_hint_example_text = instruction_hint_example_text
         self.statement_text = statement_text

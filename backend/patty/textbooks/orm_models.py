@@ -63,11 +63,14 @@ class ExerciseLocationTextbook(ExerciseLocation):
     __tablename__ = "exercise_locations__textbook"
     __mapper_args__ = {"polymorphic_identity": "textbook"}
 
-    def __init__(self, *, textbook: Textbook, page_number: int, exercise_number: str) -> None:
+    def __init__(
+        self, *, textbook: Textbook, page_number: int, exercise_number: str, removed_from_textbook: bool
+    ) -> None:
         super().__init__()
         self.textbook = textbook
         self.page_number = page_number
         self.exercise_number = exercise_number
+        self.removed_from_textbook = removed_from_textbook
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
 
@@ -77,6 +80,7 @@ class ExerciseLocationTextbook(ExerciseLocation):
     page_number: orm.Mapped[int]
     # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
     exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
+    removed_from_textbook: orm.Mapped[bool]
 
 
 class ExtractionBatch(OrmBase, CreatedByUserMixin):
@@ -89,6 +93,7 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
         created_by: str,
         pdf_file_range: PdfFileRange,
         textbook: Textbook,
+        removed_from_textbook: bool,
         first_textbook_page_number: int,
         model_for_extraction: extraction.llm.ConcreteModel,
         model_for_adaptation: adaptation.llm.ConcreteModel,
@@ -98,6 +103,7 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
         self.created_by = created_by
         self.pdf_file_range = pdf_file_range
         self.textbook = textbook
+        self.removed_from_textbook = removed_from_textbook
         self.first_textbook_page_number = first_textbook_page_number
         self.model_for_extraction = model_for_extraction
         self.model_for_adaptation = model_for_adaptation
@@ -113,6 +119,7 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
     textbook: orm.Mapped[Textbook] = orm.relationship(
         foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="extraction_batches"
     )
+    removed_from_textbook: orm.Mapped[bool]
 
     first_textbook_page_number: orm.Mapped[int]
 

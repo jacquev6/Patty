@@ -12,18 +12,16 @@ class Exercise(OrmBase):
     __tablename__ = "exercises"
     __mapper_args__ = {"polymorphic_on": "kind"}
 
-    def __init__(self, *, created: ExerciseCreation, location: ExerciseLocation, removed_from_textbook: bool) -> None:
+    def __init__(self, *, created: ExerciseCreation, location: ExerciseLocation) -> None:
         super().__init__()
         self.created = created
         self.location = location
-        self.removed_from_textbook = removed_from_textbook
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
     kind: orm.Mapped[str]
 
     created: orm.Mapped[ExerciseCreation] = orm.relationship(back_populates="exercise")
     location: orm.Mapped[ExerciseLocation] = orm.relationship(back_populates="exercise")
-    removed_from_textbook: orm.Mapped[bool]
 
 
 class ExerciseCreation(OrmBase):

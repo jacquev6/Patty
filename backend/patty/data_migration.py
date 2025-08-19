@@ -370,12 +370,12 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     textbook=textbook,
                     page_number=old_adaptable_exercise.page_number,
                     exercise_number=old_adaptable_exercise.exercise_number,
+                    removed_from_textbook=old_adaptable_exercise.removed_from_textbook,
                 )
 
             exercise = adaptation.AdaptableExercise(
                 created=exercise_created,
                 location=exercise_location,
-                removed_from_textbook=old_adaptable_exercise.removed_from_textbook,
                 full_text=old_adaptable_exercise.full_text,
                 instruction_hint_example_text=old_adaptable_exercise.instruction_hint_example_text,
                 statement_text=old_adaptable_exercise.statement_text,
@@ -576,10 +576,12 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
             row["exercise_number"] = exercise.location.exercise_number
             row["page_number"] = exercise.location.page_number
             row["textbook_id"] = None
+            row["removed_from_textbook"] = False
         elif isinstance(exercise.location, textbooks.ExerciseLocationTextbook):
             row["exercise_number"] = exercise.location.exercise_number
             row["page_number"] = exercise.location.page_number
             row["textbook_id"] = exercise.location.textbook.id
+            row["removed_from_textbook"] = exercise.location.removed_from_textbook
         else:
             assert False
         row.pop("full_text", None)
@@ -612,7 +614,6 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
         else:
             assert False
         row.pop("kind")
-        row.pop("removed_from_textbook")
         data["adaptable_exercises"].append(row)
 
     for external_exercise in session.execute(sql.select(external_exercises.ExternalExercise)).scalars():

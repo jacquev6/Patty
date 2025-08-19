@@ -1,8 +1,7 @@
 Textbook.fetch_ordered_exercises:
 ================================
 SELECT exercises.id,
-       exercises.kind,
-       exercises.removed_from_textbook
+       exercises.kind
 FROM exercises
 JOIN (exercise_locations
       JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercises.id = exercise_locations.id
@@ -15,7 +14,6 @@ PageExtraction.fetch_ordered_exercises (page and number):
 SELECT exercises__adaptable.id,
        exercises.id AS id_1,
        exercises.kind,
-       exercises.removed_from_textbook,
        exercises__adaptable.full_text,
        exercises__adaptable.instruction_hint_example_text,
        exercises__adaptable.statement_text
@@ -34,7 +32,6 @@ PageExtraction.fetch_ordered_exercises (textbook):
 SELECT exercises__adaptable.id,
        exercises.id AS id_1,
        exercises.kind,
-       exercises.removed_from_textbook,
        exercises__adaptable.full_text,
        exercises__adaptable.instruction_hint_example_text,
        exercises__adaptable.statement_text

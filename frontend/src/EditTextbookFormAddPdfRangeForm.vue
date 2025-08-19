@@ -63,7 +63,7 @@ async function submit() {
 
   assert(uploadedFileSha256.value !== null)
 
-  const response = await client.POST('/api/textbooks/{id}/range', {
+  const response = await client.POST('/api/textbooks/{id}/ranges', {
     params: { path: { id: props.textbookId } },
     body: {
       creator: identifiedUser.identifier,

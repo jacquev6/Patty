@@ -243,7 +243,6 @@ async def post_adaptation_batch(
             location=exercises.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
-            removed_from_textbook=False,
             full_text=req_input.text,
             instruction_hint_example_text=None,
             statement_text=None,
@@ -425,7 +424,6 @@ def create_classification_batch(
             location=exercises.ExerciseLocationMaybePageAndNumber(
                 page_number=req_input.page_number, exercise_number=req_input.exercise_number
             ),
-            removed_from_textbook=False,
             full_text=req_input.instruction_hint_example_text + "\n" + req_input.statement_text,
             instruction_hint_example_text=req_input.instruction_hint_example_text,
             statement_text=req_input.statement_text,
@@ -1088,6 +1086,7 @@ class ApiTextbook(ApiModel):
     external_exercises: list[ApiTextbookExternalExercise]
 
     class Range(ApiModel):
+        id: str
         pdf_file_names: list[str]
         pdf_file_sha256: str
         pdf_first_page_number: int
@@ -1101,15 +1100,18 @@ class ApiTextbook(ApiModel):
             in_progress: bool
 
             class Exercise(ApiModel):
+                id: str
                 exercise_number: str
                 full_text: str
                 exercise_class: str | None
                 exercise_class_has_settings: bool
                 adaptation: ApiAdaptation | None
+                removed_from_textbook: bool
 
             exercises: list[Exercise]
 
         pages: list[Page]
+        removed_from_textbook: bool
 
     ranges: list[Range]
 
@@ -1187,9 +1189,11 @@ def post_textbook_external_exercises(
     external_exercise = external_exercises.ExternalExercise(
         created=exercises.ExerciseCreationByUser(at=now, username=req.creator),
         location=textbooks.ExerciseLocationTextbook(
-            textbook=textbook, page_number=req.page_number, exercise_number=req.exercise_number
+            textbook=textbook,
+            page_number=req.page_number,
+            exercise_number=req.exercise_number,
+            removed_from_textbook=False,
         ),
-        removed_from_textbook=False,
         original_file_name=req.original_file_name,
     )
     session.add(external_exercise)
@@ -1202,15 +1206,15 @@ def post_textbook_external_exercises(
     )
 
 
-@api_router.put("/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed")
-def put_textbook_external_exercises_removed(
-    textbook_id: str, external_exercise_id: str, removed: bool, session: database_utils.SessionDependable
+@api_router.put("/textbooks/{textbook_id}/exercises/{exercise_id}/removed")
+def put_textbook_exercises_removed(
+    textbook_id: str, exercise_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> ApiTextbook:
     textbook = get_by_id(session, textbooks.Textbook, textbook_id)
-    external_exercise = get_by_id(session, external_exercises.ExternalExercise, external_exercise_id)
-    assert isinstance(external_exercise.location, textbooks.ExerciseLocationTextbook)
-    assert external_exercise.location.textbook == textbook
-    external_exercise.removed_from_textbook = removed
+    exercise = get_by_id(session, exercises.Exercise, exercise_id)
+    assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+    assert exercise.location.textbook == textbook
+    exercise.location.removed_from_textbook = removed
     return make_api_textbook(textbook)
 
 
@@ -1224,7 +1228,7 @@ class PostTextbookRangeRequest(ApiModel):
     model_for_adaptation: adaptation.llm.ConcreteModel
 
 
-@api_router.post("/textbooks/{id}/range", status_code=fastapi.status.HTTP_200_OK)
+@api_router.post("/textbooks/{id}/ranges", status_code=fastapi.status.HTTP_200_OK)
 async def post_textbook_range(
     id: str, req: PostTextbookRangeRequest, session: database_utils.SessionDependable
 ) -> None:
@@ -1257,6 +1261,7 @@ async def post_textbook_range(
         first_textbook_page_number=req.textbook_first_page_number,
         model_for_extraction=req.model_for_extraction,
         model_for_adaptation=req.model_for_adaptation,
+        removed_from_textbook=False,
     )
     session.add(extraction_batch)
 
@@ -1275,6 +1280,17 @@ async def post_textbook_range(
                 assistant_response=None,
             )
         )
+
+
+@api_router.put("/textbooks/{textbook_id}/ranges/{range_id}/removed")
+def put_textbook_ranges_removed(
+    textbook_id: str, range_id: str, removed: bool, session: database_utils.SessionDependable
+) -> ApiTextbook:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    batch = get_by_id(session, textbooks.ExtractionBatch, range_id)
+    assert batch.textbook == textbook
+    batch.removed_from_textbook = removed
+    return make_api_textbook(textbook)
 
 
 @api_router.get("/adaptations/{id}")
@@ -1422,7 +1438,8 @@ def make_api_adaptation(exercise_adaptation: adaptation.ExerciseAdaptation) -> A
         initial_assistant_response=exercise_adaptation.initial_assistant_response,
         adjustments=exercise_adaptation.adjustments,
         manual_edit=exercise_adaptation.manual_edit,
-        removed_from_textbook=exercise_adaptation.exercise.removed_from_textbook,
+        removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
+        and exercise_adaptation.exercise.location.removed_from_textbook,
     )
 
 
@@ -1478,30 +1495,33 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
             external_exercise = ApiTextbookExternalExercise(
                 kind="external",
                 id=str(exercise.id),
-                page_number=assert_isinstance(exercise.location, textbooks.ExerciseLocationTextbook).page_number,
-                exercise_number=assert_isinstance(
-                    exercise.location, textbooks.ExerciseLocationTextbook
-                ).exercise_number,
+                page_number=exercise.location.page_number,
+                exercise_number=exercise.location.exercise_number,
                 original_file_name=exercise.original_file_name,
-                removed_from_textbook=exercise.removed_from_textbook,
+                removed_from_textbook=exercise.location.removed_from_textbook,
             )
             external_exercises_.append(external_exercise)
-            if not exercise.removed_from_textbook:
+            if not exercise.location.removed_from_textbook:
                 page.exercises.append(external_exercise)
         elif isinstance(exercise, adaptation.AdaptableExercise):
-            if len(exercise.adaptations) > 0:
-                adaptable_exercise = ApiTextbookAdaptableExercise(
-                    kind="adaptable",
-                    page_number=assert_isinstance(exercise.location, textbooks.ExerciseLocationTextbook).page_number,
-                    exercise_number=assert_isinstance(
-                        exercise.location, textbooks.ExerciseLocationTextbook
-                    ).exercise_number,
-                    adaptation=make_api_adaptation(exercise.adaptations[-1]),
+            assert isinstance(exercise.created, extraction.ExerciseCreationByPageExtraction)
+            assert isinstance(exercise.created.page_extraction.created, textbooks.PageExtractionCreationByTextbook)
+            removed = (
+                exercise.location.removed_from_textbook
+                or exercise.created.page_extraction.created.extraction_batch.removed_from_textbook
+            )
+            if len(exercise.adaptations) > 0 and not removed:
+                page.exercises.append(
+                    ApiTextbookAdaptableExercise(
+                        kind="adaptable",
+                        page_number=exercise.location.page_number,
+                        exercise_number=exercise.location.exercise_number,
+                        adaptation=make_api_adaptation(exercise.adaptations[-1]),
+                    )
                 )
-                if not exercise.removed_from_textbook:
-                    page.exercises.append(adaptable_exercise)
         else:
             assert False
+    textbook_pages = list(filter(lambda page: len(page.exercises) > 0, textbook_pages))
 
     ranges: list[ApiTextbook.Range] = []
     for extraction_batch in textbook.extraction_batches:
@@ -1522,6 +1542,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                             exercise_number=assert_isinstance(
                                 exercise.location, textbooks.ExerciseLocationTextbook
                             ).exercise_number,
+                            id=str(exercise.id),
                             full_text=exercise.full_text,
                             exercise_class=(
                                 latest_classification.exercise_class.name
@@ -1539,6 +1560,9 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                                 if len(exercise.adaptations) == 0
                                 else make_api_adaptation(exercise.adaptations[-1])
                             ),
+                            removed_from_textbook=assert_isinstance(
+                                exercise.location, textbooks.ExerciseLocationTextbook
+                            ).removed_from_textbook,
                         )
                         for (exercise, latest_classification) in zip(page_exercises, latest_classifications)
                     ],
@@ -1547,6 +1571,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
 
         ranges.append(
             ApiTextbook.Range(
+                id=str(extraction_batch.id),
                 pdf_file_names=extraction_batch.pdf_file_range.pdf_file.known_file_names,
                 pdf_file_sha256=extraction_batch.pdf_file_range.pdf_file.sha256,
                 pdf_first_page_number=extraction_batch.pdf_file_range.first_page_number,
@@ -1555,6 +1580,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                 model_for_extraction=extraction_batch.model_for_extraction,
                 model_for_adaptation=extraction_batch.model_for_adaptation,
                 pages=range_pages,
+                removed_from_textbook=extraction_batch.removed_from_textbook,
             )
         )
 
@@ -1733,7 +1759,8 @@ def export_textbook(
 
     exercises: list[JsonDict] = []
     for exercise in textbook.fetch_ordered_exercises():
-        if not exercise.removed_from_textbook:
+        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+        if not exercise.location.removed_from_textbook:
             if isinstance(exercise, adaptation.AdaptableExercise):
                 if len(exercise.adaptations) != 0:
                     adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])

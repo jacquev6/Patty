@@ -1235,10 +1235,10 @@
         }
       }
     },
-    "/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
+    "/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed": {
       "put": {
-        "summary": "Put Textbook External Exercises Removed",
-        "operationId": "put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put",
+        "summary": "Put Textbook Exercises Removed",
+        "operationId": "put_textbook_exercises_removed_api_textbooks__textbook_id__exercises__exercise_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -1255,12 +1255,12 @@
             }
           },
           {
-            "name": "external_exercise_id",
+            "name": "exercise_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "External Exercise Id"
+              "title": "Exercise Id"
             }
           },
           {
@@ -1297,10 +1297,10 @@
         }
       }
     },
-    "/api/textbooks/{id}/range": {
+    "/api/textbooks/{id}/ranges": {
       "post": {
         "summary": "Post Textbook Range",
-        "operationId": "post_textbook_range_api_textbooks__id__range_post",
+        "operationId": "post_textbook_range_api_textbooks__id__ranges_post",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -1333,6 +1333,68 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/textbooks/{textbook_id}/ranges/{range_id}/removed": {
+      "put": {
+        "summary": "Put Textbook Ranges Removed",
+        "operationId": "put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          },
+          {
+            "name": "range_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Range Id"
+            }
+          },
+          {
+            "name": "removed",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Removed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
               }
             }
           },
@@ -4493,6 +4555,10 @@
       },
       "Range": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "pdfFileNames": {
             "items": {
               "type": "string"
@@ -4547,11 +4613,16 @@
             },
             "type": "array",
             "title": "Pages"
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "pdfFileNames",
           "pdfFileSha256",
           "pdfFirstPageNumber",
@@ -4559,7 +4630,8 @@
           "pagesCount",
           "modelForExtraction",
           "modelForAdaptation",
-          "pages"
+          "pages",
+          "removedFromTextbook"
         ],
         "title": "Range"
       },
@@ -5092,6 +5164,10 @@
       },
       "patty__api_router__ApiTextbook__Range__Page__Exercise": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "exerciseNumber": {
             "type": "string",
             "title": "Exercisenumber"
@@ -5124,16 +5200,22 @@
                 "type": "null"
               }
             ]
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
           "exerciseClassHasSettings",
-          "adaptation"
+          "adaptation",
+          "removedFromTextbook"
         ],
         "title": "Exercise"
       },

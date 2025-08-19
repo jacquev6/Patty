@@ -17,6 +17,10 @@ const props = defineProps<{
   exercise: Exercise
 }>()
 
+const emit = defineEmits<{
+  (e: 'exercise-removed'): void
+}>()
+
 const { t } = useI18n()
 
 const adaptation = computed(() => {
@@ -46,7 +50,10 @@ watch(Escape, () => {
             <WhiteSpace />
             <span class="inProgress">{{ t('inProgress') }}</span>
           </template>
-          <template v-else>: {{ exercise.exerciseClass }} </template>
+          <template v-else
+            >: {{ exercise.exerciseClass }}
+            <button @click="emit('exercise-removed')">{{ t('remove') }}</button></template
+          >
         </h5>
         <p>
           <template v-for="(line, index) in exercise.fullText.split('\n')">
@@ -126,6 +133,7 @@ en:
   llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
   llmNotJson: The LLM returned a response that is not correct JSON.
   llmUnknownError: The LLM caused an unknown error.
+  remove: Remove
 fr:
   inProgress: "en cours, se mettra à jour quand terminé"
   fullScreen: Plein écran
@@ -137,4 +145,5 @@ fr:
   llmInvalidJson: Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'exercice adapté.
   llmNotJson: Le LLM a renvoyé une réponse qui n'est pas un JSON correct.
   llmUnknownError: Le LLM a causé une erreur inconnue.
+  remove: Enlever
 </i18n>

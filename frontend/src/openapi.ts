@@ -417,7 +417,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed': {
+  '/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed': {
     parameters: {
       query?: never
       header?: never
@@ -425,8 +425,8 @@ export interface paths {
       cookie?: never
     }
     get?: never
-    /** Put Textbook External Exercises Removed */
-    put: operations['put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put']
+    /** Put Textbook Exercises Removed */
+    put: operations['put_textbook_exercises_removed_api_textbooks__textbook_id__exercises__exercise_id__removed_put']
     post?: never
     delete?: never
     options?: never
@@ -434,7 +434,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/textbooks/{id}/range': {
+  '/api/textbooks/{id}/ranges': {
     parameters: {
       query?: never
       header?: never
@@ -444,7 +444,24 @@ export interface paths {
     get?: never
     put?: never
     /** Post Textbook Range */
-    post: operations['post_textbook_range_api_textbooks__id__range_post']
+    post: operations['post_textbook_range_api_textbooks__id__ranges_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/textbooks/{textbook_id}/ranges/{range_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Ranges Removed */
+    put: operations['put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put']
+    post?: never
     delete?: never
     options?: never
     head?: never
@@ -1648,6 +1665,8 @@ export interface components {
     }
     /** Range */
     Range: {
+      /** Id */
+      id: string
       /** Pdffilenames */
       pdfFileNames: string[]
       /** Pdffilesha256 */
@@ -1667,6 +1686,8 @@ export interface components {
         | components['schemas']['OpenAiModel']
       /** Pages */
       pages: components['schemas']['patty__api_router__ApiTextbook__Range__Page'][]
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
     }
     /** ReferenceComponents */
     ReferenceComponents: {
@@ -1888,6 +1909,8 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__ApiTextbook__Range__Page__Exercise: {
+      /** Id */
+      id: string
       /** Exercisenumber */
       exerciseNumber: string
       /** Fulltext */
@@ -1897,6 +1920,8 @@ export interface components {
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
     }
     /** Exercise */
     patty__api_router__GetClassificationBatchResponse__Exercise: {
@@ -2852,7 +2877,7 @@ export interface operations {
       }
     }
   }
-  put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put: {
+  put_textbook_exercises_removed_api_textbooks__textbook_id__exercises__exercise_id__removed_put: {
     parameters: {
       query: {
         removed: boolean
@@ -2860,7 +2885,7 @@ export interface operations {
       header?: never
       path: {
         textbook_id: string
-        external_exercise_id: string
+        exercise_id: string
       }
       cookie?: never
     }
@@ -2886,7 +2911,7 @@ export interface operations {
       }
     }
   }
-  post_textbook_range_api_textbooks__id__range_post: {
+  post_textbook_range_api_textbooks__id__ranges_post: {
     parameters: {
       query?: never
       header?: never
@@ -2908,6 +2933,40 @@ export interface operations {
         }
         content: {
           'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        range_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ApiTextbook']
         }
       }
       /** @description Validation Error */

@@ -11,15 +11,8 @@ class ExternalExercise(Exercise):
     __tablename__ = "exercises__external"
     __mapper_args__ = {"polymorphic_identity": "external"}
 
-    def __init__(
-        self,
-        *,
-        created: ExerciseCreation,
-        location: ExerciseLocation,
-        removed_from_textbook: bool,
-        original_file_name: str,
-    ) -> None:
-        super().__init__(created=created, location=location, removed_from_textbook=removed_from_textbook)
+    def __init__(self, *, created: ExerciseCreation, location: ExerciseLocation, original_file_name: str) -> None:
+        super().__init__(created=created, location=location)
         self.original_file_name = original_file_name
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Exercise.id), primary_key=True)
