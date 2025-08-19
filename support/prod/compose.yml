@@ -28,8 +28,8 @@ services:
       - backend/env
       - backend/secrets.env
     depends_on:
-      db:
-        condition: service_healthy
+      data-loader:
+        condition: service_completed_successfully
 
   submission-daemon:
     image: jacquev6/patty:preview-backend
@@ -42,8 +42,8 @@ services:
     init: true
     command: ["python", "-m", "patty", "run-submission-daemon"]
     depends_on:
-      db:
-        condition: service_healthy
+      data-loader:
+        condition: service_completed_successfully
 
   frontend:
     image: jacquev6/patty:preview-frontend
@@ -53,27 +53,30 @@ services:
   # Preview-only services
   #######################
 
-  migrator:
-    image: jacquev6/patty:preview-backend
-    pull_policy: never
-    working_dir: /app/patty
-    env_file:
-      - backend/env
-      - backend/secrets.env
-    command: ["alembic", "upgrade", "head"]
-    depends_on:
-      db:
-        condition: service_healthy
   data-loader:
     image: jacquev6/patty:preview-backend
     pull_policy: never
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["python", "-m", "patty", "load-fixtures", "--truncate", "seed-data"]
+    command: ["bash", "-c", "python -m patty restore-database --patch-according-to-settings --yes && (cd patty; alembic upgrade head) && python -m patty migrate-data"]
     depends_on:
-      migrator:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+  tester:
+    build:
+      context: ../..
+      dockerfile: support/prod/tester/Dockerfile
+    image: jacquev6/patty:preview-tester
+    pull_policy: never
+    volumes:
+      - ../../frontend:/app/frontend
+    working_dir: /app/frontend
+    init: true
+    command: ["npx", "cypress", "run", "--e2e", "--config", "baseUrl=http://fanout:8090/", "--spec", "e2e-tests/prod-preview.cy.ts"]
+    depends_on:
+      fanout:
+        condition: service_started
   db-backup:
     image: jacquev6/patty:preview-backend
     pull_policy: never
