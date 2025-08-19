@@ -1100,7 +1100,9 @@ class ApiTextbook(ApiModel):
 
             class Exercise(ApiModel):
                 exercise_number: str
+                full_text: str
                 exercise_class: str | None
+                exercise_class_has_settings: bool
                 adaptation: ApiAdaptation | None
 
             exercises: list[Exercise]
@@ -1510,11 +1512,17 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                             exercise_number=assert_isinstance(
                                 exercise.location, textbooks.ExerciseLocationTextbook
                             ).exercise_number,
+                            full_text=exercise.full_text,
                             exercise_class=(
                                 latest_classification.exercise_class.name
                                 if latest_classification is not None
                                 and latest_classification.exercise_class is not None
                                 else None
+                            ),
+                            exercise_class_has_settings=(
+                                latest_classification is not None
+                                and latest_classification.exercise_class is not None
+                                and latest_classification.exercise_class.latest_strategy_settings is not None
                             ),
                             adaptation=(
                                 None

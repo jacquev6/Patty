@@ -11,9 +11,8 @@ import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreate
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
 import IdentifiedUser from './IdentifiedUser.vue'
 import LlmModelSelector from './LlmModelSelector.vue'
-import BusyBox from './BusyBox.vue'
 import WhiteSpace from './WhiteSpace.vue'
-import { preprocess as preprocessAdaptation } from './adaptations'
+import EditTextbookFormExercisePreview from './EditTextbookFormExercisePreview.vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -99,19 +98,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
           >
         </h4>
         <template v-for="exercise in page.exercises">
-          <h5>
-            Exercise {{ exercise.exerciseNumber
-            }}<template v-if="exercise.exerciseClass === null"
-              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
-            >
-          </h5>
-          <template v-if="exercise.exerciseClass !== null">
-            <p v-if="exercise.adaptation === null">Adaptation cancelled</p>
-            <BusyBox :busy="true" v-else-if="preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress'"
-              >Adaptation in progress...</BusyBox
-            >
-            <p v-else>Adaptation done</p>
-          </template>
+          <EditTextbookFormExercisePreview :exercise />
         </template>
       </template>
     </template>

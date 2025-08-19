@@ -1886,8 +1886,12 @@ export interface components {
     patty__api_router__ApiTextbook__Range__Page__Exercise: {
       /** Exercisenumber */
       exerciseNumber: string
+      /** Fulltext */
+      fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null
     }
     /** Exercise */
