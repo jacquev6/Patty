@@ -24,6 +24,7 @@ def migrate(session: database_utils.Session) -> None:
     expected_data = gather_expected_data(session)
     reset_auto_increments(session)
     do_migrate_data(session)
+    fix_failed_adaptations(session)
     fix_auto_increments(session)
     actual_data = gather_actual_data(session)
 
@@ -502,6 +503,19 @@ def do_migrate_data(session: database_utils.Session) -> None:
             )
 
     session.flush()
+
+
+def fix_failed_adaptations(session: database_utils.Session) -> None:
+    # Store a JSON null (as in old data) to avoid being retried by the submission daemon
+    for adaptation_ in session.execute(
+        sql.select(adaptation.ExerciseAdaptation).where(
+            adaptation.ExerciseAdaptation._initial_assistant_response == sql.null()
+        )
+    ).scalars():
+        adaptation_._initial_assistant_response = {}
+        session.flush()
+        adaptation_._initial_assistant_response = None
+        session.flush()
 
 
 def fix_auto_increments(session: database_utils.Session) -> None:
