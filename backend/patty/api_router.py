@@ -91,6 +91,8 @@ class ApiAdaptation(ApiModel):
     extraction_batch_id: str | None
     classification_batch_id: str | None
     adaptation_batch_id: str | None
+    textbook_id: str | None
+    textbook_title: str | None
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -1379,6 +1381,12 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.ExerciseAdaptation) -> ApiAdaptation:
+    textbook = (
+        exercise_adaptation.exercise.location.textbook
+        if isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
+        else None
+    )
+
     return ApiAdaptation(
         id=str(exercise_adaptation.id),
         extraction_batch_id=(
@@ -1406,6 +1414,8 @@ def make_api_adaptation(exercise_adaptation: adaptation.ExerciseAdaptation) -> A
             )
             else None
         ),
+        textbook_id=None if textbook is None else str(textbook.id),
+        textbook_title=None if textbook is None else textbook.title,
         strategy=make_api_strategy(exercise_adaptation.settings, exercise_adaptation.model),
         input=make_api_input(exercise_adaptation.exercise),
         raw_llm_conversations=exercise_adaptation.raw_llm_conversations,

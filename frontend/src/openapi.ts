@@ -675,6 +675,10 @@ export interface components {
       classificationBatchId: string | null
       /** Adaptationbatchid */
       adaptationBatchId: string | null
+      /** Textbookid */
+      textbookId: string | null
+      /** Textbooktitle */
+      textbookTitle: string | null
       strategy: components['schemas']['ApiStrategy-Output']
       input: components['schemas']['ApiInput']
       /** Rawllmconversations */

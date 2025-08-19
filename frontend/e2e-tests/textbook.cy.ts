@@ -84,6 +84,10 @@ describe('The edition form for textbooks', () => {
     cy.get('div.busy').should('not.exist')
 
     screenshots('textbook-with-pdf-ranges')
+
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('h1:contains("Strategy")').should('exist')
+    cy.get('a:contains("Dummy Textbook Title")').should('exist').should('have.attr', 'href', '/textbook-1')
   })
 
   it('adds and removes external exercises', () => {
