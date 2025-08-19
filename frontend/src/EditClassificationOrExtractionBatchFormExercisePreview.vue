@@ -180,7 +180,7 @@ async function submitAdaptationsWithRecentSettings() {
               :adaptedExercise="adaptation.status.adaptedExercise"
             />
             <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
-              {{ t('existFullScreen') }}
+              {{ t('exitFullScreen') }}
             </button>
           </MiniatureScreen>
         </template>
