@@ -1,8 +1,11 @@
-import { ignoreResizeObserverLoopError, visit } from './utils'
+import { ignoreResizeObserverLoopError, loadFixtures, visit } from './utils'
 
 describe('Patty', () => {
   beforeEach(() => {
     ignoreResizeObserverLoopError()
+    if (Cypress.env('PATTY_UNIT_TESTING')) {
+      loadFixtures(['seed-data'])
+    }
     cy.viewport(1600, 800)
     visit('/')
     cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })

@@ -264,7 +264,7 @@ def tests() -> None:
 def gui() -> None:
     """Run the GUI for tests."""
 
-    env = {"PATTY_UNIT_TESTING": "true"}
+    env = {"CYPRESS_PATTY_UNIT_TESTING": "true"}
 
     if os.environ.get("DISPLAY") is None:
         env["DISPLAY"] = "host.docker.internal:0"

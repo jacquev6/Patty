@@ -137,7 +137,7 @@ class DevelopmentCycle:
                                     "--spec",
                                     spec[9:],
                                 ],
-                                env={"PATTY_UNIT_TESTING": "true"},
+                                env={"CYPRESS_PATTY_UNIT_TESTING": "true"},
                                 check=False,
                                 capture=True,
                                 mount=mounts,
@@ -180,6 +180,7 @@ class DevelopmentCycle:
 
                             result = run_in_frontend_container(
                                 command=["npx", "cypress", "run", "--e2e", "--browser", browser, "--spec", spec[9:]],
+                                env={"CYPRESS_PATTY_UNIT_TESTING": "true"},
                                 check=False,
                                 capture=True,
                                 mount=mounts,
