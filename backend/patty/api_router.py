@@ -1101,9 +1101,11 @@ class ApiTextbook(ApiModel):
 
             class Exercise(ApiModel):
                 id: str
+                page_number: int
                 exercise_number: str
                 full_text: str
                 exercise_class: str | None
+                reclassified_by: None
                 exercise_class_has_settings: bool
                 adaptation: ApiAdaptation | None
                 removed_from_textbook: bool
@@ -1539,10 +1541,13 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                     in_progress=page_extraction_creation.page_extraction.assistant_response is None,
                     exercises=[
                         ApiTextbook.Range.Page.Exercise(
+                            id=str(exercise.id),
+                            page_number=assert_isinstance(
+                                exercise.location, textbooks.ExerciseLocationTextbook
+                            ).page_number,
                             exercise_number=assert_isinstance(
                                 exercise.location, textbooks.ExerciseLocationTextbook
                             ).exercise_number,
-                            id=str(exercise.id),
                             full_text=exercise.full_text,
                             exercise_class=(
                                 latest_classification.exercise_class.name
@@ -1550,6 +1555,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
                                 and latest_classification.exercise_class is not None
                                 else None
                             ),
+                            reclassified_by=None,
                             exercise_class_has_settings=(
                                 latest_classification is not None
                                 and latest_classification.exercise_class is not None

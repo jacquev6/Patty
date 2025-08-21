@@ -79,7 +79,7 @@ describe('The extraction batch creation page', () => {
 
     cy.visit('/extraction-batch-1')
     cy.get(
-      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this exercise was created.")',
     ).should('exist')
     cy.get('button:contains("Submit all adaptations in the same case")').first().click()
     cy.get('div.busy').should('have.length', 2)

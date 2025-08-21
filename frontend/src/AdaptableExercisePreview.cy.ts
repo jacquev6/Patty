@@ -3,7 +3,6 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 
 import AdaptableExercisePreview, {
-  type PreviewableExercise,
   makePreviewAbleExercise_forAdaptation,
   makePreviewAbleExercise_forClassificationOrExtraction,
   makePreviewAbleExercise_forTextbook,
@@ -15,7 +14,7 @@ import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 
 const exercises = {
   'adaptation - in progress': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -24,7 +23,7 @@ const exercises = {
     status: { kind: 'inProgress' },
   }),
   'adaptation - LLM error - invalid json': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -33,7 +32,7 @@ const exercises = {
     status: { kind: 'error', error: 'invalid-json', parsed: [] },
   }),
   'adaptation - LLM error - not json': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -42,7 +41,7 @@ const exercises = {
     status: { kind: 'error', error: 'not-json', text: 'blah' },
   }),
   'adaptation - LLM error - unknown': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -51,7 +50,7 @@ const exercises = {
     status: { kind: 'error', error: 'unknown' },
   }),
   'adaptation - LLM error - unexpected': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -60,7 +59,7 @@ const exercises = {
     status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
   }),
   'adaptation - unexpected status': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -69,7 +68,7 @@ const exercises = {
     status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
   }),
   'adaptation - success': makePreviewAbleExercise_forAdaptation(42, {
-    id: 'ff',
+    id: 'ad-id',
     input: {
       pageNumber: 37,
       exerciseNumber: '24',
@@ -100,7 +99,7 @@ const exercises = {
     'header text',
     false,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -116,7 +115,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -132,7 +131,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -148,7 +147,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -164,7 +163,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -180,7 +179,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -196,7 +195,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -212,7 +211,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -228,7 +227,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -244,7 +243,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -254,7 +253,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'inProgress' },
     },
     Promise.resolve,
@@ -263,7 +262,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -273,7 +272,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'error', error: 'not-json', text: 'blah' },
     },
     Promise.resolve,
@@ -282,7 +281,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -292,7 +291,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'error', error: 'invalid-json', parsed: [] },
     },
     Promise.resolve,
@@ -301,7 +300,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -311,7 +310,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'error', error: 'unknown' },
     },
     Promise.resolve,
@@ -320,7 +319,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -330,7 +329,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
     },
     Promise.resolve,
@@ -339,7 +338,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -349,7 +348,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: {
         kind: 'success',
         success: 'llm',
@@ -377,7 +376,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -387,7 +386,7 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: {
         kind: 'success',
         success: 'llm',
@@ -415,7 +414,7 @@ const exercises = {
     'header text',
     true,
     {
-      id: 'id',
+      id: 'ex-id',
       pageNumber: 37,
       exerciseNumber: '24',
       fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
@@ -425,116 +424,146 @@ const exercises = {
     },
     true,
     {
-      id: 'ad',
+      id: 'ad-id',
       status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
     },
     Promise.resolve,
   ),
   'textbook - classification in progress - 1': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: null,
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     null,
   ),
   'textbook - classification in progress - 2': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: null,
+      reclassifiedBy: null,
       exerciseClassHasSettings: false,
     },
     null,
   ),
   'textbook - class has no settings': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: false,
     },
     null,
   ),
   'textbook - class had no settings': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     null,
   ),
   'textbook - adaptation in progress': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'inProgress' },
     },
   ),
   'textbook - adaptation with LLM error - not json': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'error', error: 'not-json', text: 'blah' },
     },
   ),
   'textbook - adaptation with LLM error - invalid json': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'error', error: 'invalid-json', parsed: [] },
     },
   ),
   'textbook - adaptation with LLM error - unknown': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'error', error: 'unknown' },
     },
   ),
   'textbook - adaptation with LLM error - unexpected': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
     },
   ),
   'textbook - adaptation success': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: {
         kind: 'success',
         success: 'llm',
@@ -559,17 +588,19 @@ const exercises = {
   ),
   'textbook - unexpected adaptation status': makePreviewAbleExercise_forTextbook(
     {
+      id: 'ex-id',
+      pageNumber: 37,
       exerciseNumber: '32',
       fullText: 'This is the full text of the exercise. It has multiple lines.',
       exerciseClass: 'Blah',
+      reclassifiedBy: null,
       exerciseClassHasSettings: true,
     },
     {
-      id: 'ee',
+      id: 'ad-id',
       status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
     },
   ),
-  'unexpected previewable exercise kind': { kind: 'not-a-kind' } as unknown as PreviewableExercise,
 }
 
 describe('AdaptableExercisePreview', () => {

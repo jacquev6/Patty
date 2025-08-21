@@ -156,7 +156,7 @@ describe('The classification batch creation page', () => {
 
     cy.visit('/classification-batch-1')
     cy.get(
-      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this exercise was created.")',
     ).should('exist')
     cy.get('button:contains("Submit all adaptations in the same case")').click()
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')

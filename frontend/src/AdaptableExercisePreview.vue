@@ -1,55 +1,58 @@
 <script lang="ts">
 import { type PreprocessedAdaptation } from './adaptations'
 
+type Exercise = {
+  id: string
+  pageNumber: number | null
+  exerciseNumber: string | null
+  fullText: string
+  exerciseClass: string | null
+  reclassifiedBy: string | null
+  exerciseClassHasSettings: boolean
+}
+
+type Adaptation = {
+  id: string
+  input: PreprocessedAdaptation['input']
+  status: PreprocessedAdaptation['status']
+}
+
 export type PreviewableExercise =
   | {
       kind: 'adaptation'
       index: number
-      adaptation: {
-        id: string
-        input: PreprocessedAdaptation['input']
-        status: PreprocessedAdaptation['status']
-      }
+      headerText: null
+      classificationWasRequested: false
+      exercise: null
+      adaptationWasRequested: true
+      adaptation: Adaptation
+      submitAdaptationsWithRecentSettings: null
     }
   | {
       kind: 'classificationOrExtraction'
+      index: null
       headerText: string
       classificationWasRequested: boolean
-      exercise: {
-        id: string
-        pageNumber: number | null
-        exerciseNumber: string | null
-        fullText: string
-        exerciseClass: string | null
-        reclassifiedBy: string | null
-        exerciseClassHasSettings: boolean
-      }
+      exercise: Exercise
       adaptationWasRequested: boolean
-      adaptation: {
-        id: string
-        status: PreprocessedAdaptation['status']
-      } | null
+      adaptation: Adaptation | null
       submitAdaptationsWithRecentSettings: () => Promise<void>
     }
   | {
       kind: 'textbook'
-      adaptation: {
-        id: string
-        status: PreprocessedAdaptation['status']
-      } | null
-      exercise: {
-        exerciseNumber: string
-        fullText: string
-        exerciseClass: string | null
-        exerciseClassHasSettings: boolean
-      }
+      index: null
+      headerText: null
+      classificationWasRequested: true
+      exercise: Exercise
+      adaptationWasRequested: true
+      adaptation: Adaptation | null
+      submitAdaptationsWithRecentSettings: null
     }
 
 export function makePreviewAbleExercise_forAdaptation(
   index: number,
   adaptation: {
     id: string
-
     input: PreprocessedAdaptation['input']
     status: PreprocessedAdaptation['status']
   },
@@ -57,14 +60,18 @@ export function makePreviewAbleExercise_forAdaptation(
   return {
     kind: 'adaptation',
     index,
+    headerText: null,
+    classificationWasRequested: false,
+    exercise: null,
+    adaptationWasRequested: true,
     adaptation,
+    submitAdaptationsWithRecentSettings: null,
   }
 }
 
 export function makePreviewAbleExercise_forClassificationOrExtraction(
   headerText: string,
   classificationWasRequested: boolean,
-
   exercise: {
     id: string
     pageNumber: number | null
@@ -82,21 +89,35 @@ export function makePreviewAbleExercise_forClassificationOrExtraction(
   submitAdaptationsWithRecentSettings: () => Promise<void>,
 ): PreviewableExercise {
   return {
+    kind: 'classificationOrExtraction',
+    index: null,
     headerText,
     classificationWasRequested,
-    kind: 'classificationOrExtraction',
-    adaptationWasRequested,
-    adaptation,
     exercise,
+    adaptationWasRequested,
+    adaptation:
+      adaptation === null
+        ? null
+        : {
+            ...adaptation,
+            input: {
+              pageNumber: exercise.pageNumber,
+              exerciseNumber: exercise.exerciseNumber,
+              text: exercise.fullText.split('\n'),
+            },
+          },
     submitAdaptationsWithRecentSettings,
   }
 }
 
 export function makePreviewAbleExercise_forTextbook(
   exercise: {
-    exerciseNumber: string
+    id: string
+    pageNumber: number | null
+    exerciseNumber: string | null
     fullText: string
     exerciseClass: string | null
+    reclassifiedBy: string | null
     exerciseClassHasSettings: boolean
   },
   adaptation: {
@@ -106,8 +127,23 @@ export function makePreviewAbleExercise_forTextbook(
 ): PreviewableExercise {
   return {
     kind: 'textbook',
-    adaptation,
+    index: null,
+    headerText: null,
+    classificationWasRequested: true,
     exercise,
+    adaptationWasRequested: true,
+    adaptation:
+      adaptation === null
+        ? null
+        : {
+            ...adaptation,
+            input: {
+              pageNumber: exercise.pageNumber,
+              exerciseNumber: exercise.exerciseNumber,
+              text: exercise.fullText.split('\n'),
+            },
+          },
+    submitAdaptationsWithRecentSettings: null,
   }
 }
 </script>

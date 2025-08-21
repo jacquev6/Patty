@@ -7,6 +7,7 @@ import WhiteSpace from './WhiteSpace.vue'
 import { useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 import ClassEditor from './EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
+import BugMarker from './BugMarker.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
@@ -156,6 +157,7 @@ const exerciseClassProxy = computed({
       </p>
     </template>
   </template>
+  <BugMarker v-else :is="header" m="unexpected previewable exercise kind" :v="exercise" />
 </template>
 
 <style scoped>

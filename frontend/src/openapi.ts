@@ -1911,12 +1911,16 @@ export interface components {
     patty__api_router__ApiTextbook__Range__Page__Exercise: {
       /** Id */
       id: string
+      /** Pagenumber */
+      pageNumber: number
       /** Exercisenumber */
       exerciseNumber: string
       /** Fulltext */
       fullText: string
       /** Exerciseclass */
       exerciseClass: string | null
+      /** Reclassifiedby */
+      reclassifiedBy: null
       /** Exerciseclasshassettings */
       exerciseClassHasSettings: boolean
       adaptation: components['schemas']['ApiAdaptation'] | null

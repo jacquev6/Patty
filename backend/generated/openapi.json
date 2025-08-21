@@ -5168,6 +5168,10 @@
             "type": "string",
             "title": "Id"
           },
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
           "exerciseNumber": {
             "type": "string",
             "title": "Exercisenumber"
@@ -5186,6 +5190,10 @@
               }
             ],
             "title": "Exerciseclass"
+          },
+          "reclassifiedBy": {
+            "type": "null",
+            "title": "Reclassifiedby"
           },
           "exerciseClassHasSettings": {
             "type": "boolean",
@@ -5210,9 +5218,11 @@
         "type": "object",
         "required": [
           "id",
+          "pageNumber",
           "exerciseNumber",
           "fullText",
           "exerciseClass",
+          "reclassifiedBy",
           "exerciseClassHasSettings",
           "adaptation",
           "removedFromTextbook"
