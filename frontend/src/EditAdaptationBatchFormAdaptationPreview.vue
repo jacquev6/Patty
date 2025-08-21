@@ -6,15 +6,15 @@ defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   index: number
   adaptation: PreprocessedAdaptation
+  headerText: string | null
+  showPageAndExercise: boolean
 }>()
 </script>
 
 <template>
   <AdaptableExercisePreview
     :headerLevel
-    :showPageAndExercise="false"
-    :exercise="makePreviewAbleExercise_forAdaptation(index, adaptation)"
-  >
-    <slot></slot>
-  </AdaptableExercisePreview>
+    :showPageAndExercise
+    :exercise="makePreviewAbleExercise_forAdaptation(index, adaptation, headerText)"
+  />
 </template>

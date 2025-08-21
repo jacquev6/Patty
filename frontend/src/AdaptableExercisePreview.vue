@@ -21,7 +21,7 @@ export type PreviewableExercise =
   | {
       kind: 'adaptation'
       index: number
-      headerText: null
+      headerText: string | null
       classificationWasRequested: false
       exercise: null
       adaptationWasRequested: true
@@ -56,11 +56,12 @@ export function makePreviewAbleExercise_forAdaptation(
     input: PreprocessedAdaptation['input']
     status: PreprocessedAdaptation['status']
   },
+  headerText: string | null,
 ): PreviewableExercise {
   return {
     kind: 'adaptation',
     index,
-    headerText: null,
+    headerText,
     classificationWasRequested: false,
     exercise: null,
     adaptationWasRequested: true,
@@ -180,9 +181,7 @@ const rightColumn = useTemplateRef('rightColumn')
           :showPageAndExercise
           @exerciseRemoved="emit('exercise-removed')"
           @batchUpdated="emit('batch-updated')"
-        >
-          <slot v-if="$slots.default"></slot>
-        </AdaptableExercisePreview_LeftColumn>
+        />
       </template>
       <template #col-2>
         <AdaptableExercisePreview_RightColumn ref="rightColumn" :headerLevel :exercise />

@@ -69,52 +69,53 @@ const exerciseNumber = computed(() => {
 </script>
 
 <template>
-  <slot>
-    <component :is="header" style="margin-top: 0">
-      <template v-if="exercise.kind === 'adaptation'">
-        Input {{ exercise.index + 1 }}
-        <template v-if="exercise.adaptation.status.kind === 'inProgress'">
+  <component :is="header" style="margin-top: 0">
+    <template v-if="exercise.kind === 'adaptation'">
+      <template v-if="exercise.headerText !== null">
+        {{ exercise.headerText }}
+      </template>
+      <template v-else> Input {{ exercise.index + 1 }} </template>
+      <template v-if="exercise.adaptation.status.kind === 'inProgress'">
+        <WhiteSpace />
+        <span class="inProgress">({{ t('inProgress') }})</span>
+      </template>
+    </template>
+    <template v-else-if="exercise.kind === 'classificationOrExtraction'">
+      {{ exercise.headerText
+      }}<template v-if="exercise.classificationWasRequested">
+        <template v-if="exercise.exercise.exerciseClass === null">
           <WhiteSpace />
           <span class="inProgress">({{ t('inProgress') }})</span>
         </template>
-      </template>
-      <template v-else-if="exercise.kind === 'classificationOrExtraction'">
-        {{ exercise.headerText
-        }}<template v-if="exercise.classificationWasRequested">
-          <template v-if="exercise.exercise.exerciseClass === null">
-            <WhiteSpace />
-            <span class="inProgress">({{ t('inProgress') }})</span>
-          </template>
-          <template v-else-if="editingClassification">: <ClassEditor v-model="exerciseClassProxy" /> </template>
-          <template v-else
-            >: {{ exercise.exercise.exerciseClass }}
-            <template v-if="exercise.exercise.reclassifiedBy === null">
-              <span class="discrete">
-                ({{ t('classifiedByModel') }} <span class="edit" @click="editingClassification = true">🖊️</span>)
-              </span>
-            </template>
-            <template v-else>
-              <span class="discrete">
-                ({{ t('fixedBy') }} {{ exercise.exercise.reclassifiedBy }}
-                <span class="edit" @click="editingClassification = true">🖊️</span>)
-              </span>
-            </template>
-          </template>
-        </template>
-      </template>
-      <template v-else-if="exercise.kind === 'textbook'">
-        Exercise {{ exercise.exercise.exerciseNumber
-        }}<template v-if="exercise.exercise.exerciseClass === null">
-          <WhiteSpace />
-          <span class="inProgress">{{ t('inProgress') }}</span>
-        </template>
+        <template v-else-if="editingClassification">: <ClassEditor v-model="exerciseClassProxy" /> </template>
         <template v-else
           >: {{ exercise.exercise.exerciseClass }}
-          <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
+          <template v-if="exercise.exercise.reclassifiedBy === null">
+            <span class="discrete">
+              ({{ t('classifiedByModel') }} <span class="edit" @click="editingClassification = true">🖊️</span>)
+            </span>
+          </template>
+          <template v-else>
+            <span class="discrete">
+              ({{ t('fixedBy') }} {{ exercise.exercise.reclassifiedBy }}
+              <span class="edit" @click="editingClassification = true">🖊️</span>)
+            </span>
+          </template>
         </template>
       </template>
-    </component>
-  </slot>
+    </template>
+    <template v-else-if="exercise.kind === 'textbook'">
+      Exercise {{ exercise.exercise.exerciseNumber
+      }}<template v-if="exercise.exercise.exerciseClass === null">
+        <WhiteSpace />
+        <span class="inProgress">{{ t('inProgress') }}</span>
+      </template>
+      <template v-else
+        >: {{ exercise.exercise.exerciseClass }}
+        <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
+      </template>
+    </template>
+  </component>
 
   <p v-if="showPageAndExercise">
     {{ t('pageAndExercise', { pageNumber: pageNumber ?? 'N/A', exerciseNumber: exerciseNumber ?? 'N/A' }) }}

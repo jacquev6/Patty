@@ -44,7 +44,14 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
         >
       </p>
       <h1>Inputs</h1>
-      <AdaptationPreview v-for="(adaptation, index) in adaptations" :headerLevel="2" :index :adaptation />
+      <AdaptationPreview
+        v-for="(adaptation, index) in adaptations"
+        :headerLevel="2"
+        :index
+        :adaptation
+        :headerText="null"
+        :showPageAndExercise="true"
+      />
     </template>
   </ResizableColumns>
 </template>
