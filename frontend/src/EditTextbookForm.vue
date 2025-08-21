@@ -149,7 +149,7 @@ async function removeRange(id: string, removed: boolean) {
       <h2>{{ t('page') }} {{ page.number }}</h2>
       <template v-for="exercise in page.exercises">
         <template v-if="exercise.kind === 'adaptable'">
-          <AdaptationPreview header="h3" :index="0" :adaptation="preprocess(exercise.adaptation)">
+          <AdaptationPreview :headerLevel="3" :index="0" :adaptation="preprocess(exercise.adaptation)">
             <h3 style="margin-top: 0">{{ t('exercise') }} {{ exercise.exerciseNumber }}</h3>
           </AdaptationPreview>
         </template>
