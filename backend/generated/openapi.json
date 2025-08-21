@@ -7,8 +7,8 @@
   "paths": {
     "/api/errors-caught-by-frontend": {
       "get": {
-        "summary": "Get Errors Caught By Frontend",
-        "operationId": "get_errors_caught_by_frontend_api_errors_caught_by_frontend_get",
+        "summary": "Retrieve Errors",
+        "operationId": "retrieve_errors_api_errors_caught_by_frontend_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -28,8 +28,8 @@
         ]
       },
       "post": {
-        "summary": "Post Errors Caught By Frontend",
-        "operationId": "post_errors_caught_by_frontend_api_errors_caught_by_frontend_post",
+        "summary": "Create Error",
+        "operationId": "create_error_api_errors_caught_by_frontend_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1181,184 +1181,6 @@
         }
       }
     },
-    "/api/textbooks/{id}/adaptation-batches": {
-      "post": {
-        "summary": "Post Textbook Adaptation Batch",
-        "operationId": "post_textbook_adaptation_batch_api_textbooks__id__adaptation_batches_post",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostTextbookAdaptationBatchRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed": {
-      "put": {
-        "summary": "Put Textbook Adaptation Batch Removed",
-        "operationId": "put_textbook_adaptation_batch_removed_api_textbooks__textbook_id__adaptation_batches__adaptation_batch_id__removed_put",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "textbook_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Textbook Id"
-            }
-          },
-          {
-            "name": "adaptation_batch_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Adaptation Batch Id"
-            }
-          },
-          {
-            "name": "removed",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Removed"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed": {
-      "put": {
-        "summary": "Put Textbook Adaptation Removed",
-        "operationId": "put_textbook_adaptation_removed_api_textbooks__textbook_id__adaptations__adaptation_id__removed_put",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "textbook_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Textbook Id"
-            }
-          },
-          {
-            "name": "adaptation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Adaptation Id"
-            }
-          },
-          {
-            "name": "removed",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean",
-              "title": "Removed"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/textbooks/{textbook_id}/external-exercises": {
       "post": {
         "summary": "Post Textbook External Exercises",
@@ -1413,10 +1235,10 @@
         }
       }
     },
-    "/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed": {
+    "/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed": {
       "put": {
-        "summary": "Put Textbook External Exercises Removed",
-        "operationId": "put_textbook_external_exercises_removed_api_textbooks__textbook_id__external_exercises__external_exercise_id__removed_put",
+        "summary": "Put Textbook Exercises Removed",
+        "operationId": "put_textbook_exercises_removed_api_textbooks__textbook_id__exercises__exercise_id__removed_put",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -1433,12 +1255,126 @@
             }
           },
           {
-            "name": "external_exercise_id",
+            "name": "exercise_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "External Exercise Id"
+              "title": "Exercise Id"
+            }
+          },
+          {
+            "name": "removed",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean",
+              "title": "Removed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTextbook"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/textbooks/{id}/ranges": {
+      "post": {
+        "summary": "Post Textbook Range",
+        "operationId": "post_textbook_range_api_textbooks__id__ranges_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookRangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/textbooks/{textbook_id}/ranges/{range_id}/removed": {
+      "put": {
+        "summary": "Put Textbook Ranges Removed",
+        "operationId": "put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "textbook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Textbook Id"
+            }
+          },
+          {
+            "name": "range_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Range Id"
             }
           },
           {
@@ -1910,6 +1846,58 @@
           "contents"
         ]
       },
+      "AdaptationBatch": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "createdBy": {
+            "type": "string",
+            "title": "Createdby"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Model"
+          },
+          "strategySettingsName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strategysettingsname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "model",
+          "strategySettingsName"
+        ],
+        "title": "AdaptationBatch"
+      },
       "Adjustment": {
         "properties": {
           "userPrompt": {
@@ -1919,16 +1907,16 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
               },
               {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
+                "$ref": "#/components/schemas/NotJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantUnknownError"
+                "$ref": "#/components/schemas/UnknownError"
               }
             ],
             "title": "Assistantresponse"
@@ -1947,17 +1935,6 @@
           "id": {
             "type": "string",
             "title": "Id"
-          },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
           },
           "extractionBatchId": {
             "anyOf": [
@@ -1992,6 +1969,28 @@
             ],
             "title": "Adaptationbatchid"
           },
+          "textbookId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Textbookid"
+          },
+          "textbookTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Textbooktitle"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           },
@@ -2006,16 +2005,16 @@
           "initialAssistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adaptation__AssistantSuccess"
+                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
               },
               {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
+                "$ref": "#/components/schemas/NotJsonError"
               },
               {
-                "$ref": "#/components/schemas/AssistantUnknownError"
+                "$ref": "#/components/schemas/UnknownError"
               },
               {
                 "type": "null"
@@ -2033,7 +2032,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
+                "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
               },
               {
                 "type": "null"
@@ -2049,10 +2048,11 @@
         "type": "object",
         "required": [
           "id",
-          "createdBy",
           "extractionBatchId",
           "classificationBatchId",
           "adaptationBatchId",
+          "textbookId",
+          "textbookTitle",
           "strategy",
           "input",
           "rawLlmConversations",
@@ -2284,7 +2284,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -2293,7 +2293,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -2317,19 +2317,26 @@
             ],
             "title": "Isbn"
           },
-          "adaptationBatches": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__AdaptationBatch"
-            },
-            "type": "array",
-            "title": "Adaptationbatches"
-          },
           "externalExercises": {
             "items": {
-              "$ref": "#/components/schemas/ExternalExercise"
+              "$ref": "#/components/schemas/ApiTextbookExternalExercise"
             },
             "type": "array",
             "title": "Externalexercises"
+          },
+          "ranges": {
+            "items": {
+              "$ref": "#/components/schemas/Range"
+            },
+            "type": "array",
+            "title": "Ranges"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Page"
+            },
+            "type": "array",
+            "title": "Pages"
           }
         },
         "additionalProperties": false,
@@ -2338,13 +2345,83 @@
           "id",
           "createdBy",
           "title",
-          "editor",
+          "publisher",
           "year",
           "isbn",
-          "adaptationBatches",
-          "externalExercises"
+          "externalExercises",
+          "ranges",
+          "pages"
         ],
         "title": "ApiTextbook"
+      },
+      "ApiTextbookAdaptableExercise": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "adaptable",
+            "title": "Kind"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "type": "string",
+            "title": "Exercisenumber"
+          },
+          "adaptation": {
+            "$ref": "#/components/schemas/ApiAdaptation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "pageNumber",
+          "exerciseNumber",
+          "adaptation"
+        ],
+        "title": "ApiTextbookAdaptableExercise"
+      },
+      "ApiTextbookExternalExercise": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "external",
+            "title": "Kind"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "exerciseNumber": {
+            "type": "string",
+            "title": "Exercisenumber"
+          },
+          "originalFileName": {
+            "type": "string",
+            "title": "Originalfilename"
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "originalFileName",
+          "removedFromTextbook"
+        ],
+        "title": "ApiTextbookExternalExercise"
       },
       "Arrow": {
         "properties": {
@@ -2358,78 +2435,6 @@
         "required": [
           "kind"
         ]
-      },
-      "AssistantInvalidJsonError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "invalid-json",
-            "title": "Error"
-          },
-          "parsed": {
-            "title": "Parsed"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error",
-          "parsed"
-        ],
-        "title": "AssistantInvalidJsonError"
-      },
-      "AssistantNotJsonError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "not-json",
-            "title": "Error"
-          },
-          "text": {
-            "type": "string",
-            "title": "Text"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error",
-          "text"
-        ],
-        "title": "AssistantNotJsonError"
-      },
-      "AssistantUnknownError": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "error",
-            "title": "Kind"
-          },
-          "error": {
-            "type": "string",
-            "const": "unknown",
-            "title": "Error"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "error"
-        ],
-        "title": "AssistantUnknownError"
       },
       "BaseAdaptationBatch": {
         "properties": {
@@ -2886,54 +2891,6 @@
           "reference"
         ]
       },
-      "ExternalExercise": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "originalFileName": {
-            "type": "string",
-            "title": "Originalfilename"
-          },
-          "removedFromTextbook": {
-            "type": "boolean",
-            "title": "Removedfromtextbook"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "originalFileName",
-          "removedFromTextbook"
-        ],
-        "title": "ExternalExercise"
-      },
       "ExtractionBatch": {
         "properties": {
           "id": {
@@ -3233,7 +3190,7 @@
         "properties": {
           "adaptationBatches": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch"
+              "$ref": "#/components/schemas/AdaptationBatch"
             },
             "type": "array",
             "title": "Adaptationbatches"
@@ -3392,7 +3349,7 @@
           },
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page"
+              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page"
             },
             "type": "array",
             "title": "Pages"
@@ -3560,6 +3517,31 @@
           "choice"
         ],
         "title": "InstructionComponents"
+      },
+      "InvalidJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "invalid-json",
+            "title": "Error"
+          },
+          "parsed": {
+            "title": "Parsed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "parsed"
+        ],
+        "title": "InvalidJsonError"
       },
       "JsonFromTextLlmResponseSpecification": {
         "properties": {
@@ -3923,6 +3905,32 @@
           "showChoicesByDefault"
         ]
       },
+      "NotJsonError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "not-json",
+            "title": "Error"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error",
+          "text"
+        ],
+        "title": "NotJsonError"
+      },
       "OpenAiModel": {
         "properties": {
           "provider": {
@@ -3945,49 +3953,6 @@
           "name"
         ],
         "title": "OpenAiModel"
-      },
-      "Page": {
-        "properties": {
-          "pageNumber": {
-            "type": "integer",
-            "title": "Pagenumber"
-          },
-          "assistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__extraction__assistant_responses__AssistantSuccess"
-              },
-              {
-                "$ref": "#/components/schemas/AssistantInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AssistantNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AssistantUnknownError"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assistantresponse"
-          },
-          "exercises": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page__Exercise"
-            },
-            "type": "array",
-            "title": "Exercises"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "pageNumber",
-          "assistantResponse",
-          "exercises"
-        ],
-        "title": "Page"
       },
       "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
         "properties": {
@@ -4351,48 +4316,6 @@
         ],
         "title": "PostExtractionBatchResponse"
       },
-      "PostTextbookAdaptationBatchRequest": {
-        "properties": {
-          "creator": {
-            "type": "string",
-            "title": "Creator"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "branchName": {
-            "type": "string",
-            "title": "Branchname"
-          },
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/ApiInput"
-            },
-            "type": "array",
-            "title": "Inputs"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "creator",
-          "model",
-          "branchName",
-          "inputs"
-        ],
-        "title": "PostTextbookAdaptationBatchRequest"
-      },
       "PostTextbookExternalExercisesRequest": {
         "properties": {
           "creator": {
@@ -4400,25 +4323,11 @@
             "title": "Creator"
           },
           "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "integer",
             "title": "Pagenumber"
           },
           "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Exercisenumber"
           },
           "originalFileName": {
@@ -4450,6 +4359,67 @@
         ],
         "title": "PostTextbookExternalExercisesResponse"
       },
+      "PostTextbookRangeRequest": {
+        "properties": {
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "pdfFileSha256": {
+            "type": "string",
+            "title": "Pdffilesha256"
+          },
+          "pdfFirstPageNumber": {
+            "type": "integer",
+            "title": "Pdffirstpagenumber"
+          },
+          "textbookFirstPageNumber": {
+            "type": "integer",
+            "title": "Textbookfirstpagenumber"
+          },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
+          },
+          "modelForExtraction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforextraction"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "creator",
+          "pdfFileSha256",
+          "pdfFirstPageNumber",
+          "textbookFirstPageNumber",
+          "pagesCount",
+          "modelForExtraction",
+          "modelForAdaptation"
+        ],
+        "title": "PostTextbookRangeRequest"
+      },
       "PostTextbookRequest": {
         "properties": {
           "creator": {
@@ -4460,7 +4430,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -4469,7 +4439,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -4499,7 +4469,7 @@
         "required": [
           "creator",
           "title",
-          "editor",
+          "publisher",
           "year",
           "isbn"
         ],
@@ -4582,6 +4552,88 @@
           "className"
         ],
         "title": "PutAdaptableExerciseClassRequest"
+      },
+      "Range": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "pdfFileNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pdffilenames"
+          },
+          "pdfFileSha256": {
+            "type": "string",
+            "title": "Pdffilesha256"
+          },
+          "pdfFirstPageNumber": {
+            "type": "integer",
+            "title": "Pdffirstpagenumber"
+          },
+          "textbookFirstPageNumber": {
+            "type": "integer",
+            "title": "Textbookfirstpagenumber"
+          },
+          "pagesCount": {
+            "type": "integer",
+            "title": "Pagescount"
+          },
+          "modelForExtraction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforextraction"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Range__Page"
+            },
+            "type": "array",
+            "title": "Pages"
+          },
+          "removedFromTextbook": {
+            "type": "boolean",
+            "title": "Removedfromtextbook"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "pdfFileNames",
+          "pdfFileSha256",
+          "pdfFirstPageNumber",
+          "textbookFirstPageNumber",
+          "pagesCount",
+          "modelForExtraction",
+          "modelForAdaptation",
+          "pages",
+          "removedFromTextbook"
+        ],
+        "title": "Range"
       },
       "ReferenceComponents": {
         "properties": {
@@ -4879,7 +4931,7 @@
             "type": "string",
             "title": "Title"
           },
-          "editor": {
+          "publisher": {
             "anyOf": [
               {
                 "type": "string"
@@ -4888,7 +4940,7 @@
                 "type": "null"
               }
             ],
-            "title": "Editor"
+            "title": "Publisher"
           },
           "year": {
             "anyOf": [
@@ -4909,10 +4961,31 @@
           "createdBy",
           "createdAt",
           "title",
-          "editor",
+          "publisher",
           "year"
         ],
         "title": "Textbook"
+      },
+      "UnknownError": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "error",
+            "title": "Kind"
+          },
+          "error": {
+            "type": "string",
+            "const": "unknown",
+            "title": "Error"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "error"
+        ],
+        "title": "UnknownError"
       },
       "ValidationError": {
         "properties": {
@@ -4960,26 +5033,7 @@
           "kind"
         ]
       },
-      "patty__adaptation__adaptation__AssistantSuccess": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercise": {
-            "$ref": "#/components/schemas/patty__adapted__Exercise-Output"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "AssistantSuccess"
-      },
-      "patty__adapted__Exercise-Output": {
+      "patty__adaptation__adapted__Exercise-Output": {
         "properties": {
           "format": {
             "type": "string",
@@ -5033,21 +5087,127 @@
           "reference"
         ]
       },
-      "patty__api_router__ApiTextbook__AdaptationBatch": {
+      "patty__adaptation__assistant_responses__Success": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercise": {
+            "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercise"
+        ],
+        "title": "Success"
+      },
+      "patty__api_router__ApiTextbook__Page": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "exercises": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ApiTextbookAdaptableExercise"
+                },
+                {
+                  "$ref": "#/components/schemas/ApiTextbookExternalExercise"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "number",
+          "exercises"
+        ],
+        "title": "Page"
+      },
+      "patty__api_router__ApiTextbook__Range__Page": {
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "inProgress": {
+            "type": "boolean",
+            "title": "Inprogress"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Range__Page__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "inProgress",
+          "exercises"
+        ],
+        "title": "Page"
+      },
+      "patty__api_router__ApiTextbook__Range__Page__Exercise": {
         "properties": {
           "id": {
             "type": "string",
             "title": "Id"
           },
-          "strategy": {
-            "$ref": "#/components/schemas/ApiStrategy-Output"
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
           },
-          "adaptations": {
-            "items": {
-              "$ref": "#/components/schemas/ApiAdaptation"
-            },
-            "type": "array",
-            "title": "Adaptations"
+          "exerciseNumber": {
+            "type": "string",
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "type": "string",
+            "title": "Fulltext"
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "reclassifiedBy": {
+            "type": "null",
+            "title": "Reclassifiedby"
+          },
+          "exerciseClassHasSettings": {
+            "type": "boolean",
+            "title": "Exerciseclasshassettings"
+          },
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "removedFromTextbook": {
             "type": "boolean",
@@ -5058,63 +5218,16 @@
         "type": "object",
         "required": [
           "id",
-          "strategy",
-          "adaptations",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "reclassifiedBy",
+          "exerciseClassHasSettings",
+          "adaptation",
           "removedFromTextbook"
         ],
-        "title": "AdaptationBatch"
-      },
-      "patty__api_router__GetAdaptationBatchesResponse__AdaptationBatch": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "createdBy": {
-            "type": "string",
-            "title": "Createdby"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              }
-            ],
-            "title": "Model"
-          },
-          "strategySettingsName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strategysettingsname"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "createdBy",
-          "createdAt",
-          "model",
-          "strategySettingsName"
-        ],
-        "title": "AdaptationBatch"
+        "title": "Exercise"
       },
       "patty__api_router__GetClassificationBatchResponse__Exercise": {
         "properties": {
@@ -5199,6 +5312,49 @@
         ],
         "title": "Exercise"
       },
+      "patty__api_router__GetExtractionBatchResponse__Page": {
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "title": "Pagenumber"
+          },
+          "assistantResponse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistantresponse"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pageNumber",
+          "assistantResponse",
+          "exercises"
+        ],
+        "title": "Page"
+      },
       "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
         "properties": {
           "id": {
@@ -5282,7 +5438,30 @@
         ],
         "title": "Exercise"
       },
-      "patty__extracted__Exercise": {
+      "patty__extraction__assistant_responses__Success": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "success",
+            "title": "Kind"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__extraction__extracted__Exercise"
+            },
+            "type": "array",
+            "title": "Exercises"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "exercises"
+        ],
+        "title": "Success"
+      },
+      "patty__extraction__extracted__Exercise": {
         "properties": {
           "id": {
             "anyOf": [
@@ -5372,29 +5551,6 @@
         },
         "type": "object",
         "title": "Exercise"
-      },
-      "patty__extraction__assistant_responses__AssistantSuccess": {
-        "properties": {
-          "kind": {
-            "type": "string",
-            "const": "success",
-            "title": "Kind"
-          },
-          "exercises": {
-            "items": {
-              "$ref": "#/components/schemas/patty__extracted__Exercise"
-            },
-            "type": "array",
-            "title": "Exercises"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "kind",
-          "exercises"
-        ],
-        "title": "AssistantSuccess"
       }
     },
     "securitySchemes": {

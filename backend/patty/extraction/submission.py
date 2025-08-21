@@ -11,15 +11,13 @@ import PIL.Image
 import sqlalchemy as sql
 import urllib.parse
 
+from . import assistant_responses
+from . import orm_models as db
+from .. import adaptation
+from .. import classification
 from .. import database_utils
+from .. import exercises
 from .. import settings
-from ..orm_models import PageExtraction, AdaptableExercise, ClassificationBatch
-from .assistant_responses import (
-    AssistantSuccess,
-    AssistantUnknownError,
-    AssistantInvalidJsonError,
-    AssistantNotJsonError,
-)
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
@@ -36,7 +34,7 @@ pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     extractions = (
         session.execute(
-            sql.select(PageExtraction).where(PageExtraction._assistant_response == sql.null()).limit(parallelism)
+            sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()).limit(parallelism)
         )
         .scalars()
         .all()
@@ -48,52 +46,54 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
     return [submit_extraction(session, extraction) for extraction in extractions]
 
 
-async def submit_extraction(session: database_utils.Session, extraction: PageExtraction) -> None:
-    sha256 = extraction.extraction_batch.range.pdf_file.sha256
+async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
+    from .. import textbooks
+    from ..sandbox import extraction as sandbox_extraction  # noqa: F401 to populate ORM metadata
+
+    assert page_extraction.pdf_file_range is not None
+    sha256 = page_extraction.pdf_file_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
-        log(f"Found PDF data for page extraction {extraction.id} in cache")
+        log(f"Found PDF data for page extraction {page_extraction.id} in cache")
         pdf_data = pdf_data_cache[sha256]
     else:
         target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{sha256}")
-        log(f"Fetching PDF data for page extraction {extraction.id} from {target.geturl()}")
+        log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
         pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
         pdf_data_cache[sha256] = pdf_data
-    image = pdf_page_as_image(pdf_data, extraction.page_number)
+    image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
-        log(f"Submitting page extraction {extraction.id}")
-        extracted_exercises = extraction.extraction_batch.strategy.model.extract(
-            extraction.extraction_batch.strategy.prompt, image
-        )
+        log(f"Submitting page extraction {page_extraction.id}")
+        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, image)
     except InvalidJsonLlmException as error:
-        log(f"Error 'invalid JSON' on page extraction {extraction.id}")
-        extraction.assistant_response = AssistantInvalidJsonError(
+        log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
+        page_extraction.assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except NotJsonLlmException as error:
-        log(f"Error 'not JSON' on page extraction {extraction.id}")
-        extraction.assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        log(f"Error 'not JSON' on page extraction {page_extraction.id}")
+        page_extraction.assistant_response = assistant_responses.NotJsonError(
+            kind="error", error="not-json", text=error.text
+        )
     except Exception:
-        log(f"UNEXPECTED ERROR on page extraction {extraction.id}")
+        log(f"UNEXPECTED ERROR on page extraction {page_extraction.id}")
         traceback.print_exc()
-        extraction.assistant_response = AssistantUnknownError(kind="error", error="unknown")
+        page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     else:
-        log(f"Success on page extraction {extraction.id}")
+        log(f"Success on page extraction {page_extraction.id}")
 
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
-        if extraction.extraction_batch.run_classification:
-            classification_batch = ClassificationBatch(
-                created_at=created_at,
-                created_by_username=None,
-                created_by_page_extraction=extraction,
-                model_for_adaptation=extraction.extraction_batch.model_for_adaptation,
+        if page_extraction.run_classification:
+            classification_chunk = classification.ClassificationChunk(
+                created=db.ClassificationChunkCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+                model_for_adaptation=page_extraction.model_for_adaptation,
             )
-            session.add(classification_batch)
+            session.add(classification_chunk)
         else:
-            classification_batch = None
+            classification_chunk = None
 
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
@@ -110,24 +110,44 @@ async def submit_extraction(session: database_utils.Session, extraction: PageExt
                     ],
                 )
             )
-            exercise = AdaptableExercise(
-                created_at=created_at,
-                created_by_username=None,
-                textbook=None,
-                removed_from_textbook=False,
-                page_number=extraction.page_number,
-                exercise_number=extracted_exercise.numero,
-                created_by_page_extraction=extraction,
-                full_text=full_text,
-                instruction_hint_example_text=instruction_hint_example_text,
-                statement_text=extracted_exercise.enonce,
-                classified_at=None,
-                classified_by_classification_batch=classification_batch,
-                classified_by_username=None,
-                exercise_class=None,
-            )
-            session.add(exercise)
-        extraction.assistant_response = AssistantSuccess(kind="success", exercises=extracted_exercises)
+
+            if extracted_exercise.numero is not None:
+                location: exercises.ExerciseLocation
+                if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
+                    extraction_batch = page_extraction.created.textbook_extraction_batch
+                    location = textbooks.ExerciseLocationTextbook(
+                        textbook=extraction_batch.textbook,
+                        page_number=extraction_batch.first_textbook_page_number
+                        + page_extraction.pdf_page_number
+                        - extraction_batch.pdf_file_range.first_page_number,
+                        exercise_number=extracted_exercise.numero,
+                        removed_from_textbook=False,
+                    )
+                else:
+                    location = exercises.ExerciseLocationMaybePageAndNumber(
+                        page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
+                    )
+
+                exercise = adaptation.AdaptableExercise(
+                    created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+                    location=location,
+                    full_text=full_text,
+                    instruction_hint_example_text=instruction_hint_example_text,
+                    statement_text=extracted_exercise.enonce,
+                )
+                session.add(exercise)
+
+                if classification_chunk is not None:
+                    session.add(
+                        classification.ClassificationByChunk(
+                            exercise=exercise,
+                            at=created_at,
+                            classification_chunk=classification_chunk,
+                            exercise_class=None,
+                        )
+                    )
+
+        page_extraction.assistant_response = assistant_responses.Success(kind="success", exercises=extracted_exercises)
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

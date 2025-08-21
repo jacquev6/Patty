@@ -343,7 +343,7 @@ class OpenAiModelTestCase(unittest.IsolatedAsyncioTestCase):
 
     @costs_money
     async def test_adaptation_schema(self) -> None:
-        from ...adapted import Exercise
+        from ..adapted import Exercise
 
         model = OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18")
 

@@ -5,7 +5,7 @@ import typing
 import PIL.Image
 import pydantic
 
-from ... import extracted
+from .. import extracted
 
 
 class LlmException(RuntimeError):

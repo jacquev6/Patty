@@ -33,6 +33,7 @@ def clean(force: bool) -> None:
                 "frontend/",
                 "support/dev-env/backend/pip-packages/",
                 "support/dev-env/db/backups/",
+                "support/dev-env/db/dumps/",
                 "support/dev-env/frontend/cache/",
             ]
         ):
@@ -110,8 +111,10 @@ def alembic(args: tuple[str, ...]) -> None:
 @click.option("--skip-frontend", is_flag=True)
 @click.option("--only-e2e", is_flag=True)
 @click.option("--skip-e2e", is_flag=True)
+@click.option("--allow-outdated-database", is_flag=True)
 @click.option("--only-migration", is_flag=True)
 @click.option("--skip-migration", is_flag=True)
+@click.option("--skip-schema-revision", is_flag=True)
 @click.option("--only-format", is_flag=True)
 @click.option("--skip-format", is_flag=True)
 @click.option("--only-lint", is_flag=True)
@@ -137,8 +140,10 @@ def cycle(
     skip_frontend: bool,
     only_e2e: bool,
     skip_e2e: bool,
+    allow_outdated_database: bool,
     only_migration: bool,
     skip_migration: bool,
+    skip_schema_revision: bool,
     only_format: bool,
     skip_format: bool,
     only_lint: bool,
@@ -172,6 +177,7 @@ def cycle(
 
     any_only = only_migration or only_format or only_lint or only_type_check or only_test
     do_migration = not skip_migration and not any_only
+    do_schema_revision = not skip_schema_revision
     do_format = not skip_format and not any_only
     do_lint = not skip_lint and not any_only
     do_type_check = not skip_type_check and not any_only
@@ -227,6 +233,8 @@ def cycle(
 
     cycle = DevelopmentCycle(
         do_migration=do_migration,
+        allow_outdated_database=allow_outdated_database,
+        do_schema_revision=do_schema_revision,
         cost_money=cost_money,
         do_backend=do_backend,
         do_frontend=do_frontend,
@@ -242,7 +250,8 @@ def cycle(
     )
     try:
         cycle.run()
-    except DevelopmentCycleError:
+    except DevelopmentCycleError as e:
+        print(f"Development cycle failed: {e}")
         raise click.Abort()
 
 
@@ -255,7 +264,7 @@ def tests() -> None:
 def gui() -> None:
     """Run the GUI for tests."""
 
-    env = {"PATTY_UNIT_TESTING": "true"}
+    env = {"CYPRESS_PATTY_UNIT_TESTING": "true"}
 
     if os.environ.get("DISPLAY") is None:
         env["DISPLAY"] = "host.docker.internal:0"

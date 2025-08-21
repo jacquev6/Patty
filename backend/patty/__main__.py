@@ -1,9 +1,10 @@
-import textwrap
-import time
-import traceback
 from typing import Iterable
+import ast
 import asyncio
+import colorsys
 import datetime
+import glob
+import hashlib
 import io
 import json
 import os
@@ -11,6 +12,9 @@ import re
 import subprocess
 import sys
 import tarfile
+import textwrap
+import time
+import traceback
 import typing
 import urllib.parse
 
@@ -48,51 +52,294 @@ def openapi() -> None:
 
 
 @main.command()
-def db_tables_graph() -> None:
+@click.argument("kind", type=click.Choice(["full", "modules"]))
+def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
     import graphviz  # type: ignore[import-untyped]
-    import sqlalchemy
+    import sqlalchemy as sql
 
-    from . import orm_models
+    from . import database_utils
+    from . import errors  # noqa: F401 to populate the metadata
+    from . import external_exercises  # noqa: F401
+    from . import sandbox  # noqa: F401
+    from . import textbooks  # noqa: F401
 
-    models = orm_models.all_models
-    tables = [typing.cast(sqlalchemy.Table, model.__table__) for model in models]
-    known_table_names = set(table.name for table in tables)
+    colors_by_annotation: dict[frozenset[str], str | None] = {
+        frozenset({"adaptation"}): "#FF0000",
+        frozenset({"adaptation", "sandbox"}): "#FF8888",
+        frozenset({"classification"}): "#008800",
+        frozenset({"classification", "sandbox"}): "#60AD60",
+        frozenset({"errors"}): None,
+        frozenset({"exercises"}): "#000000",
+        frozenset({"external"}): "#FF55FF",
+        frozenset({"extraction"}): "#0000FF",
+        frozenset({"extraction", "sandbox"}): "#5555FF",
+        frozenset({"old"}): None,
+        frozenset({"textbooks"}): "#FFFF00",
+    }
+
+    tables = database_utils.OrmBase.metadata.sorted_tables
+    table_annotations = database_utils.table_annotations
+
+    for table in tables:
+        assert table_annotations[table.name] in colors_by_annotation
+
+    tables_by_name: dict[str, sql.Table] = {table.name: table for table in tables}
+
+    table_names_by_annotation: dict[frozenset[str], list[str]] = {
+        annotation: sorted(table.name for table in tables if frozenset(table_annotations[table.name]) == annotation)
+        for annotation in colors_by_annotation.keys()
+    }
 
     graph = graphviz.Digraph(node_attr={"shape": "none"})
-    for table in tables:
-        foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
+    graph.attr(rankdir="BT")
 
-        foreign_keys_by_field: dict[str, list[str]] = {}
-        for foreign_key_index, foreign_key in enumerate(foreign_keys):
-            for column in foreign_key.columns:
-                foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
+    if kind == "full":
+        for annotation, node_color in colors_by_annotation.items():
+            if node_color is not None:
+                for table_name in table_names_by_annotation[annotation]:
+                    table = tables_by_name[table_name]
+                    foreign_keys = sorted(table.foreign_key_constraints, key=lambda fk: typing.cast(str, fk.name))
 
-        fields = []
-        for column_index, column in enumerate(table.columns):
-            color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
-            type = str(column.type)
-            if " " in type:
-                type = "<BR/>".join(type.split(" ", 1))
-            pk_status = "PK" if column.primary_key else ""
-            null_status = "nullable" if column.nullable else ""
-            status = ", ".join(
-                filter(lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, []))
-            )
-            fields.append(
-                f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
-            )
-        graph.node(
-            table.name,
-            label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
-        )
+                    foreign_keys_by_field: dict[str, list[str]] = {}
+                    for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                        for column in foreign_key.columns:
+                            foreign_keys_by_field.setdefault(column.name, []).append(f"FK{foreign_key_index+1}")
 
-        for foreign_key_index, foreign_key in enumerate(foreign_keys):
-            target_table = foreign_key.elements[0].column.table.name
-            if target_table in known_table_names:
-                label = f"FK{foreign_key_index+1} → " + ", ".join(el.column.name for el in foreign_key.elements)
-                graph.edge(table.name, target_table, label=label)
+                    fields = []
+                    for column_index, column in enumerate(table.columns):
+                        color = ["#AAAAAA", "#DDDDDD"][column_index % 2]
+                        type = str(column.type)
+                        if " " in type:
+                            type = "<BR/>".join(type.split(" ", 1))
+                        pk_status = "PK" if column.primary_key else ""
+                        null_status = "nullable" if column.nullable else ""
+                        status = ", ".join(
+                            filter(
+                                lambda s: s != "", [pk_status, null_status] + foreign_keys_by_field.get(column.name, [])
+                            )
+                        )
+                        fields.append(
+                            f"""<TR><TD BGCOLOR="{color}">{column.name}</TD><TD BGCOLOR="{color}">{type}</TD><TD BGCOLOR="{color}">{status}</TD></TR>"""
+                        )
+                    graph.node(
+                        table.name,
+                        label=f"""<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0"><TR><TD COLSPAN="3" BGCOLOR="#DDDDDD">{table.name}</TD></TR>{''.join(fields)}</TABLE>>""",
+                        color=node_color,
+                    )
+
+                    for foreign_key_index, foreign_key in enumerate(foreign_keys):
+                        target_table = foreign_key.elements[0].column.table.name
+                        if target_table in tables_by_name:
+                            label = f"FK{foreign_key_index+1} → " + ", ".join(
+                                el.column.name for el in foreign_key.elements
+                            )
+                            graph.edge(table.name, target_table, label=label)
+
+    elif kind == "modules":
+        interesting_tables: set[str] = set()
+
+        for table in tables:
+            for foreign_key in table.foreign_key_constraints:
+                target_table = foreign_key.elements[0].column.table.name
+                if table_annotations[target_table] != table_annotations[table.name]:
+                    interesting_tables.add(table.name)
+                    interesting_tables.add(target_table)
+
+        for annotation, node_color in colors_by_annotation.items():
+            if node_color is not None:
+                cluster = graphviz.Digraph(name=f"cluster_{'_'.join(annotation)}", node_attr={"shape": "box"})
+                cluster.attr(label=" ".join(sorted(annotation)), color=node_color)
+
+                for table_name in table_names_by_annotation[annotation]:
+                    if table_name in interesting_tables:
+                        cluster.node(table_name)
+
+                graph.subgraph(cluster)
+
+        for table in tables:
+            for foreign_key in table.foreign_key_constraints:
+                target_table = foreign_key.elements[0].column.table.name
+                if table_annotations[target_table] != table_annotations[table.name]:
+                    graph.edge(table.name, target_table)
 
     sys.stdout.buffer.write(graph.pipe(format="png"))
+
+
+@main.command()
+def python_dependency_graph() -> None:
+    import graphviz
+
+    ignored_packages = {
+        # Imported many times, clutter the graph
+        ("patty", "any_json"),
+        ("patty", "api_utils"),
+        ("patty", "database_utils"),
+        ("patty", "settings"),
+        ("patty", "version"),
+        # Little interest, decrease readability
+        ("patty", "migrations", "versions"),
+        ("patty", "to_be_deleted"),
+    }
+
+    def make_module_path(file_name: str) -> tuple[str, ...]:
+        assert file_name.endswith(".py")
+        return tuple(file_name[:-3].split(os.path.sep))
+
+    def gather_dependencies(
+        file_name: str, current_module_path: tuple[str, ...], known_module_paths: set[tuple[str, ...]]
+    ) -> list[tuple[tuple[str, ...], bool]]:
+        with open(file_name, "r") as file:
+            content = file.read()
+        module = ast.parse(content, filename=file_name)
+
+        strong_dependencies: set[tuple[str, ...]] = set()
+        weak_dependencies: set[tuple[str, ...]] = set()
+
+        for nodes, dependencies in ((module.body, strong_dependencies), (ast.walk(module), weak_dependencies)):
+            for node in nodes:
+                if isinstance(node, ast.ImportFrom):
+                    if node.level == 0:
+                        # Absolute import
+                        assert node.module is not None
+                        imported_from = tuple(node.module.split("."))
+                    else:
+                        # Relative import
+                        if node.module is None:
+                            imported_from = current_module_path[: -node.level]
+                        else:
+                            imported_from = current_module_path[: -node.level] + tuple(node.module.split("."))
+
+                    if imported_from[0] == "patty":
+                        for name in node.names:
+                            candidate: tuple[str, ...]
+                            for candidate in ((name.name,), (name.name, "__init__"), ("__init__",), ()):
+                                if imported_from + candidate in known_module_paths:
+                                    dependencies.add(imported_from + candidate)
+                                    break
+                            else:
+                                print("WARNING: unhandled import:", ast.unparse(node), file=sys.stderr)
+
+                elif isinstance(node, ast.Import):
+                    for name in node.names:
+                        imported_what = tuple(name.name.split("."))
+                        if imported_what[0] == "patty":
+                            for candidate in (imported_what, imported_what + ("__init__",)):
+                                if candidate in known_module_paths:
+                                    dependencies.add(candidate)
+                                    break
+                            else:
+                                print("WARNING: unhandled import:", ast.unparse(node), file=sys.stderr)
+
+        ret = {}
+        for dep in weak_dependencies:
+            ret[dep] = current_module_path == ("patty", "__main__")
+        for dep in strong_dependencies:
+            ret[dep] = True
+
+        return list(ret.items())
+
+    def make_graph_node(module_path: tuple[str, ...]) -> str:
+        return "_".join(module_path)
+
+    def string_to_color(s: str) -> str:
+        r, g, b = colorsys.hls_to_rgb(
+            h=(int(hashlib.md5(s.encode("utf-8")).hexdigest(), 16) % 360) / 360.0, l=0.5, s=1.0
+        )
+        return "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+
+    def ignored(module_path: tuple[str, ...]) -> bool:
+        return any(module_path[: len(ignored_package)] == ignored_package for ignored_package in ignored_packages)
+
+    file_names = glob.glob("patty/**/*.py", recursive=True)
+    known_module_paths = {make_module_path(file_name) for file_name in file_names}
+
+    modules_dependency_graph = {
+        module_path: set(
+            (d, strong)
+            for (d, strong) in gather_dependencies(file_name, module_path, known_module_paths)
+            if not ignored(d)
+        )
+        for file_name in file_names
+        for module_path in [make_module_path(file_name)]
+        if not ignored(module_path)
+    }
+
+    clusters_by_package = {
+        module_path[:-1]: graphviz.Digraph(
+            name=f"cluster_{'_'.join(module_path[:-1])}",
+            graph_attr={"label": module_path[-2], "color": string_to_color(".".join((*module_path[:-1], "__init__")))},
+        )
+        for module_path in modules_dependency_graph
+    }
+
+    for module_path in modules_dependency_graph.keys():
+        clusters_by_package[module_path[:-1]].node(
+            make_graph_node(module_path), label=module_path[-1], color=string_to_color(".".join(module_path))
+        )
+
+    for module_path, cluster in reversed(clusters_by_package.items()):
+        if len(module_path) == 1:
+            assert module_path[0] == "patty"
+        else:
+            clusters_by_package[module_path[:-1]].subgraph(cluster)
+
+    graph = graphviz.Digraph(
+        node_attr={"shape": "box"}, graph_attr={"rankdir": "BT", "compound": "true", "nodesep": "0.5", "ranksep": "1"}
+    )
+    graph.subgraph(clusters_by_package[("patty",)])
+
+    for module_path, dependencies in modules_dependency_graph.items():
+        for dependency, strong in dependencies:
+            attrs = {"color": string_to_color(".".join(dependency)), "penwidth": "10"}
+            if strong:
+                attrs["weight"] = "10"
+            else:
+                attrs["weight"] = "1"
+                attrs["style"] = "dashed"
+            if dependency[-1] == "__init__":
+                attrs["lhead"] = f"cluster_{'_'.join(dependency[:-1])}"
+                attrs.pop("penwidth", None)
+            if dependency[:-1] == module_path[: len(dependency) - 1]:
+                attrs.pop("penwidth", None)
+            graph.edge(make_graph_node(module_path), make_graph_node(dependency), **attrs)
+
+    sys.stdout.buffer.write(graph.pipe(format="png"))
+
+
+@main.command()
+def tricky_sql_requests() -> None:
+    import sqlparse  # type: ignore[import-untyped]
+
+    from . import database_utils
+    from . import extraction
+    from . import textbooks
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    request: typing.Any
+    for title, request in [
+        ("Textbook.fetch_ordered_exercises", textbooks.Textbook.make_ordered_exercises_request(42)),
+        (
+            "PageExtraction.fetch_ordered_exercises (page and number)",
+            extraction.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
+        ),
+        (
+            "PageExtraction.fetch_ordered_exercises (textbook)",
+            extraction.PageExtraction.make_ordered_exercises_request__textbook(42),
+        ),
+    ]:
+        print(f"{title}:")
+        print("=" * len(title))
+        print(
+            sqlparse.format(
+                str(request.compile(database_engine, compile_kwargs={"literal_binds": True})),
+                reindent=True,
+                compact=False,
+                keyword_case="upper",
+                wrap_after=1,
+            )
+        )
+        print()
 
 
 @main.command()
@@ -110,14 +357,13 @@ def adapted_exercise_schema(
     swappable_input: bool,
     editable_text_input: bool,
 ) -> None:
-    from . import adapted
-    from .adaptation import llm
+    from . import adaptation
 
-    exercise_type = adapted.make_exercise_type(
-        adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
-        adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adapted.StatementComponents(
+    exercise_type = adaptation.adapted.make_exercise_type(
+        adaptation.adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
+        adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.StatementComponents(
             text=True,
             whitespace=True,
             arrow=True,
@@ -128,16 +374,16 @@ def adapted_exercise_schema(
             swappable_input=swappable_input,
             editable_text_input=editable_text_input,
         ),
-        adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
     )
-    print(json.dumps(llm.make_schema(exercise_type), indent=2))
+    print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
 
 
 @main.command()
 def extracted_exercise_schema() -> None:
-    from . import extracted
+    from . import extraction
 
-    print(json.dumps(extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+    print(json.dumps(extraction.extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
@@ -159,38 +405,38 @@ def json_to_html_script() -> None:
     # This is pretty hacky, but it avoids the complexity of versioning and packaging Patty,
     # and allows @eliselinc to download a single file and add it to her source tree.
 
-    from . import adapted
+    from . import adaptation
 
-    example_exercise = adapted.Exercise(
+    example_exercise = adaptation.adapted.Exercise(
         format="v1",
-        instruction=adapted.InstructionPage(
+        instruction=adaptation.adapted.InstructionPage(
             lines=[
-                adapted.InstructionLine(
+                adaptation.adapted.InstructionLine(
                     contents=[
-                        adapted.Text(kind="text", text="Example"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="exercise"),
-                        adapted.Whitespace(kind="whitespace"),
-                        adapted.Text(kind="text", text="instruction"),
-                        adapted.Text(kind="text", text="."),
+                        adaptation.adapted.Text(kind="text", text="Example"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="exercise"),
+                        adaptation.adapted.Whitespace(kind="whitespace"),
+                        adaptation.adapted.Text(kind="text", text="instruction"),
+                        adaptation.adapted.Text(kind="text", text="."),
                     ]
                 )
             ]
         ),
         example=None,
         hint=None,
-        statement=adapted.StatementPages(
+        statement=adaptation.adapted.StatementPages(
             pages=[
-                adapted.StatementPage(
+                adaptation.adapted.StatementPage(
                     lines=[
-                        adapted.StatementLine(
+                        adaptation.adapted.StatementLine(
                             contents=[
-                                adapted.Text(kind="text", text="Example"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="exercise"),
-                                adapted.Whitespace(kind="whitespace"),
-                                adapted.Text(kind="text", text="statement"),
-                                adapted.Text(kind="text", text="."),
+                                adaptation.adapted.Text(kind="text", text="Example"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="exercise"),
+                                adaptation.adapted.Whitespace(kind="whitespace"),
+                                adaptation.adapted.Text(kind="text", text="statement"),
+                                adaptation.adapted.Text(kind="text", text="."),
                             ]
                         )
                     ]
@@ -254,7 +500,7 @@ def json_to_html_script() -> None:
         yield ""
         yield "import pydantic"
         yield ""
-        with open("patty/adapted.py") as f:
+        with open("patty/adaptation/adapted.py") as f:
             for line in f:
                 if line.rstrip() == "# patty_json_to_html.py begin":
                     break
@@ -349,9 +595,9 @@ def run_submission_daemon(
     import requests
 
     from . import database_utils
-    from .adaptation.submission import submit_adaptations
-    from .classification import submit_classifications
-    from .extraction.submission import submit_extractions
+    from . import adaptation
+    from . import classification
+    from . import extraction
 
     def log(message: str) -> None:
         # @todo Use actual logging
@@ -366,11 +612,22 @@ def run_submission_daemon(
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
-                    go_on = len(await asyncio.gather(*submit_extractions(session, extraction_parallelism))) == 0
+                    go_on = (
+                        len(
+                            await asyncio.gather(
+                                *extraction.submission.submit_extractions(session, extraction_parallelism)
+                            )
+                        )
+                        == 0
+                    )
                     if go_on:
-                        go_on = not submit_classifications(session, classification_parallelism)
+                        go_on = not classification.submission.submit_classifications(
+                            session, classification_parallelism
+                        )
                         if go_on:
-                            await asyncio.gather(*submit_adaptations(session, adaptation_parallelism))
+                            await asyncio.gather(
+                                *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                            )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
                     log("Calling pulse monitoring URL")
@@ -459,7 +716,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250716-081603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250821-141603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

@@ -10,33 +10,6 @@ services:
     healthcheck:
       test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
       interval: 0.5s
-  db--for-chromium:
-    image: postgres:15
-    tmpfs:
-      - /var/lib/postgresql/data
-    env_file:
-      - db/env
-    healthcheck:
-      test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
-      interval: 0.5s
-  db--for-electron:
-    image: postgres:15
-    tmpfs:
-      - /var/lib/postgresql/data
-    env_file:
-      - db/env
-    healthcheck:
-      test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
-      interval: 0.5s
-  db--for-firefox:
-    image: postgres:15
-    tmpfs:
-      - /var/lib/postgresql/data
-    env_file:
-      - db/env
-    healthcheck:
-      test: ["CMD", "pg_isready", "--timeout=0", "--dbname=db", "--username=admin" ]
-      interval: 0.5s
 
   adminer:
     image: adminer:4
@@ -54,20 +27,23 @@ services:
       - backend/secrets.env
     command: [
       "rm", "-f",
+      "backend/generated/adapted-exercise-schema--minimal.json",
+      "backend/generated/adapted-exercise-schema--no-choice.json",
+      "backend/generated/adapted-exercise-schema--no-editable-text-input.json",
+      "backend/generated/adapted-exercise-schema--no-free-text-input.json",
+      "backend/generated/adapted-exercise-schema--no-multiple-choices-input.json",
+      "backend/generated/adapted-exercise-schema--no-selectable-input.json",
+      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema.json",
-      "backend/generated/db-tables-graph.png",
+      "backend/generated/db-tables-graph--full.png",
+      "backend/generated/db-tables-graph--modules.png",
       "backend/generated/default-adaptation-prompt.md",
       "backend/generated/default-extraction-prompt.md",
       "backend/generated/extracted-exercise-schema.json",
-      "backend/generated/extracted-exercise-schema--no-choice.json",
-      "backend/generated/extracted-exercise-schema--no-free-text-input.json",
-      "backend/generated/extracted-exercise-schema--no-multiple-choices-input.json",
-      "backend/generated/extracted-exercise-schema--no-selectable-input.json",
-      "backend/generated/extracted-exercise-schema--no-swappable-input.json",
-      "backend/generated/extracted-exercise-schema--no-editable-text-input.json",
-      "backend/generated/extracted-exercise-schema--minimal.json",
       "backend/generated/openapi.json",
       "backend/generated/patty_json_to_html.py",
+      "backend/generated/python-dependency-graph.png",
+      "backend/generated/tricky-sql-requests.txt",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
@@ -175,54 +151,6 @@ services:
         condition: service_completed_successfully
       db:
         condition: service_healthy
-  migrator--for-chromium:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend/patty
-    env_file:
-      - backend/env--for-chromium
-      - backend/secrets.env
-    command: ["alembic", "upgrade", "head"]
-    depends_on:
-      pip-installer:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-  migrator--for-electron:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend/patty
-    env_file:
-      - backend/env--for-electron
-      - backend/secrets.env
-    command: ["alembic", "upgrade", "head"]
-    depends_on:
-      pip-installer:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
-  migrator--for-firefox:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend/patty
-    env_file:
-      - backend/env--for-firefox
-      - backend/secrets.env
-    command: ["alembic", "upgrade", "head"]
-    depends_on:
-      pip-installer:
-        condition: service_completed_successfully
-      db:
-        condition: service_healthy
   data-loader:
     image: patty-dev_backend
     pull_policy: never
@@ -256,120 +184,6 @@ services:
       textbook-export-template-generator:
         condition: service_healthy
       data-loader:
-        condition: service_completed_successfully
-  backend--for-chromium:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-chromium
-      - backend/secrets.env
-    command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      adaptation-export-template-generator:
-        condition: service_healthy
-      batch-export-template-generator:
-        condition: service_healthy
-      textbook-export-template-generator:
-        condition: service_healthy
-      migrator--for-chromium:
-        condition: service_completed_successfully
-  backend--for-electron:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-electron
-      - backend/secrets.env
-    command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      adaptation-export-template-generator:
-        condition: service_healthy
-      batch-export-template-generator:
-        condition: service_healthy
-      textbook-export-template-generator:
-        condition: service_healthy
-      migrator--for-electron:
-        condition: service_completed_successfully
-  backend--for-firefox:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-firefox
-      - backend/secrets.env
-    command: ["uvicorn", "patty.asgi:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      adaptation-export-template-generator:
-        condition: service_healthy
-      batch-export-template-generator:
-        condition: service_healthy
-      textbook-export-template-generator:
-        condition: service_healthy
-      migrator--for-firefox:
-        condition: service_completed_successfully
-  submission-daemon--for-chromium:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-chromium
-      - backend/secrets.env
-    init: true
-    command: [
-      "watchmedo", "auto-restart", "--pattern", "*.py", "--recursive", "--",
-      "python", "-m", "patty", "run-submission-daemon"
-    ]
-    depends_on:
-      migrator--for-chromium:
-        condition: service_completed_successfully
-  submission-daemon--for-electron:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-electron
-      - backend/secrets.env
-    init: true
-    command: [
-      "watchmedo", "auto-restart", "--pattern", "*.py", "--recursive", "--",
-      "python", "-m", "patty", "run-submission-daemon"
-    ]
-    depends_on:
-      migrator--for-electron:
-        condition: service_completed_successfully
-  submission-daemon--for-firefox:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-firefox
-      - backend/secrets.env
-    init: true
-    command: [
-      "watchmedo", "auto-restart", "--pattern", "*.py", "--recursive", "--",
-      "python", "-m", "patty", "run-submission-daemon"
-    ]
-    depends_on:
-      migrator--for-firefox:
         condition: service_completed_successfully
   submission-daemon:
     image: patty-dev_backend
@@ -633,7 +447,7 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--minimal.json"]
       interval: 0.5s
       retries: 12
-  db-tables-graph-generator:
+  db-tables-graph-generator--full:
     image: patty-dev_backend
     pull_policy: never
     volumes:
@@ -644,7 +458,58 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph.png", "python -m patty db-tables-graph"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph--full.png", "python -m patty db-tables-graph full"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  db-tables-graph-generator--modules:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "db-tables-graph--modules.png", "python -m patty db-tables-graph modules"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  python-dependency-graph-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "python-dependency-graph.png", "python -m patty python-dependency-graph"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+  tricky-sql-requests-generator:
+    image: patty-dev_backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "tricky-sql-requests.txt", "python -m patty tricky-sql-requests"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -690,48 +555,6 @@ services:
     command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
     depends_on:
       data-loader:
-        condition: service_completed_successfully
-  fixtures-loader--for-chromium:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-chromium
-      - backend/secrets.env
-    command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      migrator--for-chromium:
-        condition: service_completed_successfully
-  fixtures-loader--for-electron:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-electron
-      - backend/secrets.env
-    command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      migrator--for-electron:
-        condition: service_completed_successfully
-  fixtures-loader--for-firefox:
-    image: patty-dev_backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/pip-packages:/home/patty/.local
-    working_dir: /app/backend
-    env_file:
-      - backend/env--for-firefox
-      - backend/secrets.env
-    command: ["uvicorn", "patty.fixtures:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
-    depends_on:
-      migrator--for-firefox:
         condition: service_completed_successfully
   db-backup:
     image: patty-dev_backend
@@ -844,9 +667,6 @@ services:
     image: nginx:latest
     ports:
       - 8080:8080
-      - 8081:8081
-      - 8082:8082
-      - 8083:8083
     volumes:
       - ./fanout/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:

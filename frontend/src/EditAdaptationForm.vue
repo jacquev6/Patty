@@ -212,8 +212,6 @@ watch(Escape, () => {
 <template>
   <ResizableColumns :columns="[1, 1, 1]">
     <template #col-1>
-      <p v-if="adaptation.createdBy === null">Created automatically</p>
-      <p v-else>Created by: {{ adaptation.createdBy }}</p>
       <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>

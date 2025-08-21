@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import _ from 'lodash'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from './apiClient'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess as preprocessAdaptation, type PreprocessedAdaptation } from './adaptations'
-import EditTextbookFormCreateAdaptationBatchForm from './EditTextbookFormCreateAdaptationBatchForm.vue'
+import { preprocess } from './adaptations'
 import assert from './assert'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
+import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
+import IdentifiedUser from './IdentifiedUser.vue'
+import LlmModelSelector from './LlmModelSelector.vue'
+import WhiteSpace from './WhiteSpace.vue'
+import EditTextbookFormExercisePreview from './EditTextbookFormExercisePreview.vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -27,103 +30,21 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-const adaptationBatches = computed(() =>
-  props.textbook.adaptationBatches.map((adaptationBatch) => {
-    return {
-      ...adaptationBatch,
-      adaptations: adaptationBatch.adaptations.map(preprocessAdaptation),
-    }
-  }),
-)
-
-const pages = computed(() => {
-  type Exercise =
-    | {
-        kind: 'adaptation'
-        adaptation: PreprocessedAdaptation
-      }
-    | {
-        kind: 'externalExercise'
-        externalExercise: {
-          pageNumber: number | null
-          exerciseNumber: string | null
-          originalFileName: string
-        }
-      }
-
-  const pages: Record<number, Exercise[]> = {}
-  for (const adaptationBatch of adaptationBatches.value) {
-    if (!adaptationBatch.removedFromTextbook) {
-      for (const adaptation of adaptationBatch.adaptations) {
-        if (
-          !adaptation.removedFromTextbook &&
-          adaptation.input.pageNumber !== null &&
-          adaptation.status.kind === 'success'
-        ) {
-          pages[adaptation.input.pageNumber] ??= []
-          pages[adaptation.input.pageNumber].push({ kind: 'adaptation', adaptation })
-        }
-      }
-    }
-  }
-  for (const externalExercise of props.textbook.externalExercises) {
-    if (!externalExercise.removedFromTextbook && externalExercise.pageNumber !== null) {
-      pages[externalExercise.pageNumber] ??= []
-      pages[externalExercise.pageNumber].push({
-        kind: 'externalExercise',
-        externalExercise,
-      })
-    }
-  }
-
-  for (const pageNumber in pages) {
-    pages[pageNumber] = _.sortBy(pages[pageNumber], [
-      (exercise) => {
-        const exerciseNumber =
-          exercise.kind === 'adaptation'
-            ? exercise.adaptation.input.exerciseNumber
-            : exercise.externalExercise.exerciseNumber
-        if (exerciseNumber === null) {
-          return 0
-        } else {
-          const asNumber = parseInt(exerciseNumber)
-          if (isNaN(asNumber)) {
-            return 0
-          } else {
-            return asNumber
-          }
-        }
-      },
-      'input.exerciseNumber',
-    ])
-  }
-
-  return pages
-})
-
 function textbookUpdated(textbook: Textbook) {
   emit('textbook-updated', textbook)
 }
 
-async function removeAdaptationBatch(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptation-batches/{adaptation_batch_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, adaptation_batch_id: id }, query: { removed } },
+async function removeExercise(id: string, removed: boolean) {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, exercise_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
 }
 
-async function removeAdaptation(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/adaptations/{adaptation_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, adaptation_id: id }, query: { removed } },
-  })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
-}
-
-async function removeExternalExercise(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/external-exercises/{external_exercise_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, external_exercise_id: id }, query: { removed } },
+async function removeRange(id: string, removed: boolean) {
+  const response = await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, range_id: id }, query: { removed } },
   })
   assert(response.data !== undefined)
   emit('textbook-updated', response.data)
@@ -132,7 +53,7 @@ async function removeExternalExercise(id: string, removed: boolean) {
 
 <template>
   <h1>
-    {{ textbook.title }}<template v-if="textbook.editor !== null">, {{ textbook.editor }}</template
+    {{ textbook.title }}<template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template
     ><template v-if="textbook.year !== null">, {{ textbook.year }}</template>
     <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
   </h1>
@@ -156,43 +77,56 @@ async function removeExternalExercise(id: string, removed: boolean) {
       {{ t('viewByPageDescription') }}
     </template>
   </p>
+  <p>{{ t('modifiedBy') }} <IdentifiedUser /></p>
   <template v-if="view === 'batch'">
-    <h2>{{ t('newBatch') }}</h2>
-    <EditTextbookFormCreateAdaptationBatchForm
-      :availableStrategySettings
-      :textbookId="textbook.id"
-      @textbookUpdated="textbookUpdated"
-    />
-    <h2>{{ t('existingBatches') }}</h2>
-    <template v-for="adaptationBatch in adaptationBatches">
-      <template v-if="adaptationBatch.removedFromTextbook">
-        <h3>
-          <span class="removed">{{ adaptationBatch.strategy.settings.name }}</span> ({{ t('removed') }})
-          <button @click="removeAdaptationBatch(adaptationBatch.id, false)">{{ t('reAdd') }}</button>
-        </h3>
-      </template>
-      <template v-else>
-        <h3>
-          {{ adaptationBatch.strategy.settings.name }}
-          <button @click="removeAdaptationBatch(adaptationBatch.id, true)">{{ t('remove') }}</button>
-        </h3>
-        <template v-for="(adaptation, index) in adaptationBatch.adaptations">
-          <template v-if="adaptation.removedFromTextbook">
-            <h4 style="margin-top: 0">
-              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span class="removed">P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>
-              ({{ t('input') }} {{ index + 1 }}, {{ t('removed') }})
-              <button @click="removeAdaptation(adaptation.id, false)">{{ t('reAdd') }}</button>
-            </h4>
+    <h2>{{ t('newTextbookPdf') }}</h2>
+    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <h2>{{ t('existingTextbookPdfs') }}</h2>
+    <template v-for="range in textbook.ranges">
+      <h3>
+        <span :class="{ removed: range.removedFromTextbook }"
+          >Pages {{ range.textbookFirstPageNumber }} to {{ range.textbookFirstPageNumber + range.pagesCount - 1 }} (from
+          {{ range.pdfFileNames[0] }} pages {{ range.pdfFirstPageNumber }} to
+          {{ range.pdfFirstPageNumber + range.pagesCount - 1 }})</span
+        >
+        <template v-if="range.removedFromTextbook">
+          ({{ t('removed') }})
+          <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
+        </template>
+        <template v-else>
+          <WhiteSpace />
+          <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
+        </template>
+      </h3>
+      <template v-if="!range.removedFromTextbook">
+        <p>
+          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
+            <template #provider>Model provider for extraction:</template>
+          </LlmModelSelector>
+        </p>
+        <p>
+          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
+            <template #provider>Model provider for adaptation:</template>
+          </LlmModelSelector>
+        </p>
+        <template v-for="page in range.pages">
+          <h4>
+            Page {{ page.pageNumber
+            }}<template v-if="page.inProgress"
+              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
+            >
+          </h4>
+          <template v-for="exercise in page.exercises">
+            <h5 v-if="exercise.removedFromTextbook">
+              <span class="removed">Exercise {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
+              <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
+            </h5>
+            <EditTextbookFormExercisePreview
+              v-else
+              :exercise
+              @exerciseRemoved="() => removeExercise(exercise.id, true)"
+            />
           </template>
-          <AdaptationPreview v-else header="h4" :index :adaptation>
-            <h4 style="margin-top: 0">
-              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span>P{{ adaptation.input.pageNumber }}Ex{{ adaptation.input.exerciseNumber }}</span>
-              ({{ t('input') }} {{ index + 1 }})
-              <button @click="removeAdaptation(adaptation.id, true)">{{ t('remove') }}</button>
-            </h4>
-          </AdaptationPreview>
         </template>
       </template>
     </template>
@@ -202,26 +136,30 @@ async function removeExternalExercise(id: string, removed: boolean) {
     <template v-for="externalExercise in textbook.externalExercises">
       <h3 v-if="externalExercise.removedFromTextbook">
         <span class="removed">{{ externalExercise.originalFileName }}</span> ({{ t('removed') }})
-        <button @click="removeExternalExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
+        <button @click="removeExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
       </h3>
       <h3 v-else>
         {{ externalExercise.originalFileName }}
-        <button @click="removeExternalExercise(externalExercise.id, true)">{{ t('remove') }}</button>
+        <button @click="removeExercise(externalExercise.id, true)">{{ t('remove') }}</button>
       </h3>
     </template>
   </template>
   <template v-else>
-    <template v-for="(adaptations, pageNumber) in pages">
-      <h2>{{ t('page') }} {{ pageNumber }}</h2>
-      <template v-for="exercise in adaptations">
-        <template v-if="exercise.kind === 'adaptation'">
-          <AdaptationPreview header="h3" :index="0" :adaptation="exercise.adaptation">
-            <h3 style="margin-top: 0">{{ t('exercise') }} {{ exercise.adaptation.input.exerciseNumber }}</h3>
-          </AdaptationPreview>
+    <template v-for="page in textbook.pages">
+      <h2>{{ t('page') }} {{ page.number }}</h2>
+      <template v-for="exercise in page.exercises">
+        <template v-if="exercise.kind === 'adaptable'">
+          <AdaptationPreview
+            :headerLevel="3"
+            :index="0"
+            :adaptation="preprocess(exercise.adaptation)"
+            :headerText="`${t('exercise')} ${exercise.exerciseNumber}`"
+            :showPageAndExercise="false"
+          />
         </template>
-        <template v-else-if="exercise.kind === 'externalExercise'">
-          <h3>{{ t('exercise') }} {{ exercise.externalExercise.exerciseNumber }}</h3>
-          <p>{{ exercise.externalExercise.originalFileName }}</p>
+        <template v-else-if="exercise.kind === 'external'">
+          <h3>{{ t('exercise') }} {{ exercise.exerciseNumber }}</h3>
+          <p>{{ exercise.originalFileName }}</p>
         </template>
       </template>
     </template>
@@ -232,6 +170,11 @@ async function removeExternalExercise(id: string, removed: boolean) {
 .removed {
   text-decoration: line-through;
 }
+
+span.inProgress {
+  color: gray;
+  font-size: 70%;
+}
 </style>
 
 <i18n>
@@ -239,13 +182,15 @@ en:
   isbn: ISBN
   downloadHtml: Download standalone HTML
   viewBy: View by
-  viewByBatch: batch and external exercises
+  viewByBatch: PDFs and external exercises
   viewByPage: page
-  viewByBatchDescription: in creation order, including errors and removed adaptations. Batches first, external exercises
+  viewByBatchDescription: in creation order, including errors and removed adaptations. PDFs first, external exercises
   viewByBatchDescriptionBelow: below
-  viewByPageDescription: sorted by page and exercise number, including only successful not-removed adaptations. Batches and external exercises together.
-  newBatch: New batch
-  existingBatches: Existing batches
+  viewByPageDescription: sorted by page and exercise number, including only successful not-removed adaptations. Adapted PDFs and external exercises together.
+  modifiedBy: Modified by
+  newTextbookPdf: New textbook PDF
+  existingTextbookPdfs: Existing textbook PDFs
+  inProgress: "(in progress, will refresh when done)"
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
   exercise: Exercise
@@ -258,13 +203,15 @@ fr:
   isbn: ISBN
   downloadHtml: Télécharger le HTML autonome
   viewBy: Afficher par
-  viewByBatch: batch et exercices externes
+  viewByBatch: PDFs et exercices externes
   viewByPage: page
-  viewByBatchDescription: dans l'ordre de création, y compris les erreurs et les adaptations supprimées. Batchs d'abord, exercices externes
+  viewByBatchDescription: dans l'ordre de création, y compris les erreurs et les adaptations supprimées. PDFs d'abord, exercices externes
   viewByBatchDescriptionBelow: en dessous
-  viewByPageDescription: trié par page et numéro d'exercice, y compris uniquement les adaptations réussies non supprimées. Batchs et exercices externes ensemble.
-  newBatch: Nouveau batch
-  existingBatches: Batchs existants
+  viewByPageDescription: trié par page et numéro d'exercice, y compris uniquement les adaptations réussies non supprimées. PDFs adaptés et exercices externes ensemble.
+  modifiedBy: Modifié par
+  newTextbookPdf: Nouveau PDF de manuel
+  existingTextbookPdfs: PDF de manuel existants
+  inProgress: "(en cours, se mettra à jour quand terminé)"
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
   exercise: Exercice

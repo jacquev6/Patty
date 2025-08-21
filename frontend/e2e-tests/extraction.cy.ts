@@ -79,7 +79,7 @@ describe('The extraction batch creation page', () => {
 
     cy.visit('/extraction-batch-1')
     cy.get(
-      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this exercise was created.")',
     ).should('exist')
     cy.get('button:contains("Submit all adaptations in the same case")').first().click()
     cy.get('div.busy').should('have.length', 2)
@@ -101,6 +101,9 @@ describe('The extraction batch creation page', () => {
     cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')
     cy.get('a:contains("Batch E1")').should('have.attr', 'href', '/extraction-batch-1')
     cy.get('ul:contains("Batch C")').should('not.exist')
+
+    cy.visit('/adaptation-2')
+    cy.get('a:contains("Extraction batch 1")').should('have.attr', 'href', '/extraction-batch-1')
   })
 
   it('remembers the last strategy used', () => {
@@ -121,7 +124,7 @@ describe('The extraction batch creation page', () => {
     cy.visit('/new-extraction-batch')
     cy.get('[data-cy="run-classification"]').select('no')
     cy.get('[data-cy="llm-name"]').should('have.length', 1)
-    cy.get('[data-cy="llm-name"]').should('have.value', 'dummy-2')
+    cy.get('[data-cy="llm-name"]').should('have.value', 'dummy-1') // Model is not remembered
     cy.get('[data-cy="prompt"]').should('have.value', 'Bleh bleh.')
   })
 

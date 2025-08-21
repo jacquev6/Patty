@@ -91,7 +91,7 @@ async function submitAdaptation() {
   <h1>Inputs</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
     <EditClassificationOrExtractionBatchFormExercisePreview
-      headerComponent="h2"
+      :headerLevel="2"
       :batch="{ kind: 'classification', id: classificationBatch.id }"
       :headerText="`Input ${index + 1}`"
       :showPageAndExercise="true"

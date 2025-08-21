@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { type Textbook, useAuthenticatedClient } from './apiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from './assert'
-import { preprocess as preprocessAdaptation } from './adaptations'
 import { useBreadcrumbsStore } from './BreadcrumbsStore'
+import { preprocess as preprocessAdaptation } from './adaptations'
 
 const props = defineProps<{
   id: string
@@ -63,10 +63,18 @@ function refreshIfNeeded() {
 
 function needsRefresh() {
   assert(textbook.value !== null)
-  for (const adaptationBatch of textbook.value.adaptationBatches) {
-    for (const adaptation of adaptationBatch.adaptations) {
-      if (preprocessAdaptation(adaptation).status.kind === 'inProgress') {
+  for (const range of textbook.value.ranges) {
+    for (const page of range.pages) {
+      if (page.inProgress) {
         return true
+      }
+      for (const exercise of page.exercises) {
+        if (exercise.exerciseClass === null) {
+          return true
+        }
+        if (exercise.adaptation !== null && preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress') {
+          return true
+        }
       }
     }
   }

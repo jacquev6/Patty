@@ -4,11 +4,11 @@ import typing
 
 import sqlalchemy as sql
 
-from .. import database_utils
+from . import assistant_responses
 from . import llm
-from ..adapted import Exercise
-from .adaptation import AssistantInvalidJsonError, AssistantNotJsonError, AssistantUnknownError, AssistantSuccess
-from ..orm_models import Adaptation
+from . import orm_models as db
+from .. import database_utils
+from .adapted import Exercise
 
 
 def log(message: str) -> None:
@@ -27,7 +27,10 @@ LlmMessage = (
 
 def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     adaptations = (
-        session.query(Adaptation).filter(Adaptation._initial_assistant_response == sql.null()).limit(parallelism).all()
+        session.query(db.Adaptation)
+        .filter(db.Adaptation._initial_assistant_response == sql.null())
+        .limit(parallelism)
+        .all()
     )
     if len(adaptations) > 0:
         log(
@@ -36,11 +39,11 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
     return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 
-async def submit_adaptation(adaptation: Adaptation) -> None:
-    response_format = adaptation.strategy.settings.response_specification.make_response_format()
+async def submit_adaptation(adaptation: db.Adaptation) -> None:
+    response_format = adaptation.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [
-        llm.SystemMessage(content=adaptation.strategy.settings.system_prompt),
+        llm.SystemMessage(content=adaptation.settings.system_prompt),
         llm.UserMessage(content=adaptation.exercise.full_text),
     ]
 
@@ -48,24 +51,26 @@ async def submit_adaptation(adaptation: Adaptation) -> None:
     # (re-submitting failing adaptation again and again)
     try:
         log(f"Submitting adaptation {adaptation.id}")
-        response = await adaptation.strategy.model.complete(messages, response_format)
+        response = await adaptation.model.complete(messages, response_format)
     except llm.InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = AssistantInvalidJsonError(
+        adaptation.initial_assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
         log(f"Error 'not JSON' on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = AssistantNotJsonError(kind="error", error="not-json", text=error.text)
+        adaptation.initial_assistant_response = assistant_responses.NotJsonError(
+            kind="error", error="not-json", text=error.text
+        )
     except Exception:
         log(f"UNEXPECTED ERROR on adaptation {adaptation.id}")
-        adaptation.initial_assistant_response = AssistantUnknownError(kind="error", error="unknown")
+        adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
         traceback.print_exc()
     else:
         log(f"Success on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [response.raw_conversation]
-        adaptation.initial_assistant_response = AssistantSuccess(
+        adaptation.initial_assistant_response = assistant_responses.Success(
             kind="success", exercise=Exercise(**response.message.content.model_dump())
         )

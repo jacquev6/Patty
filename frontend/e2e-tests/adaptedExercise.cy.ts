@@ -279,11 +279,10 @@ describe('The autonomous HTML for a textbook', () => {
     cy.get('a').eq(3).should('have.text', 'Exo identifié par texte / 5')
 
     cy.get('[data-cy="page-number-filter"]').type('{selectAll}40')
-    cy.get('a').should('have.length', 4)
+    cy.get('a').should('have.length', 3)
     cy.get('a').eq(0).should('have.text', 'Exercice 4')
     cy.get('a').eq(1).should('have.text', 'Exercice 6')
     cy.get('a').eq(2).should('have.text', 'Exercice 8')
-    cy.get('a').eq(3).should('have.text', 'Exercice 30')
   })
 
   it('has working links', () => {
@@ -314,13 +313,12 @@ describe('The autonomous HTML for a textbook', () => {
 
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('40')
-    cy.get('a').should('have.length', 6)
+    cy.get('a').should('have.length', 5)
     cy.get('a').eq(0).should('have.text', 'Exercice 1 - Word')
     cy.get('a').eq(1).should('have.text', 'Exercice 4')
     cy.get('a').eq(2).should('have.text', 'Exercice 6')
     cy.get('a').eq(3).should('have.text', 'Exercice 7 - Word')
     cy.get('a').eq(4).should('have.text', 'Exercice 8')
-    cy.get('a').eq(5).should('have.text', 'Exercice 30')
 
     cy.task('deleteFolder', Cypress.config('downloadsFolder'))
     cy.readFile(`${Cypress.config('downloadsFolder')}/P40Ex1.docx`).should('not.exist')

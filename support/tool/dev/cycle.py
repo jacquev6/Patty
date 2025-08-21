@@ -1,6 +1,5 @@
 import dataclasses
 import glob
-import itertools
 import os
 import shutil
 import subprocess
@@ -18,6 +17,8 @@ class DevelopmentCycleError(Exception):
 @dataclasses.dataclass
 class DevelopmentCycle:
     do_migration: bool
+    allow_outdated_database: bool
+    do_schema_revision: bool
     cost_money: bool
     do_backend: bool
     do_frontend: bool
@@ -43,23 +44,36 @@ class DevelopmentCycle:
                 exec_in_backend_container(
                     ["python", "-m", "patty", "restore-database", "--yes", "--patch-according-to-settings"]
                 )
-                existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
-                assert len(existing) <= 1
-                if len(existing) == 1:
-                    rev_id_options = ["--rev-id", os.path.basename(existing[0])[:-7]]
-                    os.unlink(existing[0])
-                else:
-                    rev_id_options = []
-                current = exec_alembic(["current"], capture=True).stdout.split(" ")[0]
-                expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1]
-                if current != expected:
-                    print(
-                        f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup?"
-                    )
-                    raise DevelopmentCycleError()
-                exec_alembic(["revision", "--autogenerate", "-m", "dev"] + rev_id_options)
-                input("Check (and fix) the generated migration file. Press enter to continue")
+                try:
+                    os.unlink("backend/patty/migrations/versions/check_check.py")
+                except FileNotFoundError:
+                    pass
+                if self.do_schema_revision:
+                    existing = glob.glob("backend/patty/migrations/versions/*_dev.py")
+                    assert len(existing) <= 1
+                    if len(existing) == 1:
+                        rev_id_options = ["--rev-id", os.path.basename(existing[0])[:-7]]
+                        os.unlink(existing[0])
+                    else:
+                        rev_id_options = []
+                    current = exec_alembic(["current"], capture=True).stdout.split(" ")[0].strip()
+                    expected = exec_alembic(["show", "head"], capture=True).stdout.splitlines()[0].split(" ")[1].strip()
+                    if current != expected:
+                        if self.allow_outdated_database:
+                            exec_alembic(["upgrade", "head"])
+                        else:
+                            raise DevelopmentCycleError(
+                                f"Current migration {current} does not match expected migration {expected}. Maybe you need to load a more recent backup? Or use option --allow-outdated-database."
+                            )
+                    exec_alembic(["revision", "--autogenerate", "--message", "dev"] + rev_id_options)
+                    input("Check (and fix) the generated migration file. Press enter to continue")
                 exec_alembic(["upgrade", "head"])
+                exec_alembic(["revision", "--autogenerate", "--message", "check", "--rev-id", "check"])
+                with open("backend/patty/migrations/versions/check_check.py", "r") as f:
+                    content = f.read()
+                    if "pass" not in content:
+                        raise DevelopmentCycleError("The check migration should not do anything\n" + content)
+                os.unlink("backend/patty/migrations/versions/check_check.py")
                 exec_in_backend_container(["python", "-m", "patty", "migrate-data"])
 
             if self.do_format:
@@ -123,7 +137,7 @@ class DevelopmentCycle:
                                     "--spec",
                                     spec[9:],
                                 ],
-                                env={"PATTY_UNIT_TESTING": "true"},
+                                env={"CYPRESS_PATTY_UNIT_TESTING": "true"},
                                 check=False,
                                 capture=True,
                                 mount=mounts,
@@ -132,84 +146,64 @@ class DevelopmentCycle:
                         )
 
                 component_failures: list[subprocess.CompletedProcess[str]] = []
-                result: subprocess.CompletedProcess[str]
-                for result in joblib.Parallel(n_jobs=5, return_as="generator_unordered")(
-                    joblib.delayed(run_in_frontend_container)(**job) for job in jobs
-                ):
-                    if result.returncode == 0:
-                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
-                    else:
-                        component_failures.append(result)
-                        print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
+                try:
+                    result: subprocess.CompletedProcess[str]
+                    for result in joblib.Parallel(n_jobs=5, return_as="generator_unordered")(
+                        joblib.delayed(run_in_frontend_container)(**job) for job in jobs
+                    ):
+                        if result.returncode == 0:
+                            print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
+                        else:
+                            component_failures.append(result)
+                            print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
+                finally:
+                    for component_failure in component_failures:
+                        print()
+                        title = f"{os.path.join('frontend', component_failure.args[-1])} {component_failure.args[-3]}: FAILED"
+                        print(title)
+                        print("=" * len(title))
+                        print(component_failure.stdout)
+                        print(component_failure.stderr)
 
-                for component_failure in component_failures:
-                    print()
-                    title = (
-                        f"{os.path.join('frontend', component_failure.args[-1])} {component_failure.args[-3]}: FAILED"
-                    )
-                    print(title)
-                    print("=" * len(title))
-                    print(component_failure.stdout)
-                    print(component_failure.stderr)
-
-                maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
+                    maybe_remove_screenshots_directories(self.frontend_specs, self.browsers)
 
                 if component_failures:
                     raise DevelopmentCycleError()
 
         if self.do_end_to_end:
             if self.do_test:
+                e2e_failures: list[subprocess.CompletedProcess[str]] = []
                 try:
-                    e2e_failures = list(
-                        itertools.chain.from_iterable(
-                            joblib.Parallel(n_jobs=1, return_as="list")(
-                                joblib.delayed(run_e2e_tests)(
-                                    self.end_to_end_specs, browser, clear=self.accept_visual_diffs
-                                )
-                                for browser in self.browsers
-                            )
-                        )
-                    )
+                    for browser in self.browsers:
+                        for spec in self.end_to_end_specs:
+                            mounts = make_screenshots_directory(spec, browser, clear=self.accept_visual_diffs)
 
+                            result = run_in_frontend_container(
+                                command=["npx", "cypress", "run", "--e2e", "--browser", browser, "--spec", spec[9:]],
+                                env={"CYPRESS_PATTY_UNIT_TESTING": "true"},
+                                check=False,
+                                capture=True,
+                                mount=mounts,
+                                quiet=True,
+                            )
+                            if result.returncode == 0:
+                                print(f"{spec} {browser}: OK")
+                            else:
+                                print(f"{spec} {browser}: FAILED")
+                                e2e_failures.append(result)
+                finally:
                     for e2e_failure in e2e_failures:
                         print()
-                        print(e2e_failure)
-                finally:
+                        title = f"{os.path.join('frontend', e2e_failure.args[-1])} {e2e_failure.args[-3]}: FAILED"
+                        print(title)
+                        print("=" * len(title))
+                        print(e2e_failure.stdout)
+                        print(e2e_failure.stderr)
+
                     maybe_remove_screenshots_directories(self.end_to_end_specs, self.browsers)
 
                 if e2e_failures:
                     raise DevelopmentCycleError()
-
-
-def run_e2e_tests(specs: list[str], browser: str, clear: bool) -> list[str]:
-    failures: list[str] = []
-    for spec in specs:
-        mounts = make_screenshots_directory(spec, browser, clear=clear)
-        result = run_in_frontend_container(
-            command=[
-                "npx",
-                "cypress",
-                "run",
-                "--e2e",
-                "--browser",
-                browser,
-                "--config",
-                "baseUrl=http://fanout:" + {"chromium": "8081", "electron": "8082", "firefox": "8083"}[browser],
-                "--spec",
-                spec[9:],
-            ],
-            check=False,
-            capture=True,
-            mount=mounts,
-            quiet=True,
-        )
-        if result.returncode == 0:
-            print(f"{spec} {browser}: OK")
-        else:
-            title = f"{spec} {browser}: FAILED"
-            print(title)
-            failures.append(f"{title}\n{'=' * len(title)}\n{result.stdout}\n{result.stderr}")
-    return failures
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:
@@ -239,9 +233,9 @@ def maybe_remove_screenshots_directories(specs: typing.Iterable[str], browsers: 
             shutil.rmtree(os.path.join(screenshots_path, "tmp"), ignore_errors=True)
             baseline_path = os.path.join(screenshots_path, "baseline")
             if not os.path.isdir(baseline_path) or os.listdir(baseline_path) == []:
-                shutil.rmtree(screenshots_path)
+                shutil.rmtree(screenshots_path, ignore_errors=True)
         if os.listdir(spec + ".screenshots") == []:
-            shutil.rmtree(spec + ".screenshots")
-    shutil.rmtree("frontend/cypress-image-diff-screenshots")
-    shutil.rmtree("frontend/cypress-image-diff-html-report")
-    shutil.rmtree("frontend/cypress/screenshots")
+            shutil.rmtree(spec + ".screenshots", ignore_errors=True)
+    shutil.rmtree("frontend/cypress-image-diff-screenshots", ignore_errors=True)
+    shutil.rmtree("frontend/cypress-image-diff-html-report", ignore_errors=True)
+    shutil.rmtree("frontend/cypress/screenshots", ignore_errors=True)

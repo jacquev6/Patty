@@ -14,9 +14,9 @@ CLASSIFICATION_MODELS_DIRECTORY_PATH = os.environ["PATTY_CLASSIFICATION_MODELS_D
 SECRET_JWT_KEY = os.environ["PATTY_SECRET_JWT_KEY"]
 # Hashed password can be generated with 'python -m patty hash-password <password>'
 HASHED_PASSWORD = os.environ["PATTY_HASHED_PASSWORD"]
-AUTHENTICATION_MAX_VALIDITY = pydantic.RootModel[datetime.timedelta](
-    os.environ["PATTY_AUTHENTICATION_MAX_VALIDITY"]  # type: ignore[arg-type]
-).root
+AUTHENTICATION_MAX_VALIDITY = (
+    pydantic.RootModel[datetime.timedelta].model_validate(os.environ["PATTY_AUTHENTICATION_MAX_VALIDITY"]).root
+)
 EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
 assert not EXTERNAL_EXERCISES_URL.endswith("/")
 PDF_FILES_URL = os.environ["PATTY_PDF_FILES_URL"]

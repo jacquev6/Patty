@@ -6,6 +6,7 @@ joblib-stubs
 mypy
 pandas-stubs
 ruff
+sqlparse
 types-boto3
 types-cachetools
 types-psycopg2

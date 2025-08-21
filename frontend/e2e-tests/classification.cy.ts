@@ -156,7 +156,7 @@ describe('The classification batch creation page', () => {
 
     cy.visit('/classification-batch-1')
     cy.get(
-      'p:contains("Exercise class VraiFaux did not have adaptation settings when this classification batch was submitted.")',
+      'p:contains("Exercise class VraiFaux did not have adaptation settings when this exercise was created.")',
     ).should('exist')
     cy.get('button:contains("Submit all adaptations in the same case")').click()
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
@@ -173,7 +173,7 @@ describe('The classification batch edition page', () => {
   })
 
   it("allows fixing an exercise's class", () => {
-    cy.get('h2:contains("Input 1: CocheMot (classified by model")').should('exist')
+    cy.get('h2:contains("Input 1:"):contains("CocheMot"):contains("classified by model")').should('exist')
     screenshot('classification-batch-edition-page')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-2')
     cy.get('span.edit').eq(0).click()
@@ -182,18 +182,18 @@ describe('The classification batch edition page', () => {
     cy.get('[data-cy="exercise-class"]').should('have.value', 'CocheMot')
     cy.get('[data-cy="exercise-class"]').select('CochePhrase')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
-    cy.get('h2:contains("Input 1: CochePhrase (fixed by Alice")').should('exist')
+    cy.get('h2:contains("Input 1:"):contains("CochePhrase"):contains("fixed by Alice")').should('exist')
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-3')
 
-    cy.get('h2:contains("Input 2: NoSettings (classified by model")').should('exist')
+    cy.get('h2:contains("Input 2:"):contains("NoSettings"):contains("classified by model")').should('exist')
     cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
     cy.get('span.edit').eq(1).click()
     cy.get('[data-cy="exercise-class"]').should('have.value', 'NoSettings')
     cy.get('[data-cy="exercise-class"]').select('CocheMot')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
-    cy.get('h2:contains("Input 2: CocheMot (fixed by Alice")').should('exist')
+    cy.get('h2:contains("Input 2:"):contains("CocheMot"):contains("fixed by Alice")').should('exist')
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('not.exist')
@@ -202,7 +202,7 @@ describe('The classification batch edition page', () => {
     cy.get('[data-cy="exercise-class"]').should('have.value', 'CocheMot')
     cy.get('[data-cy="exercise-class"]').select('NoSettings')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
-    cy.get('h2:contains("Input 2: NoSettings (fixed by Alice")').should('exist')
+    cy.get('h2:contains("Input 2:"):contains("NoSettings"):contains("fixed by Alice")').should('exist')
     cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
   })
 })

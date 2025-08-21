@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Literal
+from typing import Any, Literal
+
+import pydantic
 
 
-from .. import adapted
+from . import adapted
 from . import llm
 from ..any_json import JsonDict
 from ..api_utils import ApiModel
@@ -53,3 +55,7 @@ class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
 ConcreteLlmResponseSpecification = (
     JsonFromTextLlmResponseSpecification | JsonObjectLlmResponseSpecification | JsonSchemaLlmResponseSpecification
 )
+
+
+def validate(obj: Any) -> ConcreteLlmResponseSpecification:
+    return pydantic.RootModel[ConcreteLlmResponseSpecification].model_validate(obj).root

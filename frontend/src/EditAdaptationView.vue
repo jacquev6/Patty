@@ -38,24 +38,35 @@ onMounted(async () => {
     assert(response.data !== undefined)
     apiAdaptation.value = response.data
 
-    const breadcrumbs: Breadcrumbs = [{ textKey: 'sandbox' }]
-    if (apiAdaptation.value.extractionBatchId !== null) {
+    const breadcrumbs: Breadcrumbs = []
+    if (apiAdaptation.value.textbookId === null) {
+      breadcrumbs.push({ textKey: 'sandbox' })
+      if (apiAdaptation.value.extractionBatchId !== null) {
+        breadcrumbs.push({
+          textKey: 'existingExtractionBatch',
+          textArgs: { id: apiAdaptation.value.extractionBatchId },
+          to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
+        })
+      } else if (apiAdaptation.value.classificationBatchId !== null) {
+        breadcrumbs.push({
+          textKey: 'existingClassificationBatch',
+          textArgs: { id: apiAdaptation.value.classificationBatchId },
+          to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
+        })
+      } else if (apiAdaptation.value.adaptationBatchId !== null) {
+        breadcrumbs.push({
+          textKey: 'existingAdaptationBatch',
+          textArgs: { id: apiAdaptation.value.adaptationBatchId },
+          to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
+        })
+      }
+    } else {
+      assert(apiAdaptation.value.textbookTitle !== null)
+      breadcrumbs.push({ textKey: 'textbooks' })
       breadcrumbs.push({
-        textKey: 'existingExtractionBatch',
-        textArgs: { id: apiAdaptation.value.extractionBatchId },
-        to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
-      })
-    } else if (apiAdaptation.value.classificationBatchId !== null) {
-      breadcrumbs.push({
-        textKey: 'existingClassificationBatch',
-        textArgs: { id: apiAdaptation.value.classificationBatchId },
-        to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
-      })
-    } else if (apiAdaptation.value.adaptationBatchId !== null) {
-      breadcrumbs.push({
-        textKey: 'existingAdaptationBatch',
-        textArgs: { id: apiAdaptation.value.adaptationBatchId },
-        to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
+        textKey: 'existingTextbook',
+        textArgs: { title: apiAdaptation.value.textbookTitle },
+        to: { name: 'textbook', params: { id: apiAdaptation.value.textbookId } },
       })
     }
 
