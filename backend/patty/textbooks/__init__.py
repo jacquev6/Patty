@@ -1,6 +1,6 @@
 from .orm_models import (
     ExerciseLocationTextbook as ExerciseLocationTextbook,
     PageExtractionCreationByTextbook as PageExtractionCreationByTextbook,
-    ExtractionBatch as ExtractionBatch,
+    TextbookExtractionBatch as TextbookExtractionBatch,
     Textbook as Textbook,
 )

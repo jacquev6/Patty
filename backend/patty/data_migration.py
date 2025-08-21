@@ -160,7 +160,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                 sandbox.extraction.SandboxExtractionBatch(
                     created_at=old_extraction_batch.created_at,
                     created_by=old_extraction_batch.created_by_username,
-                    pdf_range=pdf_range,
+                    pdf_file_range=pdf_range,
                     settings=settings,
                     model=the_only_extraction_model,
                     run_classification=old_extraction_batch.run_classification,
@@ -183,10 +183,10 @@ def do_migrate_data(session: database_utils.Session) -> None:
             add(
                 old_page_extraction.id,
                 extraction.PageExtraction(
-                    created=sandbox.extraction.PageExtractionCreationBySandboxExtractionBatch(
+                    created=sandbox.extraction.PageExtractionCreationBySandboxBatch(
                         at=old_page_extraction.created_at, sandbox_extraction_batch=sandbox_extraction_batch
                     ),
-                    pdf_range=sandbox_extraction_batch.pdf_range,
+                    pdf_file_range=sandbox_extraction_batch.pdf_file_range,
                     pdf_page_number=old_page_extraction.page_number,
                     settings=sandbox_extraction_batch.settings,
                     model=sandbox_extraction_batch.model,
@@ -216,7 +216,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                 else adaptation.llm.validate(old_classification_batch.model_for_adaptation)
             )
 
-            classification_chunk_created: classification.ExerciseClassificationChunkCreation
+            classification_chunk_created: classification.ClassificationChunkCreation
             if old_classification_batch.created_by_username is not None:
                 classification_batch = sandbox.classification.SandboxClassificationBatch(
                     created_at=old_classification_batch.created_at,
@@ -224,16 +224,14 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     model_for_adaptation=model_for_adaptation,
                 )
                 add(old_classification_batch.id, classification_batch)
-                classification_chunk_created = (
-                    sandbox.classification.ExerciseClassificationChunkCreationBySandboxClassificationBatch(
-                        at=old_classification_batch.created_at, sandbox_classification_batch=classification_batch
-                    )
+                classification_chunk_created = sandbox.classification.ClassificationChunkCreationBySandboxBatch(
+                    at=old_classification_batch.created_at, sandbox_classification_batch=classification_batch
                 )
             elif old_classification_batch.created_by_page_extraction_id is not None:
                 page_extraction = session.get_one(
                     extraction.PageExtraction, old_classification_batch.created_by_page_extraction_id
                 )
-                classification_chunk_created = extraction.ExerciseClassificationChunkCreationByPageExtraction(
+                classification_chunk_created = extraction.ClassificationChunkCreationByPageExtraction(
                     at=old_classification_batch.created_at, page_extraction=page_extraction
                 )
             else:
@@ -241,7 +239,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
 
             add(
                 old_classification_batch.id,
-                classification.ExerciseClassificationChunk(
+                classification.ClassificationChunk(
                     created=classification_chunk_created, model_for_adaptation=model_for_adaptation
                 ),
             )
@@ -258,9 +256,9 @@ def do_migrate_data(session: database_utils.Session) -> None:
                 )
             elif old_exercise_class.created_by_classification_batch_id is not None:
                 classification_chunk = session.get_one(
-                    classification.ExerciseClassificationChunk, old_exercise_class.created_by_classification_batch_id
+                    classification.ClassificationChunk, old_exercise_class.created_by_classification_batch_id
                 )
-                exercise_class_created = classification.ExerciseClassCreationByClassificationChunk(
+                exercise_class_created = classification.ExerciseClassCreationByChunk(
                     at=old_exercise_class.created_at, classification_chunk=classification_chunk
                 )
 
@@ -286,18 +284,16 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     adaptation.ExerciseClass, old_adaptation_strategy_settings.exercise_class_id
                 )
 
-            parent: adaptation.ExerciseAdaptationSettings | None
+            parent: adaptation.AdaptationSettings | None
             if old_adaptation_strategy_settings.parent_id is None:
                 parent = None
             else:
                 session.flush()
-                parent = session.get_one(
-                    adaptation.ExerciseAdaptationSettings, old_adaptation_strategy_settings.parent_id
-                )
+                parent = session.get_one(adaptation.AdaptationSettings, old_adaptation_strategy_settings.parent_id)
 
             add(
                 old_adaptation_strategy_settings.id,
-                adaptation.ExerciseAdaptationSettings(
+                adaptation.AdaptationSettings(
                     created_at=old_adaptation_strategy_settings.created_at,
                     created_by=old_adaptation_strategy_settings.created_by_username,
                     exercise_class=exercise_class,
@@ -317,7 +313,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
             exercise_class = session.get_one(adaptation.ExerciseClass, old_exercise_class.id)
             if old_exercise_class.latest_strategy_settings_id is not None:
                 exercise_class.latest_strategy_settings = session.get_one(
-                    adaptation.ExerciseAdaptationSettings, old_exercise_class.latest_strategy_settings_id
+                    adaptation.AdaptationSettings, old_exercise_class.latest_strategy_settings_id
                 )
 
         for old_adaptation_batch in session.execute(
@@ -325,7 +321,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
         ).scalars():
             strategy = session.get_one(to_be_deleted.OldAdaptationStrategy, old_adaptation_batch.strategy_id)
             model = adaptation.llm.validate(strategy.model)
-            adaptation_settings = session.get_one(adaptation.ExerciseAdaptationSettings, strategy.settings_id)
+            adaptation_settings = session.get_one(adaptation.AdaptationSettings, strategy.settings_id)
 
             add(
                 old_adaptation_batch.id,
@@ -395,11 +391,10 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     and old_adaptable_exercise.classified_by_classification_batch_id is not None
                 ):
                     classification_chunk = session.get_one(
-                        classification.ExerciseClassificationChunk,
-                        old_adaptable_exercise.classified_by_classification_batch_id,
+                        classification.ClassificationChunk, old_adaptable_exercise.classified_by_classification_batch_id
                     )
                     session.add(
-                        classification.ExerciseClassificationByClassificationChunk(
+                        classification.ClassificationByChunk(
                             exercise=exercise,
                             at=old_adaptable_exercise.classified_at - datetime.timedelta(seconds=1),
                             classification_chunk=classification_chunk,
@@ -407,7 +402,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                         )
                     )
                     session.add(
-                        classification.ExerciseClassificationByUser(
+                        classification.ClassificationByUser(
                             exercise=exercise,
                             at=old_adaptable_exercise.classified_at,
                             username=old_adaptable_exercise.classified_by_username,
@@ -419,11 +414,10 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     and old_adaptable_exercise.classified_by_classification_batch_id is not None
                 ):
                     classification_chunk = session.get_one(
-                        classification.ExerciseClassificationChunk,
-                        old_adaptable_exercise.classified_by_classification_batch_id,
+                        classification.ClassificationChunk, old_adaptable_exercise.classified_by_classification_batch_id
                     )
                     session.add(
-                        classification.ExerciseClassificationByClassificationChunk(
+                        classification.ClassificationByChunk(
                             exercise=exercise,
                             at=old_adaptable_exercise.classified_at,
                             classification_chunk=classification_chunk,
@@ -435,7 +429,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
                     and old_adaptable_exercise.classified_by_classification_batch_id is None
                 ):
                     session.add(
-                        classification.ExerciseClassificationByUser(
+                        classification.ClassificationByUser(
                             exercise=exercise,
                             at=old_adaptable_exercise.classified_at,
                             username=old_adaptable_exercise.classified_by_username,
@@ -453,25 +447,25 @@ def do_migrate_data(session: database_utils.Session) -> None:
             exercise = session.get_one(adaptation.AdaptableExercise, old_adaptation.exercise_id)
             strategy = session.get_one(to_be_deleted.OldAdaptationStrategy, old_adaptation.strategy_id)
             adaptation_model = adaptation.llm.validate(strategy.model)
-            adaptation_settings = session.get_one(adaptation.ExerciseAdaptationSettings, strategy.settings_id)
+            adaptation_settings = session.get_one(adaptation.AdaptationSettings, strategy.settings_id)
 
-            adaptation_created: adaptation.ExerciseAdaptationCreation
+            adaptation_created: adaptation.AdaptationCreation
             if old_adaptation.adaptation_batch_id is not None:
                 adaptation_batch = session.get_one(
                     sandbox.adaptation.SandboxAdaptationBatch, old_adaptation.adaptation_batch_id
                 )
-                adaptation_created = sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                adaptation_created = sandbox.adaptation.AdaptationCreationBySandboxBatch(
                     at=old_adaptation.created_at, sandbox_adaptation_batch=adaptation_batch
                 )
             elif old_adaptation.classification_batch_id is not None:
                 classification_chunk = session.get_one(
-                    classification.ExerciseClassificationChunk, old_adaptation.classification_batch_id
+                    classification.ClassificationChunk, old_adaptation.classification_batch_id
                 )
-                adaptation_created = classification.ExerciseAdaptationCreationByClassificationChunk(
+                adaptation_created = classification.AdaptationCreationByChunk(
                     at=old_adaptation.created_at, classification_chunk=classification_chunk
                 )
             elif old_adaptation.created_by_username is not None:
-                adaptation_created = adaptation.ExerciseAdaptationCreationByUser(
+                adaptation_created = adaptation.AdaptationCreationByUser(
                     at=old_adaptation.created_at, username=old_adaptation.created_by_username
                 )
             else:
@@ -479,7 +473,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
 
             add(
                 old_adaptation.id,
-                adaptation.ExerciseAdaptation(
+                adaptation.Adaptation(
                     created=adaptation_created,
                     exercise=exercise,
                     model=adaptation_model,
@@ -508,9 +502,7 @@ def do_migrate_data(session: database_utils.Session) -> None:
 def fix_failed_adaptations(session: database_utils.Session) -> None:
     # Store a JSON null (as in old data) to avoid being retried by the submission daemon
     for adaptation_ in session.execute(
-        sql.select(adaptation.ExerciseAdaptation).where(
-            adaptation.ExerciseAdaptation._initial_assistant_response == sql.null()
-        )
+        sql.select(adaptation.Adaptation).where(adaptation.Adaptation._initial_assistant_response == sql.null())
     ).scalars():
         adaptation_._initial_assistant_response = {}
         session.flush()
@@ -571,7 +563,7 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
     for sandbox_extraction_batch in session.execute(sql.select(sandbox.extraction.SandboxExtractionBatch)).scalars():
         row = asdict(sandbox_extraction_batch)
         row["created_by_username"] = row.pop("created_by")
-        row["range_id"] = row.pop("pdf_range_id")
+        row["range_id"] = row.pop("pdf_file_range_id")
         row["strategy_id"] = row.pop("settings_id")
         row.pop("model")
         data["extraction_batches"].append(row)
@@ -613,10 +605,10 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
             row["exercise_class_id"] = (
                 None if exercise_classification.exercise_class is None else exercise_classification.exercise_class.id
             )
-            if isinstance(exercise_classification, classification.ExerciseClassificationByUser):
+            if isinstance(exercise_classification, classification.ClassificationByUser):
                 row["classified_at"] = asdict(exercise_classification)["at"]
                 row["classified_by_username"] = exercise_classification.username
-            elif isinstance(exercise_classification, classification.ExerciseClassificationByClassificationChunk):
+            elif isinstance(exercise_classification, classification.ClassificationByChunk):
                 row["classified_at"] = asdict(exercise_classification)["at"]
                 row["classified_by_classification_batch_id"] = exercise_classification.classification_chunk.id
             else:
@@ -635,28 +627,25 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
 
     for page_extraction in session.execute(sql.select(extraction.PageExtraction)).scalars():
         row = asdict(page_extraction)
-        assert isinstance(page_extraction.created, sandbox.extraction.PageExtractionCreationBySandboxExtractionBatch)
+        assert isinstance(page_extraction.created, sandbox.extraction.PageExtractionCreationBySandboxBatch)
         row["created_at"] = asdict(page_extraction.created)["at"]
         row["created_by_username"] = page_extraction.created.sandbox_extraction_batch.created_by
         row["extraction_batch_id"] = page_extraction.created.sandbox_extraction_batch.id
         row["page_number"] = row.pop("pdf_page_number")
-        row.pop("pdf_range_id")
+        row.pop("pdf_file_range_id")
         row.pop("settings_id")
         row.pop("model")
         row.pop("run_classification")
         row.pop("model_for_adaptation")
         data["page_extractions"].append(row)
 
-    for classification_chunk in session.execute(sql.select(classification.ExerciseClassificationChunk)).scalars():
+    for classification_chunk in session.execute(sql.select(classification.ClassificationChunk)).scalars():
         row = asdict(classification_chunk)
-        if isinstance(
-            classification_chunk.created,
-            sandbox.classification.ExerciseClassificationChunkCreationBySandboxClassificationBatch,
-        ):
+        if isinstance(classification_chunk.created, sandbox.classification.ClassificationChunkCreationBySandboxBatch):
             row["created_at"] = asdict(classification_chunk.created)["at"]
             row["created_by_username"] = classification_chunk.created.sandbox_classification_batch.created_by
             row["created_by_page_extraction_id"] = None
-        elif isinstance(classification_chunk.created, extraction.ExerciseClassificationChunkCreationByPageExtraction):
+        elif isinstance(classification_chunk.created, extraction.ClassificationChunkCreationByPageExtraction):
             row["created_at"] = asdict(classification_chunk.created)["at"]
             row["created_by_username"] = None
             row["created_by_page_extraction_id"] = classification_chunk.created.page_extraction.id
@@ -670,7 +659,7 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
             row["created_at"] = asdict(exercise_class.created)["at"]
             row["created_by_username"] = exercise_class.created.username
             row["created_by_classification_batch_id"] = None
-        elif isinstance(exercise_class.created, classification.ExerciseClassCreationByClassificationChunk):
+        elif isinstance(exercise_class.created, classification.ExerciseClassCreationByChunk):
             row["created_at"] = asdict(exercise_class.created)["at"]
             row["created_by_username"] = None
             row["created_by_classification_batch_id"] = exercise_class.created.classification_chunk.id
@@ -678,7 +667,7 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
             assert False
         data["exercise_classes"].append(row)
 
-    for adaptation_strategy_settings in session.execute(sql.select(adaptation.ExerciseAdaptationSettings)).scalars():
+    for adaptation_strategy_settings in session.execute(sql.select(adaptation.AdaptationSettings)).scalars():
         row = asdict(adaptation_strategy_settings)
         row["created_by_username"] = row.pop("created_by")
         if adaptation_strategy_settings.exercise_class is not None:
@@ -701,20 +690,18 @@ def gather_actual_data(session: database_utils.Session) -> dict[str, list[typing
         row.pop("model")
         data["adaptation_batches"].append(row)
 
-    for exercise_adaptation in session.execute(sql.select(adaptation.ExerciseAdaptation)).scalars():
+    for exercise_adaptation in session.execute(sql.select(adaptation.Adaptation)).scalars():
         row = asdict(exercise_adaptation)
         row["created_at"] = asdict(exercise_adaptation.created)["at"]
-        if isinstance(exercise_adaptation.created, adaptation.ExerciseAdaptationCreationByUser):
+        if isinstance(exercise_adaptation.created, adaptation.AdaptationCreationByUser):
             row["created_by_username"] = exercise_adaptation.created.username
             row["adaptation_batch_id"] = None
             row["classification_batch_id"] = None
-        elif isinstance(
-            exercise_adaptation.created, sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch
-        ):
+        elif isinstance(exercise_adaptation.created, sandbox.adaptation.AdaptationCreationBySandboxBatch):
             row["created_by_username"] = exercise_adaptation.created.sandbox_adaptation_batch.created_by
             row["adaptation_batch_id"] = exercise_adaptation.created.sandbox_adaptation_batch.id
             row["classification_batch_id"] = None
-        elif isinstance(exercise_adaptation.created, classification.ExerciseAdaptationCreationByClassificationChunk):
+        elif isinstance(exercise_adaptation.created, classification.AdaptationCreationByChunk):
             row["created_by_username"] = None
             row["adaptation_batch_id"] = None
             row["classification_batch_id"] = exercise_adaptation.created.classification_chunk.id

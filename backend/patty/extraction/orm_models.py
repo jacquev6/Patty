@@ -11,7 +11,7 @@ from . import llm
 from .. import adaptation
 from ..adaptation import AdaptableExercise
 from ..any_json import JsonDict
-from ..classification import ExerciseClassificationChunkCreation, ModelForAdaptationMixin
+from ..classification import ClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises import ExerciseCreation, ExerciseLocationMaybePageAndNumber
 
@@ -92,7 +92,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         self,
         *,
         created: PageExtractionCreation,
-        pdf_range: PdfFileRange,
+        pdf_file_range: PdfFileRange,
         pdf_page_number: int,
         settings: ExtractionSettings,
         model: llm.ConcreteModel,
@@ -102,7 +102,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
     ) -> None:
         super().__init__()
         self.created = created
-        self.pdf_range = pdf_range
+        self.pdf_file_range = pdf_file_range
         self.pdf_page_number = pdf_page_number
         self.settings = settings
         self.model = model
@@ -114,8 +114,10 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
 
     created: orm.Mapped[PageExtractionCreation] = orm.relationship(back_populates="page_extraction")
 
-    pdf_range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
-    pdf_range: orm.Mapped[PdfFileRange] = orm.relationship(foreign_keys=[pdf_range_id], remote_side=[PdfFileRange.id])
+    pdf_file_range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PdfFileRange.id))
+    pdf_file_range: orm.Mapped[PdfFileRange] = orm.relationship(
+        foreign_keys=[pdf_file_range_id], remote_side=[PdfFileRange.id]
+    )
     pdf_page_number: orm.Mapped[int]
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionSettings.id))
@@ -230,15 +232,15 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
     )
 
 
-class ExerciseClassificationChunkCreationByPageExtraction(ExerciseClassificationChunkCreation):
-    __tablename__ = "exercise_classification_chunk_creations__by_page_extraction"
+class ClassificationChunkCreationByPageExtraction(ClassificationChunkCreation):
+    __tablename__ = "classification_chunk_creations__by_page_extraction"
     __mapper_args__ = {"polymorphic_identity": "by_page_extraction"}
 
     def __init__(self, *, at: datetime.datetime, page_extraction: PageExtraction) -> None:
         super().__init__(at=at)
         self.page_extraction = page_extraction
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassificationChunkCreation.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationChunkCreation.id), primary_key=True)
 
     page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
     page_extraction: orm.Mapped[PageExtraction] = orm.relationship(

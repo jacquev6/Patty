@@ -20,7 +20,7 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
         *,
         created_by: str,
         created_at: datetime.datetime,
-        pdf_range: extraction.PdfFileRange,
+        pdf_file_range: extraction.PdfFileRange,
         settings: extraction.ExtractionSettings,
         model: extraction.llm.ConcreteModel,
         run_classification: bool,
@@ -29,7 +29,7 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
         super().__init__()
         self.created_by = created_by
         self.created_at = created_at
-        self.pdf_range = pdf_range
+        self.pdf_file_range = pdf_file_range
         self.settings = settings
         self.model = model
         self.run_classification = run_classification
@@ -37,9 +37,9 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    pdf_range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(extraction.PdfFileRange.id))
-    pdf_range: orm.Mapped[extraction.PdfFileRange] = orm.relationship(
-        foreign_keys=[pdf_range_id], remote_side=[extraction.PdfFileRange.id]
+    pdf_file_range_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(extraction.PdfFileRange.id))
+    pdf_file_range: orm.Mapped[extraction.PdfFileRange] = orm.relationship(
+        foreign_keys=[pdf_file_range_id], remote_side=[extraction.PdfFileRange.id]
     )
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(extraction.ExtractionSettings.id))
@@ -59,12 +59,12 @@ class SandboxExtractionBatch(OrmBase, CreatedByUserMixin, ModelForAdaptationMixi
 
     run_classification: orm.Mapped[bool]
 
-    page_extraction_creations: orm.Mapped[list[PageExtractionCreationBySandboxExtractionBatch]] = orm.relationship(
+    page_extraction_creations: orm.Mapped[list[PageExtractionCreationBySandboxBatch]] = orm.relationship(
         back_populates="sandbox_extraction_batch"
     )
 
 
-class PageExtractionCreationBySandboxExtractionBatch(extraction.PageExtractionCreation):
+class PageExtractionCreationBySandboxBatch(extraction.PageExtractionCreation):
     __tablename__ = "page_extraction_creations__by_sandbox_batch"
     __mapper_args__ = {"polymorphic_identity": "by_sandbox_batch"}
 

@@ -1,4 +1,4 @@
 from .orm_models import (
-    ExerciseClassificationChunkCreationBySandboxClassificationBatch as ExerciseClassificationChunkCreationBySandboxClassificationBatch,
+    ClassificationChunkCreationBySandboxBatch as ClassificationChunkCreationBySandboxBatch,
     SandboxClassificationBatch as SandboxClassificationBatch,
 )

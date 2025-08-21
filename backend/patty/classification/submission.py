@@ -37,10 +37,10 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
 
     chunk = (
         session.execute(
-            sql.select(db.ExerciseClassificationChunk)
-            .options(orm.load_only(db.ExerciseClassificationChunk.id))
-            .join(db.ExerciseClassificationByClassificationChunk)
-            .where(db.ExerciseClassificationByClassificationChunk.exercise_class == sql.null())
+            sql.select(db.ClassificationChunk)
+            .options(orm.load_only(db.ClassificationChunk.id))
+            .join(db.ClassificationByChunk)
+            .where(db.ClassificationByChunk.exercise_class == sql.null())
             .distinct()
         )
         .scalars()
@@ -68,7 +68,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             exercise_class = exercise_classes_by_name.get(exercise_class_name, None)
             if exercise_class is None:
                 exercise_class = adaptation.ExerciseClass(
-                    created=db.ExerciseClassCreationByClassificationChunk(at=now, classification_chunk=chunk),
+                    created=db.ExerciseClassCreationByChunk(at=now, classification_chunk=chunk),
                     name=exercise_class_name,
                     latest_strategy_settings=None,
                 )
@@ -78,8 +78,8 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             classification.at = now
 
             if chunk.model_for_adaptation is not None and exercise_class.latest_strategy_settings is not None:
-                exercise_adaptation = adaptation.ExerciseAdaptation(
-                    created=db.ExerciseAdaptationCreationByClassificationChunk(at=now, classification_chunk=chunk),
+                exercise_adaptation = adaptation.Adaptation(
+                    created=db.AdaptationCreationByChunk(at=now, classification_chunk=chunk),
                     exercise=classification.exercise,
                     settings=exercise_class.latest_strategy_settings,
                     model=chunk.model_for_adaptation,

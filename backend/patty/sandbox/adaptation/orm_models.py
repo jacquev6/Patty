@@ -18,7 +18,7 @@ class SandboxAdaptationBatch(OrmBase, CreatedByUserMixin):
         *,
         created_by: str,
         created_at: datetime.datetime,
-        settings: adaptation.ExerciseAdaptationSettings,
+        settings: adaptation.AdaptationSettings,
         model: adaptation.llm.ConcreteModel,
     ) -> None:
         super().__init__()
@@ -29,9 +29,9 @@ class SandboxAdaptationBatch(OrmBase, CreatedByUserMixin):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.ExerciseAdaptationSettings.id))
-    settings: orm.Mapped[adaptation.ExerciseAdaptationSettings] = orm.relationship(
-        foreign_keys=[settings_id], remote_side=[adaptation.ExerciseAdaptationSettings.id]
+    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.AdaptationSettings.id))
+    settings: orm.Mapped[adaptation.AdaptationSettings] = orm.relationship(
+        foreign_keys=[settings_id], remote_side=[adaptation.AdaptationSettings.id]
     )
 
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
@@ -44,20 +44,20 @@ class SandboxAdaptationBatch(OrmBase, CreatedByUserMixin):
     def model(self, value: adaptation.llm.ConcreteModel) -> None:
         self._model = value.model_dump()
 
-    adaptation_creations: orm.Mapped[list[ExerciseAdaptationCreationBySandboxAdaptationBatch]] = orm.relationship(
+    adaptation_creations: orm.Mapped[list[AdaptationCreationBySandboxBatch]] = orm.relationship(
         back_populates="sandbox_adaptation_batch"
     )
 
 
-class ExerciseAdaptationCreationBySandboxAdaptationBatch(adaptation.ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_sandbox_batch"
+class AdaptationCreationBySandboxBatch(adaptation.AdaptationCreation):
+    __tablename__ = "adaptation_creations__by_sandbox_batch"
     __mapper_args__ = {"polymorphic_identity": "by_sandbox_batch"}
 
     def __init__(self, *, at: datetime.datetime, sandbox_adaptation_batch: SandboxAdaptationBatch) -> None:
         super().__init__(at=at)
         self.sandbox_adaptation_batch = sandbox_adaptation_batch
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.ExerciseAdaptationCreation.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.AdaptationCreation.id), primary_key=True)
 
     sandbox_adaptation_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxAdaptationBatch.id))
     sandbox_adaptation_batch: orm.Mapped[SandboxAdaptationBatch] = orm.relationship(

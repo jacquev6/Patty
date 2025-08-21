@@ -1,13 +1,13 @@
 from . import submission as submission
 from .orm_models import (
-    ExerciseAdaptationCreationByClassificationChunk as ExerciseAdaptationCreationByClassificationChunk,
+    AdaptationCreationByChunk as AdaptationCreationByChunk,
     ExerciseClassCreation as ExerciseClassCreation,
-    ExerciseClassCreationByClassificationChunk as ExerciseClassCreationByClassificationChunk,
+    ExerciseClassCreationByChunk as ExerciseClassCreationByChunk,
     ExerciseClassCreationByUser as ExerciseClassCreationByUser,
-    ExerciseClassification as ExerciseClassification,
-    ExerciseClassificationByClassificationChunk as ExerciseClassificationByClassificationChunk,
-    ExerciseClassificationByUser as ExerciseClassificationByUser,
-    ExerciseClassificationChunk as ExerciseClassificationChunk,
-    ExerciseClassificationChunkCreation as ExerciseClassificationChunkCreation,
+    Classification as Classification,
+    ClassificationByChunk as ClassificationByChunk,
+    ClassificationByUser as ClassificationByUser,
+    ClassificationChunk as ClassificationChunk,
+    ClassificationChunkCreation as ClassificationChunkCreation,
     ModelForAdaptationMixin as ModelForAdaptationMixin,
 )

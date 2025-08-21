@@ -56,7 +56,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
         assert session is not None
         return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
 
-    extraction_batches: orm.Mapped[list[ExtractionBatch]] = orm.relationship(back_populates="textbook")
+    extraction_batches: orm.Mapped[list[TextbookExtractionBatch]] = orm.relationship(back_populates="textbook")
 
 
 class ExerciseLocationTextbook(ExerciseLocation):
@@ -83,7 +83,7 @@ class ExerciseLocationTextbook(ExerciseLocation):
     removed_from_textbook: orm.Mapped[bool]
 
 
-class ExtractionBatch(OrmBase, CreatedByUserMixin):
+class TextbookExtractionBatch(OrmBase, CreatedByUserMixin):
     __tablename__ = "textbook_extraction_batches"
 
     def __init__(
@@ -144,7 +144,7 @@ class ExtractionBatch(OrmBase, CreatedByUserMixin):
         self._model_for_adaptation = value.model_dump()
 
     page_extraction_creations: orm.Mapped[list[PageExtractionCreationByTextbook]] = orm.relationship(
-        back_populates="extraction_batch"
+        back_populates="textbook_extraction_batch"
     )
 
 
@@ -152,15 +152,17 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
     __tablename__ = "page_extraction_creations__by_textbook"
     __mapper_args__ = {"polymorphic_identity": "by_textbook"}
 
-    def __init__(self, *, at: datetime.datetime, extraction_batch: ExtractionBatch) -> None:
+    def __init__(self, *, at: datetime.datetime, textbook_extraction_batch: TextbookExtractionBatch) -> None:
         super().__init__(at=at)
-        self.extraction_batch = extraction_batch
+        self.textbook_extraction_batch = textbook_extraction_batch
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
 
-    extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExtractionBatch.id))
-    extraction_batch: orm.Mapped[ExtractionBatch] = orm.relationship(
-        foreign_keys=[extraction_batch_id], remote_side=[ExtractionBatch.id], back_populates="page_extraction_creations"
+    textbook_extraction_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(TextbookExtractionBatch.id))
+    textbook_extraction_batch: orm.Mapped[TextbookExtractionBatch] = orm.relationship(
+        foreign_keys=[textbook_extraction_batch_id],
+        remote_side=[TextbookExtractionBatch.id],
+        back_populates="page_extraction_creations",
     )
 
 

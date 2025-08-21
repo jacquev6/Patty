@@ -255,7 +255,7 @@ class FixturesCreator:
     def create_seed_data(self) -> None:
         # Adaptation
         settings = self.add(
-            adaptation.ExerciseAdaptationSettings(
+            adaptation.AdaptationSettings(
                 created_by="Patty",
                 created_at=created_at,
                 system_prompt=make_default_adaptation_prompt(),
@@ -298,9 +298,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                    at=created_at, sandbox_adaptation_batch=batch
-                )
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(at=created_at, sandbox_adaptation_batch=batch)
             ),
             settings=settings,
             model=model,
@@ -316,9 +314,9 @@ class FixturesCreator:
 
     def make_dummy_adaptation_strategy_settings(
         self, system_prompt: str = "Blah blah blah."
-    ) -> adaptation.ExerciseAdaptationSettings:
+    ) -> adaptation.AdaptationSettings:
         return self.add(
-            adaptation.ExerciseAdaptationSettings(
+            adaptation.AdaptationSettings(
                 created_by="Patty",
                 created_at=created_at,
                 system_prompt=system_prompt,
@@ -374,13 +372,13 @@ class FixturesCreator:
     def make_successful_adaptation(
         self,
         *,
-        created: adaptation.ExerciseAdaptationCreation,
-        settings: adaptation.ExerciseAdaptationSettings,
+        created: adaptation.AdaptationCreation,
+        settings: adaptation.AdaptationSettings,
         model: adaptation.llm.ConcreteModel,
         exercise: adaptation.AdaptableExercise,
-    ) -> adaptation.ExerciseAdaptation:
+    ) -> adaptation.Adaptation:
         return self.add(
-            adaptation.ExerciseAdaptation(
+            adaptation.Adaptation(
                 created=created,
                 settings=settings,
                 model=model,
@@ -518,13 +516,13 @@ class FixturesCreator:
     def make_in_progress_adaptation(
         self,
         *,
-        created: adaptation.ExerciseAdaptationCreation,
-        settings: adaptation.ExerciseAdaptationSettings,
+        created: adaptation.AdaptationCreation,
+        settings: adaptation.AdaptationSettings,
         model: adaptation.llm.ConcreteModel,
         exercise: adaptation.AdaptableExercise,
-    ) -> adaptation.ExerciseAdaptation:
+    ) -> adaptation.Adaptation:
         exercise_adaptation = self.add(
-            adaptation.ExerciseAdaptation(
+            adaptation.Adaptation(
                 created=created,
                 settings=settings,
                 model=model,
@@ -543,13 +541,13 @@ class FixturesCreator:
     def make_invalid_json_adaptation(
         self,
         *,
-        created: adaptation.ExerciseAdaptationCreation,
-        settings: adaptation.ExerciseAdaptationSettings,
+        created: adaptation.AdaptationCreation,
+        settings: adaptation.AdaptationSettings,
         model: adaptation.llm.ConcreteModel,
         exercise: adaptation.AdaptableExercise,
-    ) -> adaptation.ExerciseAdaptation:
+    ) -> adaptation.Adaptation:
         return self.add(
-            adaptation.ExerciseAdaptation(
+            adaptation.Adaptation(
                 created=created,
                 settings=settings,
                 model=model,
@@ -566,13 +564,13 @@ class FixturesCreator:
     def make_not_json_adaptation(
         self,
         *,
-        created: adaptation.ExerciseAdaptationCreation,
-        settings: adaptation.ExerciseAdaptationSettings,
+        created: adaptation.AdaptationCreation,
+        settings: adaptation.AdaptationSettings,
         model: adaptation.llm.ConcreteModel,
         exercise: adaptation.AdaptableExercise,
-    ) -> adaptation.ExerciseAdaptation:
+    ) -> adaptation.Adaptation:
         return self.add(
-            adaptation.ExerciseAdaptation(
+            adaptation.Adaptation(
                 created=created,
                 settings=settings,
                 model=model,
@@ -591,7 +589,7 @@ class FixturesCreator:
         model = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
         self.make_successful_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(
                     at=created_at,
                     sandbox_adaptation_batch=self.add(
                         sandbox.adaptation.SandboxAdaptationBatch(
@@ -615,9 +613,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                    at=created_at, sandbox_adaptation_batch=batch
-                )
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(at=created_at, sandbox_adaptation_batch=batch)
             ),
             settings=settings,
             model=model,
@@ -625,9 +621,7 @@ class FixturesCreator:
         )
         self.make_in_progress_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                    at=created_at, sandbox_adaptation_batch=batch
-                )
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(at=created_at, sandbox_adaptation_batch=batch)
             ),
             settings=settings,
             model=model,
@@ -635,9 +629,7 @@ class FixturesCreator:
         )
         self.make_invalid_json_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                    at=created_at, sandbox_adaptation_batch=batch
-                )
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(at=created_at, sandbox_adaptation_batch=batch)
             ),
             settings=settings,
             model=model,
@@ -645,9 +637,7 @@ class FixturesCreator:
         )
         self.make_not_json_adaptation(
             created=self.add(
-                sandbox.adaptation.ExerciseAdaptationCreationBySandboxAdaptationBatch(
-                    at=created_at, sandbox_adaptation_batch=batch
-                )
+                sandbox.adaptation.AdaptationCreationBySandboxBatch(at=created_at, sandbox_adaptation_batch=batch)
             ),
             settings=settings,
             model=model,
@@ -703,7 +693,7 @@ class FixturesCreator:
             )
         )
         extraction_batch = self.add(
-            textbooks.ExtractionBatch(
+            textbooks.TextbookExtractionBatch(
                 created_by="Patty",
                 created_at=created_at,
                 pdf_file_range=pdf_file_range,
@@ -720,8 +710,10 @@ class FixturesCreator:
         )
         page_40_extraction = self.add(
             extraction.PageExtraction(
-                created=textbooks.PageExtractionCreationByTextbook(at=created_at, extraction_batch=extraction_batch),
-                pdf_range=pdf_file_range,
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=created_at, textbook_extraction_batch=extraction_batch
+                ),
+                pdf_file_range=pdf_file_range,
                 pdf_page_number=10,  # Page 40 in the textbook
                 settings=extraction_settings,
                 model=model_for_extraction,
@@ -844,8 +836,10 @@ class FixturesCreator:
         )
         page_42_extraction = self.add(
             extraction.PageExtraction(
-                created=textbooks.PageExtractionCreationByTextbook(at=created_at, extraction_batch=extraction_batch),
-                pdf_range=pdf_file_range,
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=created_at, textbook_extraction_batch=extraction_batch
+                ),
+                pdf_file_range=pdf_file_range,
                 pdf_page_number=12,  # Page 42 in the textbook
                 settings=extraction_settings,
                 model=model_for_extraction,
@@ -972,15 +966,15 @@ class FixturesCreator:
 
         mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
         page_40_classification_chunk = self.add(
-            classification.ExerciseClassificationChunk(
-                created=extraction.ExerciseClassificationChunkCreationByPageExtraction(
+            classification.ClassificationChunk(
+                created=extraction.ClassificationChunkCreationByPageExtraction(
                     at=created_at, page_extraction=page_40_extraction
                 ),
                 model_for_adaptation=model_for_adaptation,
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_4_page_40,
                 at=created_at,
                 classification_chunk=page_40_classification_chunk,
@@ -988,7 +982,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_6_page_40,
                 at=created_at,
                 classification_chunk=page_40_classification_chunk,
@@ -996,7 +990,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_8_page_40,
                 at=created_at,
                 classification_chunk=page_40_classification_chunk,
@@ -1004,7 +998,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_10_page_40,
                 at=created_at,
                 classification_chunk=page_40_classification_chunk,
@@ -1012,15 +1006,15 @@ class FixturesCreator:
             )
         )
         page_42_classification_chunk = self.add(
-            classification.ExerciseClassificationChunk(
-                created=extraction.ExerciseClassificationChunkCreationByPageExtraction(
+            classification.ClassificationChunk(
+                created=extraction.ClassificationChunkCreationByPageExtraction(
                     at=created_at, page_extraction=page_42_extraction
                 ),
                 model_for_adaptation=model_for_adaptation,
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_5_page_42,
                 at=created_at,
                 classification_chunk=page_42_classification_chunk,
@@ -1028,7 +1022,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_6_page_42,
                 at=created_at,
                 classification_chunk=page_42_classification_chunk,
@@ -1036,7 +1030,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_auto_dictée_page_42,
                 at=created_at,
                 classification_chunk=page_42_classification_chunk,
@@ -1044,7 +1038,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 exercise=exercise_text_page_42,
                 at=created_at,
                 classification_chunk=page_42_classification_chunk,
@@ -1055,7 +1049,7 @@ class FixturesCreator:
         assert mcq_exercise_class.latest_strategy_settings is not None
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_40_classification_chunk
                 )
             ),
@@ -1065,7 +1059,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_40_classification_chunk
                 )
             ),
@@ -1075,7 +1069,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_40_classification_chunk
                 )
             ),
@@ -1086,7 +1080,7 @@ class FixturesCreator:
         # No adaptation for exercise_10_page_40: check that it does not appear in the exported HTML
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_42_classification_chunk
                 )
             ),
@@ -1096,7 +1090,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_42_classification_chunk
                 )
             ),
@@ -1106,7 +1100,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_42_classification_chunk
                 )
             ),
@@ -1116,7 +1110,7 @@ class FixturesCreator:
         )
         self.make_successful_adaptation(
             created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
+                classification.AdaptationCreationByChunk(
                     at=created_at, classification_chunk=page_42_classification_chunk
                 )
             ),
@@ -1173,8 +1167,8 @@ class FixturesCreator:
             )
         )
         chunk = self.add(
-            classification.ExerciseClassificationChunk(
-                created=sandbox.classification.ExerciseClassificationChunkCreationBySandboxClassificationBatch(
+            classification.ClassificationChunk(
+                created=sandbox.classification.ClassificationChunkCreationBySandboxBatch(
                     at=created_at, sandbox_classification_batch=batch
                 ),
                 model_for_adaptation=model_for_adaptation,
@@ -1190,16 +1184,12 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 at=created_at, exercise=exe1, classification_chunk=chunk, exercise_class=class1
             )
         )
         self.make_successful_adaptation(
-            created=self.add(
-                classification.ExerciseAdaptationCreationByClassificationChunk(
-                    at=created_at, classification_chunk=chunk
-                )
-            ),
+            created=self.add(classification.AdaptationCreationByChunk(at=created_at, classification_chunk=chunk)),
             model=model_for_adaptation,
             settings=class1.latest_strategy_settings,
             exercise=exe1,
@@ -1214,7 +1204,7 @@ class FixturesCreator:
             )
         )
         self.add(
-            classification.ExerciseClassificationByClassificationChunk(
+            classification.ClassificationByChunk(
                 at=created_at, exercise=exe2, classification_chunk=chunk, exercise_class=class2
             )
         )

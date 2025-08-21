@@ -15,7 +15,7 @@ from ..database_utils import CreatedByUserMixin, OrmBase, OrderBy, annotate_new_
 from ..exercises import Exercise, ExerciseCreation, ExerciseLocation
 
 if typing.TYPE_CHECKING:
-    from ..classification import ExerciseClassCreation, ExerciseClassification
+    from ..classification import ExerciseClassCreation, Classification
 
 
 class AdaptableExercise(Exercise):
@@ -41,9 +41,9 @@ class AdaptableExercise(Exercise):
     instruction_hint_example_text: orm.Mapped[str | None]
     statement_text: orm.Mapped[str | None]
 
-    adaptations: orm.Mapped[list[ExerciseAdaptation]] = orm.relationship(back_populates="exercise")
+    adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(back_populates="exercise")
 
-    def fetch_latest_adaptation(self, exercise_class: ExerciseClass) -> ExerciseAdaptation | None:
+    def fetch_latest_adaptation(self, exercise_class: ExerciseClass) -> Adaptation | None:
         # @todo Do this in SQL?
         adaptations = list(
             filter(lambda adaptation: adaptation.settings.exercise_class == exercise_class, self.adaptations)
@@ -55,11 +55,11 @@ class AdaptableExercise(Exercise):
 
     @staticmethod
     def classifications_order_by() -> OrderBy:
-        from ..classification import ExerciseClassification
+        from ..classification import Classification
 
-        return [ExerciseClassification.at]
+        return [Classification.at]
 
-    classifications: orm.Mapped[list[ExerciseClassification]] = orm.relationship(
+    classifications: orm.Mapped[list[Classification]] = orm.relationship(
         back_populates="exercise", order_by=classifications_order_by
     )
 
@@ -69,7 +69,7 @@ class ExerciseClass(OrmBase):
     __tablename__ = "exercise_classes"
 
     def __init__(
-        self, *, created: ExerciseClassCreation, name: str, latest_strategy_settings: ExerciseAdaptationSettings | None
+        self, *, created: ExerciseClassCreation, name: str, latest_strategy_settings: AdaptationSettings | None
     ) -> None:
         super().__init__()
         self.created = created
@@ -83,15 +83,15 @@ class ExerciseClass(OrmBase):
     name: orm.Mapped[str]
 
     latest_strategy_settings_id: orm.Mapped[int | None] = orm.mapped_column(
-        sql.ForeignKey("exercise_adaptation_settings.id", use_alter=True)
+        sql.ForeignKey("adaptation_settings.id", use_alter=True)
     )
-    latest_strategy_settings: orm.Mapped[ExerciseAdaptationSettings | None] = orm.relationship(
-        foreign_keys=[latest_strategy_settings_id], remote_side=lambda: [ExerciseAdaptationSettings.id]
+    latest_strategy_settings: orm.Mapped[AdaptationSettings | None] = orm.relationship(
+        foreign_keys=[latest_strategy_settings_id], remote_side=lambda: [AdaptationSettings.id]
     )
 
 
-class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
-    __tablename__ = "exercise_adaptation_settings"
+class AdaptationSettings(OrmBase, CreatedByUserMixin):
+    __tablename__ = "adaptation_settings"
 
     def __init__(
         self,
@@ -99,7 +99,7 @@ class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
         created_by: str,
         created_at: datetime.datetime,
         exercise_class: ExerciseClass | None,
-        parent: ExerciseAdaptationSettings | None,
+        parent: AdaptationSettings | None,
         system_prompt: str,
         response_specification: strategy.ConcreteLlmResponseSpecification,
     ) -> None:
@@ -116,9 +116,9 @@ class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
         foreign_keys=[exercise_class_id], remote_side=lambda: [ExerciseClass.id]
     )
 
-    parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("exercise_adaptation_settings.id"))
-    parent: orm.Mapped[ExerciseAdaptationSettings | None] = orm.relationship(
-        foreign_keys=[parent_id], remote_side=lambda: [ExerciseAdaptationSettings.id]
+    parent_id: orm.Mapped[int | None] = orm.mapped_column(sql.ForeignKey("adaptation_settings.id"))
+    parent: orm.Mapped[AdaptationSettings | None] = orm.relationship(
+        foreign_keys=[parent_id], remote_side=lambda: [AdaptationSettings.id]
     )
 
     system_prompt: orm.Mapped[str]
@@ -134,16 +134,16 @@ class ExerciseAdaptationSettings(OrmBase, CreatedByUserMixin):
         self._response_specification = value.model_dump()
 
 
-class ExerciseAdaptation(OrmBase):
-    __tablename__ = "exercise_adaptations"
+class Adaptation(OrmBase):
+    __tablename__ = "adaptations"
 
     def __init__(
         self,
         *,
-        created: ExerciseAdaptationCreation,
+        created: AdaptationCreation,
         exercise: AdaptableExercise,
         model: llm.ConcreteModel,
-        settings: ExerciseAdaptationSettings,
+        settings: AdaptationSettings,
         raw_llm_conversations: JsonList,
         initial_assistant_response: assistant_responses.Response | None,
         adjustments: list[assistant_responses.Adjustment],
@@ -161,16 +161,16 @@ class ExerciseAdaptation(OrmBase):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created: orm.Mapped[ExerciseAdaptationCreation] = orm.relationship(back_populates="exercise_adaptation")
+    created: orm.Mapped[AdaptationCreation] = orm.relationship(back_populates="exercise_adaptation")
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(
         foreign_keys=[exercise_id], remote_side=lambda: [AdaptableExercise.id], back_populates="adaptations"
     )
 
-    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationSettings.id))
-    settings: orm.Mapped[ExerciseAdaptationSettings] = orm.relationship(
-        foreign_keys=[settings_id], remote_side=lambda: [ExerciseAdaptationSettings.id]
+    settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationSettings.id))
+    settings: orm.Mapped[AdaptationSettings] = orm.relationship(
+        foreign_keys=[settings_id], remote_side=lambda: [AdaptationSettings.id]
     )
 
     _model: orm.Mapped[JsonDict] = orm.mapped_column("model", sql.JSON)
@@ -228,32 +228,32 @@ class ExerciseAdaptation(OrmBase):
             self._manual_edit = value.model_dump()
 
 
-class ExerciseAdaptationCreation(OrmBase):
-    __tablename__ = "exercise_adaptation_creations"
+class AdaptationCreation(OrmBase):
+    __tablename__ = "adaptation_creations"
     __mapper_args__ = {"polymorphic_on": "kind"}
 
     def __init__(self, *, at: datetime.datetime) -> None:
         super().__init__()
         self.at = at
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptation.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Adaptation.id), primary_key=True)
     kind: orm.Mapped[str]
     at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
-    exercise_adaptation: orm.Mapped[ExerciseAdaptation] = orm.relationship(
-        foreign_keys=[id], remote_side=[ExerciseAdaptation.id], back_populates="created"
+    exercise_adaptation: orm.Mapped[Adaptation] = orm.relationship(
+        foreign_keys=[id], remote_side=[Adaptation.id], back_populates="created"
     )
 
 
-class ExerciseAdaptationCreationByUser(ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_user"
+class AdaptationCreationByUser(AdaptationCreation):
+    __tablename__ = "adaptation_creations__by_user"
     __mapper_args__ = {"polymorphic_identity": "by_user"}
 
     def __init__(self, *, at: datetime.datetime, username: str) -> None:
         super().__init__(at=at)
         self.username = username
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationCreation.id), primary_key=True)
     username: orm.Mapped[str] = orm.mapped_column()
 
 

@@ -1,4 +1,4 @@
 from .orm_models import (
-    PageExtractionCreationBySandboxExtractionBatch as PageExtractionCreationBySandboxExtractionBatch,
+    PageExtractionCreationBySandboxBatch as PageExtractionCreationBySandboxBatch,
     SandboxExtractionBatch as SandboxExtractionBatch,
 )

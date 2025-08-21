@@ -5,9 +5,9 @@ from . import strategy as strategy
 from . import submission as submission
 from .orm_models import (
     AdaptableExercise as AdaptableExercise,
-    ExerciseAdaptation as ExerciseAdaptation,
-    ExerciseAdaptationCreation as ExerciseAdaptationCreation,
-    ExerciseAdaptationCreationByUser as ExerciseAdaptationCreationByUser,
-    ExerciseAdaptationSettings as ExerciseAdaptationSettings,
+    Adaptation as Adaptation,
+    AdaptationCreation as AdaptationCreation,
+    AdaptationCreationByUser as AdaptationCreationByUser,
+    AdaptationSettings as AdaptationSettings,
     ExerciseClass as ExerciseClass,
 )

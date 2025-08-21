@@ -50,8 +50,8 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
     from .. import textbooks
     from ..sandbox import extraction as sandbox_extraction  # noqa: F401 to populate ORM metadata
 
-    assert page_extraction.pdf_range is not None
-    sha256 = page_extraction.pdf_range.pdf_file.sha256
+    assert page_extraction.pdf_file_range is not None
+    sha256 = page_extraction.pdf_file_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
         log(f"Found PDF data for page extraction {page_extraction.id} in cache")
         pdf_data = pdf_data_cache[sha256]
@@ -87,10 +87,8 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if page_extraction.run_classification:
-            classification_chunk = classification.ExerciseClassificationChunk(
-                created=db.ExerciseClassificationChunkCreationByPageExtraction(
-                    at=created_at, page_extraction=page_extraction
-                ),
+            classification_chunk = classification.ClassificationChunk(
+                created=db.ClassificationChunkCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
                 model_for_adaptation=page_extraction.model_for_adaptation,
             )
             session.add(classification_chunk)
@@ -116,7 +114,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
             if extracted_exercise.numero is not None:
                 location: exercises.ExerciseLocation
                 if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
-                    extraction_batch = page_extraction.created.extraction_batch
+                    extraction_batch = page_extraction.created.textbook_extraction_batch
                     location = textbooks.ExerciseLocationTextbook(
                         textbook=extraction_batch.textbook,
                         page_number=extraction_batch.first_textbook_page_number
@@ -141,7 +139,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
 
                 if classification_chunk is not None:
                     session.add(
-                        classification.ExerciseClassificationByClassificationChunk(
+                        classification.ClassificationByChunk(
                             exercise=exercise,
                             at=created_at,
                             classification_chunk=classification_chunk,

@@ -1,4 +1,4 @@
 from .orm_models import (
-    ExerciseAdaptationCreationBySandboxAdaptationBatch as ExerciseAdaptationCreationBySandboxAdaptationBatch,
+    AdaptationCreationBySandboxBatch as AdaptationCreationBySandboxBatch,
     SandboxAdaptationBatch as SandboxAdaptationBatch,
 )

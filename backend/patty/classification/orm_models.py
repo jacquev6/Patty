@@ -6,7 +6,7 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from .. import adaptation
-from ..adaptation import ExerciseClass, AdaptableExercise, ExerciseAdaptationCreation
+from ..adaptation import ExerciseClass, AdaptableExercise, AdaptationCreation
 from ..any_json import JsonDict
 from ..database_utils import OrmBase, annotate_new_tables
 
@@ -58,8 +58,8 @@ class ExerciseClassCreationByUser(ExerciseClassCreation):
     username: orm.Mapped[str] = orm.mapped_column()
 
 
-class ExerciseClassification(OrmBase):
-    __tablename__ = "exercise_classifications"
+class Classification(OrmBase):
+    __tablename__ = "classifications"
     __mapper_args__ = {"polymorphic_on": "kind"}
 
     def __init__(
@@ -86,8 +86,8 @@ class ExerciseClassification(OrmBase):
     )
 
 
-class ExerciseClassificationByUser(ExerciseClassification):
-    __tablename__ = "exercise_classifications__by_user"
+class ClassificationByUser(Classification):
+    __tablename__ = "classifications__by_user"
     __mapper_args__ = {"polymorphic_identity": "by_user"}
 
     def __init__(
@@ -96,15 +96,15 @@ class ExerciseClassificationByUser(ExerciseClassification):
         super().__init__(exercise=exercise, at=at, exercise_class=exercise_class)
         self.username = username
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassification.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Classification.id), primary_key=True)
     username: orm.Mapped[str]
 
 
-class ExerciseClassificationChunk(OrmBase, ModelForAdaptationMixin):
-    __tablename__ = "exercise_classification_chunks"
+class ClassificationChunk(OrmBase, ModelForAdaptationMixin):
+    __tablename__ = "classification_chunks"
 
     def __init__(
-        self, *, created: ExerciseClassificationChunkCreation, model_for_adaptation: adaptation.llm.ConcreteModel | None
+        self, *, created: ClassificationChunkCreation, model_for_adaptation: adaptation.llm.ConcreteModel | None
     ) -> None:
         super().__init__()
         self.created = created
@@ -112,84 +112,80 @@ class ExerciseClassificationChunk(OrmBase, ModelForAdaptationMixin):
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    created: orm.Mapped[ExerciseClassificationChunkCreation] = orm.relationship(back_populates="classification_chunk")
+    created: orm.Mapped[ClassificationChunkCreation] = orm.relationship(back_populates="classification_chunk")
 
-    classifications: orm.Mapped[list[ExerciseClassificationByClassificationChunk]] = orm.relationship(
-        back_populates="classification_chunk"
-    )
+    classifications: orm.Mapped[list[ClassificationByChunk]] = orm.relationship(back_populates="classification_chunk")
 
 
-class ExerciseClassificationChunkCreation(OrmBase):
-    __tablename__ = "exercise_classification_chunk_creations"
+class ClassificationChunkCreation(OrmBase):
+    __tablename__ = "classification_chunk_creations"
     __mapper_args__ = {"polymorphic_on": "kind"}
 
     def __init__(self, *, at: datetime.datetime) -> None:
         super().__init__()
         self.at = at
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassificationChunk.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationChunk.id), primary_key=True)
     kind: orm.Mapped[str]
 
     at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
 
-    classification_chunk: orm.Mapped[ExerciseClassificationChunk] = orm.relationship(
-        foreign_keys=[id], remote_side=[ExerciseClassificationChunk.id], back_populates="created"
+    classification_chunk: orm.Mapped[ClassificationChunk] = orm.relationship(
+        foreign_keys=[id], remote_side=[ClassificationChunk.id], back_populates="created"
     )
 
 
-class ExerciseClassificationByClassificationChunk(ExerciseClassification):
-    __tablename__ = "exercise_classifications__by_classification_chunk"
-    __mapper_args__ = {"polymorphic_identity": "by_classification_chunk"}
+class ClassificationByChunk(Classification):
+    __tablename__ = "classifications__by_chunk"
+    __mapper_args__ = {"polymorphic_identity": "by_chunk"}
 
     def __init__(
         self,
         *,
         exercise: AdaptableExercise,
         at: datetime.datetime,
-        classification_chunk: ExerciseClassificationChunk,
+        classification_chunk: ClassificationChunk,
         exercise_class: ExerciseClass | None,
     ) -> None:
         super().__init__(exercise=exercise, at=at, exercise_class=exercise_class)
         self.classification_chunk = classification_chunk
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassification.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Classification.id), primary_key=True)
 
-    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassificationChunk.id))
-    classification_chunk: orm.Mapped[ExerciseClassificationChunk] = orm.relationship(
-        foreign_keys=[classification_chunk_id],
-        remote_side=[ExerciseClassificationChunk.id],
-        back_populates="classifications",
+    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationChunk.id))
+    classification_chunk: orm.Mapped[ClassificationChunk] = orm.relationship(
+        foreign_keys=[classification_chunk_id], remote_side=[ClassificationChunk.id], back_populates="classifications"
     )
 
 
-class ExerciseClassCreationByClassificationChunk(ExerciseClassCreation):
-    __tablename__ = "exercise_class_creations__by_classification_chunk"
-    __mapper_args__ = {"polymorphic_identity": "by_classification_chunk"}
+class ExerciseClassCreationByChunk(ExerciseClassCreation):
+    __tablename__ = "exercise_class_creations__by_chunk"
+    __mapper_args__ = {"polymorphic_identity": "by_chunk"}
 
-    def __init__(self, *, at: datetime.datetime, classification_chunk: ExerciseClassificationChunk) -> None:
+    def __init__(self, *, at: datetime.datetime, classification_chunk: ClassificationChunk) -> None:
         super().__init__(at=at)
         self.classification_chunk = classification_chunk
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassCreation.id), primary_key=True)
-    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassificationChunk.id))
-    classification_chunk: orm.Mapped[ExerciseClassificationChunk] = orm.relationship(
-        foreign_keys=[classification_chunk_id], remote_side=[ExerciseClassificationChunk.id]
+    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationChunk.id))
+    classification_chunk: orm.Mapped[ClassificationChunk] = orm.relationship(
+        foreign_keys=[classification_chunk_id], remote_side=[ClassificationChunk.id]
     )
 
 
-class ExerciseAdaptationCreationByClassificationChunk(ExerciseAdaptationCreation):
-    __tablename__ = "exercise_adaptation_creations__by_classification_chunk"
-    __mapper_args__ = {"polymorphic_identity": "by_classification_chunk"}
+class AdaptationCreationByChunk(AdaptationCreation):
+    __tablename__ = "adaptation_creations__by_chunk"
+    __mapper_args__ = {"polymorphic_identity": "by_chunk"}
 
-    def __init__(self, *, at: datetime.datetime, classification_chunk: ExerciseClassificationChunk) -> None:
+    def __init__(self, *, at: datetime.datetime, classification_chunk: ClassificationChunk) -> None:
         super().__init__(at=at)
         self.classification_chunk = classification_chunk
 
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseAdaptationCreation.id), primary_key=True)
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationCreation.id), primary_key=True)
 
-    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseClassificationChunk.id))
-    classification_chunk: orm.Mapped[ExerciseClassificationChunk] = orm.relationship(
-        foreign_keys=[classification_chunk_id], remote_side=[ExerciseClassificationChunk.id]
+    classification_chunk_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ClassificationChunk.id))
+    classification_chunk: orm.Mapped[ClassificationChunk] = orm.relationship(
+        foreign_keys=[classification_chunk_id], remote_side=[ClassificationChunk.id]
     )
 
 

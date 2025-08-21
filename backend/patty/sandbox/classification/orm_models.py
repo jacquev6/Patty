@@ -27,15 +27,13 @@ class SandboxClassificationBatch(OrmBase, CreatedByUserMixin, classification.Mod
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
-    classification_chunk_creation: orm.Mapped[ExerciseClassificationChunkCreationBySandboxClassificationBatch] = (
-        orm.relationship(back_populates="sandbox_classification_batch")
+    classification_chunk_creation: orm.Mapped[ClassificationChunkCreationBySandboxBatch] = orm.relationship(
+        back_populates="sandbox_classification_batch"
     )
 
 
-class ExerciseClassificationChunkCreationBySandboxClassificationBatch(
-    classification.ExerciseClassificationChunkCreation
-):
-    __tablename__ = "exercise_classification_chunk_creations__by_sandbox_batch"
+class ClassificationChunkCreationBySandboxBatch(classification.ClassificationChunkCreation):
+    __tablename__ = "classification_chunk_creations__by_sandbox_batch"
     __mapper_args__ = {"polymorphic_identity": "by_sandbox_batch"}
 
     def __init__(self, *, at: datetime.datetime, sandbox_classification_batch: SandboxClassificationBatch) -> None:
@@ -43,7 +41,7 @@ class ExerciseClassificationChunkCreationBySandboxClassificationBatch(
         self.sandbox_classification_batch = sandbox_classification_batch
 
     id: orm.Mapped[int] = orm.mapped_column(
-        sql.ForeignKey(classification.ExerciseClassificationChunkCreation.id), primary_key=True
+        sql.ForeignKey(classification.ClassificationChunkCreation.id), primary_key=True
     )
 
     sandbox_classification_batch_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(SandboxClassificationBatch.id))

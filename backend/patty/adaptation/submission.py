@@ -27,8 +27,8 @@ LlmMessage = (
 
 def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
     adaptations = (
-        session.query(db.ExerciseAdaptation)
-        .filter(db.ExerciseAdaptation._initial_assistant_response == sql.null())
+        session.query(db.Adaptation)
+        .filter(db.Adaptation._initial_assistant_response == sql.null())
         .limit(parallelism)
         .all()
     )
@@ -39,7 +39,7 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
     return [submit_adaptation(adaptation) for adaptation in adaptations]
 
 
-async def submit_adaptation(adaptation: db.ExerciseAdaptation) -> None:
+async def submit_adaptation(adaptation: db.Adaptation) -> None:
     response_format = adaptation.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [
