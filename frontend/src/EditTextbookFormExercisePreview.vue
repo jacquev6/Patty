@@ -27,7 +27,7 @@ const adaptation = computed(() => {
 <template>
   <AdaptableExercisePreview
     :headerLevel="5"
-    :showPageAndExercise="true"
+    :showPageAndExercise="false"
     :exercise="makePreviewAbleExercise_forTextbook(exercise, adaptation)"
     @exerciseRemoved="emit('exercise-removed')"
   />

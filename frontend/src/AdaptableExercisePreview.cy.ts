@@ -616,7 +616,7 @@ describe('AdaptableExercisePreview', () => {
         props: {
           headerLevel: 2,
           exercise,
-          showPageAndExercise: true,
+          showPageAndExercise: exercise.kind !== 'textbook',
         },
         global: {
           plugins: [
