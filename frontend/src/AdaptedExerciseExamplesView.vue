@@ -33,7 +33,6 @@ const highlightColors = [
 export const examples: Example[] = [
   // {
   //   title: '',
-  //   description: null,
   //   exercise: {
   //     format: 'v1',
   //     instruction: {
@@ -71,7 +70,6 @@ export const examples: Example[] = [
   // },
   {
     title: 'ExpressionEcrite',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -143,7 +141,6 @@ export const examples: Example[] = [
   },
   {
     title: 'freeTextInput in formatted',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -218,7 +215,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Imbricated selectableInput',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -420,7 +416,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CocheLettres',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -858,7 +853,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Trait',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1041,7 +1035,6 @@ export const examples: Example[] = [
   },
   {
     title: 'RCDouble',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1186,7 +1179,6 @@ export const examples: Example[] = [
   },
   {
     title: 'EditTexte',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1383,7 +1375,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Associe',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1528,7 +1519,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Classe',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1897,7 +1887,6 @@ export const examples: Example[] = [
   },
   {
     title: 'RCCadre',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1983,7 +1972,6 @@ export const examples: Example[] = [
   },
   {
     title: 'GenreNombre',
-    description: 'A simple case of ChoixMultiple.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2098,7 +2086,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Vrai/Faux',
-    description: 'A simple case of ChoixMultiple.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2202,7 +2189,6 @@ export const examples: Example[] = [
   },
   {
     title: 'TransformePhrase',
-    description: 'An alternative is to use "kind": "editableTextInput" as in the "Edit sentence" example below.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2347,7 +2333,6 @@ export const examples: Example[] = [
   },
   {
     title: 'TransformeMot',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2470,8 +2455,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CocheMot',
-    description:
-      'Note that punctuation is also selectable in this example. If this is not wanted, you should remove the "kind": "selectableInput" around punctuation elements.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2743,7 +2726,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CochePhrase',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2895,7 +2877,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Swappable inputs',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2923,7 +2904,6 @@ export const examples: Example[] = [
   },
   {
     title: 'EditPhrase',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
