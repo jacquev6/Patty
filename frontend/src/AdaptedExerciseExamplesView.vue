@@ -1079,7 +1079,10 @@ export const examples: Example[] = [
               { kind: 'whitespace' },
               { kind: 'formatted', highlighted: yellow, contents: [{ kind: 'text', text: 'comique' }] },
               { kind: 'text', text: '.' },
-              { kind: 'whitespace' },
+            ],
+          },
+          {
+            contents: [
               { kind: 'arrow' },
               { kind: 'whitespace' },
               { kind: 'text', text: "C'" },
@@ -1115,7 +1118,10 @@ export const examples: Example[] = [
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'sales' },
                   { kind: 'text', text: '.' },
-                  { kind: 'whitespace' },
+                ],
+              },
+              {
+                contents: [
                   { kind: 'arrow' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'Tous' },
@@ -1130,6 +1136,10 @@ export const examples: Example[] = [
                   { kind: 'text', text: '.' },
                 ],
               },
+            ],
+          },
+          {
+            lines: [
               {
                 contents: [
                   { kind: 'text', text: 'b' },
@@ -1148,7 +1158,10 @@ export const examples: Example[] = [
                   { kind: 'text', text: 'canards' },
                   { kind: 'text', text: '.' },
                   { kind: 'whitespace' },
-                  { kind: 'arrow' },
+                ],
+              },
+              {
+                contents: [
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'Elle' },
                   { kind: 'whitespace' },
