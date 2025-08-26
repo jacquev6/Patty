@@ -72,7 +72,7 @@ export const examples: Example[] = [
     title: 'CliqueEcrire',
     exercise: {
       format: 'v2',
-      steps: [
+      phases: [
         {
           instruction: {
             lines: [

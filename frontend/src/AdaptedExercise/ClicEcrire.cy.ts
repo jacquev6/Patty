@@ -5,7 +5,7 @@ const yellow = '#ffff00'
 
 const adaptedExercise: AdaptedExercise = {
   format: 'v2',
-  steps: [
+  phases: [
     {
       instruction: {
         lines: [

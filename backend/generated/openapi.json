@@ -2952,12 +2952,12 @@
             "const": "v2",
             "title": "Format"
           },
-          "steps": {
+          "phases": {
             "items": {
-              "$ref": "#/components/schemas/Step-Input"
+              "$ref": "#/components/schemas/Phase-Input"
             },
             "type": "array",
-            "title": "Steps"
+            "title": "Phases"
           },
           "reference": {
             "anyOf": [
@@ -2973,7 +2973,7 @@
         "type": "object",
         "required": [
           "format",
-          "steps",
+          "phases",
           "reference"
         ]
       },
@@ -2984,12 +2984,12 @@
             "const": "v2",
             "title": "Format"
           },
-          "steps": {
+          "phases": {
             "items": {
-              "$ref": "#/components/schemas/Step-Output"
+              "$ref": "#/components/schemas/Phase-Output"
             },
             "type": "array",
-            "title": "Steps"
+            "title": "Phases"
           },
           "reference": {
             "anyOf": [
@@ -3005,7 +3005,7 @@
         "type": "object",
         "required": [
           "format",
-          "steps",
+          "phases",
           "reference"
         ]
       },
@@ -4359,6 +4359,96 @@
           "pages"
         ]
       },
+      "Phase-Input": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              },
+              {
+                "$ref": "#/components/schemas/GeneratedPages-Input"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
+        ]
+      },
+      "Phase-Output": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              },
+              {
+                "$ref": "#/components/schemas/GeneratedPages-Output"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
+        ]
+      },
       "PostAdaptationAdjustmentRequest": {
         "properties": {
           "adjustment": {
@@ -5150,96 +5240,6 @@
           "editableTextInput"
         ],
         "title": "StatementComponents"
-      },
-      "Step-Input": {
-        "properties": {
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
-              },
-              {
-                "$ref": "#/components/schemas/GeneratedPages-Input"
-              }
-            ],
-            "title": "Statement"
-          }
-        },
-        "type": "object",
-        "required": [
-          "instruction",
-          "example",
-          "hint",
-          "statement"
-        ]
-      },
-      "Step-Output": {
-        "properties": {
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-              },
-              {
-                "$ref": "#/components/schemas/GeneratedPages-Output"
-              }
-            ],
-            "title": "Statement"
-          }
-        },
-        "type": "object",
-        "required": [
-          "instruction",
-          "example",
-          "hint",
-          "statement"
-        ]
       },
       "SwappableInput-Input": {
         "properties": {

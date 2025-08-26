@@ -247,11 +247,11 @@
           "title": "Format",
           "type": "string"
         },
-        "steps": {
+        "phases": {
           "items": {
-            "$ref": "#/$defs/Step"
+            "$ref": "#/$defs/Phase"
           },
-          "title": "Steps",
+          "title": "Phases",
           "type": "array"
         },
         "reference": {
@@ -267,7 +267,7 @@
       },
       "required": [
         "format",
-        "steps",
+        "phases",
         "reference"
       ],
       "type": "object",
@@ -610,6 +610,52 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Phase": {
+      "properties": {
+        "instruction": {
+          "$ref": "#/$defs/InstructionPage"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExamplePage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HintPage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatementPages"
+            },
+            {
+              "$ref": "#/$defs/GeneratedPages"
+            }
+          ],
+          "title": "Statement"
+        }
+      },
+      "required": [
+        "instruction",
+        "example",
+        "hint",
+        "statement"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "ReferenceLine": {
       "properties": {
         "contents": {
@@ -781,52 +827,6 @@
       },
       "required": [
         "pages"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
-    "Step": {
-      "properties": {
-        "instruction": {
-          "$ref": "#/$defs/InstructionPage"
-        },
-        "example": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ExamplePage"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "hint": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/HintPage"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "statement": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/StatementPages"
-            },
-            {
-              "$ref": "#/$defs/GeneratedPages"
-            }
-          ],
-          "title": "Statement"
-        }
-      },
-      "required": [
-        "instruction",
-        "example",
-        "hint",
-        "statement"
       ],
       "type": "object",
       "additionalProperties": false

@@ -34,11 +34,11 @@ class ExerciseV1(BaseModel):
 
 class ExerciseV2(BaseModel):
     format: Literal["v2"]
-    steps: list[Step]
+    phases: list[Phase]
     reference: ReferenceLine | None
 
 
-class Step(BaseModel):
+class Phase(BaseModel):
     instruction: InstructionPage
     example: ExamplePage | None
     hint: HintPage | None
@@ -333,8 +333,8 @@ def make_partial_exercise_type(components: Components) -> type[Exercise]:
 
     statement_pages_v2_type = statement_pages_v1_type | generated_pages_type
 
-    step_type: Any = pydantic.create_model(
-        "Step",
+    phase_type: Any = pydantic.create_model(
+        "Phase",
         __base__=BaseModel,
         instruction=(instruction_page_type, pydantic.Field()),
         example=(example_page_type | None, pydantic.Field()),
@@ -346,7 +346,7 @@ def make_partial_exercise_type(components: Components) -> type[Exercise]:
         "ExerciseV2",
         __base__=BaseModel,
         format=(Literal["v2"], pydantic.Field()),
-        steps=(list[step_type], pydantic.Field()),
+        phases=(list[phase_type], pydantic.Field()),
         reference=(reference_line_type | None, pydantic.Field()),
     )
 

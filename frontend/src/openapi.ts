@@ -1019,8 +1019,8 @@ export interface components {
        * @constant
        */
       format: 'v2'
-      /** Steps */
-      steps: components['schemas']['Step-Input'][]
+      /** Phases */
+      phases: components['schemas']['Phase-Input'][]
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
     }
     'ExerciseV2-Output': {
@@ -1029,8 +1029,8 @@ export interface components {
        * @constant
        */
       format: 'v2'
-      /** Steps */
-      steps: components['schemas']['Step-Output'][]
+      /** Phases */
+      phases: components['schemas']['Phase-Output'][]
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
     /** ExtractionBatch */
@@ -1583,6 +1583,24 @@ export interface components {
       /** Pages */
       pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
     }
+    'Phase-Input': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
+        | components['schemas']['GeneratedPages-Input']
+    }
+    'Phase-Output': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
+        | components['schemas']['GeneratedPages-Output']
+    }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {
       /** Adjustment */
@@ -1886,24 +1904,6 @@ export interface components {
       swappableInput: boolean
       /** Editabletextinput */
       editableTextInput: boolean
-    }
-    'Step-Input': {
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      /** Statement */
-      statement:
-        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
-        | components['schemas']['GeneratedPages-Input']
-    }
-    'Step-Output': {
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      /** Statement */
-      statement:
-        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
-        | components['schemas']['GeneratedPages-Output']
     }
     'SwappableInput-Input': {
       /**

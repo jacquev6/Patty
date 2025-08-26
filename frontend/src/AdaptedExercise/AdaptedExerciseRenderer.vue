@@ -6,23 +6,23 @@ import _ from 'lodash'
 
 import assert from '../assert'
 
-type Step = AdaptedExerciseV2['steps'][number]
-type StepInstructionComponent = Step['instruction']['lines'][number]['contents'][number]
-type StepStatementComponent = (Step['statement'] & {
+type Phase = AdaptedExerciseV2['phases'][number]
+type PhaseInstructionComponent = Phase['instruction']['lines'][number]['contents'][number]
+type PhaseStatementComponent = (Phase['statement'] & {
   generated: undefined
 })['pages'][number]['lines'][number]['contents'][number]
 
-type TextComponent = StepInstructionComponent & { kind: 'text' }
-type WhitespaceComponent = StepInstructionComponent & { kind: 'whitespace' }
-type FormattedComponent = StepInstructionComponent & { kind: 'formatted' }
-type ArrowComponent = StepInstructionComponent & { kind: 'arrow' }
-type ChoiceComponent = StepInstructionComponent & { kind: 'choice' }
-type ActiveFormattedComponent = StepStatementComponent & { kind: 'formatted' }
-type FreeTextInputComponent = StepStatementComponent & { kind: 'freeTextInput' }
-type MultipleChoicesInputComponent = StepStatementComponent & { kind: 'multipleChoicesInput' }
-type SelectableInputComponent = StepStatementComponent & { kind: 'selectableInput' }
-type SwappableInputComponent = StepStatementComponent & { kind: 'swappableInput' }
-type EditableTextInputComponent = StepStatementComponent & { kind: 'editableTextInput' }
+type TextComponent = PhaseInstructionComponent & { kind: 'text' }
+type WhitespaceComponent = PhaseInstructionComponent & { kind: 'whitespace' }
+type FormattedComponent = PhaseInstructionComponent & { kind: 'formatted' }
+type ArrowComponent = PhaseInstructionComponent & { kind: 'arrow' }
+type ChoiceComponent = PhaseInstructionComponent & { kind: 'choice' }
+type ActiveFormattedComponent = PhaseStatementComponent & { kind: 'formatted' }
+type FreeTextInputComponent = PhaseStatementComponent & { kind: 'freeTextInput' }
+type MultipleChoicesInputComponent = PhaseStatementComponent & { kind: 'multipleChoicesInput' }
+type SelectableInputComponent = PhaseStatementComponent & { kind: 'selectableInput' }
+type SwappableInputComponent = PhaseStatementComponent & { kind: 'swappableInput' }
+type EditableTextInputComponent = PhaseStatementComponent & { kind: 'editableTextInput' }
 
 type PlainTextComponent = TextComponent | WhitespaceComponent
 type FormattedTextComponent = PlainTextComponent | ArrowComponent | FormattedComponent
@@ -88,7 +88,7 @@ export function ensureV2(exercise: AdaptedExercise): AdaptedExerciseV2 {
   } else {
     return {
       format: 'v2',
-      steps: [
+      phases: [
         {
           instruction: exercise.instruction,
           example: exercise.example,
@@ -384,25 +384,25 @@ function markConsecutiveSelectableInputs(contents: AnyRenderable[]): AnyRenderab
 function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: StudentAnswers): RenderableExercise {
   const pages: RenderablePage[] = []
 
-  for (const step of exercise.steps) {
+  for (const phase of exercise.phases) {
     const instruction = [
-      ...step.instruction.lines,
-      ...(step.example ? step.example.lines : []),
-      ...(step.hint ? step.hint.lines : []),
+      ...phase.instruction.lines,
+      ...(phase.example ? phase.example.lines : []),
+      ...(phase.hint ? phase.hint.lines : []),
     ].map((line) => ({
       contents: line.contents.flatMap(makeRenderableFromInstructionComponent),
     }))
 
-    match(step.statement)
+    match(phase.statement)
       .with({ generated: P.select() }, (generator) => {
         assert(generator.items.kind === 'selectableInput')
         const selected: [string, SelectableInputComponent][] = []
-        for (const previousStep of exercise.steps) {
-          if (previousStep === step) {
+        for (const previousPhase of exercise.phases) {
+          if (previousPhase === phase) {
             break
           }
-          if ('pages' in previousStep.statement) {
-            for (const [pageIndex, page] of previousStep.statement.pages.entries()) {
+          if ('pages' in previousPhase.statement) {
+            for (const [pageIndex, page] of previousPhase.statement.pages.entries()) {
               for (const [lineIndex, line] of page.lines.entries()) {
                 for (const [componentIndex, component] of line.contents.entries()) {
                   if (component.kind === 'selectableInput') {
