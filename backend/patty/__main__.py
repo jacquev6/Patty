@@ -380,7 +380,14 @@ def adapted_exercise_schema(
             reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         )
     )
-    print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
+    schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)
+    assert ('"choice"' in schema) == choice
+    assert ('"freeTextInput"' in schema) == free_text_input
+    assert ('"multipleChoicesInput"' in schema) == multiple_choices_input
+    assert schema.count('"selectableInput"') == (2 if selectable_input else 1)
+    assert ('"swappableInput"' in schema) == swappable_input
+    assert ('"editableTextInput"' in schema) == editable_text_input
+    print(schema)
 
 
 @main.command()
@@ -502,7 +509,7 @@ def json_to_html_script() -> None:
         yield "import hashlib"
         yield "import json"
         yield ""
-        yield "import pydantic"
+        yield "import pydantic.alias_generators"
         yield ""
         with open("patty/adaptation/adapted.py") as f:
             for line in f:

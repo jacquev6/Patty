@@ -652,13 +652,6 @@ export interface components {
        */
       subscript?: boolean
     }
-    AdHocClicEcrirePages: {
-      /**
-       * Ad Hoc
-       * @constant
-       */
-      ad_hoc: 'clic-ecrire'
-    }
     /** AdaptationBatch */
     AdaptationBatch: {
       /** Id */
@@ -1181,6 +1174,61 @@ export interface components {
        * @constant
        */
       name: 'gemini-2.0-flash'
+    }
+    'GeneratedPages-Input': {
+      generated: components['schemas']['Generator-Input']
+    }
+    'GeneratedPages-Output': {
+      generated: components['schemas']['Generator-Output']
+    }
+    'Generator-Input': {
+      items: components['schemas']['SelectableInputGeneratorItems']
+      /** Itemsperpage */
+      itemsPerPage: number
+      template: components['schemas']['GeneratorTemplate-Input']
+    }
+    'Generator-Output': {
+      items: components['schemas']['SelectableInputGeneratorItems']
+      /** Itemsperpage */
+      itemsPerPage: number
+      template: components['schemas']['GeneratorTemplate-Output']
+    }
+    'GeneratorTemplate-Input': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Input']
+        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['SwappableInput-Input']
+        | components['schemas']['EditableTextInput']
+        | components['schemas']['GeneratorTemplatePlaceholder']
+      )[]
+    }
+    'GeneratorTemplate-Output': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Output']
+        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['SwappableInput-Output']
+        | components['schemas']['EditableTextInput']
+        | components['schemas']['GeneratorTemplatePlaceholder']
+      )[]
+    }
+    GeneratorTemplatePlaceholder: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'itemPlaceholder'
     }
     /** GetAdaptationBatchResponse */
     GetAdaptationBatchResponse: {
@@ -1797,6 +1845,15 @@ export interface components {
       /** Boxed */
       boxed: boolean
     }
+    SelectableInputGeneratorItems: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'selectableInput'
+      /** Colorindex */
+      colorIndex: number
+    }
     /** StatementComponents */
     StatementComponents: {
       /**
@@ -1837,7 +1894,7 @@ export interface components {
       /** Statement */
       statement:
         | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
-        | components['schemas']['AdHocClicEcrirePages']
+        | components['schemas']['GeneratedPages-Input']
     }
     'Step-Output': {
       instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
@@ -1846,7 +1903,7 @@ export interface components {
       /** Statement */
       statement:
         | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
-        | components['schemas']['AdHocClicEcrirePages']
+        | components['schemas']['GeneratedPages-Output']
     }
     'SwappableInput-Input': {
       /**

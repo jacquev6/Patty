@@ -86,20 +86,6 @@
       "type": "object",
       "additionalProperties": false
     },
-    "AdHocClicEcrirePages": {
-      "properties": {
-        "ad_hoc": {
-          "const": "clic-ecrire",
-          "title": "Ad Hoc",
-          "type": "string"
-        }
-      },
-      "required": [
-        "ad_hoc"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
     "Arrow": {
       "properties": {
         "kind": {
@@ -448,6 +434,97 @@
       "type": "object",
       "additionalProperties": false
     },
+    "GeneratedPages": {
+      "properties": {
+        "generated": {
+          "$ref": "#/$defs/Generator"
+        }
+      },
+      "required": [
+        "generated"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Generator": {
+      "properties": {
+        "items": {
+          "$ref": "#/$defs/SelectableInputGeneratorItems"
+        },
+        "itemsPerPage": {
+          "title": "Itemsperpage",
+          "type": "integer"
+        },
+        "template": {
+          "$ref": "#/$defs/GeneratorTemplate"
+        }
+      },
+      "required": [
+        "items",
+        "itemsPerPage",
+        "template"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GeneratorTemplate": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/ActiveFormatted"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              },
+              {
+                "$ref": "#/$defs/MultipleChoicesInput"
+              },
+              {
+                "$ref": "#/$defs/SelectableInput"
+              },
+              {
+                "$ref": "#/$defs/EditableTextInput"
+              },
+              {
+                "$ref": "#/$defs/GeneratorTemplatePlaceholder"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GeneratorTemplatePlaceholder": {
+      "properties": {
+        "kind": {
+          "const": "itemPlaceholder",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "HintLine": {
       "properties": {
         "contents": {
@@ -648,6 +725,25 @@
       "type": "object",
       "additionalProperties": false
     },
+    "SelectableInputGeneratorItems": {
+      "properties": {
+        "kind": {
+          "const": "selectableInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "colorIndex": {
+          "title": "Colorindex",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "colorIndex"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "StatementLine": {
       "properties": {
         "contents": {
@@ -752,7 +848,7 @@
               "$ref": "#/$defs/StatementPages"
             },
             {
-              "$ref": "#/$defs/AdHocClicEcrirePages"
+              "$ref": "#/$defs/GeneratedPages"
             }
           ],
           "title": "Statement"

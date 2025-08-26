@@ -6,7 +6,7 @@ import typing
 import unittest
 
 from polyfactory.factories.pydantic_factory import ModelFactory
-import pydantic
+import pydantic.alias_generators
 
 from ..api_utils import ApiModel
 
@@ -15,7 +15,12 @@ from ..api_utils import ApiModel
 
 
 class BaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="ignore", json_schema_extra=lambda schema: schema.pop("title"))
+    model_config = pydantic.ConfigDict(
+        alias_generator=pydantic.alias_generators.to_camel,
+        populate_by_name=True,
+        extra="ignore",
+        json_schema_extra=lambda schema: schema.pop("title"),
+    )
 
 
 class ExerciseV1(BaseModel):
@@ -45,17 +50,14 @@ Exercise = pydantic.RootModel[ExerciseAsUnion]
 
 
 class Pages[Component](BaseModel):
-    # WARNING: keep 'make_pages_type' below consistent with this class
     pages: list[Page[Component]]
 
 
 class Page[Component](BaseModel):
-    # WARNING: keep 'make_page_type' below consistent with this class
     lines: list[Line[Component]]
 
 
 class Line[Component](BaseModel):
-    # WARNING: keep 'make_line_type' below consistent with this class
     contents: list[Component]
 
 
@@ -103,7 +105,6 @@ class Choice(BaseModel):
 
 PlainText = Text | Whitespace
 
-# WARNING: keep 'FormattedText' and 'FormattedTextComponents' consistent
 FormattedText = PlainText | Arrow | Formatted
 
 
@@ -111,7 +112,6 @@ class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
-# WARNING: keep 'ActiveFormattedText' and 'ActiveFormattedTextComponents' consistent
 ActiveFormattedText = PlainText | Arrow | ActiveFormatted | FreeTextInput
 
 
@@ -144,27 +144,41 @@ class EditableTextInput(BaseModel):
     increaseHorizontalSpace: bool = False
 
 
-class AdHocClicEcrirePages(BaseModel):
-    ad_hoc: Literal["clic-ecrire"]
+class GeneratedPages(BaseModel):
+    generated: Generator
 
 
-# WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent
+class Generator(BaseModel):
+    items: SelectableInputGeneratorItems
+    items_per_page: int
+    template: GeneratorTemplate
+
+
+class SelectableInputGeneratorItems(BaseModel):
+    kind: Literal["selectableInput"]
+    color_index: int
+
+
+class GeneratorTemplate(BaseModel):
+    contents: list[StatementComponent | GeneratorTemplatePlaceholder]
+
+
+class GeneratorTemplatePlaceholder(BaseModel):
+    kind: Literal["itemPlaceholder"]
+
+
 InstructionComponent = FormattedText | Choice
 
 
-# WARNING: keep 'ExampleComponent' and 'ExampleComponents' consistent
 ExampleComponent = FormattedText
 
 
-# WARNING: keep 'HintComponent' and 'HintComponents' consistent
 HintComponent = FormattedText
 
 
-# WARNING: keep 'StatementComponent' and 'StatementComponents' consistent
 StatementComponent = ActiveFormattedText | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
 
 
-# WARNING: keep 'ReferenceComponent' and 'ReferenceComponents' consistent
 ReferenceComponent = FormattedText
 
 
@@ -180,7 +194,7 @@ HintPage = Page[HintComponent]
 StatementPage = Page[StatementComponent]
 
 StatementPagesV1 = Pages[StatementComponent]
-StatementPagesV2 = Pages[StatementComponent] | AdHocClicEcrirePages
+StatementPagesV2 = Pages[StatementComponent] | GeneratedPages
 
 # patty_json_to_html.py end
 
@@ -255,7 +269,7 @@ class ReferenceComponents(FormattedTextComponents):
     pass
 
 
-class Components(ApiModel):
+class Components(BaseModel):
     instruction: InstructionComponents
     example: ExampleComponents
     hint: HintComponents
@@ -264,7 +278,7 @@ class Components(ApiModel):
 
 
 def make_partial_exercise_type(components: Components) -> type[Exercise]:
-    # WARNING: typing dynamic types is a nightmare, so THIS FUNCTION IS MOSTLY UNTYPED
+    # Typing dynamic types is a nightmare, so this function is mostly untyped
     # and relies on a final cast of its return value.
 
     def make_line_type(name: str, contents_type: Any) -> Any:
@@ -284,7 +298,8 @@ def make_partial_exercise_type(components: Components) -> type[Exercise]:
     instruction_page_type = make_page_type("Instruction", typing.Union[tuple(components.instruction.gather())])
     example_page_type = make_page_type("Example", typing.Union[tuple(components.example.gather())])
     hint_page_type = make_page_type("Hint", typing.Union[tuple(components.hint.gather())])
-    statement_pages_v1_type = make_pages_type("Statement", typing.Union[tuple(components.statement.gather())])
+    statement_component_type: Any = typing.Union[tuple(components.statement.gather())]
+    statement_pages_v1_type = make_pages_type("Statement", statement_component_type)
     reference_line_type = make_line_type("Reference", typing.Union[tuple(components.reference.gather())])
 
     exercise_v1_type: Any = pydantic.create_model(
@@ -298,7 +313,25 @@ def make_partial_exercise_type(components: Components) -> type[Exercise]:
         reference=(reference_line_type | None, pydantic.Field()),
     )
 
-    statement_pages_v2_type = statement_pages_v1_type | AdHocClicEcrirePages
+    generator_template_type = pydantic.create_model(
+        "GeneratorTemplate",
+        __base__=BaseModel,
+        contents=(list[statement_component_type | GeneratorTemplatePlaceholder], pydantic.Field()),
+    )
+
+    generator_type = pydantic.create_model(
+        "Generator",
+        __base__=BaseModel,
+        items=(SelectableInputGeneratorItems, pydantic.Field()),
+        items_per_page=(int, pydantic.Field()),
+        template=(generator_template_type, pydantic.Field()),
+    )
+
+    generated_pages_type = pydantic.create_model(
+        "GeneratedPages", __base__=BaseModel, generated=(generator_type, pydantic.Field())
+    )
+
+    statement_pages_v2_type = statement_pages_v1_type | generated_pages_type
 
     step_type: Any = pydantic.create_model(
         "Step",

@@ -1,6 +1,202 @@
+import type { AdaptedExercise } from '@/apiClient'
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
 
 const yellow = '#ffff00'
+
+const adaptedExercise: AdaptedExercise = {
+  format: 'v2',
+  steps: [
+    {
+      instruction: {
+        lines: [
+          {
+            contents: [
+              {
+                kind: 'formatted',
+                contents: [
+                  { kind: 'text', text: 'Select' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'some' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'words' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Alpha' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Bravo' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Charlie' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Delta' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Echo' }],
+                  },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+              {
+                contents: [
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Foxtrot' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Golf' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Hotel' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'India' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Juliet' }],
+                  },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+          {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Kilo' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Lima' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Mike' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'November' }],
+                  },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'selectableInput',
+                    boxed: false,
+                    colors: [yellow],
+                    contents: [{ kind: 'text', text: 'Oscar' }],
+                  },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Comment' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'those' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'words' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        generated: {
+          items: {
+            kind: 'selectableInput',
+            colorIndex: 1,
+          },
+          itemsPerPage: 3,
+          template: {
+            contents: [
+              { kind: 'itemPlaceholder' },
+              { kind: 'whitespace' },
+              { kind: 'arrow' },
+              { kind: 'whitespace' },
+              { kind: 'freeTextInput' },
+            ],
+          },
+        },
+      },
+    },
+  ],
+  reference: null,
+}
 
 describe('An exercise of type "ClicEcrire"', () => {
   beforeEach(() => {
@@ -8,185 +204,7 @@ describe('An exercise of type "ClicEcrire"', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
-        adaptedExercise: {
-          format: 'v2',
-          steps: [
-            {
-              instruction: {
-                lines: [
-                  {
-                    contents: [
-                      {
-                        kind: 'formatted',
-                        contents: [
-                          { kind: 'text', text: 'Select' },
-                          { kind: 'whitespace' },
-                          { kind: 'text', text: 'some' },
-                          { kind: 'whitespace' },
-                          { kind: 'text', text: 'words' },
-                          { kind: 'text', text: '.' },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-              example: null,
-              hint: null,
-              statement: {
-                pages: [
-                  {
-                    lines: [
-                      {
-                        contents: [
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Alpha' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Bravo' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Charlie' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Delta' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Echo' }],
-                          },
-                          { kind: 'text', text: '.' },
-                        ],
-                      },
-                      {
-                        contents: [
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Foxtrot' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Golf' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Hotel' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'India' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Juliet' }],
-                          },
-                          { kind: 'text', text: '.' },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    lines: [
-                      {
-                        contents: [
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Kilo' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Lima' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Mike' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'November' }],
-                          },
-                          { kind: 'whitespace' },
-                          {
-                            kind: 'selectableInput',
-                            boxed: false,
-                            colors: [yellow],
-                            contents: [{ kind: 'text', text: 'Oscar' }],
-                          },
-                          { kind: 'text', text: '.' },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-            {
-              instruction: {
-                lines: [
-                  {
-                    contents: [
-                      { kind: 'text', text: 'Comment' },
-                      { kind: 'whitespace' },
-                      { kind: 'text', text: 'those' },
-                      { kind: 'whitespace' },
-                      { kind: 'text', text: 'words' },
-                      { kind: 'text', text: '.' },
-                    ],
-                  },
-                ],
-              },
-              example: null,
-              hint: null,
-              statement: {
-                ad_hoc: 'clic-ecrire',
-              },
-            },
-          ],
-          reference: null,
-        },
+        adaptedExercise,
       },
     })
   })

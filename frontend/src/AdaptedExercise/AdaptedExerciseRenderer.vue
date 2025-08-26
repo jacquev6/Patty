@@ -9,7 +9,7 @@ import assert from '../assert'
 type Step = AdaptedExerciseV2['steps'][number]
 type StepInstructionComponent = Step['instruction']['lines'][number]['contents'][number]
 type StepStatementComponent = (Step['statement'] & {
-  ad_hoc: undefined
+  generated: undefined
 })['pages'][number]['lines'][number]['contents'][number]
 
 type TextComponent = StepInstructionComponent & { kind: 'text' }
@@ -394,7 +394,8 @@ function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: Stu
     }))
 
     match(step.statement)
-      .with({ ad_hoc: 'clic-ecrire' }, () => {
+      .with({ generated: P.select() }, (generator) => {
+        assert(generator.items.kind === 'selectableInput')
         const selected: [string, SelectableInputComponent][] = []
         for (const previousStep of exercise.steps) {
           if (previousStep === step) {
@@ -407,10 +408,9 @@ function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: Stu
                   if (component.kind === 'selectableInput') {
                     const path = `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`
                     const answer = studentAnswers[path]
-                    // console.log(path, ':', answer)
                     if (answer !== undefined) {
                       assert(answer.kind === 'selectable')
-                      if (answer.color !== 0) {
+                      if (answer.color === generator.items.colorIndex) {
                         selected.push([path, component])
                       }
                     }
@@ -424,16 +424,14 @@ function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: Stu
         if (selected.length === 0) {
           pages.push({ kind: 'statement', instruction, statement: [] })
         } else {
-          for (const group of _.chunk(selected, 3)) {
+          for (const group of _.chunk(selected, generator.itemsPerPage)) {
             const statement: StatementLine[] = []
             for (const [path, component] of group) {
-              const components: StatementComponent[] = [
-                ...component.contents,
-                { kind: 'whitespace' },
-                { kind: 'arrow' },
-                { kind: 'whitespace' },
-                { kind: 'freeTextInput' },
-              ]
+              const components: StatementComponent[] = generator.template.contents.flatMap((c) =>
+                match(c)
+                  .with({ kind: 'itemPlaceholder' }, () => component.contents)
+                  .otherwise((c) => c),
+              )
               const contents = components.flatMap((c) => makeRenderableFromStatementComponent(`${path}-ecrire`, c))
               statement.push({ contents, alone: false })
             }

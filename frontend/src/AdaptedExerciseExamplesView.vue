@@ -505,7 +505,22 @@ export const examples: Example[] = [
           example: null,
           hint: null,
           statement: {
-            ad_hoc: 'clic-ecrire',
+            generated: {
+              items: {
+                kind: 'selectableInput',
+                colorIndex: 1,
+              },
+              itemsPerPage: 3,
+              template: {
+                contents: [
+                  { kind: 'itemPlaceholder' },
+                  { kind: 'whitespace' },
+                  { kind: 'arrow' },
+                  { kind: 'whitespace' },
+                  { kind: 'freeTextInput' },
+                ],
+              },
+            },
           },
         },
       ],

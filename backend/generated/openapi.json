@@ -1846,19 +1846,6 @@
           "contents"
         ]
       },
-      "AdHocClicEcrirePages": {
-        "properties": {
-          "ad_hoc": {
-            "type": "string",
-            "const": "clic-ecrire",
-            "title": "Ad Hoc"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ad_hoc"
-        ]
-      },
       "AdaptationBatch": {
         "properties": {
           "id": {
@@ -3285,6 +3272,173 @@
           "name"
         ],
         "title": "GeminiModel"
+      },
+      "GeneratedPages-Input": {
+        "properties": {
+          "generated": {
+            "$ref": "#/components/schemas/Generator-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated"
+        ]
+      },
+      "GeneratedPages-Output": {
+        "properties": {
+          "generated": {
+            "$ref": "#/components/schemas/Generator-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated"
+        ]
+      },
+      "Generator-Input": {
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/SelectableInputGeneratorItems"
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "title": "Itemsperpage"
+          },
+          "template": {
+            "$ref": "#/components/schemas/GeneratorTemplate-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "itemsPerPage",
+          "template"
+        ]
+      },
+      "Generator-Output": {
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/SelectableInputGeneratorItems"
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "title": "Itemsperpage"
+          },
+          "template": {
+            "$ref": "#/components/schemas/GeneratorTemplate-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "itemsPerPage",
+          "template"
+        ]
+      },
+      "GeneratorTemplate-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "GeneratorTemplate-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "GeneratorTemplatePlaceholder": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "itemPlaceholder",
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ]
       },
       "GetAdaptationBatchResponse": {
         "properties": {
@@ -4921,6 +5075,24 @@
           "boxed"
         ]
       },
+      "SelectableInputGeneratorItems": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "selectableInput",
+            "title": "Kind"
+          },
+          "colorIndex": {
+            "type": "integer",
+            "title": "Colorindex"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "colorIndex"
+        ]
+      },
       "StatementComponents": {
         "properties": {
           "text": {
@@ -5010,7 +5182,7 @@
                 "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
               },
               {
-                "$ref": "#/components/schemas/AdHocClicEcrirePages"
+                "$ref": "#/components/schemas/GeneratedPages-Input"
               }
             ],
             "title": "Statement"
@@ -5055,7 +5227,7 @@
                 "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
               },
               {
-                "$ref": "#/components/schemas/AdHocClicEcrirePages"
+                "$ref": "#/components/schemas/GeneratedPages-Output"
               }
             ],
             "title": "Statement"
