@@ -1,30 +1,28 @@
 <script lang="ts">
-import type { AdaptedExercise } from '@/apiClient'
+import type { AdaptedExercise, AdaptedExerciseV2 } from '@/apiClient'
 import { match, P } from 'ts-pattern'
 import deepCopy from 'deep-copy'
+import _ from 'lodash'
 
-type TextComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'text' }
-type WhitespaceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'whitespace' }
-type FormattedComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'formatted' }
-type ArrowComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'arrow' }
-type ChoiceComponent = AdaptedExercise['instruction']['lines'][number]['contents'][number] & { kind: 'choice' }
-type ActiveFormattedComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
-  kind: 'formatted'
-}
-type FreeTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
-  kind: 'freeTextInput'
-}
-type MultipleChoicesInputComponent =
-  AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & { kind: 'multipleChoicesInput' }
-type SelectableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
-  kind: 'selectableInput'
-}
-type SwappableInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
-  kind: 'swappableInput'
-}
-type EditableTextInputComponent = AdaptedExercise['statement']['pages'][number]['lines'][number]['contents'][number] & {
-  kind: 'editableTextInput'
-}
+import assert from '../assert'
+
+type Step = AdaptedExerciseV2['steps'][number]
+type StepInstructionComponent = Step['instruction']['lines'][number]['contents'][number]
+type StepStatementComponent = (Step['statement'] & {
+  ad_hoc: undefined
+})['pages'][number]['lines'][number]['contents'][number]
+
+type TextComponent = StepInstructionComponent & { kind: 'text' }
+type WhitespaceComponent = StepInstructionComponent & { kind: 'whitespace' }
+type FormattedComponent = StepInstructionComponent & { kind: 'formatted' }
+type ArrowComponent = StepInstructionComponent & { kind: 'arrow' }
+type ChoiceComponent = StepInstructionComponent & { kind: 'choice' }
+type ActiveFormattedComponent = StepStatementComponent & { kind: 'formatted' }
+type FreeTextInputComponent = StepStatementComponent & { kind: 'freeTextInput' }
+type MultipleChoicesInputComponent = StepStatementComponent & { kind: 'multipleChoicesInput' }
+type SelectableInputComponent = StepStatementComponent & { kind: 'selectableInput' }
+type SwappableInputComponent = StepStatementComponent & { kind: 'swappableInput' }
+type EditableTextInputComponent = StepStatementComponent & { kind: 'editableTextInput' }
 
 type PlainTextComponent = TextComponent | WhitespaceComponent
 type FormattedTextComponent = PlainTextComponent | ArrowComponent | FormattedComponent
@@ -83,6 +81,35 @@ export type ComponentAnswer =
     }
 
 export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
+
+export function ensureV2(exercise: AdaptedExercise): AdaptedExerciseV2 {
+  if (exercise.format === 'v2') {
+    return exercise
+  } else {
+    return {
+      format: 'v2',
+      steps: [
+        {
+          instruction: exercise.instruction,
+          example: exercise.example,
+          hint: exercise.hint,
+          statement: exercise.statement,
+        },
+      ],
+      reference: exercise.reference,
+    }
+  }
+}
+
+export function countPages(exercise: AdaptedExerciseV2) {
+  let pagesCount = exercise.steps
+    .map((s) => ('pages' in s.statement ? Math.max(1, s.statement.pages.length) : 1))
+    .reduce((a, b) => a + b, 0)
+  if (exercise.reference !== null) {
+    pagesCount += 1
+  }
+  return pagesCount
+}
 
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
@@ -354,54 +381,107 @@ function markConsecutiveSelectableInputs(contents: AnyRenderable[]): AnyRenderab
   return ret
 }
 
-function makeRenderableExercise(exercise: AdaptedExercise): RenderableExercise {
+function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: StudentAnswers): RenderableExercise {
   const pages: RenderablePage[] = []
 
-  const instruction = [
-    ...exercise.instruction.lines,
-    ...(exercise.example ? exercise.example.lines : []),
-    ...(exercise.hint ? exercise.hint.lines : []),
-  ].map((line) => ({
-    contents: line.contents.flatMap(makeRenderableFromInstructionComponent),
-  }))
+  for (const step of exercise.steps) {
+    const instruction = [
+      ...step.instruction.lines,
+      ...(step.example ? step.example.lines : []),
+      ...(step.hint ? step.hint.lines : []),
+    ].map((line) => ({
+      contents: line.contents.flatMap(makeRenderableFromInstructionComponent),
+    }))
 
-  if (exercise.statement.pages.length === 0) {
-    pages.push({ kind: 'statement', instruction, statement: [] })
-  } else {
-    for (const [pageIndex, page] of exercise.statement.pages.entries()) {
-      const statement: StatementLine[] = []
-
-      for (const [lineIndex, { contents }] of page.lines.entries()) {
-        const alone =
-          contents.length === 1 && (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
-
-        statement.push({
-          contents: markConsecutiveSelectableInputs(
-            Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
-              makeRenderableFromStatementComponent(`stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`, c),
-            ),
-          ),
-          alone,
-        })
-        for (const [componentIndex, component] of contents.entries()) {
-          if (component.kind === 'editableTextInput' && component.showOriginalText) {
-            statement.push({
-              contents: [
-                { kind: 'text', text: '→' },
-                { kind: 'whitespace' },
-                makeRenderableFromEditableTextInput(
-                  `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`,
-                  component,
-                ),
-              ],
-              alone: false,
-            })
+    match(step.statement)
+      .with({ ad_hoc: 'clic-ecrire' }, () => {
+        const selected: [string, SelectableInputComponent][] = []
+        for (const previousStep of exercise.steps) {
+          if (previousStep === step) {
+            break
+          }
+          if ('pages' in previousStep.statement) {
+            for (const [pageIndex, page] of previousStep.statement.pages.entries()) {
+              for (const [lineIndex, line] of page.lines.entries()) {
+                for (const [componentIndex, component] of line.contents.entries()) {
+                  if (component.kind === 'selectableInput') {
+                    const path = `stmt-pg${pageIndex}-ln${lineIndex}-ct${componentIndex}`
+                    const answer = studentAnswers[path]
+                    // console.log(path, ':', answer)
+                    if (answer !== undefined) {
+                      assert(answer.kind === 'selectable')
+                      if (answer.color !== 0) {
+                        selected.push([path, component])
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
-      }
 
-      pages.push({ kind: 'statement', instruction, statement })
-    }
+        if (selected.length === 0) {
+          pages.push({ kind: 'statement', instruction, statement: [] })
+        } else {
+          for (const group of _.chunk(selected, 3)) {
+            const statement: StatementLine[] = []
+            for (const [path, component] of group) {
+              const components: StatementComponent[] = [
+                ...component.contents,
+                { kind: 'whitespace' },
+                { kind: 'arrow' },
+                { kind: 'whitespace' },
+                { kind: 'freeTextInput' },
+              ]
+              const contents = components.flatMap((c) => makeRenderableFromStatementComponent(`${path}-ecrire`, c))
+              statement.push({ contents, alone: false })
+            }
+            pages.push({ kind: 'statement', instruction, statement })
+          }
+        }
+      })
+      .with({ pages: [] }, () => {
+        pages.push({ kind: 'statement', instruction, statement: [] })
+      })
+      .with({ pages: P.select() }, (statementPages) => {
+        for (const page of statementPages) {
+          const statement: StatementLine[] = []
+
+          for (const [lineIndex, { contents }] of page.lines.entries()) {
+            const alone =
+              contents.length === 1 &&
+              (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
+
+            statement.push({
+              contents: markConsecutiveSelectableInputs(
+                Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
+                  makeRenderableFromStatementComponent(`stmt-pg${pages.length}-ln${lineIndex}-ct${componentIndex}`, c),
+                ),
+              ),
+              alone,
+            })
+            for (const [componentIndex, component] of contents.entries()) {
+              if (component.kind === 'editableTextInput' && component.showOriginalText) {
+                statement.push({
+                  contents: [
+                    { kind: 'text', text: '→' },
+                    { kind: 'whitespace' },
+                    makeRenderableFromEditableTextInput(
+                      `stmt-pg${pages.length}-ln${lineIndex}-ct${componentIndex}`,
+                      component,
+                    ),
+                  ],
+                  alone: false,
+                })
+              }
+            }
+          }
+
+          pages.push({ kind: 'statement', instruction, statement })
+        }
+      })
+      .exhaustive()
   }
 
   if (exercise.reference !== null) {
@@ -445,7 +525,15 @@ provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
 
 const route = useRoute()
 
-const renderableExercise = computed(() => makeRenderableExercise(props.adaptedExercise))
+const studentAnswers =
+  props.studentAnswersStorageKey === null
+    ? ref<StudentAnswers>({})
+    : useStorage<StudentAnswers>(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
+provide('adaptedExerciseStudentAnswers', studentAnswers)
+
+const exerciseV2 = computed(() => ensureV2(props.adaptedExercise))
+
+const renderableExercise = computed(() => makeRenderableExercise(exerciseV2.value, studentAnswers.value))
 
 const swappables = computed(() => {
   const swappables: { [path: string]: SwappableInputRenderable } = {}
@@ -463,9 +551,10 @@ const swappables = computed(() => {
   return swappables
 })
 
+const pagesCount = computed(() => countPages(exerciseV2.value))
 const pageIndex = ref(0)
 watch(
-  () => props.adaptedExercise.statement.pages.length,
+  pagesCount,
   (pagesCount) => {
     if (pageIndex.value >= pagesCount) {
       pageIndex.value = Math.max(0, pagesCount - 1)
@@ -488,12 +577,6 @@ watch(pageIndex, () => {
 provide('adaptedExerciseInProgress', inProgress)
 
 const page = computed(() => renderableExercise.value.pages[pageIndex.value])
-
-const studentAnswers =
-  props.studentAnswersStorageKey === null
-    ? ref({})
-    : useStorage(`patty/student-answers/v3/exercise-${props.studentAnswersStorageKey}`, {})
-provide('adaptedExerciseStudentAnswers', studentAnswers)
 
 function reset() {
   studentAnswers.value = {}

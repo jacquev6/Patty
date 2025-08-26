@@ -1578,7 +1578,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Exercise-Input"
+                "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Input"
               }
             }
           }
@@ -1846,6 +1846,19 @@
           "contents"
         ]
       },
+      "AdHocClicEcrirePages": {
+        "properties": {
+          "ad_hoc": {
+            "type": "string",
+            "const": "clic-ecrire",
+            "title": "Ad Hoc"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ad_hoc"
+        ]
+      },
       "AdaptationBatch": {
         "properties": {
           "id": {
@@ -2032,7 +2045,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+                "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
               },
               {
                 "type": "null"
@@ -2837,7 +2850,7 @@
         ],
         "title": "ExampleComponents"
       },
-      "Exercise-Input": {
+      "ExerciseV1-Input": {
         "properties": {
           "format": {
             "type": "string",
@@ -2888,6 +2901,124 @@
           "example",
           "hint",
           "statement",
+          "reference"
+        ]
+      },
+      "ExerciseV1-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instruction",
+          "example",
+          "hint",
+          "statement",
+          "reference"
+        ]
+      },
+      "ExerciseV2-Input": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v2",
+            "title": "Format"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step-Input"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "steps",
+          "reference"
+        ]
+      },
+      "ExerciseV2-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v2",
+            "title": "Format"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step-Output"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "steps",
           "reference"
         ]
       },
@@ -4668,6 +4799,28 @@
         ],
         "title": "ReferenceComponents"
       },
+      "RootModel_Union_ExerciseV1__ExerciseV2__-Input": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ExerciseV1-Input"
+          },
+          {
+            "$ref": "#/components/schemas/ExerciseV2-Input"
+          }
+        ],
+        "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
+      },
+      "RootModel_Union_ExerciseV1__ExerciseV2__-Output": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ExerciseV1-Output"
+          },
+          {
+            "$ref": "#/components/schemas/ExerciseV2-Output"
+          }
+        ],
+        "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
+      },
       "SelectableInput-Input": {
         "properties": {
           "kind": {
@@ -4825,6 +4978,96 @@
           "editableTextInput"
         ],
         "title": "StatementComponents"
+      },
+      "Step-Input": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              },
+              {
+                "$ref": "#/components/schemas/AdHocClicEcrirePages"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
+        ]
+      },
+      "Step-Output": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              },
+              {
+                "$ref": "#/components/schemas/AdHocClicEcrirePages"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
+        ]
       },
       "SwappableInput-Input": {
         "properties": {
@@ -5033,60 +5276,6 @@
           "kind"
         ]
       },
-      "patty__adaptation__adapted__Exercise-Output": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "const": "v1",
-            "title": "Format"
-          },
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "format",
-          "instruction",
-          "example",
-          "hint",
-          "statement",
-          "reference"
-        ]
-      },
       "patty__adaptation__assistant_responses__Success": {
         "properties": {
           "kind": {
@@ -5095,7 +5284,7 @@
             "title": "Kind"
           },
           "exercise": {
-            "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
           }
         },
         "additionalProperties": false,

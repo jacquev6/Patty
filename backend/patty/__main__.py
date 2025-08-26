@@ -411,7 +411,7 @@ def json_to_html_script() -> None:
 
     from . import adaptation
 
-    example_exercise = adaptation.adapted.Exercise(
+    example_exercise = adaptation.adapted.ExerciseV1(
         format="v1",
         instruction=adaptation.adapted.InstructionPage(
             lines=[
@@ -429,7 +429,7 @@ def json_to_html_script() -> None:
         ),
         example=None,
         hint=None,
-        statement=adaptation.adapted.StatementPages(
+        statement=adaptation.adapted.StatementPagesV1(
             pages=[
                 adaptation.adapted.StatementPage(
                     lines=[
@@ -515,9 +515,9 @@ def json_to_html_script() -> None:
                     continue
                 yield line.rstrip()
         yield ""
-        yield "def exercise_to_html(exercise: Exercise | dict[str, Any]) -> str:"
-        yield "    if not isinstance(exercise, Exercise):"
-        yield "        exercise = Exercise.model_validate(exercise)"
+        yield "def exercise_to_html(exercise: ExerciseAsUnion | dict[str, Any]) -> str:"
+        yield "    if not isinstance(exercise, ExerciseAsUnion):"
+        yield "        exercise = Exercise.model_validate(exercise).root"
         yield ""
         with open("patty/export/templates/adaptation/index.html") as f:
             yield f"    template = {f.read().strip()!r}"

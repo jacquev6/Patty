@@ -652,6 +652,13 @@ export interface components {
        */
       subscript?: boolean
     }
+    AdHocClicEcrirePages: {
+      /**
+       * Ad Hoc
+       * @constant
+       */
+      ad_hoc: 'clic-ecrire'
+    }
     /** AdaptationBatch */
     AdaptationBatch: {
       /** Id */
@@ -709,7 +716,7 @@ export interface components {
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
-      manualEdit: components['schemas']['patty__adaptation__adapted__Exercise-Output'] | null
+      manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
@@ -989,7 +996,7 @@ export interface components {
        */
       formatted: true
     }
-    'Exercise-Input': {
+    'ExerciseV1-Input': {
       /**
        * Format
        * @constant
@@ -1000,6 +1007,38 @@ export interface components {
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+    }
+    'ExerciseV1-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+    }
+    'ExerciseV2-Input': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v2'
+      /** Steps */
+      steps: components['schemas']['Step-Input'][]
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+    }
+    'ExerciseV2-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v2'
+      /** Steps */
+      steps: components['schemas']['Step-Output'][]
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
     /** ExtractionBatch */
     ExtractionBatch: {
@@ -1712,6 +1751,14 @@ export interface components {
        */
       formatted: true
     }
+    /** RootModel[Union[ExerciseV1, ExerciseV2]] */
+    'RootModel_Union_ExerciseV1__ExerciseV2__-Input':
+      | components['schemas']['ExerciseV1-Input']
+      | components['schemas']['ExerciseV2-Input']
+    /** RootModel[Union[ExerciseV1, ExerciseV2]] */
+    'RootModel_Union_ExerciseV1__ExerciseV2__-Output':
+      | components['schemas']['ExerciseV1-Output']
+      | components['schemas']['ExerciseV2-Output']
     'SelectableInput-Input': {
       /**
        * Kind
@@ -1782,6 +1829,24 @@ export interface components {
       swappableInput: boolean
       /** Editabletextinput */
       editableTextInput: boolean
+    }
+    'Step-Input': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
+        | components['schemas']['AdHocClicEcrirePages']
+    }
+    'Step-Output': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
+        | components['schemas']['AdHocClicEcrirePages']
     }
     'SwappableInput-Input': {
       /**
@@ -1867,18 +1932,6 @@ export interface components {
        */
       kind: 'whitespace'
     }
-    'patty__adaptation__adapted__Exercise-Output': {
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v1'
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-    }
     /** Success */
     patty__adaptation__assistant_responses__Success: {
       /**
@@ -1886,7 +1939,7 @@ export interface components {
        * @constant
        */
       kind: 'success'
-      exercise: components['schemas']['patty__adaptation__adapted__Exercise-Output']
+      exercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
     }
     /** Page */
     patty__api_router__ApiTextbook__Page: {
@@ -3092,7 +3145,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['Exercise-Input']
+        'application/json': components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Input']
       }
     }
     responses: {

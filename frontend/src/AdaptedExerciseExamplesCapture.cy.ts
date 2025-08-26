@@ -1,5 +1,6 @@
 import { examples } from './AdaptedExerciseExamplesView.vue'
 import AdaptedExerciseExamplesCaptureComponent from './AdaptedExerciseExamplesCaptureComponent.vue'
+import { countPages, ensureV2 } from './AdaptedExercise/AdaptedExerciseRenderer.vue'
 
 const screenshotsCounts: Record<string, number> = {}
 
@@ -29,10 +30,7 @@ describe('Adapted exercises examples', () => {
           cy.viewport(width, height)
           cy.mount(AdaptedExerciseExamplesCaptureComponent, { props: { adaptedExercise: example.exercise } })
 
-          let pagesCount = Math.max(1, example.exercise.statement.pages.length)
-          if (example.exercise.reference !== null) {
-            pagesCount += 1
-          }
+          let pagesCount = countPages(ensureV2(example.exercise))
           if (exampleIndex == examples.length - 1) {
             pagesCount += 1 // For the end page, only once per resolution
           }

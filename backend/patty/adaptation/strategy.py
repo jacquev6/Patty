@@ -3,7 +3,6 @@ from typing import Any, Literal
 
 import pydantic
 
-
 from . import adapted
 from . import llm
 from ..any_json import JsonDict

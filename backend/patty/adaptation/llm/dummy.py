@@ -5,7 +5,6 @@ import unittest
 from polyfactory.factories.pydantic_factory import ModelFactory
 import pydantic
 
-
 from ...any_json import JsonDict
 from .base import (
     AssistantMessage,

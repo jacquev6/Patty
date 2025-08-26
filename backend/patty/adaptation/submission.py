@@ -72,5 +72,5 @@ async def submit_adaptation(adaptation: db.Adaptation) -> None:
         log(f"Success on adaptation {adaptation.id}")
         adaptation.raw_llm_conversations = [response.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.Success(
-            kind="success", exercise=Exercise(**response.message.content.model_dump())
+            kind="success", exercise=Exercise.model_validate(response.message.content.model_dump())
         )

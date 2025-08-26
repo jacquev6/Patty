@@ -86,6 +86,20 @@
       "type": "object",
       "additionalProperties": false
     },
+    "AdHocClicEcrirePages": {
+      "properties": {
+        "ad_hoc": {
+          "const": "clic-ecrire",
+          "title": "Ad Hoc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ad_hoc"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "Arrow": {
       "properties": {
         "kind": {
@@ -216,6 +230,94 @@
       },
       "required": [
         "lines"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExerciseV1": {
+      "properties": {
+        "format": {
+          "const": "v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "instruction": {
+          "$ref": "#/$defs/InstructionPage"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExamplePage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HintPage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statement": {
+          "$ref": "#/$defs/StatementPages"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceLine"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "instruction",
+        "example",
+        "hint",
+        "statement",
+        "reference"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExerciseV2": {
+      "properties": {
+        "format": {
+          "const": "v2",
+          "title": "Format",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceLine"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "steps",
+        "reference"
       ],
       "type": "object",
       "additionalProperties": false
@@ -622,6 +724,52 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Step": {
+      "properties": {
+        "instruction": {
+          "$ref": "#/$defs/InstructionPage"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExamplePage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HintPage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatementPages"
+            },
+            {
+              "$ref": "#/$defs/AdHocClicEcrirePages"
+            }
+          ],
+          "title": "Statement"
+        }
+      },
+      "required": [
+        "instruction",
+        "example",
+        "hint",
+        "statement"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "SwappableInput": {
       "properties": {
         "kind": {
@@ -691,57 +839,13 @@
       "additionalProperties": false
     }
   },
-  "properties": {
-    "format": {
-      "const": "v1",
-      "title": "Format",
-      "type": "string"
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ExerciseV1"
     },
-    "instruction": {
-      "$ref": "#/$defs/InstructionPage"
-    },
-    "example": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ExamplePage"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "hint": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/HintPage"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "statement": {
-      "$ref": "#/$defs/StatementPages"
-    },
-    "reference": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ReferenceLine"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    {
+      "$ref": "#/$defs/ExerciseV2"
     }
-  },
-  "required": [
-    "format",
-    "instruction",
-    "example",
-    "hint",
-    "statement",
-    "reference"
   ],
-  "type": "object",
-  "additionalProperties": false
+  "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
 }

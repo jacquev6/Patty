@@ -18,14 +18,30 @@ class BaseModel(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="ignore", json_schema_extra=lambda schema: schema.pop("title"))
 
 
-class Exercise(BaseModel):
-    # WARNING: keep 'make_exercise_type' below consistent with this class
+class ExerciseV1(BaseModel):
     format: Literal["v1"]
     instruction: InstructionPage
     example: ExamplePage | None
     hint: HintPage | None
-    statement: StatementPages
+    statement: StatementPagesV1
     reference: ReferenceLine | None
+
+
+class ExerciseV2(BaseModel):
+    format: Literal["v2"]
+    steps: list[Step]
+    reference: ReferenceLine | None
+
+
+class Step(BaseModel):
+    instruction: InstructionPage
+    example: ExamplePage | None
+    hint: HintPage | None
+    statement: StatementPagesV2
+
+
+ExerciseAsUnion = ExerciseV1 | ExerciseV2
+Exercise = pydantic.RootModel[ExerciseAsUnion]
 
 
 class Pages[Component](BaseModel):
@@ -128,6 +144,10 @@ class EditableTextInput(BaseModel):
     increaseHorizontalSpace: bool = False
 
 
+class AdHocClicEcrirePages(BaseModel):
+    ad_hoc: Literal["clic-ecrire"]
+
+
 # WARNING: keep 'InstructionComponent' and 'InstructionComponents' consistent
 InstructionComponent = FormattedText | Choice
 
@@ -159,7 +179,8 @@ ExamplePage = Page[ExampleComponent]
 HintPage = Page[HintComponent]
 StatementPage = Page[StatementComponent]
 
-StatementPages = Pages[StatementComponent]
+StatementPagesV1 = Pages[StatementComponent]
+StatementPagesV2 = Pages[StatementComponent] | AdHocClicEcrirePages
 
 # patty_json_to_html.py end
 
@@ -263,22 +284,40 @@ def make_partial_exercise_type(components: Components) -> type[Exercise]:
     instruction_page_type = make_page_type("Instruction", typing.Union[tuple(components.instruction.gather())])
     example_page_type = make_page_type("Example", typing.Union[tuple(components.example.gather())])
     hint_page_type = make_page_type("Hint", typing.Union[tuple(components.hint.gather())])
-    statement_pages_type = make_pages_type("Statement", typing.Union[tuple(components.statement.gather())])
+    statement_pages_v1_type = make_pages_type("Statement", typing.Union[tuple(components.statement.gather())])
     reference_line_type = make_line_type("Reference", typing.Union[tuple(components.reference.gather())])
 
-    return typing.cast(
-        type[Exercise],
-        pydantic.create_model(
-            "Exercise",
-            __base__=BaseModel,
-            format=(Literal["v1"], pydantic.Field()),
-            instruction=(instruction_page_type, pydantic.Field()),
-            example=(example_page_type | None, pydantic.Field()),
-            hint=(hint_page_type | None, pydantic.Field()),
-            statement=(statement_pages_type, pydantic.Field()),
-            reference=(reference_line_type | None, pydantic.Field()),
-        ),
+    exercise_v1_type: Any = pydantic.create_model(
+        "ExerciseV1",
+        __base__=BaseModel,
+        format=(Literal["v1"], pydantic.Field()),
+        instruction=(instruction_page_type, pydantic.Field()),
+        example=(example_page_type | None, pydantic.Field()),
+        hint=(hint_page_type | None, pydantic.Field()),
+        statement=(statement_pages_v1_type, pydantic.Field()),
+        reference=(reference_line_type | None, pydantic.Field()),
     )
+
+    statement_pages_v2_type = statement_pages_v1_type | AdHocClicEcrirePages
+
+    step_type: Any = pydantic.create_model(
+        "Step",
+        __base__=BaseModel,
+        instruction=(instruction_page_type, pydantic.Field()),
+        example=(example_page_type | None, pydantic.Field()),
+        hint=(hint_page_type | None, pydantic.Field()),
+        statement=(statement_pages_v2_type, pydantic.Field()),
+    )
+
+    exercise_v2_type: Any = pydantic.create_model(
+        "ExerciseV2",
+        __base__=BaseModel,
+        format=(Literal["v2"], pydantic.Field()),
+        steps=(list[step_type], pydantic.Field()),
+        reference=(reference_line_type | None, pydantic.Field()),
+    )
+
+    return typing.cast(type[Exercise], pydantic.RootModel[exercise_v1_type | exercise_v2_type])
 
 
 P = typing.ParamSpec("P")
