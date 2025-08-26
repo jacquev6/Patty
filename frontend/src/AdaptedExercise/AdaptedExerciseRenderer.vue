@@ -101,16 +101,6 @@ export function ensureV2(exercise: AdaptedExercise): AdaptedExerciseV2 {
   }
 }
 
-export function countPages(exercise: AdaptedExerciseV2) {
-  let pagesCount = exercise.steps
-    .map((s) => ('pages' in s.statement ? Math.max(1, s.statement.pages.length) : 1))
-    .reduce((a, b) => a + b, 0)
-  if (exercise.reference !== null) {
-    pagesCount += 1
-  }
-  return pagesCount
-}
-
 export const defaultSpacingVariables = () => ({
   '--extra-horizontal-space-between-words': 0.26,
   '--optional-extra-horizontal-space-between-letters-in-editable-text-input': 0.2,
@@ -549,10 +539,9 @@ const swappables = computed(() => {
   return swappables
 })
 
-const pagesCount = computed(() => countPages(exerciseV2.value))
 const pageIndex = ref(0)
 watch(
-  pagesCount,
+  computed(() => renderableExercise.value.pages.length - 1),
   (pagesCount) => {
     if (pageIndex.value >= pagesCount) {
       pageIndex.value = Math.max(0, pagesCount - 1)
