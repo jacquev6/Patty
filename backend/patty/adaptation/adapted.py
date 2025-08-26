@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from typing import Any, Iterable, Literal
+import time
 import typing
+import unittest
 
+from polyfactory.factories.pydantic_factory import ModelFactory
 import pydantic
 
 from ..api_utils import ApiModel
@@ -231,13 +234,15 @@ class ReferenceComponents(FormattedTextComponents):
     pass
 
 
-def make_exercise_type(
-    instruction_components: InstructionComponents,
-    example_components: ExampleComponents,
-    hint_components: HintComponents,
-    statement_components: StatementComponents,
-    reference_components: ReferenceComponents,
-) -> type[Exercise]:
+class Components(ApiModel):
+    instruction: InstructionComponents
+    example: ExampleComponents
+    hint: HintComponents
+    statement: StatementComponents
+    reference: ReferenceComponents
+
+
+def make_partial_exercise_type(components: Components) -> type[Exercise]:
     # WARNING: typing dynamic types is a nightmare, so THIS FUNCTION IS MOSTLY UNTYPED
     # and relies on a final cast of its return value.
 
@@ -255,11 +260,11 @@ def make_exercise_type(
         pages = (list[page_type], pydantic.Field())
         return pydantic.create_model(f"{name}Pages", __base__=BaseModel, pages=pages)
 
-    instruction_page_type = make_page_type("Instruction", typing.Union[tuple(instruction_components.gather())])
-    example_page_type = make_page_type("Example", typing.Union[tuple(example_components.gather())])
-    hint_page_type = make_page_type("Hint", typing.Union[tuple(hint_components.gather())])
-    statement_pages_type = make_pages_type("Statement", typing.Union[tuple(statement_components.gather())])
-    reference_line_type = make_line_type("Reference", typing.Union[tuple(reference_components.gather())])
+    instruction_page_type = make_page_type("Instruction", typing.Union[tuple(components.instruction.gather())])
+    example_page_type = make_page_type("Example", typing.Union[tuple(components.example.gather())])
+    hint_page_type = make_page_type("Hint", typing.Union[tuple(components.hint.gather())])
+    statement_pages_type = make_pages_type("Statement", typing.Union[tuple(components.statement.gather())])
+    reference_line_type = make_line_type("Reference", typing.Union[tuple(components.reference.gather())])
 
     return typing.cast(
         type[Exercise],
@@ -274,3 +279,81 @@ def make_exercise_type(
             reference=(reference_line_type | None, pydantic.Field()),
         ),
     )
+
+
+P = typing.ParamSpec("P")
+
+
+def repeat(seconds: float) -> typing.Callable[[typing.Callable[P, None]], typing.Callable[P, None]]:
+    def decorator(wrapped: typing.Callable[P, None]) -> typing.Callable[P, None]:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
+            start = time.perf_counter()
+            while time.perf_counter() - start < seconds:
+                wrapped(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+class MakePartialExerciseTypeTestCase(unittest.TestCase):
+    # I tried using https://hypothesis.readthedocs.io/ but it seemed to struggle with recursive models.
+    # So I fell back to random data generation.
+
+    # @hypothesis.given(
+    #     hypothesis.strategies.builds(Components),
+    #     hypothesis.strategies.data(),
+    # )
+    # def test_sub_is_super(self, components: Components, data: hypothesis.strategies.DataObject) -> None:
+    #     sub_type = make_exercise_type(components)
+    #     instance = data.draw(hypothesis.strategies.builds(sub_type))
+    #     Exercise.model_validate(instance.model_dump())
+
+    # @hypothesis.given(hypothesis.strategies.builds(Exercise))
+    # def test_super_is_full_sub(self, instance: Exercise) -> None:
+    #     self.FullSub.model_validate(instance.model_dump())
+
+    class ComponentsFactory(ModelFactory[Components]):
+        __model__ = Components
+
+    @repeat(seconds=2)
+    def test_partial_exercise_is_exercise(self) -> None:
+        class PartialExerciseFactory(ModelFactory[Exercise]):
+            __model__ = make_partial_exercise_type(self.ComponentsFactory.build())
+
+        instance = PartialExerciseFactory.build().model_dump()
+        try:
+            Exercise.model_validate(instance)
+        except pydantic.ValidationError as e:
+            self.fail(f"Validation failed for {instance}: {e}")
+
+    FullPartialExercise = make_partial_exercise_type(
+        Components(
+            instruction=InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
+            example=ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            hint=HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            statement=StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                formatted=True,
+                free_text_input=True,
+                multiple_choices_input=True,
+                selectable_input=True,
+                swappable_input=True,
+                editable_text_input=True,
+            ),
+            reference=ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        )
+    )
+
+    class ExerciseFactory(ModelFactory[Exercise]):
+        __model__ = Exercise
+
+    @repeat(seconds=2)
+    def test_exercise_is_full_partial_exercise(self) -> None:
+        instance = self.ExerciseFactory.build().model_dump()
+        try:
+            self.FullPartialExercise.model_validate(instance)
+        except pydantic.ValidationError as e:
+            self.fail(f"Validation failed for {instance}: {e}")

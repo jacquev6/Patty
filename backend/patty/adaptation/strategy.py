@@ -40,12 +40,14 @@ class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
         return llm.JsonSchemaResponseFormat(response_type=self.make_response_type())
 
     def make_response_type(self) -> type[adapted.Exercise]:
-        return adapted.make_exercise_type(
-            self.instruction_components,
-            self.example_components,
-            self.hint_components,
-            self.statement_components,
-            self.reference_components,
+        return adapted.make_partial_exercise_type(
+            adapted.Components(
+                instruction=self.instruction_components,
+                example=self.example_components,
+                hint=self.hint_components,
+                statement=self.statement_components,
+                reference=self.reference_components,
+            )
         )
 
     def make_response_schema(self) -> JsonDict:

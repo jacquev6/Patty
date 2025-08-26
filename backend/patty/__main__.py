@@ -359,22 +359,26 @@ def adapted_exercise_schema(
 ) -> None:
     from . import adaptation
 
-    exercise_type = adaptation.adapted.make_exercise_type(
-        adaptation.adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
-        adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adaptation.adapted.StatementComponents(
-            text=True,
-            whitespace=True,
-            arrow=True,
-            formatted=True,
-            free_text_input=free_text_input,
-            multiple_choices_input=multiple_choices_input,
-            selectable_input=selectable_input,
-            swappable_input=swappable_input,
-            editable_text_input=editable_text_input,
-        ),
-        adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+    exercise_type = adaptation.adapted.make_partial_exercise_type(
+        adaptation.adapted.Components(
+            instruction=adaptation.adapted.InstructionComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, choice=choice
+            ),
+            example=adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            statement=adaptation.adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                formatted=True,
+                free_text_input=free_text_input,
+                multiple_choices_input=multiple_choices_input,
+                selectable_input=selectable_input,
+                swappable_input=swappable_input,
+                editable_text_input=editable_text_input,
+            ),
+            reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        )
     )
     print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
 
