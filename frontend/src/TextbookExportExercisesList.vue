@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import _ from 'lodash'
 
-import PageNavigationControls from './AdaptedExercise/PageNavigationControls.vue'
+import HorizontalScrollingControls from './AdaptedExercise/HorizontalScrollingControls.vue'
 import type { Exercise as FullExercise } from './TextbookExportRootView.vue'
 import { match, P } from 'ts-pattern'
 
@@ -14,15 +14,12 @@ const props = defineProps<{
   exercises: Exercise[]
 }>()
 
-const pageIndex = ref(0)
-const pagesCount = computed(() => Math.ceil(props.exercises.length / 4))
-
 function hasExt(ext: string) {
   return (filename: string) => filename.endsWith(ext)
 }
 
 const columns = computed(() => {
-  const columns: (Exercise | null)[][] = _.chunk(props.exercises, 4).slice(pageIndex.value)
+  const columns: (Exercise | null)[][] = _.chunk(props.exercises, 4)
   const missing = 4 - columns[columns.length - 1]!.length
   for (let i = 0; i < missing; i++) {
     columns[columns.length - 1]!.push(null)
@@ -64,7 +61,7 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
 </script>
 
 <template>
-  <PageNavigationControls :navigateUsingArrowKeys="true" :pagesCount v-model="pageIndex">
+  <HorizontalScrollingControls :navigateUsingArrowKeys="true" :scrollBy="250">
     <div class="container">
       <div v-for="(column, columnIndex) in columns">
         <template v-for="exercise in column">
@@ -76,14 +73,14 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
               :to="{ name: 'exercise', params: { id: exercise.exerciseId }, query: { closable: 'true' } }"
               target="_blank"
             >
-              <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
+              <div class="exercise" :class="`exercise${columnIndex % 3}`">
                 <p>{{ makeExerciseTitle(exercise) }}</p>
               </div>
             </RouterLink>
           </template>
           <template v-else-if="exercise.kind === 'external'">
             <a @click="openExternalExercise(exercise)">
-              <div class="exercise" :class="`exercise${(pageIndex + columnIndex) % 3}`">
+              <div class="exercise" :class="`exercise${columnIndex % 3}`">
                 <p>{{ makeExerciseTitle(exercise) }}</p>
               </div>
             </a>
@@ -94,12 +91,11 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
         </template>
       </div>
     </div>
-  </PageNavigationControls>
+  </HorizontalScrollingControls>
 </template>
 
 <style scoped>
 .container {
-  overflow-x: hidden;
   display: flex;
 }
 

@@ -36,7 +36,7 @@ const global = { plugins: [router] }
 
 describe('TextbookExportExercisesList', () => {
   beforeEach(() => {
-    cy.viewport(500, 240)
+    cy.viewport(500, 260)
   })
 
   it('renders 4 links', () => {
@@ -57,10 +57,10 @@ describe('TextbookExportExercisesList', () => {
     screenshot()
   })
 
-  it('renders 6 links', () => {
+  it('renders 10 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
-        exercises: _.range(1, 7).map((i) => ({
+        exercises: _.range(1, 11).map((i) => ({
           kind: 'adapted' as const,
           exerciseId: `P22Ex${i}`,
           exerciseNumber: `${i}`,
@@ -75,8 +75,6 @@ describe('TextbookExportExercisesList', () => {
     screenshot()
 
     cy.get('div.control').eq(1).click()
-
-    cy.get('a').eq(0).should('have.text', 'Exercice 5')
     cy.get('div.control').eq(0).should('not.have.class', 'disabled')
     cy.get('div.control').eq(1).should('have.class', 'disabled')
     screenshot()
@@ -100,8 +98,6 @@ describe('TextbookExportExercisesList', () => {
     screenshot()
 
     cy.get('div.control').eq(1).click()
-
-    cy.get('a').eq(0).should('have.text', 'Exercice 5')
     cy.get('div.control').eq(0).should('not.have.class', 'disabled')
     cy.get('div.control').eq(1).should('not.have.class', 'disabled')
     screenshot()
