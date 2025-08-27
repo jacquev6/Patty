@@ -100,6 +100,7 @@ describe('TextbookExportExercisesList', () => {
     cy.get('div.control').eq(1).click()
     cy.get('div.control').eq(0).should('not.have.class', 'disabled')
     cy.get('div.control').eq(1).should('not.have.class', 'disabled')
+    cy.wait(500)  // Give time to the "smooth" scrolling
     screenshot()
   })
 })
