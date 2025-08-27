@@ -144,6 +144,11 @@ class EditableTextInput(BaseModel):
     increaseHorizontalSpace: bool = False
 
 
+class SplitWordInput(BaseModel):
+    kind: Literal["splitWordInput"]
+    word: str
+
+
 class GeneratedPages(BaseModel):
     generated: Generator
 
@@ -176,7 +181,9 @@ ExampleComponent = FormattedText
 HintComponent = FormattedText
 
 
-StatementComponent = ActiveFormattedText | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput
+StatementComponent = (
+    ActiveFormattedText | MultipleChoicesInput | SelectableInput | SwappableInput | EditableTextInput | SplitWordInput
+)
 
 
 ReferenceComponent = FormattedText
@@ -252,6 +259,7 @@ class StatementComponents(ActiveFormattedTextComponents):
     selectable_input: bool
     swappable_input: bool
     editable_text_input: bool
+    split_word_input: bool
 
     def gather(self) -> Iterable[type]:
         yield from super().gather()
@@ -263,6 +271,8 @@ class StatementComponents(ActiveFormattedTextComponents):
             yield SwappableInput
         if self.editable_text_input:
             yield EditableTextInput
+        if self.split_word_input:
+            yield SplitWordInput
 
 
 class ReferenceComponents(FormattedTextComponents):
@@ -414,6 +424,7 @@ class MakePartialExerciseTypeTestCase(unittest.TestCase):
                 selectable_input=True,
                 swappable_input=True,
                 editable_text_input=True,
+                split_word_input=True,
             ),
             reference=ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         )

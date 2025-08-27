@@ -349,6 +349,7 @@ def tricky_sql_requests() -> None:
 @click.option("--selectable-input/--no-selectable-input", default=True, is_flag=True)
 @click.option("--swappable-input/--no-swappable-input", default=True, is_flag=True)
 @click.option("--editable-text-input/--no-editable-text-input", default=True, is_flag=True)
+@click.option("--split-word-input/--no-split-word-input", default=True, is_flag=True)
 def adapted_exercise_schema(
     choice: bool,
     free_text_input: bool,
@@ -356,6 +357,7 @@ def adapted_exercise_schema(
     selectable_input: bool,
     swappable_input: bool,
     editable_text_input: bool,
+    split_word_input: bool,
 ) -> None:
     from . import adaptation
 
@@ -376,6 +378,7 @@ def adapted_exercise_schema(
                 selectable_input=selectable_input,
                 swappable_input=swappable_input,
                 editable_text_input=editable_text_input,
+                split_word_input=split_word_input,
             ),
             reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
         )

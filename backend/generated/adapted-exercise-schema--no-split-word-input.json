@@ -135,6 +135,46 @@
       "type": "object",
       "additionalProperties": false
     },
+    "EditableTextInput": {
+      "properties": {
+        "kind": {
+          "const": "editableTextInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "showOriginalText": {
+          "title": "Showoriginaltext",
+          "type": "boolean"
+        },
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        },
+        "increaseHorizontalSpace": {
+          "default": false,
+          "title": "Increasehorizontalspace",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "showOriginalText",
+        "contents",
+        "increaseHorizontalSpace"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "ExampleLine": {
       "properties": {
         "contents": {
@@ -457,7 +497,7 @@
                 "$ref": "#/$defs/SwappableInput"
               },
               {
-                "$ref": "#/$defs/SplitWordInput"
+                "$ref": "#/$defs/EditableTextInput"
               },
               {
                 "$ref": "#/$defs/GeneratorTemplatePlaceholder"
@@ -753,25 +793,6 @@
       "type": "object",
       "additionalProperties": false
     },
-    "SplitWordInput": {
-      "properties": {
-        "kind": {
-          "const": "splitWordInput",
-          "title": "Kind",
-          "type": "string"
-        },
-        "word": {
-          "title": "Word",
-          "type": "string"
-        }
-      },
-      "required": [
-        "kind",
-        "word"
-      ],
-      "type": "object",
-      "additionalProperties": false
-    },
     "StatementLine": {
       "properties": {
         "contents": {
@@ -802,7 +823,7 @@
                 "$ref": "#/$defs/SwappableInput"
               },
               {
-                "$ref": "#/$defs/SplitWordInput"
+                "$ref": "#/$defs/EditableTextInput"
               }
             ]
           },

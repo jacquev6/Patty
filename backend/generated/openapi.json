@@ -2868,7 +2868,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
           },
           "reference": {
             "anyOf": [
@@ -2922,7 +2922,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
           },
           "reference": {
             "anyOf": [
@@ -3368,6 +3368,9 @@
                   "$ref": "#/components/schemas/EditableTextInput"
                 },
                 {
+                  "$ref": "#/components/schemas/SplitWordInput"
+                },
+                {
                   "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
                 }
               ]
@@ -3412,6 +3415,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
                 },
                 {
                   "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
@@ -3911,7 +3917,7 @@
         ],
         "title": "JsonSchemaLlmResponseSpecification"
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -3942,6 +3948,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
                 }
               ]
             },
@@ -3954,7 +3963,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -3985,6 +3994,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
                 }
               ]
             },
@@ -4239,11 +4251,11 @@
         ],
         "title": "OpenAiModel"
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -4254,11 +4266,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -4329,11 +4341,11 @@
           "lines"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -4344,11 +4356,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "type": "array",
             "title": "Pages"
@@ -4387,7 +4399,7 @@
           "statement": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
               },
               {
                 "$ref": "#/components/schemas/GeneratedPages-Input"
@@ -4432,7 +4444,7 @@
           "statement": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
               },
               {
                 "$ref": "#/components/schemas/GeneratedPages-Output"
@@ -5183,6 +5195,24 @@
           "colorIndex"
         ]
       },
+      "SplitWordInput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "splitWordInput",
+            "title": "Kind"
+          },
+          "word": {
+            "type": "string",
+            "title": "Word"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "word"
+        ]
+      },
       "StatementComponents": {
         "properties": {
           "text": {
@@ -5224,6 +5254,10 @@
           "editableTextInput": {
             "type": "boolean",
             "title": "Editabletextinput"
+          },
+          "splitWordInput": {
+            "type": "boolean",
+            "title": "Splitwordinput"
           }
         },
         "additionalProperties": false,
@@ -5237,7 +5271,8 @@
           "multipleChoicesInput",
           "selectableInput",
           "swappableInput",
-          "editableTextInput"
+          "editableTextInput",
+          "splitWordInput"
         ],
         "title": "StatementComponents"
       },

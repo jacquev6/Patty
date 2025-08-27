@@ -23,6 +23,7 @@ type MultipleChoicesInputComponent = PhaseStatementComponent & { kind: 'multiple
 type SelectableInputComponent = PhaseStatementComponent & { kind: 'selectableInput' }
 type SwappableInputComponent = PhaseStatementComponent & { kind: 'swappableInput' }
 type EditableTextInputComponent = PhaseStatementComponent & { kind: 'editableTextInput' }
+type SplitWordInputComponent = PhaseStatementComponent & { kind: 'splitWordInput' }
 
 type PlainTextComponent = TextComponent | WhitespaceComponent
 type FormattedTextComponent = PlainTextComponent | ArrowComponent | FormattedComponent
@@ -41,6 +42,7 @@ export type StatementComponent =
   | SelectableInputComponent
   | SwappableInputComponent
   | EditableTextInputComponent
+  | SplitWordInputComponent
 export type ReferenceComponent = FormattedTextComponent
 
 export type InProgressExercise = {
@@ -78,6 +80,10 @@ export type ComponentAnswer =
   | {
       kind: 'swappable'
       contentsFrom: string
+    }
+  | {
+      kind: 'splitWord'
+      separatorIndex: number | null
     }
 
 export type StudentAnswers = Partial<Record<string, ComponentAnswer>>
@@ -175,11 +181,18 @@ type SwappableInputRenderable = {
   contents: PassiveRenderable[]
 }
 
+export type SplitWordInputRenderable = {
+  kind: 'splitWordInput'
+  path: string
+  word: string
+}
+
 type ActiveRenderable =
   | TextInputRenderable
   | MultipleChoicesInputRenderable
   | SelectableInputRenderable
   | SwappableInputRenderable
+  | SplitWordInputRenderable
 
 export type AnyRenderable = PassiveRenderable | ActiveRenderable
 
@@ -335,6 +348,13 @@ function makeRenderableFromStatementComponent(path: string, component: Statement
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)
     .with({ kind: 'editableTextInput' }, (c) => [makeRenderableFromEditableTextInput(path, c)])
+    .with({ kind: 'splitWordInput' }, (c) => [
+      {
+        kind: 'splitWordInput',
+        path,
+        word: c.word,
+      },
+    ])
     .otherwise((c) => makeRenderableFromActiveFormattedTextComponent(path, c))
 }
 

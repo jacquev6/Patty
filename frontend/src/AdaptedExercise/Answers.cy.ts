@@ -1033,4 +1033,68 @@ describe('Adapted exercise answers', () => {
 
     cy.get('[contenteditable]').should('have.text', 'Test')
   })
+
+  const exerciseWithSplitWordInput: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'splitWordInput', word: 'Alpha' },
+                { kind: 'whitespace' },
+                { kind: 'splitWordInput', word: 'Bravo' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForSplitWordInput: StudentAnswers = {
+    'stmt-pg0-ln0-ct0': { kind: 'splitWord', separatorIndex: 3 },
+    'stmt-pg0-ln0-ct2': { kind: 'splitWord', separatorIndex: null },
+  }
+
+  it('are saved for split word input', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSplitWordInput,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="splitWordInput"]').eq(0).find('span.inter').eq(2).find('span').click()
+    cy.get('[data-cy="splitWordInput"]').eq(0).should('have.text', 'Alp|ha')
+    cy.get('[data-cy="splitWordInput"]').eq(1).find('span.inter').eq(0).find('span').click()
+    cy.get('[data-cy="splitWordInput"]').eq(1).should('have.text', 'B|ravo')
+    cy.get('[data-cy="splitWordInput"]').eq(1).find('span.inter').eq(0).find('span').click()
+    cy.get('[data-cy="splitWordInput"]').eq(1).should('have.text', 'Bravo')
+
+    getAnswers().should('deep.equal', answersForSplitWordInput)
+  })
+
+  it('are loaded for split word input', () => {
+    setAnswers(answersForSplitWordInput)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSplitWordInput,
+      },
+    })
+
+    cy.get('[data-cy="splitWordInput"]').eq(0).should('have.text', 'Alp|ha')
+    cy.get('[data-cy="splitWordInput"]').eq(1).should('have.text', 'Bravo')
+  })
 })

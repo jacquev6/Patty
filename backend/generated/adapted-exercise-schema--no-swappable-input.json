@@ -497,6 +497,9 @@
                 "$ref": "#/$defs/EditableTextInput"
               },
               {
+                "$ref": "#/$defs/SplitWordInput"
+              },
+              {
                 "$ref": "#/$defs/GeneratorTemplatePlaceholder"
               }
             ]
@@ -790,6 +793,25 @@
       "type": "object",
       "additionalProperties": false
     },
+    "SplitWordInput": {
+      "properties": {
+        "kind": {
+          "const": "splitWordInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "word": {
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "word"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "StatementLine": {
       "properties": {
         "contents": {
@@ -818,6 +840,9 @@
               },
               {
                 "$ref": "#/$defs/EditableTextInput"
+              },
+              {
+                "$ref": "#/$defs/SplitWordInput"
               }
             ]
           },

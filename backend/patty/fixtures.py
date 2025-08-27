@@ -281,6 +281,7 @@ class FixturesCreator:
                         selectable_input=False,
                         swappable_input=False,
                         editable_text_input=False,
+                        split_word_input=False,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
@@ -342,6 +343,7 @@ class FixturesCreator:
                         selectable_input=True,
                         swappable_input=True,
                         editable_text_input=True,
+                        split_word_input=True,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
