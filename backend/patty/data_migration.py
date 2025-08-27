@@ -1,3 +1,5 @@
+import copy
+
 import sqlalchemy as sql
 
 from . import adaptation
@@ -9,6 +11,15 @@ from . import textbooks
 
 
 def migrate(session: database_utils.Session) -> None:
+    for adaptation_settings in session.execute(sql.select(adaptation.AdaptationSettings)).scalars():
+        spec = copy.deepcopy(adaptation_settings._response_specification)
+        if spec["format"] == "json" and spec["formalism"] == "json-schema":
+            assert "split_word_input" not in spec["statement_components"]
+            spec["statement_components"]["split_word_input"] = False
+            assert adaptation_settings._response_specification != spec
+            adaptation_settings._response_specification = spec
+    session.flush()
+
     parse_all_json_fields(session)
 
 
