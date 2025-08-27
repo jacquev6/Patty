@@ -7,6 +7,14 @@ describe('Adapted exercise answers', () => {
 
   const emptyAnswers: StudentAnswers = {}
 
+  function getAnswers(): Cypress.Chainable<StudentAnswers> {
+    return cy.getAllLocalStorage().then(Object.values).its(0).its(answersKey).then(JSON.parse)
+  }
+
+  function setAnswers(answers: StudentAnswers) {
+    localStorage.setItem(answersKey, JSON.stringify(answers))
+  }
+
   const exerciseWithFreeTextInputs: AdaptedExercise = {
     format: 'v1',
     instruction: { lines: [] },
@@ -118,6 +126,61 @@ describe('Adapted exercise answers', () => {
     'stmt-pg1-ln1-ct6': { kind: 'text', text: '11' },
     'stmt-pg1-ln2-ct4': { kind: 'text', text: '13' },
   }
+
+  it('are saved for free text inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    for (let i = 0; i < 7; i++) {
+      cy.get('[data-cy="freeTextInput"]')
+        .eq(i)
+        .should('have.text', '')
+        .type(i.toString(), { delay: 0 })
+        .should('have.text', i.toString())
+    }
+    cy.get('.control').eq(1).click()
+    for (let i = 0; i < 8; i += 2) {
+      cy.get('[data-cy="freeTextInput"]')
+        .eq(i)
+        .should('have.text', '')
+        .type((i + 7).toString(), { delay: 0 })
+        .should('have.text', (i + 7).toString())
+    }
+
+    getAnswers().should('deep.equal', answersForFreeTextInputs)
+  })
+
+  it('are loaded for free text inputs', () => {
+    setAnswers(answersForFreeTextInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithFreeTextInputs,
+      },
+    })
+
+    for (let i = 0; i < 7; i++) {
+      cy.get('[data-cy="freeTextInput"]').eq(i).should('have.text', i.toString())
+    }
+    cy.get('.control').eq(1).click()
+    for (let i = 0; i < 8; i += 2) {
+      cy.get('[data-cy="freeTextInput"]')
+        .eq(i)
+        .should('have.text', (i + 7).toString())
+    }
+    for (let i = 1; i < 8; i += 2) {
+      cy.get('[data-cy="freeTextInput"]').eq(i).should('have.text', '')
+    }
+  })
 
   const colors = ['rgb(128, 0, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 128)', 'rgba(0, 0, 0, 0)']
 
@@ -232,6 +295,65 @@ describe('Adapted exercise answers', () => {
     'stmt-pg1-ln1-ct6': { kind: 'selectable', color: 2 },
     'stmt-pg1-ln2-ct4': { kind: 'selectable', color: 1 },
   }
+
+  it('are saved for selectable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    for (let i = 0; i < 7; i++) {
+      for (let k = 0; k <= i % 4; k++) {
+        cy.get('[data-cy="selectableInput"]').eq(i).click()
+      }
+      cy.get('[data-cy="selectableInput"]')
+        .eq(i)
+        .should('have.css', 'background-color', colors[i % 4])
+    }
+    cy.get('.control').eq(1).click()
+    for (let i = 0; i < 8; i += 2) {
+      for (let k = 0; k <= i % 3; k++) {
+        cy.get('[data-cy="selectableInput"]').eq(i).click()
+      }
+      cy.get('[data-cy="selectableInput"]')
+        .eq(i)
+        .should('have.css', 'background-color', colors[i % 3])
+    }
+
+    getAnswers().should('deep.equal', answersForSelectableInputs)
+  })
+
+  it('are loaded for selectable inputs', () => {
+    setAnswers(answersForSelectableInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithSelectableInputs,
+      },
+    })
+
+    for (let i = 0; i < 7; i++) {
+      cy.get('[data-cy="selectableInput"]')
+        .eq(i)
+        .should('have.css', 'background-color', colors[i % 4])
+    }
+    cy.get('.control').eq(1).click()
+    for (let i = 0; i < 8; i += 2) {
+      cy.get('[data-cy="selectableInput"]')
+        .eq(i)
+        .should('have.css', 'background-color', colors[i % 3])
+    }
+    for (let i = 1; i < 8; i += 2) {
+      cy.get('[data-cy="selectableInput"]').eq(i).should('have.css', 'background-color', colors[3])
+    }
+  })
 
   const choices = [
     { contents: [{ kind: 'text' as const, text: '0' }] },
@@ -351,6 +473,63 @@ describe('Adapted exercise answers', () => {
     'stmt-pg1-ln2-ct4': { kind: 'choice', choice: 0 },
   }
 
+  it('are saved for multiple choices inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithMultipleChoicesInputs,
+      },
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    for (let i = 0; i < 7; i++) {
+      cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
+      cy.get(`[data-cy="choice${i % 3}"]`).click()
+      cy.get('[data-cy="multipleChoicesInput"]')
+        .eq(i)
+        .should('have.text', (i % 3).toString())
+    }
+    cy.get('.control').eq(1).click({ force: true })
+    for (let i = 0; i < 8; i += 2) {
+      cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
+      cy.get(`[data-cy="choice${i % 3}"]`).click()
+      cy.get('[data-cy="multipleChoicesInput"]')
+        .eq(i)
+        .should('have.text', (i % 3).toString())
+    }
+
+    getAnswers().should('deep.equal', answersForMultipleChoicesInputs)
+  })
+
+  it('are loaded for multiple choices inputs', () => {
+    setAnswers(answersForMultipleChoicesInputs)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithMultipleChoicesInputs,
+      },
+    })
+
+    for (let i = 0; i < 7; i++) {
+      cy.get('[data-cy="multipleChoicesInput"]')
+        .eq(i)
+        .should('have.text', (i % 3).toString())
+    }
+    cy.get('.control').eq(1).click({ force: true })
+    for (let i = 0; i < 8; i += 2) {
+      cy.get('[data-cy="multipleChoicesInput"]')
+        .eq(i)
+        .should('have.text', (i % 3).toString())
+    }
+    for (let i = 1; i < 8; i += 2) {
+      cy.get('[data-cy="multipleChoicesInput"]').eq(i).should('have.text', '....')
+    }
+  })
+
   const exerciseWithSwappableInputs: AdaptedExercise = {
     format: 'v1',
     instruction: { lines: [] },
@@ -412,185 +591,6 @@ describe('Adapted exercise answers', () => {
     'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
     'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
   }
-
-  function getAnswers(): Cypress.Chainable<StudentAnswers> {
-    return cy.getAllLocalStorage().then(Object.values).its(0).its(answersKey).then(JSON.parse)
-  }
-
-  function setAnswers(answers: StudentAnswers) {
-    localStorage.setItem(answersKey, JSON.stringify(answers))
-  }
-
-  it('are saved for free text inputs', () => {
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithFreeTextInputs,
-      },
-    })
-
-    getAnswers().should('deep.equal', emptyAnswers)
-
-    for (let i = 0; i < 7; i++) {
-      cy.get('[data-cy="freeTextInput"]')
-        .eq(i)
-        .should('have.text', '')
-        .type(i.toString(), { delay: 0 })
-        .should('have.text', i.toString())
-    }
-    cy.get('.control').eq(1).click()
-    for (let i = 0; i < 8; i += 2) {
-      cy.get('[data-cy="freeTextInput"]')
-        .eq(i)
-        .should('have.text', '')
-        .type((i + 7).toString(), { delay: 0 })
-        .should('have.text', (i + 7).toString())
-    }
-
-    getAnswers().should('deep.equal', answersForFreeTextInputs)
-  })
-
-  it('are loaded for free text inputs', () => {
-    setAnswers(answersForFreeTextInputs)
-
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithFreeTextInputs,
-      },
-    })
-
-    for (let i = 0; i < 7; i++) {
-      cy.get('[data-cy="freeTextInput"]').eq(i).should('have.text', i.toString())
-    }
-    cy.get('.control').eq(1).click()
-    for (let i = 0; i < 8; i += 2) {
-      cy.get('[data-cy="freeTextInput"]')
-        .eq(i)
-        .should('have.text', (i + 7).toString())
-    }
-    for (let i = 1; i < 8; i += 2) {
-      cy.get('[data-cy="freeTextInput"]').eq(i).should('have.text', '')
-    }
-  })
-
-  it('are saved for selectable inputs', () => {
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithSelectableInputs,
-      },
-    })
-
-    getAnswers().should('deep.equal', emptyAnswers)
-
-    for (let i = 0; i < 7; i++) {
-      for (let k = 0; k <= i % 4; k++) {
-        cy.get('[data-cy="selectableInput"]').eq(i).click()
-      }
-      cy.get('[data-cy="selectableInput"]')
-        .eq(i)
-        .should('have.css', 'background-color', colors[i % 4])
-    }
-    cy.get('.control').eq(1).click()
-    for (let i = 0; i < 8; i += 2) {
-      for (let k = 0; k <= i % 3; k++) {
-        cy.get('[data-cy="selectableInput"]').eq(i).click()
-      }
-      cy.get('[data-cy="selectableInput"]')
-        .eq(i)
-        .should('have.css', 'background-color', colors[i % 3])
-    }
-
-    getAnswers().should('deep.equal', answersForSelectableInputs)
-  })
-
-  it('are loaded for selectable inputs', () => {
-    setAnswers(answersForSelectableInputs)
-
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithSelectableInputs,
-      },
-    })
-
-    for (let i = 0; i < 7; i++) {
-      cy.get('[data-cy="selectableInput"]')
-        .eq(i)
-        .should('have.css', 'background-color', colors[i % 4])
-    }
-    cy.get('.control').eq(1).click()
-    for (let i = 0; i < 8; i += 2) {
-      cy.get('[data-cy="selectableInput"]')
-        .eq(i)
-        .should('have.css', 'background-color', colors[i % 3])
-    }
-    for (let i = 1; i < 8; i += 2) {
-      cy.get('[data-cy="selectableInput"]').eq(i).should('have.css', 'background-color', colors[3])
-    }
-  })
-
-  it('are saved for multiple choices inputs', () => {
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithMultipleChoicesInputs,
-      },
-    })
-
-    getAnswers().should('deep.equal', emptyAnswers)
-
-    for (let i = 0; i < 7; i++) {
-      cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
-      cy.get(`[data-cy="choice${i % 3}"]`).click()
-      cy.get('[data-cy="multipleChoicesInput"]')
-        .eq(i)
-        .should('have.text', (i % 3).toString())
-    }
-    cy.get('.control').eq(1).click({ force: true })
-    for (let i = 0; i < 8; i += 2) {
-      cy.get('[data-cy="multipleChoicesInput"]').eq(i).click()
-      cy.get(`[data-cy="choice${i % 3}"]`).click()
-      cy.get('[data-cy="multipleChoicesInput"]')
-        .eq(i)
-        .should('have.text', (i % 3).toString())
-    }
-
-    getAnswers().should('deep.equal', answersForMultipleChoicesInputs)
-  })
-
-  it('are loaded for multiple choices inputs', () => {
-    setAnswers(answersForMultipleChoicesInputs)
-
-    cy.mount(AdaptedExerciseRenderer, {
-      props: {
-        navigateUsingArrowKeys: true,
-        studentAnswersStorageKey,
-        adaptedExercise: exerciseWithMultipleChoicesInputs,
-      },
-    })
-
-    for (let i = 0; i < 7; i++) {
-      cy.get('[data-cy="multipleChoicesInput"]')
-        .eq(i)
-        .should('have.text', (i % 3).toString())
-    }
-    cy.get('.control').eq(1).click({ force: true })
-    for (let i = 0; i < 8; i += 2) {
-      cy.get('[data-cy="multipleChoicesInput"]')
-        .eq(i)
-        .should('have.text', (i % 3).toString())
-    }
-    for (let i = 1; i < 8; i += 2) {
-      cy.get('[data-cy="multipleChoicesInput"]').eq(i).should('have.text', '....')
-    }
-  })
 
   it('are saved for swappable inputs', () => {
     cy.mount(AdaptedExerciseRenderer, {
