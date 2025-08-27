@@ -33,7 +33,6 @@ const highlightColors = [
 export const examples: Example[] = [
   // {
   //   title: '',
-  //   description: null,
   //   exercise: {
   //     format: 'v1',
   //     instruction: {
@@ -70,8 +69,596 @@ export const examples: Example[] = [
   //   },
   // },
   {
+    title: 'Trait (using splitWordInput)',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Sépare' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'par' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'un' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'trait' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'le' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'radical' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'le' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'suffixe' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'chacun' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ces' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'mots' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'payable' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'paysagiste' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'fleurette' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'maladif' },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'b' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'fillette' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'poussoir' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'affichette' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'géographie' },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'text', text: 'c' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'lisible' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'habileté' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'énormément' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'dérapage' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: '◆' },
+                  { kind: 'whitespace' },
+                  { kind: 'splitWordInput', word: 'éducation' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+    demos: {
+      split() {
+        cy.get('[data-cy="splitWordInput"]').eq(2).find('span.inter').eq(2).find('span').click()
+      },
+    },
+  },
+  {
+    title: 'CliqueEcrire',
+    exercise: {
+      format: 'v2',
+      phases: [
+        {
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'Dans' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'ce' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'texte' },
+                  { kind: 'text', text: ',' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'colorie' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'les' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'verbes' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'qui' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'sont' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'au' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'futur' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Les' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'quatre' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'cousins' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'enfourchent' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'leurs' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'vélos' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'et' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'pédalent' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'en' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'direction' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'du' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'village' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'abandonné' }],
+                      },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Dans' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'quelques' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'minutes' }],
+                      },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'ils' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'longeront' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'le' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'haut' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'mur' }],
+                      },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Pour' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'le' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'moment' }],
+                      },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'chacun' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'pédale' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'aussi' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'vite' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: "qu'" }],
+                      },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'il' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'le' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'peut' }],
+                      },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Bientôt' }],
+                      },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'ils' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'approcheront' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'de' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'la' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'carrière' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'aux' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'champignons' }],
+                      },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Le' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'plus' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'courageux' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'coupera' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'les' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'ronces' }],
+                      },
+                      { kind: 'text', text: '.' },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'Ils' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'entreront' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'par' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'un' }],
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        boxed: false,
+                        colors: [yellow],
+                        contents: [{ kind: 'text', text: 'tunnel' }],
+                      },
+                      { kind: 'text', text: '.' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'Donne' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: "l'" },
+                  { kind: 'text', text: 'infinitif' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'de' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'ces' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'verbes' },
+                  { kind: 'text', text: '.' },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            generated: {
+              items: {
+                kind: 'selectableInput',
+                colorIndex: 1,
+              },
+              itemsPerPage: 3,
+              template: {
+                contents: [
+                  { kind: 'itemPlaceholder' },
+                  { kind: 'whitespace' },
+                  { kind: 'arrow' },
+                  { kind: 'whitespace' },
+                  { kind: 'freeTextInput' },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      reference: null,
+    },
+    demos: {
+      clic() {
+        cy.get('[data-cy="selectableInput"]').eq(17).click()
+        cy.get('[data-cy="selectableInput"]').eq(34).click()
+        cy.get('[data-cy="selectableInput"]').eq(43).click()
+        cy.get('[data-cy="selectableInput"]').eq(47).click()
+      },
+    },
+  },
+  {
     title: 'ExpressionEcrite',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -143,7 +730,6 @@ export const examples: Example[] = [
   },
   {
     title: 'freeTextInput in formatted',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -218,7 +804,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Imbricated selectableInput',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -420,7 +1005,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CocheLettres',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -857,8 +1441,7 @@ export const examples: Example[] = [
     },
   },
   {
-    title: 'Trait',
-    description: null,
+    title: 'Trait (using editableTextInput)',
     exercise: {
       format: 'v1',
       instruction: {
@@ -1041,7 +1624,6 @@ export const examples: Example[] = [
   },
   {
     title: 'RCDouble',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1079,7 +1661,10 @@ export const examples: Example[] = [
               { kind: 'whitespace' },
               { kind: 'formatted', highlighted: yellow, contents: [{ kind: 'text', text: 'comique' }] },
               { kind: 'text', text: '.' },
-              { kind: 'whitespace' },
+            ],
+          },
+          {
+            contents: [
               { kind: 'arrow' },
               { kind: 'whitespace' },
               { kind: 'text', text: "C'" },
@@ -1115,7 +1700,10 @@ export const examples: Example[] = [
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'sales' },
                   { kind: 'text', text: '.' },
-                  { kind: 'whitespace' },
+                ],
+              },
+              {
+                contents: [
                   { kind: 'arrow' },
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'Tous' },
@@ -1130,6 +1718,10 @@ export const examples: Example[] = [
                   { kind: 'text', text: '.' },
                 ],
               },
+            ],
+          },
+          {
+            lines: [
               {
                 contents: [
                   { kind: 'text', text: 'b' },
@@ -1148,7 +1740,10 @@ export const examples: Example[] = [
                   { kind: 'text', text: 'canards' },
                   { kind: 'text', text: '.' },
                   { kind: 'whitespace' },
-                  { kind: 'arrow' },
+                ],
+              },
+              {
+                contents: [
                   { kind: 'whitespace' },
                   { kind: 'text', text: 'Elle' },
                   { kind: 'whitespace' },
@@ -1173,7 +1768,6 @@ export const examples: Example[] = [
   },
   {
     title: 'EditTexte',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1370,7 +1964,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Associe',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1515,7 +2108,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Classe',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1884,7 +2476,6 @@ export const examples: Example[] = [
   },
   {
     title: 'RCCadre',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -1970,7 +2561,6 @@ export const examples: Example[] = [
   },
   {
     title: 'GenreNombre',
-    description: 'A simple case of ChoixMultiple.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2085,7 +2675,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Vrai/Faux',
-    description: 'A simple case of ChoixMultiple.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2189,7 +2778,6 @@ export const examples: Example[] = [
   },
   {
     title: 'TransformePhrase',
-    description: 'An alternative is to use "kind": "editableTextInput" as in the "Edit sentence" example below.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2334,7 +2922,6 @@ export const examples: Example[] = [
   },
   {
     title: 'TransformeMot',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2457,8 +3044,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CocheMot',
-    description:
-      'Note that punctuation is also selectable in this example. If this is not wanted, you should remove the "kind": "selectableInput" around punctuation elements.',
     exercise: {
       format: 'v1',
       instruction: {
@@ -2730,7 +3315,6 @@ export const examples: Example[] = [
   },
   {
     title: 'CochePhrase',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2882,7 +3466,6 @@ export const examples: Example[] = [
   },
   {
     title: 'Swappable inputs',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {
@@ -2910,7 +3493,6 @@ export const examples: Example[] = [
   },
   {
     title: 'EditPhrase',
-    description: null,
     exercise: {
       format: 'v1',
       instruction: {

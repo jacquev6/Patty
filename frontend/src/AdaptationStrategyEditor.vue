@@ -66,6 +66,7 @@ const llmResponseSpecificationFormalism = computed({
             selectableInput: true,
             swappableInput: true,
             editableTextInput: false,
+            splitWordInput: true,
           },
           referenceComponents: {
             text: true,
@@ -249,8 +250,6 @@ const settingsNameSuggestions = computed(() => {
                 multiple choices input
               </label>
             </p>
-          </template>
-          <template #col-2>
             <p>
               <label>
                 <input
@@ -262,6 +261,8 @@ const settingsNameSuggestions = computed(() => {
                 selectable input
               </label>
             </p>
+          </template>
+          <template #col-2>
             <p>
               <label>
                 <input
@@ -282,6 +283,17 @@ const settingsNameSuggestions = computed(() => {
                   :disabled
                 />
                 editable text input
+              </label>
+            </p>
+            <p>
+              <label>
+                <input
+                  data-cy="allow-split-word-input-in-statement"
+                  type="checkbox"
+                  v-model="strategy.settings.responseSpecification.statementComponents.splitWordInput"
+                  :disabled
+                />
+                split word input
               </label>
             </p>
           </template>

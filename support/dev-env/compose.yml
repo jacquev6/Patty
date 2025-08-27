@@ -16,7 +16,7 @@ services:
     # @todo Set default DB type, host and user (see https://github.com/TimWolla/docker-adminer/issues/39#issuecomment-408568987)
 
   generated-files-cleaner:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -34,6 +34,7 @@ services:
       "backend/generated/adapted-exercise-schema--no-multiple-choices-input.json",
       "backend/generated/adapted-exercise-schema--no-selectable-input.json",
       "backend/generated/adapted-exercise-schema--no-swappable-input.json",
+      "backend/generated/adapted-exercise-schema--no-split-word-input.json",
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph--full.png",
       "backend/generated/db-tables-graph--modules.png",
@@ -51,7 +52,7 @@ services:
     ]
 
   adaptation-export-template-generator:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -71,7 +72,7 @@ services:
       retries: 12
 
   batch-export-template-generator:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -91,7 +92,7 @@ services:
       retries: 12
 
   textbook-export-template-generator:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -111,7 +112,7 @@ services:
       retries: 12
 
   backend-shell:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     build:
       context: ..
       dockerfile: dev-env/backend/docker/Dockerfile
@@ -128,7 +129,7 @@ services:
     init: true
     command: ["sleep", "infinity"]
   pip-installer:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -136,7 +137,7 @@ services:
     working_dir: /app/backend
     command: ["bash", "-c", "pip install --upgrade pip; for req in requirements-*.txt; do pip --cache-dir /home/patty/.local/cache install -r $$req; done"]
   migrator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -152,7 +153,7 @@ services:
       db:
         condition: service_healthy
   data-loader:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -166,7 +167,7 @@ services:
       migrator:
         condition: service_completed_successfully
   backend:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -186,7 +187,7 @@ services:
       data-loader:
         condition: service_completed_successfully
   submission-daemon:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -204,7 +205,7 @@ services:
       migrator:
         condition: service_completed_successfully
   default-adaptation-prompt-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -221,7 +222,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   default-extraction-prompt-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -238,7 +239,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   openapi-json-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -259,7 +260,7 @@ services:
       interval: 0.5s
       retries: 12
   extracted-exercise-json-schema-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -280,7 +281,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -301,7 +302,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-choice:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -322,7 +323,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-free-text-input:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -343,7 +344,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-multiple-choices-input:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -364,7 +365,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-selectable-input:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -385,7 +386,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-swappable-input:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -406,7 +407,7 @@ services:
       interval: 0.5s
       retries: 12
   adapted-exercise-json-schema-generator--no-editable-text-input:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -426,8 +427,8 @@ services:
       test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-editable-text-input.json"]
       interval: 0.5s
       retries: 12
-  adapted-exercise-json-schema-generator--minimal:
-    image: patty-dev_backend
+  adapted-exercise-json-schema-generator--no-split-word-input:
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -437,7 +438,28 @@ services:
       - backend/env
       - backend/secrets.env
     init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--minimal.json", "python -m patty adapted-exercise-schema --no-choice --no-free-text-input --no-multiple-choices-input --no-selectable-input --no-swappable-input --no-editable-text-input"]
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--no-split-word-input.json", "python -m patty adapted-exercise-schema --no-split-word-input"]
+    depends_on:
+      generated-files-cleaner:
+        condition: service_completed_successfully
+      pip-installer:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/backend/generated/adapted-exercise-schema--no-split-word-input.json"]
+      interval: 0.5s
+      retries: 12
+  adapted-exercise-json-schema-generator--minimal:
+    image: jacquev6/patty:dev-backend
+    pull_policy: never
+    volumes:
+      - ../..:/app
+      - ./backend/pip-packages:/home/patty/.local
+    working_dir: /app/backend
+    env_file:
+      - backend/env
+      - backend/secrets.env
+    init: true
+    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "adapted-exercise-schema--minimal.json", "python -m patty adapted-exercise-schema --no-choice --no-free-text-input --no-multiple-choices-input --no-selectable-input --no-swappable-input --no-editable-text-input --no-split-word-input"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully
@@ -448,7 +470,7 @@ services:
       interval: 0.5s
       retries: 12
   db-tables-graph-generator--full:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -465,7 +487,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   db-tables-graph-generator--modules:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -482,7 +504,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   python-dependency-graph-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -499,7 +521,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   tricky-sql-requests-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -516,7 +538,7 @@ services:
       pip-installer:
         condition: service_completed_successfully
   json-to-html-script-generator:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -543,7 +565,7 @@ services:
       interval: 0.5s
       retries: 12
   fixtures-loader:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -557,7 +579,7 @@ services:
       data-loader:
         condition: service_completed_successfully
   db-backup:
-    image: patty-dev_backend
+    image: jacquev6/patty:dev-backend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -575,7 +597,7 @@ services:
         condition: service_completed_successfully
 
   frontend-shell:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     build:
       context: ..
       dockerfile: dev-env/frontend/docker/Dockerfile
@@ -594,7 +616,7 @@ services:
     ports:
       - 6868:6868  # For 'npx cypress-image-diff-html-report start'
   npm-installer:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -602,7 +624,7 @@ services:
     working_dir: /app/frontend
     command: ["npm", "install"]
   cypress-installer:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -613,7 +635,7 @@ services:
       npm-installer:
         condition: service_completed_successfully
   pdfjs-worker-copier:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -624,7 +646,7 @@ services:
       npm-installer:
         condition: service_completed_successfully
   openapi-ts-generator:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app
@@ -643,7 +665,7 @@ services:
       interval: 0.5s
       retries: 12
   frontend:
-    image: patty-dev_frontend
+    image: jacquev6/patty:dev-frontend
     pull_policy: never
     volumes:
       - ../..:/app

@@ -709,7 +709,7 @@ export interface components {
         | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
-      manualEdit: components['schemas']['patty__adaptation__adapted__Exercise-Output'] | null
+      manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
@@ -989,7 +989,7 @@ export interface components {
        */
       formatted: true
     }
-    'Exercise-Input': {
+    'ExerciseV1-Input': {
       /**
        * Format
        * @constant
@@ -998,8 +998,40 @@ export interface components {
       instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
       example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
       hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input']
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+    }
+    'ExerciseV1-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+    }
+    'ExerciseV2-Input': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v2'
+      /** Phases */
+      phases: components['schemas']['Phase-Input'][]
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+    }
+    'ExerciseV2-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v2'
+      /** Phases */
+      phases: components['schemas']['Phase-Output'][]
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
     /** ExtractionBatch */
     ExtractionBatch: {
@@ -1142,6 +1174,63 @@ export interface components {
        * @constant
        */
       name: 'gemini-2.0-flash'
+    }
+    'GeneratedPages-Input': {
+      generated: components['schemas']['Generator-Input']
+    }
+    'GeneratedPages-Output': {
+      generated: components['schemas']['Generator-Output']
+    }
+    'Generator-Input': {
+      items: components['schemas']['SelectableInputGeneratorItems']
+      /** Itemsperpage */
+      itemsPerPage: number
+      template: components['schemas']['GeneratorTemplate-Input']
+    }
+    'Generator-Output': {
+      items: components['schemas']['SelectableInputGeneratorItems']
+      /** Itemsperpage */
+      itemsPerPage: number
+      template: components['schemas']['GeneratorTemplate-Output']
+    }
+    'GeneratorTemplate-Input': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Input']
+        | components['schemas']['SelectableInput-Input']
+        | components['schemas']['SwappableInput-Input']
+        | components['schemas']['EditableTextInput']
+        | components['schemas']['SplitWordInput']
+        | components['schemas']['GeneratorTemplatePlaceholder']
+      )[]
+    }
+    'GeneratorTemplate-Output': {
+      /** Contents */
+      contents: (
+        | components['schemas']['Text']
+        | components['schemas']['Whitespace']
+        | components['schemas']['Arrow']
+        | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['FreeTextInput']
+        | components['schemas']['MultipleChoicesInput-Output']
+        | components['schemas']['SelectableInput-Output']
+        | components['schemas']['SwappableInput-Output']
+        | components['schemas']['EditableTextInput']
+        | components['schemas']['SplitWordInput']
+        | components['schemas']['GeneratorTemplatePlaceholder']
+      )[]
+    }
+    GeneratorTemplatePlaceholder: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'itemPlaceholder'
     }
     /** GetAdaptationBatchResponse */
     GetAdaptationBatchResponse: {
@@ -1335,7 +1424,7 @@ export interface components {
       statementComponents: components['schemas']['StatementComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
     }
-    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
@@ -1347,9 +1436,10 @@ export interface components {
         | components['schemas']['SelectableInput-Input']
         | components['schemas']['SwappableInput-Input']
         | components['schemas']['EditableTextInput']
+        | components['schemas']['SplitWordInput']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
@@ -1361,6 +1451,7 @@ export interface components {
         | components['schemas']['SelectableInput-Output']
         | components['schemas']['SwappableInput-Output']
         | components['schemas']['EditableTextInput']
+        | components['schemas']['SplitWordInput']
       )[]
     }
     'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
@@ -1464,13 +1555,13 @@ export interface components {
        */
       name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
     }
-    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
     }
     'Page_Union_Text__Whitespace__Arrow__Formatted__-Input': {
       /** Lines */
@@ -1488,13 +1579,31 @@ export interface components {
       /** Lines */
       lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
+    }
+    'Phase-Input': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
+        | components['schemas']['GeneratedPages-Input']
+    }
+    'Phase-Output': {
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      /** Statement */
+      statement:
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
+        | components['schemas']['GeneratedPages-Output']
     }
     /** PostAdaptationAdjustmentRequest */
     PostAdaptationAdjustmentRequest: {
@@ -1712,6 +1821,14 @@ export interface components {
        */
       formatted: true
     }
+    /** RootModel[Union[ExerciseV1, ExerciseV2]] */
+    'RootModel_Union_ExerciseV1__ExerciseV2__-Input':
+      | components['schemas']['ExerciseV1-Input']
+      | components['schemas']['ExerciseV2-Input']
+    /** RootModel[Union[ExerciseV1, ExerciseV2]] */
+    'RootModel_Union_ExerciseV1__ExerciseV2__-Output':
+      | components['schemas']['ExerciseV1-Output']
+      | components['schemas']['ExerciseV2-Output']
     'SelectableInput-Input': {
       /**
        * Kind
@@ -1750,6 +1867,24 @@ export interface components {
       /** Boxed */
       boxed: boolean
     }
+    SelectableInputGeneratorItems: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'selectableInput'
+      /** Colorindex */
+      colorIndex: number
+    }
+    SplitWordInput: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'splitWordInput'
+      /** Word */
+      word: string
+    }
     /** StatementComponents */
     StatementComponents: {
       /**
@@ -1782,6 +1917,8 @@ export interface components {
       swappableInput: boolean
       /** Editabletextinput */
       editableTextInput: boolean
+      /** Splitwordinput */
+      splitWordInput: boolean
     }
     'SwappableInput-Input': {
       /**
@@ -1867,18 +2004,6 @@ export interface components {
        */
       kind: 'whitespace'
     }
-    'patty__adaptation__adapted__Exercise-Output': {
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v1'
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-    }
     /** Success */
     patty__adaptation__assistant_responses__Success: {
       /**
@@ -1886,7 +2011,7 @@ export interface components {
        * @constant
        */
       kind: 'success'
-      exercise: components['schemas']['patty__adaptation__adapted__Exercise-Output']
+      exercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
     }
     /** Page */
     patty__api_router__ApiTextbook__Page: {
@@ -3092,7 +3217,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['Exercise-Input']
+        'application/json': components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Input']
       }
     }
     responses: {

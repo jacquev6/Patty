@@ -1341,7 +1341,7 @@ async def post_adaptation_adjustment(
     else:
         raw_conversation = response.raw_conversation
         assistant_response = adaptation.assistant_responses.Success(
-            kind="success", exercise=adaptation.adapted.Exercise(**response.message.content.model_dump())
+            kind="success", exercise=adaptation.adapted.Exercise.model_validate(response.message.content.model_dump())
         )
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)

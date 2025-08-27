@@ -33,7 +33,7 @@ def make_default_adaptation_prompt() -> str:
         b. Les chiens courent après ..."""
     )
 
-    exercise = adaptation.adapted.Exercise(
+    exercise = adaptation.adapted.ExerciseV1(
         format="v1",
         instruction=adaptation.adapted.InstructionPage(
             lines=[
@@ -67,7 +67,7 @@ def make_default_adaptation_prompt() -> str:
         ),
         example=None,
         hint=None,
-        statement=adaptation.adapted.StatementPages(
+        statement=adaptation.adapted.StatementPagesV1(
             pages=[
                 adaptation.adapted.StatementPage(
                     lines=[
@@ -281,6 +281,7 @@ class FixturesCreator:
                         selectable_input=False,
                         swappable_input=False,
                         editable_text_input=False,
+                        split_word_input=False,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True
@@ -342,6 +343,7 @@ class FixturesCreator:
                         selectable_input=True,
                         swappable_input=True,
                         editable_text_input=True,
+                        split_word_input=True,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
                         text=True, whitespace=True, arrow=True, formatted=True

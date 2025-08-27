@@ -1782,6 +1782,43 @@ describe('EditableTextInput', () => {
   })
 })
 
+describe('SplitWordInput', () => {
+  it('renders', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [{ kind: 'splitWordInput', word: 'Nolimber' }],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+      },
+    })
+
+    // The '|' is better centered in an actual browser than on those screenshots. I can't figure out why...
+    screenshot()
+    cy.get('[data-cy="splitWordInput"]').eq(0).find('span.inter').eq(0).find('span').click()
+    screenshot()
+    cy.get('[data-cy="splitWordInput"]').eq(0).find('span.inter').eq(2).find('span').click()
+    screenshot()
+    cy.get('[data-cy="splitWordInput"]').eq(0).find('span.inter').eq(6).find('span').click()
+    screenshot()
+  })
+})
+
 describe('AdaptedExerciseRenderer', () => {
   it('supports exercise with zero pages in statement', () => {
     cy.viewport(600, 550)

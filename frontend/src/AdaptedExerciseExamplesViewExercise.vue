@@ -11,8 +11,8 @@ import FixedColumns from './FixedColumns.vue'
 
 export type Example = {
   title: string
-  description: string | null
   exercise: AdaptedExercise
+  demos?: Record<string, () => void>
 }
 
 const props = defineProps<{
@@ -42,7 +42,6 @@ watch(Escape, () => {
   <FixedColumns :columns="[1, 1]">
     <template #col-1>
       <h2>{{ example.title }}</h2>
-      <p v-if="example.description !== null">{{ example.description }}</p>
       <p>
         <button @click="fullScreen = true">{{ t('fullScreen') }}</button>
       </p>

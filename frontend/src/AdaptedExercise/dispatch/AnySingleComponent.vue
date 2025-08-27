@@ -7,6 +7,7 @@ import TextInputRenderer from '../components/TextInputRenderer.vue'
 import MultipleChoicesInputRenderer from '../components/MultipleChoicesInputRenderer.vue'
 import SelectableInputRenderer from '../components/SelectableInputRenderer.vue'
 import SwappableInputRenderer from '../components/SwappableInputRenderer.vue'
+import SplitWordInputRenderer from '../components/SplitWordInputRenderer.vue'
 import { match, P } from 'ts-pattern'
 
 const props = defineProps<{
@@ -55,6 +56,13 @@ function render() {
       h(SwappableInputRenderer, {
         path,
         contents,
+        tricolorable: props.tricolorable,
+      }),
+    )
+    .with({ kind: 'splitWordInput' }, ({ path, word }) =>
+      h(SplitWordInputRenderer, {
+        path,
+        word,
         tricolorable: props.tricolorable,
       }),
     )

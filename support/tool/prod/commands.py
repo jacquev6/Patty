@@ -1,6 +1,7 @@
 import datetime
 import glob
 import os
+import re
 import subprocess
 import typing
 
@@ -12,6 +13,12 @@ from ..main_command import main
 @main.group()
 def prod() -> None:
     pass
+
+
+@prod.command()
+def pre_warm_build_cache() -> None:
+    print("Patty prod pre-warm: build")
+    build("pre-warm", "pre-warm")
 
 
 @prod.command()
@@ -98,15 +105,15 @@ def publish() -> None:
     subprocess.run(["git", "push", "origin", "develop"], check=True)
 
 
-def build(patty_version: str, action: typing.Literal["push", "load"]) -> None:
-    if action == "push":
-        platform = "linux/amd64,linux/arm64"
-        push_load = "--push"
-    else:
-        platform = "linux/amd64"
-        push_load = "--load"
+def build(patty_version: str, action: typing.Literal["pre-warm", "push", "load"]) -> None:
+    options = {
+        "pre-warm": ["--pull", "--platform", "linux/amd64,linux/arm64"],
+        "push": ["--platform", "linux/amd64,linux/arm64", "--push"],
+        "load": ["--platform", "linux/amd64", "--load"],
+    }
 
-    subprocess.run(["./dev.sh", "clean", "--force"])
+    if action != "pre-warm":
+        subprocess.run(["./dev.sh", "clean", "--force"])
 
     builders = subprocess.run(
         ["docker", "buildx", "ls"], check=True, capture_output=True, universal_newlines=True
@@ -114,10 +121,18 @@ def build(patty_version: str, action: typing.Literal["push", "load"]) -> None:
     if "patty-multi-platform-builder" not in builders:
         subprocess.run(["docker", "buildx", "create", "--name", "patty-multi-platform-builder"], check=True)
 
-    with open("support/prod/docker/Dockerfile") as f:
-        parts = [line.split("-")[-1].strip() for line in f if "AS final-" in line]
+    if action == "pre-warm":
+        part_pattern = re.compile(r"^FROM .* AS (?P<target>(?P<part>\S+)-dependencies)$")
+    else:
+        part_pattern = re.compile(r"^FROM .* AS (?P<target>final-(?P<part>\S+))$")
 
-    for part in parts:
+    with open("support/prod/docker/Dockerfile") as f:
+        parts = []
+        for line in f:
+            if m := part_pattern.match(line):
+                parts.append((m.group("part"), m.group("target")))
+
+    for part, target in parts:
         print(part)
         print("-" * len(part))
         subprocess.run(
@@ -125,21 +140,18 @@ def build(patty_version: str, action: typing.Literal["push", "load"]) -> None:
                 "docker",
                 "buildx",
                 "build",
-                "--pull",
                 "--builder",
                 "patty-multi-platform-builder",
                 ".",
                 "--file",
                 "support/prod/docker/Dockerfile",
                 "--target",
-                f"final-{part}",
+                target,
                 "--build-arg",
                 f"PATTY_VERSION={patty_version}",
                 "--tag",
                 f"jacquev6/patty:{patty_version}-{part}",
-                "--platform",
-                platform,
-                push_load,
+                *options[action],
             ],
             check=True,
         )

@@ -220,6 +220,94 @@
       "type": "object",
       "additionalProperties": false
     },
+    "ExerciseV1": {
+      "properties": {
+        "format": {
+          "const": "v1",
+          "title": "Format",
+          "type": "string"
+        },
+        "instruction": {
+          "$ref": "#/$defs/InstructionPage"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExamplePage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HintPage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statement": {
+          "$ref": "#/$defs/StatementPages"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceLine"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "instruction",
+        "example",
+        "hint",
+        "statement",
+        "reference"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "ExerciseV2": {
+      "properties": {
+        "format": {
+          "const": "v2",
+          "title": "Format",
+          "type": "string"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/Phase"
+          },
+          "title": "Phases",
+          "type": "array"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceLine"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "phases",
+        "reference"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "Formatted": {
       "properties": {
         "kind": {
@@ -336,6 +424,100 @@
       "properties": {
         "kind": {
           "const": "freeTextInput",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GeneratedPages": {
+      "properties": {
+        "generated": {
+          "$ref": "#/$defs/Generator"
+        }
+      },
+      "required": [
+        "generated"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "Generator": {
+      "properties": {
+        "items": {
+          "$ref": "#/$defs/SelectableInputGeneratorItems"
+        },
+        "itemsPerPage": {
+          "title": "Itemsperpage",
+          "type": "integer"
+        },
+        "template": {
+          "$ref": "#/$defs/GeneratorTemplate"
+        }
+      },
+      "required": [
+        "items",
+        "itemsPerPage",
+        "template"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GeneratorTemplate": {
+      "properties": {
+        "contents": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Whitespace"
+              },
+              {
+                "$ref": "#/$defs/Arrow"
+              },
+              {
+                "$ref": "#/$defs/ActiveFormatted"
+              },
+              {
+                "$ref": "#/$defs/FreeTextInput"
+              },
+              {
+                "$ref": "#/$defs/MultipleChoicesInput"
+              },
+              {
+                "$ref": "#/$defs/SwappableInput"
+              },
+              {
+                "$ref": "#/$defs/EditableTextInput"
+              },
+              {
+                "$ref": "#/$defs/SplitWordInput"
+              },
+              {
+                "$ref": "#/$defs/GeneratorTemplatePlaceholder"
+              }
+            ]
+          },
+          "title": "Contents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "GeneratorTemplatePlaceholder": {
+      "properties": {
+        "kind": {
+          "const": "itemPlaceholder",
           "title": "Kind",
           "type": "string"
         }
@@ -466,6 +648,52 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Phase": {
+      "properties": {
+        "instruction": {
+          "$ref": "#/$defs/InstructionPage"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExamplePage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HintPage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatementPages"
+            },
+            {
+              "$ref": "#/$defs/GeneratedPages"
+            }
+          ],
+          "title": "Statement"
+        }
+      },
+      "required": [
+        "instruction",
+        "example",
+        "hint",
+        "statement"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "ReferenceLine": {
       "properties": {
         "contents": {
@@ -491,6 +719,44 @@
       },
       "required": [
         "contents"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SelectableInputGeneratorItems": {
+      "properties": {
+        "kind": {
+          "const": "selectableInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "colorIndex": {
+          "title": "Colorindex",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "colorIndex"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "SplitWordInput": {
+      "properties": {
+        "kind": {
+          "const": "splitWordInput",
+          "title": "Kind",
+          "type": "string"
+        },
+        "word": {
+          "title": "Word",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "word"
       ],
       "type": "object",
       "additionalProperties": false
@@ -523,6 +789,9 @@
               },
               {
                 "$ref": "#/$defs/EditableTextInput"
+              },
+              {
+                "$ref": "#/$defs/SplitWordInput"
               }
             ]
           },
@@ -637,57 +906,13 @@
       "additionalProperties": false
     }
   },
-  "properties": {
-    "format": {
-      "const": "v1",
-      "title": "Format",
-      "type": "string"
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ExerciseV1"
     },
-    "instruction": {
-      "$ref": "#/$defs/InstructionPage"
-    },
-    "example": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ExamplePage"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "hint": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/HintPage"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "statement": {
-      "$ref": "#/$defs/StatementPages"
-    },
-    "reference": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ReferenceLine"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    {
+      "$ref": "#/$defs/ExerciseV2"
     }
-  },
-  "required": [
-    "format",
-    "instruction",
-    "example",
-    "hint",
-    "statement",
-    "reference"
   ],
-  "type": "object",
-  "additionalProperties": false
+  "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
 }

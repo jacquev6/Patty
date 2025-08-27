@@ -54,3 +54,4 @@ export type AdaptationBatch =
 
 export type Adaptation = paths['/api/adaptations/{id}']['get']['responses']['200']['content']['application/json']
 export type AdaptedExercise = (Adaptation['adjustments'][number]['assistantResponse'] & { kind: 'success' })['exercise']
+export type AdaptedExerciseV2 = AdaptedExercise & { format: 'v2' }

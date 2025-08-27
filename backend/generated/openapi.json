@@ -1578,7 +1578,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Exercise-Input"
+                "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Input"
               }
             }
           }
@@ -2032,7 +2032,7 @@
           "manualEdit": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+                "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
               },
               {
                 "type": "null"
@@ -2837,7 +2837,7 @@
         ],
         "title": "ExampleComponents"
       },
-      "Exercise-Input": {
+      "ExerciseV1-Input": {
         "properties": {
           "format": {
             "type": "string",
@@ -2868,7 +2868,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
           },
           "reference": {
             "anyOf": [
@@ -2888,6 +2888,124 @@
           "example",
           "hint",
           "statement",
+          "reference"
+        ]
+      },
+      "ExerciseV1-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v1",
+            "title": "Format"
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "instruction",
+          "example",
+          "hint",
+          "statement",
+          "reference"
+        ]
+      },
+      "ExerciseV2-Input": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v2",
+            "title": "Format"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/components/schemas/Phase-Input"
+            },
+            "type": "array",
+            "title": "Phases"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "phases",
+          "reference"
+        ]
+      },
+      "ExerciseV2-Output": {
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "v2",
+            "title": "Format"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/components/schemas/Phase-Output"
+            },
+            "type": "array",
+            "title": "Phases"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "format",
+          "phases",
           "reference"
         ]
       },
@@ -3154,6 +3272,179 @@
           "name"
         ],
         "title": "GeminiModel"
+      },
+      "GeneratedPages-Input": {
+        "properties": {
+          "generated": {
+            "$ref": "#/components/schemas/Generator-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated"
+        ]
+      },
+      "GeneratedPages-Output": {
+        "properties": {
+          "generated": {
+            "$ref": "#/components/schemas/Generator-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated"
+        ]
+      },
+      "Generator-Input": {
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/SelectableInputGeneratorItems"
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "title": "Itemsperpage"
+          },
+          "template": {
+            "$ref": "#/components/schemas/GeneratorTemplate-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "itemsPerPage",
+          "template"
+        ]
+      },
+      "Generator-Output": {
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/SelectableInputGeneratorItems"
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "title": "Itemsperpage"
+          },
+          "template": {
+            "$ref": "#/components/schemas/GeneratorTemplate-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "itemsPerPage",
+          "template"
+        ]
+      },
+      "GeneratorTemplate-Input": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
+                },
+                {
+                  "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "GeneratorTemplate-Output": {
+        "properties": {
+          "contents": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Text"
+                },
+                {
+                  "$ref": "#/components/schemas/Whitespace"
+                },
+                {
+                  "$ref": "#/components/schemas/Arrow"
+                },
+                {
+                  "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/FreeTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/MultipleChoicesInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SelectableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/SwappableInput-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
+                },
+                {
+                  "$ref": "#/components/schemas/GeneratorTemplatePlaceholder"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Contents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contents"
+        ]
+      },
+      "GeneratorTemplatePlaceholder": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "itemPlaceholder",
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ]
       },
       "GetAdaptationBatchResponse": {
         "properties": {
@@ -3626,7 +3917,7 @@
         ],
         "title": "JsonSchemaLlmResponseSpecification"
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -3657,6 +3948,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
                 }
               ]
             },
@@ -3669,7 +3963,7 @@
           "contents"
         ]
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -3700,6 +3994,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/EditableTextInput"
+                },
+                {
+                  "$ref": "#/components/schemas/SplitWordInput"
                 }
               ]
             },
@@ -3954,11 +4251,11 @@
         ],
         "title": "OpenAiModel"
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "type": "array",
             "title": "Lines"
@@ -3969,11 +4266,11 @@
           "lines"
         ]
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "type": "array",
             "title": "Lines"
@@ -4044,11 +4341,11 @@
           "lines"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "type": "array",
             "title": "Pages"
@@ -4059,11 +4356,11 @@
           "pages"
         ]
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "type": "array",
             "title": "Pages"
@@ -4072,6 +4369,96 @@
         "type": "object",
         "required": [
           "pages"
+        ]
+      },
+      "Phase-Input": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
+              },
+              {
+                "$ref": "#/components/schemas/GeneratedPages-Input"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
+        ]
+      },
+      "Phase-Output": {
+        "properties": {
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+              },
+              {
+                "$ref": "#/components/schemas/GeneratedPages-Output"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instruction",
+          "example",
+          "hint",
+          "statement"
         ]
       },
       "PostAdaptationAdjustmentRequest": {
@@ -4668,6 +5055,28 @@
         ],
         "title": "ReferenceComponents"
       },
+      "RootModel_Union_ExerciseV1__ExerciseV2__-Input": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ExerciseV1-Input"
+          },
+          {
+            "$ref": "#/components/schemas/ExerciseV2-Input"
+          }
+        ],
+        "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
+      },
+      "RootModel_Union_ExerciseV1__ExerciseV2__-Output": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ExerciseV1-Output"
+          },
+          {
+            "$ref": "#/components/schemas/ExerciseV2-Output"
+          }
+        ],
+        "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
+      },
       "SelectableInput-Input": {
         "properties": {
           "kind": {
@@ -4768,6 +5177,42 @@
           "boxed"
         ]
       },
+      "SelectableInputGeneratorItems": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "selectableInput",
+            "title": "Kind"
+          },
+          "colorIndex": {
+            "type": "integer",
+            "title": "Colorindex"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "colorIndex"
+        ]
+      },
+      "SplitWordInput": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "splitWordInput",
+            "title": "Kind"
+          },
+          "word": {
+            "type": "string",
+            "title": "Word"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "word"
+        ]
+      },
       "StatementComponents": {
         "properties": {
           "text": {
@@ -4809,6 +5254,10 @@
           "editableTextInput": {
             "type": "boolean",
             "title": "Editabletextinput"
+          },
+          "splitWordInput": {
+            "type": "boolean",
+            "title": "Splitwordinput"
           }
         },
         "additionalProperties": false,
@@ -4822,7 +5271,8 @@
           "multipleChoicesInput",
           "selectableInput",
           "swappableInput",
-          "editableTextInput"
+          "editableTextInput",
+          "splitWordInput"
         ],
         "title": "StatementComponents"
       },
@@ -5033,60 +5483,6 @@
           "kind"
         ]
       },
-      "patty__adaptation__adapted__Exercise-Output": {
-        "properties": {
-          "format": {
-            "type": "string",
-            "const": "v1",
-            "title": "Format"
-          },
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
-          },
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__-Output"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "format",
-          "instruction",
-          "example",
-          "hint",
-          "statement",
-          "reference"
-        ]
-      },
       "patty__adaptation__assistant_responses__Success": {
         "properties": {
           "kind": {
@@ -5095,7 +5491,7 @@
             "title": "Kind"
           },
           "exercise": {
-            "$ref": "#/components/schemas/patty__adaptation__adapted__Exercise-Output"
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
           }
         },
         "additionalProperties": false,

@@ -349,6 +349,7 @@ def tricky_sql_requests() -> None:
 @click.option("--selectable-input/--no-selectable-input", default=True, is_flag=True)
 @click.option("--swappable-input/--no-swappable-input", default=True, is_flag=True)
 @click.option("--editable-text-input/--no-editable-text-input", default=True, is_flag=True)
+@click.option("--split-word-input/--no-split-word-input", default=True, is_flag=True)
 def adapted_exercise_schema(
     choice: bool,
     free_text_input: bool,
@@ -356,27 +357,40 @@ def adapted_exercise_schema(
     selectable_input: bool,
     swappable_input: bool,
     editable_text_input: bool,
+    split_word_input: bool,
 ) -> None:
     from . import adaptation
 
-    exercise_type = adaptation.adapted.make_exercise_type(
-        adaptation.adapted.InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=choice),
-        adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
-        adaptation.adapted.StatementComponents(
-            text=True,
-            whitespace=True,
-            arrow=True,
-            formatted=True,
-            free_text_input=free_text_input,
-            multiple_choices_input=multiple_choices_input,
-            selectable_input=selectable_input,
-            swappable_input=swappable_input,
-            editable_text_input=editable_text_input,
-        ),
-        adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+    exercise_type = adaptation.adapted.make_partial_exercise_type(
+        adaptation.adapted.Components(
+            instruction=adaptation.adapted.InstructionComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, choice=choice
+            ),
+            example=adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            statement=adaptation.adapted.StatementComponents(
+                text=True,
+                whitespace=True,
+                arrow=True,
+                formatted=True,
+                free_text_input=free_text_input,
+                multiple_choices_input=multiple_choices_input,
+                selectable_input=selectable_input,
+                swappable_input=swappable_input,
+                editable_text_input=editable_text_input,
+                split_word_input=split_word_input,
+            ),
+            reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+        )
     )
-    print(json.dumps(adaptation.llm.make_schema(exercise_type), indent=2))
+    schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)
+    assert ('"choice"' in schema) == choice
+    assert ('"freeTextInput"' in schema) == free_text_input
+    assert ('"multipleChoicesInput"' in schema) == multiple_choices_input
+    assert schema.count('"selectableInput"') == (2 if selectable_input else 1)
+    assert ('"swappableInput"' in schema) == swappable_input
+    assert ('"editableTextInput"' in schema) == editable_text_input
+    print(schema)
 
 
 @main.command()
@@ -407,7 +421,7 @@ def json_to_html_script() -> None:
 
     from . import adaptation
 
-    example_exercise = adaptation.adapted.Exercise(
+    example_exercise = adaptation.adapted.ExerciseV1(
         format="v1",
         instruction=adaptation.adapted.InstructionPage(
             lines=[
@@ -425,7 +439,7 @@ def json_to_html_script() -> None:
         ),
         example=None,
         hint=None,
-        statement=adaptation.adapted.StatementPages(
+        statement=adaptation.adapted.StatementPagesV1(
             pages=[
                 adaptation.adapted.StatementPage(
                     lines=[
@@ -498,7 +512,7 @@ def json_to_html_script() -> None:
         yield "import hashlib"
         yield "import json"
         yield ""
-        yield "import pydantic"
+        yield "import pydantic.alias_generators"
         yield ""
         with open("patty/adaptation/adapted.py") as f:
             for line in f:
@@ -511,9 +525,9 @@ def json_to_html_script() -> None:
                     continue
                 yield line.rstrip()
         yield ""
-        yield "def exercise_to_html(exercise: Exercise | dict[str, Any]) -> str:"
-        yield "    if not isinstance(exercise, Exercise):"
-        yield "        exercise = Exercise.model_validate(exercise)"
+        yield "def exercise_to_html(exercise: ExerciseAsUnion | dict[str, Any]) -> str:"
+        yield "    if not isinstance(exercise, ExerciseAsUnion):"
+        yield "        exercise = Exercise.model_validate(exercise).root"
         yield ""
         with open("patty/export/templates/adaptation/index.html") as f:
             yield f"    template = {f.read().strip()!r}"
@@ -716,7 +730,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250821-141603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250827-131603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
