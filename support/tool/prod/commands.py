@@ -121,7 +121,6 @@ def build(patty_version: str, action: typing.Literal["pre-warm", "push", "load"]
     if "patty-multi-platform-builder" not in builders:
         subprocess.run(["docker", "buildx", "create", "--name", "patty-multi-platform-builder"], check=True)
 
-
     if action == "pre-warm":
         part_pattern = re.compile(r"^FROM .* AS (?P<target>(?P<part>\S+)-dependencies)$")
     else:
