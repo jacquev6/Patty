@@ -18,7 +18,7 @@ There is however a [graph of the DB tables](backend/generated/db-tables-graph.pn
 
 ## Dependencies
 
-Bash, Python and Docker (with `cocker compose`).
+Bash, Python and Docker (with `docker compose`).
 
 ## Scripts
 
@@ -32,4 +32,8 @@ Use `./dev.sh --help` to list other commands available.
 
 `./prod.sh preview` runs a production-like environment locally.
 
+`./prod.sh pre-warm-build-cache` pulls base Docker images and installs dependencies, keeping result in cache.
+It lets you choose when you want to run the long part of the build.
+
 `./prod.sh publish` publishes new Docker images.
+It does *not* pull the base images, so you should have run `./prod.sh pre-warm-build-cache` in the not-so-distant past.
