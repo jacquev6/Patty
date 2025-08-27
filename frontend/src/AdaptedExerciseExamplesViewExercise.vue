@@ -12,6 +12,7 @@ import FixedColumns from './FixedColumns.vue'
 export type Example = {
   title: string
   exercise: AdaptedExercise
+  demos?: Record<string, () => void>
 }
 
 const props = defineProps<{

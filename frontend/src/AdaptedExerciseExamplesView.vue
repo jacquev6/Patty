@@ -526,6 +526,14 @@ export const examples: Example[] = [
       ],
       reference: null,
     },
+    demos: {
+      clic() {
+        cy.get('[data-cy="selectableInput"]').eq(17).click()
+        cy.get('[data-cy="selectableInput"]').eq(34).click()
+        cy.get('[data-cy="selectableInput"]').eq(43).click()
+        cy.get('[data-cy="selectableInput"]').eq(47).click()
+      },
+    },
   },
   {
     title: 'ExpressionEcrite',
