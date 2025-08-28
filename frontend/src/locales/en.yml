@@ -1,5 +1,6 @@
 sandbox: Sandbox
 textbooks: Textbooks
+errors: Errors
 adaptedExerciseExamples: Adapted exercise examples
 newExtractionBatch: New extraction batch
 existingExtractionBatch: Extraction batch {id}

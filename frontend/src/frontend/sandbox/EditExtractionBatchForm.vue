@@ -91,12 +91,12 @@ async function submitAdaptation() {
               <code>{{ classificationCamembert20250520.fileName }}</code>
               <span>{{ classificationCamembert20250520.providedBy }}</span>
               <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span> </I18nT
-            >: <button @click="submitClassification">Submit</button>
+            >: <button @click="submitClassification">{{ t('submit') }}</button>
           </template>
-          <template v-else
-            >{{ t('no') }}
-            <span style="cursor: pointer" @click="editingRunClassification = true">(🖊️ change)</span></template
-          >
+          <template v-else>
+            {{ t('no') }}
+            <span style="cursor: pointer" @click="editingRunClassification = true">({{ t('change') }})</span>
+          </template>
         </template>
       </p>
       <p v-if="extractionBatch.runClassification">
@@ -112,12 +112,12 @@ async function submitAdaptation() {
                 <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
                 <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
               </LlmModelSelector> </I18nT
-            >: <button @click="submitAdaptation">Submit</button>
+            >: <button @click="submitAdaptation">{{ t('submit') }}</button>
           </template>
-          <template v-else
-            >{{ t('no') }}
-            <span style="cursor: pointer" @click="editingModelForAdaptation = true">(🖊️ change)</span></template
-          >
+          <template v-else>
+            {{ t('no') }}
+            <span style="cursor: pointer" @click="editingModelForAdaptation = true">({{ t('change') }})</span>
+          </template>
         </template>
         <template v-else>
           <I18nT keypath="runAdaptationYesUsing">
@@ -182,8 +182,8 @@ en:
   settings: Settings
   prompt: Prompt
   download: Download {0} or {1}
-  standaloneHtml: "standalone HTML"
-  jsonData: "JSON data"
+  standaloneHtml: standalone HTML
+  jsonData: JSON data
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
   runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
@@ -198,15 +198,17 @@ en:
   notJsonError: "The LLM returned a response that is not correct JSON."
   invalidJsonError: "The LLM returned a JSON response that does not validate against the extracted exercises list schema."
   unknownError: "The LLM caused an unknown error."
+  change: 🖊️ change
+  submit: Submit
 fr:
   createdBy: "Créé par :"
   strategy: Stratégie
   llmModel: Modèle LLM
   settings: Paramètres
   prompt: Invite
-  download: Télécharger le {0} ou les {1}
-  standaloneHtml: "HTML autonome"
-  jsonData: "données JSON"
+  download: Télécharger {0} ou {1}
+  standaloneHtml: le HTML autonome
+  jsonData: les données JSON
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
   runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"
@@ -221,6 +223,8 @@ fr:
   notJsonError: "Le LLM a renvoyé une réponse qui n'est pas un JSON correct."
   invalidJsonError: "Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'une liste d'exercices extraits."
   unknownError: "Le LLM a causé une erreur inconnue."
+  change: 🖊️ modifier
+  submit: Soumettre
 </i18n>
 
 <style scoped>

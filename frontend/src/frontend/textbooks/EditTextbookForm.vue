@@ -82,11 +82,17 @@ async function removeRange(id: string, removed: boolean) {
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
-        <span :class="{ removed: range.removedFromTextbook }"
-          >Pages {{ range.textbookFirstPageNumber }} to {{ range.textbookFirstPageNumber + range.pagesCount - 1 }} (from
-          {{ range.pdfFileNames[0] }} pages {{ range.pdfFirstPageNumber }} to
-          {{ range.pdfFirstPageNumber + range.pagesCount - 1 }})</span
-        >
+        <span :class="{ removed: range.removedFromTextbook }">
+          {{
+            t('pages', {
+              textbookFrom: range.textbookFirstPageNumber,
+              textbookTo: range.textbookFirstPageNumber + range.pagesCount - 1,
+              pdfName: range.pdfFileNames[0],
+              pdfFrom: range.pdfFirstPageNumber,
+              pdfTo: range.pdfFirstPageNumber + range.pagesCount - 1,
+            })
+          }}
+        </span>
         <template v-if="range.removedFromTextbook">
           ({{ t('removed') }})
           <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
@@ -99,24 +105,24 @@ async function removeRange(id: string, removed: boolean) {
       <template v-if="!range.removedFromTextbook">
         <p>
           <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
-            <template #provider>Model provider for extraction:</template>
+            <template #provider>{{ t('modelForExtraction') }}</template>
           </LlmModelSelector>
         </p>
         <p>
           <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
-            <template #provider>Model provider for adaptation:</template>
+            <template #provider>{{ t('modelForAdaptation') }}</template>
           </LlmModelSelector>
         </p>
         <template v-for="page in range.pages">
           <h4>
-            Page {{ page.pageNumber
+            {{ t('page') }} {{ page.pageNumber
             }}<template v-if="page.inProgress"
               ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
             >
           </h4>
           <template v-for="exercise in page.exercises">
             <h5 v-if="exercise.removedFromTextbook">
-              <span class="removed">Exercise {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
+              <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
               <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
             </h5>
             <EditTextbookFormExercisePreview
@@ -197,6 +203,9 @@ en:
   reAdd: Re-add
   remove: Remove
   removed: removed
+  modelForExtraction: "Model provider for extraction:"
+  modelForAdaptation: "Model provider for adaptation:"
+  pages: "Pages {textbookFrom} to {textbookTo} (from {pdfName} pages {pdfFrom} to {pdfTo})"
 fr:
   isbn: ISBN
   downloadHtml: Télécharger le HTML autonome
@@ -218,4 +227,7 @@ fr:
   reAdd: Rajouter
   remove: Enlever
   removed: enlevé
+  modelForExtraction: "Fournisseur de modèle pour l'extraction :"
+  modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
+  pages: "Pages {textbookFrom} à {textbookTo} (de {pdfName} pages {pdfFrom} à {pdfTo})"
 </i18n>

@@ -60,7 +60,9 @@ async function submit() {
     <p>
       <label>{{ t('isbn') }} <InputForNonEmptyStringOrNull v-model="isbn" data-cy="textbook-isbn" /></label>
     </p>
-    <p><button @click="submit" :disabled>Submit</button></p>
+    <p>
+      <button @click="submit" :disabled>{{ t('submit') }}</button>
+    </p>
   </BusyBox>
 </template>
 
@@ -71,10 +73,12 @@ en:
   publisher: "Publisher:"
   year: "Year:"
   isbn: "ISBN:"
+  submit: Submit
 fr:
   createdBy: "Créé par"
   title: "Titre :"
   publisher: "Éditeur :"
   year: "Année :"
   isbn: "ISBN :"
+  submit: Soumettre
 </i18n>

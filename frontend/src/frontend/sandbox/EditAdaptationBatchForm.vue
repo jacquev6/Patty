@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { type AdaptationBatch } from '@/apiClient'
 import ResizableColumns from '@/ResizableColumns.vue'
@@ -12,6 +13,7 @@ const props = defineProps<{
   adaptationBatch: AdaptationBatch
 }>()
 
+const { t } = useI18n()
 const authenticationTokenStore = useAuthenticationTokenStore()
 
 const adaptations = computed(() => props.adaptationBatch.adaptations.map(preprocessAdaptation))
@@ -20,7 +22,7 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
 <template>
   <ResizableColumns :columns="[1, 2]">
     <template #col-1>
-      <p>Created by: {{ adaptationBatch.createdBy }}</p>
+      <p>{{ t('createdBy') }} {{ adaptationBatch.createdBy }}</p>
       <AdaptationStrategyEditor
         :availableStrategySettings="[]"
         :disabled="true"
@@ -29,21 +31,21 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     </template>
     <template #col-2>
       <p>
-        <RouterLink :to="{ name: 'create-adaptation-batch', query: { base: adaptationBatch.id } }"
-          >New batch based on this one</RouterLink
-        >
+        <RouterLink :to="{ name: 'create-adaptation-batch', query: { base: adaptationBatch.id } }">
+          {{ t('newBatchBasedOnThisOne') }}
+        </RouterLink>
       </p>
       <p>
-        Download
-        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`"
-          >standalone HTML</a
-        >
-        or
-        <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.json?token=${authenticationTokenStore.token}`"
-          >JSON data</a
-        >
+        <I18nT keypath="download">
+          <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
+            {{ t('standaloneHtml') }}
+          </a>
+          <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.json?token=${authenticationTokenStore.token}`">
+            {{ t('jsonData') }}
+          </a>
+        </I18nT>
       </p>
-      <h1>Inputs</h1>
+      <h1>{{ t('inputs') }}</h1>
       <AdaptationPreview
         v-for="(adaptation, index) in adaptations"
         :headerLevel="2"
@@ -55,3 +57,20 @@ const adaptations = computed(() => props.adaptationBatch.adaptations.map(preproc
     </template>
   </ResizableColumns>
 </template>
+
+<i18n>
+en:
+  createdBy: "Created by:"
+  newBatchBasedOnThisOne: New batch based on this one
+  download: Download {0} or {1}
+  standaloneHtml: standalone HTML
+  jsonData: JSON data
+  inputs: Inputs
+fr:
+  createdBy: "Créé par :"
+  newBatchBasedOnThisOne: Nouveau batch basé sur celui-ci
+  download: Télécharger {0} ou {1}
+  standaloneHtml: le HTML autonome
+  jsonData: les données JSON
+  inputs: Entrées
+</i18n>

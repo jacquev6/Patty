@@ -111,7 +111,7 @@ async function submit() {
       :disabled="false"
       v-model="modelForExtraction"
     >
-      <template #provider>Model provider for extraction:</template>
+      <template #provider>{{ t('modelForExtraction') }}</template>
     </LlmModelSelector>
   </p>
   <p data-cy="adaptation">
@@ -120,7 +120,7 @@ async function submit() {
       :disabled="false"
       v-model="modelForAdaptation"
     >
-      <template #provider>Model provider for adaptation:</template>
+      <template #provider>{{ t('modelForAdaptation') }}</template>
     </LlmModelSelector>
   </p>
   <p>
@@ -131,8 +131,12 @@ async function submit() {
 <i18n>
 en:
   open: "Open a PDF file containing the textbook (or a part of it):"
+  modelForExtraction: "Model provider for extraction:"
+  modelForAdaptation: "Model provider for adaptation:"
   submit: "Submit"
 fr:
   open: "Ouvrir un fichier PDF contenant le manuel (ou une partie de celui-ci) :"
+  modelForExtraction: "Fournisseur de modèle pour l'extraction :"
+  modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
   submit: "Soumettre"
 </i18n>

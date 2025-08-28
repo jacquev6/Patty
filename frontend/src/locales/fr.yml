@@ -1,5 +1,6 @@
 sandbox: Bac à sable
 textbooks: Manuels
+errors: Erreurs
 adaptedExerciseExamples: Exemples d'exercices adaptés
 newExtractionBatch: Nouveau batch d'extraction
 existingExtractionBatch: Batch d'extraction {id}
