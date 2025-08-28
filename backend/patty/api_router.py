@@ -70,7 +70,11 @@ def get_available_adaptation_llm_models() -> list[adaptation.llm.ConcreteModel]:
 
 
 class ApiStrategySettings(ApiModel):
-    name: str | None
+    class Identity(ApiModel):
+        name: str
+        version: Literal["current", "previous", "older"]
+
+    identity: Identity | None
     system_prompt: str
     response_specification: adaptation.strategy.ConcreteLlmResponseSpecification
 
@@ -181,22 +185,15 @@ async def post_adaptation_batch(
 ) -> PostAdaptationBatchResponse:
     now = datetime.datetime.now(datetime.timezone.utc)
 
-    if req.strategy.settings.name is None:
+    if req.strategy.settings.identity is None:
         base_settings = None
         exercise_class = None
     else:
-        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
-        if req.strategy.settings.name.endswith(" (previous version)"):
-            branch_name = req.strategy.settings.name[:-19]
-        elif req.strategy.settings.name.endswith(" (older version)"):
-            branch_name = req.strategy.settings.name[:-16]
-        else:
-            branch_name = req.strategy.settings.name
+        branch_name = req.strategy.settings.identity.name
         exercise_class = (
             session.query(adaptation.ExerciseClass).filter(adaptation.ExerciseClass.name == branch_name).first()
         )
         if exercise_class is None:
-            assert branch_name == req.strategy.settings.name
             base_settings = None
             exercise_class = adaptation.ExerciseClass(
                 created=classification.ExerciseClassCreationByUser(at=now, username=req.creator),
@@ -207,7 +204,7 @@ async def post_adaptation_batch(
         else:
             if exercise_class.latest_strategy_settings is None:
                 base_settings = None
-            elif branch_name == req.strategy.settings.name:
+            elif req.strategy.settings.identity.version == "current":
                 base_settings = exercise_class.latest_strategy_settings
             else:
                 base_settings = exercise_class.latest_strategy_settings.parent
@@ -303,7 +300,7 @@ class GetAdaptationBatchesResponse(ApiModel):
         created_by: str
         created_at: datetime.datetime
         model: adaptation.llm.ConcreteModel
-        strategy_settings_name: str | None
+        strategy_settings_identity: ApiStrategySettings.Identity | None
 
     adaptation_batches: list[AdaptationBatch]
     next_chunk_id: str | None
@@ -375,7 +372,7 @@ async def get_adaptation_batches(
                 created_by=adaptation_batch.created_by,
                 created_at=adaptation_batch.created_at,
                 model=adaptation_batch.model,
-                strategy_settings_name=make_api_strategy_settings_name(adaptation_batch.settings),
+                strategy_settings_identity=make_api_strategy_settings_identity(adaptation_batch.settings),
             )
             for adaptation_batch in batches
         ],
@@ -1439,24 +1436,23 @@ def make_api_strategy(settings: adaptation.AdaptationSettings, model: adaptation
 
 def make_api_strategy_settings(settings: adaptation.AdaptationSettings) -> ApiStrategySettings:
     return ApiStrategySettings(
-        name=make_api_strategy_settings_name(settings),
+        identity=make_api_strategy_settings_identity(settings),
         system_prompt=settings.system_prompt,
         response_specification=settings.response_specification,
     )
 
 
-def make_api_strategy_settings_name(settings: adaptation.AdaptationSettings) -> str | None:
+def make_api_strategy_settings_identity(settings: adaptation.AdaptationSettings) -> ApiStrategySettings.Identity | None:
     if settings.exercise_class is None:
         return None
     else:
         assert settings.exercise_class.latest_strategy_settings is not None
         if settings.exercise_class.latest_strategy_settings.id == settings.id:
-            return settings.exercise_class.name
-        # @todo Move this string manipulation to the frontend. In particular, this will break with i18n.
+            return ApiStrategySettings.Identity(name=settings.exercise_class.name, version="current")
         elif settings.exercise_class.latest_strategy_settings.parent_id == settings.id:
-            return f"{settings.exercise_class.name} (previous version)"
+            return ApiStrategySettings.Identity(name=settings.exercise_class.name, version="previous")
         else:
-            return f"{settings.exercise_class.name} (older version)"
+            return ApiStrategySettings.Identity(name=settings.exercise_class.name, version="older")
 
 
 def make_api_input(exercise: adaptation.AdaptableExercise) -> ApiInput:

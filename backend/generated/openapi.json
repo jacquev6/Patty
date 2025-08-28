@@ -1875,16 +1875,15 @@
             ],
             "title": "Model"
           },
-          "strategySettingsName": {
+          "strategySettingsIdentity": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/Identity"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Strategysettingsname"
+            ]
           }
         },
         "additionalProperties": false,
@@ -1894,7 +1893,7 @@
           "createdBy",
           "createdAt",
           "model",
-          "strategySettingsName"
+          "strategySettingsIdentity"
         ],
         "title": "AdaptationBatch"
       },
@@ -2190,16 +2189,15 @@
       },
       "ApiStrategySettings-Input": {
         "properties": {
-          "name": {
+          "identity": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/Identity"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Name"
+            ]
           },
           "systemPrompt": {
             "type": "string",
@@ -2223,7 +2221,7 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "name",
+          "identity",
           "systemPrompt",
           "responseSpecification"
         ],
@@ -2231,16 +2229,15 @@
       },
       "ApiStrategySettings-Output": {
         "properties": {
-          "name": {
+          "identity": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/Identity"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Name"
+            ]
           },
           "systemPrompt": {
             "type": "string",
@@ -2264,7 +2261,7 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "name",
+          "identity",
           "systemPrompt",
           "responseSpecification"
         ],
@@ -3770,6 +3767,30 @@
           "formatted"
         ],
         "title": "HintComponents"
+      },
+      "Identity": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "version": {
+            "type": "string",
+            "enum": [
+              "current",
+              "previous",
+              "older"
+            ],
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "version"
+        ],
+        "title": "Identity"
       },
       "InstructionComponents": {
         "properties": {

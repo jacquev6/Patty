@@ -668,8 +668,7 @@ export interface components {
         | components['schemas']['DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
-      /** Strategysettingsname */
-      strategySettingsName: string | null
+      strategySettingsIdentity: components['schemas']['Identity'] | null
     }
     /** Adjustment */
     Adjustment: {
@@ -751,8 +750,7 @@ export interface components {
     }
     /** ApiStrategySettings */
     'ApiStrategySettings-Input': {
-      /** Name */
-      name: string | null
+      identity: components['schemas']['Identity'] | null
       /** Systemprompt */
       systemPrompt: string
       /** Responsespecification */
@@ -763,8 +761,7 @@ export interface components {
     }
     /** ApiStrategySettings */
     'ApiStrategySettings-Output': {
-      /** Name */
-      name: string | null
+      identity: components['schemas']['Identity'] | null
       /** Systemprompt */
       systemPrompt: string
       /** Responsespecification */
@@ -1339,6 +1336,16 @@ export interface components {
        * @constant
        */
       formatted: true
+    }
+    /** Identity */
+    Identity: {
+      /** Name */
+      name: string
+      /**
+       * Version
+       * @enum {string}
+       */
+      version: 'current' | 'previous' | 'older'
     }
     /** InstructionComponents */
     InstructionComponents: {

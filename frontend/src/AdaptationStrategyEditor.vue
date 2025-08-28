@@ -1,9 +1,21 @@
+<script lang="ts">
+import { type AdaptationStrategy } from './apiClient'
+
+export function makeAdaptationSettingsName(identity: AdaptationStrategy['settings']['identity']): string {
+  if (identity === null) {
+    return ''
+  } else {
+    return identity.name + (identity.version !== 'current' ? ` (${identity.version} version)` : '')
+  }
+}
+</script>
+
 <script setup lang="ts">
 import { computed } from 'vue'
 import { computedAsync } from '@vueuse/core'
 
 import assert from './assert'
-import { type AdaptationStrategy, useAuthenticatedClient } from './apiClient'
+import { useAuthenticatedClient } from './apiClient'
 import AdaptedExerciseJsonSchemaDetails from './AdaptedExerciseJsonSchemaDetails.vue'
 import TextArea from './TextArea.vue'
 import MarkDown from './MarkDown.vue'
@@ -100,19 +112,19 @@ const schema = computedAsync(async () => {
 
 const settingsName = computed({
   get: () => {
-    if (strategy.value.settings.name === null) {
+    if (strategy.value.settings.identity === null) {
       return ''
     } else {
-      return strategy.value.settings.name
+      return makeAdaptationSettingsName(strategy.value.settings.identity)
     }
   },
   set: (value: string) => {
     if (value.trim() === '') {
-      strategy.value.settings.name = null
+      strategy.value.settings.identity = null
     } else {
-      const found = props.availableStrategySettings.find((s) => s.name === value)
+      const found = props.availableStrategySettings.find((s) => makeAdaptationSettingsName(s.identity) === value)
       if (found === undefined) {
-        strategy.value.settings.name = value
+        strategy.value.settings.identity = { name: value, version: 'current' }
       } else {
         Object.assign(strategy.value.settings, found)
       }
@@ -122,8 +134,8 @@ const settingsName = computed({
 
 const settingsNameSuggestions = computed(() => {
   return props.availableStrategySettings.map((s) => {
-    assert(s.name !== null)
-    return s.name
+    assert(s.identity !== null)
+    return makeAdaptationSettingsName(s.identity)
   })
 })
 </script>

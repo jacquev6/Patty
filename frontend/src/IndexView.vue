@@ -13,6 +13,7 @@ import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 import FixedColumns from './FixedColumns.vue'
 import CreateTextbookForm from './frontend/textbooks/CreateTextbookForm.vue'
+import { makeAdaptationSettingsName } from './AdaptationStrategyEditor.vue'
 
 const client = useAuthenticatedClient()
 const { t } = useI18n()
@@ -160,8 +161,8 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
             <RouterLink :to="{ name: 'adaptation-batch', params: { id: adaptationBatch.id } }">
               {{ t('adaptationBatch', [adaptationBatch.id]) }}
             </RouterLink>
-            (<template v-if="adaptationBatch.strategySettingsName !== null"
-              >{{ adaptationBatch.strategySettingsName }},<WhiteSpace /></template
+            (<template v-if="adaptationBatch.strategySettingsIdentity !== null"
+              >{{ makeAdaptationSettingsName(adaptationBatch.strategySettingsIdentity) }},<WhiteSpace /></template
             >{{ adaptationBatch.model.provider }}/{{ adaptationBatch.model.name }},
             {{
               t('createdBy', { name: adaptationBatch.createdBy, date: d(new Date(adaptationBatch.createdAt), 'long') })
