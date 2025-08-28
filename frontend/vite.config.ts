@@ -18,7 +18,7 @@ function readOtherIndexHtml(name : string) : Plugin {
     transformIndexHtml: {
       order: 'pre',
       async handler() {
-        return await fs.readFile(`${name}.html`, 'utf8')
+        return await fs.readFile(`src/${name}/index.html`, 'utf8')
       },
     },
   }
@@ -51,7 +51,7 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
   }
 
   return {
-    publicDir: `src/${entryPointName}-public`,
+    publicDir: `src/${entryPointName}/public`,
     plugins,
     server: {
       allowedHosts: true,

@@ -6,7 +6,7 @@ import { type PreviewableExercise } from './AdaptableExercisePreview.vue'
 import WhiteSpace from './WhiteSpace.vue'
 import { useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
-import ClassEditor from './EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
+import ClassEditor from './frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6

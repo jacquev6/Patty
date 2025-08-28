@@ -12,7 +12,7 @@ import {
 import assert from './assert'
 import WhiteSpace from './WhiteSpace.vue'
 import FixedColumns from './FixedColumns.vue'
-import CreateTextbookForm from './CreateTextbookForm.vue'
+import CreateTextbookForm from './frontend/textbooks/CreateTextbookForm.vue'
 
 const client = useAuthenticatedClient()
 const { t } = useI18n()

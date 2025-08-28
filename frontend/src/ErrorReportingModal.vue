@@ -5,7 +5,7 @@ import { ref } from 'vue'
 import { useWindowSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import { app } from './frontend'
+import { app } from './frontend/main'
 import { useAuthenticatedClient } from './apiClient'
 import { useIdentifiedUserStore } from './IdentifiedUserStore'
 

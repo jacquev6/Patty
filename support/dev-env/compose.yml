@@ -33,8 +33,8 @@ services:
       "backend/generated/adapted-exercise-schema--no-free-text-input.json",
       "backend/generated/adapted-exercise-schema--no-multiple-choices-input.json",
       "backend/generated/adapted-exercise-schema--no-selectable-input.json",
-      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema--no-split-word-input.json",
+      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph--full.png",
       "backend/generated/db-tables-graph--modules.png",
@@ -48,6 +48,7 @@ services:
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
+      "frontend/src/frontend/public/pdf.worker.min.js",
       "frontend/src/openapi.ts",
     ]
 
@@ -641,7 +642,7 @@ services:
       - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
-    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend-public/pdf.worker.min.js"]
+    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend/public/pdf.worker.min.js"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully
