@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useBreadcrumbsStore, type Breadcrumb } from '@/BreadcrumbsStore'
 import LocaleSelect from '@/LocaleSelect.vue'
+import IdentifiedUser from './IdentifiedUser.vue'
 
 const { t: tl } = useI18n()
 const { t: tg } = useI18n({ useScope: 'global' })
@@ -30,7 +31,10 @@ function makeText(breadcrumb: Breadcrumb) {
       </p>
     </div>
     <div style="flex: 1; text-align: end">
-      <p><LocaleSelect /></p>
+      <p>
+        <IdentifiedUser />
+        <LocaleSelect />
+      </p>
     </div>
   </div>
 </template>

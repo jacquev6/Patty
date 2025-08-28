@@ -6,7 +6,6 @@ import { useAuthenticatedClient } from '@/apiClient'
 import LlmModelSelector from '@/LlmModelSelector.vue'
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputsEditor from './CreateClassificationBatchFormInputsEditor.vue'
-import IdentifiedUser from '@/IdentifiedUser.vue'
 import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
 import { useApiConstantsStore } from '@/ApiConstantsStore'
 import classificationCamembert20250520 from '@/ClassificationCamembert20250520'
@@ -57,7 +56,6 @@ async function submit() {
 
 <template>
   <h1>Settings</h1>
-  <p>Created by: <IdentifiedUser /></p>
   <p>
     Classification model: <code>{{ classificationCamembert20250520.fileName }}</code
     >, provided by {{ classificationCamembert20250520.providedBy }} by e-mail on

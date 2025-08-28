@@ -7,7 +7,6 @@ import { useI18n } from 'vue-i18n'
 
 import { type PDFDocumentProxy } from '@/pdfjs'
 import { type ExtractionStrategy, useAuthenticatedClient } from '@/apiClient'
-import IdentifiedUser from '@/IdentifiedUser.vue'
 import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
 import assert from '@/assert'
 import PdfPageRenderer from '@/PdfPageRenderer.vue'
@@ -117,7 +116,6 @@ const lastPage = computedAsync(async () => {
 <template>
   <ResizableColumns :columns="[1, 1]">
     <template #col-1>
-      <p>{{ t('createdBy') }} <IdentifiedUser /></p>
       <h1>{{ t('strategy') }}</h1>
       <h2>{{ t('llmModel') }}</h2>
       <p>
@@ -200,7 +198,6 @@ const lastPage = computedAsync(async () => {
 
 <i18n>
 en:
-  createdBy: "Created by:"
   strategy: Strategy
   llmModel: LLM model
   settings: Settings
@@ -221,7 +218,6 @@ en:
   pages: "Pages: from {from} to {to} (of {count})"
   submit: Submit
 fr:
-  createdBy: "Créé par :"
   strategy: Stratégie
   llmModel: Modèle LLM
   settings: Paramètres

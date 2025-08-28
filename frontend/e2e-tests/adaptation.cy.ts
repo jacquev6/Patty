@@ -6,8 +6,6 @@ describe('The adaptation batch creation page', () => {
     loadFixtures(['dummy-adaptation'])
     ignoreResizeObserverLoopError()
     visit('/new-adaptation-batch')
-    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
-    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('looks like this', () => {

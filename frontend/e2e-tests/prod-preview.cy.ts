@@ -8,8 +8,6 @@ describe('Patty', () => {
     }
     cy.viewport(1600, 800)
     visit('/')
-    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
-    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('creates an extraction batch', () => {

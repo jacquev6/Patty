@@ -9,7 +9,6 @@ import assert from '@/assert'
 import { useAuthenticationTokenStore } from '@/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
-import IdentifiedUser from '@/IdentifiedUser.vue'
 import LlmModelSelector from '@/LlmModelSelector.vue'
 import WhiteSpace from '@/WhiteSpace.vue'
 import EditTextbookFormExercisePreview from './EditTextbookFormExercisePreview.vue'
@@ -77,7 +76,6 @@ async function removeRange(id: string, removed: boolean) {
       {{ t('viewByPageDescription') }}
     </template>
   </p>
-  <p>{{ t('modifiedBy') }} <IdentifiedUser /></p>
   <template v-if="view === 'batch'">
     <h2>{{ t('newTextbookPdf') }}</h2>
     <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />

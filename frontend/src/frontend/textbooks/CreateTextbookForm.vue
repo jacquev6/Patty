@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { useAuthenticatedClient } from '@/apiClient'
-import IdentifiedUser from '@/IdentifiedUser.vue'
 import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
 import BusyBox from '@/BusyBox.vue'
 import InputForNonEmptyStringOrNull from '@/InputForNonEmptyStringOrNull.vue'
@@ -47,7 +46,6 @@ async function submit() {
 
 <template>
   <BusyBox :busy>
-    <p>{{ t('createdBy') }} <IdentifiedUser /></p>
     <p>
       <label>{{ t('title') }} <input v-model="title" data-cy="textbook-title" /></label>
     </p>

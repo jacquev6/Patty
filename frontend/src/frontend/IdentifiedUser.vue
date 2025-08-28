@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import WhiteSpace from './WhiteSpace.vue'
-import { useIdentifiedUserStore } from './IdentifiedUserStore'
+import WhiteSpace from '@/WhiteSpace.vue'
+import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
 
 const identifiedUser = useIdentifiedUserStore()
 const { t } = useI18n()
@@ -12,10 +12,9 @@ const showEditor = ref(identifiedUser.identifier === '')
 </script>
 
 <template>
-  <span
-    >{{ identifiedUser.identifier }}
-    <span data-cy="edit-identified-user" class="edit" @click="showEditor = true">({{ t('change') }})</span></span
-  >
+  <span data-cy="edit-identified-user" @click="showEditor = true" class="edit">
+    👤 {{ identifiedUser.identifier }}
+  </span>
   <Teleport to="body" v-if="showEditor">
     <div class="editor">
       <div>
@@ -37,8 +36,6 @@ const showEditor = ref(identifiedUser.identifier === '')
 <style scoped>
 .edit {
   cursor: pointer;
-  font-size: small;
-  color: grey;
 }
 
 .editor {
@@ -62,13 +59,11 @@ const showEditor = ref(identifiedUser.identifier === '')
 
 <i18n>
 en:
-  change: 🖊️ change
   identification: Identification
   firstName: "Your first name:"
   ok: OK
   message: "Nothing is checked, this is used only to record who created what."
 fr:
-  change: 🖊️ modifier
   identification: Identification
   firstName: "Votre prénom :"
   ok: OK

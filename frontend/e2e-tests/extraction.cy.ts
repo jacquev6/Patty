@@ -6,8 +6,6 @@ describe('The extraction batch creation page', () => {
     loadFixtures(['dummy-adaptation', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-extraction-batch')
-    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
-    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('looks like this', () => {

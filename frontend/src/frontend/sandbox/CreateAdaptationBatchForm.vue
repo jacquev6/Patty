@@ -7,7 +7,6 @@ import { type BaseAdaptationBatch, useAuthenticatedClient } from '@/apiClient'
 import BusyBox from '@/BusyBox.vue'
 import ResizableColumns from '@/ResizableColumns.vue'
 import AdaptationStrategyEditor from '@/AdaptationStrategyEditor.vue'
-import IdentifiedUser from '@/IdentifiedUser.vue'
 import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
 import { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import CreateAdaptationBatchFormInputsEditor from './CreateAdaptationBatchFormInputsEditor.vue'
@@ -67,7 +66,6 @@ const availableStrategySettings = computed(() => props.baseAdaptationBatch.avail
   <BusyBox :busy>
     <ResizableColumns :columns="[1, 1]">
       <template #col-1>
-        <p>Created by: <IdentifiedUser /></p>
         <AdaptationStrategyEditor :availableStrategySettings :disabled="false" v-model="strategy" />
       </template>
       <template #col-2>

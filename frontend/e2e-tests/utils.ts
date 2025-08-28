@@ -23,6 +23,8 @@ export function visit(url: string) {
   cy.visit(url)
   cy.get('[data-cy="password"]').type('password')
   cy.get('[data-cy="submit"]').click()
+  cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
+  cy.get('[data-cy="identified-user-ok"]').click()
 }
 
 export function loadFixtures(fixtures_: string[]) {

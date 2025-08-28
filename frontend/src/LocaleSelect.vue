@@ -20,11 +20,15 @@ const { t } = useI18n()
   </form>
 </template>
 
-<!--
 <i18n>
 en:
   language: "🇺🇸 English"
 fr:
   language: "🇫🇷 Français"
 </i18n>
--->
+
+<style scoped>
+form {
+  display: inline;
+}
+</style>

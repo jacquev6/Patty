@@ -6,8 +6,6 @@ describe('The creation form for textbooks', () => {
     loadFixtures(['dummy-branch'])
     ignoreResizeObserverLoopError()
     visit('/')
-    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
-    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   it('creates a textbook with only a title', () => {
@@ -44,8 +42,6 @@ describe('The edition form for textbooks', () => {
     loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
-    cy.get('[data-cy="identified-user"]').type('Alice', { delay: 0 })
-    cy.get('[data-cy="identified-user-ok"]').click()
   })
 
   function screenshots(slug: string) {
