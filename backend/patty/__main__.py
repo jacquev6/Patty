@@ -499,7 +499,7 @@ def json_to_html_script() -> None:
                 yield f">>> {line}"
                 continuation = True
             if line.startswith("print"):
-                yield "<!DOCTYPE html>"
+                yield "<!doctype html>"
                 yield '<html lang="">'
                 yield "  ..."
                 yield "</html>"

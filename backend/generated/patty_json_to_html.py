@@ -45,7 +45,7 @@ Example usage (note that `exercise_to_html` also accepts an instance of `Exercis
 ... }
 
 >>> print(exercise_to_html(exercise))
-<!DOCTYPE html>
+<!doctype html>
 <html lang="">
   ...
 </html>
@@ -56,7 +56,7 @@ Example usage (note that `exercise_to_html` also accepts an instance of `Exercis
 ... }
 
 >>> print(textbook_to_html(textbook))
-<!DOCTYPE html>
+<!doctype html>
 <html lang="">
   ...
 </html>
