@@ -12,6 +12,7 @@ import sqlalchemy.orm
 from . import adaptation
 from . import classification
 from . import database_utils
+from . import errors  # noqa: F401 to populate the metadata
 from . import exercises
 from . import external_exercises  # noqa: F401 to populate the metadata
 from . import extraction
