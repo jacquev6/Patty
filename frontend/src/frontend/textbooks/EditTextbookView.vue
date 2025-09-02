@@ -2,11 +2,11 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type Textbook, useAuthenticatedClient } from '@/apiClient'
+import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
-import assert from '@/assert'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
-import { preprocess as preprocessAdaptation } from '@/adaptations'
+import assert from '$/assert'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
+import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 
 const props = defineProps<{
   id: string

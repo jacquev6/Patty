@@ -2,12 +2,12 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type AdaptationBatch } from '@/apiClient'
-import ResizableColumns from '@/ResizableColumns.vue'
-import AdaptationStrategyEditor from '@/AdaptationStrategyEditor.vue'
+import { type AdaptationBatch } from '@/frontend/ApiClient'
+import ResizableColumns from '$/ResizableColumns.vue'
+import AdaptationStrategyEditor from '@/frontend/common/AdaptationStrategyEditor.vue'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess as preprocessAdaptation } from '@/adaptations'
-import { useAuthenticationTokenStore } from '@/AuthenticationTokenStore'
+import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
+import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 
 const props = defineProps<{
   adaptationBatch: AdaptationBatch

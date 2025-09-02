@@ -31,7 +31,7 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
     readOtherIndexHtml(entryPointName),
     vue(),
     vueI18n({
-      include: path.resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
+      include: path.resolve(dirname(fileURLToPath(import.meta.url)), './src/frontend/locales/**'),
       defaultSFCLang: 'yml',
       strictMessage: false,
     })
@@ -58,7 +58,8 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
     },
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '$': fileURLToPath(new URL('./src/reusable', import.meta.url)),
       },
     },
   }

@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { PreprocessedAdaptation } from '@/adaptations'
-import AdaptableExercisePreview, { makePreviewAbleExercise_forAdaptation } from '@/AdaptableExercisePreview.vue'
+import type { PreprocessedAdaptation } from '@/frontend/Adaptations'
+import AdaptableExercisePreview, {
+  makePreviewAbleExercise_forAdaptation,
+} from '@/frontend/common/AdaptableExercisePreview.vue'
 
 defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6

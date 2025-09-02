@@ -2,9 +2,9 @@
 import { ref, watch } from 'vue'
 
 import CreateAdaptationBatchForm from './CreateAdaptationBatchForm.vue'
-import { type BaseAdaptationBatch, useAuthenticatedClient } from '@/apiClient'
-import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
+import { type BaseAdaptationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
+import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
   base: string | null

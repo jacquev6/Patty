@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, useTemplateRef } from 'vue'
-import { type PDFDocumentProxy } from '@/pdfjs'
 import { useI18n } from 'vue-i18n'
 
-import { type Textbook } from '@/apiClient'
-import UploadPdfForm from '@/UploadPdfForm.vue'
-import PdfPagesRangeSelector from '@/PdfPagesRangeSelector.vue'
-import { useAuthenticatedClient } from '@/apiClient'
-import assert from '@/assert'
-import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
-import LlmModelSelector from '@/LlmModelSelector.vue'
-import { useApiConstantsStore } from '@/ApiConstantsStore'
+import { type PDFDocumentProxy } from '$/pdfjs'
+import { type Textbook } from '@/frontend/ApiClient'
+import UploadPdfForm from '@/frontend/UploadPdfForm.vue'
+import PdfPagesRangeSelector from '$/PdfPagesRangeSelector.vue'
+import { useAuthenticatedClient } from '@/frontend/ApiClient'
+import assert from '$/assert'
+import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
+import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
+import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 
 const props = defineProps<{
   textbookId: string

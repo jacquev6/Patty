@@ -16,7 +16,7 @@ import Papa from 'papaparse'
 
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputEditor from './CreateClassificationBatchFormInputEditor.vue'
-import assert from '@/assert'
+import assert from '$/assert'
 
 defineProps<{
   headers: string

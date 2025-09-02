@@ -3,10 +3,10 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import EditExtractionBatchForm from './EditExtractionBatchForm.vue'
-import { type ExtractionBatch, useAuthenticatedClient } from '@/apiClient'
-import assert from '@/assert'
-import { preprocess as preprocessAdaptation } from '@/adaptations'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
+import { type ExtractionBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
+import assert from '$/assert'
+import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
   id: string

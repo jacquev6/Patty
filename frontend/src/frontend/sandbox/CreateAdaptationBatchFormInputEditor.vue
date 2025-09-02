@@ -10,10 +10,10 @@ export type InputWithFile = {
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
 
-import WhiteSpace from '@/WhiteSpace.vue'
-import InputForNumberOrNull from '@/InputForNumberOrNull.vue'
-import InputForNonEmptyStringOrNull from '@/InputForNonEmptyStringOrNull.vue'
-import TextArea from '@/TextArea.vue'
+import WhiteSpace from '$/WhiteSpace.vue'
+import InputForNumberOrNull from '$/InputForNumberOrNull.vue'
+import InputForNonEmptyStringOrNull from '$/InputForNonEmptyStringOrNull.vue'
+import TextArea from '$/TextArea.vue'
 
 defineProps<{
   headers: string

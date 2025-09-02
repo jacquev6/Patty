@@ -2,11 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type ClassificationBatch, useAuthenticatedClient } from '@/apiClient'
-import assert from '@/assert'
+import { type ClassificationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
+import assert from '$/assert'
 import EditClassificationBatchForm from './EditClassificationBatchForm.vue'
-import { preprocess as preprocessAdaptation } from '@/adaptations'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
+import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
   id: string

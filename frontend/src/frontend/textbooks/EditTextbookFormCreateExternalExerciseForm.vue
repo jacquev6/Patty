@@ -2,12 +2,12 @@
 import { ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type Textbook } from '@/apiClient'
-import BusyBox from '@/BusyBox.vue'
-import assert from '@/assert'
-import { useAuthenticatedClient } from '@/apiClient'
-import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
-import { parseExerciseFileName } from '../sandbox/CreateAdaptationBatchFormInputsEditor.vue'
+import { type Textbook } from '@/frontend/ApiClient'
+import BusyBox from '$/BusyBox.vue'
+import assert from '$/assert'
+import { useAuthenticatedClient } from '@/frontend/ApiClient'
+import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
+import { parseExerciseFileName } from '@/frontend/sandbox/CreateAdaptationBatchFormInputsEditor.vue'
 
 const props = defineProps<{
   textbookId: string

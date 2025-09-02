@@ -15,7 +15,7 @@ import _ from 'lodash'
 import * as zip from '@zip.js/zip.js'
 
 import CreateAdaptationBatchFormInputEditor, { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
-import assert from '@/assert'
+import assert from '$/assert'
 import { useTemplateRef, watch } from 'vue'
 
 defineProps<{

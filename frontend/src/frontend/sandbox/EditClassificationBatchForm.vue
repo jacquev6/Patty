@@ -2,13 +2,13 @@
 import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
 
-import { useAuthenticatedClient, type ClassificationBatch } from '@/apiClient'
-import LlmModelSelector from '@/LlmModelSelector.vue'
+import { useAuthenticatedClient, type ClassificationBatch } from '@/frontend/ApiClient'
+import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
-import { useAuthenticationTokenStore } from '@/AuthenticationTokenStore'
-import classificationCamembert20250520 from '@/ClassificationCamembert20250520'
-import { useApiConstantsStore } from '@/ApiConstantsStore'
-import WhiteSpace from '@/WhiteSpace.vue'
+import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
+import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
+import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
+import WhiteSpace from '$/WhiteSpace.vue'
 
 const props = defineProps<{
   classificationBatch: ClassificationBatch

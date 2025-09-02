@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CreateClassificationBatchForm from './CreateClassificationBatchForm.vue'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 import { onMounted } from 'vue'
 
 const breadcrumbsStore = useBreadcrumbsStore()

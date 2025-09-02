@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-
-import { preprocess as preprocessAdaptation } from '@/adaptations'
-import { useAuthenticatedClient, type ClassificationBatch } from '@/apiClient'
 import { match } from 'ts-pattern'
+
+import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
+import { useAuthenticatedClient, type ClassificationBatch } from '@/frontend/ApiClient'
 import AdaptableExercisePreview, {
   makePreviewAbleExercise_forClassificationOrExtraction,
-} from '@/AdaptableExercisePreview.vue'
+} from '@/frontend/common/AdaptableExercisePreview.vue'
 
 type BatchId = {
   kind: 'classification' | 'extraction'

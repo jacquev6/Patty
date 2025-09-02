@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
-import { useAuthenticatedClient } from '@/apiClient'
-import LlmModelSelector from '@/LlmModelSelector.vue'
+import { useAuthenticatedClient } from '@/frontend/ApiClient'
+import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputsEditor from './CreateClassificationBatchFormInputsEditor.vue'
-import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
-import { useApiConstantsStore } from '@/ApiConstantsStore'
-import classificationCamembert20250520 from '@/ClassificationCamembert20250520'
-import { useI18n } from 'vue-i18n'
+import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
+import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
+import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 
 const { d } = useI18n({ useScope: 'global' })
 const apiConstantsStore = useApiConstantsStore()

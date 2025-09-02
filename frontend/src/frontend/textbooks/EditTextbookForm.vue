@@ -2,15 +2,15 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type Textbook, useAuthenticatedClient } from '@/apiClient'
-import AdaptationPreview from '../sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess } from '@/adaptations'
-import assert from '@/assert'
-import { useAuthenticationTokenStore } from '@/AuthenticationTokenStore'
+import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
+import AdaptationPreview from '@/frontend/sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
+import { preprocess } from '@/frontend/Adaptations'
+import assert from '$/assert'
+import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
-import LlmModelSelector from '@/LlmModelSelector.vue'
-import WhiteSpace from '@/WhiteSpace.vue'
+import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
+import WhiteSpace from '$/WhiteSpace.vue'
 import EditTextbookFormExercisePreview from './EditTextbookFormExercisePreview.vue'
 
 const props = defineProps<{

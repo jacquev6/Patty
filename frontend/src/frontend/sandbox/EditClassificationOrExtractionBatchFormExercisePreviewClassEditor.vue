@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive } from 'vue'
 
-import { useAuthenticatedClient } from '@/apiClient'
+import { useAuthenticatedClient } from '@/frontend/ApiClient'
 
 const model = defineModel<string>({ required: true })
 

@@ -2,8 +2,8 @@
 import { ref, onMounted } from 'vue'
 
 import CreateExtractionBatchForm from './CreateExtractionBatchForm.vue'
-import { type ExtractionStrategy, useAuthenticatedClient } from '@/apiClient'
-import { useBreadcrumbsStore } from '@/BreadcrumbsStore'
+import { type ExtractionStrategy, useAuthenticatedClient } from '@/frontend/ApiClient'
+import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const client = useAuthenticatedClient()
 const breadcrumbsStore = useBreadcrumbsStore()

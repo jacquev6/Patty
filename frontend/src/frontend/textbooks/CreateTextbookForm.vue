@@ -3,11 +3,11 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
-import { useAuthenticatedClient } from '@/apiClient'
-import { useIdentifiedUserStore } from '@/IdentifiedUserStore'
-import BusyBox from '@/BusyBox.vue'
-import InputForNonEmptyStringOrNull from '@/InputForNonEmptyStringOrNull.vue'
-import InputForNumberOrNull from '@/InputForNumberOrNull.vue'
+import { useAuthenticatedClient } from '@/frontend/ApiClient'
+import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
+import BusyBox from '$/BusyBox.vue'
+import InputForNonEmptyStringOrNull from '$/InputForNonEmptyStringOrNull.vue'
+import InputForNumberOrNull from '$/InputForNumberOrNull.vue'
 
 const router = useRouter()
 const { t } = useI18n()
