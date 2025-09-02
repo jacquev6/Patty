@@ -74,7 +74,7 @@ const exerciseNumber = computed(() => {
       <template v-if="exercise.headerText !== null">
         {{ exercise.headerText }}
       </template>
-      <template v-else> Input {{ exercise.index + 1 }} </template>
+      <template v-else>{{ t('input') }} {{ exercise.index + 1 }}</template>
       <template v-if="exercise.adaptation.status.kind === 'inProgress'">
         <WhiteSpace />
         <span class="inProgress">({{ t('inProgress') }})</span>
@@ -105,7 +105,7 @@ const exerciseNumber = computed(() => {
       </template>
     </template>
     <template v-else-if="exercise.kind === 'textbook'">
-      Exercise {{ exercise.exercise.exerciseNumber
+      {{ t('exercise') }} {{ exercise.exercise.exerciseNumber
       }}<template v-if="exercise.exercise.exerciseClass === null">
         <WhiteSpace />
         <span class="inProgress">{{ t('inProgress') }}</span>
@@ -157,6 +157,8 @@ span.edit {
 
 <i18n>
 en:
+  input: Input
+  exercise: Exercise
   classifiedByModel: classified by model
   fixedBy: fixed by
   pageAndExercise: "Page: {pageNumber}, exercise: {exerciseNumber}"
@@ -165,6 +167,8 @@ en:
   viewDetails: View details and make adjustments
   remove: Remove
 fr:
+  input: Entrée
+  exercise: Exercice
   classifiedByModel: classifié par le modèle
   fixedBy: corrigé par
   pageAndExercise: "Page : {pageNumber}, exercice : {exerciseNumber}"

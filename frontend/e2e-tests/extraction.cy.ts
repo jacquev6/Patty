@@ -93,7 +93,7 @@ describe('The extraction batch creation page', () => {
         expect(href).to.include('/api/export/extraction-batch/1.html?token=')
         cy.visit(`${href}&download=false`)
       })
-    cy.get('a:contains("Exercise")').should('have.length', 4)
+    cy.get('a:contains("Exercice")').should('have.length', 4)
 
     cy.visit('/')
     cy.get('ul:contains("Batch E1 (created by Alice")').should('exist')

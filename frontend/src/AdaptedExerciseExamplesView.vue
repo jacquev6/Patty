@@ -3673,6 +3673,7 @@ onMounted(() => {
           <b>{{ key }}</b>
         </dt>
         <dd>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-v-html -->
           <span v-html="t(`variable.${key}`)"></span> :
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <input type="number" v-model="spacingVariables[key]" />em

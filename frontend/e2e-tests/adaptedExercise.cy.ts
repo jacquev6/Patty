@@ -216,14 +216,14 @@ describe('The autonomous HTML for an adaptation batch', () => {
 
   it('remembers student answers ands shares them with the autonomous HTML for a single adaptation', () => {
     visitExport('/api/export/adaptation-batch/1.html')
-    cy.get('a:contains("Exercise P42Ex5")').click()
+    cy.get('a:contains("Exercice P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
     cy.get('[data-cy="choice0"]').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
     visitExport('/api/export/adaptation-batch/1.html')
-    cy.get('a:contains("Exercise P42Ex5")').click()
+    cy.get('a:contains("Exercice P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
     visitExport('/api/export/adaptation/1.html')

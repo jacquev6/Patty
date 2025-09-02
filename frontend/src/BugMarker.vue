@@ -7,6 +7,7 @@ defineProps<{
 </script>
 
 <template>
+  <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
   <component :is class="bug">BUG ({{ m }}): {{ v }}</component>
 </template>
 

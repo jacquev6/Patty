@@ -10,6 +10,8 @@ const props = defineProps<{
   tricolorable: boolean
 }>()
 
+const separator = '|'
+
 const studentAnswers = inject<Ref<StudentAnswers>>('adaptedExerciseStudentAnswers')
 assert(studentAnswers !== undefined)
 
@@ -40,7 +42,9 @@ function toggle(index: number) {
   <span data-cy="splitWordInput" class="main" :class="{ tricolorable }">
     <template v-for="(letter, index) in letters" :key="index">
       <span v-if="index > 0" class="inter">
-        <span @click="toggle(index)"><template v-if="separatorIndex === index">|</template></span>
+        <span @click="toggle(index)">
+          <template v-if="separatorIndex === index">{{ separator }}</template>
+        </span>
       </span>
       <span class="letter">{{ letter }}</span>
     </template>
