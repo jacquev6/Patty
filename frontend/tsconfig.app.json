@@ -14,7 +14,8 @@
     "strict": true,
     "lib": ["dom", "ESNext"],
     "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+      "@/*": ["./src/*"],
+      "$/*": ["./src/reusable/*"],
+    },
+  },
 }

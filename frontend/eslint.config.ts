@@ -33,12 +33,12 @@ export default defineConfigWithVueTs(
       'vue/require-v-for-key': 'off',
       'vue/valid-v-for': 'off',
       '@intlify/vue-i18n/no-raw-text': [
-        'warn',  // @todo Make it an error
+        'error',
+        // Use the following comment to ignore this rule on a specific line:
+        // <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {
-          // Use the following comment to ignore this rule in a specific line:
-          // <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           ignoreText: [
-            ',', ':', '.', '(', ')', '/', '<', '>', '✅', '❌', '🌐', '🖊️', 'BUG:',
+            ',', ':', '.', '(', ')', '/', '<', '>', '✅', '❌', '🌐', '🖊️', '👤', 'BUG:',
           ],
         },
       ],

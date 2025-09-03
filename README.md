@@ -11,7 +11,8 @@
 # Documentation
 
 There is little documentation because our small team focuses on creating a working prototype.
-There is however a [graph of the DB tables](backend/generated/db-tables-graph.png), generated from the ORM models.
+There is however a [graph of the DB tables](backend/generated/db-tables-graph--full.png), generated from the ORM models,
+and a [graph of the Python dependencies](backend/generated/python-dependency-graph.png).
 
 
 # Development

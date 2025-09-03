@@ -6,7 +6,6 @@ from patty import external_exercises  # noqa: F401
 from patty import sandbox  # noqa: F401
 from patty import settings
 from patty import textbooks  # noqa: F401
-from patty import to_be_deleted  # noqa: F401
 
 
 assert not context.is_offline_mode()

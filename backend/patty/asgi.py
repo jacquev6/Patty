@@ -2,12 +2,14 @@ import fastapi
 import sqlalchemy as sql
 
 from . import api_router
+from . import errors
 from . import authentication
 from . import database_utils
 from . import settings
 
 
 openapi_router = fastapi.APIRouter()
+openapi_router.include_router(errors.router, prefix="/api/errors-caught-by-frontend")
 openapi_router.include_router(api_router.api_router, prefix="/api")
 openapi_router.include_router(authentication.router, prefix="/api")
 

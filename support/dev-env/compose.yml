@@ -33,8 +33,8 @@ services:
       "backend/generated/adapted-exercise-schema--no-free-text-input.json",
       "backend/generated/adapted-exercise-schema--no-multiple-choices-input.json",
       "backend/generated/adapted-exercise-schema--no-selectable-input.json",
-      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema--no-split-word-input.json",
+      "backend/generated/adapted-exercise-schema--no-swappable-input.json",
       "backend/generated/adapted-exercise-schema.json",
       "backend/generated/db-tables-graph--full.png",
       "backend/generated/db-tables-graph--modules.png",
@@ -48,7 +48,8 @@ services:
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
-      "frontend/src/openapi.ts",
+      "frontend/src/frontend/public/pdf.worker.min.js",
+      "frontend/src/frontend/openapi.ts",
     ]
 
   adaptation-export-template-generator:
@@ -59,7 +60,7 @@ services:
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
-      PATTY_ENTRY_POINT_NAME: adaptation-export
+      PATTY_ENTRY_POINT_NAME: export/adaptation
     command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/adaptation", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
@@ -79,7 +80,7 @@ services:
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
-      PATTY_ENTRY_POINT_NAME: batch-export
+      PATTY_ENTRY_POINT_NAME: export/batch
     command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/batch", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
@@ -99,7 +100,7 @@ services:
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
     environment:
-      PATTY_ENTRY_POINT_NAME: textbook-export
+      PATTY_ENTRY_POINT_NAME: export/textbook
     command: ["npx", "vite", "build", "--watch", "--mode", "development", "--outDir", "../backend/patty/export/templates/textbook", "--emptyOutDir"]
     depends_on:
       generated-files-cleaner:
@@ -641,7 +642,7 @@ services:
       - ../..:/app
       - ./frontend/cache:/home/patty/.cache
     working_dir: /app/frontend
-    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend-public/pdf.worker.min.js"]
+    command: ["cp", "node_modules/pdfjs-dist/build/pdf.worker.min.mjs", "src/frontend/public/pdf.worker.min.js"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully
@@ -654,14 +655,14 @@ services:
     working_dir: /app/frontend
     environment:
       SHELL: bash
-    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/src/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript --default-non-nullable false ../backend/generated/openapi.json | npx prettier --parser typescript >src/openapi.ts"]
+    command: ["npx", "chokidar", "../backend/generated/openapi.json", "--silent", "--initial", "--command", "echo 'Updating frontend/src/frontend/openapi.ts because backend/generated/openapi.json changed' && npx openapi-typescript --default-non-nullable false ../backend/generated/openapi.json | npx prettier --parser typescript >src/frontend/openapi.ts"]
     depends_on:
       npm-installer:
         condition: service_completed_successfully
       openapi-json-generator:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "test", "-f", "/app/frontend/src/openapi.ts"]
+      test: ["CMD", "test", "-f", "/app/frontend/src/frontend/openapi.ts"]
       interval: 0.5s
       retries: 12
   frontend:
