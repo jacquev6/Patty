@@ -20,17 +20,17 @@ RUN npx vite build
 
 
 FROM frontend-dependencies AS adaptation-export-template-builder
-ENV PATTY_ENTRY_POINT_NAME=adaptation-export
+ENV PATTY_ENTRY_POINT_NAME=export/adaptation
 RUN npx vite build
 
 
 FROM frontend-dependencies AS batch-export-template-builder
-ENV PATTY_ENTRY_POINT_NAME=batch-export
+ENV PATTY_ENTRY_POINT_NAME=export/batch
 RUN npx vite build
 
 
 FROM frontend-dependencies AS textbook-export-template-builder
-ENV PATTY_ENTRY_POINT_NAME=textbook-export
+ENV PATTY_ENTRY_POINT_NAME=export/textbook
 RUN npx vite build
 
 
