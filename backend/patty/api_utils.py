@@ -56,3 +56,11 @@ def paginate(
         next_chunk_id = str(typing.cast(HasIntId, instances[-2]).id)
 
     return instances[:chunk_size], next_chunk_id
+
+
+T1 = typing.TypeVar("T1")
+
+
+def assert_isinstance(value: typing.Any, type_: type[T1]) -> T1:
+    assert isinstance(value, type_)
+    return value

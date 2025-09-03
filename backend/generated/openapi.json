@@ -609,7 +609,7 @@
           },
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Page"
+              "$ref": "#/components/schemas/patty__api_router__textbooks__ApiTextbook__Page"
             },
             "title": "Pages",
             "type": "array"
@@ -1830,7 +1830,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetClassificationBatchResponse__Exercise"
+              "$ref": "#/components/schemas/patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise"
             },
             "title": "Exercises",
             "type": "array"
@@ -1942,7 +1942,7 @@
           },
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page"
+              "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page"
             },
             "title": "Pages",
             "type": "array"
@@ -3306,7 +3306,7 @@
           },
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Range__Page"
+              "$ref": "#/components/schemas/patty__api_router__textbooks__ApiTextbook__Range__Page"
             },
             "title": "Pages",
             "type": "array"
@@ -3834,7 +3834,216 @@
         "title": "Success",
         "type": "object"
       },
-      "patty__api_router__ApiTextbook__Page": {
+      "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "title": "Exerciseclasshassettings",
+            "type": "boolean"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "reclassifiedBy",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise",
+        "type": "object"
+      },
+      "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page": {
+        "additionalProperties": false,
+        "properties": {
+          "assistantResponse": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistantresponse"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "pageNumber": {
+            "title": "Pagenumber",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pageNumber",
+          "assistantResponse",
+          "exercises"
+        ],
+        "title": "Page",
+        "type": "object"
+      },
+      "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApiAdaptation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exerciseClass": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exerciseclass"
+          },
+          "exerciseClassHasSettings": {
+            "title": "Exerciseclasshassettings",
+            "type": "boolean"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "reclassifiedBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reclassifiedby"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "reclassifiedBy",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise",
+        "type": "object"
+      },
+      "patty__api_router__textbooks__ApiTextbook__Page": {
         "additionalProperties": false,
         "properties": {
           "exercises": {
@@ -3863,12 +4072,12 @@
         "title": "Page",
         "type": "object"
       },
-      "patty__api_router__ApiTextbook__Range__Page": {
+      "patty__api_router__textbooks__ApiTextbook__Range__Page": {
         "additionalProperties": false,
         "properties": {
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__ApiTextbook__Range__Page__Exercise"
+              "$ref": "#/components/schemas/patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise"
             },
             "title": "Exercises",
             "type": "array"
@@ -3890,7 +4099,7 @@
         "title": "Page",
         "type": "object"
       },
-      "patty__api_router__ApiTextbook__Range__Page__Exercise": {
+      "patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise": {
         "additionalProperties": false,
         "properties": {
           "adaptation": {
@@ -3953,215 +4162,6 @@
           "exerciseClassHasSettings",
           "adaptation",
           "removedFromTextbook"
-        ],
-        "title": "Exercise",
-        "type": "object"
-      },
-      "patty__api_router__GetClassificationBatchResponse__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptation": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiAdaptation"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "exerciseClass": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exerciseclass"
-          },
-          "exerciseClassHasSettings": {
-            "title": "Exerciseclasshassettings",
-            "type": "boolean"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          },
-          "reclassifiedBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reclassifiedby"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "exerciseClass",
-          "reclassifiedBy",
-          "exerciseClassHasSettings",
-          "adaptation"
-        ],
-        "title": "Exercise",
-        "type": "object"
-      },
-      "patty__api_router__GetExtractionBatchResponse__Page": {
-        "additionalProperties": false,
-        "properties": {
-          "assistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
-              },
-              {
-                "$ref": "#/components/schemas/InvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/NotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/UnknownError"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assistantresponse"
-          },
-          "exercises": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__GetExtractionBatchResponse__Page__Exercise"
-            },
-            "title": "Exercises",
-            "type": "array"
-          },
-          "pageNumber": {
-            "title": "Pagenumber",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "pageNumber",
-          "assistantResponse",
-          "exercises"
-        ],
-        "title": "Page",
-        "type": "object"
-      },
-      "patty__api_router__GetExtractionBatchResponse__Page__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptation": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ApiAdaptation"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "exerciseClass": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exerciseclass"
-          },
-          "exerciseClassHasSettings": {
-            "title": "Exerciseclasshassettings",
-            "type": "boolean"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          },
-          "reclassifiedBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reclassifiedby"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "exerciseClass",
-          "reclassifiedBy",
-          "exerciseClassHasSettings",
-          "adaptation"
         ],
         "title": "Exercise",
         "type": "object"

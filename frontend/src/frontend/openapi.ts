@@ -781,7 +781,7 @@ export interface components {
       /** Isbn */
       isbn: string | null
       /** Pages */
-      pages: components['schemas']['patty__api_router__ApiTextbook__Page'][]
+      pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Page'][]
       /** Publisher */
       publisher: string | null
       /** Ranges */
@@ -1251,7 +1251,7 @@ export interface components {
       /** Createdby */
       createdBy: string | null
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__GetClassificationBatchResponse__Exercise'][]
+      exercises: components['schemas']['patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise'][]
       /** Id */
       id: string
       /** Modelforadaptation */
@@ -1286,7 +1286,7 @@ export interface components {
         | components['schemas']['OpenAiModel']
         | null
       /** Pages */
-      pages: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page'][]
+      pages: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page'][]
       /** Runclassification */
       runClassification: boolean
       strategy: components['schemas']['ApiExtractionStrategy']
@@ -1791,7 +1791,7 @@ export interface components {
       /** Modelforextraction */
       modelForExtraction: components['schemas']['DummyModel'] | components['schemas']['GeminiModel']
       /** Pages */
-      pages: components['schemas']['patty__api_router__ApiTextbook__Range__Page'][]
+      pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page'][]
       /** Pagescount */
       pagesCount: number
       /** Pdffilenames */
@@ -2020,8 +2020,58 @@ export interface components {
        */
       kind: 'success'
     }
+    /** Exercise */
+    patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
+      adaptation: components['schemas']['ApiAdaptation'] | null
+      /** Exerciseclass */
+      exerciseClass: string | null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
+    }
     /** Page */
-    patty__api_router__ApiTextbook__Page: {
+    patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
+      /** Assistantresponse */
+      assistantResponse:
+        | components['schemas']['patty__extraction__assistant_responses__Success']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
+        | null
+      /** Exercises */
+      exercises: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise'][]
+      /** Pagenumber */
+      pageNumber: number
+    }
+    /** Exercise */
+    patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise: {
+      adaptation: components['schemas']['ApiAdaptation'] | null
+      /** Exerciseclass */
+      exerciseClass: string | null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Reclassifiedby */
+      reclassifiedBy: string | null
+    }
+    /** Page */
+    patty__api_router__textbooks__ApiTextbook__Page: {
       /** Exercises */
       exercises: (
         | components['schemas']['ApiTextbookAdaptableExercise']
@@ -2031,16 +2081,16 @@ export interface components {
       number: number
     }
     /** Page */
-    patty__api_router__ApiTextbook__Range__Page: {
+    patty__api_router__textbooks__ApiTextbook__Range__Page: {
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__ApiTextbook__Range__Page__Exercise'][]
+      exercises: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise'][]
       /** Inprogress */
       inProgress: boolean
       /** Pagenumber */
       pageNumber: number
     }
     /** Exercise */
-    patty__api_router__ApiTextbook__Range__Page__Exercise: {
+    patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise: {
       adaptation: components['schemas']['ApiAdaptation'] | null
       /** Exerciseclass */
       exerciseClass: string | null
@@ -2058,56 +2108,6 @@ export interface components {
       reclassifiedBy: null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
-    }
-    /** Exercise */
-    patty__api_router__GetClassificationBatchResponse__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation'] | null
-      /** Exerciseclass */
-      exerciseClass: string | null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Pagenumber */
-      pageNumber: number | null
-      /** Reclassifiedby */
-      reclassifiedBy: string | null
-    }
-    /** Page */
-    patty__api_router__GetExtractionBatchResponse__Page: {
-      /** Assistantresponse */
-      assistantResponse:
-        | components['schemas']['patty__extraction__assistant_responses__Success']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
-        | components['schemas']['UnknownError']
-        | null
-      /** Exercises */
-      exercises: components['schemas']['patty__api_router__GetExtractionBatchResponse__Page__Exercise'][]
-      /** Pagenumber */
-      pageNumber: number
-    }
-    /** Exercise */
-    patty__api_router__GetExtractionBatchResponse__Page__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation'] | null
-      /** Exerciseclass */
-      exerciseClass: string | null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Pagenumber */
-      pageNumber: number | null
-      /** Reclassifiedby */
-      reclassifiedBy: string | null
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {

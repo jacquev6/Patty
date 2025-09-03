@@ -3,6 +3,7 @@ import datetime
 import fastapi
 import sqlalchemy as sql
 
+from .. import authentication
 from ..api_utils import ApiModel
 from ..database_utils import SessionDependable
 from ..mailing import send_mail
@@ -11,7 +12,7 @@ from ..version import PATTY_VERSION
 from .orm_models import ErrorCaughtByFrontend
 
 
-router = fastapi.APIRouter()
+router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_bearer_dependable)])
 
 
 class PostErrorsCaughtByFrontendRequest(ApiModel):
