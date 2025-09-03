@@ -13,6 +13,7 @@ export function parseExerciseFileName(fileName: string) {
 <script setup lang="ts">
 import _ from 'lodash'
 import * as zip from '@zip.js/zip.js'
+import { useI18n } from 'vue-i18n'
 
 import CreateAdaptationBatchFormInputEditor, { type InputWithFile } from './CreateAdaptationBatchFormInputEditor.vue'
 import assert from '$/assert'
@@ -23,6 +24,8 @@ defineProps<{
 }>()
 
 const inputs = defineModel<InputWithFile[]>({ required: true })
+
+const { t } = useI18n()
 
 function readFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -116,10 +119,17 @@ watch(
 
 <template>
   <p>
-    Open one or several text or zip files:
+    {{ t('openFiles') }}
     <input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" />
   </p>
   <template v-for="index in inputs.length">
     <CreateAdaptationBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />
   </template>
 </template>
+
+<i18n>
+en:
+  openFiles: "Open one or several text or zip files:"
+fr:
+  openFiles: "Ouvrir un ou plusieurs fichiers texte ou zip :"
+</i18n>

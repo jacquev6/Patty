@@ -1,5 +1,9 @@
+import { createI18n } from 'vue-i18n'
+
 import type { AdaptedExercise } from '@/frontend/ApiClient'
 import AdaptedExerciseRenderer, { type StudentAnswers } from './AdaptedExerciseRenderer.vue'
+
+const global = { plugins: [createI18n({ legacy: false, locale: 'fr' })] }
 
 describe('Adapted exercise answers', () => {
   const studentAnswersStorageKey = '1'
@@ -134,6 +138,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -166,6 +171,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
       },
+      global,
     })
 
     for (let i = 0; i < 7; i++) {
@@ -303,6 +309,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -337,6 +344,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
       },
+      global,
     })
 
     for (let i = 0; i < 7; i++) {
@@ -480,6 +488,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -512,6 +521,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
       },
+      global,
     })
 
     for (let i = 0; i < 7; i++) {
@@ -599,6 +609,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -630,6 +641,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
       },
+      global,
     })
 
     cy.get('[data-cy="swappableInput"]').eq(0).should('have.text', 'd')
@@ -724,6 +736,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -746,6 +759,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
       },
+      global,
     })
 
     cy.get('[data-cy="freeTextInput"]').eq(0).should('have.text', 'AAA AAA')
@@ -824,6 +838,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableLettersInputs,
       },
+      global,
       attrs: {
         style: `min-height: 450px;`,
       },
@@ -857,6 +872,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableLettersInputs,
       },
+      global,
     })
 
     cy.get('span:contains("a")').eq(0).should('have.css', 'background-color', colors[0])
@@ -922,6 +938,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithNestedSelectableInputs,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -946,6 +963,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithNestedSelectableInputs,
       },
+      global,
     })
 
     cy.get('span:contains("B")').eq(0).should('have.css', 'background-color', colors[0])
@@ -1011,6 +1029,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputInFormatted,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -1029,6 +1048,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputInFormatted,
       },
+      global,
     })
 
     cy.get('[contenteditable]').should('have.text', 'Test')
@@ -1069,6 +1089,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSplitWordInput,
       },
+      global,
     })
 
     getAnswers().should('deep.equal', emptyAnswers)
@@ -1092,6 +1113,7 @@ describe('Adapted exercise answers', () => {
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSplitWordInput,
       },
+      global,
     })
 
     cy.get('[data-cy="splitWordInput"]').eq(0).should('have.text', 'Alp|ha')

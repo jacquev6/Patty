@@ -9,6 +9,7 @@ export type InputWithFile = {
 
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import WhiteSpace from '$/WhiteSpace.vue'
 import InputForNumberOrNull from '$/InputForNumberOrNull.vue'
@@ -21,6 +22,8 @@ defineProps<{
 }>()
 
 const model = defineModel<InputWithFile>({ required: true })
+
+const { t } = useI18n()
 
 const pageNumberProxy = computed({
   get: () => model.value.pageNumber,
@@ -59,17 +62,18 @@ defineExpose({
 
 <template>
   <component :is="headers">
-    Input {{ index }}
+    {{ t('input') }} {{ index }}
     <template v-if="model.inputFile !== undefined">
       <span class="discreet">({{ model.inputFile }})</span>
     </template>
     <template v-if="model.text.trim() === ''">
       <WhiteSpace />
-      <span class="discreet">(empty, ignored)</span>
+      <span class="discreet">{{ t('emptyIgnored') }}</span>
     </template>
   </component>
   <p>
-    Page: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />, exercise:
+    {{ t('page') }}: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />,
+    {{ t('exercise') }}:
     <InputForNonEmptyStringOrNull data-cy="input-exercise-number" v-model="exerciseNumberProxy" />
   </p>
   <TextArea ref="textArea" data-cy="input-text" v-model="textProxy"></TextArea>
@@ -81,3 +85,16 @@ defineExpose({
   color: grey;
 }
 </style>
+
+<i18n>
+en:
+  input: Input
+  emptyIgnored: "(empty, ignored)"
+  page: Page
+  exercise: exercise
+fr:
+  input: Entrée
+  emptyIgnored: "(vide, ignoré)"
+  page: Page
+  exercise: exercice
+</i18n>

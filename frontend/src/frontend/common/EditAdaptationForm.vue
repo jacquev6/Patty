@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import jsonStringify from 'json-stringify-pretty-compact'
 import Ajv, { type ErrorObject } from 'ajv'
 import { useMagicKeys } from '@vueuse/core'
@@ -28,6 +29,7 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
+const { t } = useI18n()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 
@@ -215,16 +217,21 @@ watch(Escape, () => {
       <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
     <template #col-2>
-      <h1>Input</h1>
-      <p>Page: {{ adaptation.input.pageNumber ?? 'N/A' }}, exercise: {{ adaptation.input.exerciseNumber ?? 'N/A' }}</p>
+      <h1>{{ t('input') }}</h1>
+      <p>
+        {{ t('page') }}: {{ adaptation.input.pageNumber ?? t('na') }}, {{ t('exercise') }}:
+        {{ adaptation.input.exerciseNumber ?? t('na') }}
+      </p>
       <p>
         <template v-for="(line, index) in adaptation.input.text">
           <br v-if="index !== 0" />
           {{ line }}
         </template>
       </p>
-      <h1>Adjustments</h1>
-      <p><button @click="showRaw = true">View the raw conversation with the LLM</button></p>
+      <h1>{{ t('adjustments') }}</h1>
+      <p>
+        <button @click="showRaw = true">{{ t('viewRaw') }}</button>
+      </p>
       <BusyBox :busy>
         <template v-for="(adjustmentPrompt, adjustmentIndex) in adaptation.adjustmentPrompts">
           <div style="display: flex" class="user-prompt">
@@ -243,7 +250,7 @@ watch(Escape, () => {
           <TextArea data-cy="user-prompt" v-model="adjustmentPrompt" :disabled="isAdjustmentPromptDisabled"></TextArea>
           <p>
             <button data-cy="submit-adjustment" @click="submitAdjustment" :disabled="isSubmitAdjustmentDisabled">
-              Submit
+              {{ t('submit') }}
             </button>
           </p>
         </div>
@@ -253,50 +260,46 @@ watch(Escape, () => {
       <template v-if="adaptedExercise === null">
         <template v-if="manualAdaptedExercise === null">
           <template v-if="/*assert*/ adaptation.llmStatus.kind === 'error'">
-            <h1>Error with the LLM</h1>
+            <h1>{{ t('llmError') }}</h1>
             <p>
               <template v-if="adaptation.llmStatus.error === 'invalid-json'">
-                The LLM returned a JSON response that does not validate against the adapted exercise schema.
+                {{ t('llmInvalidJson') }}
               </template>
               <template v-else-if="adaptation.llmStatus.error === 'not-json'">
-                The LLM returned a response that is not correct JSON.
+                {{ t('llmNotJson') }}
               </template>
               <template v-else-if="adaptation.llmStatus.error === 'unknown'">
-                The LLM caused an unknown error.
+                {{ t('llmUnknownError') }}
               </template>
               <template v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</template>
-              You can:
+              {{ t('youCan') }}
             </p>
             <ul>
-              <li v-if="adaptation.llmStatus.error !== 'unknown'">ask the LLM for an adjustment</li>
-              <li v-if="adaptation.llmStatus.error === 'invalid-json'">
-                edit the JSON manually to make it conform to the schema
-              </li>
-              <li v-else-if="adaptation.llmStatus.error === 'not-json'">
-                edit the response manually to make it correct JSON that conforms to the schema
-              </li>
-              <li v-else-if="adaptation.llmStatus.error === 'unknown'">ask Vincent Jacques to investigate</li>
+              <li v-if="adaptation.llmStatus.error !== 'unknown'">{{ t('askAdjustment') }}</li>
+              <li v-if="adaptation.llmStatus.error === 'invalid-json'">{{ t('editJson') }}</li>
+              <li v-else-if="adaptation.llmStatus.error === 'not-json'">{{ t('editResponse') }}</li>
+              <li v-else-if="adaptation.llmStatus.error === 'unknown'">{{ t('askVincent') }}</li>
               <li v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</li>
             </ul>
           </template>
         </template>
         <template v-else>
-          <h1>Error in manually edited exercise</h1>
+          <h1>{{ t('manualEditError') }}</h1>
           <p>
             <template v-if="manualAdaptedExercise.syntaxError !== null">
-              The manually edited exercise is not correct JSON.
+              {{ t('manualNotJson') }}
             </template>
             <template v-else-if="manualAdaptedExercise.validationErrors.length !== 0">
-              The manually edited exercise does not validate against the adapted exercise schema.
+              {{ t('manualInvalidJson') }}
             </template>
           </p>
         </template>
         <template v-if="syntaxErrorProxy !== null">
-          <h2>Syntax error</h2>
+          <h2>{{ t('syntaxError') }}</h2>
           {{ syntaxErrorProxy.message }}
         </template>
         <template v-else-if="validationErrorsProxy.length !== 0">
-          <h2>Validation errors</h2>
+          <h2>{{ t('validationErrors') }}</h2>
           <ul>
             <li v-for="error in validationErrorsProxy">
               {{ error.instancePath }}: {{ error.message }}
@@ -306,26 +309,28 @@ watch(Escape, () => {
         </template>
       </template>
       <template v-else>
-        <h1>Adapted exercise</h1>
+        <h1>{{ t('adaptedExercise') }}</h1>
         <MiniatureScreen :fullScreen>
           <AdaptedExerciseRenderer :navigateUsingArrowKeys="fullScreen" :adaptedExercise />
-          <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">Exit full screen (Esc)</button>
+          <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
+            {{ t('exitFullScreen') }}
+          </button>
         </MiniatureScreen>
         <p>
-          <button @click="fullScreen = true">Full screen</button>
+          <button @click="fullScreen = true">{{ t('fullScreen') }}</button>
           <WhiteSpace />
           <a :href="`/api/export/adaptation/${adaptation.id}.html?token=${authenticationTokenStore.token}`">
-            Download standalone HTML
+            {{ t('downloadHtml') }}
           </a>
         </p>
       </template>
-      <h1>Manual edition</h1>
+      <h1>{{ t('manualEdition') }}</h1>
       <TextArea
         data-cy="manual-edition"
         v-model="manualAdaptedExerciseProxy"
         style="font-family: 'Courier New', Courier, monospace; font-size: 70%"
       ></TextArea>
-      <p>(If you change something here, you won't be able to ask the LLM for adjustments.)</p>
+      <p>{{ t('manualEditionWarning') }}</p>
       <p>
         <button
           data-cy="reset-manual-edition"
@@ -333,7 +338,7 @@ watch(Escape, () => {
           :disabled="manualAdaptedExercise === null"
           title="Forget all manual changes; go back to the last version from the LLM"
         >
-          Reset
+          {{ t('reset') }}
         </button>
         <WhiteSpace />
         <button
@@ -341,7 +346,7 @@ watch(Escape, () => {
           @click="reformatManualAdaptedExercise"
           :disabled="manualAdaptedExercise === null || manualAdaptedExercise.parsed === null"
         >
-          Reformat
+          {{ t('reformat') }}
         </button>
       </p>
     </template>
@@ -349,8 +354,8 @@ watch(Escape, () => {
   <div v-if="showRaw" class="overlay">
     <div>
       <div>
-        <h1>Raw conversation with the LLM</h1>
-        <button class="exitFullScreen" @click="showRaw = false">Close (Esc)</button>
+        <h1>{{ t('rawConversation') }}</h1>
+        <button class="exitFullScreen" @click="showRaw = false">{{ t('close') }}</button>
         <pre>{{ jsonStringify(adaptation.rawLlmConversations, { maxLength: 120 }) }}</pre>
       </div>
     </div>
@@ -398,3 +403,70 @@ button.exitFullScreen {
   bottom: 2rem;
 }
 </style>
+
+<i18n>
+en:
+  input: Input
+  page: Page
+  exercise: exercise
+  na: N/A
+  submit: Submit
+  adjustments: Adjustments
+  viewRaw: View the raw conversation with the LLM
+  llmError: Error with the LLM
+  llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
+  llmNotJson: The LLM returned a response that is not correct JSON.
+  llmUnknownError: The LLM caused an unknown error.
+  youCan: "You can:"
+  askAdjustment: ask the LLM for an adjustment
+  editJson: edit the JSON manually to make it conform to the schema
+  editResponse: edit the response manually to make it correct JSON that conforms to the schema
+  askVincent: ask Vincent Jacques to investigate
+  manualEditError: Error in manually edited exercise
+  manualNotJson: The manually edited exercise is not correct JSON.
+  manualInvalidJson: The manually edited exercise does not validate against the adapted exercise schema.
+  syntaxError: Syntax error
+  validationErrors: Validation errors
+  adaptedExercise: Adapted exercise
+  exitFullScreen: Exit full screen (Esc)
+  fullScreen: Full screen
+  downloadHtml: Download standalone HTML
+  manualEdition: Manual edition
+  manualEditionWarning: (If you change something here, you won't be able to ask the LLM for adjustments.)
+  reset: Reset
+  reformat: Reformat
+  rawConversation: Raw conversation with the LLM
+  close: Close (Esc)
+fr:
+  input: Entrée
+  page: Page
+  exercise: exercice
+  na: N/D
+  submit: Soumettre
+  adjustments: Ajustements
+  viewRaw: Voir la conversation brute avec le LLM
+  llmError: Erreur avec le LLM
+  llmInvalidJson: Le LLM a retourné une réponse JSON qui ne valide pas contre le schéma d'exercice adapté.
+  llmNotJson: Le LLM a retourné une réponse qui n'est pas un JSON correct.
+  llmUnknownError: Le LLM a causé une erreur inconnue.
+  youCan: "Vous pouvez :"
+  askAdjustment: demander un ajustement au LLM
+  editJson: éditer le JSON manuellement pour le rendre conforme au schéma
+  editResponse: éditer la réponse manuellement pour qu'elle soit un JSON correct conforme au schéma
+  askVincent: demander à Vincent Jacques d'enquêter
+  manualEditError: Erreur dans l'exercice édité manuellement
+  manualNotJson: L'exercice édité manuellement n'est pas un JSON correct.
+  manualInvalidJson: L'exercice édité manuellement ne valide pas contre le schéma d'exercice adapté.
+  syntaxError: Erreur de syntaxe
+  validationErrors: Erreurs de validation
+  adaptedExercise: Exercice adapté
+  exitFullScreen: Quitter le plein écran (Échap)
+  fullScreen: Plein écran
+  downloadHtml: Télécharger le HTML autonome
+  manualEdition: Édition manuelle
+  manualEditionWarning: (Si vous modifiez quelque chose ici, vous ne pourrez plus demander d'ajustements au LLM.)
+  reset: Réinitialiser
+  reformat: Reformater
+  rawConversation: Conversation brute avec le LLM
+  close: Fermer (Échap)
+</i18n>

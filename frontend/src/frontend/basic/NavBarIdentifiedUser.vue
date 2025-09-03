@@ -8,14 +8,12 @@ import { useIdentifiedUserStore } from './IdentifiedUserStore'
 const identifiedUser = useIdentifiedUserStore()
 const { t } = useI18n()
 
-const userIcon = '👤'
-
 const showEditor = ref(identifiedUser.identifier === '')
 </script>
 
 <template>
   <span data-cy="edit-identified-user" @click="showEditor = true" class="edit">
-    {{ userIcon }} {{ identifiedUser.identifier }}
+    👤 {{ identifiedUser.identifier }}
   </span>
   <Teleport to="body" v-if="showEditor">
     <div class="editor">

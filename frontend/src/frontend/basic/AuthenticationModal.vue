@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthenticationClient } from '../ApiClient'
 import { useAuthenticationTokenStore } from './AuthenticationTokenStore'
 import WhiteSpace from '$/WhiteSpace.vue'
-import LocaleSelect from './LocaleSelect.vue'
+import LocaleSelect from './NavBarLocaleSelect.vue'
 
 const client = useAuthenticationClient()
 const tokenStore = useAuthenticationTokenStore()

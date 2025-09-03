@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import deepCopy from 'deep-copy'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { type BaseAdaptationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
 import BusyBox from '$/BusyBox.vue'
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 
 const client = useAuthenticatedClient()
 
@@ -69,10 +71,21 @@ const availableStrategySettings = computed(() => props.baseAdaptationBatch.avail
         <AdaptationStrategyEditor :availableStrategySettings :disabled="false" v-model="strategy" />
       </template>
       <template #col-2>
-        <h1>Inputs</h1>
-        <p><button @click="submit" :disabled>Submit</button></p>
+        <h1>{{ t('inputs') }}</h1>
+        <p>
+          <button @click="submit" :disabled>{{ t('submit') }}</button>
+        </p>
         <CreateAdaptationBatchFormInputsEditor headers="h2" v-model="inputs" />
       </template>
     </ResizableColumns>
   </BusyBox>
 </template>
+
+<i18n>
+en:
+  inputs: Inputs
+  submit: Submit
+fr:
+  inputs: Entrées
+  submit: Soumettre
+</i18n>

@@ -511,6 +511,7 @@ function makeRenderableExercise(exercise: AdaptedExerciseV2, studentAnswers: Stu
 import { computed, nextTick, provide, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import AnySequenceComponent from './dispatch/AnySequenceComponent.vue'
 import AloneFreeTextInput from './dispatch/AloneFreeTextInput.vue'
@@ -532,6 +533,7 @@ provide('adaptedExerciseContainerDiv', useTemplateRef('container'))
 provide('adaptedExerciseStatementDiv', useTemplateRef('statement'))
 
 const route = useRoute()
+const { t } = useI18n()
 
 const studentAnswers =
   props.studentAnswersStorageKey === null
@@ -646,9 +648,15 @@ const spacingVariables = computed(() =>
         </div>
       </template>
       <template v-else-if="page.kind === 'end'">
-        <p class="reference"><button :disabled="!closable" @click="close">Quitter l'exercice</button></p>
-        <p class="reference"><button @click="pageIndex = 0">Revenir au début de l'exercice</button></p>
-        <p class="reference"><button @click="reset">Effacer mes réponses</button></p>
+        <p class="reference">
+          <button :disabled="!closable" @click="close">{{ t('exit') }}</button>
+        </p>
+        <p class="reference">
+          <button @click="pageIndex = 0">{{ t('back') }}</button>
+        </p>
+        <p class="reference">
+          <button @click="reset">{{ t('reset') }}</button>
+        </p>
       </template>
       <p v-else>BUG: {{ ((page: never) => page)(page) }}</p>
       <p v-if="pageIndex < renderableExercise.pages.length - 1" class="arrow">
@@ -712,3 +720,10 @@ p.arrow img {
   cursor: pointer;
 }
 </style>
+
+<i18n>
+fr:
+  exit: Quitter l'exercice
+  back: Revenir au début de l'exercice
+  reset: Effacer mes réponses
+</i18n>

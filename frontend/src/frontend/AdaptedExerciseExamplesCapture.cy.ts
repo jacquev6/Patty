@@ -1,4 +1,5 @@
 import { defineComponent, h } from 'vue'
+import { createI18n } from 'vue-i18n'
 
 import { examples } from './AdaptedExerciseExamplesView.vue'
 import { ensureV2 } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
@@ -44,6 +45,8 @@ const AdaptedExerciseExamplesCaptureComponent = defineComponent({
 })
 
 describe('Adapted exercises examples', () => {
+  const i18n = createI18n({ legacy: false, locale: 'fr' })
+
   if (Cypress.browser.name === 'electron') {
     for (const [exampleIndex, example] of examples.entries()) {
       for (const [width, height] of [
@@ -59,7 +62,10 @@ describe('Adapted exercises examples', () => {
             `renders "${example.title}" in ${width}x${height}` + (demoName !== 'not-a-demo' ? ` - ${demoName}` : ''),
             () => {
               cy.viewport(width, height)
-              cy.mount(AdaptedExerciseExamplesCaptureComponent, { props: { adaptedExercise: example.exercise } })
+              cy.mount(AdaptedExerciseExamplesCaptureComponent, {
+                props: { adaptedExercise: example.exercise },
+                global: { plugins: [i18n] },
+              })
 
               demoFn()
 

@@ -1,3 +1,5 @@
+import { createI18n } from 'vue-i18n'
+
 import type { AdaptedExercise } from '@/frontend/ApiClient'
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
 
@@ -206,6 +208,7 @@ describe('An exercise of type "ClicEcrire"', () => {
         navigateUsingArrowKeys: true,
         adaptedExercise,
       },
+      global: { plugins: [createI18n({ legacy: false, locale: 'fr' })] },
     })
   })
 

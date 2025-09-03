@@ -10,8 +10,10 @@ import CreateClassificationBatchFormInputsEditor from './CreateClassificationBat
 import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
+import WhiteSpace from '$/WhiteSpace.vue'
 
 const { d } = useI18n({ useScope: 'global' })
+const { t } = useI18n()
 const apiConstantsStore = useApiConstantsStore()
 const router = useRouter()
 
@@ -55,39 +57,71 @@ async function submit() {
 </script>
 
 <template>
-  <h1>Settings</h1>
+  <h1>{{ t('settings') }}</h1>
   <p>
-    Classification model: <code>{{ classificationCamembert20250520.fileName }}</code
-    >, provided by {{ classificationCamembert20250520.providedBy }} by e-mail on
-    {{ d(classificationCamembert20250520.providedOn, 'long-date') }}
+    <I18nT keypath="classificationModel">
+      <code>{{ classificationCamembert20250520.fileName }}</code>
+      <span>{{ classificationCamembert20250520.providedBy }}</span>
+      <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
+    </I18nT>
   </p>
   <p>
-    Class names produced:
+    {{ t('classNamesProduced') }}
     <template v-for="(className, index) in classificationCamembert20250520.classesProduced">
       <template v-if="index !== 0">, </template>
       <code>{{ className }}</code>
     </template>
   </p>
   <p>
-    Run adaptations after classification:
+    {{ t('runAdaptation') }}
     <select data-cy="run-adaptation" v-model="runAdaptationAsString">
-      <option>yes</option>
-      <option>no</option>
+      <option>{{ t('yes') }}</option>
+      <option>{{ t('no') }}</option>
     </select>
     <template v-if="runAdaptation">
-      using
-      <LlmModelSelector
-        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
-        :disabled="false"
-        v-model="llmModel"
-      >
-        <template #provider>provider</template>
-        <template #model> and model</template>
-      </LlmModelSelector>
-      with the latest settings for each known exercise class.</template
-    >
+      <WhiteSpace />
+      <I18nT keypath="runAdaptationYesUsing">
+        <LlmModelSelector
+          :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+          :disabled="false"
+          v-model="llmModel"
+        >
+          <template #provider>{{ t('runAdaptationUsingProvider') }}</template>
+          <template #model><WhiteSpace />{{ t('runAdaptationUsingModel') }}</template>
+        </LlmModelSelector>
+      </I18nT>
+    </template>
   </p>
-  <h1>Inputs</h1>
-  <p><button @click="submit" :disabled>Submit</button></p>
+  <h1>{{ t('inputs') }}</h1>
+  <p>
+    <button @click="submit" :disabled>{{ t('submit') }}</button>
+  </p>
   <CreateClassificationBatchFormInputsEditor headers="h2" v-model="inputs" />
 </template>
+
+<i18n>
+en:
+  settings: Settings
+  classificationModel: "Classification model: {0}, provided by {1} by e-mail on {2}"
+  classNamesProduced: "Class names produced:"
+  runAdaptation: "Run adaptations after classification:"
+  runAdaptationYesUsing: "using {0} with the latest settings for each known exercise class"
+  runAdaptationUsingProvider: provider
+  runAdaptationUsingModel: and model
+  yes: yes
+  no: no
+  submit: Submit
+  inputs: Inputs
+fr:
+  settings: Paramètres
+  classificationModel: "Modèle de classification : {0}, fourni par {1} par e-mail le {2}"
+  classNamesProduced: "Noms de classe produits :"
+  runAdaptation: "Exécuter l'adaptation après la classification :"
+  runAdaptationYesUsing: "en utilisant {0} avec les derniers paramètres pour chaque classe d'exercice connue"
+  runAdaptationUsingProvider: fournisseur
+  runAdaptationUsingModel: et modèle
+  yes: oui
+  no: non
+  submit: Soumettre
+  inputs: Entrées
+</i18n>

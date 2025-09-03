@@ -1,3 +1,5 @@
+import { createI18n } from 'vue-i18n'
+
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
 import TriColorLines from './TriColorLines.vue'
 import assert from '$/assert'
@@ -12,6 +14,8 @@ function screenshot() {
     cy.compareSnapshot(name)
   }
 }
+
+const global = { plugins: [createI18n({ legacy: false, locale: 'fr' })] }
 
 describe('FormattedComponent', () => {
   it('renders plain text and whitespace', () => {
@@ -46,6 +50,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('p').should('have.text', 'Some casual text.')
     screenshot()
@@ -82,6 +87,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -117,6 +123,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -152,6 +159,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -187,6 +195,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -222,6 +231,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -272,6 +282,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -303,6 +314,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -334,6 +346,7 @@ describe('FormattedComponent', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -376,6 +389,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -424,6 +438,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('[data-cy="selectableInput"]').as('input')
     cy.get('@input').click()
@@ -458,6 +473,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('@input').click()
     screenshot()
@@ -503,6 +519,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('@input').click({ multiple: true })
     screenshot()
@@ -548,6 +565,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('@input').click({ multiple: true })
     screenshot()
@@ -581,6 +599,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('@input').click()
     screenshot()
@@ -614,6 +633,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('@input').click()
     screenshot()
@@ -662,6 +682,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('[data-cy="selectableInput"]').as('input')
     cy.get('@input').click('left', { multiple: true })
@@ -719,6 +740,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('[data-cy="selectableInput"]').as('input')
     cy.get('@input').click('left', { multiple: true })
@@ -776,6 +798,7 @@ describe('SelectableInput', () => {
           reference: null,
         },
       },
+      global,
     })
     cy.get('[data-cy="selectableInput"]').as('input')
     cy.get('@input').click('left', { multiple: true })
@@ -799,6 +822,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -826,6 +850,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -889,6 +914,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     // In Cypress, we have to trigger the two events
@@ -962,6 +988,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -999,6 +1026,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="freeTextInput"]').as('input')
@@ -1126,6 +1154,7 @@ describe('FreeTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1188,6 +1217,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1243,6 +1273,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -1285,6 +1316,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -1339,6 +1371,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="multipleChoicesInput"]').as('input')
@@ -1393,6 +1426,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1431,6 +1465,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1501,6 +1536,7 @@ describe('MultipleChoicesInput', () => {
           reference: null,
         },
       },
+      global,
     })
     screenshot()
   })
@@ -1579,6 +1615,7 @@ describe('SwappableInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1623,6 +1660,7 @@ describe('SwappableInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="swappableInput"]').eq(0).as('a')
@@ -1702,6 +1740,7 @@ describe('SwappableInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
@@ -1771,6 +1810,7 @@ describe('EditableTextInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1806,6 +1846,7 @@ describe('SplitWordInput', () => {
           reference: null,
         },
       },
+      global,
     })
 
     // The '|' is better centered in an actual browser than on those screenshots. I can't figure out why...
@@ -1839,6 +1880,7 @@ describe('AdaptedExerciseRenderer', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1875,6 +1917,7 @@ describe('AdaptedExerciseRenderer', () => {
           reference: null,
         },
       },
+      global,
     })
 
     screenshot()
@@ -1907,6 +1950,7 @@ describe('AdaptedExerciseRenderer', () => {
           reference: { contents: [{ kind: 'text', text: 'Reference' }] },
         },
       },
+      global,
     })
 
     cy.get('div.control').last().click()

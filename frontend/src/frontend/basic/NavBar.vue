@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 
 import { useBreadcrumbsStore, type Breadcrumb } from '@/frontend/basic/BreadcrumbsStore'
-import LocaleSelect from './LocaleSelect.vue'
+import LocaleSelect from './NavBarLocaleSelect.vue'
 import IdentifiedUser from './NavBarIdentifiedUser.vue'
 
 const { t: tl } = useI18n()

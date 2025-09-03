@@ -10,11 +10,12 @@ export type InputWithFile = {
 
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
-
+import { useI18n } from 'vue-i18n'
 import WhiteSpace from '$/WhiteSpace.vue'
 import InputForNumberOrNull from '$/InputForNumberOrNull.vue'
 import InputForNonEmptyStringOrNull from '$/InputForNonEmptyStringOrNull.vue'
 import TextArea from '$/TextArea.vue'
+const { t } = useI18n()
 
 defineProps<{
   headers: string
@@ -68,22 +69,23 @@ defineExpose({
 
 <template>
   <component :is="headers">
-    Input {{ index }}
+    {{ t('input') }} {{ index }}
     <template v-if="model.inputFile !== undefined">
       <span class="discreet">({{ model.inputFile }})</span>
     </template>
     <template v-if="model.instructionHintExampleText.trim() === '' && model.statementText.trim() === ''">
       <WhiteSpace />
-      <span class="discreet">(empty, ignored)</span>
+      <span class="discreet">{{ t('emptyIgnored') }}</span>
     </template>
   </component>
   <p>
-    Page: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />, exercise:
+    {{ t('page') }}: <InputForNumberOrNull data-cy="input-page-number" v-model="pageNumberProxy" />,
+    {{ t('exercise') }}:
     <InputForNonEmptyStringOrNull data-cy="input-exercise-number" v-model="exerciseNumberProxy" />
   </p>
-  <p>Instruction, hint and example:</p>
+  <p>{{ t('instructionHintExample') }}</p>
   <TextArea ref="textArea" data-cy="input-instruction-text" v-model="instructionHintExampleTextProxy"></TextArea>
-  <p>Statement:</p>
+  <p>{{ t('statement') }}</p>
   <TextArea data-cy="input-statement-text" v-model="statementTextProxy"></TextArea>
 </template>
 
@@ -93,3 +95,20 @@ defineExpose({
   color: grey;
 }
 </style>
+
+<i18n>
+en:
+  input: Input
+  emptyIgnored: "(empty, ignored)"
+  page: Page
+  exercise: exercise
+  instructionHintExample: "Instruction, hint and example:"
+  statement: "Statement:"
+fr:
+  input: Entrée
+  emptyIgnored: "(vide, ignoré)"
+  page: Page
+  exercise: exercice
+  instructionHintExample: "Consigne, indice et exemple :"
+  statement: "Énoncé :"
+</i18n>

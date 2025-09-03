@@ -15,7 +15,7 @@ const firstPdfPageNumber = defineModel<number>('firstInPdf', { required: true })
 const lastPdfPageNumber = defineModel<number>('lastInPdf', { required: true })
 const firstTextbookPageNumber = defineModel<number>('firstInTextbook', { required: true })
 
-useI18n()
+const { t } = useI18n()
 
 const firstPdfPageNumberProxy = computed({
   get: () => firstPdfPageNumber.value,
@@ -64,8 +64,17 @@ const lastPage = computedAsync(async () => {
     <template #from>
       <span class="pagePreview">
         <p>
-          <PdfNavigationControls v-model:page="firstPdfPageNumberProxy" :pagesCount="document.numPages" /> in pdf
-          <i>i.e.</i> <PdfNavigationControls v-model:page="firstTextbookPageNumber" :pagesCount="null" /> in textbook
+          <I18nT keypath="inPdfIeInTextbook">
+            <template #pdfPage>
+              <PdfNavigationControls v-model:page="firstPdfPageNumberProxy" :pagesCount="document.numPages" />
+            </template>
+            <template #ie>
+              <i>{{ t('ie') }}</i>
+            </template>
+            <template #textbookPage>
+              <PdfNavigationControls v-model:page="firstTextbookPageNumber" :pagesCount="null" />
+            </template>
+          </I18nT>
         </p>
         <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
       </span>
@@ -73,8 +82,15 @@ const lastPage = computedAsync(async () => {
     <template #to>
       <span class="pagePreview">
         <p>
-          <PdfNavigationControls v-model:page="lastPdfPageNumber" :pagesCount="document.numPages" /> in pdf <i>i.e.</i>
-          {{ lastTextbookPageNumber }} in textbook
+          <I18nT keypath="inPdfIeInTextbook">
+            <template #pdfPage>
+              <PdfNavigationControls v-model:page="lastPdfPageNumber" :pagesCount="document.numPages" />
+            </template>
+            <template #ie>
+              <i>{{ t('ie') }}</i>
+            </template>
+            <template #textbookPage>{{ lastTextbookPageNumber }}</template>
+          </I18nT>
         </p>
         <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
       </span>
@@ -85,8 +101,12 @@ const lastPage = computedAsync(async () => {
 <i18n>
 en:
   pages: "Pages: from {from} to {to}"
+  inPdfIeInTextbook: "{pdfPage} in pdf, {ie} {textbookPage} in textbook"
+  ie: "i.e."
 fr:
   pages: "Pages : de {from} à {to}"
+  inPdfIeInTextbook: "{pdfPage} dans le pdf, {ie} {textbookPage} dans le manuel"
+  ie: "i.e."
 </i18n>
 
 <style scoped>

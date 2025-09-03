@@ -13,16 +13,20 @@ export function parseExerciseFileName(fileName: string) {
 <script setup lang="ts">
 import { useTemplateRef, watch } from 'vue'
 import Papa from 'papaparse'
+import { useI18n } from 'vue-i18n'
 
 import { type InputWithFile } from './CreateClassificationBatchFormInputEditor.vue'
 import CreateClassificationBatchFormInputEditor from './CreateClassificationBatchFormInputEditor.vue'
 import assert from '$/assert'
+import WhiteSpace from '$/WhiteSpace.vue'
 
 defineProps<{
   headers: string
 }>()
 
 const inputs = defineModel<InputWithFile[]>({ required: true })
+
+const { t } = useI18n()
 
 async function openFile(event: Event) {
   const files = (event.target as HTMLInputElement).files
@@ -110,20 +114,65 @@ watch(
   },
   { deep: true, immediate: true },
 )
+
+const tsvFileExtension = '.tsv'
+const pageFieldName = 'page'
+const numFieldName = 'num'
+const idFieldName = 'id'
+const idFieldFormat = 'p{page}_ex{num}'
+const fields = [pageFieldName, numFieldName, 'instruction_hint_example', 'statement']
 </script>
 
 <template>
   <p>
-    Open a <code>.tsv</code> file:
+    <I18nT keypath="openFile">
+      <template #fileType>
+        <code>{{ tsvFileExtension }}</code>
+      </template>
+    </I18nT>
+    <WhiteSpace />
     <input data-cy="input-files" type="file" @change="openFile" accept=".tsv" />
   </p>
   <p>
-    Format: the file must be a tab-separated file, with fields <code>page</code>, <code>num</code>,
-    <code>instruction_hint_example</code>, and <code>statement</code>. If fields <code>page</code> and
-    <code>num</code> are not both present, the <code>id</code> field must be present and must be in the format
-    <code>p{page}_ex{num}</code>.
+    <I18nT keypath="format">
+      <template #fields>
+        <template v-for="(field, index) in fields">
+          <template v-if="index === fields.length - 1">, {{ t('and') }}<WhiteSpace /></template>
+          <template v-else-if="index !== 0">, </template>
+          <code>{{ field }}</code>
+        </template>
+      </template>
+    </I18nT>
+    <WhiteSpace />
+    <I18nT keypath="pageNumOrId">
+      <template #pageName>
+        <code>{{ pageFieldName }}</code>
+      </template>
+      <template #numName>
+        <code>{{ numFieldName }}</code>
+      </template>
+      <template #idName>
+        <code>{{ idFieldName }}</code>
+      </template>
+      <template #idFormat>
+        <code>{{ idFieldFormat }}</code>
+      </template>
+    </I18nT>
   </p>
   <template v-for="index in inputs.length">
     <CreateClassificationBatchFormInputEditor ref="editors" :index :headers v-model="inputs[index - 1]" />
   </template>
 </template>
+
+<i18n>
+en:
+  openFile: "Open a {fileType} file:"
+  format: "Format: the file must be a tab-separated file, with fields {fields}."
+  and: and
+  pageNumOrId: "If fields {pageName} and {numName} are not both present, the {idName} field must be present and must have format {idFormat}."
+fr:
+  openFile: "Ouvrir un fichier {fileType} :"
+  format: "Format : le fichier doit être un fichier tabulé, avec les champs {fields}."
+  and: et
+  pageNumOrId: "Si les champs {pageName} et {numName} ne sont pas tous deux présents, le champ {idName} doit être présent et doit avoir le format {idFormat}."
+</i18n>
