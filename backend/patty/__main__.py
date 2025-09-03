@@ -48,7 +48,7 @@ def openapi() -> None:
     app = fastapi.FastAPI()
     app.include_router(asgi.openapi_router)
 
-    print(json.dumps(app.openapi(), indent=2))
+    print(json.dumps(app.openapi(), indent=2, sort_keys=True))
 
 
 @main.command()
