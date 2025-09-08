@@ -68,7 +68,7 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
         frozenset({"adaptation", "sandbox"}): "#FF8888",
         frozenset({"classification"}): "#008800",
         frozenset({"classification", "sandbox"}): "#60AD60",
-        frozenset({"errors"}): None,
+        frozenset({"errors"}): "#000000",
         frozenset({"exercises"}): "#000000",
         frozenset({"external"}): "#FF55FF",
         frozenset({"extraction"}): "#0000FF",
