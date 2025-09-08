@@ -36,7 +36,7 @@ describe('The creation form for textbooks', () => {
   })
 })
 
-describe('The edition form for textbooks', () => {
+describe('The edition form for textbooks - empty', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
@@ -164,5 +164,25 @@ describe('The edition form for textbooks', () => {
     cy.get('h3').eq(0).should('have.text', 'Exercise 1')
 
     screenshots('textbook-with-external-exercises')
+  })
+})
+
+describe('The edition form for textbooks - with a PDF range', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    ignoreResizeObserverLoopError()
+    visit('/textbook-1')
+  })
+
+  it('fixes exercise class', () => {
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1')
+    cy.get('span.edit').eq(1).click()
+    cy.get('[data-cy="exercise-class"]').should('have.value', 'QCM')
+    cy.get('[data-cy="exercise-class"]').select('CochePhrase')
+    cy.get('[data-cy="exercise-class"]').should('not.exist')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy').should('not.exist')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4')
   })
 })

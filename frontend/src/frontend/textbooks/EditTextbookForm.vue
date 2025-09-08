@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'textbook-updated', textbook: Textbook): void
+  (e: 'textbook-updated', textbook: Textbook | null): void
 }>()
 
 const { t } = useI18n()
@@ -29,7 +29,7 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-function textbookUpdated(textbook: Textbook) {
+function textbookUpdated(textbook: Textbook | null) {
   emit('textbook-updated', textbook)
 }
 
@@ -129,6 +129,7 @@ async function removeRange(id: string, removed: boolean) {
               v-else
               :exercise
               @exerciseRemoved="() => removeExercise(exercise.id, true)"
+              @batchUpdated="() => textbookUpdated(null)"
             />
           </template>
         </template>

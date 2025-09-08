@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'exercise-removed'): void
+  (e: 'batch-updated'): void
 }>()
 
 const adaptation = computed(() => {
@@ -32,5 +33,6 @@ const adaptation = computed(() => {
     :showPageAndExercise="false"
     :exercise="makePreviewAbleExercise_forTextbook(exercise, adaptation)"
     @exerciseRemoved="emit('exercise-removed')"
+    @batchUpdated="emit('batch-updated')"
   />
 </template>

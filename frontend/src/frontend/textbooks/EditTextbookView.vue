@@ -46,9 +46,13 @@ onMounted(refresh)
 
 onUnmounted(cancelRefresh)
 
-function textbookUpdated(newTextbook: Textbook) {
-  textbook.value = newTextbook
-  refreshIfNeeded()
+function textbookUpdated(newTextbook: Textbook | null) {
+  if (newTextbook === null) {
+    refresh()
+  } else {
+    textbook.value = newTextbook
+    refreshIfNeeded()
+  }
 }
 
 function refreshIfNeeded() {

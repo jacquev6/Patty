@@ -326,6 +326,7 @@ h5 {
   margin: 0;
 }
 </style>
+
 <i18n>
 en:
   strategy: Strategy
