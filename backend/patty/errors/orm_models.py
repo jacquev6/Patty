@@ -49,5 +49,7 @@ class ErrorCaughtByFrontend(OrmBase):
     message: orm.Mapped[str]
     code_location: orm.Mapped[str | None]
 
+    github_issue_number: orm.Mapped[int | None]
+
 
 annotate_new_tables("errors")

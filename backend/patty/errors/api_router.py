@@ -67,6 +67,7 @@ class GetErrorsCaughtByFrontendResponse(ApiModel):
         caught_by: str
         message: str
         code_location: str | None
+        github_issue_number: int | None
 
     errors: list[Error]
 
@@ -86,6 +87,7 @@ def retrieve_errors(session: SessionDependable) -> GetErrorsCaughtByFrontendResp
                 caught_by=error.caught_by,
                 message=error.message,
                 code_location=error.code_location,
+                github_issue_number=error.github_issue_number,
             )
             for error in session.execute(sql.select(ErrorCaughtByFrontend).order_by(-ErrorCaughtByFrontend.id))
             .scalars()

@@ -950,6 +950,8 @@ export interface components {
       createdAt: string
       /** Createdby */
       createdBy: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
       /** Id */
       id: string
       /** Message */

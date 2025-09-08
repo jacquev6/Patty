@@ -1072,6 +1072,17 @@
             ],
             "title": "Createdby"
           },
+          "githubIssueNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Githubissuenumber"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -1107,7 +1118,8 @@
           "url",
           "caughtBy",
           "message",
-          "codeLocation"
+          "codeLocation",
+          "githubIssueNumber"
         ],
         "title": "Error",
         "type": "object"
