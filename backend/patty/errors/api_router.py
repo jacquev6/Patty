@@ -23,6 +23,7 @@ class PostErrorsCaughtByFrontendRequest(ApiModel):
     caught_by: str
     message: str
     code_location: str | None
+    github_issue_number: int | None
 
 
 class PostErrorsCaughtByFrontendResponse(ApiModel):
@@ -33,7 +34,7 @@ class PostErrorsCaughtByFrontendResponse(ApiModel):
 def create_error(
     req: PostErrorsCaughtByFrontendRequest, session: SessionDependable
 ) -> PostErrorsCaughtByFrontendResponse:
-    if PATTY_VERSION != "dev":
+    if PATTY_VERSION != "dev" and req.github_issue_number is None:
         send_mail(
             to=MAIL_SENDER,
             subject=f"Patty version {PATTY_VERSION}: error caught by frontend",
@@ -50,6 +51,7 @@ def create_error(
             caught_by=req.caught_by,
             message=req.message,
             code_location=req.code_location,
+            github_issue_number=req.github_issue_number,
         )
     )
     return PostErrorsCaughtByFrontendResponse()

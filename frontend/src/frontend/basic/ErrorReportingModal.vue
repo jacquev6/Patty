@@ -37,6 +37,12 @@ type GlobalError = {
 }
 
 const error = ref<GlobalError | null>(null)
+function isNetworkError(e: GlobalError): boolean {
+  return (
+    e.message.startsWith('TypeError: Failed to fetch') ||
+    e.message.startsWith('TypeError: NetworkError when attempting to fetch resource.')
+  )
+}
 
 async function reportError(e: GlobalError) {
   error.value = e
@@ -47,6 +53,7 @@ async function reportError(e: GlobalError) {
       windowSize: `${windowWidth.value}x${windowHeight.value}`,
       url: window.location.href,
       ...e,
+      githubIssueNumber: isNetworkError(e) ? 99 : null,
     },
   })
 }
@@ -84,10 +91,16 @@ app.config.errorHandler = function (err, _vm, info) {
 
 <template>
   <div v-if="error !== null" class="backdrop">
-    <div>
-      <h1>{{ t('title') }}</h1>
-      <p>{{ t('message1') }}</p>
-      <p>{{ t('message2') }}</p>
+    <div v-if="isNetworkError(error)">
+      <h1>{{ t('network.title') }}</h1>
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-v-html -->
+      <p v-html="t('network.message1')"></p>
+      <p>{{ t('network.message2') }}</p>
+    </div>
+    <div v-else>
+      <h1>{{ t('bug.title') }}</h1>
+      <p>{{ t('bug.message1') }}</p>
+      <p>{{ t('bug.message2') }}</p>
       <pre>{{ error.message }}</pre>
       <pre>{{ error.codeLocation }}</pre>
     </div>
@@ -119,11 +132,21 @@ app.config.errorHandler = function (err, _vm, info) {
 
 <i18n>
 en:
-  title: There was a bug
-  message1: It's not your fault. I (Vincent Jacques) have been notified and will look into it.
-  message2: Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.
+  bug:
+    title: There was a bug
+    message1: It's not your fault. I (Vincent Jacques) have been notified and will look into it.
+    message2: Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.
+  network:
+    title: There was a network error
+    message1: "Are you on a weak internet connection? If this happens often, you may want to increase the priority of <a href=\"https://github.com/jacquev6/Patty/issues/99\">issue #99</a>."
+    message2: Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.
 fr:
-  title: Il y a eu un bug
-  message1: Ce n'est pas de votre faute. J'ai (Vincent Jacques) été prévenu et je vais regarder ça.
-  message2: Votre travail non encore soumis est perdu, je suis vraiment désolé. Vous pouvez seulement rafraîchir la page et recommencer.
+  bug:
+    title: Il y a eu un bug
+    message1: Ce n'est pas de votre faute. J'ai (Vincent Jacques) été prévenu et je vais regarder ça.
+    message2: Votre travail non encore soumis est perdu, je suis vraiment désolé. Vous pouvez seulement rafraîchir la page et recommencer.
+  network:
+    title: Il y a eu une erreur réseau
+    message1: "Êtes-vous sur une connexion internet fragile ? Si cela arrive souvent, vous pouvez augmenter la priorité de <a href=\"https://github.com/jacquev6/Patty/issues/99\">l'issue #99</a>."
+    message2: Votre travail non encore soumis est perdu, je suis vraiment désolé. Vous pouvez seulement rafraîchir la page et recommencer.
 </i18n>

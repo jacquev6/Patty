@@ -1658,6 +1658,8 @@ export interface components {
       codeLocation: string | null
       /** Creator */
       creator: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
       /** Message */
       message: string
       /** Url */

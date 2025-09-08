@@ -23,6 +23,7 @@ class ErrorCaughtByFrontend(OrmBase):
         caught_by: str,
         message: str,
         code_location: str | None,
+        github_issue_number: int | None,
     ) -> None:
         super().__init__()
         self.created_at = created_at
@@ -34,6 +35,7 @@ class ErrorCaughtByFrontend(OrmBase):
         self.caught_by = caught_by
         self.message = message
         self.code_location = code_location
+        self.github_issue_number = github_issue_number
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 

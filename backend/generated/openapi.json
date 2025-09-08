@@ -2942,6 +2942,17 @@
             ],
             "title": "Creator"
           },
+          "githubIssueNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Githubissuenumber"
+          },
           "message": {
             "title": "Message",
             "type": "string"
@@ -2966,7 +2977,8 @@
           "url",
           "caughtBy",
           "message",
-          "codeLocation"
+          "codeLocation",
+          "githubIssueNumber"
         ],
         "title": "PostErrorsCaughtByFrontendRequest",
         "type": "object"
