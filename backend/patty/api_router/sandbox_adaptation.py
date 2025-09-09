@@ -220,6 +220,7 @@ async def post_adaptation_batch(
 
 class GetAdaptationBatchResponse(ApiModel):
     id: str
+    needs_refresh: bool
     created_by: str
     strategy: ApiStrategy
     adaptations: list[ApiAdaptation]
@@ -228,14 +229,17 @@ class GetAdaptationBatchResponse(ApiModel):
 @router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, sandbox.adaptation.SandboxAdaptationBatch, id)
+    adaptations = [
+        make_api_adaptation(adaptation_creation.exercise_adaptation)
+        for adaptation_creation in adaptation_batch.adaptation_creations
+    ]
+    needs_refresh = any(a.status.kind == "inProgress" for a in adaptations)
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
+        needs_refresh=needs_refresh,
         created_by=adaptation_batch.created_by,
         strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
-        adaptations=[
-            make_api_adaptation(adaptation_creation.exercise_adaptation)
-            for adaptation_creation in adaptation_batch.adaptation_creations
-        ],
+        adaptations=adaptations,
     )
 
 

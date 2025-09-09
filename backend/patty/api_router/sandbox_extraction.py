@@ -127,6 +127,7 @@ def create_extraction_batch(
 
 class GetExtractionBatchResponse(ApiModel):
     id: str
+    needs_refresh: bool
     created_by: str
     strategy: ApiExtractionStrategy
     run_classification: bool
@@ -154,66 +155,77 @@ class GetExtractionBatchResponse(ApiModel):
 @router.get("/extraction-batches/{id}")
 async def get_extraction_batch(id: str, session: database_utils.SessionDependable) -> GetExtractionBatchResponse:
     extraction_batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
+    needs_refresh = False
     pages: list[GetExtractionBatchResponse.Page] = []
 
     for page_extraction_creation in extraction_batch.page_extraction_creations:
         page_extraction = page_extraction_creation.page_extraction
+        if page_extraction.assistant_response is None:
+            needs_refresh = True
 
         exercises_ = list(page_extraction.fetch_ordered_exercises())
+        api_exercises: list[GetExtractionBatchResponse.Page.Exercise] = []
 
-        latest_classifications = [
-            exercise.classifications[-1] if exercise.classifications else None for exercise in exercises_
-        ]
+        for exercise in exercises_:
+            assert isinstance(exercise, adaptation.AdaptableExercise)
+            latest_classification = exercise.classifications[-1] if exercise.classifications else None
 
-        latest_adaptations = [
-            (
+            latest_adaptation = (
                 None
                 if latest_classification is None or latest_classification.exercise_class is None
                 else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
             )
-            for (exercise, latest_classification) in zip(exercises_, latest_classifications)
-        ]
+
+            exercise_class = (
+                latest_classification.exercise_class.name
+                if latest_classification is not None and latest_classification.exercise_class is not None
+                else None
+            )
+
+            if extraction_batch.run_classification and exercise_class is None:
+                needs_refresh = True
+
+            api_adaptation = None if latest_adaptation is None else make_api_adaptation(latest_adaptation)
+
+            if api_adaptation is not None and api_adaptation.status.kind == "inProgress":
+                needs_refresh = True
+
+            api_exercises.append(
+                GetExtractionBatchResponse.Page.Exercise(
+                    id=str(exercise.id),
+                    page_number=assert_isinstance(
+                        exercise.location, exercises.ExerciseLocationMaybePageAndNumber
+                    ).page_number,
+                    exercise_number=assert_isinstance(
+                        exercise.location, exercises.ExerciseLocationMaybePageAndNumber
+                    ).exercise_number,
+                    full_text=exercise.full_text,
+                    exercise_class=exercise_class,
+                    reclassified_by=(
+                        latest_classification.username
+                        if isinstance(latest_classification, classification.ClassificationByUser)
+                        else None
+                    ),
+                    exercise_class_has_settings=(
+                        latest_classification is not None
+                        and latest_classification.exercise_class is not None
+                        and latest_classification.exercise_class.latest_strategy_settings is not None
+                    ),
+                    adaptation=api_adaptation,
+                )
+            )
 
         pages.append(
             GetExtractionBatchResponse.Page(
                 page_number=page_extraction.pdf_page_number,
                 assistant_response=page_extraction.assistant_response,
-                exercises=[
-                    GetExtractionBatchResponse.Page.Exercise(
-                        id=str(exercise.id),
-                        page_number=assert_isinstance(
-                            exercise.location, exercises.ExerciseLocationMaybePageAndNumber
-                        ).page_number,
-                        exercise_number=assert_isinstance(
-                            exercise.location, exercises.ExerciseLocationMaybePageAndNumber
-                        ).exercise_number,
-                        full_text=exercise.full_text,
-                        exercise_class=(
-                            latest_classification.exercise_class.name
-                            if latest_classification is not None and latest_classification.exercise_class is not None
-                            else None
-                        ),
-                        reclassified_by=(
-                            latest_classification.username
-                            if isinstance(latest_classification, classification.ClassificationByUser)
-                            else None
-                        ),
-                        exercise_class_has_settings=(
-                            latest_classification is not None
-                            and latest_classification.exercise_class is not None
-                            and latest_classification.exercise_class.latest_strategy_settings is not None
-                        ),
-                        adaptation=None if latest_adaptation is None else make_api_adaptation(latest_adaptation),
-                    )
-                    for exercise, latest_classification, latest_adaptation in zip(
-                        exercises_, latest_classifications, latest_adaptations
-                    )
-                ],
+                exercises=api_exercises,
             )
         )
 
     return GetExtractionBatchResponse(
         id=str(extraction_batch.id),
+        needs_refresh=needs_refresh,
         created_by=extraction_batch.created_by,
         strategy=ApiExtractionStrategy(
             id=str(extraction_batch.settings.id), model=extraction_batch.model, prompt=extraction_batch.settings.prompt

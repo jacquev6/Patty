@@ -73,6 +73,7 @@ def create_classification_batch(
 
 class GetClassificationBatchResponse(ApiModel):
     id: str
+    needs_refresh: bool
     created_by: str | None
     model_for_adaptation: adaptation.llm.ConcreteModel | None
 
@@ -94,30 +95,35 @@ async def get_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> GetClassificationBatchResponse:
     classification_batch = get_by_id(session, sandbox.classification.SandboxClassificationBatch, id)
+    needs_refresh = False
 
-    exercises_ = [
-        classification.exercise
-        for classification in classification_batch.classification_chunk_creation.classification_chunk.classifications
-    ]
+    api_exercises: list[GetClassificationBatchResponse.Exercise] = []
+    for classification_ in classification_batch.classification_chunk_creation.classification_chunk.classifications:
+        exercise = classification_.exercise
 
-    latest_classifications = [
-        exercise.classifications[-1] if exercise.classifications else None for exercise in exercises_
-    ]
+        latest_classification = exercise.classifications[-1] if exercise.classifications else None
 
-    latest_adaptations = [
-        (
+        latest_adaptation = (
             None
             if latest_classification is None or latest_classification.exercise_class is None
             else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
         )
-        for (exercise, latest_classification) in zip(exercises_, latest_classifications)
-    ]
 
-    return GetClassificationBatchResponse(
-        id=str(classification_batch.id),
-        created_by=classification_batch.created_by,
-        model_for_adaptation=classification_batch.model_for_adaptation,
-        exercises=[
+        exercise_class = (
+            latest_classification.exercise_class.name
+            if latest_classification is not None and latest_classification.exercise_class is not None
+            else None
+        )
+
+        if exercise_class is None:
+            needs_refresh = True
+
+        adaptation = None if latest_adaptation is None else make_api_adaptation(latest_adaptation)
+
+        if adaptation is not None and adaptation.status.kind == "inProgress":
+            needs_refresh = True
+
+        api_exercises.append(
             GetClassificationBatchResponse.Exercise(
                 id=str(exercise.id),
                 page_number=assert_isinstance(
@@ -127,11 +133,7 @@ async def get_classification_batch(
                     exercise.location, exercises.ExerciseLocationMaybePageAndNumber
                 ).exercise_number,
                 full_text=exercise.full_text,
-                exercise_class=(
-                    latest_classification.exercise_class.name
-                    if latest_classification is not None and latest_classification.exercise_class is not None
-                    else None
-                ),
+                exercise_class=exercise_class,
                 reclassified_by=(
                     latest_classification.username
                     if isinstance(latest_classification, classification.ClassificationByUser)
@@ -142,12 +144,16 @@ async def get_classification_batch(
                     and latest_classification.exercise_class is not None
                     and latest_classification.exercise_class.latest_strategy_settings is not None
                 ),
-                adaptation=None if latest_adaptation is None else make_api_adaptation(latest_adaptation),
+                adaptation=adaptation,
             )
-            for (exercise, latest_classification, latest_adaptation) in zip(
-                exercises_, latest_classifications, latest_adaptations
-            )
-        ],
+        )
+
+    return GetClassificationBatchResponse(
+        id=str(classification_batch.id),
+        needs_refresh=needs_refresh,
+        created_by=classification_batch.created_by,
+        model_for_adaptation=classification_batch.model_for_adaptation,
+        exercises=api_exercises,
     )
 
 

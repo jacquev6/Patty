@@ -1878,12 +1878,17 @@
             "title": "Id",
             "type": "string"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           }
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "strategy",
           "adaptations"
@@ -1961,10 +1966,15 @@
               }
             ],
             "title": "Modelforadaptation"
+          },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
           }
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "modelForAdaptation",
           "exercises"
@@ -2046,6 +2056,10 @@
             ],
             "title": "Modelforadaptation"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "pages": {
             "items": {
               "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page"
@@ -2063,6 +2077,7 @@
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "strategy",
           "runClassification",
@@ -2111,11 +2126,16 @@
             "title": "Availablestrategysettings",
             "type": "array"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "textbook": {
             "$ref": "#/components/schemas/ApiTextbook"
           }
         },
         "required": [
+          "needsRefresh",
           "textbook",
           "availableStrategySettings"
         ],
@@ -5981,9 +6001,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -6097,9 +6115,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"

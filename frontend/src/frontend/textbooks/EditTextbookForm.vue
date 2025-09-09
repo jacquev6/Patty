@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import AdaptationPreview from '@/frontend/sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
-import assert from '$/assert'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
@@ -18,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'textbook-updated', textbook: Textbook | null): void
+  (e: 'textbook-updated'): void
 }>()
 
 const { t } = useI18n()
@@ -28,24 +27,18 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-function textbookUpdated(textbook: Textbook | null) {
-  emit('textbook-updated', textbook)
-}
-
 async function removeExercise(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
+  await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, exercise_id: id }, query: { removed } },
   })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
+  emit('textbook-updated')
 }
 
 async function removeRange(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
+  await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, range_id: id }, query: { removed } },
   })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
+  emit('textbook-updated')
 }
 </script>
 
@@ -77,7 +70,7 @@ async function removeRange(id: string, removed: boolean) {
   </p>
   <template v-if="view === 'batch'">
     <h2>{{ t('newTextbookPdf') }}</h2>
-    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
@@ -128,14 +121,14 @@ async function removeRange(id: string, removed: boolean) {
               v-else
               :exercise
               @exerciseRemoved="() => removeExercise(exercise.id, true)"
-              @batchUpdated="() => textbookUpdated(null)"
+              @batchUpdated="emit('textbook-updated')"
             />
           </template>
         </template>
       </template>
     </template>
     <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>
-    <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
     <h2>{{ t('existingExternalExercises') }}</h2>
     <template v-for="externalExercise in textbook.externalExercises">
       <h3 v-if="externalExercise.removedFromTextbook">

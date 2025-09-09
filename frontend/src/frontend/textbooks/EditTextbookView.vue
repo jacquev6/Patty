@@ -1,112 +1,34 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from '$/assert'
-import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
+import AutoRefresh from '@/frontend/basic/AutoRefresh.vue'
 
 const props = defineProps<{
   id: string
 }>()
 
-const { t } = useI18n()
 const client = useAuthenticatedClient()
-const breadcrumbsStore = useBreadcrumbsStore()
 
-const found = ref<boolean | null>(null)
-const textbook = ref<Textbook | null>(null)
-const availableStrategySettings = ref<string[] | null>(null)
-
-let refreshes = 0
-
-let refreshTimeoutId: number | null = null
-
-async function refresh() {
+async function load() {
   const response = await client.GET(`/api/textbooks/{id}`, { params: { path: { id: props.id } } })
   if (response.response.status === 404) {
-    found.value = false
-    textbook.value = null
+    return null
   } else {
-    found.value = true
     assert(response.data !== undefined)
-    textbook.value = response.data.textbook
-    availableStrategySettings.value = response.data.availableStrategySettings
-    breadcrumbsStore.set([
-      { textKey: 'textbooks' },
-      { textKey: 'existingTextbook', textArgs: { title: textbook.value.title }, to: {} },
-    ])
-    refreshIfNeeded()
+    return response.data
   }
 }
 
-onMounted(refresh)
-
-onUnmounted(cancelRefresh)
-
-function textbookUpdated(newTextbook: Textbook | null) {
-  if (newTextbook === null) {
-    refresh()
-  } else {
-    textbook.value = newTextbook
-    refreshIfNeeded()
-  }
-}
-
-function refreshIfNeeded() {
-  if (needsRefresh()) {
-    refreshTimeoutId = window.setTimeout(refresh, 500 * Math.pow(1.1, refreshes))
-    refreshes++
-  } else {
-    refreshTimeoutId = null
-    refreshes = 0
-  }
-}
-
-function needsRefresh() {
-  assert(textbook.value !== null)
-  for (const range of textbook.value.ranges) {
-    for (const page of range.pages) {
-      if (page.inProgress) {
-        return true
-      }
-      for (const exercise of page.exercises) {
-        if (exercise.exerciseClass === null) {
-          return true
-        }
-        if (exercise.adaptation !== null && exercise.adaptation.status.kind === 'inProgress') {
-          return true
-        }
-      }
-    }
-  }
-  return false
-}
-
-function cancelRefresh() {
-  if (refreshTimeoutId !== null) {
-    window.clearTimeout(refreshTimeoutId)
-    refreshTimeoutId = null
-  }
-  refreshes = 0
+function breadcrumbs({ textbook: { title } }: { textbook: Textbook }) {
+  return [{ textKey: 'textbooks' }, { textKey: 'existingTextbook', textArgs: { title }, to: {} }]
 }
 </script>
 
 <template>
-  <div style="padding-left: 5px; padding-right: 5px">
-    <template v-if="availableStrategySettings !== null && textbook !== null">
-      <EditTextbookForm :availableStrategySettings :textbook @textbookUpdated="textbookUpdated" />
+  <AutoRefresh :load :breadcrumbs>
+    <template v-slot="{ data: { textbook, availableStrategySettings }, refresh }">
+      <EditTextbookForm :availableStrategySettings :textbook @textbookUpdated="refresh" />
     </template>
-    <template v-else-if="found === false">
-      <h1>{{ t('notFound') }}</h1>
-    </template>
-  </div>
+  </AutoRefresh>
 </template>
-
-<i18n>
-en:
-  notFound: Not found
-fr:
-  notFound: Non trouvé
-</i18n>

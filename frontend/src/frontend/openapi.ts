@@ -1289,6 +1289,8 @@ export interface components {
       createdBy: string
       /** Id */
       id: string
+      /** Needsrefresh */
+      needsRefresh: boolean
       strategy: components['schemas']['ApiStrategy-Output']
     }
     /** GetAdaptationBatchesResponse */
@@ -1312,6 +1314,8 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
+      /** Needsrefresh */
+      needsRefresh: boolean
     }
     /** GetClassificationBatchesResponse */
     GetClassificationBatchesResponse: {
@@ -1337,6 +1341,8 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
+      /** Needsrefresh */
+      needsRefresh: boolean
       /** Pages */
       pages: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page'][]
       /** Runclassification */
@@ -1354,6 +1360,8 @@ export interface components {
     GetTextbookResponse: {
       /** Availablestrategysettings */
       availableStrategySettings: string[]
+      /** Needsrefresh */
+      needsRefresh: boolean
       textbook: components['schemas']['ApiTextbook']
     }
     /** GetTextbooksResponse */
@@ -3281,7 +3289,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiTextbook']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
@@ -3350,7 +3358,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiTextbook']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
