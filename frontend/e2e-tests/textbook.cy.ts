@@ -176,13 +176,15 @@ describe('The edition form for textbooks - with a PDF range', () => {
   })
 
   it('fixes exercise class', () => {
-    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1').click()
+    cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1').click()
     cy.get('span.edit').eq(1).click()
     cy.get('[data-cy="exercise-class"]').should('have.value', 'QCM')
     cy.get('[data-cy="exercise-class"]').select('CochePhrase')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
-    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
+    cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1').click()
   })
 })

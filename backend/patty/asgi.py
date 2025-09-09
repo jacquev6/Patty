@@ -2,9 +2,9 @@ import fastapi
 import sqlalchemy as sql
 
 from . import api_router
-from . import errors
 from . import authentication
 from . import database_utils
+from . import errors
 from . import settings
 
 

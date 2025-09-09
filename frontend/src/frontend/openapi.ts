@@ -683,14 +683,14 @@ export interface components {
     }
     /** ApiAdaptation */
     ApiAdaptation: {
-      /** Adaptationbatchid */
-      adaptationBatchId: string | null
       /** Adjustments */
       adjustments: components['schemas']['Adjustment'][]
-      /** Classificationbatchid */
-      classificationBatchId: string | null
-      /** Extractionbatchid */
-      extractionBatchId: string | null
+      /** Belongsto */
+      belongsTo:
+        | components['schemas']['BelongsToExtractionBatch']
+        | components['schemas']['BelongsToClassificationBatch']
+        | components['schemas']['BelongsToAdaptationBatch']
+        | components['schemas']['BelongsToTextbook']
       /** Id */
       id: string
       /** Initialassistantresponse */
@@ -707,10 +707,6 @@ export interface components {
       /** Removedfromtextbook */
       removedFromTextbook: boolean
       strategy: components['schemas']['ApiStrategy-Output']
-      /** Textbookid */
-      textbookId: string | null
-      /** Textbooktitle */
-      textbookTitle: string | null
     }
     /** ApiExtractionStrategy */
     ApiExtractionStrategy: {
@@ -838,6 +834,48 @@ export interface components {
       /** Inputs */
       inputs: components['schemas']['ApiInput'][]
       strategy: components['schemas']['ApiStrategy-Output']
+    }
+    /** BelongsToAdaptationBatch */
+    BelongsToAdaptationBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adaptation-batch'
+    }
+    /** BelongsToClassificationBatch */
+    BelongsToClassificationBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'classification-batch'
+    }
+    /** BelongsToExtractionBatch */
+    BelongsToExtractionBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'extraction-batch'
+    }
+    /** BelongsToTextbook */
+    BelongsToTextbook: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'textbook'
+      /** Title */
+      title: string
     }
     'Choice-Input': {
       /** Contents */

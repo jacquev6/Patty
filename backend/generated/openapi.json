@@ -243,17 +243,6 @@
       "ApiAdaptation": {
         "additionalProperties": false,
         "properties": {
-          "adaptationBatchId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Adaptationbatchid"
-          },
           "adjustments": {
             "items": {
               "$ref": "#/components/schemas/Adjustment"
@@ -261,27 +250,22 @@
             "title": "Adjustments",
             "type": "array"
           },
-          "classificationBatchId": {
+          "belongsTo": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/BelongsToExtractionBatch"
               },
               {
-                "type": "null"
-              }
-            ],
-            "title": "Classificationbatchid"
-          },
-          "extractionBatchId": {
-            "anyOf": [
-              {
-                "type": "string"
+                "$ref": "#/components/schemas/BelongsToClassificationBatch"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/BelongsToAdaptationBatch"
+              },
+              {
+                "$ref": "#/components/schemas/BelongsToTextbook"
               }
             ],
-            "title": "Extractionbatchid"
+            "title": "Belongsto"
           },
           "id": {
             "title": "Id",
@@ -331,37 +315,11 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
-          },
-          "textbookId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Textbookid"
-          },
-          "textbookTitle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Textbooktitle"
           }
         },
         "required": [
           "id",
-          "extractionBatchId",
-          "classificationBatchId",
-          "adaptationBatchId",
-          "textbookId",
-          "textbookTitle",
+          "belongsTo",
           "strategy",
           "input",
           "rawLlmConversations",
@@ -776,6 +734,91 @@
           "availableStrategySettings"
         ],
         "title": "BaseAdaptationBatch",
+        "type": "object"
+      },
+      "BelongsToAdaptationBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "adaptation-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToAdaptationBatch",
+        "type": "object"
+      },
+      "BelongsToClassificationBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "classification-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToClassificationBatch",
+        "type": "object"
+      },
+      "BelongsToExtractionBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "extraction-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToExtractionBatch",
+        "type": "object"
+      },
+      "BelongsToTextbook": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "textbook",
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title"
+        ],
+        "title": "BelongsToTextbook",
         "type": "object"
       },
       "Choice-Input": {

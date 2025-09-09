@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { match } from 'ts-pattern'
 
 import { useAuthenticatedClient, type Adaptation } from '@/frontend/ApiClient'
 import assert from '$/assert'
@@ -38,37 +39,29 @@ onMounted(async () => {
     assert(response.data !== undefined)
     apiAdaptation.value = response.data
 
-    const breadcrumbs: Breadcrumbs = []
-    if (apiAdaptation.value.textbookId === null) {
-      breadcrumbs.push({ textKey: 'sandbox' })
-      if (apiAdaptation.value.extractionBatchId !== null) {
-        breadcrumbs.push({
-          textKey: 'existingExtractionBatch',
-          textArgs: { id: apiAdaptation.value.extractionBatchId },
-          to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
-        })
-      } else if (apiAdaptation.value.classificationBatchId !== null) {
-        breadcrumbs.push({
+    const breadcrumbs = match(apiAdaptation.value.belongsTo)
+      .returnType<Breadcrumbs>()
+      .with({ kind: 'textbook' }, ({ id, title }) => [
+        { textKey: 'textbooks' },
+        { textKey: 'existingTextbook', textArgs: { title }, to: { name: 'textbook', params: { id } } },
+      ])
+      .with({ kind: 'adaptation-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        { textKey: 'existingAdaptationBatch', textArgs: { id }, to: { name: 'adaptation-batch', params: { id } } },
+      ])
+      .with({ kind: 'classification-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        {
           textKey: 'existingClassificationBatch',
-          textArgs: { id: apiAdaptation.value.classificationBatchId },
-          to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
-        })
-      } else if (apiAdaptation.value.adaptationBatchId !== null) {
-        breadcrumbs.push({
-          textKey: 'existingAdaptationBatch',
-          textArgs: { id: apiAdaptation.value.adaptationBatchId },
-          to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
-        })
-      }
-    } else {
-      assert(apiAdaptation.value.textbookTitle !== null)
-      breadcrumbs.push({ textKey: 'textbooks' })
-      breadcrumbs.push({
-        textKey: 'existingTextbook',
-        textArgs: { title: apiAdaptation.value.textbookTitle },
-        to: { name: 'textbook', params: { id: apiAdaptation.value.textbookId } },
-      })
-    }
+          textArgs: { id },
+          to: { name: 'classification-batch', params: { id } },
+        },
+      ])
+      .with({ kind: 'extraction-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        { textKey: 'existingExtractionBatch', textArgs: { id }, to: { name: 'extraction-batch', params: { id } } },
+      ])
+      .exhaustive()
 
     breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: apiAdaptation.value.id }, to: {} })
 

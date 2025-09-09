@@ -171,9 +171,10 @@ describe('The classification batch edition page', () => {
   })
 
   it("allows fixing an exercise's class", () => {
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-2').click()
+    cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1').click()
     cy.get('h2:contains("Input 1:"):contains("CocheMot"):contains("classified by model")').should('exist')
     screenshot('classification-batch-edition-page')
-    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-2')
     cy.get('span.edit').eq(1).click()
     cy.get('[data-cy="exercise-class"]').should('have.value', 'CocheMot')
     cy.get('[data-cy="exercise-class"]').select('CochePhrase')
@@ -181,7 +182,8 @@ describe('The classification batch edition page', () => {
     cy.get('h2:contains("Input 1:"):contains("CochePhrase"):contains("fixed by Alice")').should('exist')
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
-    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-3')
+    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-3').click()
+    cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1').click()
 
     cy.get('h2:contains("Input 2:"):contains("NoSettings"):contains("classified by model")').should('exist')
     cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
@@ -193,7 +195,8 @@ describe('The classification batch edition page', () => {
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get(':contains("Exercise class NoSettings does not have adaptation settings yet.")').should('not.exist')
-    cy.get('a:contains("View details")').eq(1).should('have.attr', 'href', '/adaptation-4')
+    cy.get('a:contains("View details")').eq(1).should('have.attr', 'href', '/adaptation-4').click()
+    cy.get('a:contains("Classification batch 1")').should('have.attr', 'href', '/classification-batch-1').click()
     cy.get('span.edit').eq(2).click()
     cy.get('[data-cy="exercise-class"]').should('have.value', 'CocheMot')
     cy.get('[data-cy="exercise-class"]').select('NoSettings')

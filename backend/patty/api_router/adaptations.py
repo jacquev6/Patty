@@ -3,11 +3,9 @@ from typing import Literal
 import fastapi
 
 from .. import adaptation
-from .. import classification
 from .. import database_utils
+from .. import dispatching as dispatch
 from .. import exercises
-from .. import extraction
-from .. import sandbox
 from .. import textbooks
 from ..any_json import JsonList
 from ..api_utils import ApiModel, get_by_id
@@ -39,11 +37,26 @@ class ApiInput(ApiModel):
 
 class ApiAdaptation(ApiModel):
     id: str
-    extraction_batch_id: str | None
-    classification_batch_id: str | None
-    adaptation_batch_id: str | None
-    textbook_id: str | None
-    textbook_title: str | None
+
+    class BelongsToExtractionBatch(ApiModel):
+        kind: Literal["extraction-batch"]
+        id: str
+
+    class BelongsToClassificationBatch(ApiModel):
+        kind: Literal["classification-batch"]
+        id: str
+
+    class BelongsToAdaptationBatch(ApiModel):
+        kind: Literal["adaptation-batch"]
+        id: str
+
+    class BelongsToTextbook(ApiModel):
+        kind: Literal["textbook"]
+        id: str
+        title: str
+
+    belongs_to: BelongsToExtractionBatch | BelongsToClassificationBatch | BelongsToAdaptationBatch | BelongsToTextbook
+
     strategy: ApiStrategy
     input: ApiInput
     raw_llm_conversations: JsonList
@@ -157,39 +170,9 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdaptation:
-    textbook = (
-        exercise_adaptation.exercise.location.textbook
-        if isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
-        else None
-    )
-
     return ApiAdaptation(
         id=str(exercise_adaptation.id),
-        extraction_batch_id=(
-            str(exercise_adaptation.exercise.created.page_extraction.created.sandbox_extraction_batch.id)
-            if isinstance(exercise_adaptation.exercise.created, extraction.ExerciseCreationByPageExtraction)
-            and isinstance(
-                exercise_adaptation.exercise.created.page_extraction.created,
-                sandbox.extraction.PageExtractionCreationBySandboxBatch,
-            )
-            else None
-        ),
-        classification_batch_id=(
-            str(exercise_adaptation.created.classification_chunk.created.sandbox_classification_batch.id)
-            if isinstance(exercise_adaptation.created, classification.AdaptationCreationByChunk)
-            and isinstance(
-                exercise_adaptation.created.classification_chunk.created,
-                sandbox.classification.ClassificationChunkCreationBySandboxBatch,
-            )
-            else None
-        ),
-        adaptation_batch_id=(
-            str(exercise_adaptation.created.sandbox_adaptation_batch.id)
-            if isinstance(exercise_adaptation.created, sandbox.adaptation.AdaptationCreationBySandboxBatch)
-            else None
-        ),
-        textbook_id=None if textbook is None else str(textbook.id),
-        textbook_title=None if textbook is None else textbook.title,
+        belongs_to=make_api_adaptation_belongs_to(exercise_adaptation),
         strategy=make_api_strategy(exercise_adaptation.settings, exercise_adaptation.model),
         input=make_api_input(exercise_adaptation.exercise),
         raw_llm_conversations=exercise_adaptation.raw_llm_conversations,
@@ -198,6 +181,43 @@ def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdapta
         manual_edit=exercise_adaptation.manual_edit,
         removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
         and exercise_adaptation.exercise.location.removed_from_textbook,
+    )
+
+
+def make_api_adaptation_belongs_to(
+    adaptation_: adaptation.Adaptation,
+) -> (
+    ApiAdaptation.BelongsToExtractionBatch
+    | ApiAdaptation.BelongsToClassificationBatch
+    | ApiAdaptation.BelongsToAdaptationBatch
+    | ApiAdaptation.BelongsToTextbook
+):
+    return dispatch.exercise_creation(
+        adaptation_.exercise.created,
+        by_user=lambda _: dispatch.adaptation_creation(
+            adaptation_.created,
+            by_chunk=lambda ac: dispatch.classification_chunk_creation(
+                ac.classification_chunk.created,
+                by_page_extraction=None,  # The exercise has been created by a user, so the classification chunk cannot have been created by a page extraction
+                by_sandbox_batch=lambda ccc: ApiAdaptation.BelongsToClassificationBatch(
+                    kind="classification-batch", id=str(ccc.sandbox_classification_batch.id)
+                ),
+            ),
+            by_sandbox_batch=lambda ac: ApiAdaptation.BelongsToAdaptationBatch(
+                kind="adaptation-batch", id=str(ac.sandbox_adaptation_batch.id)
+            ),
+        ),
+        by_page_extraction=lambda ec: dispatch.page_extraction_creation(
+            ec.page_extraction.created,
+            by_sandbox_batch=lambda pec: ApiAdaptation.BelongsToExtractionBatch(
+                kind="extraction-batch", id=str(pec.sandbox_extraction_batch.id)
+            ),
+            by_textbook=lambda pec: ApiAdaptation.BelongsToTextbook(
+                kind="textbook",
+                id=str(pec.textbook_extraction_batch.textbook.id),
+                title=pec.textbook_extraction_batch.textbook.title,
+            ),
+        ),
     )
 
 

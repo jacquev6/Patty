@@ -3,8 +3,6 @@ import type { Adaptation as ApiAdaptation, AdaptedExercise } from './ApiClient'
 
 export type PreprocessedAdaptation = {
   id: string
-  classificationBatchId: string | null
-  adaptationBatchId: string | null
   strategy: ApiAdaptation['strategy']
   input: { pageNumber: number | null; exerciseNumber: string | null; text: string[] }
   adjustmentPrompts: string[]
@@ -97,8 +95,6 @@ export function preprocess(adaptation: ApiAdaptation): PreprocessedAdaptation {
 
   return {
     id: adaptation.id,
-    classificationBatchId: adaptation.classificationBatchId,
-    adaptationBatchId: adaptation.adaptationBatchId,
     strategy: adaptation.strategy,
     input: {
       pageNumber: adaptation.input.pageNumber,
