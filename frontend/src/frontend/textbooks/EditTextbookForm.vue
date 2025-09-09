@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import AdaptationPreview from '@/frontend/sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess } from '@/frontend/Adaptations'
 import assert from '$/assert'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
@@ -157,7 +156,7 @@ async function removeRange(id: string, removed: boolean) {
           <AdaptationPreview
             :headerLevel="3"
             :index="0"
-            :adaptation="preprocess(exercise.adaptation)"
+            :adaptation="exercise.adaptation"
             :headerText="`${t('exercise')} ${exercise.exerciseNumber}`"
             :showPageAndExercise="false"
           />

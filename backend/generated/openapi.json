@@ -208,46 +208,14 @@
         "title": "AdaptationBatch",
         "type": "object"
       },
-      "Adjustment": {
-        "additionalProperties": false,
-        "properties": {
-          "assistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
-              },
-              {
-                "$ref": "#/components/schemas/InvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/NotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/UnknownError"
-              }
-            ],
-            "title": "Assistantresponse"
-          },
-          "userPrompt": {
-            "title": "Userprompt",
-            "type": "string"
-          }
-        },
-        "required": [
-          "userPrompt",
-          "assistantResponse"
-        ],
-        "title": "Adjustment",
-        "type": "object"
-      },
       "ApiAdaptation": {
         "additionalProperties": false,
         "properties": {
-          "adjustments": {
+          "adjustmentPrompts": {
             "items": {
-              "$ref": "#/components/schemas/Adjustment"
+              "type": "string"
             },
-            "title": "Adjustments",
+            "title": "Adjustmentprompts",
             "type": "array"
           },
           "belongsTo": {
@@ -271,7 +239,10 @@
             "title": "Id",
             "type": "string"
           },
-          "initialAssistantResponse": {
+          "input": {
+            "$ref": "#/components/schemas/ApiInputOut"
+          },
+          "lastAssistantResponse": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
@@ -289,10 +260,27 @@
                 "type": "null"
               }
             ],
-            "title": "Initialassistantresponse"
+            "title": "Lastassistantresponse"
           },
-          "input": {
-            "$ref": "#/components/schemas/ApiInput"
+          "llmStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InProgress"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/LlmSuccess"
+              }
+            ],
+            "title": "Llmstatus"
           },
           "manualEdit": {
             "anyOf": [
@@ -313,6 +301,26 @@
             "title": "Removedfromtextbook",
             "type": "boolean"
           },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InProgress"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/patty__api_router__adaptations__ApiAdaptation__Success"
+              }
+            ],
+            "title": "Status"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           }
@@ -323,10 +331,12 @@
           "strategy",
           "input",
           "rawLlmConversations",
-          "initialAssistantResponse",
-          "adjustments",
+          "lastAssistantResponse",
+          "adjustmentPrompts",
           "manualEdit",
-          "removedFromTextbook"
+          "removedFromTextbook",
+          "llmStatus",
+          "status"
         ],
         "title": "ApiAdaptation",
         "type": "object"
@@ -398,6 +408,47 @@
           "text"
         ],
         "title": "ApiInput",
+        "type": "object"
+      },
+      "ApiInputOut": {
+        "additionalProperties": false,
+        "properties": {
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "text": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Text",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "text"
+        ],
+        "title": "ApiInputOut",
         "type": "object"
       },
       "ApiStrategy-Input": {
@@ -2158,6 +2209,21 @@
         "title": "Identity",
         "type": "object"
       },
+      "InProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "inProgress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "InProgress",
+        "type": "object"
+      },
       "InstructionComponents": {
         "additionalProperties": false,
         "properties": {
@@ -2512,6 +2578,25 @@
         "required": [
           "contents"
         ],
+        "type": "object"
+      },
+      "LlmSuccess": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptedExercise": {
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "adaptedExercise"
+        ],
+        "title": "LlmSuccess",
         "type": "object"
       },
       "MistralAiModel": {
@@ -3897,6 +3982,34 @@
         "required": [
           "kind",
           "exercise"
+        ],
+        "title": "Success",
+        "type": "object"
+      },
+      "patty__api_router__adaptations__ApiAdaptation__Success": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptedExercise": {
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "success": {
+            "enum": [
+              "llm",
+              "manual"
+            ],
+            "title": "Success",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "success",
+          "adaptedExercise"
         ],
         "title": "Success",
         "type": "object"

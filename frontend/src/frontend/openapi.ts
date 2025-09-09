@@ -670,21 +670,10 @@ export interface components {
         | components['schemas']['OpenAiModel']
       strategySettingsIdentity: components['schemas']['Identity'] | null
     }
-    /** Adjustment */
-    Adjustment: {
-      /** Assistantresponse */
-      assistantResponse:
-        | components['schemas']['patty__adaptation__assistant_responses__Success']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
-        | components['schemas']['UnknownError']
-      /** Userprompt */
-      userPrompt: string
-    }
     /** ApiAdaptation */
     ApiAdaptation: {
-      /** Adjustments */
-      adjustments: components['schemas']['Adjustment'][]
+      /** Adjustmentprompts */
+      adjustmentPrompts: string[]
       /** Belongsto */
       belongsTo:
         | components['schemas']['BelongsToExtractionBatch']
@@ -693,19 +682,33 @@ export interface components {
         | components['schemas']['BelongsToTextbook']
       /** Id */
       id: string
-      /** Initialassistantresponse */
-      initialAssistantResponse:
+      input: components['schemas']['ApiInputOut']
+      /** Lastassistantresponse */
+      lastAssistantResponse:
         | components['schemas']['patty__adaptation__assistant_responses__Success']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
         | null
-      input: components['schemas']['ApiInput']
+      /** Llmstatus */
+      llmStatus:
+        | components['schemas']['InProgress']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
+        | components['schemas']['LlmSuccess']
       manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
       /** Removedfromtextbook */
       removedFromTextbook: boolean
+      /** Status */
+      status:
+        | components['schemas']['InProgress']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__Success']
       strategy: components['schemas']['ApiStrategy-Output']
     }
     /** ApiExtractionStrategy */
@@ -725,6 +728,15 @@ export interface components {
       pageNumber: number | null
       /** Text */
       text: string
+    }
+    /** ApiInputOut */
+    ApiInputOut: {
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Text */
+      text: string[]
     }
     /** ApiStrategy */
     'ApiStrategy-Input': {
@@ -1387,6 +1399,14 @@ export interface components {
        */
       version: 'current' | 'previous' | 'older'
     }
+    /** InProgress */
+    InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
+    }
     /** InstructionComponents */
     InstructionComponents: {
       /**
@@ -1538,6 +1558,15 @@ export interface components {
         | components['schemas']['Formatted-Output']
         | components['schemas']['Choice-Output']
       )[]
+    }
+    /** LlmSuccess */
+    LlmSuccess: {
+      adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
     }
     /** MistralAiModel */
     MistralAiModel: {
@@ -2061,6 +2090,20 @@ export interface components {
        * @constant
        */
       kind: 'success'
+    }
+    /** Success */
+    patty__api_router__adaptations__ApiAdaptation__Success: {
+      adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /**
+       * Success
+       * @enum {string}
+       */
+      success: 'llm' | 'manual'
     }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {

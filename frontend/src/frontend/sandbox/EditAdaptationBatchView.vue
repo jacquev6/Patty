@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { type AdaptationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
 import assert from '$/assert'
 import EditAdaptationBatchForm from './EditAdaptationBatchForm.vue'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
@@ -35,7 +34,7 @@ async function refresh() {
 
     let needsRefresh = false
     for (const adaptation of adaptationBatch.value.adaptations) {
-      if (preprocessAdaptation(adaptation).status.kind === 'inProgress') {
+      if (adaptation.status.kind === 'inProgress') {
         needsRefresh = true
         break
       }

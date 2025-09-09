@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { type ClassificationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
 import assert from '$/assert'
 import EditClassificationBatchForm from './EditClassificationBatchForm.vue'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
@@ -39,7 +38,7 @@ async function refresh() {
         needsRefresh = true
         break
       }
-      if (exercise.adaptation !== null && preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress') {
+      if (exercise.adaptation !== null && exercise.adaptation.status.kind === 'inProgress') {
         needsRefresh = true
         break
       }

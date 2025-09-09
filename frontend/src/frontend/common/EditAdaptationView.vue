@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { match } from 'ts-pattern'
 
 import { useAuthenticatedClient, type Adaptation } from '@/frontend/ApiClient'
 import assert from '$/assert'
 import EditAdaptationForm from './EditAdaptationForm.vue'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useBreadcrumbsStore, type Breadcrumbs } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
@@ -18,28 +17,20 @@ const client = useAuthenticatedClient()
 const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
-const apiAdaptation = ref<Adaptation | null>(null)
-
-const adaptation = computed(() => {
-  if (apiAdaptation.value === null) {
-    return null
-  } else {
-    return preprocessAdaptation(apiAdaptation.value)
-  }
-})
+const adaptation = ref<Adaptation | null>(null)
 
 onMounted(async () => {
   const response = await client.GET(`/api/adaptations/{id}`, { params: { path: { id: props.id } } })
 
   if (response.response.status === 404) {
     found.value = false
-    apiAdaptation.value = null
+    adaptation.value = null
   } else {
     found.value = true
     assert(response.data !== undefined)
-    apiAdaptation.value = response.data
+    adaptation.value = response.data
 
-    const breadcrumbs = match(apiAdaptation.value.belongsTo)
+    const breadcrumbs = match(adaptation.value.belongsTo)
       .returnType<Breadcrumbs>()
       .with({ kind: 'textbook' }, ({ id, title }) => [
         { textKey: 'textbooks' },
@@ -63,7 +54,7 @@ onMounted(async () => {
       ])
       .exhaustive()
 
-    breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: apiAdaptation.value.id }, to: {} })
+    breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: adaptation.value.id }, to: {} })
 
     breadcrumbsStore.set(breadcrumbs)
   }
@@ -73,7 +64,7 @@ onMounted(async () => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="adaptation !== null">
-      <EditAdaptationForm :adaptation @adaptationUpdated="apiAdaptation = $event" />
+      <EditAdaptationForm :adaptation @adaptationUpdated="adaptation = $event" />
     </template>
     <template v-else-if="found === false">
       <h1>{{ t('notFound') }}</h1>

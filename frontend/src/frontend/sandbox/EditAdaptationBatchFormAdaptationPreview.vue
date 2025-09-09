@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PreprocessedAdaptation } from '@/frontend/Adaptations'
+import { type Adaptation } from '@/frontend/ApiClient'
 import AdaptableExercisePreview, {
   makePreviewAbleExercise_forAdaptation,
 } from '@/frontend/common/AdaptableExercisePreview.vue'
@@ -7,7 +7,7 @@ import AdaptableExercisePreview, {
 defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   index: number
-  adaptation: PreprocessedAdaptation
+  adaptation: Adaptation
   headerText: string | null
   showPageAndExercise: boolean
 }>()

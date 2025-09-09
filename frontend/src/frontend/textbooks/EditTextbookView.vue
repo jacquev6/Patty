@@ -6,7 +6,6 @@ import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import EditTextbookForm from './EditTextbookForm.vue'
 import assert from '$/assert'
 import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 
 const props = defineProps<{
   id: string
@@ -76,7 +75,7 @@ function needsRefresh() {
         if (exercise.exerciseClass === null) {
           return true
         }
-        if (exercise.adaptation !== null && preprocessAdaptation(exercise.adaptation).status.kind === 'inProgress') {
+        if (exercise.adaptation !== null && exercise.adaptation.status.kind === 'inProgress') {
           return true
         }
       }

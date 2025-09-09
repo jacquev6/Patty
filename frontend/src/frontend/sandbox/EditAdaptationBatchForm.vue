@@ -6,7 +6,6 @@ import { type AdaptationBatch } from '@/frontend/ApiClient'
 import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptationStrategyEditor from '@/frontend/common/AdaptationStrategyEditor.vue'
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 
 const props = defineProps<{
@@ -16,7 +15,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const authenticationTokenStore = useAuthenticationTokenStore()
 
-const adaptations = computed(() => props.adaptationBatch.adaptations.map(preprocessAdaptation))
+const adaptations = computed(() => props.adaptationBatch.adaptations)
 </script>
 
 <template>
