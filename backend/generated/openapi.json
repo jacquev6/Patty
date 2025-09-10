@@ -242,26 +242,6 @@
           "input": {
             "$ref": "#/components/schemas/ApiInputOut"
           },
-          "lastAssistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
-              },
-              {
-                "$ref": "#/components/schemas/InvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/NotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/UnknownError"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lastassistantresponse"
-          },
           "llmStatus": {
             "anyOf": [
               {
@@ -331,7 +311,6 @@
           "strategy",
           "input",
           "rawLlmConversations",
-          "lastAssistantResponse",
           "adjustmentPrompts",
           "manualEdit",
           "removedFromTextbook",
@@ -3987,25 +3966,6 @@
         ],
         "type": "object"
       },
-      "patty__adaptation__assistant_responses__Success": {
-        "additionalProperties": false,
-        "properties": {
-          "exercise": {
-            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
-          },
-          "kind": {
-            "const": "success",
-            "title": "Kind",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "Success",
-        "type": "object"
-      },
       "patty__api_router__adaptations__ApiAdaptation__Success": {
         "additionalProperties": false,
         "properties": {
@@ -4813,9 +4773,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4857,9 +4815,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4901,9 +4857,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4953,9 +4907,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"

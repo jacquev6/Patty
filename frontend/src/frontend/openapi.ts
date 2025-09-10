@@ -700,13 +700,6 @@ export interface components {
       /** Id */
       id: string
       input: components['schemas']['ApiInputOut']
-      /** Lastassistantresponse */
-      lastAssistantResponse:
-        | components['schemas']['patty__adaptation__assistant_responses__Success']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
-        | components['schemas']['UnknownError']
-        | null
       /** Llmstatus */
       llmStatus:
         | components['schemas']['InProgress']
@@ -2108,15 +2101,6 @@ export interface components {
       kind: 'whitespace'
     }
     /** Success */
-    patty__adaptation__assistant_responses__Success: {
-      exercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'success'
-    }
-    /** Success */
     patty__api_router__adaptations__ApiAdaptation__Success: {
       adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
       /**
@@ -2479,7 +2463,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiAdaptation']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
@@ -2510,7 +2494,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiAdaptation']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
@@ -2545,7 +2529,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiAdaptation']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
@@ -2576,7 +2560,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiAdaptation']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

@@ -157,9 +157,7 @@ async def get_classification_batch(
     )
 
 
-@router.post(
-    "/classification-batches/{id}/submit-adaptations-with-recent-settings", status_code=fastapi.status.HTTP_200_OK
-)
+@router.post("/classification-batches/{id}/submit-adaptations-with-recent-settings")
 def submit_adaptations_with_recent_settings_in_classification_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
@@ -188,7 +186,7 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
             )
 
 
-@router.put("/classification-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/classification-batches/{id}/model-for-adaptation")
 def put_classification_batch_model_for_adaptation(
     id: str, req: adaptation.llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:

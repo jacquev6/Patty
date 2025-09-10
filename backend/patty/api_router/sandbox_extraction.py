@@ -236,7 +236,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
     )
 
 
-@router.post("/extraction-batches/{id}/submit-adaptations-with-recent-settings", status_code=fastapi.status.HTTP_200_OK)
+@router.post("/extraction-batches/{id}/submit-adaptations-with-recent-settings")
 def submit_adaptations_with_recent_settings_in_extraction_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
@@ -285,7 +285,7 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                 )
 
 
-@router.put("/extraction-batches/{id}/run-classification", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/extraction-batches/{id}/run-classification")
 def put_extraction_batch_run_classification(id: str, session: database_utils.SessionDependable) -> None:
     extraction_batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
     assert extraction_batch.run_classification is False
@@ -312,7 +312,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
             )
 
 
-@router.put("/extraction-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/extraction-batches/{id}/model-for-adaptation")
 def put_extraction_batch_model_for_adaptation(
     id: str, req: adaptation.llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:

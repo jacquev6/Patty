@@ -24,7 +24,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'adaptation-updated', adaptation: Adaptation): void
+  (e: 'adaptation-updated'): void
 }>()
 
 const client = useAuthenticatedClient()
@@ -171,31 +171,28 @@ async function submitAdjustment() {
   })
 
   adjustmentPrompt.value = ''
-  const response = await responsePromise
+  await responsePromise
 
-  if (response.data !== undefined) {
-    emit('adaptation-updated', response.data)
-  }
+  emit('adaptation-updated')
 
   busy.value = false
 }
 
 async function deleteLastAdjustment() {
-  const responsePromise = client.DELETE(`/api/adaptations/{id}/last-adjustment`, {
+  await client.DELETE(`/api/adaptations/{id}/last-adjustment`, {
     params: { path: { id: props.adaptation.id } },
   })
 
-  const response = await responsePromise
-  if (response.data !== undefined) {
-    emit('adaptation-updated', response.data)
-  }
+  emit('adaptation-updated')
 }
 
-function resetManualEdit() {
+async function resetManualEdit() {
   manualAdaptedExercise.value = null
-  /* No await: fire and forget */ client.DELETE('/api/adaptations/{id}/manual-edit', {
+  await client.DELETE('/api/adaptations/{id}/manual-edit', {
     params: { path: { id: props.adaptation.id } },
   })
+
+  emit('adaptation-updated')
 }
 
 const fullScreen = ref(false)

@@ -205,7 +205,7 @@ def post_textbook_external_exercises(
     )
 
 
-@router.put("/textbooks/{textbook_id}/exercises/{exercise_id}/removed", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/textbooks/{textbook_id}/exercises/{exercise_id}/removed")
 def put_textbook_exercises_removed(
     textbook_id: str, exercise_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> None:
@@ -226,7 +226,7 @@ class PostTextbookRangeRequest(ApiModel):
     model_for_adaptation: adaptation.llm.ConcreteModel
 
 
-@router.post("/textbooks/{id}/ranges", status_code=fastapi.status.HTTP_200_OK)
+@router.post("/textbooks/{id}/ranges")
 async def post_textbook_range(
     id: str, req: PostTextbookRangeRequest, session: database_utils.SessionDependable
 ) -> None:
@@ -282,7 +282,7 @@ async def post_textbook_range(
         )
 
 
-@router.put("/textbooks/{textbook_id}/ranges/{range_id}/removed", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/textbooks/{textbook_id}/ranges/{range_id}/removed")
 def put_textbook_ranges_removed(
     textbook_id: str, range_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> None:
@@ -292,7 +292,7 @@ def put_textbook_ranges_removed(
     batch.removed_from_textbook = removed
 
 
-@router.put("/textbooks/{textbook_id}/pages/{page_id}/removed", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/textbooks/{textbook_id}/pages/{page_id}/removed")
 def put_textbook_pages_removed(
     textbook_id: str, page_id: str, removed: bool, session: database_utils.SessionDependable
 ) -> None:

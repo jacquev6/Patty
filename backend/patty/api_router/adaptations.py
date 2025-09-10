@@ -67,7 +67,6 @@ class ApiAdaptation(ApiModel):
     strategy: ApiStrategy
     input: ApiInputOut
     raw_llm_conversations: JsonList
-    last_assistant_response: adaptation.assistant_responses.Response | None
     adjustment_prompts: list[str]
     manual_edit: adaptation.adapted.Exercise | None
     removed_from_textbook: bool
@@ -115,7 +114,7 @@ class PostAdaptationAdjustmentRequest(ApiModel):
 @router.post("/adaptations/{id}/adjustment")
 async def post_adaptation_adjustment(
     id: str, req: PostAdaptationAdjustmentRequest, session: database_utils.SessionDependable
-) -> ApiAdaptation:
+) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     assert exercise_adaptation.initial_assistant_response is not None
 
@@ -172,11 +171,9 @@ async def post_adaptation_adjustment(
     )
     exercise_adaptation.adjustments = adjustments
 
-    return make_api_adaptation(exercise_adaptation)
-
 
 @router.delete("/adaptations/{id}/last-adjustment")
-def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
+def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)
@@ -187,23 +184,19 @@ def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDe
     adjustments.pop()
     exercise_adaptation.adjustments = adjustments
 
-    return make_api_adaptation(exercise_adaptation)
-
 
 @router.put("/adaptations/{id}/manual-edit")
 def put_adaptation_manual_edit(
     id: str, req: adaptation.adapted.Exercise, session: database_utils.SessionDependable
-) -> ApiAdaptation:
+) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     exercise_adaptation.manual_edit = req
-    return make_api_adaptation(exercise_adaptation)
 
 
 @router.delete("/adaptations/{id}/manual-edit")
-def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> ApiAdaptation:
+def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     exercise_adaptation.manual_edit = None
-    return make_api_adaptation(exercise_adaptation)
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdaptation:
@@ -255,7 +248,6 @@ def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdapta
         strategy=make_api_strategy(exercise_adaptation.settings, exercise_adaptation.model),
         input=make_api_input_out(exercise_adaptation.exercise),
         raw_llm_conversations=exercise_adaptation.raw_llm_conversations,
-        last_assistant_response=last_assistant_response,
         adjustment_prompts=[prompt.user_prompt for prompt in exercise_adaptation.adjustments],
         manual_edit=exercise_adaptation.manual_edit,
         removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
