@@ -520,6 +520,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{textbook_id}/pages/{page_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Pages Removed */
+    put: operations['put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{textbook_id}/ranges/{range_id}/removed': {
     parameters: {
       query?: never
@@ -670,47 +687,46 @@ export interface components {
         | components['schemas']['OpenAiModel']
       strategySettingsIdentity: components['schemas']['Identity'] | null
     }
-    /** Adjustment */
-    Adjustment: {
-      /** Assistantresponse */
-      assistantResponse:
-        | components['schemas']['patty__adaptation__assistant_responses__Success']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
-        | components['schemas']['UnknownError']
-      /** Userprompt */
-      userPrompt: string
-    }
     /** ApiAdaptation */
     ApiAdaptation: {
-      /** Adaptationbatchid */
-      adaptationBatchId: string | null
-      /** Adjustments */
-      adjustments: components['schemas']['Adjustment'][]
-      /** Classificationbatchid */
-      classificationBatchId: string | null
-      /** Extractionbatchid */
-      extractionBatchId: string | null
+      /** Adjustmentprompts */
+      adjustmentPrompts: string[]
+      /** Belongsto */
+      belongsTo:
+        | components['schemas']['BelongsToExtractionBatch']
+        | components['schemas']['BelongsToClassificationBatch']
+        | components['schemas']['BelongsToAdaptationBatch']
+        | components['schemas']['BelongsToTextbook']
       /** Id */
       id: string
-      /** Initialassistantresponse */
-      initialAssistantResponse:
+      input: components['schemas']['ApiInputOut']
+      /** Lastassistantresponse */
+      lastAssistantResponse:
         | components['schemas']['patty__adaptation__assistant_responses__Success']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
         | null
-      input: components['schemas']['ApiInput']
+      /** Llmstatus */
+      llmStatus:
+        | components['schemas']['InProgress']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
+        | components['schemas']['LlmSuccess']
       manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
       /** Removedfromtextbook */
       removedFromTextbook: boolean
+      /** Status */
+      status:
+        | components['schemas']['InProgress']
+        | components['schemas']['InvalidJsonError']
+        | components['schemas']['NotJsonError']
+        | components['schemas']['UnknownError']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__Success']
       strategy: components['schemas']['ApiStrategy-Output']
-      /** Textbookid */
-      textbookId: string | null
-      /** Textbooktitle */
-      textbookTitle: string | null
     }
     /** ApiExtractionStrategy */
     ApiExtractionStrategy: {
@@ -729,6 +745,15 @@ export interface components {
       pageNumber: number | null
       /** Text */
       text: string
+    }
+    /** ApiInputOut */
+    ApiInputOut: {
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Text */
+      text: string[]
     }
     /** ApiStrategy */
     'ApiStrategy-Input': {
@@ -838,6 +863,48 @@ export interface components {
       /** Inputs */
       inputs: components['schemas']['ApiInput'][]
       strategy: components['schemas']['ApiStrategy-Output']
+    }
+    /** BelongsToAdaptationBatch */
+    BelongsToAdaptationBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adaptation-batch'
+    }
+    /** BelongsToClassificationBatch */
+    BelongsToClassificationBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'classification-batch'
+    }
+    /** BelongsToExtractionBatch */
+    BelongsToExtractionBatch: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'extraction-batch'
+    }
+    /** BelongsToTextbook */
+    BelongsToTextbook: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'textbook'
+      /** Title */
+      title: string
     }
     'Choice-Input': {
       /** Contents */
@@ -950,6 +1017,8 @@ export interface components {
       createdAt: string
       /** Createdby */
       createdBy: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
       /** Id */
       id: string
       /** Message */
@@ -1237,6 +1306,8 @@ export interface components {
       createdBy: string
       /** Id */
       id: string
+      /** Needsrefresh */
+      needsRefresh: boolean
       strategy: components['schemas']['ApiStrategy-Output']
     }
     /** GetAdaptationBatchesResponse */
@@ -1260,6 +1331,8 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
+      /** Needsrefresh */
+      needsRefresh: boolean
     }
     /** GetClassificationBatchesResponse */
     GetClassificationBatchesResponse: {
@@ -1285,6 +1358,8 @@ export interface components {
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
+      /** Needsrefresh */
+      needsRefresh: boolean
       /** Pages */
       pages: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page'][]
       /** Runclassification */
@@ -1302,6 +1377,8 @@ export interface components {
     GetTextbookResponse: {
       /** Availablestrategysettings */
       availableStrategySettings: string[]
+      /** Needsrefresh */
+      needsRefresh: boolean
       textbook: components['schemas']['ApiTextbook']
     }
     /** GetTextbooksResponse */
@@ -1346,6 +1423,14 @@ export interface components {
        * @enum {string}
        */
       version: 'current' | 'previous' | 'older'
+    }
+    /** InProgress */
+    InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
     }
     /** InstructionComponents */
     InstructionComponents: {
@@ -1498,6 +1583,15 @@ export interface components {
         | components['schemas']['Formatted-Output']
         | components['schemas']['Choice-Output']
       )[]
+    }
+    /** LlmSuccess */
+    LlmSuccess: {
+      adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
     }
     /** MistralAiModel */
     MistralAiModel: {
@@ -1656,6 +1750,8 @@ export interface components {
       codeLocation: string | null
       /** Creator */
       creator: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
       /** Message */
       message: string
       /** Url */
@@ -2020,6 +2116,20 @@ export interface components {
        */
       kind: 'success'
     }
+    /** Success */
+    patty__api_router__adaptations__ApiAdaptation__Success: {
+      adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /**
+       * Success
+       * @enum {string}
+       */
+      success: 'llm' | 'manual'
+    }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
       adaptation: components['schemas']['ApiAdaptation'] | null
@@ -2084,10 +2194,14 @@ export interface components {
     patty__api_router__textbooks__ApiTextbook__Range__Page: {
       /** Exercises */
       exercises: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise'][]
+      /** Id */
+      id: string
       /** Inprogress */
       inProgress: boolean
       /** Pagenumber */
       pageNumber: number
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
     }
     /** Exercise */
     patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise: {
@@ -3196,7 +3310,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiTextbook']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */
@@ -3245,6 +3359,40 @@ export interface operations {
       }
     }
   }
+  put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
   put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put: {
     parameters: {
       query: {
@@ -3265,7 +3413,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiTextbook']
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

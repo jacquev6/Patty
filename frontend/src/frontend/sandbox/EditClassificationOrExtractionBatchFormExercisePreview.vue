@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { match } from 'ts-pattern'
 
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useAuthenticatedClient, type ClassificationBatch } from '@/frontend/ApiClient'
 import AdaptableExercisePreview, {
   makePreviewAbleExercise_forClassificationOrExtraction,
@@ -28,14 +26,6 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
-
-const adaptation = computed(() => {
-  if (props.exercise.adaptation === null) {
-    return null
-  } else {
-    return preprocessAdaptation(props.exercise.adaptation)
-  }
-})
 
 async function submitAdaptationsWithRecentSettings() {
   await match(props.batch)
@@ -63,7 +53,7 @@ async function submitAdaptationsWithRecentSettings() {
         classificationWasRequested,
         exercise,
         adaptationWasRequested,
-        adaptation,
+        exercise.adaptation,
         submitAdaptationsWithRecentSettings,
       )
     "

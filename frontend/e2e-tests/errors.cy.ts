@@ -16,6 +16,7 @@ describe("Patty's error catcher", () => {
       .should('have.length', 1)
       .should('contain', '"caughtBy": "Vue.config.errorHandler",')
       .should('contain', 'Error: Assertion failed')
+      .should('contain', '"githubIssueNumber": null')
   })
 
   it('catches dereferencing undefined', () => {
@@ -29,6 +30,7 @@ describe("Patty's error catcher", () => {
       .should('contain', '"caughtBy": "Vue.config.errorHandler",')
       .should('contain', 'TypeError:')
       .should('contain', 'undefined')
+      .should('contain', '"githubIssueNumber": null')
   })
 
   it('catches dereferencing null', () => {
@@ -42,6 +44,7 @@ describe("Patty's error catcher", () => {
       .should('contain', '"caughtBy": "Vue.config.errorHandler",')
       .should('contain', 'TypeError:')
       .should('contain', 'null')
+      .should('contain', '"githubIssueNumber": null')
   })
 
   it('catches unhandled rejection', () => {
@@ -54,6 +57,7 @@ describe("Patty's error catcher", () => {
       .should('have.length', 1)
       .should('contain', '"caughtBy": "Vue.config.errorHandler",')
       .should('contain', 'This is the reason')
+      .should('contain', '"githubIssueNumber": null')
   })
 
   it('catches exception', () => {
@@ -66,5 +70,24 @@ describe("Patty's error catcher", () => {
       .should('have.length', 1)
       .should('contain', '"caughtBy": "Vue.config.errorHandler",')
       .should('contain', 'Error: This is the error')
+      .should('contain', '"githubIssueNumber": null')
+  })
+
+  it('catches network error', () => {
+    cy.get('button:contains("Network error")').click()
+
+    cy.get('h1:contains("There was a network error")').should('exist')
+
+    cy.visit('/errors')
+    cy.get('pre')
+      .should('have.length', 1)
+      .should('contain', '"caughtBy": "Vue.config.errorHandler",')
+      .should(
+        'contain',
+        Cypress.browser.family === 'chromium'
+          ? 'TypeError: Failed to fetch'
+          : 'TypeError: NetworkError when attempting to fetch resource.',
+      )
+      .should('contain', '"githubIssueNumber": 99')
   })
 })

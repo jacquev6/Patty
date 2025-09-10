@@ -7,7 +7,7 @@ import AdaptableExercisePreview, {
   makePreviewAbleExercise_forClassificationOrExtraction,
   makePreviewAbleExercise_forTextbook,
 } from './AdaptableExercisePreview.vue'
-import type { PreprocessedAdaptation } from '../Adaptations'
+import { type Adaptation } from '@/frontend/ApiClient'
 import { ignoreResizeObserverLoopError } from '@/../e2e-tests/utils'
 import { useIdentifiedUserStore } from '../basic/IdentifiedUserStore'
 import { useAuthenticationTokenStore } from '../basic/AuthenticationTokenStore'
@@ -74,7 +74,7 @@ const exercises = {
         exerciseNumber: '24',
         text: ['This is the full text of the exercise.', 'It has multiple lines.'],
       },
-      status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
     },
     null,
   ),
@@ -87,7 +87,7 @@ const exercises = {
         exerciseNumber: '24',
         text: ['This is the full text of the exercise.', 'It has multiple lines.'],
       },
-      status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
     },
     null,
   ),
@@ -358,7 +358,7 @@ const exercises = {
     true,
     {
       id: 'ad-id',
-      status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
     },
     Promise.resolve,
   ),
@@ -453,7 +453,7 @@ const exercises = {
     true,
     {
       id: 'ad-id',
-      status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
     },
     Promise.resolve,
   ),
@@ -577,7 +577,7 @@ const exercises = {
     },
     {
       id: 'ad-id',
-      status: { kind: 'error', error: 'not-an-error' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
     },
   ),
   'textbook - adaptation success': makePreviewAbleExercise_forTextbook(
@@ -626,7 +626,7 @@ const exercises = {
     },
     {
       id: 'ad-id',
-      status: { kind: 'not-a-status' } as unknown as PreprocessedAdaptation['status'],
+      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
     },
   ),
 }

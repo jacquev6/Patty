@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { match } from 'ts-pattern'
 
 import { useAuthenticatedClient, type Adaptation } from '@/frontend/ApiClient'
 import assert from '$/assert'
 import EditAdaptationForm from './EditAdaptationForm.vue'
-import { preprocess as preprocessAdaptation } from '@/frontend/Adaptations'
 import { useBreadcrumbsStore, type Breadcrumbs } from '@/frontend/basic/BreadcrumbsStore'
 
 const props = defineProps<{
@@ -17,60 +17,44 @@ const client = useAuthenticatedClient()
 const breadcrumbsStore = useBreadcrumbsStore()
 
 const found = ref<boolean | null>(null)
-const apiAdaptation = ref<Adaptation | null>(null)
-
-const adaptation = computed(() => {
-  if (apiAdaptation.value === null) {
-    return null
-  } else {
-    return preprocessAdaptation(apiAdaptation.value)
-  }
-})
+const adaptation = ref<Adaptation | null>(null)
 
 onMounted(async () => {
   const response = await client.GET(`/api/adaptations/{id}`, { params: { path: { id: props.id } } })
 
   if (response.response.status === 404) {
     found.value = false
-    apiAdaptation.value = null
+    adaptation.value = null
   } else {
     found.value = true
     assert(response.data !== undefined)
-    apiAdaptation.value = response.data
+    adaptation.value = response.data
 
-    const breadcrumbs: Breadcrumbs = []
-    if (apiAdaptation.value.textbookId === null) {
-      breadcrumbs.push({ textKey: 'sandbox' })
-      if (apiAdaptation.value.extractionBatchId !== null) {
-        breadcrumbs.push({
-          textKey: 'existingExtractionBatch',
-          textArgs: { id: apiAdaptation.value.extractionBatchId },
-          to: { name: 'extraction-batch', params: { id: apiAdaptation.value.extractionBatchId } },
-        })
-      } else if (apiAdaptation.value.classificationBatchId !== null) {
-        breadcrumbs.push({
+    const breadcrumbs = match(adaptation.value.belongsTo)
+      .returnType<Breadcrumbs>()
+      .with({ kind: 'textbook' }, ({ id, title }) => [
+        { textKey: 'textbooks' },
+        { textKey: 'existingTextbook', textArgs: { title }, to: { name: 'textbook', params: { id } } },
+      ])
+      .with({ kind: 'adaptation-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        { textKey: 'existingAdaptationBatch', textArgs: { id }, to: { name: 'adaptation-batch', params: { id } } },
+      ])
+      .with({ kind: 'classification-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        {
           textKey: 'existingClassificationBatch',
-          textArgs: { id: apiAdaptation.value.classificationBatchId },
-          to: { name: 'classification-batch', params: { id: apiAdaptation.value.classificationBatchId } },
-        })
-      } else if (apiAdaptation.value.adaptationBatchId !== null) {
-        breadcrumbs.push({
-          textKey: 'existingAdaptationBatch',
-          textArgs: { id: apiAdaptation.value.adaptationBatchId },
-          to: { name: 'adaptation-batch', params: { id: apiAdaptation.value.adaptationBatchId } },
-        })
-      }
-    } else {
-      assert(apiAdaptation.value.textbookTitle !== null)
-      breadcrumbs.push({ textKey: 'textbooks' })
-      breadcrumbs.push({
-        textKey: 'existingTextbook',
-        textArgs: { title: apiAdaptation.value.textbookTitle },
-        to: { name: 'textbook', params: { id: apiAdaptation.value.textbookId } },
-      })
-    }
+          textArgs: { id },
+          to: { name: 'classification-batch', params: { id } },
+        },
+      ])
+      .with({ kind: 'extraction-batch' }, ({ id }) => [
+        { textKey: 'sandbox' },
+        { textKey: 'existingExtractionBatch', textArgs: { id }, to: { name: 'extraction-batch', params: { id } } },
+      ])
+      .exhaustive()
 
-    breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: apiAdaptation.value.id }, to: {} })
+    breadcrumbs.push({ textKey: 'existingAdaptation', textArgs: { id: adaptation.value.id }, to: {} })
 
     breadcrumbsStore.set(breadcrumbs)
   }
@@ -80,7 +64,7 @@ onMounted(async () => {
 <template>
   <div style="padding-left: 5px; padding-right: 5px">
     <template v-if="adaptation !== null">
-      <EditAdaptationForm :adaptation @adaptationUpdated="apiAdaptation = $event" />
+      <EditAdaptationForm :adaptation @adaptationUpdated="adaptation = $event" />
     </template>
     <template v-else-if="found === false">
       <h1>{{ t('notFound') }}</h1>

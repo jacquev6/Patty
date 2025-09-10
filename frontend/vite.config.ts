@@ -37,12 +37,10 @@ export default defineConfig(({ command/*, mode, isSsrBuild, isPreview*/ }) => {
     })
   ]
   
-  // Run the following in a shell to enable opening VSCode from the browser:
-  //   ./dev.sh compose -- logs --follow frontend | stdbuf -oL sed 's/^.*| //' | stdbuf -oL grep '^code' | sh
   // @todo Find a way to re-enable Vue DevTools for interactive development but not for end-to-end testing: they pollute visual tests.
-  // if (process.env.PATTY_UNIT_TESTING !== 'true') {
-  //   plugins.push(vueDevTools())
-  // }
+  // plugins.push(vueDevTools())
+  // When Vue DevTools are enabled, you can run the following in a shell to enable opening VSCode from the browser:
+  //   ./dev.sh compose -- logs --since 0m --follow frontend | stdbuf -oL sed 's/^.*| //' | stdbuf -oL grep '^code' | sh
 
   if (command === 'build' && entryPointName !== 'frontend') {
     // Generate a standalone HTML file that can be downloaded and opened offline

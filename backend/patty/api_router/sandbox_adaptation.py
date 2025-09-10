@@ -6,6 +6,7 @@ import sqlalchemy as sql
 from .. import adaptation
 from .. import classification
 from .. import database_utils
+from .. import dispatching as dispatch
 from .. import exercises
 from .. import sandbox
 from ..any_json import JsonDict
@@ -219,6 +220,7 @@ async def post_adaptation_batch(
 
 class GetAdaptationBatchResponse(ApiModel):
     id: str
+    needs_refresh: bool
     created_by: str
     strategy: ApiStrategy
     adaptations: list[ApiAdaptation]
@@ -227,14 +229,17 @@ class GetAdaptationBatchResponse(ApiModel):
 @router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, sandbox.adaptation.SandboxAdaptationBatch, id)
+    adaptations = [
+        make_api_adaptation(adaptation_creation.exercise_adaptation)
+        for adaptation_creation in adaptation_batch.adaptation_creations
+    ]
+    needs_refresh = any(a.status.kind == "inProgress" for a in adaptations)
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
+        needs_refresh=needs_refresh,
         created_by=adaptation_batch.created_by,
         strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
-        adaptations=[
-            make_api_adaptation(adaptation_creation.exercise_adaptation)
-            for adaptation_creation in adaptation_batch.adaptation_creations
-        ],
+        adaptations=adaptations,
     )
 
 
@@ -273,34 +278,53 @@ def put_adaptable_exercise_class(
     if exercise_class is None:
         raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
 
-    if len(exercise.adaptations) != 0:
-        adaptation_model: adaptation.llm.ConcreteModel | None = exercise.adaptations[-1].model
-    elif len(exercise.classifications) != 0 and isinstance(
-        exercise.classifications[-1], classification.ClassificationByChunk
-    ):
-        adaptation_model = exercise.classifications[-1].classification_chunk.model_for_adaptation
-    else:
-        adaptation_model = None
-
     session.add(
         classification.ClassificationByUser(
             exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
         )
     )
 
-    if adaptation_model is not None and exercise_class.latest_strategy_settings is not None:
-        session.add(
-            adaptation.Adaptation(
-                created=adaptation.AdaptationCreationByUser(at=now, username=req.creator),
-                settings=exercise_class.latest_strategy_settings,
-                model=adaptation_model,
-                exercise=exercise,
-                raw_llm_conversations=[],
-                initial_assistant_response=None,
-                adjustments=[],
-                manual_edit=None,
+    if exercise_class.latest_strategy_settings is not None:
+        adaptation_model: adaptation.llm.ConcreteModel | None = None
+        created: adaptation.AdaptationCreation | None = None
+
+        if len(exercise.adaptations) != 0:
+            some_previous_adaptation = exercise.adaptations[0]
+            adaptation_model = some_previous_adaptation.model
+            created = dispatch.adaptation_creation(
+                some_previous_adaptation.created,
+                by_chunk=lambda ac: classification.AdaptationCreationByChunk(
+                    at=now, classification_chunk=ac.classification_chunk
+                ),
+                by_sandbox_batch=lambda ac: sandbox.adaptation.AdaptationCreationBySandboxBatch(
+                    at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
+                ),
             )
-        )
+        elif len(exercise.classifications) != 0:
+            automatic_classifications = list(
+                filter(lambda c: isinstance(c, classification.ClassificationByChunk), exercise.classifications)
+            )
+            if len(automatic_classifications) != 0:
+                some_classification = automatic_classifications[0]
+                assert isinstance(some_classification, classification.ClassificationByChunk)
+                adaptation_model = some_classification.classification_chunk.model_for_adaptation
+                created = classification.AdaptationCreationByChunk(
+                    at=now, classification_chunk=some_classification.classification_chunk
+                )
+
+        if adaptation_model is not None and created is not None:
+            session.add(
+                adaptation.Adaptation(
+                    created=created,
+                    settings=exercise_class.latest_strategy_settings,
+                    model=adaptation_model,
+                    exercise=exercise,
+                    raw_llm_conversations=[],
+                    initial_assistant_response=None,
+                    adjustments=[],
+                    manual_edit=None,
+                )
+            )
 
 
 @router.get("/adaptation-batches")

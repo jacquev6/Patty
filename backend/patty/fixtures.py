@@ -674,7 +674,17 @@ class FixturesCreator:
             )
         )
 
-    def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
+    def create_dummy_textbook_with_pdf_range(
+        self,
+    ) -> tuple[
+        extraction.llm.ConcreteModel,
+        adaptation.llm.ConcreteModel,
+        textbooks.Textbook,
+        extraction.PdfFileRange,
+        textbooks.TextbookExtractionBatch,
+        extraction.ExtractionSettings,
+        adaptation.ExerciseClass,
+    ]:
         model_for_extraction = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
         model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
 
@@ -714,7 +724,7 @@ class FixturesCreator:
         page_40_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=10,  # Page 40 in the textbook
@@ -837,10 +847,107 @@ class FixturesCreator:
                 statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
             )
         )
+
+        mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
+        page_40_classification_chunk = self.add(
+            classification.ClassificationChunk(
+                created=extraction.ClassificationChunkCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                model_for_adaptation=model_for_adaptation,
+            )
+        )
+        self.add(
+            classification.ClassificationByChunk(
+                exercise=exercise_4_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification.ClassificationByChunk(
+                exercise=exercise_6_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification.ClassificationByChunk(
+                exercise=exercise_8_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+        self.add(
+            classification.ClassificationByChunk(
+                exercise=exercise_10_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+
+        assert mcq_exercise_class.latest_strategy_settings is not None
+        self.make_successful_adaptation(
+            created=self.add(
+                classification.AdaptationCreationByChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_4_page_40,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification.AdaptationCreationByChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_6_page_40,
+        )
+        self.make_successful_adaptation(
+            created=self.add(
+                classification.AdaptationCreationByChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_8_page_40,
+        )
+        # No adaptation for exercise_10_page_40: check that it does not appear in the exported HTML
+
+        return (
+            model_for_extraction,
+            model_for_adaptation,
+            textbook,
+            pdf_file_range,
+            extraction_batch,
+            extraction_settings,
+            mcq_exercise_class,
+        )
+
+    def create_dummy_textbook_with_text_exercise_numbers(self) -> None:
+        (
+            model_for_extraction,
+            model_for_adaptation,
+            textbook,
+            pdf_file_range,
+            extraction_batch,
+            extraction_settings,
+            mcq_exercise_class,
+        ) = self.create_dummy_textbook_with_pdf_range()
+
         page_42_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=12,  # Page 42 in the textbook
@@ -967,47 +1074,6 @@ class FixturesCreator:
             )
         )
 
-        mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
-        page_40_classification_chunk = self.add(
-            classification.ClassificationChunk(
-                created=extraction.ClassificationChunkCreationByPageExtraction(
-                    at=created_at, page_extraction=page_40_extraction
-                ),
-                model_for_adaptation=model_for_adaptation,
-            )
-        )
-        self.add(
-            classification.ClassificationByChunk(
-                exercise=exercise_4_page_40,
-                at=created_at,
-                classification_chunk=page_40_classification_chunk,
-                exercise_class=mcq_exercise_class,
-            )
-        )
-        self.add(
-            classification.ClassificationByChunk(
-                exercise=exercise_6_page_40,
-                at=created_at,
-                classification_chunk=page_40_classification_chunk,
-                exercise_class=mcq_exercise_class,
-            )
-        )
-        self.add(
-            classification.ClassificationByChunk(
-                exercise=exercise_8_page_40,
-                at=created_at,
-                classification_chunk=page_40_classification_chunk,
-                exercise_class=mcq_exercise_class,
-            )
-        )
-        self.add(
-            classification.ClassificationByChunk(
-                exercise=exercise_10_page_40,
-                at=created_at,
-                classification_chunk=page_40_classification_chunk,
-                exercise_class=mcq_exercise_class,
-            )
-        )
         page_42_classification_chunk = self.add(
             classification.ClassificationChunk(
                 created=extraction.ClassificationChunkCreationByPageExtraction(
@@ -1050,37 +1116,6 @@ class FixturesCreator:
         )
 
         assert mcq_exercise_class.latest_strategy_settings is not None
-        self.make_successful_adaptation(
-            created=self.add(
-                classification.AdaptationCreationByChunk(
-                    at=created_at, classification_chunk=page_40_classification_chunk
-                )
-            ),
-            settings=mcq_exercise_class.latest_strategy_settings,
-            model=model_for_adaptation,
-            exercise=exercise_4_page_40,
-        )
-        self.make_successful_adaptation(
-            created=self.add(
-                classification.AdaptationCreationByChunk(
-                    at=created_at, classification_chunk=page_40_classification_chunk
-                )
-            ),
-            settings=mcq_exercise_class.latest_strategy_settings,
-            model=model_for_adaptation,
-            exercise=exercise_6_page_40,
-        )
-        self.make_successful_adaptation(
-            created=self.add(
-                classification.AdaptationCreationByChunk(
-                    at=created_at, classification_chunk=page_40_classification_chunk
-                )
-            ),
-            settings=mcq_exercise_class.latest_strategy_settings,
-            model=model_for_adaptation,
-            exercise=exercise_8_page_40,
-        )
-        # No adaptation for exercise_10_page_40: check that it does not appear in the exported HTML
         self.make_successful_adaptation(
             created=self.add(
                 classification.AdaptationCreationByChunk(

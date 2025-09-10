@@ -68,12 +68,11 @@ def db_tables_graph(kind: typing.Literal["full", "modules"]) -> None:
         frozenset({"adaptation", "sandbox"}): "#FF8888",
         frozenset({"classification"}): "#008800",
         frozenset({"classification", "sandbox"}): "#60AD60",
-        frozenset({"errors"}): None,
+        frozenset({"errors"}): "#000000",
         frozenset({"exercises"}): "#000000",
         frozenset({"external"}): "#FF55FF",
         frozenset({"extraction"}): "#0000FF",
         frozenset({"extraction", "sandbox"}): "#5555FF",
-        frozenset({"old"}): None,
         frozenset({"textbooks"}): "#FFFF00",
     }
 
@@ -729,7 +728,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250902-071603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250909-121603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

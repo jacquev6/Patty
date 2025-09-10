@@ -7,6 +7,7 @@ import WhiteSpace from '$/WhiteSpace.vue'
 import { useAuthenticatedClient } from '@/frontend/ApiClient'
 import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
 import ClassEditor from '@/frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
+import BugMarker from '@/reusable/BugMarker.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
@@ -30,9 +31,14 @@ const editingClassification = ref(false)
 
 const exerciseClassProxy = computed({
   get: () =>
-    props.exercise.kind === 'classificationOrExtraction' ? (props.exercise.exercise.exerciseClass ?? '') : '',
+    props.exercise.kind === 'classificationOrExtraction' || props.exercise.kind === 'textbook'
+      ? (props.exercise.exercise.exerciseClass ?? '')
+      : '',
   async set(className: string) {
-    if (props.exercise.kind === 'classificationOrExtraction' && className !== props.exercise.exercise.exerciseClass) {
+    if (
+      (props.exercise.kind === 'classificationOrExtraction' || props.exercise.kind === 'textbook') &&
+      className !== props.exercise.exercise.exerciseClass
+    ) {
       await client.PUT('/api/adaptable-exercises/{id}/exercise-class', {
         params: { path: { id: props.exercise.exercise.id } },
         body: { creator: identifiedUser.identifier, className },
@@ -87,7 +93,9 @@ const exerciseNumber = computed(() => {
           <WhiteSpace />
           <span class="inProgress">({{ t('inProgress') }})</span>
         </template>
-        <template v-else-if="editingClassification">: <ClassEditor v-model="exerciseClassProxy" /> </template>
+        <template v-else-if="editingClassification"
+          >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
+        </template>
         <template v-else
           >: {{ exercise.exercise.exerciseClass }}
           <template v-if="exercise.exercise.reclassifiedBy === null">
@@ -110,11 +118,17 @@ const exerciseNumber = computed(() => {
         <WhiteSpace />
         <span class="inProgress">{{ t('inProgress') }}</span>
       </template>
+      <template v-else-if="editingClassification"
+        >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
+      </template>
       <template v-else
         >: {{ exercise.exercise.exerciseClass }}
+        <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
+        <WhiteSpace />
         <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
       </template>
     </template>
+    <BugMarker v-else is="span" m="Unexpected exercise kind" :v="exercise" />
   </component>
 
   <p v-if="showPageAndExercise">

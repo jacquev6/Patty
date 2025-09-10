@@ -1,5 +1,5 @@
 <script lang="ts">
-import { type PreprocessedAdaptation } from '../Adaptations'
+import { type Adaptation as ApiAdaptation } from '@/frontend/ApiClient'
 
 type Exercise = {
   id: string
@@ -12,9 +12,9 @@ type Exercise = {
 }
 
 type Adaptation = {
-  id: string
-  input: PreprocessedAdaptation['input']
-  status: PreprocessedAdaptation['status']
+  id: ApiAdaptation['id']
+  input: ApiAdaptation['input']
+  status: ApiAdaptation['status']
 }
 
 export type PreviewableExercise =
@@ -53,8 +53,8 @@ export function makePreviewAbleExercise_forAdaptation(
   index: number,
   adaptation: {
     id: string
-    input: PreprocessedAdaptation['input']
-    status: PreprocessedAdaptation['status']
+    input: Adaptation['input']
+    status: Adaptation['status']
   },
   headerText: string | null,
 ): PreviewableExercise {
@@ -85,7 +85,7 @@ export function makePreviewAbleExercise_forClassificationOrExtraction(
   adaptationWasRequested: boolean,
   adaptation: {
     id: string
-    status: PreprocessedAdaptation['status']
+    status: Adaptation['status']
   } | null,
   submitAdaptationsWithRecentSettings: () => Promise<void>,
 ): PreviewableExercise {
@@ -123,7 +123,7 @@ export function makePreviewAbleExercise_forTextbook(
   },
   adaptation: {
     id: string
-    status: PreprocessedAdaptation['status']
+    status: Adaptation['status']
   } | null,
 ): PreviewableExercise {
   return {

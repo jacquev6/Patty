@@ -17,11 +17,10 @@ import adaptedExerciseSchema from '@/../../backend/generated/adapted-exercise-sc
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
 import AdaptationStrategyEditor from './AdaptationStrategyEditor.vue'
-import { type PreprocessedAdaptation } from '@/frontend/Adaptations'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 
 const props = defineProps<{
-  adaptation: PreprocessedAdaptation
+  adaptation: Adaptation
 }>()
 
 const emit = defineEmits<{

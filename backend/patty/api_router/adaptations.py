@@ -1,13 +1,12 @@
 from typing import Literal
+import typing
 
 import fastapi
 
 from .. import adaptation
-from .. import classification
 from .. import database_utils
+from .. import dispatching as dispatch
 from .. import exercises
-from .. import extraction
-from .. import sandbox
 from .. import textbooks
 from ..any_json import JsonList
 from ..api_utils import ApiModel, get_by_id
@@ -37,20 +36,71 @@ class ApiInput(ApiModel):
     text: str
 
 
+class ApiInputOut(ApiModel):
+    page_number: int | None
+    exercise_number: str | None
+    text: list[str]
+
+
 class ApiAdaptation(ApiModel):
     id: str
-    extraction_batch_id: str | None
-    classification_batch_id: str | None
-    adaptation_batch_id: str | None
-    textbook_id: str | None
-    textbook_title: str | None
+
+    class BelongsToExtractionBatch(ApiModel):
+        kind: Literal["extraction-batch"]
+        id: str
+
+    class BelongsToClassificationBatch(ApiModel):
+        kind: Literal["classification-batch"]
+        id: str
+
+    class BelongsToAdaptationBatch(ApiModel):
+        kind: Literal["adaptation-batch"]
+        id: str
+
+    class BelongsToTextbook(ApiModel):
+        kind: Literal["textbook"]
+        id: str
+        title: str
+
+    belongs_to: BelongsToExtractionBatch | BelongsToClassificationBatch | BelongsToAdaptationBatch | BelongsToTextbook
+
     strategy: ApiStrategy
-    input: ApiInput
+    input: ApiInputOut
     raw_llm_conversations: JsonList
-    initial_assistant_response: adaptation.assistant_responses.Response | None
-    adjustments: list[adaptation.assistant_responses.Adjustment]
+    last_assistant_response: adaptation.assistant_responses.Response | None
+    adjustment_prompts: list[str]
     manual_edit: adaptation.adapted.Exercise | None
     removed_from_textbook: bool
+
+    class InProgress(ApiModel):
+        kind: Literal["inProgress"]
+
+    class InvalidJsonError(ApiModel):
+        kind: Literal["error"]
+        error: Literal["invalid-json"]
+        parsed: typing.Any
+
+    class NotJsonError(ApiModel):
+        kind: Literal["error"]
+        error: Literal["not-json"]
+        text: str
+
+    class UnknownError(ApiModel):
+        kind: Literal["error"]
+        error: Literal["unknown"]
+
+    class LlmSuccess(ApiModel):
+        kind: Literal["success"]
+        adapted_exercise: adaptation.adapted.Exercise
+
+    llm_status: InProgress | InvalidJsonError | NotJsonError | UnknownError | LlmSuccess
+
+    class Success(ApiModel):
+        kind: Literal["success"]
+        success: Literal["llm", "manual"]
+        adapted_exercise: adaptation.adapted.Exercise
+
+    status: InProgress | InvalidJsonError | NotJsonError | UnknownError | Success
 
 
 @router.get("/adaptations/{id}")
@@ -157,47 +207,98 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdaptation:
-    textbook = (
-        exercise_adaptation.exercise.location.textbook
-        if isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
-        else None
+    last_assistant_response = exercise_adaptation.initial_assistant_response
+    if exercise_adaptation.adjustments:
+        last_assistant_response = exercise_adaptation.adjustments[-1].assistant_response
+
+    llm_status: (
+        ApiAdaptation.InProgress
+        | ApiAdaptation.InvalidJsonError
+        | ApiAdaptation.NotJsonError
+        | ApiAdaptation.UnknownError
+        | ApiAdaptation.LlmSuccess
     )
+    if last_assistant_response is None:
+        llm_status = ApiAdaptation.InProgress(kind="inProgress")
+    elif isinstance(last_assistant_response, adaptation.assistant_responses.Success):
+        llm_status = ApiAdaptation.LlmSuccess(kind="success", adapted_exercise=last_assistant_response.exercise)
+    elif isinstance(last_assistant_response, adaptation.assistant_responses.InvalidJsonError):
+        llm_status = ApiAdaptation.InvalidJsonError(
+            kind="error", error="invalid-json", parsed=last_assistant_response.parsed
+        )
+    elif isinstance(last_assistant_response, adaptation.assistant_responses.NotJsonError):
+        llm_status = ApiAdaptation.NotJsonError(kind="error", error="not-json", text=last_assistant_response.text)
+    elif isinstance(last_assistant_response, adaptation.assistant_responses.UnknownError):
+        llm_status = ApiAdaptation.UnknownError(kind="error", error="unknown")
+    else:
+        assert False
+
+    status: (
+        ApiAdaptation.InProgress
+        | ApiAdaptation.InvalidJsonError
+        | ApiAdaptation.NotJsonError
+        | ApiAdaptation.UnknownError
+        | ApiAdaptation.Success
+    )
+    if exercise_adaptation.manual_edit is not None:
+        status = ApiAdaptation.Success(
+            kind="success", success="manual", adapted_exercise=exercise_adaptation.manual_edit
+        )
+    elif isinstance(llm_status, ApiAdaptation.LlmSuccess):
+        status = ApiAdaptation.Success(kind="success", success="llm", adapted_exercise=llm_status.adapted_exercise)
+    else:
+        status = llm_status
 
     return ApiAdaptation(
         id=str(exercise_adaptation.id),
-        extraction_batch_id=(
-            str(exercise_adaptation.exercise.created.page_extraction.created.sandbox_extraction_batch.id)
-            if isinstance(exercise_adaptation.exercise.created, extraction.ExerciseCreationByPageExtraction)
-            and isinstance(
-                exercise_adaptation.exercise.created.page_extraction.created,
-                sandbox.extraction.PageExtractionCreationBySandboxBatch,
-            )
-            else None
-        ),
-        classification_batch_id=(
-            str(exercise_adaptation.created.classification_chunk.created.sandbox_classification_batch.id)
-            if isinstance(exercise_adaptation.created, classification.AdaptationCreationByChunk)
-            and isinstance(
-                exercise_adaptation.created.classification_chunk.created,
-                sandbox.classification.ClassificationChunkCreationBySandboxBatch,
-            )
-            else None
-        ),
-        adaptation_batch_id=(
-            str(exercise_adaptation.created.sandbox_adaptation_batch.id)
-            if isinstance(exercise_adaptation.created, sandbox.adaptation.AdaptationCreationBySandboxBatch)
-            else None
-        ),
-        textbook_id=None if textbook is None else str(textbook.id),
-        textbook_title=None if textbook is None else textbook.title,
+        belongs_to=make_api_adaptation_belongs_to(exercise_adaptation),
         strategy=make_api_strategy(exercise_adaptation.settings, exercise_adaptation.model),
-        input=make_api_input(exercise_adaptation.exercise),
+        input=make_api_input_out(exercise_adaptation.exercise),
         raw_llm_conversations=exercise_adaptation.raw_llm_conversations,
-        initial_assistant_response=exercise_adaptation.initial_assistant_response,
-        adjustments=exercise_adaptation.adjustments,
+        last_assistant_response=last_assistant_response,
+        adjustment_prompts=[prompt.user_prompt for prompt in exercise_adaptation.adjustments],
         manual_edit=exercise_adaptation.manual_edit,
         removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
         and exercise_adaptation.exercise.location.removed_from_textbook,
+        llm_status=llm_status,
+        status=status,
+    )
+
+
+def make_api_adaptation_belongs_to(
+    adaptation_: adaptation.Adaptation,
+) -> (
+    ApiAdaptation.BelongsToExtractionBatch
+    | ApiAdaptation.BelongsToClassificationBatch
+    | ApiAdaptation.BelongsToAdaptationBatch
+    | ApiAdaptation.BelongsToTextbook
+):
+    return dispatch.exercise_creation(
+        adaptation_.exercise.created,
+        by_user=lambda _: dispatch.adaptation_creation(
+            adaptation_.created,
+            by_chunk=lambda ac: dispatch.classification_chunk_creation(
+                ac.classification_chunk.created,
+                by_page_extraction=None,  # The exercise has been created by a user, so the classification chunk cannot have been created by a page extraction
+                by_sandbox_batch=lambda ccc: ApiAdaptation.BelongsToClassificationBatch(
+                    kind="classification-batch", id=str(ccc.sandbox_classification_batch.id)
+                ),
+            ),
+            by_sandbox_batch=lambda ac: ApiAdaptation.BelongsToAdaptationBatch(
+                kind="adaptation-batch", id=str(ac.sandbox_adaptation_batch.id)
+            ),
+        ),
+        by_page_extraction=lambda ec: dispatch.page_extraction_creation(
+            ec.page_extraction.created,
+            by_sandbox_batch=lambda pec: ApiAdaptation.BelongsToExtractionBatch(
+                kind="extraction-batch", id=str(pec.sandbox_extraction_batch.id)
+            ),
+            by_textbook=lambda pec: ApiAdaptation.BelongsToTextbook(
+                kind="textbook",
+                id=str(pec.textbook_extraction_batch.textbook.id),
+                title=pec.textbook_extraction_batch.textbook.title,
+            ),
+        ),
     )
 
 
@@ -234,4 +335,15 @@ def make_api_input(exercise: adaptation.AdaptableExercise) -> ApiInput:
         page_number=exercise.location.page_number,
         exercise_number=exercise.location.exercise_number,
         text=exercise.full_text,
+    )
+
+
+def make_api_input_out(exercise: adaptation.AdaptableExercise) -> ApiInputOut:
+    assert isinstance(
+        exercise.location, (textbooks.ExerciseLocationTextbook, exercises.ExerciseLocationMaybePageAndNumber)
+    )
+    return ApiInputOut(
+        page_number=exercise.location.page_number,
+        exercise_number=exercise.location.exercise_number,
+        text=exercise.full_text.split("\n"),
     )

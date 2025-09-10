@@ -25,6 +25,7 @@ const errors: [string, () => void][] = [
       throw new Error('This is the error')
     },
   ],
+  ['Network error', () => fetch('http://not-a-host/not-a-path/')],
 ]
 
 if (window.location.search.includes('reject')) {

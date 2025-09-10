@@ -4,8 +4,6 @@ import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import AdaptationPreview from '@/frontend/sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
-import { preprocess } from '@/frontend/Adaptations'
-import assert from '$/assert'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
@@ -19,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'textbook-updated', textbook: Textbook): void
+  (e: 'textbook-updated'): void
 }>()
 
 const { t } = useI18n()
@@ -29,24 +27,25 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-function textbookUpdated(textbook: Textbook) {
-  emit('textbook-updated', textbook)
+async function removeExercise(exercise_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
+  })
+  emit('textbook-updated')
 }
 
-async function removeExercise(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, exercise_id: id }, query: { removed } },
+async function removePage(page_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/pages/{page_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, page_id }, query: { removed } },
   })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
+  emit('textbook-updated')
 }
 
-async function removeRange(id: string, removed: boolean) {
-  const response = await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, range_id: id }, query: { removed } },
+async function removeRange(range_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, range_id }, query: { removed } },
   })
-  assert(response.data !== undefined)
-  emit('textbook-updated', response.data)
+  emit('textbook-updated')
 }
 </script>
 
@@ -78,7 +77,7 @@ async function removeRange(id: string, removed: boolean) {
   </p>
   <template v-if="view === 'batch'">
     <h2>{{ t('newTextbookPdf') }}</h2>
-    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
@@ -115,27 +114,40 @@ async function removeRange(id: string, removed: boolean) {
         </p>
         <template v-for="page in range.pages">
           <h4>
-            {{ t('page') }} {{ page.pageNumber
-            }}<template v-if="page.inProgress"
-              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
-            >
+            <span :class="{ removed: page.removedFromTextbook }">{{ t('page') }} {{ page.pageNumber }}</span>
+            <template v-if="page.inProgress">
+              <WhiteSpace />
+              <span class="inProgress">{{ t('inProgress') }}</span>
+            </template>
+            <template v-else-if="page.removedFromTextbook">
+              ({{ t('removed') }})
+              <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
+            </template>
+            <template v-else>
+              <WhiteSpace />
+              <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
+            </template>
           </h4>
-          <template v-for="exercise in page.exercises">
-            <h5 v-if="exercise.removedFromTextbook">
-              <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
-              <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
-            </h5>
-            <EditTextbookFormExercisePreview
-              v-else
-              :exercise
-              @exerciseRemoved="() => removeExercise(exercise.id, true)"
-            />
+          <template v-if="!page.removedFromTextbook">
+            <template v-for="exercise in page.exercises">
+              <h5 v-if="exercise.removedFromTextbook">
+                <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
+                ({{ t('removed') }})
+                <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
+              </h5>
+              <EditTextbookFormExercisePreview
+                v-else
+                :exercise
+                @exerciseRemoved="() => removeExercise(exercise.id, true)"
+                @batchUpdated="emit('textbook-updated')"
+              />
+            </template>
           </template>
         </template>
       </template>
     </template>
     <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>
-    <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="textbookUpdated" />
+    <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
     <h2>{{ t('existingExternalExercises') }}</h2>
     <template v-for="externalExercise in textbook.externalExercises">
       <h3 v-if="externalExercise.removedFromTextbook">
@@ -156,7 +168,7 @@ async function removeRange(id: string, removed: boolean) {
           <AdaptationPreview
             :headerLevel="3"
             :index="0"
-            :adaptation="preprocess(exercise.adaptation)"
+            :adaptation="exercise.adaptation"
             :headerText="`${t('exercise')} ${exercise.exerciseNumber}`"
             :showPageAndExercise="false"
           />

@@ -208,86 +208,41 @@
         "title": "AdaptationBatch",
         "type": "object"
       },
-      "Adjustment": {
-        "additionalProperties": false,
-        "properties": {
-          "assistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
-              },
-              {
-                "$ref": "#/components/schemas/InvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/NotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/UnknownError"
-              }
-            ],
-            "title": "Assistantresponse"
-          },
-          "userPrompt": {
-            "title": "Userprompt",
-            "type": "string"
-          }
-        },
-        "required": [
-          "userPrompt",
-          "assistantResponse"
-        ],
-        "title": "Adjustment",
-        "type": "object"
-      },
       "ApiAdaptation": {
         "additionalProperties": false,
         "properties": {
-          "adaptationBatchId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Adaptationbatchid"
-          },
-          "adjustments": {
+          "adjustmentPrompts": {
             "items": {
-              "$ref": "#/components/schemas/Adjustment"
+              "type": "string"
             },
-            "title": "Adjustments",
+            "title": "Adjustmentprompts",
             "type": "array"
           },
-          "classificationBatchId": {
+          "belongsTo": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/BelongsToExtractionBatch"
               },
               {
-                "type": "null"
-              }
-            ],
-            "title": "Classificationbatchid"
-          },
-          "extractionBatchId": {
-            "anyOf": [
-              {
-                "type": "string"
+                "$ref": "#/components/schemas/BelongsToClassificationBatch"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/BelongsToAdaptationBatch"
+              },
+              {
+                "$ref": "#/components/schemas/BelongsToTextbook"
               }
             ],
-            "title": "Extractionbatchid"
+            "title": "Belongsto"
           },
           "id": {
             "title": "Id",
             "type": "string"
           },
-          "initialAssistantResponse": {
+          "input": {
+            "$ref": "#/components/schemas/ApiInputOut"
+          },
+          "lastAssistantResponse": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
@@ -305,10 +260,27 @@
                 "type": "null"
               }
             ],
-            "title": "Initialassistantresponse"
+            "title": "Lastassistantresponse"
           },
-          "input": {
-            "$ref": "#/components/schemas/ApiInput"
+          "llmStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InProgress"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/LlmSuccess"
+              }
+            ],
+            "title": "Llmstatus"
           },
           "manualEdit": {
             "anyOf": [
@@ -329,46 +301,42 @@
             "title": "Removedfromtextbook",
             "type": "boolean"
           },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InProgress"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/UnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/patty__api_router__adaptations__ApiAdaptation__Success"
+              }
+            ],
+            "title": "Status"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
-          },
-          "textbookId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Textbookid"
-          },
-          "textbookTitle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Textbooktitle"
           }
         },
         "required": [
           "id",
-          "extractionBatchId",
-          "classificationBatchId",
-          "adaptationBatchId",
-          "textbookId",
-          "textbookTitle",
+          "belongsTo",
           "strategy",
           "input",
           "rawLlmConversations",
-          "initialAssistantResponse",
-          "adjustments",
+          "lastAssistantResponse",
+          "adjustmentPrompts",
           "manualEdit",
-          "removedFromTextbook"
+          "removedFromTextbook",
+          "llmStatus",
+          "status"
         ],
         "title": "ApiAdaptation",
         "type": "object"
@@ -440,6 +408,47 @@
           "text"
         ],
         "title": "ApiInput",
+        "type": "object"
+      },
+      "ApiInputOut": {
+        "additionalProperties": false,
+        "properties": {
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "text": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Text",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "text"
+        ],
+        "title": "ApiInputOut",
         "type": "object"
       },
       "ApiStrategy-Input": {
@@ -778,6 +787,91 @@
         "title": "BaseAdaptationBatch",
         "type": "object"
       },
+      "BelongsToAdaptationBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "adaptation-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToAdaptationBatch",
+        "type": "object"
+      },
+      "BelongsToClassificationBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "classification-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToClassificationBatch",
+        "type": "object"
+      },
+      "BelongsToExtractionBatch": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "extraction-batch",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "BelongsToExtractionBatch",
+        "type": "object"
+      },
+      "BelongsToTextbook": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "textbook",
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "title"
+        ],
+        "title": "BelongsToTextbook",
+        "type": "object"
+      },
       "Choice-Input": {
         "properties": {
           "contents": {
@@ -1072,6 +1166,17 @@
             ],
             "title": "Createdby"
           },
+          "githubIssueNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Githubissuenumber"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -1107,7 +1212,8 @@
           "url",
           "caughtBy",
           "message",
-          "codeLocation"
+          "codeLocation",
+          "githubIssueNumber"
         ],
         "title": "Error",
         "type": "object"
@@ -1772,12 +1878,17 @@
             "title": "Id",
             "type": "string"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
           }
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "strategy",
           "adaptations"
@@ -1855,10 +1966,15 @@
               }
             ],
             "title": "Modelforadaptation"
+          },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
           }
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "modelForAdaptation",
           "exercises"
@@ -1940,6 +2056,10 @@
             ],
             "title": "Modelforadaptation"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "pages": {
             "items": {
               "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page"
@@ -1957,6 +2077,7 @@
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "strategy",
           "runClassification",
@@ -2005,11 +2126,16 @@
             "title": "Availablestrategysettings",
             "type": "array"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "textbook": {
             "$ref": "#/components/schemas/ApiTextbook"
           }
         },
         "required": [
+          "needsRefresh",
           "textbook",
           "availableStrategySettings"
         ],
@@ -2101,6 +2227,21 @@
           "version"
         ],
         "title": "Identity",
+        "type": "object"
+      },
+      "InProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "inProgress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "InProgress",
         "type": "object"
       },
       "InstructionComponents": {
@@ -2457,6 +2598,25 @@
         "required": [
           "contents"
         ],
+        "type": "object"
+      },
+      "LlmSuccess": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptedExercise": {
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "adaptedExercise"
+        ],
+        "title": "LlmSuccess",
         "type": "object"
       },
       "MistralAiModel": {
@@ -2930,6 +3090,17 @@
             ],
             "title": "Creator"
           },
+          "githubIssueNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Githubissuenumber"
+          },
           "message": {
             "title": "Message",
             "type": "string"
@@ -2954,7 +3125,8 @@
           "url",
           "caughtBy",
           "message",
-          "codeLocation"
+          "codeLocation",
+          "githubIssueNumber"
         ],
         "title": "PostErrorsCaughtByFrontendRequest",
         "type": "object"
@@ -3834,6 +4006,34 @@
         "title": "Success",
         "type": "object"
       },
+      "patty__api_router__adaptations__ApiAdaptation__Success": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptedExercise": {
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "success": {
+            "enum": [
+              "llm",
+              "manual"
+            ],
+            "title": "Success",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "success",
+          "adaptedExercise"
+        ],
+        "title": "Success",
+        "type": "object"
+      },
       "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
         "additionalProperties": false,
         "properties": {
@@ -4082,6 +4282,10 @@
             "title": "Exercises",
             "type": "array"
           },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "inProgress": {
             "title": "Inprogress",
             "type": "boolean"
@@ -4089,12 +4293,18 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
+          },
+          "removedFromTextbook": {
+            "title": "Removedfromtextbook",
+            "type": "boolean"
           }
         },
         "required": [
+          "id",
           "pageNumber",
           "inProgress",
-          "exercises"
+          "exercises",
+          "removedFromTextbook"
         ],
         "title": "Page",
         "type": "object"
@@ -5801,9 +6011,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -5881,6 +6089,66 @@
         "summary": "Post Textbook External Exercises"
       }
     },
+    "/api/textbooks/{textbook_id}/pages/{page_id}/removed": {
+      "put": {
+        "operationId": "put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page_id",
+            "required": true,
+            "schema": {
+              "title": "Page Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "removed",
+            "required": true,
+            "schema": {
+              "title": "Removed",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Put Textbook Pages Removed"
+      }
+    },
     "/api/textbooks/{textbook_id}/ranges/{range_id}/removed": {
       "put": {
         "operationId": "put_textbook_ranges_removed_api_textbooks__textbook_id__ranges__range_id__removed_put",
@@ -5917,9 +6185,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiTextbook"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
