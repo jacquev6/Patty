@@ -724,7 +724,7 @@ class FixturesCreator:
         page_40_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=10,  # Page 40 in the textbook
@@ -947,7 +947,7 @@ class FixturesCreator:
         page_42_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=12,  # Page 42 in the textbook

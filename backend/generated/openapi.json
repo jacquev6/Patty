@@ -4282,6 +4282,10 @@
             "title": "Exercises",
             "type": "array"
           },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "inProgress": {
             "title": "Inprogress",
             "type": "boolean"
@@ -4289,12 +4293,18 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
+          },
+          "removedFromTextbook": {
+            "title": "Removedfromtextbook",
+            "type": "boolean"
           }
         },
         "required": [
+          "id",
           "pageNumber",
           "inProgress",
-          "exercises"
+          "exercises",
+          "removedFromTextbook"
         ],
         "title": "Page",
         "type": "object"
@@ -6077,6 +6087,66 @@
           }
         ],
         "summary": "Post Textbook External Exercises"
+      }
+    },
+    "/api/textbooks/{textbook_id}/pages/{page_id}/removed": {
+      "put": {
+        "operationId": "put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page_id",
+            "required": true,
+            "schema": {
+              "title": "Page Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "removed",
+            "required": true,
+            "schema": {
+              "title": "Removed",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Put Textbook Pages Removed"
       }
     },
     "/api/textbooks/{textbook_id}/ranges/{range_id}/removed": {

@@ -55,7 +55,7 @@ describe('The edition form for textbooks - empty', () => {
     screenshot(`${slug}-edition-form-by-batch`)
   }
 
-  it('adds and removes pdf ranges', () => {
+  it('adds and removes PDF ranges', () => {
     screenshots('empty-textbook')
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
@@ -87,27 +87,27 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h2').eq(0).should('have.text', 'Page 6')
     cy.get('h2').eq(1).should('have.text', 'Page 7')
     cy.get('[data-cy="view-by"]').select('batch')
-    cy.get('button:contains("Remove")').should('have.length', 5)
-    cy.get('button:contains("Remove")').eq(1).click()
+    cy.get('button:contains("Remove")').should('have.length', 7)
+    cy.get('button:contains("Remove")').eq(2).click()
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2').should('have.length', 1)
     cy.get('h2').should('have.text', 'Page 7')
     cy.get('[data-cy="view-by"]').select('batch')
     cy.get('button:contains("Re-add")').should('have.length', 1)
     cy.get('button:contains("Re-add")').click()
-    cy.get('button:contains("Remove")').should('have.length', 5)
-    cy.get('button:contains("Remove")').eq(3).click()
+    cy.get('button:contains("Remove")').should('have.length', 7)
+    cy.get('button:contains("Remove")').eq(4).click()
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2').should('have.length', 1)
     cy.get('h2').should('have.text', 'Page 6')
     cy.get('[data-cy="view-by"]').select('batch')
     cy.get('button:contains("Re-add")').should('have.length', 1)
     cy.get('button:contains("Re-add")').click()
-    cy.get('button:contains("Remove")').should('have.length', 5)
+    cy.get('button:contains("Remove")').should('have.length', 7)
 
     // Remove batch
     cy.get('[data-cy="view-by"]').select('batch')
-    cy.get('button:contains("Remove")').should('have.length', 5)
+    cy.get('button:contains("Remove")').should('have.length', 7)
     cy.get('button:contains("Remove")').eq(0).click()
     cy.get('button:contains("Remove")').should('not.exist')
     cy.get('[data-cy="view-by"]').select('page')
@@ -116,7 +116,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('[data-cy="view-by"]').select('batch')
     cy.get('button:contains("Re-add")').should('have.length', 1)
     cy.get('button:contains("Re-add")').click()
-    cy.get('button:contains("Remove")').should('have.length', 5)
+    cy.get('button:contains("Remove")').should('have.length', 7)
 
     cy.get('button:contains("View details")').eq(0).click()
     cy.get('h1:contains("Strategy")').should('exist')
@@ -186,5 +186,24 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('div.busy').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1').click()
+  })
+
+  it('removes and re-adds PDF pages', () => {
+    cy.get('h5:contains("Exercise")').should('have.length', 4)
+    cy.get('[data-cy="view-by"]').select('page')
+    cy.get('h2').should('have.length', 1).should('have.text', 'Page 40')
+    cy.get('[data-cy="view-by"]').select('batch')
+
+    cy.get('h4:contains("Page 40") button:contains("Remove")').should('have.length', 1).click()
+    cy.get('h5:contains("Exercise")').should('have.length', 0)
+    cy.get('[data-cy="view-by"]').select('page')
+    cy.get('h2').should('have.length', 0)
+    cy.get('[data-cy="view-by"]').select('batch')
+
+    cy.get('h4:contains("Page 40") button:contains("Re-add")').should('have.length', 1).click()
+    cy.get('h5:contains("Exercise")').should('have.length', 4)
+    cy.get('[data-cy="view-by"]').select('page')
+    cy.get('h2').should('have.length', 1).should('have.text', 'Page 40')
+    cy.get('[data-cy="view-by"]').select('batch')
   })
 })

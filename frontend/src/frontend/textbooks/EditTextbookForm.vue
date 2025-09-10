@@ -27,16 +27,23 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 
 const view = ref<'batch' | 'page'>('batch')
 
-async function removeExercise(id: string, removed: boolean) {
+async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, exercise_id: id }, query: { removed } },
+    params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
 
-async function removeRange(id: string, removed: boolean) {
+async function removePage(page_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/pages/{page_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, page_id }, query: { removed } },
+  })
+  emit('textbook-updated')
+}
+
+async function removeRange(range_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/ranges/{range_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, range_id: id }, query: { removed } },
+    params: { path: { textbook_id: props.textbook.id, range_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
@@ -107,22 +114,34 @@ async function removeRange(id: string, removed: boolean) {
         </p>
         <template v-for="page in range.pages">
           <h4>
-            {{ t('page') }} {{ page.pageNumber
-            }}<template v-if="page.inProgress"
-              ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
-            >
+            <span :class="{ removed: page.removedFromTextbook }">{{ t('page') }} {{ page.pageNumber }}</span>
+            <template v-if="page.inProgress">
+              <WhiteSpace />
+              <span class="inProgress">{{ t('inProgress') }}</span>
+            </template>
+            <template v-else-if="page.removedFromTextbook">
+              ({{ t('removed') }})
+              <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
+            </template>
+            <template v-else>
+              <WhiteSpace />
+              <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
+            </template>
           </h4>
-          <template v-for="exercise in page.exercises">
-            <h5 v-if="exercise.removedFromTextbook">
-              <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span> {{ t('removed') }}
-              <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
-            </h5>
-            <EditTextbookFormExercisePreview
-              v-else
-              :exercise
-              @exerciseRemoved="() => removeExercise(exercise.id, true)"
-              @batchUpdated="emit('textbook-updated')"
-            />
+          <template v-if="!page.removedFromTextbook">
+            <template v-for="exercise in page.exercises">
+              <h5 v-if="exercise.removedFromTextbook">
+                <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
+                ({{ t('removed') }})
+                <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
+              </h5>
+              <EditTextbookFormExercisePreview
+                v-else
+                :exercise
+                @exerciseRemoved="() => removeExercise(exercise.id, true)"
+                @batchUpdated="emit('textbook-updated')"
+              />
+            </template>
           </template>
         </template>
       </template>

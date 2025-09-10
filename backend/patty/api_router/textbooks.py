@@ -86,6 +86,7 @@ class ApiTextbook(ApiModel):
         model_for_adaptation: adaptation.llm.ConcreteModel
 
         class Page(ApiModel):
+            id: str
             page_number: int
             in_progress: bool
 
@@ -101,6 +102,7 @@ class ApiTextbook(ApiModel):
                 removed_from_textbook: bool
 
             exercises: list[Exercise]
+            removed_from_textbook: bool
 
         pages: list[Page]
         removed_from_textbook: bool
@@ -266,7 +268,9 @@ async def post_textbook_range(
     ):
         session.add(
             extraction.PageExtraction(
-                created=textbooks.PageExtractionCreationByTextbook(at=now, textbook_extraction_batch=extraction_batch),
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=now, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=page_number,
                 settings=settings,
@@ -286,6 +290,16 @@ def put_textbook_ranges_removed(
     batch = get_by_id(session, textbooks.TextbookExtractionBatch, range_id)
     assert batch.textbook == textbook
     batch.removed_from_textbook = removed
+
+
+@router.put("/textbooks/{textbook_id}/pages/{page_id}/removed", status_code=fastapi.status.HTTP_200_OK)
+def put_textbook_pages_removed(
+    textbook_id: str, page_id: str, removed: bool, session: database_utils.SessionDependable
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    page = get_by_id(session, textbooks.PageExtractionCreationByTextbook, page_id)
+    assert page.textbook_extraction_batch.textbook == textbook
+    page.removed_from_textbook = removed
 
 
 def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
@@ -315,6 +329,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
             assert isinstance(exercise.created.page_extraction.created, textbooks.PageExtractionCreationByTextbook)
             removed = (
                 exercise.location.removed_from_textbook
+                or exercise.created.page_extraction.created.removed_from_textbook
                 or exercise.created.page_extraction.created.textbook_extraction_batch.removed_from_textbook
             )
             if len(exercise.adaptations) > 0 and not removed:
@@ -383,11 +398,13 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                 needs_refresh = True
             range_pages.append(
                 ApiTextbook.Range.Page(
+                    id=str(page_extraction_creation.id),
                     page_number=extraction_batch.first_textbook_page_number
                     + page_extraction_creation.page_extraction.pdf_page_number
                     - extraction_batch.pdf_file_range.first_page_number,
                     in_progress=in_progress,
                     exercises=page_exercises,
+                    removed_from_textbook=page_extraction_creation.removed_from_textbook,
                 )
             )
 

@@ -520,6 +520,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{textbook_id}/pages/{page_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Pages Removed */
+    put: operations['put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{textbook_id}/ranges/{range_id}/removed': {
     parameters: {
       query?: never
@@ -2177,10 +2194,14 @@ export interface components {
     patty__api_router__textbooks__ApiTextbook__Range__Page: {
       /** Exercises */
       exercises: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise'][]
+      /** Id */
+      id: string
       /** Inprogress */
       inProgress: boolean
       /** Pagenumber */
       pageNumber: number
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
     }
     /** Exercise */
     patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise: {
@@ -3325,6 +3346,40 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['PostTextbookExternalExercisesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_pages_removed_api_textbooks__textbook_id__pages__page_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
         }
       }
       /** @description Validation Error */

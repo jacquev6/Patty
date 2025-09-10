@@ -152,9 +152,12 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
     __tablename__ = "page_extraction_creations__by_textbook"
     __mapper_args__ = {"polymorphic_identity": "by_textbook"}
 
-    def __init__(self, *, at: datetime.datetime, textbook_extraction_batch: TextbookExtractionBatch) -> None:
+    def __init__(
+        self, *, at: datetime.datetime, textbook_extraction_batch: TextbookExtractionBatch, removed_from_textbook: bool
+    ) -> None:
         super().__init__(at=at)
         self.textbook_extraction_batch = textbook_extraction_batch
+        self.removed_from_textbook = removed_from_textbook
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
 
@@ -164,6 +167,7 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
         remote_side=[TextbookExtractionBatch.id],
         back_populates="page_extraction_creations",
     )
+    removed_from_textbook: orm.Mapped[bool] = orm.mapped_column(server_default="false")
 
 
 annotate_new_tables("textbooks")
