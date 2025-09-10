@@ -13,47 +13,33 @@ type Exercise = {
 
 type Adaptation = {
   id: ApiAdaptation['id']
-  input: ApiAdaptation['input']
   status: ApiAdaptation['status']
 }
 
-export type PreviewableExercise =
-  | {
-      kind: 'adaptation'
-      index: number
-      headerText: string | null
-      classificationWasRequested: false
-      exercise: null
-      adaptationWasRequested: true
-      adaptation: Adaptation
-      submitAdaptationsWithRecentSettings: null
-    }
-  | {
-      kind: 'classificationOrExtraction'
-      index: null
-      headerText: string
-      classificationWasRequested: boolean
-      exercise: Exercise
-      adaptationWasRequested: boolean
-      adaptation: Adaptation | null
-      submitAdaptationsWithRecentSettings: () => Promise<void>
-    }
-  | {
-      kind: 'textbook'
-      index: null
-      headerText: null
-      classificationWasRequested: true
-      exercise: Exercise
-      adaptationWasRequested: true
-      adaptation: Adaptation | null
-      submitAdaptationsWithRecentSettings: null
-    }
+export type PreviewableExercise = {
+  kind: 'adaptation' | 'classificationOrExtraction' | 'textbook'
+  index: number | null
+  headerText: string | null
+  classificationWasRequested: boolean
+  exercise: Exercise
+  adaptationWasRequested: boolean
+  adaptation: Adaptation | null
+  submitAdaptationsWithRecentSettings: (() => Promise<void>) | null
+}
 
 export function makePreviewAbleExercise_forAdaptation(
   index: number,
+  exercise: {
+    id: string
+    pageNumber: number | null
+    exerciseNumber: string | null
+    fullText: string
+    exerciseClass: string | null
+    reclassifiedBy: string | null
+    exerciseClassHasSettings: boolean
+  },
   adaptation: {
     id: string
-    input: Adaptation['input']
     status: Adaptation['status']
   },
   headerText: string | null,
@@ -63,7 +49,7 @@ export function makePreviewAbleExercise_forAdaptation(
     index,
     headerText,
     classificationWasRequested: false,
-    exercise: null,
+    exercise,
     adaptationWasRequested: true,
     adaptation,
     submitAdaptationsWithRecentSettings: null,
@@ -96,17 +82,7 @@ export function makePreviewAbleExercise_forClassificationOrExtraction(
     classificationWasRequested,
     exercise,
     adaptationWasRequested,
-    adaptation:
-      adaptation === null
-        ? null
-        : {
-            ...adaptation,
-            input: {
-              pageNumber: exercise.pageNumber,
-              exerciseNumber: exercise.exerciseNumber,
-              text: exercise.fullText.split('\n'),
-            },
-          },
+    adaptation,
     submitAdaptationsWithRecentSettings,
   }
 }
@@ -133,17 +109,7 @@ export function makePreviewAbleExercise_forTextbook(
     classificationWasRequested: true,
     exercise,
     adaptationWasRequested: true,
-    adaptation:
-      adaptation === null
-        ? null
-        : {
-            ...adaptation,
-            input: {
-              pageNumber: exercise.pageNumber,
-              exerciseNumber: exercise.exerciseNumber,
-              text: exercise.fullText.split('\n'),
-            },
-          },
+    adaptation,
     submitAdaptationsWithRecentSettings: null,
   }
 }

@@ -62,10 +62,10 @@ describe('The extraction batch creation page', () => {
     cy.get('h2 span.inProgress:contains("in progress")').should('have.length', 1)
     cy.get('h2 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 4)
-    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 2)
-    cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('div.busy').should('have.length', 2)
+    cy.get('h3 span.inProgress:contains("in progress")').should('have.length', 2)
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('h3 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
     cy.get('button:contains("Full screen")').should('have.length', 2)
 

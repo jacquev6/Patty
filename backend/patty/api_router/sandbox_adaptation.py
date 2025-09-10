@@ -9,6 +9,7 @@ from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
 from .. import sandbox
+from .. import textbooks
 from ..any_json import JsonDict
 from ..api_utils import ApiModel, get_by_id, paginate
 from ..version import PATTY_VERSION
@@ -223,23 +224,55 @@ class GetAdaptationBatchResponse(ApiModel):
     needs_refresh: bool
     created_by: str
     strategy: ApiStrategy
-    adaptations: list[ApiAdaptation]
+
+    class Exercise(ApiModel):
+        id: str
+        page_number: int | None
+        exercise_number: str | None
+        full_text: str
+        exercise_class: None
+        reclassified_by: None
+        exercise_class_has_settings: bool
+        adaptation: ApiAdaptation
+
+    exercises: list[Exercise]
 
 
 @router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, sandbox.adaptation.SandboxAdaptationBatch, id)
-    adaptations = [
-        make_api_adaptation(adaptation_creation.exercise_adaptation)
-        for adaptation_creation in adaptation_batch.adaptation_creations
-    ]
-    needs_refresh = any(a.status.kind == "inProgress" for a in adaptations)
+
+    api_exercises: list[GetAdaptationBatchResponse.Exercise] = []
+    needs_refresh = False
+    for adaptation_creation in adaptation_batch.adaptation_creations:
+        adaptation_ = make_api_adaptation(adaptation_creation.exercise_adaptation)
+        if adaptation_.status.kind == "inProgress":
+            needs_refresh = True
+
+        exercise = adaptation_creation.exercise_adaptation.exercise
+        assert isinstance(
+            exercise.location, (textbooks.ExerciseLocationTextbook, exercises.ExerciseLocationMaybePageAndNumber)
+        )
+
+        api_exercises.append(
+            GetAdaptationBatchResponse.Exercise(
+                id=str(exercise.id),
+                page_number=exercise.location.page_number,
+                exercise_number=exercise.location.exercise_number,
+                full_text=exercise.full_text,
+                exercise_class=None,
+                reclassified_by=None,
+                exercise_class_has_settings=False,
+                adaptation=adaptation_,
+            )
+        )
+
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
         needs_refresh=needs_refresh,
         created_by=adaptation_batch.created_by,
         strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
-        adaptations=adaptations,
+        exercises=api_exercises,
     )
 
 

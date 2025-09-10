@@ -75,8 +75,8 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h4 span.inProgress:contains("in progress")').should('have.length', 2)
     cy.get('h4 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('h5 span.inProgress:contains("in progress")').should('have.length', 2)
-    cy.get('h5 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('div.busy').should('have.length', 2)
+    cy.get('h5 span.inProgress:contains("in progress")').should('not.exist')
     cy.get('div.busy').should('not.exist')
 
     screenshots('textbook-with-pdf-ranges')

@@ -168,7 +168,7 @@ async function removeRange(range_id: string, removed: boolean) {
           <AdaptationPreview
             :headerLevel="3"
             :index="0"
-            :adaptation="exercise.adaptation"
+            :exercise
             :headerText="`${t('exercise')} ${exercise.exerciseNumber}`"
             :showPageAndExercise="false"
           />

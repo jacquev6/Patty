@@ -16,12 +16,16 @@ const exercises = {
   'adaptation - in progress': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'inProgress' },
     },
     null,
@@ -29,12 +33,16 @@ const exercises = {
   'adaptation - LLM error - invalid json': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'error', error: 'invalid-json', parsed: [] },
     },
     null,
@@ -42,12 +50,16 @@ const exercises = {
   'adaptation - LLM error - not json': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'error', error: 'not-json', text: 'blah' },
     },
     null,
@@ -55,12 +67,16 @@ const exercises = {
   'adaptation - LLM error - unknown': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'error', error: 'unknown' },
     },
     null,
@@ -68,12 +84,16 @@ const exercises = {
   'adaptation - LLM error - unexpected': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
     },
     null,
@@ -81,12 +101,16 @@ const exercises = {
   'adaptation - unexpected status': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
     },
     null,
@@ -94,12 +118,16 @@ const exercises = {
   'adaptation - success': makePreviewAbleExercise_forAdaptation(
     42,
     {
+      id: 'ex-id',
+      pageNumber: 37,
+      exerciseNumber: '24',
+      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+      exerciseClass: null,
+      reclassifiedBy: null,
+      exerciseClassHasSettings: false,
+    },
+    {
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
       status: {
         kind: 'success',
         success: 'llm',

@@ -51,8 +51,13 @@ def post_textbook(
 
 class ApiTextbookAdaptableExercise(ApiModel):
     kind: Literal["adaptable"]
+    id: str
     page_number: int
     exercise_number: str
+    full_text: str
+    exercise_class: None
+    reclassified_by: None
+    exercise_class_has_settings: bool
     adaptation: ApiAdaptation
 
 
@@ -336,8 +341,13 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                 page.exercises.append(
                     ApiTextbookAdaptableExercise(
                         kind="adaptable",
+                        id=str(exercise.id),
                         page_number=exercise.location.page_number,
                         exercise_number=exercise.location.exercise_number,
+                        full_text=exercise.full_text,
+                        exercise_class=None,
+                        reclassified_by=None,
+                        exercise_class_has_settings=False,
                         adaptation=make_api_adaptation(exercise.adaptations[-1]),
                     )
                 )

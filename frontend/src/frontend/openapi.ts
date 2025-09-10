@@ -812,8 +812,16 @@ export interface components {
     /** ApiTextbookAdaptableExercise */
     ApiTextbookAdaptableExercise: {
       adaptation: components['schemas']['ApiAdaptation']
+      /** Exerciseclass */
+      exerciseClass: null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
       /** Exercisenumber */
       exerciseNumber: string
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
       /**
        * Kind
        * @constant
@@ -821,6 +829,8 @@ export interface components {
       kind: 'adaptable'
       /** Pagenumber */
       pageNumber: number
+      /** Reclassifiedby */
+      reclassifiedBy: null
     }
     /** ApiTextbookExternalExercise */
     ApiTextbookExternalExercise: {
@@ -1293,10 +1303,10 @@ export interface components {
     }
     /** GetAdaptationBatchResponse */
     GetAdaptationBatchResponse: {
-      /** Adaptations */
-      adaptations: components['schemas']['ApiAdaptation'][]
       /** Createdby */
       createdBy: string
+      /** Exercises */
+      exercises: components['schemas']['patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise'][]
       /** Id */
       id: string
       /** Needsrefresh */
@@ -2113,6 +2123,24 @@ export interface components {
        * @enum {string}
        */
       success: 'llm' | 'manual'
+    }
+    /** Exercise */
+    patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise: {
+      adaptation: components['schemas']['ApiAdaptation']
+      /** Exerciseclass */
+      exerciseClass: null
+      /** Exerciseclasshassettings */
+      exerciseClassHasSettings: boolean
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Reclassifiedby */
+      reclassifiedBy: null
     }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {

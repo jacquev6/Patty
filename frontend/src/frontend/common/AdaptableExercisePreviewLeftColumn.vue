@@ -7,7 +7,6 @@ import WhiteSpace from '$/WhiteSpace.vue'
 import { useAuthenticatedClient } from '@/frontend/ApiClient'
 import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
 import ClassEditor from '@/frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
-import BugMarker from '@/reusable/BugMarker.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
@@ -30,15 +29,9 @@ const header = computed(() => `h${props.headerLevel}`)
 const editingClassification = ref(false)
 
 const exerciseClassProxy = computed({
-  get: () =>
-    props.exercise.kind === 'classificationOrExtraction' || props.exercise.kind === 'textbook'
-      ? (props.exercise.exercise.exerciseClass ?? '')
-      : '',
+  get: () => props.exercise.exercise?.exerciseClass ?? '',
   async set(className: string) {
-    if (
-      (props.exercise.kind === 'classificationOrExtraction' || props.exercise.kind === 'textbook') &&
-      className !== props.exercise.exercise.exerciseClass
-    ) {
+    if (props.exercise.exercise !== null && className !== props.exercise.exercise.exerciseClass) {
       await client.PUT('/api/adaptable-exercises/{id}/exercise-class', {
         params: { path: { id: props.exercise.exercise.id } },
         body: { creator: identifiedUser.identifier, className },
@@ -49,55 +42,32 @@ const exerciseClassProxy = computed({
   },
 })
 
-const fullTextLines = computed(() => {
-  if (props.exercise.kind === 'adaptation') {
-    return props.exercise.adaptation.input.text
-  } else {
-    return props.exercise.exercise.fullText.split('\n')
-  }
-})
+const fullTextLines = computed(() => props.exercise.exercise.fullText.split('\n'))
 
-const pageNumber = computed(() => {
-  if (props.exercise.kind === 'adaptation') {
-    return props.exercise.adaptation.input.pageNumber
-  } else {
-    return props.exercise.exercise.pageNumber
-  }
-})
+const pageNumber = computed(() => props.exercise.exercise.pageNumber)
 
-const exerciseNumber = computed(() => {
-  if (props.exercise.kind === 'adaptation') {
-    return props.exercise.adaptation.input.exerciseNumber
-  } else {
-    return props.exercise.exercise.exerciseNumber
-  }
-})
+const exerciseNumber = computed(() => props.exercise.exercise.exerciseNumber)
 </script>
 
 <template>
   <component :is="header" style="margin-top: 0">
-    <template v-if="exercise.kind === 'adaptation'">
-      <template v-if="exercise.headerText !== null">
-        {{ exercise.headerText }}
-      </template>
-      <template v-else>{{ t('input') }} {{ exercise.index + 1 }}</template>
-      <template v-if="exercise.adaptation.status.kind === 'inProgress'">
+    <template v-if="exercise.headerText !== null">{{ exercise.headerText }}</template>
+    <template v-else-if="exercise.index !== null">{{ t('input') }} {{ exercise.index + 1 }}</template>
+    <template v-else-if="exercise.exercise !== null">
+      {{ t('exercise') }} {{ exercise.exercise.exerciseNumber }}
+    </template>
+
+    <template v-if="exercise.exercise !== null && exercise.classificationWasRequested">
+      <template v-if="exercise.exercise.exerciseClass === null">
         <WhiteSpace />
         <span class="inProgress">({{ t('inProgress') }})</span>
       </template>
-    </template>
-    <template v-else-if="exercise.kind === 'classificationOrExtraction'">
-      {{ exercise.headerText
-      }}<template v-if="exercise.classificationWasRequested">
-        <template v-if="exercise.exercise.exerciseClass === null">
-          <WhiteSpace />
-          <span class="inProgress">({{ t('inProgress') }})</span>
-        </template>
-        <template v-else-if="editingClassification"
-          >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
-        </template>
-        <template v-else
-          >: {{ exercise.exercise.exerciseClass }}
+      <template v-else-if="editingClassification"
+        >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
+      </template>
+      <template v-else
+        >: {{ exercise.exercise.exerciseClass }}
+        <template v-if="exercise.kind === 'classificationOrExtraction'">
           <template v-if="exercise.exercise.reclassifiedBy === null">
             <span class="discrete">
               ({{ t('classifiedByModel') }} <span class="edit" @click="editingClassification = true">🖊️</span>)
@@ -110,25 +80,18 @@ const exerciseNumber = computed(() => {
             </span>
           </template>
         </template>
+        <template v-else-if="exercise.kind === 'textbook'">
+          <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
+          <WhiteSpace />
+          <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
+        </template>
       </template>
     </template>
-    <template v-else-if="exercise.kind === 'textbook'">
-      {{ t('exercise') }} {{ exercise.exercise.exerciseNumber
-      }}<template v-if="exercise.exercise.exerciseClass === null">
-        <WhiteSpace />
-        <span class="inProgress">{{ t('inProgress') }}</span>
-      </template>
-      <template v-else-if="editingClassification"
-        >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
-      </template>
-      <template v-else
-        >: {{ exercise.exercise.exerciseClass }}
-        <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
-        <WhiteSpace />
-        <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
-      </template>
+
+    <template v-if="exercise.adaptation !== null && exercise.adaptation.status.kind === 'inProgress'">
+      <WhiteSpace />
+      <span class="inProgress">({{ t('inProgress') }})</span>
     </template>
-    <BugMarker v-else is="span" m="Unexpected exercise kind" :v="exercise" />
   </component>
 
   <p v-if="showPageAndExercise">

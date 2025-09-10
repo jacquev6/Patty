@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Adaptation } from '@/frontend/ApiClient'
+import { type AdaptationBatch } from '@/frontend/ApiClient'
 import AdaptableExercisePreview, {
   makePreviewAbleExercise_forAdaptation,
 } from '@/frontend/common/AdaptableExercisePreview.vue'
@@ -7,7 +7,7 @@ import AdaptableExercisePreview, {
 defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   index: number
-  adaptation: Adaptation
+  exercise: AdaptationBatch['exercises'][number]
   headerText: string | null
   showPageAndExercise: boolean
 }>()
@@ -17,6 +17,6 @@ defineProps<{
   <AdaptableExercisePreview
     :headerLevel
     :showPageAndExercise
-    :exercise="makePreviewAbleExercise_forAdaptation(index, adaptation, headerText)"
+    :exercise="makePreviewAbleExercise_forAdaptation(index, exercise, exercise.adaptation, headerText)"
   />
 </template>

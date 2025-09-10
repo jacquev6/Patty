@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { type AdaptationBatch } from '@/frontend/ApiClient'
@@ -8,14 +7,12 @@ import AdaptationStrategyEditor from '@/frontend/common/AdaptationStrategyEditor
 import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 
-const props = defineProps<{
+defineProps<{
   adaptationBatch: AdaptationBatch
 }>()
 
 const { t } = useI18n()
 const authenticationTokenStore = useAuthenticationTokenStore()
-
-const adaptations = computed(() => props.adaptationBatch.adaptations)
 </script>
 
 <template>
@@ -46,10 +43,10 @@ const adaptations = computed(() => props.adaptationBatch.adaptations)
       </p>
       <h1>{{ t('inputs') }}</h1>
       <AdaptationPreview
-        v-for="(adaptation, index) in adaptations"
+        v-for="(exercise, index) in adaptationBatch.exercises"
         :headerLevel="2"
         :index
-        :adaptation
+        :exercise
         :headerText="null"
         :showPageAndExercise="true"
       />

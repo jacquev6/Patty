@@ -656,8 +656,24 @@
           "adaptation": {
             "$ref": "#/components/schemas/ApiAdaptation"
           },
+          "exerciseClass": {
+            "title": "Exerciseclass",
+            "type": "null"
+          },
+          "exerciseClassHasSettings": {
+            "title": "Exerciseclasshassettings",
+            "type": "boolean"
+          },
           "exerciseNumber": {
             "title": "Exercisenumber",
+            "type": "string"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
             "type": "string"
           },
           "kind": {
@@ -668,12 +684,21 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
+          },
+          "reclassifiedBy": {
+            "title": "Reclassifiedby",
+            "type": "null"
           }
         },
         "required": [
           "kind",
+          "id",
           "pageNumber",
           "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "reclassifiedBy",
+          "exerciseClassHasSettings",
           "adaptation"
         ],
         "title": "ApiTextbookAdaptableExercise",
@@ -1842,16 +1867,16 @@
       "GetAdaptationBatchResponse": {
         "additionalProperties": false,
         "properties": {
-          "adaptations": {
-            "items": {
-              "$ref": "#/components/schemas/ApiAdaptation"
-            },
-            "title": "Adaptations",
-            "type": "array"
-          },
           "createdBy": {
             "title": "Createdby",
             "type": "string"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise"
+            },
+            "title": "Exercises",
+            "type": "array"
           },
           "id": {
             "title": "Id",
@@ -1870,7 +1895,7 @@
           "needsRefresh",
           "createdBy",
           "strategy",
-          "adaptations"
+          "exercises"
         ],
         "title": "GetAdaptationBatchResponse",
         "type": "object"
@@ -3992,6 +4017,68 @@
           "adaptedExercise"
         ],
         "title": "Success",
+        "type": "object"
+      },
+      "patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptation": {
+            "$ref": "#/components/schemas/ApiAdaptation"
+          },
+          "exerciseClass": {
+            "title": "Exerciseclass",
+            "type": "null"
+          },
+          "exerciseClassHasSettings": {
+            "title": "Exerciseclasshassettings",
+            "type": "boolean"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "reclassifiedBy": {
+            "title": "Reclassifiedby",
+            "type": "null"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "exerciseClass",
+          "reclassifiedBy",
+          "exerciseClassHasSettings",
+          "adaptation"
+        ],
+        "title": "Exercise",
         "type": "object"
       },
       "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
