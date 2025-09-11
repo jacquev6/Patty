@@ -3,6 +3,7 @@ import datetime
 import fastapi
 import sqlalchemy as sql
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import classification
 from .. import database_utils
@@ -17,8 +18,6 @@ from .adaptations import (
     ApiStrategySettings,
     ApiStrategy,
     ApiInput,
-    ApiAdaptation,
-    make_api_adaptation,
     make_api_strategy,
     make_api_strategy_settings,
     make_api_strategy_settings_identity,
@@ -225,15 +224,8 @@ class GetAdaptationBatchResponse(ApiModel):
     created_by: str
     strategy: ApiStrategy
 
-    class Exercise(ApiModel):
-        id: str
-        page_number: int | None
-        exercise_number: str | None
-        full_text: str
-        exercise_class: None
-        reclassified_by: None
-        exercise_class_has_settings: bool
-        adaptation: ApiAdaptation
+    class Exercise(previewable_exercise.PreviewableExercise):
+        pass
 
     exercises: list[Exercise]
 
@@ -245,8 +237,9 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
     api_exercises: list[GetAdaptationBatchResponse.Exercise] = []
     needs_refresh = False
     for adaptation_creation in adaptation_batch.adaptation_creations:
-        adaptation_ = make_api_adaptation(adaptation_creation.exercise_adaptation)
-        if adaptation_.status.kind == "inProgress":
+        adaptation_status = previewable_exercise.make_api_adaptation_status(adaptation_creation.exercise_adaptation)
+
+        if adaptation_status.kind == "inProgress":
             needs_refresh = True
 
         exercise = adaptation_creation.exercise_adaptation.exercise
@@ -260,10 +253,8 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
                 page_number=exercise.location.page_number,
                 exercise_number=exercise.location.exercise_number,
                 full_text=exercise.full_text,
-                exercise_class=None,
-                reclassified_by=None,
-                exercise_class_has_settings=False,
-                adaptation=adaptation_,
+                classification_status=previewable_exercise.NotRequested(kind="notRequested"),
+                adaptation_status=adaptation_status,
             )
         )
 

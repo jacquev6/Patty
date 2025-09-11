@@ -2,16 +2,17 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type PreviewableExercise } from './AdaptableExercisePreview.vue'
+import { type PreviewableExercise, type Context } from './AdaptableExercisePreview.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
 import { useAuthenticatedClient } from '@/frontend/ApiClient'
 import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
-import ClassEditor from '@/frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreviewClassEditor.vue'
+import ClassEditor from '@/frontend/common/AdaptableExercisePreviewLeftColumnClassEditor.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   exercise: PreviewableExercise
-  showPageAndExercise: boolean
+  context: Context
+  index: number | null
   rightColumn: { setFullScreen: () => void } | null
 }>()
 
@@ -29,11 +30,18 @@ const header = computed(() => `h${props.headerLevel}`)
 const editingClassification = ref(false)
 
 const exerciseClassProxy = computed({
-  get: () => props.exercise.exercise?.exerciseClass ?? '',
+  get: () =>
+    props.exercise.classificationStatus.kind === 'byModel' || props.exercise.classificationStatus.kind === 'byUser'
+      ? props.exercise.classificationStatus.exerciseClass
+      : '',
   async set(className: string) {
-    if (props.exercise.exercise !== null && className !== props.exercise.exercise.exerciseClass) {
+    if (
+      props.exercise.classificationStatus.kind === 'byModel' ||
+      (props.exercise.classificationStatus.kind === 'byUser' &&
+        className !== props.exercise.classificationStatus.exerciseClass)
+    ) {
       await client.PUT('/api/adaptable-exercises/{id}/exercise-class', {
-        params: { path: { id: props.exercise.exercise.id } },
+        params: { path: { id: props.exercise.id } },
         body: { creator: identifiedUser.identifier, className },
       })
       emit('batch-updated')
@@ -42,23 +50,21 @@ const exerciseClassProxy = computed({
   },
 })
 
-const fullTextLines = computed(() => props.exercise.exercise.fullText.split('\n'))
+const fullTextLines = computed(() => props.exercise.fullText.split('\n'))
 
-const pageNumber = computed(() => props.exercise.exercise.pageNumber)
+const pageNumber = computed(() => props.exercise.pageNumber)
 
-const exerciseNumber = computed(() => props.exercise.exercise.exerciseNumber)
+const exerciseNumber = computed(() => props.exercise.exerciseNumber)
 </script>
 
 <template>
   <component :is="header" style="margin-top: 0">
-    <template v-if="exercise.headerText !== null">{{ exercise.headerText }}</template>
-    <template v-else-if="exercise.index !== null">{{ t('input') }} {{ exercise.index + 1 }}</template>
-    <template v-else-if="exercise.exercise !== null">
-      {{ t('exercise') }} {{ exercise.exercise.exerciseNumber }}
-    </template>
+    <template v-if="context === 'extraction' && index !== null">{{ t('exercise') }} {{ index + 1 }}</template>
+    <template v-else-if="index !== null">{{ t('input') }} {{ index + 1 }}</template>
+    <template v-else>{{ t('exercise') }} {{ exercise.exerciseNumber }}</template>
 
-    <template v-if="exercise.exercise !== null && exercise.classificationWasRequested">
-      <template v-if="exercise.exercise.exerciseClass === null">
+    <template v-if="exercise.classificationStatus.kind !== 'notRequested'">
+      <template v-if="exercise.classificationStatus.kind === 'inProgress'">
         <WhiteSpace />
         <span class="inProgress">({{ t('inProgress') }})</span>
       </template>
@@ -66,21 +72,21 @@ const exerciseNumber = computed(() => props.exercise.exercise.exerciseNumber)
         >: <ClassEditor v-model="exerciseClassProxy" @done="editingClassification = false" />
       </template>
       <template v-else
-        >: {{ exercise.exercise.exerciseClass }}
-        <template v-if="exercise.kind === 'classificationOrExtraction'">
-          <template v-if="exercise.exercise.reclassifiedBy === null">
+        >: {{ exercise.classificationStatus.exerciseClass }}
+        <template v-if="context === 'classification' || context === 'extraction'">
+          <template v-if="exercise.classificationStatus.kind === 'byModel'">
             <span class="discrete">
               ({{ t('classifiedByModel') }} <span class="edit" @click="editingClassification = true">🖊️</span>)
             </span>
           </template>
           <template v-else>
             <span class="discrete">
-              ({{ t('fixedBy') }} {{ exercise.exercise.reclassifiedBy }}
+              ({{ t('fixedBy') }} {{ exercise.classificationStatus.by }}
               <span class="edit" @click="editingClassification = true">🖊️</span>)
             </span>
           </template>
         </template>
-        <template v-else-if="exercise.kind === 'textbook'">
+        <template v-else-if="context === 'textbookByBatch'">
           <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
           <WhiteSpace />
           <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
@@ -88,13 +94,13 @@ const exerciseNumber = computed(() => props.exercise.exercise.exerciseNumber)
       </template>
     </template>
 
-    <template v-if="exercise.adaptation !== null && exercise.adaptation.status.kind === 'inProgress'">
+    <template v-if="exercise.adaptationStatus.kind === 'inProgress'">
       <WhiteSpace />
       <span class="inProgress">({{ t('inProgress') }})</span>
     </template>
   </component>
 
-  <p v-if="showPageAndExercise">
+  <p v-if="context === 'adaptation' || context === 'classification'">
     {{ t('pageAndExercise', { pageNumber: pageNumber ?? 'N/A', exerciseNumber: exerciseNumber ?? 'N/A' }) }}
   </p>
   <p>
@@ -103,15 +109,17 @@ const exerciseNumber = computed(() => props.exercise.exercise.exerciseNumber)
       {{ line }}
     </template>
   </p>
-  <template v-if="exercise.adaptation !== null">
+  <template v-if="exercise.adaptationStatus.kind !== 'notRequested' && exercise.adaptationStatus.kind !== 'notStarted'">
     <p>
-      <button :disabled="exercise.adaptation.status.kind !== 'success'" @click="rightColumn?.setFullScreen()">
+      <button :disabled="exercise.adaptationStatus.kind !== 'success'" @click="rightColumn?.setFullScreen()">
         {{ t('fullScreen') }}
       </button>
     </p>
     <p>
-      <RouterLink :to="{ name: 'adaptation', params: { id: exercise.adaptation.id } }">
-        <button :disabled="exercise.adaptation.status.kind === 'inProgress'">{{ t('viewDetails') }}</button>
+      <RouterLink :to="{ name: 'adaptation', params: { id: exercise.adaptationStatus.id } }">
+        <button :disabled="exercise.adaptationStatus.kind === 'inProgress'">
+          {{ t('viewDetails') }}
+        </button>
       </RouterLink>
     </p>
   </template>

@@ -5,7 +5,9 @@ import urllib.parse
 import fastapi
 import sqlalchemy as sql
 
+from . import previewable_exercise
 from .. import adaptation
+from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import external_exercises
@@ -13,7 +15,6 @@ from .. import extraction
 from .. import settings
 from .. import textbooks
 from ..api_utils import ApiModel, get_by_id, assert_isinstance
-from .adaptations import ApiAdaptation, make_api_adaptation
 from .s3_client import s3
 
 
@@ -49,16 +50,8 @@ def post_textbook(
     return PostTextbookResponse(id=str(textbook.id))
 
 
-class ApiTextbookAdaptableExercise(ApiModel):
+class ApiTextbookAdaptableExercise(previewable_exercise.PreviewableExercise):
     kind: Literal["adaptable"]
-    id: str
-    page_number: int
-    exercise_number: str
-    full_text: str
-    exercise_class: None
-    reclassified_by: None
-    exercise_class_has_settings: bool
-    adaptation: ApiAdaptation
 
 
 class ApiTextbookExternalExercise(ApiModel):
@@ -95,15 +88,7 @@ class ApiTextbook(ApiModel):
             page_number: int
             in_progress: bool
 
-            class Exercise(ApiModel):
-                id: str
-                page_number: int
-                exercise_number: str
-                full_text: str
-                exercise_class: str | None
-                reclassified_by: None
-                exercise_class_has_settings: bool
-                adaptation: ApiAdaptation | None
+            class Exercise(previewable_exercise.PreviewableExercise):
                 removed_from_textbook: bool
 
             exercises: list[Exercise]
@@ -345,10 +330,8 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                         page_number=exercise.location.page_number,
                         exercise_number=exercise.location.exercise_number,
                         full_text=exercise.full_text,
-                        exercise_class=None,
-                        reclassified_by=None,
-                        exercise_class_has_settings=False,
-                        adaptation=make_api_adaptation(exercise.adaptations[-1]),
+                        classification_status=previewable_exercise.NotRequested(kind="notRequested"),
+                        adaptation_status=previewable_exercise.make_api_adaptation_status(exercise.adaptations[-1]),
                     )
                 )
         else:
@@ -372,11 +355,34 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                 if exercise_class is None:
                     needs_refresh = True
 
-                adaptation_ = (
-                    None if len(page_exercise.adaptations) == 0 else make_api_adaptation(page_exercise.adaptations[-1])
+                exercise_class_has_settings = (
+                    latest_classification is not None
+                    and latest_classification.exercise_class is not None
+                    and latest_classification.exercise_class.latest_strategy_settings is not None
                 )
 
-                if adaptation_ is not None and adaptation_.status.kind == "inProgress":
+                classification_status: previewable_exercise.ClassificationStatus
+                if exercise_class is None:
+                    classification_status = previewable_exercise.ClassificationInProgress(kind="inProgress")
+                elif isinstance(latest_classification, classification.ClassificationByUser):
+                    classification_status = previewable_exercise.ReclassifiedByUser(
+                        kind="byUser",
+                        by=latest_classification.username,
+                        exercise_class=exercise_class,
+                        class_has_settings=exercise_class_has_settings,
+                    )
+                else:
+                    classification_status = previewable_exercise.ClassifiedByModel(
+                        kind="byModel", exercise_class=exercise_class, class_has_settings=exercise_class_has_settings
+                    )
+
+                adaptation_status: previewable_exercise.AdaptationStatus
+                if len(page_exercise.adaptations) == 0:
+                    adaptation_status = previewable_exercise.AdaptationNotStarted(kind="notStarted")
+                else:
+                    adaptation_status = previewable_exercise.make_api_adaptation_status(page_exercise.adaptations[-1])
+
+                if adaptation_status.kind == "inProgress":
                     needs_refresh = True
 
                 page_exercises.append(
@@ -389,17 +395,11 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                             page_exercise.location, textbooks.ExerciseLocationTextbook
                         ).exercise_number,
                         full_text=page_exercise.full_text,
-                        exercise_class=exercise_class,
-                        reclassified_by=None,
-                        exercise_class_has_settings=(
-                            latest_classification is not None
-                            and latest_classification.exercise_class is not None
-                            and latest_classification.exercise_class.latest_strategy_settings is not None
-                        ),
-                        adaptation=adaptation_,
                         removed_from_textbook=assert_isinstance(
                             page_exercise.location, textbooks.ExerciseLocationTextbook
                         ).removed_from_textbook,
+                        classification_status=classification_status,
+                        adaptation_status=adaptation_status,
                     )
                 )
 

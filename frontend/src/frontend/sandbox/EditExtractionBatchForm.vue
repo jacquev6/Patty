@@ -6,13 +6,13 @@ import { ref } from 'vue'
 import { useAuthenticatedClient, type ExtractionBatch } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import WhiteSpace from '$/WhiteSpace.vue'
-import EditClassificationOrExtractionBatchFormExercisePreview from '@/frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from '@/frontend/common/AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from '$/MarkDown.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
+import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 
 const props = defineProps<{
   extractionBatch: ExtractionBatch
@@ -45,6 +45,13 @@ async function submitAdaptation() {
   await client.PUT('/api/extraction-batches/{id}/model-for-adaptation', {
     params: { path: { id: props.extractionBatch.id } },
     body: llmModelForAdaptation.value,
+  })
+  emit('batch-updated')
+}
+
+async function submitAdaptationsWithRecentSettings() {
+  await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
+    params: { path: { id: props.extractionBatch.id } },
   })
   emit('batch-updated')
 }
@@ -143,15 +150,13 @@ async function submitAdaptation() {
         <template v-if="page.assistantResponse !== null">
           <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
-              <EditClassificationOrExtractionBatchFormExercisePreview
+              <AdaptableExercisePreview
                 :headerLevel="3"
-                :batch="{ kind: 'extraction', id: extractionBatch.id }"
-                :headerText="`Exercise ${index + 1}`"
-                :showPageAndExercise="false"
-                :classificationWasRequested="extractionBatch.runClassification"
-                :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
+                context="extraction"
+                :index
                 :exercise
                 @batchUpdated="emit('batch-updated')"
+                @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
               />
             </template>
           </template>

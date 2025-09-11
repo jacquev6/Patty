@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n'
 import { type AdaptationBatch } from '@/frontend/ApiClient'
 import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptationStrategyEditor from '@/frontend/common/AdaptationStrategyEditor.vue'
-import AdaptationPreview from './EditAdaptationBatchFormAdaptationPreview.vue'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
+import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 
 defineProps<{
   adaptationBatch: AdaptationBatch
@@ -42,13 +42,12 @@ const authenticationTokenStore = useAuthenticationTokenStore()
         </I18nT>
       </p>
       <h1>{{ t('inputs') }}</h1>
-      <AdaptationPreview
+      <AdaptableExercisePreview
         v-for="(exercise, index) in adaptationBatch.exercises"
         :headerLevel="2"
+        context="adaptation"
         :index
         :exercise
-        :headerText="null"
-        :showPageAndExercise="true"
       />
     </template>
   </ResizableColumns>

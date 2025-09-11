@@ -3,13 +3,12 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
-import AdaptationPreview from '@/frontend/sandbox/EditAdaptationBatchFormAdaptationPreview.vue'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
-import EditTextbookFormExercisePreview from './EditTextbookFormExercisePreview.vue'
+import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -135,8 +134,11 @@ async function removeRange(range_id: string, removed: boolean) {
                 ({{ t('removed') }})
                 <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
               </h5>
-              <EditTextbookFormExercisePreview
+              <AdaptableExercisePreview
                 v-else
+                :headerLevel="5"
+                context="textbookByBatch"
+                :index="null"
                 :exercise
                 @exerciseRemoved="() => removeExercise(exercise.id, true)"
                 @batchUpdated="emit('textbook-updated')"
@@ -165,13 +167,7 @@ async function removeRange(range_id: string, removed: boolean) {
       <h2>{{ t('page') }} {{ page.number }}</h2>
       <template v-for="exercise in page.exercises">
         <template v-if="exercise.kind === 'adaptable'">
-          <AdaptationPreview
-            :headerLevel="3"
-            :index="0"
-            :exercise
-            :headerText="`${t('exercise')} ${exercise.exerciseNumber}`"
-            :showPageAndExercise="false"
-          />
+          <AdaptableExercisePreview :headerLevel="3" context="textbookByPage" :index="null" :exercise />
         </template>
         <template v-else-if="exercise.kind === 'external'">
           <h3>{{ t('exercise') }} {{ exercise.exerciseNumber }}</h3>

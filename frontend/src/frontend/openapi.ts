@@ -687,6 +687,89 @@ export interface components {
         | components['schemas']['OpenAiModel']
       strategySettingsIdentity: components['schemas']['Identity'] | null
     }
+    /** AdaptationInProgress */
+    AdaptationInProgress: {
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
+    }
+    /** AdaptationInvalidJsonError */
+    AdaptationInvalidJsonError: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Parsed */
+      parsed: unknown
+    }
+    /** AdaptationNotJsonError */
+    AdaptationNotJsonError: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Text */
+      text: string
+    }
+    /** AdaptationNotStarted */
+    AdaptationNotStarted: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'notStarted'
+    }
+    /** AdaptationSuccess */
+    AdaptationSuccess: {
+      adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /**
+       * Success
+       * @enum {string}
+       */
+      success: 'llm' | 'manual'
+    }
+    /** AdaptationUnknownError */
+    AdaptationUnknownError: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'unknown'
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+    }
     /** ApiAdaptation */
     ApiAdaptation: {
       /** Adjustmentprompts */
@@ -811,13 +894,23 @@ export interface components {
     }
     /** ApiTextbookAdaptableExercise */
     ApiTextbookAdaptableExercise: {
-      adaptation: components['schemas']['ApiAdaptation']
-      /** Exerciseclass */
-      exerciseClass: null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
       /** Exercisenumber */
-      exerciseNumber: string
+      exerciseNumber: string | null
       /** Fulltext */
       fullText: string
       /** Id */
@@ -828,9 +921,7 @@ export interface components {
        */
       kind: 'adaptable'
       /** Pagenumber */
-      pageNumber: number
-      /** Reclassifiedby */
-      reclassifiedBy: null
+      pageNumber: number | null
     }
     /** ApiTextbookExternalExercise */
     ApiTextbookExternalExercise: {
@@ -949,6 +1040,14 @@ export interface components {
       /** Id */
       id: string
     }
+    /** ClassificationInProgress */
+    ClassificationInProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
+    }
     /** ClassificationInput */
     ClassificationInput: {
       /** Exercisenumber */
@@ -959,6 +1058,18 @@ export interface components {
       pageNumber: number | null
       /** Statementtext */
       statementText: string
+    }
+    /** ClassifiedByModel */
+    ClassifiedByModel: {
+      /** Classhassettings */
+      classHasSettings: boolean
+      /** Exerciseclass */
+      exerciseClass: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'byModel'
     }
     /** CreatePdfFileRequest */
     CreatePdfFileRequest: {
@@ -1646,6 +1757,14 @@ export interface components {
       /** Text */
       text: string
     }
+    /** NotRequested */
+    NotRequested: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'notRequested'
+    }
     /** OpenAiModel */
     OpenAiModel: {
       /**
@@ -1904,6 +2023,20 @@ export interface components {
       /** Textbookfirstpagenumber */
       textbookFirstPageNumber: number
     }
+    /** ReclassifiedByUser */
+    ReclassifiedByUser: {
+      /** By */
+      by: string
+      /** Classhassettings */
+      classHasSettings: boolean
+      /** Exerciseclass */
+      exerciseClass: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'byUser'
+    }
     /** ReferenceComponents */
     ReferenceComponents: {
       /**
@@ -2126,11 +2259,21 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation']
-      /** Exerciseclass */
-      exerciseClass: null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
       /** Exercisenumber */
       exerciseNumber: string | null
       /** Fulltext */
@@ -2139,16 +2282,24 @@ export interface components {
       id: string
       /** Pagenumber */
       pageNumber: number | null
-      /** Reclassifiedby */
-      reclassifiedBy: null
     }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation'] | null
-      /** Exerciseclass */
-      exerciseClass: string | null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
       /** Exercisenumber */
       exerciseNumber: string | null
       /** Fulltext */
@@ -2157,8 +2308,6 @@ export interface components {
       id: string
       /** Pagenumber */
       pageNumber: number | null
-      /** Reclassifiedby */
-      reclassifiedBy: string | null
     }
     /** Page */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
@@ -2176,11 +2325,21 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation'] | null
-      /** Exerciseclass */
-      exerciseClass: string | null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
       /** Exercisenumber */
       exerciseNumber: string | null
       /** Fulltext */
@@ -2189,8 +2348,6 @@ export interface components {
       id: string
       /** Pagenumber */
       pageNumber: number | null
-      /** Reclassifiedby */
-      reclassifiedBy: string | null
     }
     /** Page */
     patty__api_router__textbooks__ApiTextbook__Page: {
@@ -2217,21 +2374,29 @@ export interface components {
     }
     /** Exercise */
     patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise: {
-      adaptation: components['schemas']['ApiAdaptation'] | null
-      /** Exerciseclass */
-      exerciseClass: string | null
-      /** Exerciseclasshassettings */
-      exerciseClassHasSettings: boolean
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
       /** Exercisenumber */
-      exerciseNumber: string
+      exerciseNumber: string | null
       /** Fulltext */
       fullText: string
       /** Id */
       id: string
       /** Pagenumber */
-      pageNumber: number
-      /** Reclassifiedby */
-      reclassifiedBy: null
+      pageNumber: number | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }
