@@ -94,14 +94,19 @@ async function submitAdaptationsWithRecentSettings() {
   <p>
     <I18nT keypath="download">
       <a
-        :href="`/api/export/classification-batch/${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
       >
         {{ t('standaloneHtml') }}
       </a>
       <a
-        :href="`/api/export/classification-batch/${classificationBatch.id}.json?token=${authenticationTokenStore.token}`"
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}-classified-exercises.tsv?token=${authenticationTokenStore.token}`"
       >
-        {{ t('jsonData') }}
+        {{ t('tsvDataForClassifiedExercises') }}
+      </a>
+      <a
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}-adapted-exercises.json?token=${authenticationTokenStore.token}`"
+      >
+        {{ t('jsonDataForAdaptedExercises') }}
       </a>
     </I18nT>
   </p>
@@ -131,9 +136,10 @@ en:
   runAdaptationUsingModel: and model
   no: no
   submit: Submit
-  download: Download {0} or {1}
+  download: Download {0}, {1}, or {2}
   standaloneHtml: standalone HTML
-  jsonData: JSON data
+  tsvDataForClassifiedExercises: TSV data for classified exercises
+  jsonDataForAdaptedExercises: JSON data for adapted exercises
   inputs: Inputs
 fr:
   settings: Paramètres
@@ -147,8 +153,9 @@ fr:
   runAdaptationUsingModel: et modèle
   no: non
   submit: Soumettre
-  download: Télécharger {0} ou {1}
+  download: Télécharger {0}, {1}, ou {2}
   standaloneHtml: le HTML autonome
-  jsonData: les données JSON
+  tsvDataForClassifiedExercises: les données TSV des exercices classifiés
+  jsonDataForAdaptedExercises: les données JSON des exercices adaptés
   inputs: Entrées
 </i18n>

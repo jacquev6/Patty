@@ -157,6 +157,10 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         back_populates="page_extraction"
     )
 
+    classification_chunk_creations: orm.Mapped[list[ClassificationChunkCreationByPageExtraction]] = orm.relationship(
+        back_populates="page_extraction"
+    )
+
     @staticmethod
     def make_ordered_exercises_request__maybe_page_and_number(id: int) -> sql.Select[tuple[AdaptableExercise]]:
         return (
@@ -244,7 +248,9 @@ class ClassificationChunkCreationByPageExtraction(ClassificationChunkCreation):
 
     page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
     page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
-        foreign_keys=[page_extraction_id], remote_side=[PageExtraction.id]
+        foreign_keys=[page_extraction_id],
+        remote_side=[PageExtraction.id],
+        back_populates="classification_chunk_creations",
     )
 
 

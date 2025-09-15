@@ -195,7 +195,7 @@ describe('The autonomous HTML for a single adaptation', () => {
   })
 })
 
-describe('The autonomous HTML for an adaptation batch', () => {
+describe('The exported data for an adaptation batch', () => {
   before(login)
 
   beforeEach(() => {
@@ -203,31 +203,164 @@ describe('The autonomous HTML for an adaptation batch', () => {
     loadFixtures(['mixed-dummy-adaptation-batch'])
   })
 
-  it('is downloadable', () => {
+  it('can be downloaded as autonomous HTML', () => {
     cy.task('deleteFolder', Cypress.config('downloadsFolder'))
-    cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`).should('not.exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-adaptation-batch-1.html`).should('not.exist')
 
     visit('/adaptation-batch-1')
     cy.get('a:contains("standalone HTML")').click()
     cy.wait(1000)
     cy.get('a:contains("standalone HTML")').should('exist')
-    cy.readFile(`${Cypress.config('downloadsFolder')}/test-adaptation-batch-1.html`)
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-adaptation-batch-1.html`)
+  })
+
+  it('can be downloaded as JSON', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-adaptation-batch-1-adapted-exercises.json`).should(
+      'not.exist',
+    )
+
+    visit('/adaptation-batch-1')
+    cy.get('a:contains("JSON data for adapted exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("JSON data for adapted exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-adaptation-batch-1-adapted-exercises.json`)
   })
 
   it('remembers student answers ands shares them with the autonomous HTML for a single adaptation', () => {
-    visitExport('/api/export/adaptation-batch/1.html')
+    visitExport('/api/export/sandbox-adaptation-batch-1.html')
     cy.get('a:contains("Exercice P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('not.contain', 'vent')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
     cy.get('[data-cy="choice0"]').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
-    visitExport('/api/export/adaptation-batch/1.html')
+    visitExport('/api/export/sandbox-adaptation-batch-1.html')
     cy.get('a:contains("Exercice P42Ex5")').click()
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
 
     visitExport('/api/export/adaptation/1.html')
     cy.get('[data-cy="multipleChoicesInput"]').eq(0).should('contain', 'vent')
+  })
+})
+
+describe('The exported data for a classification batch', () => {
+  before(login)
+
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-classification-batch'])
+    ignoreResizeObserverLoopError()
+  })
+
+  it('the adapted exercises can be downloaded as autonomous HTML', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1.html`).should('not.exist')
+
+    visit('/classification-batch-1')
+    cy.get('a:contains("standalone HTML")').click()
+    cy.wait(1000)
+    cy.get('a:contains("standalone HTML")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1.html`)
+  })
+
+  it('the classified exercises can be downloaded as TSV', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1-classified-exercises.tsv`).should(
+      'not.exist',
+    )
+
+    visit('/classification-batch-1')
+    cy.get('a:contains("TSV data for classified exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("TSV data for classified exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1-classified-exercises.tsv`)
+  })
+
+  it('the adapted exercises can be downloaded as JSON', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1-adapted-exercises.json`).should(
+      'not.exist',
+    )
+
+    visit('/classification-batch-1')
+    cy.get('a:contains("JSON data for adapted exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("JSON data for adapted exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-classification-batch-1-adapted-exercises.json`)
+  })
+})
+
+describe('The exported data for an extraction batch', () => {
+  before(login)
+
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['empty-extraction-batch'])
+    ignoreResizeObserverLoopError()
+  })
+
+  it('the adapted exercises can be downloaded as autonomous HTML', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1.html`).should('not.exist')
+
+    visit('/extraction-batch-1')
+    cy.get('a:contains("standalone HTML")').click()
+    cy.wait(1000)
+    cy.get('a:contains("standalone HTML")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1.html`)
+  })
+
+  it('the extracted exercises can be downloaded as JSON', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-extracted-exercises.json`).should(
+      'not.exist',
+    )
+
+    visit('/extraction-batch-1')
+    cy.get('a:contains("JSON data for extracted exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("JSON data for extracted exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-extracted-exercises.json`)
+  })
+
+  it('the extracted exercises can be downloaded as TSV', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-extracted-exercises.tsv`).should(
+      'not.exist',
+    )
+
+    visit('/extraction-batch-1')
+    cy.get('a:contains("TSV data for extracted exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("TSV data for extracted exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-extracted-exercises.tsv`)
+  })
+
+  it('the classified exercises can be downloaded as TSV', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-classified-exercises.tsv`).should(
+      'not.exist',
+    )
+
+    visit('/extraction-batch-1')
+    cy.get('a:contains("TSV data for classified exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("TSV data for classified exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-classified-exercises.tsv`)
+  })
+
+  it('the adapted exercises can be downloaded as JSON', () => {
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-adapted-exercises.json`).should(
+      'not.exist',
+    )
+
+    visit('/extraction-batch-1')
+    cy.get('a:contains("JSON data for adapted exercises")').click()
+    cy.wait(1000)
+    cy.get('a:contains("JSON data for adapted exercises")').should('exist')
+    cy.readFile(`${Cypress.config('downloadsFolder')}/sandbox-extraction-batch-1-adapted-exercises.json`)
   })
 })
 

@@ -1247,6 +1247,40 @@ class FixturesCreator:
             )
         )
 
+    def create_empty_extraction_batch(self) -> None:
+        model_for_extraction = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
+        model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
+
+        pdf_file = self.add(
+            extraction.PdfFile(
+                created_by="Patty",
+                created_at=created_at,
+                sha256="dummy_sha256",
+                bytes_count=123456,
+                pages_count=30,
+                known_file_names=["dummy_textbook.pdf"],
+            )
+        )
+        pdf_file_range = self.add(
+            extraction.PdfFileRange(
+                created_by="Patty", created_at=created_at, pdf_file=pdf_file, first_page_number=10, pages_count=3
+            )
+        )
+        settings = self.add(
+            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+        )
+        self.add(
+            sandbox.extraction.SandboxExtractionBatch(
+                created_by="Patty",
+                created_at=created_at,
+                pdf_file_range=pdf_file_range,
+                settings=settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+            )
+        )
+
 
 def load(session: database_utils.Session, truncate: bool, fixtures: Iterable[str]) -> None:
     creator = FixturesCreator(session)

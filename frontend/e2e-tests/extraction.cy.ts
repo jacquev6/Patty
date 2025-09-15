@@ -90,7 +90,7 @@ describe('The extraction batch creation page', () => {
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
       .then((href) => {
-        expect(href).to.include('/api/export/extraction-batch/1.html?token=')
+        expect(href).to.include('/api/export/sandbox-extraction-batch-1.html?token=')
         cy.visit(`${href}&download=false`)
       })
     cy.get('a:contains("Exercice")').should('have.length', 4)

@@ -33,11 +33,15 @@ const authenticationTokenStore = useAuthenticationTokenStore()
       </p>
       <p>
         <I18nT keypath="download">
-          <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`">
+          <a
+            :href="`/api/export/sandbox-adaptation-batch-${adaptationBatch.id}.html?token=${authenticationTokenStore.token}`"
+          >
             {{ t('standaloneHtml') }}
           </a>
-          <a :href="`/api/export/adaptation-batch/${adaptationBatch.id}.json?token=${authenticationTokenStore.token}`">
-            {{ t('jsonData') }}
+          <a
+            :href="`/api/export/sandbox-adaptation-batch-${adaptationBatch.id}-adapted-exercises.json?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('jsonDataForAdaptedExercises') }}
           </a>
         </I18nT>
       </p>
@@ -59,13 +63,13 @@ en:
   newBatchBasedOnThisOne: New batch based on this one
   download: Download {0} or {1}
   standaloneHtml: standalone HTML
-  jsonData: JSON data
+  jsonDataForAdaptedExercises: JSON data for adapted exercises
   inputs: Inputs
 fr:
   createdBy: "Créé par :"
   newBatchBasedOnThisOne: Nouveau batch basé sur celui-ci
   download: Télécharger {0} ou {1}
   standaloneHtml: le HTML autonome
-  jsonData: les données JSON
+  jsonDataForAdaptedExercises: les données JSON des exercices adaptés
   inputs: Entrées
 </i18n>
