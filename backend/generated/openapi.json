@@ -208,6 +208,161 @@
         "title": "AdaptationBatch",
         "type": "object"
       },
+      "AdaptationInProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "inProgress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "AdaptationInProgress",
+        "type": "object"
+      },
+      "AdaptationInvalidJsonError": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "invalid-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "parsed": {
+            "title": "Parsed"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "id",
+          "parsed"
+        ],
+        "title": "AdaptationInvalidJsonError",
+        "type": "object"
+      },
+      "AdaptationNotJsonError": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "not-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "id",
+          "text"
+        ],
+        "title": "AdaptationNotJsonError",
+        "type": "object"
+      },
+      "AdaptationNotStarted": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "notStarted",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "AdaptationNotStarted",
+        "type": "object"
+      },
+      "AdaptationSuccess": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptedExercise": {
+            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "success": {
+            "enum": [
+              "llm",
+              "manual"
+            ],
+            "title": "Success",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "success",
+          "id",
+          "adaptedExercise"
+        ],
+        "title": "AdaptationSuccess",
+        "type": "object"
+      },
+      "AdaptationUnknownError": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "unknown",
+            "title": "Error",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "error"
+        ],
+        "title": "AdaptationUnknownError",
+        "type": "object"
+      },
       "ApiAdaptation": {
         "additionalProperties": false,
         "properties": {
@@ -241,26 +396,6 @@
           },
           "input": {
             "$ref": "#/components/schemas/ApiInputOut"
-          },
-          "lastAssistantResponse": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__adaptation__assistant_responses__Success"
-              },
-              {
-                "$ref": "#/components/schemas/InvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/NotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/UnknownError"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lastassistantresponse"
           },
           "llmStatus": {
             "anyOf": [
@@ -331,7 +466,6 @@
           "strategy",
           "input",
           "rawLlmConversations",
-          "lastAssistantResponse",
           "adjustmentPrompts",
           "manualEdit",
           "removedFromTextbook",
@@ -674,11 +808,66 @@
       "ApiTextbookAdaptableExercise": {
         "additionalProperties": false,
         "properties": {
-          "adaptation": {
-            "$ref": "#/components/schemas/ApiAdaptation"
+          "adaptationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotStarted"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
+              }
+            ],
+            "title": "Adaptationstatus"
+          },
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
           },
           "exerciseNumber": {
-            "title": "Exercisenumber",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
             "type": "string"
           },
           "kind": {
@@ -687,15 +876,25 @@
             "type": "string"
           },
           "pageNumber": {
-            "title": "Pagenumber",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
           }
         },
         "required": [
-          "kind",
+          "id",
           "pageNumber",
           "exerciseNumber",
-          "adaptation"
+          "fullText",
+          "classificationStatus",
+          "adaptationStatus",
+          "kind"
         ],
         "title": "ApiTextbookAdaptableExercise",
         "type": "object"
@@ -972,6 +1171,21 @@
         "title": "ClassificationBatch",
         "type": "object"
       },
+      "ClassificationInProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "inProgress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "ClassificationInProgress",
+        "type": "object"
+      },
       "ClassificationInput": {
         "additionalProperties": false,
         "properties": {
@@ -1013,6 +1227,31 @@
           "statementText"
         ],
         "title": "ClassificationInput",
+        "type": "object"
+      },
+      "ClassifiedByModel": {
+        "additionalProperties": false,
+        "properties": {
+          "classHasSettings": {
+            "title": "Classhassettings",
+            "type": "boolean"
+          },
+          "exerciseClass": {
+            "title": "Exerciseclass",
+            "type": "string"
+          },
+          "kind": {
+            "const": "byModel",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "exerciseClass",
+          "classHasSettings"
+        ],
+        "title": "ClassifiedByModel",
         "type": "object"
       },
       "CreatePdfFileRequest": {
@@ -1863,16 +2102,16 @@
       "GetAdaptationBatchResponse": {
         "additionalProperties": false,
         "properties": {
-          "adaptations": {
-            "items": {
-              "$ref": "#/components/schemas/ApiAdaptation"
-            },
-            "title": "Adaptations",
-            "type": "array"
-          },
           "createdBy": {
             "title": "Createdby",
             "type": "string"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise"
+            },
+            "title": "Exercises",
+            "type": "array"
           },
           "id": {
             "title": "Id",
@@ -1891,7 +2130,7 @@
           "needsRefresh",
           "createdBy",
           "strategy",
-          "adaptations"
+          "exercises"
         ],
         "title": "GetAdaptationBatchResponse",
         "type": "object"
@@ -2720,6 +2959,21 @@
         "title": "NotJsonError",
         "type": "object"
       },
+      "NotRequested": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "notRequested",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "NotRequested",
+        "type": "object"
+      },
       "OpenAiModel": {
         "properties": {
           "name": {
@@ -3526,6 +3780,36 @@
         "title": "Range",
         "type": "object"
       },
+      "ReclassifiedByUser": {
+        "additionalProperties": false,
+        "properties": {
+          "by": {
+            "title": "By",
+            "type": "string"
+          },
+          "classHasSettings": {
+            "title": "Classhassettings",
+            "type": "boolean"
+          },
+          "exerciseClass": {
+            "title": "Exerciseclass",
+            "type": "string"
+          },
+          "kind": {
+            "const": "byUser",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "exerciseClass",
+          "classHasSettings",
+          "by"
+        ],
+        "title": "ReclassifiedByUser",
+        "type": "object"
+      },
       "ReferenceComponents": {
         "additionalProperties": false,
         "properties": {
@@ -3987,25 +4271,6 @@
         ],
         "type": "object"
       },
-      "patty__adaptation__assistant_responses__Success": {
-        "additionalProperties": false,
-        "properties": {
-          "exercise": {
-            "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
-          },
-          "kind": {
-            "const": "success",
-            "title": "Kind",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kind",
-          "exercise"
-        ],
-        "title": "Success",
-        "type": "object"
-      },
       "patty__api_router__adaptations__ApiAdaptation__Success": {
         "additionalProperties": false,
         "properties": {
@@ -4034,33 +4299,51 @@
         "title": "Success",
         "type": "object"
       },
-      "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
+      "patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise": {
         "additionalProperties": false,
         "properties": {
-          "adaptation": {
+          "adaptationStatus": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ApiAdaptation"
+                "$ref": "#/components/schemas/NotRequested"
               },
               {
-                "type": "null"
-              }
-            ]
-          },
-          "exerciseClass": {
-            "anyOf": [
-              {
-                "type": "string"
+                "$ref": "#/components/schemas/AdaptationNotStarted"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
               }
             ],
-            "title": "Exerciseclass"
+            "title": "Adaptationstatus"
           },
-          "exerciseClassHasSettings": {
-            "title": "Exerciseclasshassettings",
-            "type": "boolean"
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
           },
           "exerciseNumber": {
             "anyOf": [
@@ -4091,8 +4374,66 @@
               }
             ],
             "title": "Pagenumber"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "classificationStatus",
+          "adaptationStatus"
+        ],
+        "title": "Exercise",
+        "type": "object"
+      },
+      "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotStarted"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
+              }
+            ],
+            "title": "Adaptationstatus"
           },
-          "reclassifiedBy": {
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
+          },
+          "exerciseNumber": {
             "anyOf": [
               {
                 "type": "string"
@@ -4101,7 +4442,26 @@
                 "type": "null"
               }
             ],
-            "title": "Reclassifiedby"
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
           }
         },
         "required": [
@@ -4109,10 +4469,8 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
-          "exerciseClass",
-          "reclassifiedBy",
-          "exerciseClassHasSettings",
-          "adaptation"
+          "classificationStatus",
+          "adaptationStatus"
         ],
         "title": "Exercise",
         "type": "object"
@@ -4163,30 +4521,48 @@
       "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise": {
         "additionalProperties": false,
         "properties": {
-          "adaptation": {
+          "adaptationStatus": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ApiAdaptation"
+                "$ref": "#/components/schemas/NotRequested"
               },
               {
-                "type": "null"
-              }
-            ]
-          },
-          "exerciseClass": {
-            "anyOf": [
-              {
-                "type": "string"
+                "$ref": "#/components/schemas/AdaptationNotStarted"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
               }
             ],
-            "title": "Exerciseclass"
+            "title": "Adaptationstatus"
           },
-          "exerciseClassHasSettings": {
-            "title": "Exerciseclasshassettings",
-            "type": "boolean"
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
           },
           "exerciseNumber": {
             "anyOf": [
@@ -4217,17 +4593,6 @@
               }
             ],
             "title": "Pagenumber"
-          },
-          "reclassifiedBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reclassifiedby"
           }
         },
         "required": [
@@ -4235,10 +4600,8 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
-          "exerciseClass",
-          "reclassifiedBy",
-          "exerciseClassHasSettings",
-          "adaptation"
+          "classificationStatus",
+          "adaptationStatus"
         ],
         "title": "Exercise",
         "type": "object"
@@ -4312,17 +4675,50 @@
       "patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise": {
         "additionalProperties": false,
         "properties": {
-          "adaptation": {
+          "adaptationStatus": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ApiAdaptation"
+                "$ref": "#/components/schemas/NotRequested"
               },
               {
-                "type": "null"
+                "$ref": "#/components/schemas/AdaptationNotStarted"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
               }
-            ]
+            ],
+            "title": "Adaptationstatus"
           },
-          "exerciseClass": {
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
+          },
+          "exerciseNumber": {
             "anyOf": [
               {
                 "type": "string"
@@ -4331,15 +4727,7 @@
                 "type": "null"
               }
             ],
-            "title": "Exerciseclass"
-          },
-          "exerciseClassHasSettings": {
-            "title": "Exerciseclasshassettings",
-            "type": "boolean"
-          },
-          "exerciseNumber": {
-            "title": "Exercisenumber",
-            "type": "string"
+            "title": "Exercisenumber"
           },
           "fullText": {
             "title": "Fulltext",
@@ -4350,12 +4738,15 @@
             "type": "string"
           },
           "pageNumber": {
-            "title": "Pagenumber",
-            "type": "integer"
-          },
-          "reclassifiedBy": {
-            "title": "Reclassifiedby",
-            "type": "null"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
           },
           "removedFromTextbook": {
             "title": "Removedfromtextbook",
@@ -4367,10 +4758,8 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
-          "exerciseClass",
-          "reclassifiedBy",
-          "exerciseClassHasSettings",
-          "adaptation",
+          "classificationStatus",
+          "adaptationStatus",
           "removedFromTextbook"
         ],
         "title": "Exercise",
@@ -4813,9 +5202,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4857,9 +5244,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4901,9 +5286,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"
@@ -4953,9 +5336,7 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiAdaptation"
-                }
+                "schema": {}
               }
             },
             "description": "Successful Response"

@@ -1,7 +1,9 @@
 from collections.abc import Iterable
 from typing import Any, Literal
 import base64
+import csv
 import hashlib
+import io
 import json
 import os
 import urllib.parse
@@ -10,6 +12,7 @@ import fastapi
 
 from .. import adaptation
 from .. import authentication
+from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import external_exercises
@@ -29,18 +32,92 @@ export_batch_template_file_path = os.path.join(
 )
 
 
-@router.get("/extraction-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+@router.get("/sandbox-extraction-batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_extraction_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     return export_batch_html("extraction", id, get_extraction_batch_adaptations(session, id), download)
 
 
-@router.get("/extraction-batch/{id}.json")
-def export_extraction_batch_json(
+class TsvResponse(fastapi.responses.Response):
+    media_type = "text/tab-separated-values"
+
+
+@router.get("/sandbox-extraction-batch-{id}-extracted-exercises.json")
+def export_extraction_batch_extracted_exercises_json(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.JSONResponse:
-    return export_batch_json("extraction", id, get_extraction_batch_adaptations(session, id), download)
+    batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
+
+    content = []
+    for page_creation in batch.page_extraction_creations:
+        page = page_creation.page_extraction
+        assert page.assistant_response is not None
+        content.append({"pdf_page_number": page.pdf_page_number, "response": page.assistant_response.model_dump()})
+
+    return fastapi.responses.JSONResponse(
+        content=content, headers=make_export_header(download, f"sandbox-extraction-batch-{id}-extracted-exercises.json")
+    )
+
+
+@router.get("/sandbox-extraction-batch-{id}-extracted-exercises.tsv")
+def export_extraction_batch_extracted_exercises_tsv(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> TsvResponse:
+    batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
+
+    headers = ("page", "num", "instruction_hint_example", "statement")
+    data = []
+    for page in batch.page_extraction_creations:
+        for exercise in page.page_extraction.fetch_ordered_exercises():
+            assert isinstance(exercise, adaptation.AdaptableExercise)
+            assert isinstance(exercise.location, exercises.ExerciseLocationMaybePageAndNumber)
+            data.append(
+                (
+                    exercise.location.page_number,
+                    exercise.location.exercise_number,
+                    exercise.instruction_hint_example_text,
+                    exercise.statement_text,
+                )
+            )
+
+    return make_tsv_response(headers, data, download, f"sandbox-extraction-batch-{id}-extracted-exercises.tsv")
+
+
+def make_tsv_response(
+    headers: tuple[str, ...], data: list[tuple[Any, ...]], download: bool, filename: str
+) -> TsvResponse:
+    string_file = io.StringIO()
+    writer = csv.writer(string_file, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(headers)
+    writer.writerows(data)
+    content = string_file.getvalue()
+
+    return TsvResponse(content=content, headers=make_export_header(download, filename))
+
+
+@router.get("/sandbox-extraction-batch-{id}-classified-exercises.tsv")
+def export_extraction_batch_classified_exercises_tsv(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> TsvResponse:
+    batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
+
+    classifications: list[classification.ClassificationByChunk] = []
+    if batch.run_classification:
+        for page_creation in batch.page_extraction_creations:
+            for chunk_creation in page_creation.page_extraction.classification_chunk_creations:
+                classifications.extend(chunk_creation.classification_chunk.classifications)
+
+    return export_batch_classified_exercises_tsv("extraction", id, classifications, download)
+
+
+@router.get("/sandbox-extraction-batch-{id}-adapted-exercises.json")
+def export_extraction_batch_adapted_exercises_json(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.JSONResponse:
+    return export_batch_adapted_exercises_json(
+        "extraction", id, get_extraction_batch_adaptations(session, id), download
+    )
 
 
 def get_extraction_batch_adaptations(
@@ -54,18 +131,31 @@ def get_extraction_batch_adaptations(
     ]
 
 
-@router.get("/classification-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+@router.get("/sandbox-classification-batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_classification_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     return export_batch_html("classification", id, get_classification_batch_adaptations(session, id), download)
 
 
-@router.get("/classification-batch/{id}.json")
-def export_classification_batch_json(
+@router.get("/sandbox-classification-batch-{id}-classified-exercises.tsv")
+def export_classification_batch_classified_exercises_tsv(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> TsvResponse:
+    batch = get_by_id(session, sandbox.classification.SandboxClassificationBatch, id)
+
+    return export_batch_classified_exercises_tsv(
+        "classification", id, batch.classification_chunk_creation.classification_chunk.classifications, download
+    )
+
+
+@router.get("/sandbox-classification-batch-{id}-adapted-exercises.json")
+def export_classification_batch_adapted_exercises_json(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.JSONResponse:
-    return export_batch_json("classification", id, get_classification_batch_adaptations(session, id), download)
+    return export_batch_adapted_exercises_json(
+        "classification", id, get_classification_batch_adaptations(session, id), download
+    )
 
 
 def get_classification_batch_adaptations(
@@ -79,18 +169,20 @@ def get_classification_batch_adaptations(
     ]
 
 
-@router.get("/adaptation-batch/{id}.html", response_class=fastapi.responses.HTMLResponse)
+@router.get("/sandbox-adaptation-batch-{id}.html", response_class=fastapi.responses.HTMLResponse)
 def export_adaptation_batch_html(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
     return export_batch_html("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
 
 
-@router.get("/adaptation-batch/{id}.json")
-def export_adaptation_batch_json(
+@router.get("/sandbox-adaptation-batch-{id}-adapted-exercises.json")
+def export_adaptation_batch_adapted_exercises_json(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.JSONResponse:
-    return export_batch_json("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
+    return export_batch_adapted_exercises_json(
+        "adaptation", id, get_adaptation_batch_adaptations(session, id), download
+    )
 
 
 def get_adaptation_batch_adaptations(
@@ -124,15 +216,13 @@ def export_batch_html(
 
     content = render_template(export_batch_template_file_path, "BATCH_EXPORT_DATA", data)
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+    return fastapi.responses.HTMLResponse(
+        content=content, headers=make_export_header(download, f"sandbox-{kind}-batch-{id}.html")
+    )
 
 
-def export_batch_json(
-    kind: Literal["extraction", "adaptation", "classification"],
+def export_batch_adapted_exercises_json(
+    kind: Literal["extraction", "classification", "adaptation"],
     id: str,
     adaptations: Iterable[adaptation.Adaptation | None],
     download: bool,
@@ -145,11 +235,35 @@ def export_batch_json(
         if adapted_exercise_data is not None
     )
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="test-{kind}-batch-{id}.json"'
+    return fastapi.responses.JSONResponse(
+        content=content, headers=make_export_header(download, f"sandbox-{kind}-batch-{id}-adapted-exercises.json")
+    )
 
-    return fastapi.responses.JSONResponse(content=content, headers=headers)
+
+def export_batch_classified_exercises_tsv(
+    kind: Literal["extraction", "classification"],
+    id: str,
+    classifications: Iterable[classification.ClassificationByChunk],
+    download: bool,
+) -> TsvResponse:
+    headers = ("page", "num", "instruction_hint_example", "statement", "class_name")
+
+    data: list[tuple[int | None, str | None, str | None, str | None, str]] = []
+    for classification_ in classifications:
+        exercise = classification_.exercise
+        assert isinstance(exercise.location, exercises.ExerciseLocationMaybePageAndNumber)
+        if classification_.exercise_class is not None:
+            data.append(
+                (
+                    exercise.location.page_number,
+                    exercise.location.exercise_number,
+                    exercise.instruction_hint_example_text,
+                    exercise.statement_text,
+                    classification_.exercise_class.name,
+                )
+            )
+
+    return make_tsv_response(headers, data, download, f"sandbox-{kind}-batch-{id}-classified-exercises.tsv")
 
 
 export_adaptation_template_file_path = os.path.join(
@@ -165,11 +279,9 @@ def export_adaptation(
     assert data is not None
     content = render_template(export_adaptation_template_file_path, "ADAPTATION_EXPORT_DATA", data)
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="{data['exerciseId']}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+    return fastapi.responses.HTMLResponse(
+        content=content, headers=make_export_header(download, f"{data['exerciseId']}.html")
+    )
 
 
 export_textbook_template_file_path = os.path.join(
@@ -201,11 +313,9 @@ def export_textbook(
 
     content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
 
-    headers = {}
-    if download:
-        headers["Content-Disposition"] = f'attachment; filename="{textbook.title}.html"'
-
-    return fastapi.responses.HTMLResponse(content=content, headers=headers)
+    return fastapi.responses.HTMLResponse(
+        content=content, headers=make_export_header(download, f"{textbook.title}.html")
+    )
 
 
 def render_template(template: str, placeholder: str, data: Any) -> str:
@@ -265,3 +375,10 @@ def make_external_exercise_data(external_exercise: external_exercises.ExternalEx
         "originalFileName": external_exercise.original_file_name,
         "data": data,
     }
+
+
+def make_export_header(download: bool, filename: str) -> dict[str, str]:
+    headers = {}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return headers

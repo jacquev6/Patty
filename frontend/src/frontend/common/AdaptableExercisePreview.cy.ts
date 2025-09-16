@@ -2,649 +2,439 @@ import { createI18n } from 'vue-i18n'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 
-import AdaptableExercisePreview, {
-  makePreviewAbleExercise_forAdaptation,
-  makePreviewAbleExercise_forClassificationOrExtraction,
-  makePreviewAbleExercise_forTextbook,
-} from './AdaptableExercisePreview.vue'
-import { type Adaptation } from '@/frontend/ApiClient'
+import AdaptableExercisePreview, { type PreviewableExercise } from './AdaptableExercisePreview.vue'
 import { ignoreResizeObserverLoopError } from '@/../e2e-tests/utils'
 import { useIdentifiedUserStore } from '../basic/IdentifiedUserStore'
 import { useAuthenticationTokenStore } from '../basic/AuthenticationTokenStore'
 
-const exercises = {
-  'adaptation - in progress': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+const exercises: Record<string, PreviewableExercise> = {
+  'adaptation - in progress': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'inProgress',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'inProgress' },
     },
-    null,
-  ),
-  'adaptation - LLM error - invalid json': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+  },
+  'adaptation - LLM error - invalid json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'invalid-json',
+      parsed: [],
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'error', error: 'invalid-json', parsed: [] },
     },
-    null,
-  ),
-  'adaptation - LLM error - not json': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+  },
+  'adaptation - LLM error - not json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-json',
+      text: 'blah',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'error', error: 'not-json', text: 'blah' },
     },
-    null,
-  ),
-  'adaptation - LLM error - unknown': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+  },
+  'adaptation - LLM error - unknown': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'unknown',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'error', error: 'unknown' },
     },
-    null,
-  ),
-  'adaptation - LLM error - unexpected': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+  },
+  'adaptation - LLM error - unexpected': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-an-error',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
-    },
-    null,
-  ),
-  'adaptation - unexpected status': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
+  'adaptation - unexpected status': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'not-a-status',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
-    },
-    null,
-  ),
-  'adaptation - success': makePreviewAbleExercise_forAdaptation(
-    42,
-    {
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
+  'adaptation - success': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
       id: 'ad-id',
-      input: {
-        pageNumber: 37,
-        exerciseNumber: '24',
-        text: ['This is the full text of the exercise.', 'It has multiple lines.'],
-      },
-      status: {
-        kind: 'success',
-        success: 'llm',
-        adaptedExercise: {
-          format: 'v1',
-          instruction: {
-            lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
-          },
-          example: null,
-          hint: null,
-          statement: {
-            pages: [
-              {
-                lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
-              },
-            ],
-          },
-          reference: null,
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
         },
-      },
-    },
-    null,
-  ),
-  'classification - classification not requested': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    false,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    false,
-    null,
-    Promise.resolve,
-  ),
-  'classification - classification in progress - 1': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    false,
-    null,
-    Promise.resolve,
-  ),
-  'classification - classification in progress - 2': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    false,
-    null,
-    Promise.resolve,
-  ),
-  'classification - classification in progress - 3': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    null,
-    Promise.resolve,
-  ),
-  'classification - classification in progress - 4': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    true,
-    null,
-    Promise.resolve,
-  ),
-  'classification - adaptation not requested - 1': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    false,
-    null,
-    Promise.resolve,
-  ),
-  'classification - adaptation not requested - 2': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    false,
-    null,
-    Promise.resolve,
-  ),
-  'classification - class has no settings': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    true,
-    null,
-    Promise.resolve,
-  ),
-  'classification - class had no settings': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    null,
-    Promise.resolve,
-  ),
-  'classification - adaptation in progress': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'inProgress' },
-    },
-    Promise.resolve,
-  ),
-  'classification - adaptation with LLM error - not json': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'not-json', text: 'blah' },
-    },
-    Promise.resolve,
-  ),
-  'classification - adaptation with LLM error - invalid json': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'invalid-json', parsed: [] },
-    },
-    Promise.resolve,
-  ),
-  'classification - adaptation with LLM error - unknown': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'unknown' },
-    },
-    Promise.resolve,
-  ),
-  'classification - adaptation with LLM error - unexpected': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
-    },
-    Promise.resolve,
-  ),
-  'classification - adaptation success': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: {
-        kind: 'success',
-        success: 'llm',
-        adaptedExercise: {
-          format: 'v1',
-          instruction: {
-            lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
-          },
-          example: null,
-          hint: null,
-          statement: {
-            pages: [
-              {
-                lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
-              },
-            ],
-          },
-          reference: null,
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
         },
+        reference: null,
       },
     },
-    Promise.resolve,
-  ),
-  'classification - reclassified': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: 'Bob',
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
+  },
+  'classification - classification not requested': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: { kind: 'notRequested' },
+  },
+  'classification - classification in progress - 1': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'inProgress' },
+    adaptationStatus: { kind: 'notRequested' },
+  },
+  'classification - adaptation not requested - 1': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: { kind: 'notRequested' },
+  },
+  'classification - adaptation not requested - 2': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
+    adaptationStatus: { kind: 'notRequested' },
+  },
+  'classification - class has no settings': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
+    adaptationStatus: { kind: 'notStarted' },
+  },
+  'classification - class had no settings': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: { kind: 'notStarted' },
+  },
+  'classification - adaptation in progress': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'inProgress',
       id: 'ad-id',
-      status: {
-        kind: 'success',
-        success: 'llm',
-        adaptedExercise: {
-          format: 'v1',
-          instruction: {
-            lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
-          },
-          example: null,
-          hint: null,
-          statement: {
-            pages: [
-              {
-                lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
-              },
-            ],
-          },
-          reference: null,
+    },
+  },
+  'classification - adaptation with LLM error - not json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-json',
+      text: 'blah',
+      id: 'ad-id',
+    },
+  },
+  'classification - adaptation with LLM error - invalid json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'invalid-json',
+      parsed: [],
+      id: 'ad-id',
+    },
+  },
+  'classification - adaptation with LLM error - unknown': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'unknown',
+      id: 'ad-id',
+    },
+  },
+  'classification - adaptation with LLM error - unexpected': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-an-error',
+      id: 'ad-id',
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
+  'classification - adaptation success': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
         },
-      },
-    },
-    Promise.resolve,
-  ),
-  'classification - unexpected adaptation status': makePreviewAbleExercise_forClassificationOrExtraction(
-    'header text',
-    true,
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '24',
-      fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    true,
-    {
-      id: 'ad-id',
-      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
-    },
-    Promise.resolve,
-  ),
-  'textbook - classification in progress - 1': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    null,
-  ),
-  'textbook - classification in progress - 2': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: null,
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    null,
-  ),
-  'textbook - class has no settings': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: false,
-    },
-    null,
-  ),
-  'textbook - class had no settings': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    null,
-  ),
-  'textbook - adaptation in progress': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: { kind: 'inProgress' },
-    },
-  ),
-  'textbook - adaptation with LLM error - not json': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'not-json', text: 'blah' },
-    },
-  ),
-  'textbook - adaptation with LLM error - invalid json': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'invalid-json', parsed: [] },
-    },
-  ),
-  'textbook - adaptation with LLM error - unknown': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'unknown' },
-    },
-  ),
-  'textbook - adaptation with LLM error - unexpected': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: { kind: 'error', error: 'not-an-error' } as unknown as Adaptation['status'],
-    },
-  ),
-  'textbook - adaptation success': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
-      id: 'ad-id',
-      status: {
-        kind: 'success',
-        success: 'llm',
-        adaptedExercise: {
-          format: 'v1',
-          instruction: {
-            lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
-          },
-          example: null,
-          hint: null,
-          statement: {
-            pages: [
-              {
-                lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
-              },
-            ],
-          },
-          reference: null,
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
         },
+        reference: null,
       },
     },
-  ),
-  'textbook - unexpected adaptation status': makePreviewAbleExercise_forTextbook(
-    {
-      id: 'ex-id',
-      pageNumber: 37,
-      exerciseNumber: '32',
-      fullText: 'This is the full text of the exercise. It has multiple lines.',
-      exerciseClass: 'Blah',
-      reclassifiedBy: null,
-      exerciseClassHasSettings: true,
-    },
-    {
+  },
+  'classification - reclassified': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byUser', exerciseClass: 'Blah', by: 'Bob', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
       id: 'ad-id',
-      status: { kind: 'not-a-status' } as unknown as Adaptation['status'],
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
     },
-  ),
+  },
+  'classification - unexpected adaptation status': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'not-a-status',
+      id: 'ad-id',
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
+  'textbook - classification in progress - 1': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'inProgress' },
+    adaptationStatus: { kind: 'notStarted' },
+  },
+  'textbook - class has no settings': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
+    adaptationStatus: { kind: 'notStarted' },
+  },
+  'textbook - class had no settings': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: { kind: 'notStarted' },
+  },
+  'textbook - adaptation in progress': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'inProgress',
+      id: 'ad-id',
+    },
+  },
+  'textbook - adaptation with LLM error - not json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-json',
+      text: 'blah',
+      id: 'ad-id',
+    },
+  },
+  'textbook - adaptation with LLM error - invalid json': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'invalid-json',
+      parsed: [],
+      id: 'ad-id',
+    },
+  },
+  'textbook - adaptation with LLM error - unknown': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'unknown',
+      id: 'ad-id',
+    },
+  },
+  'textbook - adaptation with LLM error - unexpected': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'error',
+      error: 'not-an-error',
+      id: 'ad-id',
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
+  'textbook - adaptation success': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+    },
+  },
+  'textbook - unexpected adaptation status': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'not-a-status',
+      id: 'ad-id',
+    } as unknown as PreviewableExercise['adaptationStatus'],
+  },
 }
 
 describe('AdaptableExercisePreview', () => {
   for (const [title, exercise] of Object.entries(exercises)) {
+    const [context, index] = (() => {
+      if (title.startsWith('adaptation - ')) {
+        return ['adaptation', 42] as const
+      } else if (title.startsWith('classification - ')) {
+        return ['classification', 42] as const
+      } else {
+        assert(title.startsWith('textbook - '))
+        return ['textbookByBatch', null] as const
+      }
+    })()
+
     it(`looks like this - ${title}`, () => {
       ignoreResizeObserverLoopError()
       setActivePinia(createPinia())
       useIdentifiedUserStore().identifier = 'Alice'
       useAuthenticationTokenStore().set('1234567890abcdef', new Date(Date.now() + 1000 * 60 * 60 * 24))
       cy.viewport(1000, 500)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cy.mount(AdaptableExercisePreview as any, {
+      cy.mount(AdaptableExercisePreview, {
         props: {
           headerLevel: 2,
+          context,
+          index,
           exercise,
-          showPageAndExercise: exercise.kind !== 'textbook',
         },
         global: {
           plugins: [

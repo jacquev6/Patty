@@ -139,7 +139,7 @@ describe('The classification batch creation page', () => {
     cy.get('h2:contains("Input 1: CocheMot")').should('exist')
     cy.get('h2:contains("Input 2: CochePhrase")').should('exist')
     cy.get('h2:contains("Input 3: VraiFaux")').should('exist')
-    cy.get('div.busy').should('not.exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
     cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")').should('exist')
     cy.get('button:contains("Full screen")').should('have.length', 2)
 

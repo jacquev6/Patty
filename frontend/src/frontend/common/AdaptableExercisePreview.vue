@@ -1,152 +1,9 @@
 <script lang="ts">
-import { type Adaptation as ApiAdaptation } from '@/frontend/ApiClient'
+import { type ExtractionBatch } from '@/frontend/ApiClient'
 
-type Exercise = {
-  id: string
-  pageNumber: number | null
-  exerciseNumber: string | null
-  fullText: string
-  exerciseClass: string | null
-  reclassifiedBy: string | null
-  exerciseClassHasSettings: boolean
-}
+export type PreviewableExercise = ExtractionBatch['pages'][number]['exercises'][number]
 
-type Adaptation = {
-  id: ApiAdaptation['id']
-  input: ApiAdaptation['input']
-  status: ApiAdaptation['status']
-}
-
-export type PreviewableExercise =
-  | {
-      kind: 'adaptation'
-      index: number
-      headerText: string | null
-      classificationWasRequested: false
-      exercise: null
-      adaptationWasRequested: true
-      adaptation: Adaptation
-      submitAdaptationsWithRecentSettings: null
-    }
-  | {
-      kind: 'classificationOrExtraction'
-      index: null
-      headerText: string
-      classificationWasRequested: boolean
-      exercise: Exercise
-      adaptationWasRequested: boolean
-      adaptation: Adaptation | null
-      submitAdaptationsWithRecentSettings: () => Promise<void>
-    }
-  | {
-      kind: 'textbook'
-      index: null
-      headerText: null
-      classificationWasRequested: true
-      exercise: Exercise
-      adaptationWasRequested: true
-      adaptation: Adaptation | null
-      submitAdaptationsWithRecentSettings: null
-    }
-
-export function makePreviewAbleExercise_forAdaptation(
-  index: number,
-  adaptation: {
-    id: string
-    input: Adaptation['input']
-    status: Adaptation['status']
-  },
-  headerText: string | null,
-): PreviewableExercise {
-  return {
-    kind: 'adaptation',
-    index,
-    headerText,
-    classificationWasRequested: false,
-    exercise: null,
-    adaptationWasRequested: true,
-    adaptation,
-    submitAdaptationsWithRecentSettings: null,
-  }
-}
-
-export function makePreviewAbleExercise_forClassificationOrExtraction(
-  headerText: string,
-  classificationWasRequested: boolean,
-  exercise: {
-    id: string
-    pageNumber: number | null
-    exerciseNumber: string | null
-    fullText: string
-    exerciseClass: string | null
-    reclassifiedBy: string | null
-    exerciseClassHasSettings: boolean
-  },
-  adaptationWasRequested: boolean,
-  adaptation: {
-    id: string
-    status: Adaptation['status']
-  } | null,
-  submitAdaptationsWithRecentSettings: () => Promise<void>,
-): PreviewableExercise {
-  return {
-    kind: 'classificationOrExtraction',
-    index: null,
-    headerText,
-    classificationWasRequested,
-    exercise,
-    adaptationWasRequested,
-    adaptation:
-      adaptation === null
-        ? null
-        : {
-            ...adaptation,
-            input: {
-              pageNumber: exercise.pageNumber,
-              exerciseNumber: exercise.exerciseNumber,
-              text: exercise.fullText.split('\n'),
-            },
-          },
-    submitAdaptationsWithRecentSettings,
-  }
-}
-
-export function makePreviewAbleExercise_forTextbook(
-  exercise: {
-    id: string
-    pageNumber: number | null
-    exerciseNumber: string | null
-    fullText: string
-    exerciseClass: string | null
-    reclassifiedBy: string | null
-    exerciseClassHasSettings: boolean
-  },
-  adaptation: {
-    id: string
-    status: Adaptation['status']
-  } | null,
-): PreviewableExercise {
-  return {
-    kind: 'textbook',
-    index: null,
-    headerText: null,
-    classificationWasRequested: true,
-    exercise,
-    adaptationWasRequested: true,
-    adaptation:
-      adaptation === null
-        ? null
-        : {
-            ...adaptation,
-            input: {
-              pageNumber: exercise.pageNumber,
-              exerciseNumber: exercise.exerciseNumber,
-              text: exercise.fullText.split('\n'),
-            },
-          },
-    submitAdaptationsWithRecentSettings: null,
-  }
-}
+export type Context = 'adaptation' | 'classification' | 'extraction' | 'textbookByBatch' | 'textbookByPage'
 </script>
 
 <script setup lang="ts">
@@ -158,13 +15,15 @@ import FixedColumns from '$/FixedColumns.vue'
 
 defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
+  context: Context
+  index: number | null
   exercise: PreviewableExercise
-  showPageAndExercise: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'exercise-removed'): void
   (e: 'batch-updated'): void
+  (e: 'submit-extractions-with-recent-settings'): void
 }>()
 
 const rightColumn = useTemplateRef('rightColumn')
@@ -176,15 +35,22 @@ const rightColumn = useTemplateRef('rightColumn')
       <template #col-1>
         <AdaptableExercisePreview_LeftColumn
           :headerLevel
+          :context
+          :index
           :exercise
           :rightColumn
-          :showPageAndExercise
           @exerciseRemoved="emit('exercise-removed')"
           @batchUpdated="emit('batch-updated')"
         />
       </template>
       <template #col-2>
-        <AdaptableExercisePreview_RightColumn ref="rightColumn" :headerLevel :exercise />
+        <AdaptableExercisePreview_RightColumn
+          ref="rightColumn"
+          :headerLevel
+          :exercise
+          :context
+          @submitExtractionsWithRecentSettings="emit('submit-extractions-with-recent-settings')"
+        />
       </template>
     </FixedColumns>
   </div>

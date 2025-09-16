@@ -6,13 +6,13 @@ import { ref } from 'vue'
 import { useAuthenticatedClient, type ExtractionBatch } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import WhiteSpace from '$/WhiteSpace.vue'
-import EditClassificationOrExtractionBatchFormExercisePreview from '@/frontend/sandbox/EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from '@/frontend/common/AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from '$/MarkDown.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
+import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 
 const props = defineProps<{
   extractionBatch: ExtractionBatch
@@ -48,6 +48,13 @@ async function submitAdaptation() {
   })
   emit('batch-updated')
 }
+
+async function submitAdaptationsWithRecentSettings() {
+  await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
+    params: { path: { id: props.extractionBatch.id } },
+  })
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -66,13 +73,30 @@ async function submitAdaptation() {
       <p>
         <I18nT keypath="download">
           <a
-            :href="`/api/export/extraction-batch/${extractionBatch.id}.html?token=${authenticationTokenStore.token}`"
-            >{{ t('standaloneHtml') }}</a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}.html?token=${authenticationTokenStore.token}`"
           >
+            {{ t('standaloneHtml') }}
+          </a>
           <a
-            :href="`/api/export/extraction-batch/${extractionBatch.id}.json?token=${authenticationTokenStore.token}`"
-            >{{ t('jsonData') }}</a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}-extracted-exercises.json?token=${authenticationTokenStore.token}`"
           >
+            {{ t('jsonDataForExtractedExercises') }}
+          </a>
+          <a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}-extracted-exercises.tsv?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('tsvDataForExtractedExercises') }}
+          </a>
+          <a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}-classified-exercises.tsv?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('tsvDataForClassifiedExercises') }}
+          </a>
+          <a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}-adapted-exercises.json?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('jsonDataForAdaptedExercises') }}
+          </a>
         </I18nT>
       </p>
       <h1>{{ t('followUps') }}</h1>
@@ -143,15 +167,13 @@ async function submitAdaptation() {
         <template v-if="page.assistantResponse !== null">
           <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
-              <EditClassificationOrExtractionBatchFormExercisePreview
+              <AdaptableExercisePreview
                 :headerLevel="3"
-                :batch="{ kind: 'extraction', id: extractionBatch.id }"
-                :headerText="`Exercise ${index + 1}`"
-                :showPageAndExercise="false"
-                :classificationWasRequested="extractionBatch.runClassification"
-                :adaptationWasRequested="extractionBatch.modelForAdaptation !== null"
+                context="extraction"
+                :index
                 :exercise
                 @batchUpdated="emit('batch-updated')"
+                @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
               />
             </template>
           </template>
@@ -181,9 +203,12 @@ en:
   llmModel: LLM model
   settings: Settings
   prompt: Prompt
-  download: Download {0} or {1}
+  download: Download {0}, {1}, {2}, {3}, or {4}
   standaloneHtml: standalone HTML
-  jsonData: JSON data
+  jsonDataForExtractedExercises: JSON data for extracted exercises
+  tsvDataForExtractedExercises: TSV data for extracted exercises
+  tsvDataForClassifiedExercises: TSV data for classified exercises
+  jsonDataForAdaptedExercises: JSON data for adapted exercises
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
   runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
@@ -206,9 +231,12 @@ fr:
   llmModel: Modèle LLM
   settings: Paramètres
   prompt: Invite
-  download: Télécharger {0} ou {1}
+  download: Télécharger {0}, {1}, {2}, {3}, ou {4}
   standaloneHtml: le HTML autonome
-  jsonData: les données JSON
+  jsonDataForExtractedExercises: les données JSON des exercices extraits
+  tsvDataForExtractedExercises: les données TSV des exercices extraits
+  tsvDataForClassifiedExercises: les données TSV des exercices classifiés
+  jsonDataForAdaptedExercises: les données JSON des exercices adaptés
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
   runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"

@@ -4,11 +4,11 @@ import { ref } from 'vue'
 
 import { useAuthenticatedClient, type ClassificationBatch } from '@/frontend/ApiClient'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
-import EditClassificationOrExtractionBatchFormExercisePreview from './EditClassificationOrExtractionBatchFormExercisePreview.vue'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import WhiteSpace from '$/WhiteSpace.vue'
+import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 
 const props = defineProps<{
   classificationBatch: ClassificationBatch
@@ -33,6 +33,14 @@ async function submitAdaptation() {
     params: { path: { id: props.classificationBatch.id } },
     body: llmModelForAdaptation.value,
   })
+  emit('batch-updated')
+}
+
+async function submitAdaptationsWithRecentSettings() {
+  await client.POST(`/api/classification-batches/{id}/submit-adaptations-with-recent-settings`, {
+    params: { path: { id: props.classificationBatch.id } },
+  })
+
   emit('batch-updated')
 }
 </script>
@@ -86,28 +94,31 @@ async function submitAdaptation() {
   <p>
     <I18nT keypath="download">
       <a
-        :href="`/api/export/classification-batch/${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}.html?token=${authenticationTokenStore.token}`"
       >
         {{ t('standaloneHtml') }}
       </a>
       <a
-        :href="`/api/export/classification-batch/${classificationBatch.id}.json?token=${authenticationTokenStore.token}`"
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}-classified-exercises.tsv?token=${authenticationTokenStore.token}`"
       >
-        {{ t('jsonData') }}
+        {{ t('tsvDataForClassifiedExercises') }}
+      </a>
+      <a
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}-adapted-exercises.json?token=${authenticationTokenStore.token}`"
+      >
+        {{ t('jsonDataForAdaptedExercises') }}
       </a>
     </I18nT>
   </p>
   <h1>{{ t('inputs') }}</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
-    <EditClassificationOrExtractionBatchFormExercisePreview
+    <AdaptableExercisePreview
       :headerLevel="2"
-      :batch="{ kind: 'classification', id: classificationBatch.id }"
-      :headerText="`Input ${index + 1}`"
-      :showPageAndExercise="true"
-      :classificationWasRequested="true"
-      :adaptationWasRequested="classificationBatch.modelForAdaptation !== null"
+      context="classification"
+      :index
       :exercise
       @batchUpdated="emit('batch-updated')"
+      @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
     />
   </template>
 </template>
@@ -125,9 +136,10 @@ en:
   runAdaptationUsingModel: and model
   no: no
   submit: Submit
-  download: Download {0} or {1}
+  download: Download {0}, {1}, or {2}
   standaloneHtml: standalone HTML
-  jsonData: JSON data
+  tsvDataForClassifiedExercises: TSV data for classified exercises
+  jsonDataForAdaptedExercises: JSON data for adapted exercises
   inputs: Inputs
 fr:
   settings: Paramètres
@@ -141,8 +153,9 @@ fr:
   runAdaptationUsingModel: et modèle
   no: non
   submit: Soumettre
-  download: Télécharger {0} ou {1}
+  download: Télécharger {0}, {1}, ou {2}
   standaloneHtml: le HTML autonome
-  jsonData: les données JSON
+  tsvDataForClassifiedExercises: les données TSV des exercices classifiés
+  jsonDataForAdaptedExercises: les données JSON des exercices adaptés
   inputs: Entrées
 </i18n>

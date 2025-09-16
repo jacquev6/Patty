@@ -3,6 +3,7 @@ import datetime
 import fastapi
 import sqlalchemy as sql
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import classification
 from .. import database_utils
@@ -12,7 +13,6 @@ from .. import sandbox
 from ..any_json import JsonDict
 from ..api_utils import ApiModel, get_by_id, paginate, assert_isinstance
 from ..version import PATTY_VERSION
-from .adaptations import ApiAdaptation, make_api_adaptation
 
 
 router = fastapi.APIRouter()
@@ -137,15 +137,8 @@ class GetExtractionBatchResponse(ApiModel):
         page_number: int
         assistant_response: extraction.assistant_responses.Response | None
 
-        class Exercise(ApiModel):
-            id: str
-            page_number: int | None
-            exercise_number: str | None
-            full_text: str
-            exercise_class: str | None
-            reclassified_by: str | None
-            exercise_class_has_settings: bool
-            adaptation: ApiAdaptation | None
+        class Exercise(previewable_exercise.PreviewableExercise):
+            pass
 
         exercises: list[Exercise]
 
@@ -185,9 +178,38 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             if extraction_batch.run_classification and exercise_class is None:
                 needs_refresh = True
 
-            api_adaptation = None if latest_adaptation is None else make_api_adaptation(latest_adaptation)
+            exercise_class_has_settings = (
+                latest_classification is not None
+                and latest_classification.exercise_class is not None
+                and latest_classification.exercise_class.latest_strategy_settings is not None
+            )
 
-            if api_adaptation is not None and api_adaptation.status.kind == "inProgress":
+            classification_status: previewable_exercise.ClassificationStatus
+            if not extraction_batch.run_classification:
+                classification_status = previewable_exercise.NotRequested(kind="notRequested")
+            elif exercise_class is None:
+                classification_status = previewable_exercise.ClassificationInProgress(kind="inProgress")
+            elif isinstance(latest_classification, classification.ClassificationByUser):
+                classification_status = previewable_exercise.ReclassifiedByUser(
+                    kind="byUser",
+                    by=latest_classification.username,
+                    exercise_class=exercise_class,
+                    class_has_settings=exercise_class_has_settings,
+                )
+            else:
+                classification_status = previewable_exercise.ClassifiedByModel(
+                    kind="byModel", exercise_class=exercise_class, class_has_settings=exercise_class_has_settings
+                )
+
+            adaptation_status: previewable_exercise.AdaptationStatus
+            if extraction_batch.model_for_adaptation is None:
+                adaptation_status = previewable_exercise.NotRequested(kind="notRequested")
+            elif latest_adaptation is None:
+                adaptation_status = previewable_exercise.AdaptationNotStarted(kind="notStarted")
+            else:
+                adaptation_status = previewable_exercise.make_api_adaptation_status(latest_adaptation)
+
+            if adaptation_status.kind == "inProgress":
                 needs_refresh = True
 
             api_exercises.append(
@@ -200,18 +222,8 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                         exercise.location, exercises.ExerciseLocationMaybePageAndNumber
                     ).exercise_number,
                     full_text=exercise.full_text,
-                    exercise_class=exercise_class,
-                    reclassified_by=(
-                        latest_classification.username
-                        if isinstance(latest_classification, classification.ClassificationByUser)
-                        else None
-                    ),
-                    exercise_class_has_settings=(
-                        latest_classification is not None
-                        and latest_classification.exercise_class is not None
-                        and latest_classification.exercise_class.latest_strategy_settings is not None
-                    ),
-                    adaptation=api_adaptation,
+                    classification_status=classification_status,
+                    adaptation_status=adaptation_status,
                 )
             )
 
@@ -236,7 +248,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
     )
 
 
-@router.post("/extraction-batches/{id}/submit-adaptations-with-recent-settings", status_code=fastapi.status.HTTP_200_OK)
+@router.post("/extraction-batches/{id}/submit-adaptations-with-recent-settings")
 def submit_adaptations_with_recent_settings_in_extraction_batch(
     id: str, session: database_utils.SessionDependable
 ) -> None:
@@ -285,7 +297,7 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                 )
 
 
-@router.put("/extraction-batches/{id}/run-classification", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/extraction-batches/{id}/run-classification")
 def put_extraction_batch_run_classification(id: str, session: database_utils.SessionDependable) -> None:
     extraction_batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
     assert extraction_batch.run_classification is False
@@ -312,7 +324,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
             )
 
 
-@router.put("/extraction-batches/{id}/model-for-adaptation", status_code=fastapi.status.HTTP_200_OK)
+@router.put("/extraction-batches/{id}/model-for-adaptation")
 def put_extraction_batch_model_for_adaptation(
     id: str, req: adaptation.llm.ConcreteModel, session: database_utils.SessionDependable
 ) -> None:

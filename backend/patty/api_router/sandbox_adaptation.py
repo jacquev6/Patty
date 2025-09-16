@@ -3,12 +3,14 @@ import datetime
 import fastapi
 import sqlalchemy as sql
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import classification
 from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
 from .. import sandbox
+from .. import textbooks
 from ..any_json import JsonDict
 from ..api_utils import ApiModel, get_by_id, paginate
 from ..version import PATTY_VERSION
@@ -16,8 +18,6 @@ from .adaptations import (
     ApiStrategySettings,
     ApiStrategy,
     ApiInput,
-    ApiAdaptation,
-    make_api_adaptation,
     make_api_strategy,
     make_api_strategy_settings,
     make_api_strategy_settings_identity,
@@ -223,23 +223,47 @@ class GetAdaptationBatchResponse(ApiModel):
     needs_refresh: bool
     created_by: str
     strategy: ApiStrategy
-    adaptations: list[ApiAdaptation]
+
+    class Exercise(previewable_exercise.PreviewableExercise):
+        pass
+
+    exercises: list[Exercise]
 
 
 @router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, sandbox.adaptation.SandboxAdaptationBatch, id)
-    adaptations = [
-        make_api_adaptation(adaptation_creation.exercise_adaptation)
-        for adaptation_creation in adaptation_batch.adaptation_creations
-    ]
-    needs_refresh = any(a.status.kind == "inProgress" for a in adaptations)
+
+    api_exercises: list[GetAdaptationBatchResponse.Exercise] = []
+    needs_refresh = False
+    for adaptation_creation in adaptation_batch.adaptation_creations:
+        adaptation_status = previewable_exercise.make_api_adaptation_status(adaptation_creation.exercise_adaptation)
+
+        if adaptation_status.kind == "inProgress":
+            needs_refresh = True
+
+        exercise = adaptation_creation.exercise_adaptation.exercise
+        assert isinstance(
+            exercise.location, (textbooks.ExerciseLocationTextbook, exercises.ExerciseLocationMaybePageAndNumber)
+        )
+
+        api_exercises.append(
+            GetAdaptationBatchResponse.Exercise(
+                id=str(exercise.id),
+                page_number=exercise.location.page_number,
+                exercise_number=exercise.location.exercise_number,
+                full_text=exercise.full_text,
+                classification_status=previewable_exercise.NotRequested(kind="notRequested"),
+                adaptation_status=adaptation_status,
+            )
+        )
+
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
         needs_refresh=needs_refresh,
         created_by=adaptation_batch.created_by,
         strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
-        adaptations=adaptations,
+        exercises=api_exercises,
     )
 
 

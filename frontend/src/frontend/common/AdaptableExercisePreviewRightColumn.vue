@@ -3,7 +3,8 @@ import { useI18n } from 'vue-i18n'
 import { computed, ref, watch } from 'vue'
 import { useMagicKeys } from '@vueuse/core'
 
-import { type PreviewableExercise } from './AdaptableExercisePreview.vue'
+import { type PreviewableExercise, type Context } from './AdaptableExercisePreview.vue'
+
 import BugMarker from '$/BugMarker.vue'
 import BusyBox from '$/BusyBox.vue'
 import MiniatureScreen from '$/MiniatureScreen.vue'
@@ -12,6 +13,11 @@ import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   exercise: PreviewableExercise
+  context: Context
+}>()
+
+const emit = defineEmits<{
+  (e: 'submit-extractions-with-recent-settings'): void
 }>()
 
 const { t } = useI18n()
@@ -32,55 +38,67 @@ defineExpose({
 </script>
 
 <template>
-  <template v-if="exercise.adaptation === null">
-    <template v-if="!exercise.adaptationWasRequested">
-      <p>{{ t('adaptationNotRequested') }}</p>
+  <template v-if="exercise.adaptationStatus.kind === 'notRequested'">
+    <p>{{ t('adaptationNotRequested') }}</p>
+  </template>
+  <template v-else-if="exercise.adaptationStatus.kind === 'notStarted'">
+    <template v-if="exercise.classificationStatus.kind === 'notRequested'">
+      <!-- @todo Display something? -->
     </template>
-    <template v-else-if="exercise.exercise !== null">
-      <template v-if="exercise.exercise.exerciseClass === null">
-        <BusyBox :busy="true"><MiniatureScreen :fullScreen="false" /></BusyBox>
-      </template>
-      <template v-else-if="!exercise.exercise.exerciseClassHasSettings">
+    <template v-else-if="exercise.classificationStatus.kind === 'inProgress'">
+      <BusyBox :busy="true"><MiniatureScreen :fullScreen="false" /></BusyBox>
+    </template>
+    <template
+      v-else-if="exercise.classificationStatus.kind === 'byModel' || exercise.classificationStatus.kind === 'byUser'"
+    >
+      <template v-if="exercise.classificationStatus.classHasSettings">
         <p>
-          <I18nT keypath="exerciseClassHasNoSettings">
-            <b>{{ exercise.exercise.exerciseClass }}</b>
+          <I18nT keypath="exerciseClassHadNoSettings">
+            <b>{{ exercise.classificationStatus.exerciseClass }}</b>
           </I18nT>
+        </p>
+        <p v-if="context === 'extraction' || context === 'classification'">
+          <button @click="emit('submit-extractions-with-recent-settings')">{{ t('submitSimilarAdaptations') }}</button>
         </p>
       </template>
       <template v-else>
         <p>
-          <I18nT keypath="exerciseClassHadNoSettings">
-            <b>{{ exercise.exercise.exerciseClass }}</b>
+          <I18nT keypath="exerciseClassHasNoSettings">
+            <b>{{ exercise.classificationStatus.exerciseClass }}</b>
           </I18nT>
-        </p>
-        <p v-if="exercise.submitAdaptationsWithRecentSettings !== null">
-          <button @click="exercise.submitAdaptationsWithRecentSettings">{{ t('submitSimilarAdaptations') }}</button>
         </p>
       </template>
     </template>
+    <BugMarker v-else :is="header" m="unexpected classification status" :v="exercise.classificationStatus" />
   </template>
-  <template v-else-if="exercise.adaptation.status.kind === 'inProgress'">
+  <template v-else-if="exercise.adaptationStatus.kind === 'inProgress'">
     <BusyBox :busy="true"><MiniatureScreen :fullScreen="false" /></BusyBox>
   </template>
-  <template v-else-if="exercise.adaptation.status.kind === 'error'">
+  <template v-else-if="exercise.adaptationStatus.kind === 'error'">
     <component :is="header" style="margin-top: 0">{{ t('errorWithLLM') }}</component>
     <p>
-      <template v-if="exercise.adaptation.status.error === 'invalid-json'">{{ t('llmInvalidJson') }}</template>
-      <template v-else-if="exercise.adaptation.status.error === 'not-json'">{{ t('llmNotJson') }}</template>
-      <template v-else-if="exercise.adaptation.status.error === 'unknown'">{{ t('llmUnknownError') }}</template>
-      <BugMarker v-else is="span" m="unexpected adaptation error" :v="exercise.adaptation.status" />
+      <template v-if="exercise.adaptationStatus.error === 'invalid-json'">
+        {{ t('llmInvalidJson') }}
+      </template>
+      <template v-else-if="exercise.adaptationStatus.error === 'not-json'">
+        {{ t('llmNotJson') }}
+      </template>
+      <template v-else-if="exercise.adaptationStatus.error === 'unknown'">
+        {{ t('llmUnknownError') }}
+      </template>
+      <BugMarker v-else is="span" m="unexpected adaptation error" :v="exercise.adaptationStatus" />
     </p>
   </template>
-  <template v-else-if="exercise.adaptation.status.kind === 'success'">
+  <template v-else-if="exercise.adaptationStatus.kind === 'success'">
     <MiniatureScreen :fullScreen>
       <AdaptedExerciseRenderer
         :navigateUsingArrowKeys="fullScreen"
-        :adaptedExercise="exercise.adaptation.status.adaptedExercise"
+        :adaptedExercise="exercise.adaptationStatus.adaptedExercise"
       />
       <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
     </MiniatureScreen>
   </template>
-  <BugMarker v-else :is="header" m="unexpected adaptation status" :v="exercise.adaptation.status" />
+  <BugMarker v-else :is="header" m="unexpected adaptation status" :v="exercise.adaptationStatus" />
 </template>
 
 <style scoped>
