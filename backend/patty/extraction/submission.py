@@ -75,6 +75,23 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                 f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.extracted.{identifier}.png"
             )
 
+    created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    extracted_images: list[tuple[db.ExtractedImage, PIL.Image.Image]] = []
+    for identifier, image in detected_images.items():
+        extracted_image = db.ExtractedImage(
+            page_extraction=page_extraction, created_at=created_at, page_local_id=identifier
+        )
+        session.add(extracted_image)
+        extracted_images.append((extracted_image, image))
+    session.flush()  # To get all extracted image ids
+    for extracted_image, image in extracted_images:
+        target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{extracted_image.id}.png")
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format="PNG")
+        image_bytes.seek(0)
+        s3.put_object(Bucket=target.netloc, Key=target.path[1:], Body=image_bytes, ContentType="image/png")
+
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:

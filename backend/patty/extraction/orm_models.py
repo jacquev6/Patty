@@ -161,6 +161,8 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         back_populates="page_extraction"
     )
 
+    extracted_images: orm.Mapped[list[ExtractedImage]] = orm.relationship(back_populates="page_extraction")
+
     @staticmethod
     def make_ordered_exercises_request__maybe_page_and_number(id: int) -> sql.Select[tuple[AdaptableExercise]]:
         return (
@@ -251,6 +253,27 @@ class ClassificationChunkCreationByPageExtraction(ClassificationChunkCreation):
         foreign_keys=[page_extraction_id],
         remote_side=[PageExtraction.id],
         back_populates="classification_chunk_creations",
+    )
+
+
+class ExtractedImage(OrmBase):
+    __tablename__ = "extracted_images"
+
+    def __init__(self, *, created_at: datetime.datetime, page_local_id: str, page_extraction: PageExtraction) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.page_local_id = page_local_id
+        self.page_extraction = page_extraction
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    created_at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    page_local_id: orm.Mapped[str]
+
+    page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
+    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
+        foreign_keys=[page_extraction_id], remote_side=[PageExtraction.id], back_populates="extracted_images"
     )
 
 
