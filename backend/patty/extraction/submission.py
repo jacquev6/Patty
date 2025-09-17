@@ -3,13 +3,13 @@ import io
 import subprocess
 import traceback
 import typing
+import urllib.parse
 
 import boto3
 import botocore
 import cachetools
 import PIL.Image
 import sqlalchemy as sql
-import urllib.parse
 
 from . import assistant_responses
 from . import orm_models as db
@@ -18,6 +18,7 @@ from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import settings
+from .images_detection import detect_images
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
@@ -60,13 +61,25 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
         pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
         pdf_data_cache[sha256] = pdf_data
-    image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
+    pdf_page_image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
+
+    annotated_pdf_page_image, detected_images = detect_images(f"p{page_extraction.pdf_page_number}", pdf_page_image)
+
+    if settings.DETECTED_IMAGES_SAVE_PATH is not None:
+        pdf_page_image.save(f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.png")
+        annotated_pdf_page_image.save(
+            f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.annotated.png"
+        )
+        for identifier, image in detected_images.items():
+            image.save(
+                f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.extracted.{identifier}.png"
+            )
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {page_extraction.id}")
-        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, image)
+        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, annotated_pdf_page_image)
     except InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
         page_extraction.assistant_response = assistant_responses.InvalidJsonError(

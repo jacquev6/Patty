@@ -10,6 +10,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
       graphviz \
+      libgl1 \
+      libglib2.0-bin \
       poppler-utils \
       postgresql-client \
  && true
