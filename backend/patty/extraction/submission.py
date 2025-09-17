@@ -127,21 +127,25 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
 
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
-                filter(None, extracted_exercise.consignes + [extracted_exercise.conseil, extracted_exercise.exemple])
+                filter(
+                    None,
+                    extracted_exercise.properties.consignes
+                    + [extracted_exercise.properties.conseil, extracted_exercise.properties.exemple],
+                )
             )
             full_text = "\n".join(
                 filter(
                     None,
                     [
                         instruction_hint_example_text,
-                        extracted_exercise.enonce,
-                        extracted_exercise.references,
-                        extracted_exercise.autre,
+                        extracted_exercise.properties.enonce,
+                        extracted_exercise.properties.references,
+                        extracted_exercise.properties.autre,
                     ],
                 )
             )
 
-            if extracted_exercise.numero is not None:
+            if extracted_exercise.properties.numero is not None:
                 location: exercises.ExerciseLocation
                 if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
                     extraction_batch = page_extraction.created.textbook_extraction_batch
@@ -150,12 +154,13 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                         page_number=extraction_batch.first_textbook_page_number
                         + page_extraction.pdf_page_number
                         - extraction_batch.pdf_file_range.first_page_number,
-                        exercise_number=extracted_exercise.numero,
+                        exercise_number=extracted_exercise.properties.numero,
                         removed_from_textbook=False,
                     )
                 else:
                     location = exercises.ExerciseLocationMaybePageAndNumber(
-                        page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
+                        page_number=page_extraction.pdf_page_number,
+                        exercise_number=extracted_exercise.properties.numero,
                     )
 
                 exercise = adaptation.AdaptableExercise(
@@ -163,7 +168,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     location=location,
                     full_text=full_text,
                     instruction_hint_example_text=instruction_hint_example_text,
-                    statement_text=extracted_exercise.enonce,
+                    statement_text=extracted_exercise.properties.enonce,
                 )
                 session.add(exercise)
 

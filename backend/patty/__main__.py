@@ -728,7 +728,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250915-041603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250917-091603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -817,6 +817,8 @@ def migrate_data(dry_run: bool) -> None:
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         data_migration.migrate(session)
+        session.flush()
+        data_migration.validate(session)
         if not dry_run:
             session.commit()
 

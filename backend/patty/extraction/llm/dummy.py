@@ -29,36 +29,46 @@ class DummyModel(Model):
                 [
                     Exercise(
                         id=None,
-                        numero="1",
-                        consignes=["Recopie les deux mots de chaque phrase qui se prononcent de la même façon."],
-                        conseil=None,
-                        exemple=None,
-                        enonce=textwrap.dedent(
-                            """\
-                            a. Il a gagné le gros lot à la kermesse des écoles.
-                            b. À la fin du film, il y a une bonne surprise.
-                            c. Il a garé sa voiture dans le parking, à droite de la nôtre.
-                            d. Il m'a invité à venir chez lui.
-                            e. Mon oncle a un vélo à vendre.
-                            """
+                        type="exercice",
+                        images=False,
+                        type_images="none",
+                        properties=Exercise.Properties(
+                            numero="1",
+                            consignes=["Recopie les deux mots de chaque phrase qui se prononcent de la même façon."],
+                            conseil=None,
+                            exemple=None,
+                            enonce=textwrap.dedent(
+                                """\
+                                a. Il a gagné le gros lot à la kermesse des écoles.
+                                b. À la fin du film, il y a une bonne surprise.
+                                c. Il a garé sa voiture dans le parking, à droite de la nôtre.
+                                d. Il m'a invité à venir chez lui.
+                                e. Mon oncle a un vélo à vendre.
+                                """
+                            ),
+                            references=None,
+                            autre=None,
                         ),
-                        references=None,
-                        autre=None,
                     ).model_dump(),
                     Exercise(
                         id=None,
-                        numero="2",
-                        consignes=["Réponds par vrai ou faux."],
-                        conseil=None,
-                        exemple=None,
-                        enonce=textwrap.dedent(
-                            """\
-                            a. Bleu est une couleur
-                            b. Un triangle a quatre côtés
-                            """
+                        type="exercice",
+                        images=False,
+                        type_images="none",
+                        properties=Exercise.Properties(
+                            numero="2",
+                            consignes=["Réponds par vrai ou faux."],
+                            conseil=None,
+                            exemple=None,
+                            enonce=textwrap.dedent(
+                                """\
+                                a. Bleu est une couleur
+                                b. Un triangle a quatre côtés
+                                """
+                            ),
+                            references=None,
+                            autre=None,
                         ),
-                        references=None,
-                        autre=None,
                     ).model_dump(),
                 ]
             )

@@ -165,7 +165,9 @@ async function submitAdaptationsWithRecentSettings() {
           >
         </h2>
         <template v-if="page.assistantResponse !== null">
-          <template v-if="page.assistantResponse.kind === 'success'">
+          <template
+            v-if="page.assistantResponse.kind === 'success' || page.assistantResponse.kind === 'success-without-images'"
+          >
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
               <AdaptableExercisePreview
                 :headerLevel="3"

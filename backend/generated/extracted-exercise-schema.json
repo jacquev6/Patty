@@ -14,6 +14,46 @@
           "default": null,
           "title": "Id"
         },
+        "type": {
+          "const": "exercice",
+          "default": "exercice",
+          "title": "Type",
+          "type": "string"
+        },
+        "images": {
+          "default": false,
+          "title": "Images",
+          "type": "boolean"
+        },
+        "type_images": {
+          "default": "none",
+          "enum": [
+            "none",
+            "ordered",
+            "unordered",
+            "composite"
+          ],
+          "title": "Type Images",
+          "type": "string"
+        },
+        "properties": {
+          "$ref": "#/$defs/Properties",
+          "default": {
+            "numero": null,
+            "consignes": [],
+            "enonce": null,
+            "conseil": null,
+            "exemple": null,
+            "references": null,
+            "autre": null
+          }
+        }
+      },
+      "title": "Exercise",
+      "type": "object"
+    },
+    "Properties": {
+      "properties": {
         "numero": {
           "anyOf": [
             {
@@ -33,6 +73,18 @@
           },
           "title": "Consignes",
           "type": "array"
+        },
+        "enonce": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enonce"
         },
         "conseil": {
           "anyOf": [
@@ -57,18 +109,6 @@
           ],
           "default": null,
           "title": "Exemple"
-        },
-        "enonce": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Enonce"
         },
         "references": {
           "anyOf": [
@@ -95,7 +135,7 @@
           "title": "Autre"
         }
       },
-      "title": "Exercise",
+      "title": "Properties",
       "type": "object"
     }
   },

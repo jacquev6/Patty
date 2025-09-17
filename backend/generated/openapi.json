@@ -1662,6 +1662,97 @@
         ],
         "type": "object"
       },
+      "ExerciseWithoutImages": {
+        "properties": {
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "consignes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Consignes",
+            "type": "array"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          }
+        },
+        "title": "ExerciseWithoutImages",
+        "type": "object"
+      },
       "ExtractionBatch": {
         "additionalProperties": false,
         "properties": {
@@ -3679,6 +3770,86 @@
         "title": "PostTokenResponse",
         "type": "object"
       },
+      "Properties": {
+        "properties": {
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "consignes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Consignes",
+            "type": "array"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          }
+        },
+        "title": "Properties",
+        "type": "object"
+      },
       "PutAdaptableExerciseClassRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4062,6 +4233,29 @@
           "splitWordInput"
         ],
         "title": "StatementComponents",
+        "type": "object"
+      },
+      "SuccessWithoutImages": {
+        "additionalProperties": false,
+        "properties": {
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseWithoutImages"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "kind": {
+            "const": "success-without-images",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "exercises"
+        ],
+        "title": "SuccessWithoutImages",
         "type": "object"
       },
       "SwappableInput-Input": {
@@ -4481,6 +4675,9 @@
           "assistantResponse": {
             "anyOf": [
               {
+                "$ref": "#/components/schemas/SuccessWithoutImages"
+              },
+              {
                 "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
               },
               {
@@ -4790,58 +4987,6 @@
       },
       "patty__extraction__extracted__Exercise": {
         "properties": {
-          "autre": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Autre"
-          },
-          "conseil": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Conseil"
-          },
-          "consignes": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Consignes",
-            "type": "array"
-          },
-          "enonce": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enonce"
-          },
-          "exemple": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exemple"
-          },
           "id": {
             "anyOf": [
               {
@@ -4853,27 +4998,33 @@
             ],
             "title": "Id"
           },
-          "numero": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Numero"
+          "images": {
+            "default": false,
+            "title": "Images",
+            "type": "boolean"
           },
-          "references": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "properties": {
+            "$ref": "#/components/schemas/Properties",
+            "default": {
+              "consignes": []
+            }
+          },
+          "type": {
+            "const": "exercice",
+            "default": "exercice",
+            "title": "Type",
+            "type": "string"
+          },
+          "type_images": {
+            "default": "none",
+            "enum": [
+              "none",
+              "ordered",
+              "unordered",
+              "composite"
             ],
-            "title": "References"
+            "title": "Type Images",
+            "type": "string"
           }
         },
         "title": "Exercise",

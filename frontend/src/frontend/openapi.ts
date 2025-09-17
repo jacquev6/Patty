@@ -1213,6 +1213,28 @@ export interface components {
       phases: components['schemas']['Phase-Output'][]
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
     }
+    /** ExerciseWithoutImages */
+    ExerciseWithoutImages: {
+      /** Autre */
+      autre?: string | null
+      /** Conseil */
+      conseil?: string | null
+      /**
+       * Consignes
+       * @default []
+       */
+      consignes?: string[]
+      /** Enonce */
+      enonce?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Id */
+      id?: string | null
+      /** Numero */
+      numero?: string | null
+      /** References */
+      references?: string | null
+    }
     /** ExtractionBatch */
     ExtractionBatch: {
       /**
@@ -1990,6 +2012,26 @@ export interface components {
        */
       validUntil: string
     }
+    /** Properties */
+    Properties: {
+      /** Autre */
+      autre?: string | null
+      /** Conseil */
+      conseil?: string | null
+      /**
+       * Consignes
+       * @default []
+       */
+      consignes?: string[]
+      /** Enonce */
+      enonce?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Numero */
+      numero?: string | null
+      /** References */
+      references?: string | null
+    }
     /** PutAdaptableExerciseClassRequest */
     PutAdaptableExerciseClassRequest: {
       /** Classname */
@@ -2159,6 +2201,16 @@ export interface components {
        */
       whitespace: true
     }
+    /** SuccessWithoutImages */
+    SuccessWithoutImages: {
+      /** Exercises */
+      exercises: components['schemas']['ExerciseWithoutImages'][]
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success-without-images'
+    }
     'SwappableInput-Input': {
       /** Contents */
       contents: (
@@ -2313,6 +2365,7 @@ export interface components {
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
       /** Assistantresponse */
       assistantResponse:
+        | components['schemas']['SuccessWithoutImages']
         | components['schemas']['patty__extraction__assistant_responses__Success']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
@@ -2412,25 +2465,29 @@ export interface components {
     }
     /** Exercise */
     patty__extraction__extracted__Exercise: {
-      /** Autre */
-      autre?: string | null
-      /** Conseil */
-      conseil?: string | null
-      /**
-       * Consignes
-       * @default []
-       */
-      consignes?: string[]
-      /** Enonce */
-      enonce?: string | null
-      /** Exemple */
-      exemple?: string | null
       /** Id */
       id?: string | null
-      /** Numero */
-      numero?: string | null
-      /** References */
-      references?: string | null
+      /**
+       * Images
+       * @default false
+       */
+      images?: boolean
+      /** @default {
+       *       "consignes": []
+       *     } */
+      properties?: components['schemas']['Properties']
+      /**
+       * Type
+       * @default exercice
+       * @constant
+       */
+      type?: 'exercice'
+      /**
+       * Type Images
+       * @default none
+       * @enum {string}
+       */
+      type_images?: 'none' | 'ordered' | 'unordered' | 'composite'
     }
   }
   responses: never
