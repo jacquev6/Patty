@@ -4,7 +4,7 @@ import jsonStringify from 'json-stringify-pretty-compact'
 import { useMagicKeys } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import type { AdaptedExercise } from './ApiClient'
+import type { AdaptedExercise, ImagesUrls } from './ApiClient'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer, { type SpacingVariables } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import FixedColumns from '$/FixedColumns.vue'
@@ -12,6 +12,7 @@ import FixedColumns from '$/FixedColumns.vue'
 export type Example = {
   title: string
   exercise: AdaptedExercise
+  imagesUrls?: ImagesUrls
   demos?: Record<string, () => void>
 }
 
@@ -59,6 +60,7 @@ watch(Escape, () => {
           :navigateUsingArrowKeys="fullScreen"
           :spacingVariables
           :adaptedExercise="example.exercise"
+          :imagesUrls="example.imagesUrls ?? {}"
         />
         <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
       </MiniatureScreen>

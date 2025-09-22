@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import type { AdaptedExercise } from '@/frontend/ApiClient'
+import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 
+// WARNING: changing this type requires changing the export code in the backend
 export type Data = {
   exerciseId: string
   studentAnswersStorageKey: string
   adaptedExercise: AdaptedExercise
+  imagesUrls: ImagesUrls
 }[]
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_BATCH_EXPORT_DATA##') as Data

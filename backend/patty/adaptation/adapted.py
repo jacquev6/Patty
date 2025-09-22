@@ -23,6 +23,9 @@ class BaseModel(pydantic.BaseModel):
     )
 
 
+ImagesUrls = dict[str, str]
+
+
 class ExerciseV1(BaseModel):
     format: Literal["v1"]
     instruction: InstructionPage
@@ -82,6 +85,11 @@ class Formatted(BaseModel):
     subscript: bool = False
 
 
+class Image(BaseModel):
+    kind: Literal["image"]
+    identifier: str
+
+
 class ActiveFormatted(BaseModel):
     kind: Literal["formatted"]
     contents: list[ActiveFormattedText]
@@ -105,14 +113,14 @@ class Choice(BaseModel):
 
 PlainText = Text | Whitespace
 
-FormattedText = PlainText | Arrow | Formatted
+FormattedText = PlainText | Arrow | Formatted | Image
 
 
 class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
 
 
-ActiveFormattedText = PlainText | Arrow | ActiveFormatted | FreeTextInput
+ActiveFormattedText = PlainText | Arrow | ActiveFormatted | Image | FreeTextInput
 
 
 class FormattedTextContainer(BaseModel):
@@ -211,12 +219,14 @@ class FormattedTextComponents(ApiModel):
     whitespace: Literal[True]
     arrow: Literal[True]
     formatted: Literal[True]
+    image: Literal[True]
 
     def gather(self) -> Iterable[type]:
         yield Text
         yield Whitespace
         yield Arrow
         yield Formatted
+        yield Image
 
 
 class ActiveFormattedTextComponents(ApiModel):
@@ -224,6 +234,7 @@ class ActiveFormattedTextComponents(ApiModel):
     whitespace: Literal[True]
     arrow: Literal[True]
     formatted: Literal[True]
+    image: Literal[True]
     free_text_input: bool
 
     def gather(self) -> Iterable[type]:
@@ -235,6 +246,7 @@ class ActiveFormattedTextComponents(ApiModel):
             yield FreeTextInput
         else:
             yield Formatted
+        yield Image
 
 
 class InstructionComponents(FormattedTextComponents):
@@ -411,14 +423,17 @@ class MakePartialExerciseTypeTestCase(unittest.TestCase):
 
     FullPartialExercise = make_partial_exercise_type(
         Components(
-            instruction=InstructionComponents(text=True, whitespace=True, arrow=True, formatted=True, choice=True),
-            example=ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            hint=HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            instruction=InstructionComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=True
+            ),
+            example=ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True, image=True),
+            hint=HintComponents(text=True, whitespace=True, arrow=True, formatted=True, image=True),
             statement=StatementComponents(
                 text=True,
                 whitespace=True,
                 arrow=True,
                 formatted=True,
+                image=True,
                 free_text_input=True,
                 multiple_choices_input=True,
                 selectable_input=True,
@@ -426,7 +441,7 @@ class MakePartialExerciseTypeTestCase(unittest.TestCase):
                 editable_text_input=True,
                 split_word_input=True,
             ),
-            reference=ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            reference=ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True, image=True),
         )
     )
 

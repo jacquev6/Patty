@@ -307,7 +307,11 @@ watch(Escape, () => {
       <template v-else>
         <h1>{{ t('adaptedExercise') }}</h1>
         <MiniatureScreen :fullScreen>
-          <AdaptedExerciseRenderer :navigateUsingArrowKeys="fullScreen" :adaptedExercise />
+          <AdaptedExerciseRenderer
+            :navigateUsingArrowKeys="fullScreen"
+            :adaptedExercise
+            :imagesUrls="adaptation.imagesUrls"
+          />
           <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
             {{ t('exitFullScreen') }}
           </button>

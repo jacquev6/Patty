@@ -29,6 +29,9 @@
                   "$ref": "#/components/schemas/ActiveFormatted-Input"
                 },
                 {
+                  "$ref": "#/components/schemas/Image"
+                },
+                {
                   "$ref": "#/components/schemas/FreeTextInput"
                 }
               ]
@@ -107,6 +110,9 @@
                   "$ref": "#/components/schemas/ActiveFormatted-Output"
                 },
                 {
+                  "$ref": "#/components/schemas/Image"
+                },
+                {
                   "$ref": "#/components/schemas/FreeTextInput"
                 }
               ]
@@ -176,7 +182,7 @@
           "model": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -394,6 +400,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "input": {
             "$ref": "#/components/schemas/ApiInputOut"
           },
@@ -466,6 +479,7 @@
           "strategy",
           "input",
           "rawLlmConversations",
+          "imagesUrls",
           "adjustmentPrompts",
           "manualEdit",
           "removedFromTextbook",
@@ -485,7 +499,7 @@
           "model": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/GeminiModel"
@@ -591,7 +605,7 @@
           "model": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -619,7 +633,7 @@
           "model": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -870,6 +884,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "kind": {
             "const": "adaptable",
             "title": "Kind",
@@ -892,6 +913,7 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
+          "imagesUrls",
           "classificationStatus",
           "adaptationStatus",
           "kind"
@@ -1087,6 +1109,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -1121,6 +1146,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -1309,30 +1337,6 @@
         "title": "CreatePdfFileResponse",
         "type": "object"
       },
-      "DummyModel": {
-        "properties": {
-          "name": {
-            "enum": [
-              "dummy-1",
-              "dummy-2",
-              "dummy-3"
-            ],
-            "title": "Name",
-            "type": "string"
-          },
-          "provider": {
-            "const": "dummy",
-            "title": "Provider",
-            "type": "string"
-          }
-        },
-        "required": [
-          "provider",
-          "name"
-        ],
-        "title": "DummyModel",
-        "type": "object"
-      },
       "EditableTextInput": {
         "properties": {
           "contents": {
@@ -1470,6 +1474,11 @@
             "title": "Formatted",
             "type": "boolean"
           },
+          "image": {
+            "const": true,
+            "title": "Image",
+            "type": "boolean"
+          },
           "text": {
             "const": true,
             "title": "Text",
@@ -1485,7 +1494,8 @@
           "text",
           "whitespace",
           "arrow",
-          "formatted"
+          "formatted",
+          "image"
         ],
         "title": "ExampleComponents",
         "type": "object"
@@ -1495,7 +1505,7 @@
           "example": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -1510,7 +1520,7 @@
           "hint": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -1518,12 +1528,12 @@
             ]
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input"
           },
           "reference": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -1531,7 +1541,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
           }
         },
         "required": [
@@ -1549,7 +1559,7 @@
           "example": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -1564,7 +1574,7 @@
           "hint": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -1572,12 +1582,12 @@
             ]
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output"
           },
           "reference": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -1585,7 +1595,7 @@
             ]
           },
           "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
           }
         },
         "required": [
@@ -1615,7 +1625,7 @@
           "reference": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -1647,7 +1657,7 @@
           "reference": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -1804,6 +1814,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -1879,6 +1892,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -1944,6 +1960,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -1972,6 +1991,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -2097,6 +2119,9 @@
                   "$ref": "#/components/schemas/ActiveFormatted-Input"
                 },
                 {
+                  "$ref": "#/components/schemas/Image"
+                },
+                {
                   "$ref": "#/components/schemas/FreeTextInput"
                 },
                 {
@@ -2144,6 +2169,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/FreeTextInput"
@@ -2283,7 +2311,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -2372,7 +2400,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -2515,6 +2543,11 @@
             "title": "Formatted",
             "type": "boolean"
           },
+          "image": {
+            "const": true,
+            "title": "Image",
+            "type": "boolean"
+          },
           "text": {
             "const": true,
             "title": "Text",
@@ -2530,7 +2563,8 @@
           "text",
           "whitespace",
           "arrow",
-          "formatted"
+          "formatted",
+          "image"
         ],
         "title": "HintComponents",
         "type": "object"
@@ -2557,6 +2591,24 @@
           "version"
         ],
         "title": "Identity",
+        "type": "object"
+      },
+      "Image": {
+        "properties": {
+          "identifier": {
+            "title": "Identifier",
+            "type": "string"
+          },
+          "kind": {
+            "const": "image",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "identifier"
+        ],
         "type": "object"
       },
       "InProgress": {
@@ -2591,6 +2643,11 @@
             "title": "Formatted",
             "type": "boolean"
           },
+          "image": {
+            "const": true,
+            "title": "Image",
+            "type": "boolean"
+          },
           "text": {
             "const": true,
             "title": "Text",
@@ -2607,6 +2664,7 @@
           "whitespace",
           "arrow",
           "formatted",
+          "image",
           "choice"
         ],
         "title": "InstructionComponents",
@@ -2720,7 +2778,7 @@
         "title": "JsonSchemaLlmResponseSpecification",
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -2736,6 +2794,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/ActiveFormatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/FreeTextInput"
@@ -2766,7 +2827,7 @@
         ],
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -2782,6 +2843,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/ActiveFormatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/FreeTextInput"
@@ -2812,7 +2876,7 @@
         ],
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -2828,6 +2892,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -2840,7 +2907,7 @@
         ],
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -2856,6 +2923,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -2868,7 +2938,7 @@
         ],
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input": {
         "properties": {
           "contents": {
             "items": {
@@ -2884,6 +2954,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/Choice-Input"
@@ -2899,7 +2972,7 @@
         ],
         "type": "object"
       },
-      "Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output": {
+      "Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output": {
         "properties": {
           "contents": {
             "items": {
@@ -2915,6 +2988,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/Choice-Output"
@@ -3088,11 +3164,11 @@
         "title": "OpenAiModel",
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "title": "Lines",
             "type": "array"
@@ -3103,11 +3179,11 @@
         ],
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "title": "Lines",
             "type": "array"
@@ -3118,11 +3194,11 @@
         ],
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
             },
             "title": "Lines",
             "type": "array"
@@ -3133,11 +3209,11 @@
         ],
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
             },
             "title": "Lines",
             "type": "array"
@@ -3148,11 +3224,11 @@
         ],
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input"
             },
             "title": "Lines",
             "type": "array"
@@ -3163,11 +3239,11 @@
         ],
         "type": "object"
       },
-      "Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output": {
+      "Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output": {
         "properties": {
           "lines": {
             "items": {
-              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+              "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output"
             },
             "title": "Lines",
             "type": "array"
@@ -3178,11 +3254,11 @@
         ],
         "type": "object"
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
             },
             "title": "Pages",
             "type": "array"
@@ -3193,11 +3269,11 @@
         ],
         "type": "object"
       },
-      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
+      "Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output": {
         "properties": {
           "pages": {
             "items": {
-              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+              "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
             },
             "title": "Pages",
             "type": "array"
@@ -3213,7 +3289,7 @@
           "example": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -3223,7 +3299,7 @@
           "hint": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Input"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input"
               },
               {
                 "type": "null"
@@ -3231,12 +3307,12 @@
             ]
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input"
           },
           "statement": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input"
               },
               {
                 "$ref": "#/components/schemas/GeneratedPages-Input"
@@ -3258,7 +3334,7 @@
           "example": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -3268,7 +3344,7 @@
           "hint": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__-Output"
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
               },
               {
                 "type": "null"
@@ -3276,12 +3352,12 @@
             ]
           },
           "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output"
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output"
           },
           "statement": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+                "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
               },
               {
                 "$ref": "#/components/schemas/GeneratedPages-Output"
@@ -3369,7 +3445,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -3496,7 +3572,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -3605,7 +3681,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -3619,7 +3695,7 @@
           "modelForExtraction": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/GeminiModel"
@@ -3879,7 +3955,7 @@
           "modelForAdaptation": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/MistralAiModel"
@@ -3893,7 +3969,7 @@
           "modelForExtraction": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DummyModel"
+                "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
               },
               {
                 "$ref": "#/components/schemas/GeminiModel"
@@ -3994,6 +4070,11 @@
             "title": "Formatted",
             "type": "boolean"
           },
+          "image": {
+            "const": true,
+            "title": "Image",
+            "type": "boolean"
+          },
           "text": {
             "const": true,
             "title": "Text",
@@ -4009,7 +4090,8 @@
           "text",
           "whitespace",
           "arrow",
-          "formatted"
+          "formatted",
+          "image"
         ],
         "title": "ReferenceComponents",
         "type": "object"
@@ -4065,6 +4147,9 @@
                   "$ref": "#/components/schemas/Formatted-Input"
                 },
                 {
+                  "$ref": "#/components/schemas/Image"
+                },
+                {
                   "$ref": "#/components/schemas/SelectableInput-Input"
                 }
               ]
@@ -4113,6 +4198,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 },
                 {
                   "$ref": "#/components/schemas/SelectableInput-Output"
@@ -4193,6 +4281,11 @@
             "title": "Freetextinput",
             "type": "boolean"
           },
+          "image": {
+            "const": true,
+            "title": "Image",
+            "type": "boolean"
+          },
           "multipleChoicesInput": {
             "title": "Multiplechoicesinput",
             "type": "boolean"
@@ -4225,6 +4318,7 @@
           "whitespace",
           "arrow",
           "formatted",
+          "image",
           "freeTextInput",
           "multipleChoicesInput",
           "selectableInput",
@@ -4274,6 +4368,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Input"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -4308,6 +4405,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Formatted-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Image"
                 }
               ]
             },
@@ -4465,6 +4565,31 @@
         ],
         "type": "object"
       },
+      "patty__adaptation__llm__dummy__DummyModel": {
+        "properties": {
+          "name": {
+            "enum": [
+              "dummy-1",
+              "dummy-2",
+              "dummy-3",
+              "dummy-for-images"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "provider": {
+            "const": "dummy",
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "name"
+        ],
+        "title": "DummyModel",
+        "type": "object"
+      },
       "patty__api_router__adaptations__ApiAdaptation__Success": {
         "additionalProperties": false,
         "properties": {
@@ -4558,6 +4683,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4575,6 +4707,7 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
+          "imagesUrls",
           "classificationStatus",
           "adaptationStatus"
         ],
@@ -4646,6 +4779,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4663,6 +4803,7 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
+          "imagesUrls",
           "classificationStatus",
           "adaptationStatus"
         ],
@@ -4780,6 +4921,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4797,6 +4945,7 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
+          "imagesUrls",
           "classificationStatus",
           "adaptationStatus"
         ],
@@ -4934,6 +5083,13 @@
             "title": "Id",
             "type": "string"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -4955,6 +5111,7 @@
           "pageNumber",
           "exerciseNumber",
           "fullText",
+          "imagesUrls",
           "classificationStatus",
           "adaptationStatus",
           "removedFromTextbook"
@@ -5028,6 +5185,30 @@
           }
         },
         "title": "Exercise",
+        "type": "object"
+      },
+      "patty__extraction__llm__dummy__DummyModel": {
+        "properties": {
+          "name": {
+            "enum": [
+              "dummy-1",
+              "dummy-2",
+              "dummy-for-images"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "provider": {
+            "const": "dummy",
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "name"
+        ],
+        "title": "DummyModel",
         "type": "object"
       }
     },
@@ -5522,7 +5703,7 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/DummyModel"
+                        "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
                       },
                       {
                         "$ref": "#/components/schemas/MistralAiModel"
@@ -5559,7 +5740,7 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/DummyModel"
+                        "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
                       },
                       {
                         "$ref": "#/components/schemas/GeminiModel"
@@ -5798,7 +5979,7 @@
               "schema": {
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/DummyModel"
+                    "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
                   },
                   {
                     "$ref": "#/components/schemas/MistralAiModel"
@@ -6130,7 +6311,7 @@
               "schema": {
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/DummyModel"
+                    "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
                   },
                   {
                     "$ref": "#/components/schemas/MistralAiModel"

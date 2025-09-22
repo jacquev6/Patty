@@ -592,6 +592,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
       )[]
       /** Highlighted */
@@ -639,6 +640,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
       )[]
       /** Highlighted */
@@ -682,7 +684,7 @@ export interface components {
       id: string
       /** Model */
       model:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       strategySettingsIdentity: components['schemas']['Identity'] | null
@@ -782,6 +784,10 @@ export interface components {
         | components['schemas']['BelongsToTextbook']
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       input: components['schemas']['ApiInputOut']
       /** Llmstatus */
       llmStatus:
@@ -809,7 +815,7 @@ export interface components {
       /** Id */
       id: string
       /** Model */
-      model: components['schemas']['DummyModel'] | components['schemas']['GeminiModel']
+      model: components['schemas']['patty__extraction__llm__dummy__DummyModel'] | components['schemas']['GeminiModel']
       /** Prompt */
       prompt: string
     }
@@ -835,7 +841,7 @@ export interface components {
     'ApiStrategy-Input': {
       /** Model */
       model:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       settings: components['schemas']['ApiStrategySettings-Input']
@@ -844,7 +850,7 @@ export interface components {
     'ApiStrategy-Output': {
       /** Model */
       model:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       settings: components['schemas']['ApiStrategySettings-Output']
@@ -915,6 +921,10 @@ export interface components {
       fullText: string
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /**
        * Kind
        * @constant
@@ -1007,6 +1017,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
       )[]
       /**
        * Kind
@@ -1021,6 +1032,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
       )[]
       /**
        * Kind
@@ -1089,19 +1101,6 @@ export interface components {
       /** Uploadurl */
       uploadUrl: string | null
     }
-    /** DummyModel */
-    DummyModel: {
-      /**
-       * Name
-       * @enum {string}
-       */
-      name: 'dummy-1' | 'dummy-2' | 'dummy-3'
-      /**
-       * Provider
-       * @constant
-       */
-      provider: 'dummy'
-    }
     EditableTextInput: {
       /** Contents */
       contents: (components['schemas']['Text'] | components['schemas']['Whitespace'])[]
@@ -1159,6 +1158,11 @@ export interface components {
        */
       formatted: true
       /**
+       * Image
+       * @constant
+       */
+      image: true
+      /**
        * Text
        * @constant
        */
@@ -1170,28 +1174,28 @@ export interface components {
       whitespace: true
     }
     'ExerciseV1-Input': {
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
       /**
        * Format
        * @constant
        */
       format: 'v1'
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
     }
     'ExerciseV1-Output': {
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
       /**
        * Format
        * @constant
        */
       format: 'v1'
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
     }
     'ExerciseV2-Input': {
       /**
@@ -1201,7 +1205,7 @@ export interface components {
       format: 'v2'
       /** Phases */
       phases: components['schemas']['Phase-Input'][]
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
     }
     'ExerciseV2-Output': {
       /**
@@ -1211,7 +1215,7 @@ export interface components {
       format: 'v2'
       /** Phases */
       phases: components['schemas']['Phase-Output'][]
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
     }
     /** ExerciseWithoutImages */
     ExerciseWithoutImages: {
@@ -1264,6 +1268,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
       )[]
       /** Highlighted */
       highlighted?: string | null
@@ -1310,6 +1315,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
       )[]
       /** Highlighted */
       highlighted?: string | null
@@ -1346,6 +1352,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
       )[]
     }
     'FormattedTextContainer-Output': {
@@ -1355,6 +1362,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
       )[]
     }
     FreeTextInput: {
@@ -1402,6 +1410,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Input']
         | components['schemas']['SelectableInput-Input']
@@ -1418,6 +1427,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Output']
         | components['schemas']['SelectableInput-Output']
@@ -1463,7 +1473,7 @@ export interface components {
       id: string
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
@@ -1490,7 +1500,7 @@ export interface components {
       id: string
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
@@ -1540,6 +1550,11 @@ export interface components {
        */
       formatted: true
       /**
+       * Image
+       * @constant
+       */
+      image: true
+      /**
        * Text
        * @constant
        */
@@ -1559,6 +1574,15 @@ export interface components {
        * @enum {string}
        */
       version: 'current' | 'previous' | 'older'
+    }
+    Image: {
+      /** Identifier */
+      identifier: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'image'
     }
     /** InProgress */
     InProgress: {
@@ -1582,6 +1606,11 @@ export interface components {
        * @constant
        */
       formatted: true
+      /**
+       * Image
+       * @constant
+       */
+      image: true
       /**
        * Text
        * @constant
@@ -1652,13 +1681,14 @@ export interface components {
       referenceComponents: components['schemas']['ReferenceComponents']
       statementComponents: components['schemas']['StatementComponents']
     }
-    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Input']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Input']
         | components['schemas']['SelectableInput-Input']
@@ -1667,13 +1697,14 @@ export interface components {
         | components['schemas']['SplitWordInput']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['ActiveFormatted-Output']
+        | components['schemas']['Image']
         | components['schemas']['FreeTextInput']
         | components['schemas']['MultipleChoicesInput-Output']
         | components['schemas']['SelectableInput-Output']
@@ -1682,41 +1713,45 @@ export interface components {
         | components['schemas']['SplitWordInput']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__-Input': {
+    'Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input': {
+    'Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
         | components['schemas']['Choice-Input']
       )[]
     }
-    'Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output': {
+    'Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output': {
       /** Contents */
       contents: (
         | components['schemas']['Text']
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
         | components['schemas']['Choice-Output']
       )[]
     }
@@ -1800,54 +1835,54 @@ export interface components {
        */
       provider: 'openai'
     }
-    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
+    'Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__-Input': {
+    'Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__-Output': {
+    'Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input': {
+    'Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input'][]
     }
-    'Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output': {
+    'Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output': {
       /** Lines */
-      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output'][]
+      lines: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input'][]
     }
-    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
+    'Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output': {
       /** Pages */
-      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
+      pages: components['schemas']['Page_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output'][]
     }
     'Phase-Input': {
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Input'] | null
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Input']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Input']
       /** Statement */
       statement:
-        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
         | components['schemas']['GeneratedPages-Input']
     }
     'Phase-Output': {
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__-Output'] | null
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Choice__-Output']
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output']
       /** Statement */
       statement:
-        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
+        | components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
         | components['schemas']['GeneratedPages-Output']
     }
     /** PostAdaptationAdjustmentRequest */
@@ -1876,7 +1911,7 @@ export interface components {
       inputs: components['schemas']['ClassificationInput'][]
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
@@ -1915,7 +1950,7 @@ export interface components {
       firstPage: number
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
         | null
@@ -1954,11 +1989,13 @@ export interface components {
       creator: string
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       /** Modelforextraction */
-      modelForExtraction: components['schemas']['DummyModel'] | components['schemas']['GeminiModel']
+      modelForExtraction:
+        | components['schemas']['patty__extraction__llm__dummy__DummyModel']
+        | components['schemas']['GeminiModel']
       /** Pagescount */
       pagesCount: number
       /** Pdffilesha256 */
@@ -2045,11 +2082,13 @@ export interface components {
       id: string
       /** Modelforadaptation */
       modelForAdaptation:
-        | components['schemas']['DummyModel']
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
       /** Modelforextraction */
-      modelForExtraction: components['schemas']['DummyModel'] | components['schemas']['GeminiModel']
+      modelForExtraction:
+        | components['schemas']['patty__extraction__llm__dummy__DummyModel']
+        | components['schemas']['GeminiModel']
       /** Pages */
       pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page'][]
       /** Pagescount */
@@ -2092,6 +2131,11 @@ export interface components {
        */
       formatted: true
       /**
+       * Image
+       * @constant
+       */
+      image: true
+      /**
        * Text
        * @constant
        */
@@ -2121,6 +2165,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
         | components['schemas']['SelectableInput-Input']
       )[]
       /**
@@ -2140,6 +2185,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
         | components['schemas']['SelectableInput-Output']
       )[]
       /**
@@ -2182,6 +2228,11 @@ export interface components {
       formatted: true
       /** Freetextinput */
       freeTextInput: boolean
+      /**
+       * Image
+       * @constant
+       */
+      image: true
       /** Multiplechoicesinput */
       multipleChoicesInput: boolean
       /** Selectableinput */
@@ -2218,6 +2269,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Input']
+        | components['schemas']['Image']
       )[]
       /**
        * Kind
@@ -2232,6 +2284,7 @@ export interface components {
         | components['schemas']['Whitespace']
         | components['schemas']['Arrow']
         | components['schemas']['Formatted-Output']
+        | components['schemas']['Image']
       )[]
       /**
        * Kind
@@ -2295,6 +2348,19 @@ export interface components {
        */
       kind: 'whitespace'
     }
+    /** DummyModel */
+    patty__adaptation__llm__dummy__DummyModel: {
+      /**
+       * Name
+       * @enum {string}
+       */
+      name: 'dummy-1' | 'dummy-2' | 'dummy-3' | 'dummy-for-images'
+      /**
+       * Provider
+       * @constant
+       */
+      provider: 'dummy'
+    }
     /** Success */
     patty__api_router__adaptations__ApiAdaptation__Success: {
       adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
@@ -2332,6 +2398,10 @@ export interface components {
       fullText: string
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /** Pagenumber */
       pageNumber: number | null
     }
@@ -2358,6 +2428,10 @@ export interface components {
       fullText: string
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /** Pagenumber */
       pageNumber: number | null
     }
@@ -2399,6 +2473,10 @@ export interface components {
       fullText: string
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /** Pagenumber */
       pageNumber: number | null
     }
@@ -2448,6 +2526,10 @@ export interface components {
       fullText: string
       /** Id */
       id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /** Pagenumber */
       pageNumber: number | null
       /** Removedfromtextbook */
@@ -2488,6 +2570,19 @@ export interface components {
        * @enum {string}
        */
       type_images?: 'none' | 'ordered' | 'unordered' | 'composite'
+    }
+    /** DummyModel */
+    patty__extraction__llm__dummy__DummyModel: {
+      /**
+       * Name
+       * @enum {string}
+       */
+      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images'
+      /**
+       * Provider
+       * @constant
+       */
+      provider: 'dummy'
     }
   }
   responses: never
@@ -2840,7 +2935,7 @@ export interface operations {
         }
         content: {
           'application/json': (
-            | components['schemas']['DummyModel']
+            | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
             | components['schemas']['MistralAiModel']
             | components['schemas']['OpenAiModel']
           )[]
@@ -2863,7 +2958,10 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': (components['schemas']['DummyModel'] | components['schemas']['GeminiModel'])[]
+          'application/json': (
+            | components['schemas']['patty__extraction__llm__dummy__DummyModel']
+            | components['schemas']['GeminiModel']
+          )[]
         }
       }
     }
@@ -3007,7 +3105,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json':
-          | components['schemas']['DummyModel']
+          | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
           | components['schemas']['MistralAiModel']
           | components['schemas']['OpenAiModel']
       }
@@ -3244,7 +3342,7 @@ export interface operations {
     requestBody: {
       content: {
         'application/json':
-          | components['schemas']['DummyModel']
+          | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
           | components['schemas']['MistralAiModel']
           | components['schemas']['OpenAiModel']
       }

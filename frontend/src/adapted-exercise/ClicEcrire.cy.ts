@@ -207,6 +207,7 @@ describe('An exercise of type "ClicEcrire"', () => {
       props: {
         navigateUsingArrowKeys: true,
         adaptedExercise,
+        imagesUrls: {},
       },
       global: { plugins: [createI18n({ legacy: false, locale: 'fr' })] },
     })

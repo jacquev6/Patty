@@ -29,6 +29,7 @@ def get_available_extraction_llm_models() -> list[extraction.llm.ConcreteModel]:
         return [
             extraction.llm.DummyModel(provider="dummy", name="dummy-1"),
             extraction.llm.DummyModel(provider="dummy", name="dummy-2"),
+            extraction.llm.DummyModel(provider="dummy", name="dummy-for-images"),
             extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
         ]
     else:
@@ -222,6 +223,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                         exercise.location, exercises.ExerciseLocationMaybePageAndNumber
                     ).exercise_number,
                     full_text=exercise.full_text,
+                    images_urls=previewable_exercise.gather_images_urls("s3", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
                 )

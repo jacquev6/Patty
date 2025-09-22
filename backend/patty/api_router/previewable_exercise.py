@@ -1,7 +1,13 @@
+import base64
+import urllib.parse
 import typing
 
 from .. import adaptation
+from .. import dispatching as dispatch
+from .. import extraction
+from .. import settings
 from ..api_utils import ApiModel
+from .s3_client import s3
 
 
 class NotRequested(ApiModel):
@@ -85,8 +91,34 @@ class PreviewableExercise(ApiModel):
     page_number: int | None
     exercise_number: str | None
     full_text: str
+    images_urls: adaptation.adapted.ImagesUrls
     classification_status: ClassificationStatus
     adaptation_status: AdaptationStatus
+
+
+def gather_images_urls(
+    kind: typing.Literal["s3", "data"], exercise: adaptation.AdaptableExercise
+) -> adaptation.adapted.ImagesUrls:
+    def gather(creation: extraction.ExerciseCreationByPageExtraction) -> adaptation.adapted.ImagesUrls:
+        page = creation.page_extraction
+        images = page.extracted_images
+        urls: adaptation.adapted.ImagesUrls = {}
+        for image in images:
+            target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{image.id}.png")
+            if kind == "data":
+                object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
+                data = base64.b64encode(object["Body"].read()).decode("ascii")
+                url = f"data:image/png;base64,{data}"
+            elif kind == "s3":
+                url = s3.generate_presigned_url(
+                    "get_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=3600
+                )
+            else:
+                assert False
+            urls[image.page_local_id] = url
+        return urls
+
+    return dispatch.exercise_creation(exercise.created, by_user=lambda ec: {}, by_page_extraction=gather)
 
 
 def make_api_adaptation_status(exercise_adaptation: adaptation.Adaptation) -> AdaptationStatus:

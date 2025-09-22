@@ -273,19 +273,20 @@ class FixturesCreator:
                     format="json",
                     formalism="json-schema",
                     instruction_components=adaptation.adapted.InstructionComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=True
                     ),
                     example_components=adaptation.adapted.ExampleComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     hint_components=adaptation.adapted.HintComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
                         formatted=True,
+                        image=True,
                         free_text_input=False,
                         multiple_choices_input=True,
                         selectable_input=False,
@@ -294,7 +295,7 @@ class FixturesCreator:
                         split_word_input=False,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                 ),
                 exercise_class=None,
@@ -335,19 +336,20 @@ class FixturesCreator:
                     format="json",
                     formalism="json-schema",
                     instruction_components=adaptation.adapted.InstructionComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=True
                     ),
                     example_components=adaptation.adapted.ExampleComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     hint_components=adaptation.adapted.HintComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
                         formatted=True,
+                        image=True,
                         free_text_input=True,
                         multiple_choices_input=True,
                         selectable_input=True,
@@ -356,7 +358,7 @@ class FixturesCreator:
                         split_word_input=True,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                 ),
                 exercise_class=None,
@@ -1209,6 +1211,9 @@ class FixturesCreator:
     def create_dummy_coche_exercise_classes(self) -> None:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
+
+    def create_dummy_rcimage_exercise_class(self) -> None:
+        self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
     def create_dummy_extraction_strategy(self) -> None:
         self.add(extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah."))

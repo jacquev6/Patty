@@ -137,6 +137,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -170,6 +171,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -308,6 +310,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -343,6 +346,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -487,6 +491,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -520,6 +525,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithMultipleChoicesInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -608,6 +614,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -640,6 +647,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSwappableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -735,6 +743,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -758,6 +767,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithEditableTextInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -837,6 +847,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableLettersInputs,
+        imagesUrls: {},
       },
       global,
       attrs: {
@@ -871,6 +882,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSelectableLettersInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -937,6 +949,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithNestedSelectableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -962,6 +975,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithNestedSelectableInputs,
+        imagesUrls: {},
       },
       global,
     })
@@ -1028,6 +1042,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputInFormatted,
+        imagesUrls: {},
       },
       global,
     })
@@ -1047,6 +1062,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithFreeTextInputInFormatted,
+        imagesUrls: {},
       },
       global,
     })
@@ -1088,6 +1104,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSplitWordInput,
+        imagesUrls: {},
       },
       global,
     })
@@ -1112,6 +1129,7 @@ describe('Adapted exercise answers', () => {
         navigateUsingArrowKeys: true,
         studentAnswersStorageKey,
         adaptedExercise: exerciseWithSplitWordInput,
+        imagesUrls: {},
       },
       global,
     })

@@ -10,6 +10,7 @@ import urllib.parse
 
 import fastapi
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import authentication
 from .. import classification
@@ -357,6 +358,7 @@ def make_adapted_exercise_data(exercise_adaptation: adaptation.Adaptation) -> Js
             json.dumps(adapted_exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
         "adaptedExercise": adapted_exercise_dump,
+        "imagesUrls": previewable_exercise.gather_images_urls("data", exercise_adaptation.exercise),
     }
 
 

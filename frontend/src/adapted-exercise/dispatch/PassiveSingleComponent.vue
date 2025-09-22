@@ -6,6 +6,7 @@ import type { PassiveRenderable } from '@/adapted-exercise/AdaptedExerciseRender
 import FormattedRenderer from '@/adapted-exercise/components/FormattedTextRenderer.vue'
 import TextRenderer from '@/adapted-exercise/components/TextRenderer.vue'
 import WhitespaceRenderer from '@/adapted-exercise/components/WhitespaceRenderer.vue'
+import ImageRenderer from '@/adapted-exercise/components/ImageRenderer.vue'
 
 const props = defineProps<{
   component: PassiveRenderable
@@ -30,6 +31,7 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
+    .with({ kind: 'image' }, ({ url }) => h(ImageRenderer, { url }))
     .exhaustive()
 }
 </script>

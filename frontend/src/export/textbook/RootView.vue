@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { AdaptedExercise } from '@/frontend/ApiClient'
+import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 
+// WARNING: changing these types requires changing the export code in the backend
 export type Exercise =
   | {
       exerciseId: string
@@ -9,6 +10,7 @@ export type Exercise =
       kind: 'adapted'
       studentAnswersStorageKey: string
       adaptedExercise: AdaptedExercise
+      imagesUrls: ImagesUrls
     }
   | {
       exerciseId: string

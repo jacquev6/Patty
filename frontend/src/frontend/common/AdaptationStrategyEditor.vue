@@ -56,6 +56,7 @@ const llmResponseSpecificationFormalism = computed({
             whitespace: true,
             arrow: true,
             formatted: true,
+            image: true,
             choice: true,
           },
           exampleComponents: {
@@ -63,18 +64,21 @@ const llmResponseSpecificationFormalism = computed({
             whitespace: true,
             arrow: true,
             formatted: true,
+            image: true,
           },
           hintComponents: {
             text: true,
             whitespace: true,
             arrow: true,
             formatted: true,
+            image: true,
           },
           statementComponents: {
             text: true,
             whitespace: true,
             arrow: true,
             formatted: true,
+            image: true,
             freeTextInput: true,
             multipleChoicesInput: true,
             selectableInput: true,
@@ -87,6 +91,7 @@ const llmResponseSpecificationFormalism = computed({
             whitespace: true,
             arrow: true,
             formatted: true,
+            image: true,
           },
         }
       })

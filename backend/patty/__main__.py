@@ -362,15 +362,18 @@ def adapted_exercise_schema(
     exercise_type = adaptation.adapted.make_partial_exercise_type(
         adaptation.adapted.Components(
             instruction=adaptation.adapted.InstructionComponents(
-                text=True, whitespace=True, arrow=True, formatted=True, choice=choice
+                text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=choice
             ),
-            example=adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            example=adaptation.adapted.ExampleComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, image=True
+            ),
+            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True, image=True),
             statement=adaptation.adapted.StatementComponents(
                 text=True,
                 whitespace=True,
                 arrow=True,
                 formatted=True,
+                image=True,
                 free_text_input=free_text_input,
                 multiple_choices_input=multiple_choices_input,
                 selectable_input=selectable_input,
@@ -378,7 +381,9 @@ def adapted_exercise_schema(
                 editable_text_input=editable_text_input,
                 split_word_input=split_word_input,
             ),
-            reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            reference=adaptation.adapted.ReferenceComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, image=True
+            ),
         )
     )
     schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)

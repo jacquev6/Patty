@@ -49,6 +49,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -86,6 +87,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -122,6 +124,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -158,6 +161,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -194,6 +198,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -230,6 +235,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -281,6 +287,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -313,6 +320,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -345,6 +353,7 @@ describe('FormattedComponent', () => {
           statement: { pages: [] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -388,6 +397,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -437,6 +447,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -472,6 +483,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -518,6 +530,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -564,6 +577,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -598,6 +612,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -632,6 +647,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -681,6 +697,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -739,6 +756,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -797,6 +815,7 @@ describe('SelectableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -821,6 +840,7 @@ describe('FreeTextInput', () => {
           statement: { pages: [{ lines: [{ contents: [{ kind: 'freeTextInput' }] }] }] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -849,6 +869,7 @@ describe('FreeTextInput', () => {
           statement: { pages: [{ lines: [{ contents: [{ kind: 'freeTextInput' }] }] }] },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -913,6 +934,7 @@ describe('FreeTextInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -987,6 +1009,7 @@ describe('FreeTextInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1025,6 +1048,7 @@ describe('FreeTextInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1153,6 +1177,7 @@ describe('FreeTextInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1216,6 +1241,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1272,6 +1298,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1315,6 +1342,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1370,6 +1398,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1425,6 +1454,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1464,6 +1494,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1535,6 +1566,7 @@ describe('MultipleChoicesInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1614,6 +1646,7 @@ describe('SwappableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1659,6 +1692,7 @@ describe('SwappableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1739,6 +1773,7 @@ describe('SwappableInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1809,6 +1844,7 @@ describe('EditableTextInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1845,6 +1881,7 @@ describe('SplitWordInput', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1879,6 +1916,7 @@ describe('AdaptedExerciseRenderer', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1916,6 +1954,7 @@ describe('AdaptedExerciseRenderer', () => {
           },
           reference: null,
         },
+        imagesUrls: {},
       },
       global,
     })
@@ -1949,6 +1988,7 @@ describe('AdaptedExerciseRenderer', () => {
           },
           reference: { contents: [{ kind: 'text', text: 'Reference' }] },
         },
+        imagesUrls: {},
       },
       global,
     })

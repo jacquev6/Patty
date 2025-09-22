@@ -10,9 +10,44 @@ from .base import Model
 
 class DummyModel(Model):
     provider: Literal["dummy"]
-    name: Literal["dummy-1", "dummy-2", "dummy-3"]
+    name: Literal["dummy-1", "dummy-2", "dummy-for-images"]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
+        if self.name == "dummy-for-images":
+            return self.do_extract_for_images(prompt, image)
+        else:
+            return self.do_extract_standard(prompt, image)
+
+    def do_extract_for_images(self, prompt: str, image: PIL.Image.Image) -> str:
+        return json.dumps(
+            [
+                Exercise(
+                    id=None,
+                    type="exercice",
+                    images=False,
+                    type_images="none",
+                    properties=Exercise.Properties(
+                        numero="1",
+                        consignes=["Écris les noms représentés par les dessins."],
+                        conseil=None,
+                        exemple=None,
+                        enonce=textwrap.dedent(
+                            """\
+                            {p1c6}
+                            {p1c1}
+                            {p1c8}
+                            {p1c3}
+                            {p1c4}
+                            """
+                        ),
+                        references=None,
+                        autre=None,
+                    ),
+                ).model_dump()
+            ]
+        )
+
+    def do_extract_standard(self, prompt: str, image: PIL.Image.Image) -> str:
         def raise_exception() -> str:
             raise Exception("Unknown error from DummyModel")
 
