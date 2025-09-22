@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useBreadcrumbsStore, type Breadcrumbs } from '@/frontend/basic/BreadcrumbsStore'
+import BugMarker from '$/BugMarker.vue'
 
 const props = defineProps<{
   load: () => Promise<T | null>
