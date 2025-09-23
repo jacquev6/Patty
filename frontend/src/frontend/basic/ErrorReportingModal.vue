@@ -36,6 +36,7 @@ type GlobalError = {
   codeLocation: string | null
 }
 
+const errorsCount = ref(0)
 const error = ref<GlobalError | null>(null)
 function isNetworkError(e: GlobalError): boolean {
   return (
@@ -45,17 +46,23 @@ function isNetworkError(e: GlobalError): boolean {
 }
 
 async function reportError(e: GlobalError) {
-  error.value = e
-  await client.POST('/api/errors-caught-by-frontend', {
-    body: {
-      creator: identifierUser.identifier,
-      userAgent,
-      windowSize: `${windowWidth.value}x${windowHeight.value}`,
-      url: window.location.href,
-      ...e,
-      githubIssueNumber: isNetworkError(e) ? 99 : null,
-    },
-  })
+  errorsCount.value += 1
+  if (errorsCount.value === 1) {
+    console.error('Reporting error', e)
+    error.value = e
+    await client.POST('/api/errors-caught-by-frontend', {
+      body: {
+        creator: identifierUser.identifier,
+        userAgent,
+        windowSize: `${windowWidth.value}x${windowHeight.value}`,
+        url: window.location.href,
+        ...e,
+        githubIssueNumber: isNetworkError(e) ? 99 : null,
+      },
+    })
+  } else {
+    console.error('An error is already being reported, ignoring', e)
+  }
 }
 
 window.onerror = (message, source, lineno, colno) => {
@@ -98,7 +105,10 @@ app.config.errorHandler = function (err, _vm, info) {
       <p>{{ t('network.message2') }}</p>
     </div>
     <div v-else>
-      <h1>{{ t('bug.title') }}</h1>
+      <h1>
+        {{ t('bug.title') }}
+        <template v-if="errorsCount !== 1"> {{ t('bug.occurrences', { count: errorsCount }) }}</template>
+      </h1>
       <p>{{ t('bug.message1') }}</p>
       <p>{{ t('bug.message2') }}</p>
       <pre>{{ error.message }}</pre>
@@ -134,6 +144,7 @@ app.config.errorHandler = function (err, _vm, info) {
 en:
   bug:
     title: There was a bug
+    occurrences: " ({count} occurrences)"
     message1: It's not your fault. I (Vincent Jacques) have been notified and will look into it.
     message2: Your not-yet-submitted work is lost, I'm very sorry. You can only refresh the page and start over.
   network:
@@ -143,6 +154,7 @@ en:
 fr:
   bug:
     title: Il y a eu un bug
+    occurrences: " ({count} occurrences)"
     message1: Ce n'est pas de votre faute. J'ai (Vincent Jacques) été prévenu et je vais regarder ça.
     message2: Votre travail non encore soumis est perdu, je suis vraiment désolé. Vous pouvez seulement rafraîchir la page et recommencer.
   network:

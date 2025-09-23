@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { defineComponent, h, onMounted, ref } from 'vue'
 
 import { useBreadcrumbsStore } from './BreadcrumbsStore'
 import { useAuthenticatedClient, type ErrorCaughtByFrontend } from '@/frontend/ApiClient'
@@ -14,6 +14,22 @@ const undef: any = undefined
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const nul: any = null
 
+const triggerRepeatedAsserts = ref(false)
+const emptyObjects = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}] as { notAnAttribute: { b: boolean } }[]
+
+const TestComponent = defineComponent({
+  name: 'TestComponent',
+  props: {
+    notAnAttribute: {
+      type: Object as () => { b: boolean },
+      required: true,
+    },
+  },
+  setup(props) {
+    return () => h('div', {}, props.notAnAttribute.b ? [] : [])
+  },
+})
+
 const errors: [string, () => void][] = [
   ['Assert', () => assert(false)],
   ['Dereference undefined', () => undef.foo],
@@ -26,6 +42,12 @@ const errors: [string, () => void][] = [
     },
   ],
   ['Network error', () => fetch('http://not-a-host/not-a-path/')],
+  [
+    'Repeated undefined',
+    () => {
+      triggerRepeatedAsserts.value = true
+    },
+  ],
 ]
 
 if (window.location.search.includes('reject')) {
@@ -70,6 +92,9 @@ const showOnlyWithoutGithubIssue = ref(false)
       <template v-if="!showOnlyWithoutGithubIssue || error.githubIssueNumber === null">
         <pre>{{ error }}</pre>
       </template>
+    </template>
+    <template v-if="triggerRepeatedAsserts">
+      <TestComponent v-for="emptyObject in emptyObjects" :notAnAttribute="emptyObject.notAnAttribute" />
     </template>
   </div>
 </template>

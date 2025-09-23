@@ -90,4 +90,13 @@ describe("Patty's error catcher", () => {
       )
       .should('contain', '"githubIssueNumber": 99')
   })
+
+  it('reports repeated undefined only once', () => {
+    cy.get('button:contains("Repeated undefined")').click()
+
+    cy.get('h1:contains("There was a bug"):contains("(10 occurrences)")').should('exist')
+
+    cy.visit('/errors')
+    cy.get('pre').should('have.length', 1)
+  })
 })
