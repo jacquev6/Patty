@@ -1,5 +1,7 @@
 import { loadFixtures, visit, ignoreResizeObserverLoopError, screenshot } from './utils'
 
+const dataUriRegex = /^data:image\/png;base64,/
+
 function checkImagesFrontend() {
   cy.get('img').should('have.length', 4)
   cy.get('img')
@@ -28,22 +30,10 @@ function checkImagesFrontend() {
 
 function checkImagesExport() {
   cy.get('img').should('have.length', 4)
-  cy.get('img')
-    .eq(0)
-    .should('have.attr', 'src')
-    .and('match', /^data:image\/png;base64,/)
-  cy.get('img')
-    .eq(1)
-    .should('have.attr', 'src')
-    .and('match', /^data:image\/png;base64,/)
-  cy.get('img')
-    .eq(2)
-    .should('have.attr', 'src')
-    .and('match', /^data:image\/png;base64,/)
-  cy.get('img')
-    .eq(3)
-    .should('have.attr', 'src')
-    .and('match', /^data:image\/png;base64,/)
+  cy.get('img').eq(0).should('have.attr', 'src').and('match', dataUriRegex)
+  cy.get('img').eq(1).should('have.attr', 'src').and('match', dataUriRegex)
+  cy.get('img').eq(2).should('have.attr', 'src').and('match', dataUriRegex)
+  cy.get('img').eq(3).should('have.attr', 'src').and('match', dataUriRegex)
 }
 
 describe('Patty', () => {
@@ -63,6 +53,22 @@ describe('Patty', () => {
     cy.get('a:contains("View details")').should('have.attr', 'href', '/adaptation-2')
     checkImagesFrontend()
     screenshot('images-sandbox-batch-frontend')
+
+    cy.get('a:contains("JSON data for extracted exercises")')
+      .should('have.attr', 'href')
+      .then((href) => {
+        cy.request(href + '&download=false').then((response) => {
+          expect(response.body[0].imagesUrls.p1c1).to.match(dataUriRegex)
+        })
+      })
+
+    cy.get('a:contains("JSON data for adapted exercises")')
+      .should('have.attr', 'href')
+      .then((href) => {
+        cy.request(href + '&download=false').then((response) => {
+          expect(response.body[0].imagesUrls.p1c1).to.match(dataUriRegex)
+        })
+      })
 
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')

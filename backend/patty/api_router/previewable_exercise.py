@@ -4,6 +4,7 @@ import typing
 
 from .. import adaptation
 from .. import dispatching as dispatch
+from .. import extraction
 from .. import settings
 from ..api_utils import ApiModel
 from .s3_client import s3
@@ -150,6 +151,23 @@ def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.A
         yield from _gather_required_image_identifiers_from_adapted_exercise(adaptation_.manual_edit)
 
 
+def make_image_url(kind: typing.Literal["s3", "data"], image: extraction.ExtractedImage) -> str:
+    target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{image.id}.png")
+    if kind == "data":
+        object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
+        data = base64.b64encode(object["Body"].read()).decode("ascii")
+        return f"data:image/png;base64,{data}"
+    elif kind == "s3":
+        return typing.cast(
+            str,
+            s3.generate_presigned_url(
+                "get_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=3600
+            ),
+        )
+    else:
+        assert False
+
+
 def gather_images_urls(
     kind: typing.Literal["s3", "data"], exercise: adaptation.AdaptableExercise
 ) -> adaptation.adapted.ImagesUrls:
@@ -166,18 +184,7 @@ def gather_images_urls(
     urls: adaptation.adapted.ImagesUrls = {}
     for image in available_images:
         if image.page_local_id in required_image_identifiers:
-            target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{image.id}.png")
-            if kind == "data":
-                object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
-                data = base64.b64encode(object["Body"].read()).decode("ascii")
-                url = f"data:image/png;base64,{data}"
-            elif kind == "s3":
-                url = s3.generate_presigned_url(
-                    "get_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=3600
-                )
-            else:
-                assert False
-            urls[image.page_local_id] = url
+            urls[image.page_local_id] = make_image_url(kind, image)
 
     return urls
 

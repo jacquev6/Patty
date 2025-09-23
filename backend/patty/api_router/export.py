@@ -54,7 +54,16 @@ def export_extraction_batch_extracted_exercises_json(
     for page_creation in batch.page_extraction_creations:
         page = page_creation.page_extraction
         assert page.assistant_response is not None
-        content.append({"pdf_page_number": page.pdf_page_number, "response": page.assistant_response.model_dump()})
+        content.append(
+            {
+                "pdfPageNumber": page.pdf_page_number,
+                "response": page.assistant_response.model_dump(),
+                "imagesUrls": {
+                    image.page_local_id: previewable_exercise.make_image_url("data", image)
+                    for image in page.extracted_images
+                },
+            }
+        )
 
     return fastapi.responses.JSONResponse(
         content=content, headers=make_export_header(download, f"sandbox-extraction-batch-{id}-extracted-exercises.json")
