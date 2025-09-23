@@ -48,14 +48,16 @@ def detect_images(
     boxes_ = model.predict(source=input_pil_image, verbose=False)[0].boxes
     assert boxes_ is not None
     boxes = [
-        (
-            f"{identifier_prefix}c{box_index}",
-            int(box[0].item()),
-            int(box[1].item()),
-            int(box[2].item()),
-            int(box[3].item()),
+        (f"{identifier_prefix}c{box_index + 1}", x1, y1, x2, y2)
+        for box_index, (x1, y1, x2, y2) in enumerate(
+            sorted(
+                (
+                    (int(box[0].item()), int(box[1].item()), int(box[2].item()), int(box[3].item()))
+                    for box in boxes_.xyxy
+                ),
+                key=lambda box: (box[1], box[0]),
+            )
         )
-        for box_index, box in enumerate(boxes_.xyxy)
     ]
     detected_images: dict[str, PIL.Image.Image] = {}
 

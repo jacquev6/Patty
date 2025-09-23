@@ -7,7 +7,7 @@ function checkImagesFrontend() {
     .should('have.attr', 'src')
     .and(
       'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/7\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
+      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/3\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
     )
   cy.get('img')
     .eq(1)
@@ -21,7 +21,7 @@ function checkImagesFrontend() {
     .should('have.attr', 'src')
     .and(
       'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/9\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
+      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/1\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
     )
   cy.get('img').eq(3).should('have.attr', 'src', '/src/adapted-exercise/arrow.png')
 }

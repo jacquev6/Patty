@@ -33,11 +33,11 @@ class DummyModel(Model):
                         exemple=None,
                         enonce=textwrap.dedent(
                             """\
-                            {p1c6}
-                            {p1c1}
-                            {p1c8}
                             {p1c3}
+                            {p1c2}
+                            {p1c1}
                             {p1c4}
+                            {p1c5}
                             """
                         ),
                         references=None,
