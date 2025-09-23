@@ -12,5 +12,6 @@ defineProps<{
 img {
   vertical-align: middle;
   margin: 0.5em;
+  max-height: 5em;
 }
 </style>

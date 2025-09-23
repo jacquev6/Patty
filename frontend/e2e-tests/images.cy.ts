@@ -1,4 +1,4 @@
-import { loadFixtures, visit, ignoreResizeObserverLoopError } from './utils'
+import { loadFixtures, visit, ignoreResizeObserverLoopError, screenshot } from './utils'
 
 function checkImagesFrontend() {
   cy.get('img').should('have.length', 4)
@@ -62,6 +62,7 @@ describe('Patty', () => {
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     cy.get('a:contains("View details")').should('have.attr', 'href', '/adaptation-2')
     checkImagesFrontend()
+    screenshot('images-sandbox-batch-frontend')
 
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
@@ -70,9 +71,11 @@ describe('Patty', () => {
       })
     cy.get('a:contains("Exercice P1Ex1")').click()
     checkImagesExport()
+    screenshot('images-sandbox-batch-export')
 
     cy.visit('/adaptation-2')
     checkImagesFrontend()
+    screenshot('images-sandbox-adaptation-frontend')
 
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
@@ -80,6 +83,7 @@ describe('Patty', () => {
         cy.visit(href + '&download=false')
       })
     checkImagesExport()
+    screenshot('images-sandbox-adaptation-export')
   })
 
   it('extracts images in textbooks', () => {
@@ -92,11 +96,13 @@ describe('Patty', () => {
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend()
+    screenshot('images-textbook-frontend-by-batch')
 
     cy.get('h2').should('have.length', 4)
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2').should('have.length', 1)
     checkImagesFrontend()
+    screenshot('images-textbook-frontend-by-page')
 
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
@@ -106,5 +112,6 @@ describe('Patty', () => {
     cy.get('[data-cy="page-number-filter"]').type('1')
     cy.get('a:contains("Exercice 1")').invoke('removeAttr', 'target').click()
     checkImagesExport()
+    screenshot('images-textbook-export')
   })
 })
