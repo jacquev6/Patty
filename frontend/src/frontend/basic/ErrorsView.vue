@@ -43,6 +43,8 @@ onMounted(async () => {
 
   breadcrumbsStore.set([{ textKey: 'errors', to: {} }])
 })
+
+const showOnlyWithoutGithubIssue = ref(false)
 </script>
 
 <template>
@@ -57,6 +59,17 @@ onMounted(async () => {
     </p>
     <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
     <h1>Previously caught</h1>
-    <pre v-for="error in existingErrors" :key="error.id">{{ error }}</pre>
+    <p>
+      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+      <label>
+        Show only errors without a GitHub issue number
+        <input v-model="showOnlyWithoutGithubIssue" type="checkbox" />
+      </label>
+    </p>
+    <template v-for="error in existingErrors">
+      <template v-if="!showOnlyWithoutGithubIssue || error.githubIssueNumber === null">
+        <pre>{{ error }}</pre>
+      </template>
+    </template>
   </div>
 </template>
