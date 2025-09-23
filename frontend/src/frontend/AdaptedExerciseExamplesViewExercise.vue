@@ -53,6 +53,16 @@ watch(Escape, () => {
         <summary>{{ t('seeJson') }}</summary>
         <pre>{{ jsonStringify(example.exercise) }}</pre>
       </details>
+      <p v-if="example.imagesUrls && Object.keys(example.imagesUrls).length !== 0">
+        <template v-for="(imageUrl, imageIdentifier) in example.imagesUrls">
+          <span style="display: inline-block; margin-right: 1em; margin-bottom: 1em; text-align: center">
+            <img :src="imageUrl" style="max-height: 4em" />
+            <br />
+            {{ imageIdentifier }}
+          </span>
+        </template>
+      </p>
+      <p v-else>{{ t('noImages') }}</p>
     </template>
     <template #col-2>
       <MiniatureScreen :fullScreen>
@@ -73,11 +83,13 @@ en:
   fullScreen: Full screen
   copyJson: Copy JSON code 📋
   seeJson: See JSON code
+  noImages: "No images"
   exitFullScreen: Exit full screen (Esc)
 fr:
   fullScreen: Plein écran
   copyJson: Copier le code JSON 📋
   seeJson: Voir le code JSON
+  noImages: "Pas d'images"
   exitFullScreen: Quitter le plein écran (Échap)
 </i18n>
 
