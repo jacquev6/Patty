@@ -136,6 +136,7 @@ class GetExtractionBatchResponse(ApiModel):
 
     class Page(ApiModel):
         page_number: int
+        images_urls: adaptation.adapted.ImagesUrls
         assistant_response: extraction.assistant_responses.Response | None
 
         class Exercise(previewable_exercise.PreviewableExercise):
@@ -232,6 +233,10 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         pages.append(
             GetExtractionBatchResponse.Page(
                 page_number=page_extraction.pdf_page_number,
+                images_urls={
+                    image.page_local_id: previewable_exercise.make_image_url("s3", image)
+                    for image in page_extraction.extracted_images
+                },
                 assistant_response=page_extraction.assistant_response,
                 exercises=api_exercises,
             )

@@ -2447,6 +2447,10 @@ export interface components {
         | null
       /** Exercises */
       exercises: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise'][]
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
       /** Pagenumber */
       pageNumber: number
     }

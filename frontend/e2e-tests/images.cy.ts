@@ -2,30 +2,32 @@ import { loadFixtures, visit, ignoreResizeObserverLoopError, screenshot } from '
 
 const dataUriRegex = /^data:image\/png;base64,/
 
-function checkImagesFrontend() {
-  cy.get('img').should('have.length', 4)
+function checkImagesFrontend(length: number) {
+  cy.get('img').should('have.length', length)
   cy.get('img')
-    .eq(0)
+    .eq(length - 4)
     .should('have.attr', 'src')
     .and(
       'match',
       /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/3\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
     )
   cy.get('img')
-    .eq(1)
+    .eq(length - 3)
     .should('have.attr', 'src')
     .and(
       'match',
       /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/2\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
     )
   cy.get('img')
-    .eq(2)
+    .eq(length - 2)
     .should('have.attr', 'src')
     .and(
       'match',
       /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/extracted-images\/1\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
     )
-  cy.get('img').eq(3).should('have.attr', 'src', '/src/adapted-exercise/arrow.png')
+  cy.get('img')
+    .eq(length - 1)
+    .should('have.attr', 'src', '/src/adapted-exercise/arrow.png')
 }
 
 function checkImagesExport() {
@@ -51,8 +53,10 @@ describe('Patty', () => {
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     cy.get('a:contains("View details")').should('have.attr', 'href', '/adaptation-2')
-    checkImagesFrontend()
-    screenshot('images-sandbox-batch-frontend')
+    checkImagesFrontend(15)
+    screenshot('images-sandbox-batch-frontend-1')
+    cy.get('.column').eq(1).scrollTo('bottom')
+    screenshot('images-sandbox-batch-frontend-2')
 
     cy.get('a:contains("JSON data for extracted exercises")')
       .should('have.attr', 'href')
@@ -80,7 +84,7 @@ describe('Patty', () => {
     screenshot('images-sandbox-batch-export')
 
     cy.visit('/adaptation-2')
-    checkImagesFrontend()
+    checkImagesFrontend(4)
     screenshot('images-sandbox-adaptation-frontend')
 
     cy.get('a:contains("standalone HTML")')
@@ -101,13 +105,13 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
-    checkImagesFrontend()
+    checkImagesFrontend(4)
     screenshot('images-textbook-frontend-by-batch')
 
     cy.get('h2').should('have.length', 4)
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2').should('have.length', 1)
-    checkImagesFrontend()
+    checkImagesFrontend(4)
     screenshot('images-textbook-frontend-by-page')
 
     cy.get('a:contains("standalone HTML")')

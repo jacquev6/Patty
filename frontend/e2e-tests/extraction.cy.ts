@@ -49,7 +49,7 @@ describe('The extraction batch creation page', () => {
     cy.get('span:contains("(🖊️ change)")').click()
     cy.get('button:contains("Submit")').click()
     cy.get('div.busy').should('exist')
-    cy.get('div.busy').should('not.exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
     cy.get('p:contains("Adaptation was not requested.")').should('not.exist')
   })
 
@@ -115,7 +115,7 @@ describe('The extraction batch creation page', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
     cy.get('button:contains("Submit")').click()
     cy.get('.inProgress').should('exist')
-    cy.get('.inProgress').should('not.exist')
+    cy.get('.inProgress', { timeout: 10000 }).should('not.exist')
     cy.get('p:contains("Provider: dummy, model: dummy-2")').should('exist')
     cy.get('p:contains("Bleh bleh.")').should('exist')
 

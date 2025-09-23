@@ -4843,6 +4843,13 @@
             "title": "Exercises",
             "type": "array"
           },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
@@ -4850,6 +4857,7 @@
         },
         "required": [
           "pageNumber",
+          "imagesUrls",
           "assistantResponse",
           "exercises"
         ],
