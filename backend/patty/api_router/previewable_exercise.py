@@ -4,7 +4,6 @@ import typing
 
 from .. import adaptation
 from .. import dispatching as dispatch
-from .. import extraction
 from .. import settings
 from ..api_utils import ApiModel
 from .s3_client import s3
@@ -96,14 +95,77 @@ class PreviewableExercise(ApiModel):
     adaptation_status: AdaptationStatus
 
 
+def _gather_lines_of_exercise(
+    exercise: adaptation.adapted.ExerciseAsUnion,
+) -> typing.Iterable[
+    adaptation.adapted.InstructionLine
+    | adaptation.adapted.StatementLine
+    | adaptation.adapted.ExampleLine
+    | adaptation.adapted.HintLine
+]:
+    if isinstance(exercise, adaptation.adapted.ExerciseV1):
+        yield from exercise.instruction.lines
+        if exercise.hint is not None:
+            yield from exercise.hint.lines
+        if exercise.example is not None:
+            yield from exercise.example.lines
+        for page in exercise.statement.pages:
+            yield from page.lines
+        if exercise.reference is not None:
+            yield exercise.reference
+    elif isinstance(exercise, adaptation.adapted.ExerciseV2):
+        for phase in exercise.phases:
+            yield from phase.instruction.lines
+            if phase.hint is not None:
+                yield from phase.hint.lines
+            if phase.example is not None:
+                yield from phase.example.lines
+            if isinstance(phase.statement, adaptation.adapted.Pages):
+                for page in phase.statement.pages:
+                    yield from page.lines
+        if exercise.reference is not None:
+            yield exercise.reference
+    else:
+        assert False
+
+
+def _gather_required_image_identifiers_from_adapted_exercise(
+    exercise: adaptation.adapted.Exercise,
+) -> typing.Iterable[str]:
+    for line in _gather_lines_of_exercise(exercise.root):
+        for component in line.contents:
+            if isinstance(component, adaptation.adapted.Image):
+                yield component.identifier
+
+
+def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.Adaptation) -> typing.Iterable[str]:
+    if isinstance(adaptation_.initial_assistant_response, adaptation.assistant_responses.Success):
+        yield from _gather_required_image_identifiers_from_adapted_exercise(
+            adaptation_.initial_assistant_response.exercise
+        )
+    for adjustment in adaptation_.adjustments:
+        if isinstance(adjustment.assistant_response, adaptation.assistant_responses.Success):
+            yield from _gather_required_image_identifiers_from_adapted_exercise(adjustment.assistant_response.exercise)
+    if adaptation_.manual_edit is not None:
+        yield from _gather_required_image_identifiers_from_adapted_exercise(adaptation_.manual_edit)
+
+
 def gather_images_urls(
     kind: typing.Literal["s3", "data"], exercise: adaptation.AdaptableExercise
 ) -> adaptation.adapted.ImagesUrls:
-    def gather(creation: extraction.ExerciseCreationByPageExtraction) -> adaptation.adapted.ImagesUrls:
-        page = creation.page_extraction
-        images = page.extracted_images
-        urls: adaptation.adapted.ImagesUrls = {}
-        for image in images:
+    available_images = dispatch.exercise_creation(
+        exercise.created, by_user=lambda ec: [], by_page_extraction=lambda ec: ec.page_extraction.extracted_images
+    )
+
+    required_image_identifiers = {
+        identifier
+        for adaptation_ in exercise.adaptations
+        for identifier in _gather_required_image_identifiers_from_adaptation(adaptation_)
+    }
+
+    urls: adaptation.adapted.ImagesUrls = {}
+    for image in available_images:
+        if image.page_local_id in required_image_identifiers:
             target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{image.id}.png")
             if kind == "data":
                 object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
@@ -116,9 +178,8 @@ def gather_images_urls(
             else:
                 assert False
             urls[image.page_local_id] = url
-        return urls
 
-    return dispatch.exercise_creation(exercise.created, by_user=lambda ec: {}, by_page_extraction=gather)
+    return urls
 
 
 def make_api_adaptation_status(exercise_adaptation: adaptation.Adaptation) -> AdaptationStatus:
