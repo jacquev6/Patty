@@ -44,4 +44,6 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_exercise_image_creations__by_page_extraction")),
     )
+    op.add_column("adaptations", sa.Column("approved_by", sa.String(), nullable=True))
+    op.add_column("adaptations", sa.Column("approved_at", sa.DateTime(timezone=True), nullable=True))
     # ### end Alembic commands ###

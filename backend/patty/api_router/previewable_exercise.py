@@ -1,4 +1,5 @@
 import base64
+import datetime
 import urllib.parse
 import typing
 
@@ -53,6 +54,12 @@ class AdaptationSuccess(ApiModel):
     success: typing.Literal["llm", "manual"]
     id: str
     adapted_exercise: adaptation.adapted.Exercise
+
+    class AdaptationApproval(ApiModel):
+        by: str
+        at: datetime.datetime
+
+    approved: AdaptationApproval | None
 
 
 AdaptationStatus = (
@@ -222,6 +229,14 @@ def make_api_adaptation_status(exercise_adaptation: adaptation.Adaptation) -> Ad
     else:
         assert False
 
+    if exercise_adaptation.approved_by is None:
+        approved = None
+    else:
+        assert exercise_adaptation.approved_at is not None
+        approved = AdaptationSuccess.AdaptationApproval(
+            by=exercise_adaptation.approved_by, at=exercise_adaptation.approved_at
+        )
+
     status: (
         AdaptationInProgress
         | AdaptationInvalidJsonError
@@ -231,11 +246,19 @@ def make_api_adaptation_status(exercise_adaptation: adaptation.Adaptation) -> Ad
     )
     if exercise_adaptation.manual_edit is not None:
         status = AdaptationSuccess(
-            kind="success", success="manual", id=adaptation_id, adapted_exercise=exercise_adaptation.manual_edit
+            kind="success",
+            success="manual",
+            id=adaptation_id,
+            adapted_exercise=exercise_adaptation.manual_edit,
+            approved=approved,
         )
     elif isinstance(llm_status, AdaptationLlmSuccess):
         status = AdaptationSuccess(
-            kind="success", success="llm", id=adaptation_id, adapted_exercise=llm_status.adapted_exercise
+            kind="success",
+            success="llm",
+            id=adaptation_id,
+            adapted_exercise=llm_status.adapted_exercise,
+            approved=approved,
         )
     else:
         status = llm_status

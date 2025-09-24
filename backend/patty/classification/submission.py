@@ -87,6 +87,8 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                     initial_assistant_response=None,
                     adjustments=[],
                     manual_edit=None,
+                    approved_by=None,
+                    approved_at=None,
                 )
                 session.add(exercise_adaptation)
         return True

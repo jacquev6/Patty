@@ -163,6 +163,26 @@
         ],
         "type": "object"
       },
+      "AdaptationApproval": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "by": {
+            "title": "By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "by",
+          "at"
+        ],
+        "title": "AdaptationApproval",
+        "type": "object"
+      },
       "AdaptationBatch": {
         "additionalProperties": false,
         "properties": {
@@ -316,6 +336,16 @@
           "adaptedExercise": {
             "$ref": "#/components/schemas/RootModel_Union_ExerciseV1__ExerciseV2__-Output"
           },
+          "approved": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdaptationApproval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -338,7 +368,8 @@
           "kind",
           "success",
           "id",
-          "adaptedExercise"
+          "adaptedExercise",
+          "approved"
         ],
         "title": "AdaptationSuccess",
         "type": "object"
@@ -959,6 +990,25 @@
           "removedFromTextbook"
         ],
         "title": "ApiTextbookExternalExercise",
+        "type": "object"
+      },
+      "ApprovalRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "by": {
+            "title": "By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approved",
+          "by"
+        ],
+        "title": "ApprovalRequest",
         "type": "object"
       },
       "Arrow": {
@@ -5564,6 +5614,58 @@
           }
         ],
         "summary": "Post Adaptation Adjustment"
+      }
+    },
+    "/api/adaptations/{id}/approved": {
+      "put": {
+        "operationId": "set_adaptation_approved_api_adaptations__id__approved_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Set Adaptation Approved"
       }
     },
     "/api/adaptations/{id}/last-adjustment": {

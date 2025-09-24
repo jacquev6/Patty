@@ -300,6 +300,8 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                         initial_assistant_response=None,
                         adjustments=[],
                         manual_edit=None,
+                        approved_by=None,
+                        approved_at=None,
                     )
                 )
 
@@ -378,6 +380,8 @@ def put_extraction_batch_model_for_adaptation(
                         initial_assistant_response=None,
                         adjustments=[],
                         manual_edit=None,
+                        approved_by=None,
+                        approved_at=None,
                     )
                 )
 

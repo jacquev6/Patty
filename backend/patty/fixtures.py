@@ -524,6 +524,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -545,6 +547,8 @@ class FixturesCreator:
                 initial_assistant_response=None,
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
         # Hack: store a JSON null in _initial_assistant_response instead of a SQL NULL to avoid
@@ -572,6 +576,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -595,6 +601,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 

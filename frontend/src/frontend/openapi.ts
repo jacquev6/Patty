@@ -107,6 +107,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptations/{id}/approved': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Set Adaptation Approved */
+    put: operations['set_adaptation_approved_api_adaptations__id__approved_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/adaptations/{id}/last-adjustment': {
     parameters: {
       query?: never
@@ -671,6 +688,16 @@ export interface components {
        */
       underlined?: boolean
     }
+    /** AdaptationApproval */
+    AdaptationApproval: {
+      /**
+       * At
+       * Format: date-time
+       */
+      at: string
+      /** By */
+      by: string
+    }
     /** AdaptationBatch */
     AdaptationBatch: {
       /**
@@ -744,6 +771,7 @@ export interface components {
     /** AdaptationSuccess */
     AdaptationSuccess: {
       adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
+      approved: components['schemas']['AdaptationApproval'] | null
       /** Id */
       id: string
       /**
@@ -950,6 +978,13 @@ export interface components {
       pageNumber: number
       /** Removedfromtextbook */
       removedFromTextbook: boolean
+    }
+    /** ApprovalRequest */
+    ApprovalRequest: {
+      /** Approved */
+      approved: boolean
+      /** By */
+      by: string
     }
     Arrow: {
       /**
@@ -2803,6 +2838,41 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['PostAdaptationAdjustmentRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  set_adaptation_approved_api_adaptations__id__approved_put: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ApprovalRequest']
       }
     }
     responses: {

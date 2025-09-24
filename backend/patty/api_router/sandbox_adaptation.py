@@ -211,6 +211,8 @@ async def post_adaptation_batch(
                 initial_assistant_response=None,
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -349,6 +351,8 @@ def put_adaptable_exercise_class(
                     initial_assistant_response=None,
                     adjustments=[],
                     manual_edit=None,
+                    approved_by=None,
+                    approved_at=None,
                 )
             )
 
