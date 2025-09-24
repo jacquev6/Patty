@@ -14,6 +14,7 @@ import sqlalchemy as sql
 import sqlalchemy.exc
 
 from . import settings
+from . import test_utils
 
 Engine = sqlalchemy.Engine
 
@@ -132,7 +133,7 @@ class TestCaseWithDatabase(unittest.TestCase):
         # (Documented: https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect).
         # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
         # but would have failed in production.
-        if os.environ.get("PATTY_TESTS_SKIP_MIGRATIONS", "false") == "true":
+        if test_utils.skip_migrations:
             with cls.engine.connect() as conn:
                 conn.execute(create_exercise_number_collation)
                 conn.commit()

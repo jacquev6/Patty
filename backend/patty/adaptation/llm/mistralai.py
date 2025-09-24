@@ -1,12 +1,13 @@
 import json
 from typing import Iterable, Literal
-import os
 import unittest
 
 import mistralai
 import pydantic
 
+from ... import settings
 from ...any_json import JsonDict
+from ...test_utils import costs_money
 from .base import (
     AssistantMessage,
     InvalidJsonAssistantMessage,
@@ -22,11 +23,10 @@ from .base import (
     UserMessage,
 )
 from .schema import make_schema
-from ...test_utils import costs_money
 
 
 # Using a global client; we'll do dependency injection at a higher abstraction level
-client = mistralai.Mistral(api_key=os.environ["MISTRALAI_API_KEY"])
+client = mistralai.Mistral(api_key=settings.MISTRALAI_API_KEY)
 
 
 class MistralAiModel(Model):
@@ -101,7 +101,7 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
         super().setUp()
         # Avoid "RuntimeError: Event loop is closed" (see https://stackoverflow.com/a/76249506/905845)
         global client
-        client = mistralai.Mistral(api_key=os.environ["MISTRALAI_API_KEY"])
+        client = mistralai.Mistral(api_key=settings.MISTRALAI_API_KEY)
 
     @costs_money
     async def test_json_schema(self) -> None:

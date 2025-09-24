@@ -4,6 +4,15 @@ import os
 import pydantic
 
 
+# This file can be used as a reference for required environment variables
+
+assert "AWS_ACCESS_KEY_ID" in os.environ
+assert "AWS_SECRET_ACCESS_KEY" in os.environ
+
+MISTRALAI_API_KEY = os.environ["PATTY_MISTRALAI_API_KEY"]
+OPENAI_API_KEY = os.environ["PATTY_OPENAI_API_KEY"]
+GEMINIAI_KEY = os.environ["PATTY_GEMINIAI_KEY"]
+
 DATABASE_URL = os.environ["PATTY_DATABASE_URL"]
 DATABASE_BACKUPS_URL = os.environ["PATTY_DATABASE_BACKUPS_URL"]
 assert not DATABASE_BACKUPS_URL.endswith("/")

@@ -709,8 +709,6 @@ def backup_database() -> None:
         with tarfile.open(os.path.join(parsed_database_backups_url.path, archive_name), "w:gz") as tarball:
             populate_tarball(tarball)
     elif parsed_database_backups_url.scheme == "s3":
-        assert "AWS_ACCESS_KEY_ID" in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" in os.environ
         s3 = boto3.client("s3")
         buffer = io.BytesIO()
         with tarfile.open(fileobj=buffer, mode="w:gz") as tarball:
@@ -748,8 +746,6 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
             assert pg_dump_file is not None
             pg_dump = pg_dump_file.read()
     elif parsed_backup_url.scheme == "s3":
-        assert "AWS_ACCESS_KEY_ID" in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" in os.environ
         s3 = boto3.client("s3")
         buffer = io.BytesIO()
         s3.download_fileobj(parsed_backup_url.netloc, f"{parsed_backup_url.path[1:]}", buffer)
