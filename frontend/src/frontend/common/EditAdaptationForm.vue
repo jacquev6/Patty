@@ -205,10 +205,25 @@ watch(Escape, () => {
   showRaw.value = false
   fullScreen.value = false
 })
+
+const columns = computed(() => {
+  if (props.adaptation.belongsTo.kind === 'textbook') {
+    return [
+      { name: 'col-2', width: 1 },
+      { name: 'col-3', width: 1 },
+    ]
+  } else {
+    return [
+      { name: 'col-1', width: 1 },
+      { name: 'col-2', width: 1 },
+      { name: 'col-3', width: 1 },
+    ]
+  }
+})
 </script>
 
 <template>
-  <ResizableColumns :columns="[1, 1, 1]">
+  <ResizableColumns :columns>
     <template #col-1>
       <AdaptationStrategyEditor :availableStrategySettings="[]" :disabled="true" :modelValue="adaptation.strategy" />
     </template>
@@ -307,7 +322,11 @@ watch(Escape, () => {
       <template v-else>
         <h1>{{ t('adaptedExercise') }}</h1>
         <MiniatureScreen :fullScreen>
-          <AdaptedExerciseRenderer :navigateUsingArrowKeys="fullScreen" :adaptedExercise />
+          <AdaptedExerciseRenderer
+            :navigateUsingArrowKeys="fullScreen"
+            :adaptedExercise
+            :imagesUrls="adaptation.imagesUrls"
+          />
           <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">
             {{ t('exitFullScreen') }}
           </button>

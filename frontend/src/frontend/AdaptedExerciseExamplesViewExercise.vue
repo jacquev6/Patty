@@ -4,7 +4,7 @@ import jsonStringify from 'json-stringify-pretty-compact'
 import { useMagicKeys } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import type { AdaptedExercise } from './ApiClient'
+import type { AdaptedExercise, ImagesUrls } from './ApiClient'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer, { type SpacingVariables } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import FixedColumns from '$/FixedColumns.vue'
@@ -12,6 +12,7 @@ import FixedColumns from '$/FixedColumns.vue'
 export type Example = {
   title: string
   exercise: AdaptedExercise
+  imagesUrls?: ImagesUrls
   demos?: Record<string, () => void>
 }
 
@@ -52,6 +53,16 @@ watch(Escape, () => {
         <summary>{{ t('seeJson') }}</summary>
         <pre>{{ jsonStringify(example.exercise) }}</pre>
       </details>
+      <p v-if="example.imagesUrls && Object.keys(example.imagesUrls).length !== 0">
+        <template v-for="(imageUrl, imageIdentifier) in example.imagesUrls">
+          <span style="display: inline-block; margin-right: 1em; margin-bottom: 1em; text-align: center">
+            <img :src="imageUrl" style="max-height: 4em" />
+            <br />
+            {{ imageIdentifier }}
+          </span>
+        </template>
+      </p>
+      <p v-else>{{ t('noImages') }}</p>
     </template>
     <template #col-2>
       <MiniatureScreen :fullScreen>
@@ -59,6 +70,7 @@ watch(Escape, () => {
           :navigateUsingArrowKeys="fullScreen"
           :spacingVariables
           :adaptedExercise="example.exercise"
+          :imagesUrls="example.imagesUrls ?? {}"
         />
         <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
       </MiniatureScreen>
@@ -71,11 +83,13 @@ en:
   fullScreen: Full screen
   copyJson: Copy JSON code 📋
   seeJson: See JSON code
+  noImages: "No images"
   exitFullScreen: Exit full screen (Esc)
 fr:
   fullScreen: Plein écran
   copyJson: Copier le code JSON 📋
   seeJson: Voir le code JSON
+  noImages: "Pas d'images"
   exitFullScreen: Quitter le plein écran (Échap)
 </i18n>
 

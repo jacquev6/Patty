@@ -18,6 +18,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'inProgress',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'adaptation - LLM error - invalid json': {
     id: 'ex-id',
@@ -31,6 +32,7 @@ const exercises: Record<string, PreviewableExercise> = {
       parsed: [],
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'adaptation - LLM error - not json': {
     id: 'ex-id',
@@ -44,6 +46,7 @@ const exercises: Record<string, PreviewableExercise> = {
       text: 'blah',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'adaptation - LLM error - unknown': {
     id: 'ex-id',
@@ -56,6 +59,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'unknown',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'adaptation - LLM error - unexpected': {
     id: 'ex-id',
@@ -68,6 +72,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'not-an-error',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
   'adaptation - unexpected status': {
     id: 'ex-id',
@@ -79,6 +84,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'not-a-status',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
   'adaptation - success': {
     id: 'ex-id',
@@ -106,7 +112,9 @@ const exercises: Record<string, PreviewableExercise> = {
         },
         reference: null,
       },
+      approved: null,
     },
+    imagesUrls: {},
   },
   'classification - classification not requested': {
     id: 'ex-id',
@@ -115,6 +123,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'notRequested' },
     adaptationStatus: { kind: 'notRequested' },
+    imagesUrls: {},
   },
   'classification - classification in progress - 1': {
     id: 'ex-id',
@@ -123,6 +132,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'inProgress' },
     adaptationStatus: { kind: 'notRequested' },
+    imagesUrls: {},
   },
   'classification - adaptation not requested - 1': {
     id: 'ex-id',
@@ -130,6 +140,7 @@ const exercises: Record<string, PreviewableExercise> = {
     exerciseNumber: '24',
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    imagesUrls: {},
     adaptationStatus: { kind: 'notRequested' },
   },
   'classification - adaptation not requested - 2': {
@@ -138,6 +149,7 @@ const exercises: Record<string, PreviewableExercise> = {
     exerciseNumber: '24',
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
+    imagesUrls: {},
     adaptationStatus: { kind: 'notRequested' },
   },
   'classification - class has no settings': {
@@ -147,6 +159,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
     adaptationStatus: { kind: 'notStarted' },
+    imagesUrls: {},
   },
   'classification - class had no settings': {
     id: 'ex-id',
@@ -155,6 +168,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
     adaptationStatus: { kind: 'notStarted' },
+    imagesUrls: {},
   },
   'classification - adaptation in progress': {
     id: 'ex-id',
@@ -166,6 +180,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'inProgress',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'classification - adaptation with LLM error - not json': {
     id: 'ex-id',
@@ -179,6 +194,7 @@ const exercises: Record<string, PreviewableExercise> = {
       text: 'blah',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'classification - adaptation with LLM error - invalid json': {
     id: 'ex-id',
@@ -192,6 +208,7 @@ const exercises: Record<string, PreviewableExercise> = {
       parsed: [],
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'classification - adaptation with LLM error - unknown': {
     id: 'ex-id',
@@ -204,6 +221,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'unknown',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'classification - adaptation with LLM error - unexpected': {
     id: 'ex-id',
@@ -216,6 +234,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'not-an-error',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
   'classification - adaptation success': {
     id: 'ex-id',
@@ -243,7 +262,9 @@ const exercises: Record<string, PreviewableExercise> = {
         },
         reference: null,
       },
+      approved: null,
     },
+    imagesUrls: {},
   },
   'classification - reclassified': {
     id: 'ex-id',
@@ -271,7 +292,9 @@ const exercises: Record<string, PreviewableExercise> = {
         },
         reference: null,
       },
+      approved: null,
     },
+    imagesUrls: {},
   },
   'classification - unexpected adaptation status': {
     id: 'ex-id',
@@ -283,6 +306,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'not-a-status',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
   'textbook - classification in progress - 1': {
     id: 'ex-id',
@@ -291,6 +315,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise. It has multiple lines.',
     classificationStatus: { kind: 'inProgress' },
     adaptationStatus: { kind: 'notStarted' },
+    imagesUrls: {},
   },
   'textbook - class has no settings': {
     id: 'ex-id',
@@ -299,6 +324,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise. It has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: false },
     adaptationStatus: { kind: 'notStarted' },
+    imagesUrls: {},
   },
   'textbook - class had no settings': {
     id: 'ex-id',
@@ -307,6 +333,7 @@ const exercises: Record<string, PreviewableExercise> = {
     fullText: 'This is the full text of the exercise. It has multiple lines.',
     classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
     adaptationStatus: { kind: 'notStarted' },
+    imagesUrls: {},
   },
   'textbook - adaptation in progress': {
     id: 'ex-id',
@@ -318,6 +345,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'inProgress',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'textbook - adaptation with LLM error - not json': {
     id: 'ex-id',
@@ -331,6 +359,7 @@ const exercises: Record<string, PreviewableExercise> = {
       text: 'blah',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'textbook - adaptation with LLM error - invalid json': {
     id: 'ex-id',
@@ -344,6 +373,7 @@ const exercises: Record<string, PreviewableExercise> = {
       parsed: [],
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'textbook - adaptation with LLM error - unknown': {
     id: 'ex-id',
@@ -356,6 +386,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'unknown',
       id: 'ad-id',
     },
+    imagesUrls: {},
   },
   'textbook - adaptation with LLM error - unexpected': {
     id: 'ex-id',
@@ -368,6 +399,7 @@ const exercises: Record<string, PreviewableExercise> = {
       error: 'not-an-error',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
   'textbook - adaptation success': {
     id: 'ex-id',
@@ -395,7 +427,42 @@ const exercises: Record<string, PreviewableExercise> = {
         },
         reference: null,
       },
+      approved: null,
     },
+    imagesUrls: {},
+  },
+  'textbook - adaptation success - approved': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '32',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: {
+        by: 'Bob',
+        at: '2024-01-02T12:34:56Z',
+      },
+    },
+    imagesUrls: {},
   },
   'textbook - unexpected adaptation status': {
     id: 'ex-id',
@@ -407,6 +474,7 @@ const exercises: Record<string, PreviewableExercise> = {
       kind: 'not-a-status',
       id: 'ad-id',
     } as unknown as PreviewableExercise['adaptationStatus'],
+    imagesUrls: {},
   },
 }
 

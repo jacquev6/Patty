@@ -55,6 +55,14 @@ const fullTextLines = computed(() => props.exercise.fullText.split('\n'))
 const pageNumber = computed(() => props.exercise.pageNumber)
 
 const exerciseNumber = computed(() => props.exercise.exerciseNumber)
+
+async function approve(adaptationId: string) {
+  await client.PUT('/api/adaptations/{id}/approved', {
+    params: { path: { id: adaptationId } },
+    body: { approved: true, by: identifiedUser.identifier },
+  })
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -91,6 +99,16 @@ const exerciseNumber = computed(() => props.exercise.exerciseNumber)
           <WhiteSpace />
           <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
         </template>
+        <template
+          v-if="
+            context === 'textbookByBatch' &&
+            exercise.adaptationStatus.kind === 'success' &&
+            exercise.adaptationStatus.approved !== null
+          "
+        >
+          <WhiteSpace />
+          <span :title="t('approved', exercise.adaptationStatus.approved)" style="font-size: 130%">✅</span>
+        </template>
       </template>
     </template>
 
@@ -99,6 +117,18 @@ const exerciseNumber = computed(() => props.exercise.exerciseNumber)
       <span class="inProgress">({{ t('inProgress') }})</span>
     </template>
   </component>
+
+  <template
+    v-if="
+      context === 'textbookByBatch' &&
+      exercise.adaptationStatus.kind === 'success' &&
+      exercise.adaptationStatus.approved === null
+    "
+  >
+    <p>
+      <button @click="approve(exercise.adaptationStatus.id)">{{ t('approve') }}</button>
+    </p>
+  </template>
 
   <p v-if="context === 'adaptation' || context === 'classification'">
     {{ t('pageAndExercise', { pageNumber: pageNumber ?? 'N/A', exerciseNumber: exerciseNumber ?? 'N/A' }) }}
@@ -151,6 +181,8 @@ en:
   fullScreen: Full screen
   viewDetails: View details and make adjustments
   remove: Remove
+  approve: Approve
+  approved: "Approved by {by}"
 fr:
   input: Entrée
   exercise: Exercice
@@ -161,4 +193,6 @@ fr:
   fullScreen: Plein écran
   viewDetails: Voir les détails et faire des ajustements
   remove: Enlever
+  approve: Valider
+  approved: "Validé par {by}"
 </i18n>

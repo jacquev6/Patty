@@ -5,7 +5,7 @@ import { examples } from './AdaptedExerciseExamplesView.vue'
 import { ensureV2 } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
-import type { AdaptedExercise } from '@/frontend/ApiClient'
+import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 
 const screenshotsCounts: Record<string, number> = {}
 
@@ -27,6 +27,10 @@ const AdaptedExerciseExamplesCaptureComponent = defineComponent({
       type: Object as () => AdaptedExercise,
       required: true,
     },
+    imagesUrls: {
+      type: Object as () => ImagesUrls,
+      required: true,
+    },
   },
   setup(props) {
     return () =>
@@ -37,6 +41,7 @@ const AdaptedExerciseExamplesCaptureComponent = defineComponent({
           default: () =>
             h(AdaptedExerciseRenderer, {
               adaptedExercise: props.adaptedExercise,
+              imagesUrls: props.imagesUrls,
               navigateUsingArrowKeys: false,
             }),
         },
@@ -63,7 +68,7 @@ describe('Adapted exercises examples', () => {
             () => {
               cy.viewport(width, height)
               cy.mount(AdaptedExerciseExamplesCaptureComponent, {
-                props: { adaptedExercise: example.exercise },
+                props: { adaptedExercise: example.exercise, imagesUrls: example.imagesUrls ?? {} },
                 global: { plugins: [i18n] },
               })
 

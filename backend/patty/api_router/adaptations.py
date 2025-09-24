@@ -1,8 +1,10 @@
+import datetime
 from typing import Literal
 import typing
 
 import fastapi
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import database_utils
 from .. import dispatching as dispatch
@@ -67,6 +69,7 @@ class ApiAdaptation(ApiModel):
     strategy: ApiStrategy
     input: ApiInputOut
     raw_llm_conversations: JsonList
+    images_urls: adaptation.adapted.ImagesUrls
     adjustment_prompts: list[str]
     manual_edit: adaptation.adapted.Exercise | None
     removed_from_textbook: bool
@@ -199,6 +202,22 @@ def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDepend
     exercise_adaptation.manual_edit = None
 
 
+class ApprovalRequest(ApiModel):
+    approved: bool
+    by: str
+
+
+@router.put("/adaptations/{id}/approved")
+def set_adaptation_approved(id: str, session: database_utils.SessionDependable, req: ApprovalRequest) -> None:
+    exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
+    if req.approved:
+        exercise_adaptation.approved_by = req.by
+        exercise_adaptation.approved_at = datetime.datetime.now()
+    else:
+        exercise_adaptation.approved_by = None
+        exercise_adaptation.approved_at = None
+
+
 def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdaptation:
     last_assistant_response = exercise_adaptation.initial_assistant_response
     if exercise_adaptation.adjustments:
@@ -252,6 +271,7 @@ def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdapta
         manual_edit=exercise_adaptation.manual_edit,
         removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
         and exercise_adaptation.exercise.location.removed_from_textbook,
+        images_urls=previewable_exercise.gather_images_urls("s3", exercise_adaptation.exercise),
         llm_status=llm_status,
         status=status,
     )

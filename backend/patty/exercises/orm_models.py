@@ -83,4 +83,35 @@ class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
     exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
 
 
+class ExerciseImage(OrmBase):
+    __tablename__ = "exercise_images"
+
+    def __init__(self, *, local_identifier: str, created: ExerciseImageCreation) -> None:
+        super().__init__()
+        self.local_identifier = local_identifier
+        self.created = created
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+    local_identifier: orm.Mapped[str]
+
+    created: orm.Mapped[ExerciseImageCreation] = orm.relationship(back_populates="image")
+
+
+class ExerciseImageCreation(OrmBase):
+    __tablename__ = "exercise_image_creations"
+    __mapper_args__ = {"polymorphic_on": "kind"}
+
+    def __init__(self, *, at: datetime.datetime) -> None:
+        super().__init__()
+        self.at = at
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseImage.id), primary_key=True)
+    kind: orm.Mapped[str]
+    at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))
+
+    image: orm.Mapped[ExerciseImage] = orm.relationship(
+        foreign_keys=[id], remote_side=[ExerciseImage.id], back_populates="created"
+    )
+
+
 annotate_new_tables("exercises")

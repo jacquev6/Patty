@@ -13,10 +13,15 @@ defineProps<{
 
 const { t } = useI18n()
 const authenticationTokenStore = useAuthenticationTokenStore()
+
+const columns = [
+  { name: 'col-1', width: 1 },
+  { name: 'col-2', width: 2 },
+]
 </script>
 
 <template>
-  <ResizableColumns :columns="[1, 2]">
+  <ResizableColumns :columns>
     <template #col-1>
       <p>{{ t('createdBy') }} {{ adaptationBatch.createdBy }}</p>
       <AdaptationStrategyEditor

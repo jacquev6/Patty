@@ -1,3 +1,4 @@
+import copy
 import sqlalchemy as sql
 
 from . import adaptation
@@ -5,11 +6,42 @@ from . import api_router
 from . import classification
 from . import database_utils
 from . import extraction
+from . import fixtures
 from . import sandbox
 from . import textbooks
 
 
 def migrate(session: database_utils.Session) -> None:
+    fix_type_of_legacy_extraction_assistant_responses(session)
+    add_image_to_response_specifications(session)
+    fixtures.FixturesCreator(session).create_extraction_seed_data()
+
+
+def fix_type_of_legacy_extraction_assistant_responses(session: database_utils.Session) -> None:
+    for page_extraction in session.execute(sql.select(extraction.PageExtraction)).scalars():
+        if (
+            page_extraction._assistant_response is not None
+            and page_extraction._assistant_response.get("kind") == "success"
+        ):
+            response = copy.deepcopy(page_extraction._assistant_response)
+            response["kind"] = "success-without-images"
+            page_extraction._assistant_response = response
+
+
+def add_image_to_response_specifications(session: database_utils.Session) -> None:
+    for adaptation_settings in session.execute(sql.select(adaptation.AdaptationSettings)).scalars():
+        assert adaptation_settings._response_specification["format"] == "json"
+        if adaptation_settings._response_specification["formalism"] == "json-schema":
+            spec = copy.deepcopy(adaptation_settings._response_specification)
+            spec["instruction_components"]["image"] = True
+            spec["example_components"]["image"] = True
+            spec["hint_components"]["image"] = True
+            spec["statement_components"]["image"] = True
+            spec["reference_components"]["image"] = True
+            adaptation_settings._response_specification = spec
+
+
+def validate(session: database_utils.Session) -> None:
     parse_all_json_fields(session)
     make_all_api_objects(session)
 

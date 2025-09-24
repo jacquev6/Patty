@@ -55,10 +55,15 @@ async function submitAdaptationsWithRecentSettings() {
   })
   emit('batch-updated')
 }
+
+const columns = [
+  { name: 'col-1', width: 1 },
+  { name: 'col-2', width: 2 },
+]
 </script>
 
 <template>
-  <ResizableColumns :columns="[1, 2]">
+  <ResizableColumns :columns>
     <template #col-1>
       <p>{{ t('createdBy') }} {{ extractionBatch.createdBy }}</p>
       <h1>{{ t('strategy') }}</h1>
@@ -164,8 +169,21 @@ async function submitAdaptationsWithRecentSettings() {
             ><WhiteSpace /><span class="inProgress">{{ t('inProgress') }}</span></template
           >
         </h2>
+        <h3>{{ t('images') }}</h3>
+        <p v-if="Object.keys(page.imagesUrls).length === 0">{{ t('noImages') }}</p>
+        <p v-else>
+          <template v-for="(imageUrl, imageIdentifier) in page.imagesUrls">
+            <span style="display: inline-block; margin-right: 1em; margin-bottom: 1em; text-align: center">
+              <img :src="imageUrl" style="max-height: 4em" />
+              <br />
+              {{ imageIdentifier }}
+            </span>
+          </template>
+        </p>
         <template v-if="page.assistantResponse !== null">
-          <template v-if="page.assistantResponse.kind === 'success'">
+          <template
+            v-if="page.assistantResponse.kind === 'success' || page.assistantResponse.kind === 'success-without-images'"
+          >
             <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
               <AdaptableExercisePreview
                 :headerLevel="3"
@@ -219,6 +237,8 @@ en:
   no: no
   result: Result
   page: Page {pageNumber}
+  images: Images
+  noImages: "None."
   inProgress: "(in progress, will refresh when done)"
   notJsonError: "The LLM returned a response that is not correct JSON."
   invalidJsonError: "The LLM returned a JSON response that does not validate against the extracted exercises list schema."
@@ -247,6 +267,8 @@ fr:
   no: non
   result: Résultat
   page: Page {pageNumber}
+  images: Images
+  noImages: "Aucune."
   inProgress: "(en cours, se mettra à jour quand terminé)"
   notJsonError: "Le LLM a renvoyé une réponse qui n'est pas un JSON correct."
   invalidJsonError: "Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'une liste d'exercices extraits."

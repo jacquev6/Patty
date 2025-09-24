@@ -53,5 +53,6 @@ export type AdaptationBatch =
   paths['/api/adaptation-batches/{id}']['get']['responses']['200']['content']['application/json']
 
 export type Adaptation = paths['/api/adaptations/{id}']['get']['responses']['200']['content']['application/json']
+export type ImagesUrls = Partial<Record<string, string>>
 export type AdaptedExercise = (Adaptation['status'] & { kind: 'success' })['adaptedExercise']
 export type AdaptedExerciseV2 = AdaptedExercise & { format: 'v2' }

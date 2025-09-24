@@ -23,6 +23,9 @@
                 "$ref": "#/$defs/ActiveFormatted"
               },
               {
+                "$ref": "#/$defs/Image"
+              },
+              {
                 "$ref": "#/$defs/FreeTextInput"
               }
             ]
@@ -121,6 +124,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -151,6 +157,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -289,6 +298,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -367,6 +379,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -448,6 +463,9 @@
                 "$ref": "#/$defs/FreeTextInput"
               },
               {
+                "$ref": "#/$defs/Image"
+              },
+              {
                 "$ref": "#/$defs/MultipleChoicesInput"
               },
               {
@@ -504,6 +522,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -533,6 +554,25 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Image": {
+      "properties": {
+        "kind": {
+          "const": "image",
+          "title": "Kind",
+          "type": "string"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "InstructionLine": {
       "properties": {
         "contents": {
@@ -549,6 +589,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               },
               {
                 "$ref": "#/$defs/Choice"
@@ -670,6 +713,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -704,6 +750,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               },
               {
                 "$ref": "#/$defs/SelectableInput"
@@ -793,6 +842,9 @@
                 "$ref": "#/$defs/FreeTextInput"
               },
               {
+                "$ref": "#/$defs/Image"
+              },
+              {
                 "$ref": "#/$defs/MultipleChoicesInput"
               },
               {
@@ -869,6 +921,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },

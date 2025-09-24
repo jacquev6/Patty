@@ -148,6 +148,8 @@ class Adaptation(OrmBase):
         initial_assistant_response: assistant_responses.Response | None,
         adjustments: list[assistant_responses.Adjustment],
         manual_edit: adapted.Exercise | None,
+        approved_by: str | None,
+        approved_at: datetime.datetime | None,
     ) -> None:
         super().__init__()
         self.created = created
@@ -158,6 +160,8 @@ class Adaptation(OrmBase):
         self.initial_assistant_response = initial_assistant_response
         self.adjustments = adjustments
         self.manual_edit = manual_edit
+        self.approved_by = approved_by
+        self.approved_at = approved_at
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -226,6 +230,9 @@ class Adaptation(OrmBase):
             self._manual_edit = sql.null()
         else:
             self._manual_edit = value.model_dump()
+
+    approved_by: orm.Mapped[str | None]
+    approved_at: orm.Mapped[datetime.datetime | None] = orm.mapped_column(sql.DateTime(timezone=True))
 
 
 class AdaptationCreation(OrmBase):

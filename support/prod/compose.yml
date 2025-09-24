@@ -24,6 +24,7 @@ services:
     pull_policy: never
     volumes:
       - ./backend/classification-models:/classification-models
+      - ./backend/images-detection-models:/images-detection-models
     env_file:
       - backend/env
       - backend/secrets.env
@@ -36,6 +37,7 @@ services:
     pull_policy: never
     volumes:
       - ./backend/classification-models:/classification-models
+      - ./backend/images-detection-models:/images-detection-models
     env_file:
       - backend/env
       - backend/secrets.env

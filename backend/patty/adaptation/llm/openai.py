@@ -1,6 +1,5 @@
 import json
 from typing import Iterable, Literal
-import os
 import unittest
 
 import openai
@@ -8,7 +7,9 @@ import openai.types.chat
 import openai.types.shared_params
 import pydantic
 
+from ... import settings
 from ...any_json import JsonDict
+from ...test_utils import costs_money
 from .base import (
     AssistantMessage,
     InvalidJsonAssistantMessage,
@@ -24,11 +25,10 @@ from .base import (
     UserMessage,
 )
 from .schema import make_schema
-from ...test_utils import costs_money
 
 
 # Using a global client; we'll do dependency injection at a higher abstraction level
-client = openai.AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 class OpenAiModel(Model):

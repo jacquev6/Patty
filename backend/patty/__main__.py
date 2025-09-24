@@ -362,15 +362,18 @@ def adapted_exercise_schema(
     exercise_type = adaptation.adapted.make_partial_exercise_type(
         adaptation.adapted.Components(
             instruction=adaptation.adapted.InstructionComponents(
-                text=True, whitespace=True, arrow=True, formatted=True, choice=choice
+                text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=choice
             ),
-            example=adaptation.adapted.ExampleComponents(text=True, whitespace=True, arrow=True, formatted=True),
-            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            example=adaptation.adapted.ExampleComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, image=True
+            ),
+            hint=adaptation.adapted.HintComponents(text=True, whitespace=True, arrow=True, formatted=True, image=True),
             statement=adaptation.adapted.StatementComponents(
                 text=True,
                 whitespace=True,
                 arrow=True,
                 formatted=True,
+                image=True,
                 free_text_input=free_text_input,
                 multiple_choices_input=multiple_choices_input,
                 selectable_input=selectable_input,
@@ -378,7 +381,9 @@ def adapted_exercise_schema(
                 editable_text_input=editable_text_input,
                 split_word_input=split_word_input,
             ),
-            reference=adaptation.adapted.ReferenceComponents(text=True, whitespace=True, arrow=True, formatted=True),
+            reference=adaptation.adapted.ReferenceComponents(
+                text=True, whitespace=True, arrow=True, formatted=True, image=True
+            ),
         )
     )
     schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)
@@ -704,8 +709,6 @@ def backup_database() -> None:
         with tarfile.open(os.path.join(parsed_database_backups_url.path, archive_name), "w:gz") as tarball:
             populate_tarball(tarball)
     elif parsed_database_backups_url.scheme == "s3":
-        assert "AWS_ACCESS_KEY_ID" in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" in os.environ
         s3 = boto3.client("s3")
         buffer = io.BytesIO()
         with tarfile.open(fileobj=buffer, mode="w:gz") as tarball:
@@ -728,7 +731,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250915-041603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250923-131603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -743,8 +746,6 @@ def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bo
             assert pg_dump_file is not None
             pg_dump = pg_dump_file.read()
     elif parsed_backup_url.scheme == "s3":
-        assert "AWS_ACCESS_KEY_ID" in os.environ
-        assert "AWS_SECRET_ACCESS_KEY" in os.environ
         s3 = boto3.client("s3")
         buffer = io.BytesIO()
         s3.download_fileobj(parsed_backup_url.netloc, f"{parsed_backup_url.path[1:]}", buffer)
@@ -817,6 +818,8 @@ def migrate_data(dry_run: bool) -> None:
     database_engine = database_utils.create_engine(settings.DATABASE_URL)
     with database_utils.make_session(database_engine) as session:
         data_migration.migrate(session)
+        session.flush()
+        data_migration.validate(session)
         if not dry_run:
             session.commit()
 

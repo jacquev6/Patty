@@ -22,9 +22,78 @@ from .base import (
 
 class DummyModel(Model):
     provider: Literal["dummy"]
-    name: Literal["dummy-1", "dummy-2", "dummy-3"]
+    name: Literal["dummy-1", "dummy-2", "dummy-3", "dummy-for-images"]
 
     async def do_complete(
+        self,
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
+        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
+    ) -> tuple[JsonDict, str]:
+        if self.name == "dummy-for-images":
+            return self.do_complete_for_images(messages, response_format)
+        else:
+            return await self.do_complete_standard(messages, response_format)
+
+    def do_complete_for_images(
+        self,
+        messages: list[
+            SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage
+        ],
+        response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
+    ) -> tuple[JsonDict, str]:
+        from .. import adapted
+
+        response = adapted.ExerciseV2(
+            format="v2",
+            phases=[
+                adapted.Phase(
+                    instruction=adapted.InstructionPage(
+                        lines=[
+                            adapted.InstructionLine(
+                                contents=[adapted.Text(kind="text", text="Écris les noms représentés par les dessins.")]
+                            )
+                        ]
+                    ),
+                    example=None,
+                    hint=None,
+                    statement=adapted.Pages(
+                        pages=[
+                            adapted.StatementPage(
+                                lines=[
+                                    adapted.StatementLine(
+                                        contents=[
+                                            adapted.Image(kind="image", identifier="p1c3"),
+                                            adapted.Whitespace(kind="whitespace"),
+                                            adapted.FreeTextInput(kind="freeTextInput"),
+                                        ]
+                                    ),
+                                    adapted.StatementLine(
+                                        contents=[
+                                            adapted.Image(kind="image", identifier="p1c2"),
+                                            adapted.Whitespace(kind="whitespace"),
+                                            adapted.FreeTextInput(kind="freeTextInput"),
+                                        ]
+                                    ),
+                                    adapted.StatementLine(
+                                        contents=[
+                                            adapted.Image(kind="image", identifier="p1c1"),
+                                            adapted.Whitespace(kind="whitespace"),
+                                            adapted.FreeTextInput(kind="freeTextInput"),
+                                        ]
+                                    ),
+                                ]
+                            )
+                        ]
+                    ),
+                )
+            ],
+            reference=None,
+        )
+        return ({"dummy": "conversation"}, response.model_dump_json())
+
+    async def do_complete_standard(
         self,
         messages: list[
             SystemMessage | UserMessage | AssistantMessage[T] | InvalidJsonAssistantMessage | NotJsonAssistantMessage

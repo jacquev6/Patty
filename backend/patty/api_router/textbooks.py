@@ -330,6 +330,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                         page_number=exercise.location.page_number,
                         exercise_number=exercise.location.exercise_number,
                         full_text=exercise.full_text,
+                        images_urls=previewable_exercise.gather_images_urls("s3", exercise),
                         classification_status=previewable_exercise.NotRequested(kind="notRequested"),
                         adaptation_status=previewable_exercise.make_api_adaptation_status(exercise.adaptations[-1]),
                     )
@@ -398,6 +399,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
                         removed_from_textbook=assert_isinstance(
                             page_exercise.location, textbooks.ExerciseLocationTextbook
                         ).removed_from_textbook,
+                        images_urls=previewable_exercise.gather_images_urls("s3", page_exercise),
                         classification_status=classification_status,
                         adaptation_status=adaptation_status,
                     )

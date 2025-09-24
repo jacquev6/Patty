@@ -13,7 +13,7 @@ from ..adaptation import AdaptableExercise
 from ..any_json import JsonDict
 from ..classification import ClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..exercises import ExerciseCreation, ExerciseLocationMaybePageAndNumber
+from ..exercises import ExerciseCreation, ExerciseImageCreation, ExerciseLocationMaybePageAndNumber
 
 
 class PdfFile(OrmBase, CreatedByUserMixin):
@@ -161,6 +161,10 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         back_populates="page_extraction"
     )
 
+    extracted_images: orm.Mapped[list[ExerciseImageCreationByPageExtraction]] = orm.relationship(
+        back_populates="page_extraction"
+    )
+
     @staticmethod
     def make_ordered_exercises_request__maybe_page_and_number(id: int) -> sql.Select[tuple[AdaptableExercise]]:
         return (
@@ -251,6 +255,22 @@ class ClassificationChunkCreationByPageExtraction(ClassificationChunkCreation):
         foreign_keys=[page_extraction_id],
         remote_side=[PageExtraction.id],
         back_populates="classification_chunk_creations",
+    )
+
+
+class ExerciseImageCreationByPageExtraction(ExerciseImageCreation):
+    __tablename__ = "exercise_image_creations__by_page_extraction"
+    __mapper_args__ = {"polymorphic_identity": "by_page_extraction"}
+
+    def __init__(self, *, at: datetime.datetime, page_extraction: PageExtraction) -> None:
+        super().__init__(at=at)
+        self.page_extraction = page_extraction
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseImageCreation.id), primary_key=True)
+
+    page_extraction_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtraction.id))
+    page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
+        foreign_keys=[page_extraction_id], remote_side=[PageExtraction.id], back_populates="extracted_images"
     )
 
 

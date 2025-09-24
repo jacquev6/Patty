@@ -15,6 +15,8 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.1
 compact-json==1.8.1
+contourpy==1.3.3
+cycler==0.12.1
 datasets==3.6.0
 dill==0.3.8
 distro==1.9.0
@@ -22,6 +24,7 @@ docstring_parser==0.16
 eval_type_backport==0.2.2
 Faker==37.4.0
 fastapi==0.115.14
+fonttools==4.59.2
 frozenlist==1.7.0
 google-api-core==2.25.1
 google-auth==2.40.3
@@ -48,19 +51,24 @@ importlib_resources==6.5.2
 jiter==0.10.0
 jmespath==1.0.1
 joblib==1.5.1
+kiwisolver==1.4.9
 Mako==1.3.10
+matplotlib==3.10.6
 mistralai==1.9.1
 multidict==6.6.3
 multiprocess==0.70.16
-numpy==2.3.1
+numpy==2.2.6
 openai==1.93.0
+opencv-python==4.12.0.88
 packaging==25.0
 pandas==2.3.0
 pillow==11.3.0
+polars==1.33.1
 polyfactory==2.22.0
 propcache==0.3.2
 proto-plus==1.26.1
 protobuf==6.31.1
+psutil==7.0.0
 psycopg2-binary==2.9.10
 pyarrow==20.0.0
 pyasn1==0.6.1
@@ -69,10 +77,11 @@ pycparser==2.22
 pydantic==2.10.6
 pydantic_core==2.27.2  # @todo Remove this dependency, without breaking unit tests
 PyJWT==2.10.1
+pyparsing==3.2.4
 python-dateutil==2.9.0.post0
 pytz==2025.2
 PyYAML==6.0.2
-recursive-diff==1.2.0
+recursive_diff==1.2.0
 regex==2024.11.6
 requests==2.32.4
 rsa==4.9.1
@@ -89,13 +98,17 @@ starlette==0.46.2
 tenacity==8.5.0
 threadpoolctl==3.6.0
 tokenizers==0.19.1
+torchvision==0.23.0
 tqdm==4.67.1
 transformers==4.41.2  # Newer versions fail with "'CamembertModel' object has no attribute 'attn_implementation'"
 typing-inspection==0.4.1
 tzdata==2025.2
+ultralytics==8.3.199
+ultralytics-thop==2.0.17
 urllib3==2.5.0
 uvicorn==0.35.0
 wcwidth==0.2.13
 websockets==15.0.1
+xarray==2025.9.0
 xxhash==3.5.0
 yarl==1.20.1

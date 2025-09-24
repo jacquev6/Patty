@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { AdaptedExercise } from '@/frontend/ApiClient'
+import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 
+// WARNING: changing this type requires changing the export code in the backend
 type Data = {
   studentAnswersStorageKey: string
   adaptedExercise: AdaptedExercise
+  imagesUrls: ImagesUrls
 }
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_ADAPTATION_EXPORT_DATA##') as Data

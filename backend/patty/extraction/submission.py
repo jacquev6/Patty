@@ -3,13 +3,13 @@ import io
 import subprocess
 import traceback
 import typing
+import urllib.parse
 
 import boto3
 import botocore
 import cachetools
 import PIL.Image
 import sqlalchemy as sql
-import urllib.parse
 
 from . import assistant_responses
 from . import orm_models as db
@@ -18,6 +18,7 @@ from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import settings
+from .images_detection import detect_images
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 
 
@@ -60,13 +61,43 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
         pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
         pdf_data_cache[sha256] = pdf_data
-    image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
+    pdf_page_image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
+
+    annotated_pdf_page_image, detected_images = detect_images(f"p{page_extraction.pdf_page_number}", pdf_page_image)
+
+    if settings.DETECTED_IMAGES_SAVE_PATH is not None:
+        pdf_page_image.save(f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.png")
+        annotated_pdf_page_image.save(
+            f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.annotated.png"
+        )
+        for identifier, image in detected_images.items():
+            image.save(
+                f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.extracted.{identifier}.png"
+            )
+
+    created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    extracted_images: list[tuple[exercises.ExerciseImage, PIL.Image.Image]] = []
+    for identifier, image in detected_images.items():
+        extracted_image = exercises.ExerciseImage(
+            local_identifier=identifier,
+            created=db.ExerciseImageCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+        )
+        session.add(extracted_image)
+        extracted_images.append((extracted_image, image))
+    session.flush()  # To get all extracted image ids
+    for extracted_image, image in extracted_images:
+        target = urllib.parse.urlparse(f"{settings.EXERCISE_IMAGES_URL}/{extracted_image.id}.png")
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format="PNG")
+        image_bytes.seek(0)
+        s3.put_object(Bucket=target.netloc, Key=target.path[1:], Body=image_bytes, ContentType="image/png")
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {page_extraction.id}")
-        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, image)
+        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, annotated_pdf_page_image)
     except InvalidJsonLlmException as error:
         log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
         page_extraction.assistant_response = assistant_responses.InvalidJsonError(
@@ -97,21 +128,25 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
 
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
-                filter(None, extracted_exercise.consignes + [extracted_exercise.conseil, extracted_exercise.exemple])
+                filter(
+                    None,
+                    extracted_exercise.properties.consignes
+                    + [extracted_exercise.properties.conseil, extracted_exercise.properties.exemple],
+                )
             )
             full_text = "\n".join(
                 filter(
                     None,
                     [
                         instruction_hint_example_text,
-                        extracted_exercise.enonce,
-                        extracted_exercise.references,
-                        extracted_exercise.autre,
+                        extracted_exercise.properties.enonce,
+                        extracted_exercise.properties.references,
+                        extracted_exercise.properties.autre,
                     ],
                 )
             )
 
-            if extracted_exercise.numero is not None:
+            if extracted_exercise.properties.numero is not None:
                 location: exercises.ExerciseLocation
                 if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
                     extraction_batch = page_extraction.created.textbook_extraction_batch
@@ -120,12 +155,13 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                         page_number=extraction_batch.first_textbook_page_number
                         + page_extraction.pdf_page_number
                         - extraction_batch.pdf_file_range.first_page_number,
-                        exercise_number=extracted_exercise.numero,
+                        exercise_number=extracted_exercise.properties.numero,
                         removed_from_textbook=False,
                     )
                 else:
                     location = exercises.ExerciseLocationMaybePageAndNumber(
-                        page_number=page_extraction.pdf_page_number, exercise_number=extracted_exercise.numero
+                        page_number=page_extraction.pdf_page_number,
+                        exercise_number=extracted_exercise.properties.numero,
                     )
 
                 exercise = adaptation.AdaptableExercise(
@@ -133,7 +169,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     location=location,
                     full_text=full_text,
                     instruction_hint_example_text=instruction_hint_example_text,
-                    statement_text=extracted_exercise.enonce,
+                    statement_text=extracted_exercise.properties.enonce,
                 )
                 session.add(exercise)
 

@@ -1,15 +1,15 @@
 from typing import Literal
-import os
 import unittest
 
 import google.genai.types
 import PIL.Image
 
-from .base import Model
+from ... import settings
 from ...test_utils import costs_money
+from .base import Model
 
 
-client = google.genai.Client(api_key=os.environ["GEMINIAI_KEY"])
+client = google.genai.Client(api_key=settings.GEMINIAI_KEY)
 
 
 class GeminiModel(Model):

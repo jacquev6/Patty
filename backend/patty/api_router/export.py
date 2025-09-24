@@ -10,6 +10,7 @@ import urllib.parse
 
 import fastapi
 
+from . import previewable_exercise
 from .. import adaptation
 from .. import authentication
 from .. import classification
@@ -53,7 +54,16 @@ def export_extraction_batch_extracted_exercises_json(
     for page_creation in batch.page_extraction_creations:
         page = page_creation.page_extraction
         assert page.assistant_response is not None
-        content.append({"pdf_page_number": page.pdf_page_number, "response": page.assistant_response.model_dump()})
+        content.append(
+            {
+                "pdfPageNumber": page.pdf_page_number,
+                "response": page.assistant_response.model_dump(),
+                "imagesUrls": {
+                    creation.image.local_identifier: previewable_exercise.make_image_url("data", creation.image)
+                    for creation in page.extracted_images
+                },
+            }
+        )
 
     return fastapi.responses.JSONResponse(
         content=content, headers=make_export_header(download, f"sandbox-extraction-batch-{id}-extracted-exercises.json")
@@ -357,6 +367,7 @@ def make_adapted_exercise_data(exercise_adaptation: adaptation.Adaptation) -> Js
             json.dumps(adapted_exercise_dump, separators=(",", ":"), indent=None).encode()
         ).hexdigest(),
         "adaptedExercise": adapted_exercise_dump,
+        "imagesUrls": previewable_exercise.gather_images_urls("data", exercise_adaptation.exercise),
     }
 
 

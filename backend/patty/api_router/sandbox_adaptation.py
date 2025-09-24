@@ -35,6 +35,7 @@ def get_available_adaptation_llm_models() -> list[adaptation.llm.ConcreteModel]:
             adaptation.llm.DummyModel(provider="dummy", name="dummy-1"),
             adaptation.llm.DummyModel(provider="dummy", name="dummy-2"),
             adaptation.llm.DummyModel(provider="dummy", name="dummy-3"),
+            adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
             adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
             adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
             adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
@@ -210,6 +211,8 @@ async def post_adaptation_batch(
                 initial_assistant_response=None,
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -253,6 +256,7 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
                 page_number=exercise.location.page_number,
                 exercise_number=exercise.location.exercise_number,
                 full_text=exercise.full_text,
+                images_urls=previewable_exercise.gather_images_urls("s3", exercise),
                 classification_status=previewable_exercise.NotRequested(kind="notRequested"),
                 adaptation_status=adaptation_status,
             )
@@ -347,6 +351,8 @@ def put_adaptable_exercise_class(
                     initial_assistant_response=None,
                     adjustments=[],
                     manual_edit=None,
+                    approved_by=None,
+                    approved_at=None,
                 )
             )
 

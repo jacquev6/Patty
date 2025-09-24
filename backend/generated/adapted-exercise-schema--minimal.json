@@ -30,6 +30,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -168,6 +171,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -281,6 +287,9 @@
                 "$ref": "#/$defs/Formatted"
               },
               {
+                "$ref": "#/$defs/Image"
+              },
+              {
                 "$ref": "#/$defs/GeneratorTemplatePlaceholder"
               }
             ]
@@ -325,6 +334,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -354,6 +366,25 @@
       "type": "object",
       "additionalProperties": false
     },
+    "Image": {
+      "properties": {
+        "kind": {
+          "const": "image",
+          "title": "Kind",
+          "type": "string"
+        },
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
     "InstructionLine": {
       "properties": {
         "contents": {
@@ -370,6 +401,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -461,6 +495,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },
@@ -509,6 +546,9 @@
               },
               {
                 "$ref": "#/$defs/Formatted"
+              },
+              {
+                "$ref": "#/$defs/Image"
               }
             ]
           },

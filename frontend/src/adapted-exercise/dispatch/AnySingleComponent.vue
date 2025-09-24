@@ -19,7 +19,7 @@ const props = defineProps<{
 function render() {
   return match(props.component)
     .returnType<VNode>()
-    .with({ kind: P.union('formatted', 'text', 'whitespace') }, (c) =>
+    .with({ kind: P.union('formatted', 'text', 'whitespace', 'image') }, (c) =>
       h(PassiveSingleComponent, {
         component: c,
         tricolorable: props.tricolorable,

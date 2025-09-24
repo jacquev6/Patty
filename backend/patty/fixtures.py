@@ -184,62 +184,68 @@ def make_default_extraction_prompt() -> str:
     exercise = extraction.extracted.Exercise.model_validate(
         {
             "id": "p47_ex4",
-            "numero": "1",
-            "consignes": [
-                "Additionne les nombres suivants et donne le résultat.",
-                "Soustrais les nombres suivants et donne le résultat.",
-            ],
-            "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
-            "conseil": "Commence par ajouter les unités et vérifie ton résultat.",
-            "exemple": "4 + 5 = 9.",
-            "references": "© Source: Manuel de mathématiques, page 34.",
-            "autre": "Informations additionnelles si présentes.",
+            "type": "exercice",
+            "images": True,
+            "type_images": "ordered",
+            "properties": {
+                "numero": "1",
+                "consignes": [
+                    "Additionne les nombres suivants et donne le résultat.",
+                    "Soustrais les nombres suivants et donne le résultat.",
+                ],
+                "enonce": "7 + 3, 5 + 2, 8 + 6, 4 + 9",
+                "conseil": "Commence par ajouter les unités et vérifie ton résultat.",
+                "exemple": "4 + 5 = 9.",
+                "references": "© Source: Manuel de mathématiques, page 34.",
+                "autre": "Informations additionnelles si présentes.",
+            },
         }
     )
 
+    # Unusual whitespace (U+00a0) comes from Mohamed-Amine's prompt. Cowardly keeping it for now. Same for missing last line ending.
     return textwrap.dedent(
         f"""\
-        You are an expert in the extraction and structuring of educational exercises from texts. Your task is to :
-        1. Carefully read the input and extract exercises without modifying the text in any way. Keep the exact format, language, letters, words, punctuation, and sentence structure as in the original.
-        2. Extract only the exercise-related elements, structured as follows:
+        You are an expert in the extraction and structuring of educational exercises from texts. 
+        Your task is to :  
 
-           JSON Schema:
-        { textwrap.indent(exercise.model_dump_json(indent=2), "        ").lstrip() }
+        1. Carefully read the input and extract exercises without modifying the text in any way. Keep the exact format, language, letters, words, punctuation, and sentence structure as in the original.  
 
-        3. Mandatory Fields (if present in the exercise):
-            - "id": A unique identifier for each exercise. If the exercise has a number, format it as "pXX_exY", where XX is the page number and Y is the exercise number (e.g., "p47_ex4"). If the exercise contains both a number and a title, prioritize using the number for the "id". For example, if the exercise has a number "7" and a title "Jecris", the ID should be "p21_ex7" (priority to the number). If no number is given, use a descriptive title for the exercise (e.g., "p45_exDefiLangue", "p49_exJecris").
-            - "numero": Exercise number (e.g., "1"). If no number is given, skip it.
-            - "consignes": A **list** of all instructions that belong to the same exercise. These are often bolded or clearly marked.
-            - **"exemple": Example or model solution (optional). Identify text that demonstrates how to do the exercise. Look for visual/textual cues:
-                - **Position:** Often appears *between* the `consignes` and the main `enonce` (especially before lists like a., b., c...).
-                - **Keywords:** May start with indicators like "Exemple:", "Ex:", etc.
-                - **Formatting:** May use distinct formatting such as *italics*, indentation, parentheses, or be visually set apart (reflecting original distinctions like color or boxing).**
-            - "enonce": The main content of the exercise **itself** (e.g., questions, sentences to complete, list items). This follows `consignes` and any `exemple` or `conseil`. **Crucially, ensure that text identified as `exemple` or `conseil` is *excluded* from the `enonce`.**
-            - **"conseil": Helpful hints, tips, or guidance (optional). Identify text offering advice. Look for visual/textual cues:
-                - **Position:** Can appear anywhere relative to the `consignes`, `exemple`, or `enonce`, but is distinct from them.
-                - **Keywords:** May start with indicators like "Conseil:", "Astuce:", "Attention:", "N.B.:", "Rappel:", etc.
-                - **Formatting:** May use distinct formatting such as *italics*, indentation, parentheses, or be visually set apart.**
-            - "references": Source or citation (optional).
-            - "autre": Other relevant information (optional).
+        2. Extract only the exercise-related elements, structured as follows:  
+        { textwrap.indent(exercise.model_dump_json(indent=2).replace("  ", "  "), "        ").lstrip() }
 
-        4. Preserve the original format and layout as in the input document.
-        5. Group multiple instructions ("consignes") under the same `"numero"` if they belong to the same exercise.
-        6. Return only the JSON content without any formatting markers.
-        7. Do not wrap the response in <think> tags—provide the JSON directly.
-        8. Do not solve the exercises please, you should only extract them as-is.
-        9. Maintain list structures exactly as they appear.
-        10. Do not separate words or phrases unnecessarily.
-        11. Respect list ordering.
-        12. Return a list of exercises in strict JSON format. Use only double quotes for keys and values.
-        13. An image of the page is attached that contains exercise boxes—structure the content based on the visual layout.
-        14. In the image, the 'consigne' is typically bold. Use **all available visual and textual cues** to distinguish between `consignes`, `exemple`, `conseil`, and `enonce`. Pay close attention to:
-            - **Formatting:** Bolding (often `consignes`), *italics* (often `exemple` or `conseil`), indentation, parentheses.
-            - **Positioning:** Especially text located between `consignes` and list-based `enonce` (often `exemple`).
-            - **Keywords:** Explicit labels like "Exemple:", "Conseil:", "Attention:", etc.
-            **Assume that elements like examples and advice might have had distinct visual treatments (like color or boxing) in the source, and look for corresponding textual cues (italics, indentation, keywords) to identify them.**
-        15. Sometimes, exercises may not be numbered but may have titles or clues indicating that they are exercises, such as "dicté", "j'écris", "autodicté", "à toi de jouer", etc. These should be included as exercises as well.
-        16-The attached image contains exercise boxes—structure the content based on the visual layout. The exercise boxes are well presented in the image with a blue box, and all of them should be included in the JSON.
-        """
+        3. **Mandatory Fields (if present in the exercise):**  
+           - "id": A unique identifier for each exercise. If the exercise has a number, format it as "pXX_exY", where XX is the page number and Y is the exercise number.  
+           - "numero": Exercise number.  
+           - "consignes": List of all instructions.  
+           - "exemple": Example solution (optional).  
+           - "enonce": The main content of the exercise.  
+           - "conseil": Helpful hints (optional).  
+           - "references": Source (optional).  
+           - "autre": Other info (optional).  
+
+        4. **Images rule:**  
+           - If no image → "images": false, "type_images": "none".  
+           - If one image → "images": true, "type_images": "unique".  
+           - If multiple images → "images": true, "type_images": "ordered", "unordered" or "composite".  
+           - Images are **always contained in a red box**, and their **name is written in the middle of the image in white text with a black background**.  
+           - When an image is present, insert its filename (without extension) in the `enonce` between `{{ }}`.  
+             - Example: `a. {{p130c2}} {{p130c3}}, b. {{p130c0}} {{p130c1}}`  
+
+        5. Preserve the original format and layout as in the input document.  
+
+        6. Group multiple consignes under the same "numero" if they belong to the same exercise.  
+
+        7. Return only the JSON content, strict JSON format, with double quotes.  
+
+        8. Do not solve the exercises.  
+
+        9. Maintain list structures and ordering.  
+
+        10. For images, filenames like `p078c10.png` should appear in the `enonce` as `{{p078c10}}`.  
+
+        11. Use all visual and textual cues (bold, italics, indentation) to separate consigne, exemple, conseil, and enonce.  
+
+        12. Always output a JSON list of exercises.  """
     )
 
 
@@ -254,7 +260,10 @@ class FixturesCreator:
         return instance
 
     def create_seed_data(self) -> None:
-        # Adaptation
+        self.create_adaptation_seed_data()
+        self.create_extraction_seed_data()
+
+    def create_adaptation_seed_data(self) -> None:
         settings = self.add(
             adaptation.AdaptationSettings(
                 created_by="Patty",
@@ -264,19 +273,20 @@ class FixturesCreator:
                     format="json",
                     formalism="json-schema",
                     instruction_components=adaptation.adapted.InstructionComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=True
                     ),
                     example_components=adaptation.adapted.ExampleComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     hint_components=adaptation.adapted.HintComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
                         formatted=True,
+                        image=True,
                         free_text_input=False,
                         multiple_choices_input=True,
                         selectable_input=False,
@@ -285,7 +295,7 @@ class FixturesCreator:
                         split_word_input=False,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                 ),
                 exercise_class=None,
@@ -307,7 +317,7 @@ class FixturesCreator:
             exercise=self.create_default_adaptation_input(),
         )
 
-        # Extraction
+    def create_extraction_seed_data(self) -> None:
         self.add(
             extraction.ExtractionSettings(
                 created_by="Patty", created_at=created_at, prompt=make_default_extraction_prompt()
@@ -326,19 +336,20 @@ class FixturesCreator:
                     format="json",
                     formalism="json-schema",
                     instruction_components=adaptation.adapted.InstructionComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True, choice=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True, choice=True
                     ),
                     example_components=adaptation.adapted.ExampleComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     hint_components=adaptation.adapted.HintComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                     statement_components=adaptation.adapted.StatementComponents(
                         text=True,
                         whitespace=True,
                         arrow=True,
                         formatted=True,
+                        image=True,
                         free_text_input=True,
                         multiple_choices_input=True,
                         selectable_input=True,
@@ -347,7 +358,7 @@ class FixturesCreator:
                         split_word_input=True,
                     ),
                     reference_components=adaptation.adapted.ReferenceComponents(
-                        text=True, whitespace=True, arrow=True, formatted=True
+                        text=True, whitespace=True, arrow=True, formatted=True, image=True
                     ),
                 ),
                 exercise_class=None,
@@ -513,6 +524,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -534,6 +547,8 @@ class FixturesCreator:
                 initial_assistant_response=None,
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
         # Hack: store a JSON null in _initial_assistant_response instead of a SQL NULL to avoid
@@ -561,6 +576,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -584,6 +601,8 @@ class FixturesCreator:
                 ),
                 adjustments=[],
                 manual_edit=None,
+                approved_by=None,
+                approved_at=None,
             )
         )
 
@@ -737,43 +756,63 @@ class FixturesCreator:
                     exercises=[
                         extraction.extracted.Exercise(
                             id="p40_ex4",
-                            numero="4",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="4",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p40_ex6",
-                            numero="6",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="6",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p40_ex8",
-                            numero="8",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="8",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p40_ex10",
-                            numero="10",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="10",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                     ],
                 ),
@@ -960,43 +999,63 @@ class FixturesCreator:
                     exercises=[
                         extraction.extracted.Exercise(
                             id="p42_ex5",
-                            numero="5",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="5",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p42_ex6",
-                            numero="6",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="6",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p42_exAutoDictée",
-                            numero="Auto-dictée",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="Auto-dictée",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                         extraction.extracted.Exercise(
                             id="p42_ex6Texte",
-                            numero="Exo identifié par texte / 5",
-                            consignes=['Complète avec "le vent" ou "la pluie"'],
-                            conseil=None,
-                            exemple=None,
-                            enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
-                            references=None,
-                            autre=None,
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.Exercise.Properties(
+                                numero="Exo identifié par texte / 5",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
                         ),
                     ],
                 ),
@@ -1160,6 +1219,9 @@ class FixturesCreator:
     def create_dummy_coche_exercise_classes(self) -> None:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
+
+    def create_dummy_rcimage_exercise_class(self) -> None:
+        self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
     def create_dummy_extraction_strategy(self) -> None:
         self.add(extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah."))

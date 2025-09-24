@@ -12,7 +12,7 @@ do
     echo "Please create '$file' according to '$template'"
     ok=false
   fi
-done < <(find . -name '*.template' -not -path './.venv/*' -not -path './support/dev-env/backend/pip-packages/*')
+done < <(find . -name '*.template' -not -path './.venv/*' -not -path './support/dev-env/backend/home-local/*')
 $ok
 
 # @todo Evaluate if https://github.com/astral-sh/uv can make this use case easier

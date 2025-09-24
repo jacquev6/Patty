@@ -39,6 +39,8 @@ FROM python:3.12-slim AS backend-dependencies
 RUN set -x \
  && apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
+      libgl1 \
+      libglib2.0-bin \
       poppler-utils \
       postgresql-client \
  && true
@@ -50,6 +52,9 @@ RUN pip install -r requirements-10-torch.txt
 
 ADD backend/requirements-20-main.txt .
 RUN pip install -r requirements-20-main.txt uvicorn
+
+# Create ~/.config/Ultralytics now to avoid verbose messages later
+RUN mkdir ~/.config && python -c 'import ultralytics' && test -d ~/.config/Ultralytics
 
 
 FROM nginx:alpine AS final-frontend

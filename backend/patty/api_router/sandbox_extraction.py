@@ -29,6 +29,7 @@ def get_available_extraction_llm_models() -> list[extraction.llm.ConcreteModel]:
         return [
             extraction.llm.DummyModel(provider="dummy", name="dummy-1"),
             extraction.llm.DummyModel(provider="dummy", name="dummy-2"),
+            extraction.llm.DummyModel(provider="dummy", name="dummy-for-images"),
             extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
         ]
     else:
@@ -135,6 +136,7 @@ class GetExtractionBatchResponse(ApiModel):
 
     class Page(ApiModel):
         page_number: int
+        images_urls: adaptation.adapted.ImagesUrls
         assistant_response: extraction.assistant_responses.Response | None
 
         class Exercise(previewable_exercise.PreviewableExercise):
@@ -222,6 +224,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                         exercise.location, exercises.ExerciseLocationMaybePageAndNumber
                     ).exercise_number,
                     full_text=exercise.full_text,
+                    images_urls=previewable_exercise.gather_images_urls("s3", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
                 )
@@ -230,6 +233,10 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         pages.append(
             GetExtractionBatchResponse.Page(
                 page_number=page_extraction.pdf_page_number,
+                images_urls={
+                    creation.image.local_identifier: previewable_exercise.make_image_url("s3", creation.image)
+                    for creation in page_extraction.extracted_images
+                },
                 assistant_response=page_extraction.assistant_response,
                 exercises=api_exercises,
             )
@@ -293,6 +300,8 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                         initial_assistant_response=None,
                         adjustments=[],
                         manual_edit=None,
+                        approved_by=None,
+                        approved_at=None,
                     )
                 )
 
@@ -371,6 +380,8 @@ def put_extraction_batch_model_for_adaptation(
                         initial_assistant_response=None,
                         adjustments=[],
                         manual_edit=None,
+                        approved_by=None,
+                        approved_at=None,
                     )
                 )
 

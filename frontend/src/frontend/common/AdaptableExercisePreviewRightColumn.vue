@@ -94,6 +94,7 @@ defineExpose({
       <AdaptedExerciseRenderer
         :navigateUsingArrowKeys="fullScreen"
         :adaptedExercise="exercise.adaptationStatus.adaptedExercise"
+        :imagesUrls="exercise.imagesUrls"
       />
       <button v-if="fullScreen" class="exitFullScreen" @click="fullScreen = false">{{ t('exitFullScreen') }}</button>
     </MiniatureScreen>
