@@ -77,6 +77,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h5 span.inProgress:contains("in progress")').should('have.length', 2)
     cy.get('div.busy').should('have.length', 2)
     cy.get('h5 span.inProgress:contains("in progress")').should('not.exist')
+    cy.get(':contains("in progress")').should('not.exist')
     cy.get('div.busy').should('not.exist')
 
     screenshots('textbook-with-pdf-ranges')
@@ -119,7 +120,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('button:contains("Remove")').should('have.length', 7)
 
     cy.get('button:contains("View details")').eq(0).click()
-    cy.get('h1:contains("Strategy")').should('exist')
+    cy.get('h1:contains("Adapted exercise")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').should('exist').should('have.attr', 'href', '/textbook-1')
 
     cy.visit('/')
@@ -173,6 +174,11 @@ describe('The edition form for textbooks - with a PDF range', () => {
     loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
+  })
+
+  it('has adaptation pages that look like this', () => {
+    cy.get('a:contains("View details")').eq(0).click()
+    screenshot(`adaptation`)
   })
 
   it('fixes exercise class', () => {

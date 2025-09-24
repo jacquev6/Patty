@@ -62,11 +62,16 @@ const disabled = computed(() => {
 })
 
 const availableStrategySettings = computed(() => props.baseAdaptationBatch.availableStrategySettings)
+
+const columns = [
+  { name: 'col-1', width: 1 },
+  { name: 'col-2', width: 1 },
+]
 </script>
 
 <template>
   <BusyBox :busy>
-    <ResizableColumns :columns="[1, 1]">
+    <ResizableColumns :columns>
       <template #col-1>
         <AdaptationStrategyEditor :availableStrategySettings :disabled="false" v-model="strategy" />
       </template>

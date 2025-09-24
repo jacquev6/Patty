@@ -111,10 +111,15 @@ const lastPage = computedAsync(async () => {
     return await document.value.getPage(lastPageNumber.value)
   }
 }, null)
+
+const columns = [
+  { name: 'col-1', width: 1 },
+  { name: 'col-2', width: 1 },
+]
 </script>
 
 <template>
-  <ResizableColumns :columns="[1, 1]">
+  <ResizableColumns :columns>
     <template #col-1>
       <h1>{{ t('strategy') }}</h1>
       <h2>{{ t('llmModel') }}</h2>
