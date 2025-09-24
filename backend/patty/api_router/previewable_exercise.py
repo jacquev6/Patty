@@ -4,7 +4,7 @@ import typing
 
 from .. import adaptation
 from .. import dispatching as dispatch
-from .. import extraction
+from .. import exercises
 from .. import settings
 from ..api_utils import ApiModel
 from .s3_client import s3
@@ -151,8 +151,8 @@ def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.A
         yield from _gather_required_image_identifiers_from_adapted_exercise(adaptation_.manual_edit)
 
 
-def make_image_url(kind: typing.Literal["s3", "data"], image: extraction.ExtractedImage) -> str:
-    target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{image.id}.png")
+def make_image_url(kind: typing.Literal["s3", "data"], image: exercises.ExerciseImage) -> str:
+    target = urllib.parse.urlparse(f"{settings.EXERCISE_IMAGES_URL}/{image.id}.png")
     if kind == "data":
         object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
         data = base64.b64encode(object["Body"].read()).decode("ascii")
@@ -172,7 +172,9 @@ def gather_images_urls(
     kind: typing.Literal["s3", "data"], exercise: adaptation.AdaptableExercise
 ) -> adaptation.adapted.ImagesUrls:
     available_images = dispatch.exercise_creation(
-        exercise.created, by_user=lambda ec: [], by_page_extraction=lambda ec: ec.page_extraction.extracted_images
+        exercise.created,
+        by_user=lambda ec: [],
+        by_page_extraction=lambda ec: [creation.image for creation in ec.page_extraction.extracted_images],
     )
 
     required_image_identifiers = {
@@ -183,8 +185,8 @@ def gather_images_urls(
 
     urls: adaptation.adapted.ImagesUrls = {}
     for image in available_images:
-        if image.page_local_id in required_image_identifiers:
-            urls[image.page_local_id] = make_image_url(kind, image)
+        if image.local_identifier in required_image_identifiers:
+            urls[image.local_identifier] = make_image_url(kind, image)
 
     return urls
 

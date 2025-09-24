@@ -59,8 +59,8 @@ def export_extraction_batch_extracted_exercises_json(
                 "pdfPageNumber": page.pdf_page_number,
                 "response": page.assistant_response.model_dump(),
                 "imagesUrls": {
-                    image.page_local_id: previewable_exercise.make_image_url("data", image)
-                    for image in page.extracted_images
+                    creation.image.local_identifier: previewable_exercise.make_image_url("data", creation.image)
+                    for creation in page.extracted_images
                 },
             }
         )

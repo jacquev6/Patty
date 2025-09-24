@@ -77,16 +77,17 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
 
     created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
-    extracted_images: list[tuple[db.ExtractedImage, PIL.Image.Image]] = []
+    extracted_images: list[tuple[exercises.ExerciseImage, PIL.Image.Image]] = []
     for identifier, image in detected_images.items():
-        extracted_image = db.ExtractedImage(
-            page_extraction=page_extraction, created_at=created_at, page_local_id=identifier
+        extracted_image = exercises.ExerciseImage(
+            local_identifier=identifier,
+            created=db.ExerciseImageCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
         )
         session.add(extracted_image)
         extracted_images.append((extracted_image, image))
     session.flush()  # To get all extracted image ids
     for extracted_image, image in extracted_images:
-        target = urllib.parse.urlparse(f"{settings.EXTRACTED_IMAGES_URL}/{extracted_image.id}.png")
+        target = urllib.parse.urlparse(f"{settings.EXERCISE_IMAGES_URL}/{extracted_image.id}.png")
         image_bytes = io.BytesIO()
         image.save(image_bytes, format="PNG")
         image_bytes.seek(0)

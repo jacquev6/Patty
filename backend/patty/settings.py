@@ -26,9 +26,9 @@ assert not EXTERNAL_EXERCISES_URL.endswith("/")
 PDF_FILES_URL = os.environ["PATTY_PDF_FILES_URL"]
 assert PDF_FILES_URL.startswith("s3://")
 assert not PDF_FILES_URL.endswith("/")
-EXTRACTED_IMAGES_URL = os.environ["PATTY_EXTRACTED_IMAGES_URL"]
-assert EXTRACTED_IMAGES_URL.startswith("s3://")
-assert not EXTRACTED_IMAGES_URL.endswith("/")
+EXERCISE_IMAGES_URL = os.environ["PATTY_EXERCISE_IMAGES_URL"]
+assert EXERCISE_IMAGES_URL.startswith("s3://")
+assert not EXERCISE_IMAGES_URL.endswith("/")
 
 MAIL_SENDER = os.environ["PATTY_MAIL_SENDER"]
 SMTP_HOST = os.environ["PATTY_SMTP_HOST"]

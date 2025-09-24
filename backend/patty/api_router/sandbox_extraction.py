@@ -234,8 +234,8 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             GetExtractionBatchResponse.Page(
                 page_number=page_extraction.pdf_page_number,
                 images_urls={
-                    image.page_local_id: previewable_exercise.make_image_url("s3", image)
-                    for image in page_extraction.extracted_images
+                    creation.image.local_identifier: previewable_exercise.make_image_url("s3", creation.image)
+                    for creation in page_extraction.extracted_images
                 },
                 assistant_response=page_extraction.assistant_response,
                 exercises=api_exercises,

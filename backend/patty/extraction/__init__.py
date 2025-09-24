@@ -5,7 +5,7 @@ from . import submission as submission
 from .orm_models import (
     ClassificationChunkCreationByPageExtraction as ClassificationChunkCreationByPageExtraction,
     ExerciseCreationByPageExtraction as ExerciseCreationByPageExtraction,
-    ExtractedImage as ExtractedImage,
+    ExerciseImageCreationByPageExtraction as ExerciseImageCreationByPageExtraction,
     ExtractionSettings as ExtractionSettings,
     PageExtraction as PageExtraction,
     PageExtractionCreation as PageExtractionCreation,
