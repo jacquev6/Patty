@@ -22,7 +22,7 @@ class Exercise(pydantic.BaseModel):
     id: str | None = None
     type: typing.Literal["exercice"] = "exercice"
     images: bool = False
-    type_images: typing.Literal["none", "ordered", "unordered", "composite"] = "none"
+    type_images: typing.Literal["none", "unique", "ordered", "unordered", "composite"] = "none"
 
     class Properties(pydantic.BaseModel):
         model_config = pydantic.ConfigDict(extra="ignore")

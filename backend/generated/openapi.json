@@ -5234,6 +5234,7 @@
             "default": "none",
             "enum": [
               "none",
+              "unique",
               "ordered",
               "unordered",
               "composite"

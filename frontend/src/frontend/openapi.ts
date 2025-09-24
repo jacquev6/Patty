@@ -2608,7 +2608,7 @@ export interface components {
        * @default none
        * @enum {string}
        */
-      type_images?: 'none' | 'ordered' | 'unordered' | 'composite'
+      type_images?: 'none' | 'unique' | 'ordered' | 'unordered' | 'composite'
     }
     /** DummyModel */
     patty__extraction__llm__dummy__DummyModel: {
