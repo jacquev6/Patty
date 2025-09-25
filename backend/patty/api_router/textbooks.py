@@ -27,6 +27,7 @@ class PostTextbookRequest(ApiModel):
     publisher: str | None
     year: int | None
     isbn: str | None
+    pages_count: int | None
 
 
 class PostTextbookResponse(ApiModel):
@@ -44,6 +45,7 @@ def post_textbook(
         publisher=req.publisher,
         year=req.year,
         isbn=req.isbn,
+        pages_count=req.pages_count,
     )
     session.add(textbook)
     session.flush()
@@ -70,6 +72,7 @@ class ApiTextbook(ApiModel):
     publisher: str | None
     year: int | None
     isbn: str | None
+    pages_count: int | None
 
     external_exercises: list[ApiTextbookExternalExercise]
 
@@ -136,6 +139,7 @@ class GetTextbooksResponse(ApiModel):
         title: str
         publisher: str | None
         year: int | None
+        pages_count: int | None
 
     textbooks: list[Textbook]
 
@@ -152,6 +156,7 @@ async def get_textbooks(session: database_utils.SessionDependable) -> GetTextboo
                 title=textbook.title,
                 publisher=textbook.publisher,
                 year=textbook.year,
+                pages_count=textbook.pages_count,
             )
             for textbook in textbooks_
         ]
@@ -443,6 +448,7 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
             publisher=textbook.publisher,
             year=textbook.year,
             isbn=textbook.isbn,
+            pages_count=textbook.pages_count,
             external_exercises=external_exercises_,
             ranges=ranges,
             pages=textbook_pages,

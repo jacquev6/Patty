@@ -20,6 +20,7 @@ const title = ref('')
 const publisher = ref<string | null>(null)
 const year = ref<number | null>(null)
 const isbn = ref<string | null>(null)
+const pagesCount = ref<number | null>(null)
 
 const disabled = computed(() => title.value === '')
 
@@ -35,6 +36,7 @@ async function submit() {
       publisher: publisher.value,
       year: year.value,
       isbn: isbn.value,
+      pagesCount: pagesCount.value,
     },
   })
   busy.value = false
@@ -61,6 +63,9 @@ async function submit() {
       <label>{{ t('isbn') }} <InputForNonEmptyStringOrNull v-model="isbn" data-cy="textbook-isbn" /></label>
     </p>
     <p>
+      <label>{{ t('pagesCount') }} <InputForNumberOrNull v-model="pagesCount" data-cy="textbook-pages-count" /></label>
+    </p>
+    <p>
       <button @click="submit" :disabled>{{ t('submit') }}</button>
     </p>
   </BusyBox>
@@ -73,6 +78,7 @@ en:
   publisher: "Publisher:"
   year: "Year:"
   isbn: "ISBN:"
+  pagesCount: "Pages count:"
   submit: Submit
 fr:
   createdBy: "Créé par"
@@ -80,5 +86,6 @@ fr:
   publisher: "Éditeur :"
   year: "Année :"
   isbn: "ISBN :"
+  pagesCount: "Nombre de pages :"
   submit: Soumettre
 </i18n>

@@ -917,6 +917,8 @@ export interface components {
       isbn: string | null
       /** Pages */
       pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Page'][]
+      /** Pagescount */
+      pagesCount: number | null
       /** Publisher */
       publisher: string | null
       /** Ranges */
@@ -2046,6 +2048,8 @@ export interface components {
       creator: string
       /** Isbn */
       isbn: string | null
+      /** Pagescount */
+      pagesCount: number | null
       /** Publisher */
       publisher: string | null
       /** Title */
@@ -2347,6 +2351,8 @@ export interface components {
       createdBy: string
       /** Id */
       id: string
+      /** Pagescount */
+      pagesCount: number | null
       /** Publisher */
       publisher: string | null
       /** Title */

@@ -802,6 +802,17 @@
             "title": "Pages",
             "type": "array"
           },
+          "pagesCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagescount"
+          },
           "publisher": {
             "anyOf": [
               {
@@ -843,6 +854,7 @@
           "publisher",
           "year",
           "isbn",
+          "pagesCount",
           "externalExercises",
           "ranges",
           "pages"
@@ -3800,6 +3812,17 @@
             ],
             "title": "Isbn"
           },
+          "pagesCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagescount"
+          },
           "publisher": {
             "anyOf": [
               {
@@ -3832,7 +3855,8 @@
           "title",
           "publisher",
           "year",
-          "isbn"
+          "isbn",
+          "pagesCount"
         ],
         "title": "PostTextbookRequest",
         "type": "object"
@@ -4510,6 +4534,17 @@
             "title": "Id",
             "type": "string"
           },
+          "pagesCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagescount"
+          },
           "publisher": {
             "anyOf": [
               {
@@ -4543,7 +4578,8 @@
           "createdAt",
           "title",
           "publisher",
-          "year"
+          "year",
+          "pagesCount"
         ],
         "title": "Textbook",
         "type": "object"

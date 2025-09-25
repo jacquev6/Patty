@@ -26,6 +26,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
         publisher: str | None,
         year: int | None,
         isbn: str | None,
+        pages_count: int | None,
     ) -> None:
         super().__init__()
         self.created_at = created_at
@@ -34,6 +35,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
         self.publisher = publisher
         self.year = year
         self.isbn = isbn
+        self.pages_count = pages_count
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -41,6 +43,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
     publisher: orm.Mapped[str | None]
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
+    pages_count: orm.Mapped[int | None]
 
     @staticmethod
     def make_ordered_exercises_request(id: int) -> sql.Select[tuple[Exercise]]:

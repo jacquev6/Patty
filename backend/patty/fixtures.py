@@ -690,6 +690,7 @@ class FixturesCreator:
                 publisher=None,
                 year=None,
                 isbn=None,
+                pages_count=None,
             )
         )
 

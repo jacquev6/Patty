@@ -50,8 +50,10 @@ async function removeRange(range_id: string, removed: boolean) {
 
 <template>
   <h1>
-    {{ textbook.title }}<template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template
-    ><template v-if="textbook.year !== null">, {{ textbook.year }}</template>
+    {{ textbook.title
+    }}<template v-if="textbook.pagesCount !== null"> ({{ t('pagesCount', { count: textbook.pagesCount }) }})</template>
+    <template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template>
+    <template v-if="textbook.year !== null">, {{ textbook.year }}</template>
     <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
   </h1>
   <p>
@@ -192,6 +194,7 @@ span.inProgress {
 <i18n>
 en:
   isbn: ISBN
+  pagesCount: "{count} pages"
   downloadHtml: Download standalone HTML
   viewBy: View by
   viewByBatch: PDFs and external exercises
@@ -216,6 +219,7 @@ en:
   pages: "Pages {textbookFrom} to {textbookTo} (from {pdfName} pages {pdfFrom} to {pdfTo})"
 fr:
   isbn: ISBN
+  pagesCount: "{count} pages"
   downloadHtml: Télécharger le HTML autonome
   viewBy: Afficher par
   viewByBatch: PDFs et exercices externes
