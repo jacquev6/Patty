@@ -2,7 +2,6 @@
 import { ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { type Textbook } from '@/frontend/ApiClient'
 import BusyBox from '$/BusyBox.vue'
 import assert from '$/assert'
 import { useAuthenticatedClient } from '@/frontend/ApiClient'
@@ -14,7 +13,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'textbook-updated', textbook: Textbook): void
+  (e: 'textbook-updated'): void
 }>()
 
 const { t } = useI18n()
@@ -61,12 +60,7 @@ async function upload() {
     assert(uploadResponse.status === 200)
   }
 
-  const textbookResponse = await client.GET(`/api/textbooks/{id}`, {
-    params: { path: { id: props.textbookId } },
-  })
-  assert(textbookResponse.data !== undefined)
-  emit('textbook-updated', textbookResponse.data.textbook)
-
+  emit('textbook-updated')
   input.value.value = ''
   busy.value = false
 }
