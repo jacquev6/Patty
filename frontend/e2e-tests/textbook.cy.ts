@@ -130,10 +130,20 @@ describe('The edition form for textbooks - empty', () => {
   })
 
   it('adds and removes external exercises', () => {
+    cy.get('p:contains("Files must be named like")').should('exist')
+    cy.get("input[data-cy='external-files']").selectFile([
+      'e2e-tests/inputs/P40Ex1.docx',
+      'e2e-tests/inputs/bad-name.docx',
+      'e2e-tests/inputs/P40Ex7.docx',
+    ])
+    cy.get('.busy').should('not.exist')
+    cy.get('p:contains("Files must be named like")').should('have.class', 'error')
+
     cy.get("input[data-cy='external-files']").selectFile([
       'e2e-tests/inputs/P40Ex1.docx',
       'e2e-tests/inputs/P40Ex7.docx',
     ])
+    cy.get('p:contains("Files must be named like")').should('not.have.class', 'error')
     cy.get('.busy').should('not.exist')
 
     cy.get('[data-cy="view-by"]').select('page')
