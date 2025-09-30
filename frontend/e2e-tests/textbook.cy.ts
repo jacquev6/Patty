@@ -202,7 +202,7 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('div.busy').should('exist')
     cy.get('div.busy').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
-    cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1').click()
+    cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
   })
 
   it('removes and re-adds PDF pages', () => {

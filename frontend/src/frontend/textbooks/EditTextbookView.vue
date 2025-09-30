@@ -20,15 +20,15 @@ async function load() {
   }
 }
 
-function breadcrumbs({ textbook: { title } }: { textbook: Textbook }) {
+function breadcrumbs({ title }: Textbook) {
   return [{ textKey: 'textbooks' }, { textKey: 'existingTextbook', textArgs: { title }, to: {} }]
 }
 </script>
 
 <template>
   <AutoRefresh :load :breadcrumbs>
-    <template v-slot="{ data: { textbook, availableStrategySettings }, refresh }">
-      <EditTextbookForm :availableStrategySettings :textbook @textbookUpdated="refresh" />
+    <template v-slot="{ data: textbook, refresh }">
+      <EditTextbookForm :textbook @textbookUpdated="refresh" />
     </template>
   </AutoRefresh>
 </template>

@@ -67,6 +67,7 @@ class ApiTextbookExternalExercise(ApiModel):
 
 class ApiTextbook(ApiModel):
     id: str
+    needs_refresh: bool
     created_by: str
     title: str
     publisher: str | None
@@ -109,26 +110,11 @@ class ApiTextbook(ApiModel):
     pages: list[Page]
 
 
-class GetTextbookResponse(ApiModel):
-    needs_refresh: bool
-    textbook: ApiTextbook
-    available_strategy_settings: list[str]
-
-
 @router.get("/textbooks/{id}")
-async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
+async def get_textbook(id: str, session: database_utils.SessionDependable) -> ApiTextbook:
     textbook = get_by_id(session, textbooks.Textbook, id)
 
-    (api_textbook, needs_refresh) = make_api_textbook(textbook)
-
-    return GetTextbookResponse(
-        needs_refresh=needs_refresh,
-        textbook=api_textbook,
-        available_strategy_settings=[
-            exercise_class.name
-            for exercise_class in session.query(adaptation.ExerciseClass).order_by(adaptation.ExerciseClass.name).all()
-        ],
-    )
+    return make_api_textbook(textbook)
 
 
 class GetTextbooksResponse(ApiModel):
@@ -297,7 +283,7 @@ def put_textbook_pages_removed(
     page.removed_from_textbook = removed
 
 
-def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
+def make_api_textbook(textbook: textbooks.Textbook) -> ApiTextbook:
     needs_refresh = False
     external_exercises_: list[ApiTextbookExternalExercise] = []
     textbook_pages: list[ApiTextbook.Page] = []
@@ -440,18 +426,16 @@ def make_api_textbook(textbook: textbooks.Textbook) -> tuple[ApiTextbook, bool]:
             )
         )
 
-    return (
-        ApiTextbook(
-            id=str(textbook.id),
-            created_by=textbook.created_by,
-            title=textbook.title,
-            publisher=textbook.publisher,
-            year=textbook.year,
-            isbn=textbook.isbn,
-            pages_count=textbook.pages_count,
-            external_exercises=external_exercises_,
-            ranges=ranges,
-            pages=textbook_pages,
-        ),
-        needs_refresh,
+    return ApiTextbook(
+        id=str(textbook.id),
+        needs_refresh=needs_refresh,
+        created_by=textbook.created_by,
+        title=textbook.title,
+        publisher=textbook.publisher,
+        year=textbook.year,
+        isbn=textbook.isbn,
+        pages_count=textbook.pages_count,
+        external_exercises=external_exercises_,
+        ranges=ranges,
+        pages=textbook_pages,
     )

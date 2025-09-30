@@ -915,6 +915,8 @@ export interface components {
       id: string
       /** Isbn */
       isbn: string | null
+      /** Needsrefresh */
+      needsRefresh: boolean
       /** Pages */
       pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Page'][]
       /** Pagescount */
@@ -1555,14 +1557,6 @@ export interface components {
       extractionBatches: components['schemas']['ExtractionBatch'][]
       /** Nextchunkid */
       nextChunkId: string | null
-    }
-    /** GetTextbookResponse */
-    GetTextbookResponse: {
-      /** Availablestrategysettings */
-      availableStrategySettings: string[]
-      /** Needsrefresh */
-      needsRefresh: boolean
-      textbook: components['schemas']['ApiTextbook']
     }
     /** GetTextbooksResponse */
     GetTextbooksResponse: {
@@ -3653,7 +3647,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['GetTextbookResponse']
+          'application/json': components['schemas']['ApiTextbook']
         }
       }
       /** @description Validation Error */

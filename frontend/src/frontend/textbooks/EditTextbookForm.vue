@@ -12,7 +12,6 @@ import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview
 
 const props = defineProps<{
   textbook: Textbook
-  availableStrategySettings: string[]
 }>()
 
 const emit = defineEmits<{

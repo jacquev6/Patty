@@ -795,6 +795,10 @@
             ],
             "title": "Isbn"
           },
+          "needsRefresh": {
+            "title": "Needsrefresh",
+            "type": "boolean"
+          },
           "pages": {
             "items": {
               "$ref": "#/components/schemas/patty__api_router__textbooks__ApiTextbook__Page"
@@ -849,6 +853,7 @@
         },
         "required": [
           "id",
+          "needsRefresh",
           "createdBy",
           "title",
           "publisher",
@@ -2534,32 +2539,6 @@
           "nextChunkId"
         ],
         "title": "GetExtractionBatchesResponse",
-        "type": "object"
-      },
-      "GetTextbookResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "availableStrategySettings": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Availablestrategysettings",
-            "type": "array"
-          },
-          "needsRefresh": {
-            "title": "Needsrefresh",
-            "type": "boolean"
-          },
-          "textbook": {
-            "$ref": "#/components/schemas/ApiTextbook"
-          }
-        },
-        "required": [
-          "needsRefresh",
-          "textbook",
-          "availableStrategySettings"
-        ],
-        "title": "GetTextbookResponse",
         "type": "object"
       },
       "GetTextbooksResponse": {
@@ -6758,7 +6737,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTextbookResponse"
+                  "$ref": "#/components/schemas/ApiTextbook"
                 }
               }
             },
