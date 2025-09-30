@@ -2,12 +2,12 @@
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
 
-import { useAuthenticatedClient, type Textbook } from '../ApiClient'
+import { useAuthenticatedClient, type TextbookPage } from '../ApiClient'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
+import BugMarker from '@/reusable/BugMarker.vue'
 
 const props = defineProps<{
-  textbook: Textbook
-  pageNumber: number
+  textbookPage: TextbookPage
 }>()
 
 const emit = defineEmits<{
@@ -17,52 +17,49 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const client = useAuthenticatedClient()
 
+const textbook = computed(() => props.textbookPage.textbook)
+
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
-    params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
+    params: { path: { textbook_id: textbook.value.id, exercise_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
-
-const page = computed(() => {
-  for (const range of props.textbook.ranges) {
-    for (const p of range.pages) {
-      if (p.pageNumber === props.pageNumber) {
-        return p
-      }
-    }
-  }
-  return null
-})
 </script>
 
 <template>
-  <template v-if="page !== null && !page.removedFromTextbook">
-    <template v-for="exercise in page.exercises">
-      <h5 v-if="exercise.removedFromTextbook">
-        <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
-        ({{ t('removed') }})
-        <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
-      </h5>
-      <AdaptableExercisePreview
-        v-else
-        :headerLevel="5"
-        context="textbookByBatch"
-        :index="null"
-        :exercise
-        @exerciseRemoved="() => removeExercise(exercise.id, true)"
-        @batchUpdated="emit('textbook-updated')"
-      />
+  <h1>{{ t('titleAndPage', { title: textbook.title, pageNumber: textbookPage.number }) }}</h1>
+  <template v-for="exercise in textbookPage.exercises">
+    <h2 v-if="exercise.removedFromTextbook">
+      <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
+      ({{ t('removed') }})
+      <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
+    </h2>
+    <AdaptableExercisePreview
+      v-else-if="exercise.kind === 'adaptable'"
+      :headerLevel="2"
+      context="textbookByBatch"
+      :index="null"
+      :exercise
+      @exerciseRemoved="() => removeExercise(exercise.id, true)"
+      @batchUpdated="emit('textbook-updated')"
+    />
+    <template v-else-if="exercise.kind === 'external'">
+      <h2>{{ t('exercise') }} {{ exercise.exerciseNumber }}</h2>
+      <p>{{ exercise.originalFileName }}</p>
     </template>
+    <BugMarker v-else is="p" m="Unknown exercise kind" :v="exercise" />
   </template>
 </template>
 
 <i18n>
 en:
+  titleAndPage: '{title}, page {pageNumber}'
   exercise: Exercise
   reAdd: Re-add
   removed: removed
 fr:
+  titleAndPage: '{title}, page {pageNumber}'
   exercise: Exercice
   reAdd: Rajouter
   removed: enlevé

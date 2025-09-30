@@ -486,6 +486,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{id}/pages/{number}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Textbook Page */
+    get: operations['get_textbook_page_api_textbooks__id__pages__number__get']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{id}/ranges': {
     parameters: {
       query?: never
@@ -905,84 +922,6 @@ export interface components {
       /** Systemprompt */
       systemPrompt: string
     }
-    /** ApiTextbook */
-    ApiTextbook: {
-      /** Createdby */
-      createdBy: string
-      /** Externalexercises */
-      externalExercises: components['schemas']['ApiTextbookExternalExercise'][]
-      /** Id */
-      id: string
-      /** Isbn */
-      isbn: string | null
-      /** Needsrefresh */
-      needsRefresh: boolean
-      /** Pages */
-      pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Page'][]
-      /** Pagescount */
-      pagesCount: number | null
-      /** Publisher */
-      publisher: string | null
-      /** Ranges */
-      ranges: components['schemas']['Range'][]
-      /** Title */
-      title: string
-      /** Year */
-      year: number | null
-    }
-    /** ApiTextbookAdaptableExercise */
-    ApiTextbookAdaptableExercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adaptable'
-      /** Pagenumber */
-      pageNumber: number | null
-    }
-    /** ApiTextbookExternalExercise */
-    ApiTextbookExternalExercise: {
-      /** Exercisenumber */
-      exerciseNumber: string
-      /** Id */
-      id: string
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'external'
-      /** Originalfilename */
-      originalFileName: string
-      /** Pagenumber */
-      pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
-    }
     /** ApprovalRequest */
     ApprovalRequest: {
       /** Approved */
@@ -1280,6 +1219,24 @@ export interface components {
       /** References */
       references?: string | null
     }
+    /** ExternalExercise */
+    ExternalExercise: {
+      /** Exercisenumber */
+      exerciseNumber: string
+      /** Id */
+      id: string
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'external'
+      /** Originalfilename */
+      originalFileName: string
+      /** Pagenumber */
+      pageNumber: number
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
+    }
     /** ExtractionBatch */
     ExtractionBatch: {
       /**
@@ -1560,10 +1517,48 @@ export interface components {
       /** Nextchunkid */
       nextChunkId: string | null
     }
+    /** GetTextbookPageResponse */
+    GetTextbookPageResponse: {
+      /** Exercises */
+      exercises: (
+        | components['schemas']['patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise']
+        | components['schemas']['ExternalExercise']
+      )[]
+      /** Needsrefresh */
+      needsRefresh: boolean
+      /** Number */
+      number: number
+      textbook: components['schemas']['patty__api_router__textbooks__GetTextbookPageResponse__Textbook']
+    }
+    /** GetTextbookResponse */
+    GetTextbookResponse: {
+      /** Createdby */
+      createdBy: string
+      /** Externalexercises */
+      externalExercises: components['schemas']['ExternalExercise'][]
+      /** Id */
+      id: string
+      /** Isbn */
+      isbn: string | null
+      /** Needsrefresh */
+      needsRefresh: boolean
+      /** Pages */
+      pages: components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Page'][]
+      /** Pagescount */
+      pagesCount: number | null
+      /** Publisher */
+      publisher: string | null
+      /** Ranges */
+      ranges: components['schemas']['Range'][]
+      /** Title */
+      title: string
+      /** Year */
+      year: number | null
+    }
     /** GetTextbooksResponse */
     GetTextbooksResponse: {
       /** Textbooks */
-      textbooks: components['schemas']['Textbook'][]
+      textbooks: components['schemas']['patty__api_router__textbooks__GetTextbooksResponse__Textbook'][]
     }
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -2125,7 +2120,7 @@ export interface components {
         | components['schemas']['patty__extraction__llm__dummy__DummyModel']
         | components['schemas']['GeminiModel']
       /** Pages */
-      pages: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page'][]
+      pages: components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page'][]
       /** Pagescount */
       pagesCount: number
       /** Pdffilenames */
@@ -2336,26 +2331,6 @@ export interface components {
       /** Text */
       text: string
     }
-    /** Textbook */
-    Textbook: {
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Createdby */
-      createdBy: string
-      /** Id */
-      id: string
-      /** Pagescount */
-      pagesCount: number | null
-      /** Publisher */
-      publisher: string | null
-      /** Title */
-      title: string
-      /** Year */
-      year: number | null
-    }
     /** UnknownError */
     UnknownError: {
       /**
@@ -2521,20 +2496,99 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
+    /** AdaptableExercise */
+    patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise: {
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adaptable'
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
+    }
+    /** Textbook */
+    patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {
+      /** Id */
+      id: string
+      /** Title */
+      title: string
+    }
+    /** AdaptableExercise */
+    patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise: {
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adaptable'
+      /** Pagenumber */
+      pageNumber: number | null
+    }
     /** Page */
-    patty__api_router__textbooks__ApiTextbook__Page: {
+    patty__api_router__textbooks__GetTextbookResponse__Page: {
       /** Exercises */
       exercises: (
-        | components['schemas']['ApiTextbookAdaptableExercise']
-        | components['schemas']['ApiTextbookExternalExercise']
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise']
+        | components['schemas']['ExternalExercise']
       )[]
       /** Number */
       number: number
     }
     /** Page */
-    patty__api_router__textbooks__ApiTextbook__Range__Page: {
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise'][]
+      exercises: components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise'][]
       /** Id */
       id: string
       /** Inprogress */
@@ -2545,7 +2599,7 @@ export interface components {
       removedFromTextbook: boolean
     }
     /** Exercise */
-    patty__api_router__textbooks__ApiTextbook__Range__Page__Exercise: {
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise: {
       /** Adaptationstatus */
       adaptationStatus:
         | components['schemas']['NotRequested']
@@ -2575,6 +2629,26 @@ export interface components {
       pageNumber: number | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
+    }
+    /** Textbook */
+    patty__api_router__textbooks__GetTextbooksResponse__Textbook: {
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Createdby */
+      createdBy: string
+      /** Id */
+      id: string
+      /** Pagescount */
+      pagesCount: number | null
+      /** Publisher */
+      publisher: string | null
+      /** Title */
+      title: string
+      /** Year */
+      year: number | null
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {
@@ -3649,7 +3723,39 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': components['schemas']['ApiTextbook']
+          'application/json': components['schemas']['GetTextbookResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  get_textbook_page_api_textbooks__id__pages__number__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+        number: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['GetTextbookPageResponse']
         }
       }
       /** @description Validation Error */
@@ -3684,7 +3790,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': unknown
+          'application/json': null
         }
       }
       /** @description Validation Error */
@@ -3718,7 +3824,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': unknown
+          'application/json': null
         }
       }
       /** @description Validation Error */
@@ -3787,7 +3893,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': unknown
+          'application/json': null
         }
       }
       /** @description Validation Error */
@@ -3821,7 +3927,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': unknown
+          'application/json': null
         }
       }
       /** @description Validation Error */

@@ -59,6 +59,21 @@ class Textbook(OrmBase, CreatedByUserMixin):
         assert session is not None
         return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
 
+    @staticmethod
+    def make_ordered_exercises_on_page_request(id: int, page_number: int) -> sql.Select[tuple[Exercise]]:
+        return (
+            sql.select(Exercise)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseLocationTextbook.textbook_id == id)
+            .where(ExerciseLocationTextbook.page_number == page_number)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_exercises_on_page(self, page_number: int) -> typing.Iterable[Exercise]:
+        session = orm.object_session(self)
+        assert session is not None
+        return session.execute(self.make_ordered_exercises_on_page_request(self.id, page_number)).scalars().all()
+
     extraction_batches: orm.Mapped[list[TextbookExtractionBatch]] = orm.relationship(back_populates="textbook")
 
 

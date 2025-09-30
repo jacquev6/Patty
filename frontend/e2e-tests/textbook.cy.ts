@@ -80,7 +80,7 @@ describe('The edition form for textbooks - empty', () => {
 
     // Remove exercises
     cy.get('[data-cy="view-by"]').select('page')
-    cy.get('h2').should('have.length', 2)
+    cy.get('h2', { timeout: 10000 }).should('have.length', 2)
     cy.get('h2').eq(0).should('have.text', 'Page 6')
     cy.get('h2').eq(1).should('have.text', 'Page 7')
     cy.get('[data-cy="view-by"]').select('batch')

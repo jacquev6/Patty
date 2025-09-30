@@ -325,6 +325,10 @@ def tricky_sql_requests() -> None:
             "PageExtraction.fetch_ordered_exercises (textbook)",
             extraction.PageExtraction.make_ordered_exercises_request__textbook(42),
         ),
+        (
+            "Textbook.make_ordered_exercises_on_page_request",
+            textbooks.Textbook.make_ordered_exercises_on_page_request(42, 57),
+        ),
     ]:
         print(f"{title}:")
         print("=" * len(title))

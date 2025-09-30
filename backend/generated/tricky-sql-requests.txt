@@ -45,3 +45,15 @@ WHERE exercise_creations__by_page_extraction.page_extraction_id = 42
 ORDER BY exercise_locations__textbook.page_number,
          exercise_locations__textbook.exercise_number
 
+Textbook.make_ordered_exercises_on_page_request:
+===============================================
+SELECT exercises.id,
+       exercises.kind
+FROM exercises
+JOIN (exercise_locations
+      JOIN exercise_locations__textbook ON exercise_locations.id = exercise_locations__textbook.id) ON exercises.id = exercise_locations.id
+WHERE exercise_locations__textbook.textbook_id = 42
+  AND exercise_locations__textbook.page_number = 57
+ORDER BY exercise_locations__textbook.page_number,
+         exercise_locations__textbook.exercise_number
+

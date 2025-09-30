@@ -35,6 +35,8 @@ export type AdaptationStrategy = BaseAdaptationBatch['strategy']
 
 export type Textbooks = paths['/api/textbooks']['get']['responses']['200']['content']['application/json']
 export type Textbook = paths['/api/textbooks/{id}']['get']['responses']['200']['content']['application/json']
+export type TextbookPage =
+  paths['/api/textbooks/{id}/pages/{number}']['get']['responses']['200']['content']['application/json']
 
 export type ExtractionBatches =
   paths['/api/extraction-batches']['get']['responses']['200']['content']['application/json']
