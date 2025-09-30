@@ -705,6 +705,43 @@ export interface components {
        */
       underlined?: boolean
     }
+    /** AdaptableExercise */
+    AdaptableExercise: {
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'adaptable'
+      /** Pagenumber */
+      pageNumber: number | null
+      /** Removedfromtextbook */
+      removedFromTextbook: boolean
+    }
     /** AdaptationApproval */
     AdaptationApproval: {
       /**
@@ -1520,10 +1557,7 @@ export interface components {
     /** GetTextbookPageResponse */
     GetTextbookPageResponse: {
       /** Exercises */
-      exercises: (
-        | components['schemas']['patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise']
-        | components['schemas']['ExternalExercise']
-      )[]
+      exercises: (components['schemas']['AdaptableExercise'] | components['schemas']['ExternalExercise'])[]
       /** Needsrefresh */
       needsRefresh: boolean
       /** Number */
@@ -1542,8 +1576,6 @@ export interface components {
       isbn: string | null
       /** Needsrefresh */
       needsRefresh: boolean
-      /** Pages */
-      pages: components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Page'][]
       /** Pagescount */
       pagesCount: number | null
       /** Publisher */
@@ -2125,8 +2157,6 @@ export interface components {
       pagesCount: number
       /** Pdffilenames */
       pdfFileNames: string[]
-      /** Pdffilesha256 */
-      pdfFileSha256: string
       /** Pdffirstpagenumber */
       pdfFirstPageNumber: number
       /** Removedfromtextbook */
@@ -2496,43 +2526,6 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
-    /** AdaptableExercise */
-    patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adaptable'
-      /** Pagenumber */
-      pageNumber: number | null
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
-    }
     /** Textbook */
     patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {
       /** Id */
@@ -2540,93 +2533,14 @@ export interface components {
       /** Title */
       title: string
     }
-    /** AdaptableExercise */
-    patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'adaptable'
-      /** Pagenumber */
-      pageNumber: number | null
-    }
-    /** Page */
-    patty__api_router__textbooks__GetTextbookResponse__Page: {
-      /** Exercises */
-      exercises: (
-        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise']
-        | components['schemas']['ExternalExercise']
-      )[]
-      /** Number */
-      number: number
-    }
     /** Page */
     patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
-      /** Exercises */
-      exercises: components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise'][]
       /** Id */
       id: string
       /** Inprogress */
       inProgress: boolean
       /** Pagenumber */
       pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
-    }
-    /** Exercise */
-    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /** Pagenumber */
-      pageNumber: number | null
       /** Removedfromtextbook */
       removedFromTextbook: boolean
     }

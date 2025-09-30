@@ -45,7 +45,10 @@ async function removeExercise(exercise_id: string, removed: boolean) {
       @batchUpdated="emit('textbook-updated')"
     />
     <template v-else-if="exercise.kind === 'external'">
-      <h2>{{ t('exercise') }} {{ exercise.exerciseNumber }}</h2>
+      <h2>
+        {{ t('exercise') }} {{ exercise.exerciseNumber }}
+        <button @click="removeExercise(exercise.id, true)">{{ t('remove') }}</button>
+      </h2>
       <p>{{ exercise.originalFileName }}</p>
     </template>
     <BugMarker v-else is="p" m="Unknown exercise kind" :v="exercise" />
@@ -57,10 +60,12 @@ en:
   titleAndPage: '{title}, page {pageNumber}'
   exercise: Exercise
   reAdd: Re-add
+  remove: Remove
   removed: removed
 fr:
   titleAndPage: '{title}, page {pageNumber}'
   exercise: Exercice
   reAdd: Rajouter
+  remove: Enlever
   removed: enlevé
 </i18n>

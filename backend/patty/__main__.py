@@ -317,6 +317,7 @@ def tricky_sql_requests() -> None:
     request: typing.Any
     for title, request in [
         ("Textbook.fetch_ordered_exercises", textbooks.Textbook.make_ordered_exercises_request(42)),
+        ("Textbook.fetch_ordered_external_exercises", textbooks.Textbook.make_ordered_external_exercises_request(42)),
         (
             "PageExtraction.fetch_ordered_exercises (page and number)",
             extraction.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),

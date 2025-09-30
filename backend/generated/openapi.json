@@ -163,6 +163,113 @@
         ],
         "type": "object"
       },
+      "AdaptableExercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotStarted"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
+              }
+            ],
+            "title": "Adaptationstatus"
+          },
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
+          "kind": {
+            "const": "adaptable",
+            "title": "Kind",
+            "type": "string"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          },
+          "removedFromTextbook": {
+            "title": "Removedfromtextbook",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "imagesUrls",
+          "classificationStatus",
+          "adaptationStatus",
+          "kind",
+          "removedFromTextbook"
+        ],
+        "title": "AdaptableExercise",
+        "type": "object"
+      },
       "AdaptationApproval": {
         "additionalProperties": false,
         "properties": {
@@ -2350,7 +2457,7 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise"
+                  "$ref": "#/components/schemas/AdaptableExercise"
                 },
                 {
                   "$ref": "#/components/schemas/ExternalExercise"
@@ -2414,13 +2521,6 @@
             "title": "Needsrefresh",
             "type": "boolean"
           },
-          "pages": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__Page"
-            },
-            "title": "Pages",
-            "type": "array"
-          },
           "pagesCount": {
             "anyOf": [
               {
@@ -2476,8 +2576,7 @@
           "isbn",
           "pagesCount",
           "externalExercises",
-          "ranges",
-          "pages"
+          "ranges"
         ],
         "title": "GetTextbookResponse",
         "type": "object"
@@ -3989,10 +4088,6 @@
             "title": "Pdffilenames",
             "type": "array"
           },
-          "pdfFileSha256": {
-            "title": "Pdffilesha256",
-            "type": "string"
-          },
           "pdfFirstPageNumber": {
             "title": "Pdffirstpagenumber",
             "type": "integer"
@@ -4009,7 +4104,6 @@
         "required": [
           "id",
           "pdfFileNames",
-          "pdfFileSha256",
           "pdfFirstPageNumber",
           "textbookFirstPageNumber",
           "pagesCount",
@@ -4900,113 +4994,6 @@
         "title": "Exercise",
         "type": "object"
       },
-      "patty__api_router__textbooks__GetTextbookPageResponse__AdaptableExercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "kind": {
-            "const": "adaptable",
-            "title": "Kind",
-            "type": "string"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus",
-          "kind",
-          "removedFromTextbook"
-        ],
-        "title": "AdaptableExercise",
-        "type": "object"
-      },
       "patty__api_router__textbooks__GetTextbookPageResponse__Textbook": {
         "additionalProperties": false,
         "properties": {
@@ -5026,147 +5013,9 @@
         "title": "Textbook",
         "type": "object"
       },
-      "patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "kind": {
-            "const": "adaptable",
-            "title": "Kind",
-            "type": "string"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus",
-          "kind"
-        ],
-        "title": "AdaptableExercise",
-        "type": "object"
-      },
-      "patty__api_router__textbooks__GetTextbookResponse__Page": {
-        "additionalProperties": false,
-        "properties": {
-          "exercises": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__AdaptableExercise"
-                },
-                {
-                  "$ref": "#/components/schemas/ExternalExercise"
-                }
-              ]
-            },
-            "title": "Exercises",
-            "type": "array"
-          },
-          "number": {
-            "title": "Number",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "number",
-          "exercises"
-        ],
-        "title": "Page",
-        "type": "object"
-      },
       "patty__api_router__textbooks__GetTextbookResponse__Range__Page": {
         "additionalProperties": false,
         "properties": {
-          "exercises": {
-            "items": {
-              "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise"
-            },
-            "title": "Exercises",
-            "type": "array"
-          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -5188,111 +5037,9 @@
           "id",
           "pageNumber",
           "inProgress",
-          "exercises",
           "removedFromTextbook"
         ],
         "title": "Page",
-        "type": "object"
-      },
-      "patty__api_router__textbooks__GetTextbookResponse__Range__Page__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus",
-          "removedFromTextbook"
-        ],
-        "title": "Exercise",
         "type": "object"
       },
       "patty__api_router__textbooks__GetTextbooksResponse__Textbook": {

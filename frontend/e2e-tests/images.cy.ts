@@ -108,15 +108,9 @@ describe('Patty', () => {
     cy.get('a:contains("View details")').click()
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
-    screenshot('images-textbook-frontend-by-batch')
+    screenshot('images-textbook-frontend')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
-    cy.get('h2').should('have.length', 4)
-    cy.get('[data-cy="view-by"]').select('page')
-    cy.get('h2').should('have.length', 1)
-    checkImagesFrontend(4)
-    screenshot('images-textbook-frontend-by-page')
-
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
       .then((href) => {
