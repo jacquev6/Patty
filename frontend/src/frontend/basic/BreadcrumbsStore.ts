@@ -4,7 +4,7 @@ import type { RouteLocationRaw } from 'vue-router'
 
 export type Breadcrumb = {
   textKey: string
-  textArgs?: Record<string, string>
+  textArgs?: Record<string, string | number>
   to?: RouteLocationRaw
 }
 export type Breadcrumbs = Breadcrumb[]

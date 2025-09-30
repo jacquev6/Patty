@@ -105,9 +105,12 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
+    cy.get('a:contains("View details")').click()
+    cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
     screenshot('images-textbook-frontend-by-batch')
 
+    cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('h2').should('have.length', 4)
     cy.get('[data-cy="view-by"]').select('page')
     cy.get('h2').should('have.length', 1)

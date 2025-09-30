@@ -27,9 +27,14 @@ async function load() {
 function breadcrumbs(adaptation: Adaptation) {
   const breadcrumbs = match(adaptation.belongsTo)
     .returnType<Breadcrumbs>()
-    .with({ kind: 'textbook' }, ({ id, title }) => [
+    .with({ kind: 'textbook' }, ({ id, title, page }) => [
       { textKey: 'textbooks' },
       { textKey: 'existingTextbook', textArgs: { title }, to: { name: 'textbook', params: { id } } },
+      {
+        textKey: 'textbookPage',
+        textArgs: { number: page } as Record<string, string | number>,
+        to: { name: 'textbook-page', params: { textbookId: id, pageNumber: page } },
+      },
     ])
     .with({ kind: 'adaptation-batch' }, ({ id }) => [
       { textKey: 'sandbox' },

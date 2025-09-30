@@ -128,24 +128,13 @@ async function removeRange(range_id: string, removed: boolean) {
               <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
             </template>
           </h4>
-          <template v-if="!page.removedFromTextbook">
-            <template v-for="exercise in page.exercises">
-              <h5 v-if="exercise.removedFromTextbook">
-                <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
-                ({{ t('removed') }})
-                <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>
-              </h5>
-              <AdaptableExercisePreview
-                v-else
-                :headerLevel="5"
-                context="textbookByBatch"
-                :index="null"
-                :exercise
-                @exerciseRemoved="() => removeExercise(exercise.id, true)"
-                @batchUpdated="emit('textbook-updated')"
-              />
-            </template>
-          </template>
+          <p>
+            <RouterLink
+              :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
+            >
+              {{ t('viewDetails') }}
+            </RouterLink>
+          </p>
         </template>
       </template>
     </template>
@@ -201,7 +190,6 @@ en:
   viewByBatchDescription: in creation order, including errors and removed adaptations. PDFs first, external exercises
   viewByBatchDescriptionBelow: below
   viewByPageDescription: sorted by page and exercise number, including only successful not-removed adaptations. Adapted PDFs and external exercises together.
-  modifiedBy: Modified by
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
   inProgress: "(in progress, will refresh when done)"
@@ -209,13 +197,13 @@ en:
   existingExternalExercises: Existing external exercises
   exercise: Exercise
   page: Page
-  input: input
   reAdd: Re-add
   remove: Remove
   removed: removed
   modelForExtraction: "Model provider for extraction:"
   modelForAdaptation: "Model provider for adaptation:"
   pages: "Pages {textbookFrom} to {textbookTo} (from {pdfName} pages {pdfFrom} to {pdfTo})"
+  viewDetails: "View details"
 fr:
   isbn: ISBN
   pagesCount: "{count} pages"
@@ -226,7 +214,6 @@ fr:
   viewByBatchDescription: dans l'ordre de création, y compris les erreurs et les adaptations supprimées. PDFs d'abord, exercices externes
   viewByBatchDescriptionBelow: en dessous
   viewByPageDescription: trié par page et numéro d'exercice, y compris uniquement les adaptations réussies non supprimées. PDFs adaptés et exercices externes ensemble.
-  modifiedBy: Modifié par
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
   inProgress: "(en cours, se mettra à jour quand terminé)"
@@ -234,11 +221,11 @@ fr:
   existingExternalExercises: Exercices externes existants
   exercise: Exercice
   page: Page
-  input: entrée
   reAdd: Rajouter
   remove: Enlever
   removed: enlevé
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
   modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
   pages: "Pages {textbookFrom} à {textbookTo} (de {pdfName} pages {pdfFrom} à {pdfTo})"
+  viewDetails: "Voir les détails"
 </i18n>

@@ -1046,6 +1046,8 @@ export interface components {
        * @constant
        */
       kind: 'textbook'
+      /** Page */
+      page: number
       /** Title */
       title: string
     }

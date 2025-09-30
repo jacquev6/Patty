@@ -17,6 +17,7 @@ import EditExtractionBatchView from './sandbox/EditExtractionBatchView.vue'
 import FrontendRootView from './basic/RootView.vue'
 import AdaptedExerciseExamplesView from './AdaptedExerciseExamplesView.vue'
 import EditTextbookView from './textbooks/EditTextbookView.vue'
+import EditTextbookPageView from './textbooks/EditTextbookPageView.vue'
 import EditClassificationBatchView from './sandbox/EditClassificationBatchView.vue'
 import { useBreadcrumbsStore } from './basic/BreadcrumbsStore'
 import ErrorsView from './basic/ErrorsView.vue'
@@ -76,6 +77,15 @@ const router = createRouter({
       name: 'textbook',
       component: EditTextbookView,
       props: true,
+    },
+    {
+      path: '/textbook-:textbookId/page-:pageNumber',
+      name: 'textbook-page',
+      component: EditTextbookPageView,
+      props: ({ params: { textbookId, pageNumber } }) => ({
+        textbookId,
+        pageNumber: Number.parseInt(pageNumber as string),
+      }),
     },
     {
       path: '/adapted-exercice-examples',
