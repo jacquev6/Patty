@@ -7,6 +7,7 @@ from sqlalchemy import orm
 import sqlalchemy as sql
 
 from .. import adaptation
+from .. import external_exercises
 from .. import extraction
 from ..any_json import JsonDict
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
@@ -26,6 +27,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
         publisher: str | None,
         year: int | None,
         isbn: str | None,
+        pages_count: int | None,
     ) -> None:
         super().__init__()
         self.created_at = created_at
@@ -34,6 +36,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
         self.publisher = publisher
         self.year = year
         self.isbn = isbn
+        self.pages_count = pages_count
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -41,6 +44,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
     publisher: orm.Mapped[str | None]
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
+    pages_count: orm.Mapped[int | None]
 
     @staticmethod
     def make_ordered_exercises_request(id: int) -> sql.Select[tuple[Exercise]]:
@@ -55,6 +59,35 @@ class Textbook(OrmBase, CreatedByUserMixin):
         session = orm.object_session(self)
         assert session is not None
         return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
+
+    @staticmethod
+    def make_ordered_external_exercises_request(id: int) -> sql.Select[tuple[external_exercises.ExternalExercise]]:
+        return (
+            sql.select(external_exercises.ExternalExercise)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseLocationTextbook.textbook_id == id)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_external_exercises(self) -> typing.Iterable[external_exercises.ExternalExercise]:
+        session = orm.object_session(self)
+        assert session is not None
+        return session.execute(self.make_ordered_external_exercises_request(self.id)).scalars().all()
+
+    @staticmethod
+    def make_ordered_exercises_on_page_request(id: int, page_number: int) -> sql.Select[tuple[Exercise]]:
+        return (
+            sql.select(Exercise)
+            .join(ExerciseLocationTextbook)
+            .where(ExerciseLocationTextbook.textbook_id == id)
+            .where(ExerciseLocationTextbook.page_number == page_number)
+            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
+        )
+
+    def fetch_ordered_exercises_on_page(self, page_number: int) -> typing.Iterable[Exercise]:
+        session = orm.object_session(self)
+        assert session is not None
+        return session.execute(self.make_ordered_exercises_on_page_request(self.id, page_number)).scalars().all()
 
     extraction_batches: orm.Mapped[list[TextbookExtractionBatch]] = orm.relationship(back_populates="textbook")
 

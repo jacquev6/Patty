@@ -38,7 +38,7 @@ export default defineConfigWithVueTs(
         // <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {
           ignoreText: [
-            ',', ':', '.', '(', ')', '/', '<', '>', '✅', '❌', '🌐', '🖊️', '👤', 'BUG:',
+            ',', ':', '.', '(', ')', '/', '<', '>', '-', '✅', '❌', '🌐', '🖊️', '👤', 'BUG:',
           ],
         },
       ],

@@ -317,6 +317,7 @@ def tricky_sql_requests() -> None:
     request: typing.Any
     for title, request in [
         ("Textbook.fetch_ordered_exercises", textbooks.Textbook.make_ordered_exercises_request(42)),
+        ("Textbook.fetch_ordered_external_exercises", textbooks.Textbook.make_ordered_external_exercises_request(42)),
         (
             "PageExtraction.fetch_ordered_exercises (page and number)",
             extraction.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
@@ -324,6 +325,10 @@ def tricky_sql_requests() -> None:
         (
             "PageExtraction.fetch_ordered_exercises (textbook)",
             extraction.PageExtraction.make_ordered_exercises_request__textbook(42),
+        ),
+        (
+            "Textbook.make_ordered_exercises_on_page_request",
+            textbooks.Textbook.make_ordered_exercises_on_page_request(42, 57),
         ),
     ]:
         print(f"{title}:")
@@ -731,7 +736,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250923-131603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250929-121602.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

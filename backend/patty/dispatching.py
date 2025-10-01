@@ -34,6 +34,22 @@ def exercise_creation(
         assert False
 
 
+def exercise_location(
+    exercise_location: exercises.ExerciseLocation,
+    *,
+    textbook: typing.Callable[[textbooks.ExerciseLocationTextbook], T1] | None,
+    maybe_page_and_number: typing.Callable[[exercises.ExerciseLocationMaybePageAndNumber], T2] | None,
+) -> T1 | T2:
+    if isinstance(exercise_location, textbooks.ExerciseLocationTextbook):
+        assert textbook is not None
+        return textbook(exercise_location)
+    elif isinstance(exercise_location, exercises.ExerciseLocationMaybePageAndNumber):
+        assert maybe_page_and_number is not None
+        return maybe_page_and_number(exercise_location)
+    else:
+        assert False
+
+
 def page_extraction_creation(
     page_extraction_creation: extraction.PageExtractionCreation,
     *,

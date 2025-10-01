@@ -88,7 +88,11 @@ async function loadNextAdaptationBatchesChunk() {
 }
 
 function textbookSummary(textbook: Textbooks['textbooks'][number]) {
-  return [textbook.title, textbook.publisher, textbook.year ? textbook.year.toString() : null]
+  return [
+    textbook.title + (textbook.pagesCount ? ` (${textbook.pagesCount} pages)` : ''),
+    textbook.publisher,
+    textbook.year ? textbook.year.toString() : null,
+  ]
     .filter((part) => part !== null && part !== undefined)
     .join(', ')
 }

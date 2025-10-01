@@ -6,6 +6,7 @@ import { useBreadcrumbsStore, type Breadcrumbs } from '@/frontend/basic/Breadcru
 import BugMarker from '$/BugMarker.vue'
 
 const props = defineProps<{
+  reloadOnChanges: unknown
   load: () => Promise<T | null>
   breadcrumbs: (t: T) => Breadcrumbs
 }>()
@@ -16,7 +17,7 @@ const breadcrumbsStore = useBreadcrumbsStore()
 type Status = { kind: 'loading' } | { kind: 'notFound' } | { kind: 'loaded'; val: T }
 
 const data = ref<Status>({ kind: 'loading' })
-let done: boolean
+let unmounted: boolean
 let refreshes: number
 let timerId: number | null
 
@@ -27,7 +28,7 @@ async function refresh() {
     data.value = { kind: 'notFound' }
   } else {
     data.value = { kind: 'loaded', val: val }
-    if (val.needsRefresh && !done) {
+    if (val.needsRefresh && !unmounted) {
       refreshes += 1
       const duration = 500 * Math.pow(1.1, refreshes)
       timerId = window.setTimeout(refresh, duration)
@@ -38,14 +39,30 @@ async function refresh() {
 }
 
 onMounted(() => {
-  done = false
+  unmounted = false
   refreshes = 0
   timerId = null
   refresh()
 })
 
+watch(
+  () => props.reloadOnChanges,
+  () => {
+    if (!unmounted) {
+      data.value = { kind: 'loading' }
+      refreshes = 0
+      if (timerId !== null) {
+        window.clearTimeout(timerId)
+        timerId = null
+      }
+      refresh()
+    }
+  },
+  { deep: true, immediate: false },
+)
+
 onUnmounted(() => {
-  done = true
+  unmounted = true
   if (timerId !== null) {
     window.clearTimeout(timerId)
   }

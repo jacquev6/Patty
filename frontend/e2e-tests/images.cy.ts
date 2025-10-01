@@ -105,15 +105,13 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
+    cy.get('li a:contains("1")').click()
+    cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
-    screenshot('images-textbook-frontend-by-batch')
+    cy.wait(500) // For Firefox
+    screenshot('images-textbook-frontend')
 
-    cy.get('h2').should('have.length', 4)
-    cy.get('[data-cy="view-by"]').select('page')
-    cy.get('h2').should('have.length', 1)
-    checkImagesFrontend(4)
-    screenshot('images-textbook-frontend-by-page')
-
+    cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('a:contains("standalone HTML")')
       .should('have.attr', 'href')
       .then((href) => {

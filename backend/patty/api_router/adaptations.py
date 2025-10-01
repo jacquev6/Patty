@@ -63,6 +63,7 @@ class ApiAdaptation(ApiModel):
         kind: Literal["textbook"]
         id: str
         title: str
+        page: int
 
     belongs_to: BelongsToExtractionBatch | BelongsToClassificationBatch | BelongsToAdaptationBatch | BelongsToTextbook
 
@@ -309,6 +310,9 @@ def make_api_adaptation_belongs_to(
                 kind="textbook",
                 id=str(pec.textbook_extraction_batch.textbook.id),
                 title=pec.textbook_extraction_batch.textbook.title,
+                page=dispatch.exercise_location(
+                    adaptation_.exercise.location, textbook=lambda el: el.page_number, maybe_page_and_number=None
+                ),
             ),
         ),
     )

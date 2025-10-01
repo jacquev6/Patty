@@ -26,7 +26,7 @@ function breadcrumbs({ id }: ExtractionBatch) {
 </script>
 
 <template>
-  <AutoRefresh :load :breadcrumbs>
+  <AutoRefresh :reloadOnChanges="{ id }" :load :breadcrumbs>
     <template v-slot="{ data: extractionBatch, refresh }">
       <EditExtractionBatchForm :extractionBatch @batchUpdated="refresh" />
     </template>

@@ -3,7 +3,6 @@ import { computed, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { type PDFDocumentProxy } from '$/pdfjs'
-import { type Textbook } from '@/frontend/ApiClient'
 import UploadPdfForm from '@/frontend/UploadPdfForm.vue'
 import PdfPagesRangeSelector from '$/PdfPagesRangeSelector.vue'
 import { useAuthenticatedClient } from '@/frontend/ApiClient'
@@ -17,7 +16,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'textbook-updated', textbook: Textbook): void
+  (e: 'textbook-updated'): void
 }>()
 
 const client = useAuthenticatedClient()
@@ -77,11 +76,7 @@ async function submit() {
   })
   assert(response.response.status === 200)
 
-  const textbookResponse = await client.GET(`/api/textbooks/{id}`, {
-    params: { path: { id: props.textbookId } },
-  })
-  assert(textbookResponse.data !== undefined)
-  emit('textbook-updated', textbookResponse.data.textbook)
+  emit('textbook-updated')
   busy.value = false
   assert(uploadForm.value !== null)
   uploadForm.value.reset()
