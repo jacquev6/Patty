@@ -108,6 +108,7 @@ describe('Patty', () => {
     cy.get('a:contains("View details")').click()
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
+    cy.wait(500) // For Firefox
     screenshot('images-textbook-frontend')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
