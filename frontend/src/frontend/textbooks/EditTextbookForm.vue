@@ -84,17 +84,23 @@ async function removeRange(range_id: string, removed: boolean) {
     <template v-if="!range.removedFromTextbook">
       <p>
         <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
-          <template #provider>{{ t('modelForExtraction') }}</template>
-        </LlmModelSelector>
-      </p>
-      <p>
+          <template #provider>{{ t('modelForExtraction') }}</template></LlmModelSelector
+        >,
         <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
           <template #provider>{{ t('modelForAdaptation') }}</template>
         </LlmModelSelector>
       </p>
-      <template v-for="page in range.pages">
-        <h4>
-          <span :class="{ removed: page.removedFromTextbook }">{{ t('page') }} {{ page.pageNumber }}</span>
+      <p>{{ t('pagesHeader') }}</p>
+      <ul class="rangePages">
+        <li v-for="page in range.pages">
+          <span :class="{ removed: page.removedFromTextbook }">
+            {{ page.pageNumber }}
+            <RouterLink
+              :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
+            >
+              {{ t('viewDetails') }}
+            </RouterLink>
+          </span>
           <template v-if="page.inProgress">
             <WhiteSpace />
             <span class="inProgress">{{ t('inProgress') }}</span>
@@ -107,13 +113,8 @@ async function removeRange(range_id: string, removed: boolean) {
             <WhiteSpace />
             <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
           </template>
-        </h4>
-        <p>
-          <RouterLink :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }">
-            {{ t('viewDetails') }}
-          </RouterLink>
-        </p>
-      </template>
+        </li>
+      </ul>
     </template>
   </template>
   <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>
@@ -140,6 +141,18 @@ span.inProgress {
   color: gray;
   font-size: 70%;
 }
+
+ul.rangePages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7em;
+}
+
+ul.rangePages li {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  margin-right: 2em;
+}
 </style>
 
 <i18n>
@@ -158,8 +171,9 @@ en:
   remove: Remove
   removed: removed
   modelForExtraction: "Model provider for extraction:"
-  modelForAdaptation: "Model provider for adaptation:"
+  modelForAdaptation: "for adaptation:"
   pages: "Pages {textbookFrom} to {textbookTo} (from {pdfName} pages {pdfFrom} to {pdfTo})"
+  pagesHeader: "Pages:"
   viewDetails: "View details"
 fr:
   isbn: ISBN
@@ -176,7 +190,8 @@ fr:
   remove: Enlever
   removed: enlevé
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
-  modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
+  modelForAdaptation: "pour l'adaptation :"
   pages: "Pages {textbookFrom} à {textbookTo} (de {pdfName} pages {pdfFrom} à {pdfTo})"
+  pagesHeader: "Pages :"
   viewDetails: "Voir les détails"
 </i18n>
