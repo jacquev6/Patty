@@ -34,7 +34,21 @@ const nextPage = computed(() =>
     : { number: props.textbookPage.number + 1 },
 )
 
-const exercisesToShow = ref<'notApproved' | 'all'>('all')
+const allExercisesHaveBeenApproved = computed(
+  () =>
+    props.textbookPage.exercises.filter(
+      (e) => e.kind === 'adaptable' && e.adaptationStatus.kind === 'success' && e.adaptationStatus.approved === null,
+    ).length === 0,
+)
+
+const exercisesToShowRequestedByUser = ref<'notApproved' | 'all'>('all')
+
+const exercisesToShow = computed({
+  get: () => (allExercisesHaveBeenApproved.value ? 'all' : exercisesToShowRequestedByUser.value),
+  set: (v) => {
+    exercisesToShowRequestedByUser.value = v
+  },
+})
 </script>
 
 <template>
@@ -57,9 +71,15 @@ const exercisesToShow = ref<'notApproved' | 'all'>('all')
     </RouterLink>
   </p>
   <p>
-    <label>
+    <label :class="{ disabled: allExercisesHaveBeenApproved }">
       {{ t('showOnlyExercisesNotYetApproved') }}
-      <input type="radio" name="showAllExercises" v-model="exercisesToShow" value="notApproved" />
+      <input
+        type="radio"
+        name="showAllExercises"
+        v-model="exercisesToShow"
+        value="notApproved"
+        :disabled="allExercisesHaveBeenApproved"
+      />
     </label>
     <WhiteSpace />
     <label>
@@ -101,6 +121,12 @@ const exercisesToShow = ref<'notApproved' | 'all'>('all')
     </template>
   </template>
 </template>
+
+<style scoped>
+label.disabled {
+  color: gray;
+}
+</style>
 
 <i18n>
 en:
