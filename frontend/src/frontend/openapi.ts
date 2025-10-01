@@ -1578,6 +1578,8 @@ export interface components {
       needsRefresh: boolean
       /** Pagescount */
       pagesCount: number | null
+      /** Pageswithexercises */
+      pagesWithExercises: number[]
       /** Publisher */
       publisher: string | null
       /** Ranges */

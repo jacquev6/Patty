@@ -73,7 +73,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('div.busy').should('not.exist')
 
     // Remove exercises
-    cy.get('a:contains("View details")').eq(0).click()
+    cy.get('li a:contains("6")').click()
     cy.get('button:contains("Remove")').should('have.length', 2)
     cy.get('button:contains("Remove")').eq(0).click()
     cy.get('button:contains("Re-add")').should('have.length', 1)
@@ -106,7 +106,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h2').should('have.length', 2)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
-    cy.get('a:contains("View details")').eq(0).click()
+    cy.get('li a:contains("6")').click()
     cy.get('button:contains("View details")').eq(0).click()
     cy.get('h1:contains("Adapted exercise")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').should('exist').should('have.attr', 'href', '/textbook-1')
@@ -176,13 +176,13 @@ describe('The edition form for textbooks - with a PDF range', () => {
   })
 
   it('has adaptation pages that look like this', () => {
-    cy.get('a:contains("View details")').eq(0).click()
+    cy.get('li a:contains("40")').click()
     cy.get('a:contains("View details")').eq(0).click()
     screenshot(`adaptation`)
   })
 
   it('fixes exercise class', () => {
-    cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/textbook-1/page-40').click()
+    cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
     cy.get('a:contains("Page 40")').should('have.attr', 'href', '/textbook-1/page-40').click()
@@ -190,7 +190,7 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('[data-cy="exercise-class"]').should('have.value', 'QCM')
     cy.get('[data-cy="exercise-class"]').select('CochePhrase')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
-    cy.get('div.busy', { timeout: 10000 }).should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('exist') // This fails sometimes. @todo Fix it. There might be a race condition.
     cy.get('div.busy').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
@@ -198,23 +198,23 @@ describe('The edition form for textbooks - with a PDF range', () => {
   })
 
   it('removes and re-adds PDF pages', () => {
-    cy.get('a:contains("View details")').click()
+    cy.get('li a:contains("40")').click()
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
     cy.get('li:contains("40") button:contains("Remove")').should('have.length', 1).click()
-    cy.get('a:contains("View details")').click()
+    cy.get('li a:contains("40")').click()
     cy.get('h2').should('have.length', 0)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
     cy.get('li:contains("40") button:contains("Re-add")').should('have.length', 1).click()
-    cy.get('a:contains("View details")').click()
+    cy.get('li a:contains("40")').click()
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
   })
 
   it('approves exercises', () => {
-    cy.get('a:contains("View details")').click()
+    cy.get('li a:contains("40")').click()
 
     // Make sure all exercises are adapted
     cy.get('span.edit').eq(4).click()

@@ -62,6 +62,7 @@ class GetTextbookResponse(ApiModel):
     year: int | None
     isbn: str | None
     pages_count: int | None
+    pages_with_exercises: list[int]
 
     class AdaptableExercise(previewable_exercise.PreviewableExercise):
         kind: Literal["adaptable"]
@@ -101,9 +102,12 @@ class GetTextbookResponse(ApiModel):
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
     textbook = get_by_id(session, textbooks.Textbook, id)
 
+    pages_with_exercises: set[int] = set()
+
     external_exercises_: list[GetTextbookResponse.ExternalExercise] = []
     for exercise in textbook.fetch_ordered_external_exercises():
         assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+        pages_with_exercises.add(exercise.location.page_number)
         external_exercises_.append(
             GetTextbookResponse.ExternalExercise(
                 kind="external",
@@ -134,6 +138,13 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 )
             )
 
+        pages_with_exercises.update(
+            range(
+                extraction_batch.first_textbook_page_number,
+                extraction_batch.first_textbook_page_number + extraction_batch.pdf_file_range.pages_count,
+            )
+        )
+
         ranges.append(
             GetTextbookResponse.Range(
                 id=str(extraction_batch.id),
@@ -157,6 +168,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         year=textbook.year,
         isbn=textbook.isbn,
         pages_count=textbook.pages_count,
+        pages_with_exercises=sorted(pages_with_exercises),
         external_exercises=external_exercises_,
         ranges=ranges,
     )

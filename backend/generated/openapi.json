@@ -2532,6 +2532,13 @@
             ],
             "title": "Pagescount"
           },
+          "pagesWithExercises": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pageswithexercises",
+            "type": "array"
+          },
           "publisher": {
             "anyOf": [
               {
@@ -2575,6 +2582,7 @@
           "year",
           "isbn",
           "pagesCount",
+          "pagesWithExercises",
           "externalExercises",
           "ranges"
         ],

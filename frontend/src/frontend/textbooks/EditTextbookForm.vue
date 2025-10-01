@@ -56,6 +56,14 @@ async function removeRange(range_id: string, removed: boolean) {
       {{ t('downloadHtml') }}
     </a>
   </p>
+  <h2>{{ t('pagesWithExercises') }}</h2>
+  <ul class="rangePages">
+    <li v-for="pageNumber in textbook.pagesWithExercises">
+      <RouterLink :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber } }">
+        {{ pageNumber }}
+      </RouterLink>
+    </li>
+  </ul>
   <h2>{{ t('newTextbookPdf') }}</h2>
   <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
   <h2>{{ t('existingTextbookPdfs') }}</h2>
@@ -90,16 +98,16 @@ async function removeRange(range_id: string, removed: boolean) {
           <template #provider>{{ t('modelForAdaptation') }}</template>
         </LlmModelSelector>
       </p>
-      <p>{{ t('pagesHeader') }}</p>
+      <p>{{ t('extractedPagesHeader') }}</p>
       <ul class="rangePages">
         <li v-for="page in range.pages">
           <span :class="{ removed: page.removedFromTextbook }">
             {{ page.pageNumber }}
-            <RouterLink
+            <!-- <RouterLink
               :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
             >
               {{ t('viewDetails') }}
-            </RouterLink>
+            </RouterLink> -->
           </span>
           <template v-if="page.inProgress">
             <WhiteSpace />
@@ -160,6 +168,7 @@ en:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Download standalone HTML
+  pagesWithExercises: "Pages with exercises"
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
   inProgress: "(in progress, will refresh when done)"
@@ -173,12 +182,13 @@ en:
   modelForExtraction: "Model provider for extraction:"
   modelForAdaptation: "for adaptation:"
   pages: "Pages {textbookFrom} to {textbookTo} (from {pdfName} pages {pdfFrom} to {pdfTo})"
-  pagesHeader: "Pages:"
+  extractedPagesHeader: "Extracted pages:"
   viewDetails: "View details"
 fr:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Télécharger le HTML autonome
+  pagesWithExercises: "Pages avec des exercices"
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
   inProgress: "(en cours, se mettra à jour quand terminé)"
@@ -192,6 +202,6 @@ fr:
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
   modelForAdaptation: "pour l'adaptation :"
   pages: "Pages {textbookFrom} à {textbookTo} (de {pdfName} pages {pdfFrom} à {pdfTo})"
-  pagesHeader: "Pages :"
+  extractedPagesHeader: "Pages extraites :"
   viewDetails: "Voir les détails"
 </i18n>

@@ -105,7 +105,7 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.contains('in progress').should('exist')
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
-    cy.get('a:contains("View details")').click()
+    cy.get('li a:contains("1")').click()
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
     cy.wait(500) // For Firefox
