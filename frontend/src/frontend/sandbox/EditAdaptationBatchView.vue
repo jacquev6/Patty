@@ -27,7 +27,7 @@ function breadcrumbs({ id }: AdaptationBatch) {
 </script>
 
 <template>
-  <AutoRefresh :load :breadcrumbs>
+  <AutoRefresh :reloadOnChanges="{ id }" :load :breadcrumbs>
     <template v-slot="{ data: adaptationBatch }">
       <EditAdaptationBatchForm :adaptationBatch />
     </template>

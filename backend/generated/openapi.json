@@ -5001,6 +5001,17 @@
             "title": "Id",
             "type": "string"
           },
+          "pagesCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagescount"
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -5008,7 +5019,8 @@
         },
         "required": [
           "id",
-          "title"
+          "title",
+          "pagesCount"
         ],
         "title": "Textbook",
         "type": "object"

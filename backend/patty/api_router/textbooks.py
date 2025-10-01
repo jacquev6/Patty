@@ -169,6 +169,7 @@ class GetTextbookPageResponse(ApiModel):
     class Textbook(ApiModel):
         id: str
         title: str
+        pages_count: int | None
 
     textbook: Textbook
 
@@ -277,7 +278,9 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
     return GetTextbookPageResponse(
         number=number,
         needs_refresh=needs_refresh,
-        textbook=GetTextbookPageResponse.Textbook(id=str(textbook.id), title=textbook.title),
+        textbook=GetTextbookPageResponse.Textbook(
+            id=str(textbook.id), title=textbook.title, pages_count=textbook.pages_count
+        ),
         exercises=exercises_,
     )
 

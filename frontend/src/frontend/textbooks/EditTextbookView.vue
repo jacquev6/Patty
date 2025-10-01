@@ -26,7 +26,7 @@ function breadcrumbs({ title }: Textbook) {
 </script>
 
 <template>
-  <AutoRefresh :load :breadcrumbs>
+  <AutoRefresh :reloadOnChanges="{ id }" :load :breadcrumbs>
     <template v-slot="{ data: textbook, refresh }">
       <EditTextbookForm :textbook @textbookUpdated="refresh" />
     </template>

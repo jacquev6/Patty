@@ -2530,6 +2530,8 @@ export interface components {
     patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {
       /** Id */
       id: string
+      /** Pagescount */
+      pagesCount: number | null
       /** Title */
       title: string
     }

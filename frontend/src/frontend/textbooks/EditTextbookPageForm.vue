@@ -25,10 +25,34 @@ async function removeExercise(exercise_id: string, removed: boolean) {
   })
   emit('textbook-updated')
 }
+
+const previousPage = computed(() => (props.textbookPage.number <= 1 ? null : { number: props.textbookPage.number - 1 }))
+const nextPage = computed(() =>
+  textbook.value.pagesCount !== null && props.textbookPage.number >= textbook.value.pagesCount
+    ? null
+    : { number: props.textbookPage.number + 1 },
+)
 </script>
 
 <template>
   <h1>{{ t('titleAndPage', { title: textbook.title, pageNumber: textbookPage.number }) }}</h1>
+  <p>
+    <span v-if="!previousPage">{{ t('noPreviousPage') }}</span>
+    <RouterLink
+      v-else
+      :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: previousPage.number } }"
+    >
+      {{ t('previousPage', { number: previousPage.number }) }}
+    </RouterLink>
+    -
+    <span v-if="!nextPage">{{ t('noNextPage') }}</span>
+    <RouterLink
+      v-else
+      :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: nextPage.number } }"
+    >
+      {{ t('nextPage', { number: nextPage.number }) }}
+    </RouterLink>
+  </p>
   <template v-for="exercise in textbookPage.exercises">
     <h2 v-if="exercise.removedFromTextbook">
       <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
@@ -58,12 +82,20 @@ async function removeExercise(exercise_id: string, removed: boolean) {
 <i18n>
 en:
   titleAndPage: '{title}, page {pageNumber}'
+  noPreviousPage: 'No previous page'
+  noNextPage: 'No next page'
+  previousPage: 'Previous page: {number}'
+  nextPage: 'Next page: {number}'
   exercise: Exercise
   reAdd: Re-add
   remove: Remove
   removed: removed
 fr:
   titleAndPage: '{title}, page {pageNumber}'
+  noPreviousPage: 'Pas de page précédente'
+  previousPage: 'Page précédente : {number}'
+  noNextPage: 'Pas de page suivante'
+  nextPage: 'Page suivante : {number}'
   exercise: Exercice
   reAdd: Rajouter
   remove: Enlever
