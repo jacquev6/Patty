@@ -1,3 +1,6 @@
+ARG FRONTEND_DEPENDENCIES_IMAGE=frontend-dependencies
+ARG BACKEND_DEPENDENCIES_IMAGE=backend-dependencies
+
 FROM node:22 AS frontend-dependencies
 
 WORKDIR /app
@@ -12,24 +15,24 @@ ADD backend/generated/adapted-exercise-schema.json /backend/generated
 ADD frontend .
 
 
-FROM frontend-dependencies AS frontend-builder
+FROM $FRONTEND_DEPENDENCIES_IMAGE AS frontend-builder
 ENV PATTY_ENTRY_POINT_NAME=frontend
 RUN test ! -e src/frontend/public/pdf.worker.min.js
 RUN cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs src/frontend/public/pdf.worker.min.js
 RUN npx vite build
 
 
-FROM frontend-dependencies AS adaptation-export-template-builder
+FROM $FRONTEND_DEPENDENCIES_IMAGE AS adaptation-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/adaptation
 RUN npx vite build
 
 
-FROM frontend-dependencies AS batch-export-template-builder
+FROM $FRONTEND_DEPENDENCIES_IMAGE AS batch-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/batch
 RUN npx vite build
 
 
-FROM frontend-dependencies AS textbook-export-template-builder
+FROM $FRONTEND_DEPENDENCIES_IMAGE AS textbook-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/textbook
 RUN npx vite build
 
@@ -65,7 +68,7 @@ ADD --chmod=777 support/prod/docker/40-substitute.sh /docker-entrypoint.d/40-sub
 COPY --from=frontend-builder /app/dist /usr/share/nginx/templates/frontend
 
 
-FROM backend-dependencies AS final-backend
+FROM $BACKEND_DEPENDENCIES_IMAGE AS final-backend
 
 ADD backend .
 ARG PATTY_VERSION

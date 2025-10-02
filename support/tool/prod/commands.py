@@ -18,13 +18,13 @@ def prod() -> None:
 @prod.command()
 def pre_warm_build_cache() -> None:
     print("Patty prod pre-warm: build")
-    build("pre-warm", "pre-warm")
+    build(patty_version=None, action="pre-warm")
 
 
 @prod.command()
 def preview() -> None:
     print("Patty prod preview: build")
-    build("preview", "load")
+    build(patty_version="preview", action="load")
     subprocess.run(["docker", "compose", "build"], cwd="support/prod", check=True)
     print("Patty prod preview: pull")
     subprocess.run(["docker", "compose", "pull", "--ignore-buildable"], cwd="support/prod", check=True)
@@ -95,7 +95,7 @@ def publish() -> None:
     subprocess.run(["git", "commit", "--allow-empty", "-m", f"Publish version {patty_version}"], check=True)
 
     # Build and publish
-    build(patty_version, "push")
+    build(patty_version=patty_version, action="push")
     subprocess.run(["git", "tag", patty_version], check=True)
     subprocess.run(["git", "push", "origin", "main", "--tags"], check=True)
 
@@ -105,13 +105,10 @@ def publish() -> None:
     subprocess.run(["git", "push", "origin", "develop"], check=True)
 
 
-def build(patty_version: str, action: typing.Literal["pre-warm", "push", "load"]) -> None:
-    options = {
-        "pre-warm": ["--pull", "--platform", "linux/amd64,linux/arm64"],
-        "push": ["--platform", "linux/amd64,linux/arm64", "--push"],
-        "load": ["--platform", "linux/amd64", "--load"],
-    }
+Action = typing.Literal["pre-warm", "push", "load"]
 
+
+def build(*, patty_version: str | None, action: Action) -> None:
     if action != "pre-warm":
         subprocess.run(["./dev.sh", "clean", "--force"])
 
@@ -121,6 +118,13 @@ def build(patty_version: str, action: typing.Literal["pre-warm", "push", "load"]
     if "patty-multi-platform-builder" not in builders:
         subprocess.run(["docker", "buildx", "create", "--name", "patty-multi-platform-builder"], check=True)
 
+    for part, target in find_parts(action):
+        print(part)
+        print("-" * len(part))
+        subprocess.run(make_build_command(patty_version=patty_version, target=target, part=part, action=action), check=True)
+
+
+def find_parts(action: Action) -> typing.Iterable[tuple[str, str]]:
     if action == "pre-warm":
         part_pattern = re.compile(r"^FROM .* AS (?P<target>(?P<part>\S+)-dependencies)$")
     else:
@@ -130,31 +134,55 @@ def build(patty_version: str, action: typing.Literal["pre-warm", "push", "load"]
         parts = []
         for line in f:
             if m := part_pattern.match(line):
-                parts.append((m.group("part"), m.group("target")))
+                yield (m.group("part"), m.group("target"))
 
-    for part, target in parts:
-        print(part)
-        print("-" * len(part))
-        subprocess.run(
-            [
-                "docker",
-                "buildx",
-                "build",
-                "--builder",
-                "patty-multi-platform-builder",
-                ".",
-                "--file",
-                "support/prod/docker/Dockerfile",
-                "--target",
-                target,
-                "--build-arg",
-                f"PATTY_VERSION={patty_version}",
-                "--tag",
-                f"jacquev6/patty:{patty_version}-{part}",
-                *options[action],
-            ],
-            check=True,
-        )
+
+def make_build_command(*, patty_version: str | None , target: str, part: str, action: Action) -> list[str]:
+    command = [
+        "docker",
+        "buildx",
+        "build",
+        "--builder",
+        "patty-multi-platform-builder",
+        ".",
+        "--file",
+        "support/prod/docker/Dockerfile",
+        "--target",
+        target,
+        "--pull",
+        "--no-cache",
+    ]
+
+    if patty_version is None:
+        assert action == "pre-warm"
+    else:
+        command += [
+            "--build-arg",
+            f"PATTY_VERSION={patty_version}",
+            "--tag",
+            f"jacquev6/patty:{patty_version}-{part}",
+        ]
+
+    if action == "pre-warm":
+        command += ["--tag", f"jacquev6/patty:latest-{part}-dependencies", "--push"]
+    else:
+        command += [
+            "--build-arg",
+            "FRONTEND_DEPENDENCIES_IMAGE=jacquev6/patty:latest-frontend-dependencies",
+            "--build-arg",
+            "BACKEND_DEPENDENCIES_IMAGE=jacquev6/patty:latest-backend-dependencies",
+        ]
+
+    if action == "pre-warm":
+        command += ["--platform", "linux/amd64,linux/arm64"]
+    elif action == "push":
+        command += ["--platform", "linux/amd64,linux/arm64", "--push"]
+    elif action == "load":
+        command += ["--platform", "linux/amd64", "--load"]
+    else:
+        assert False
+
+    return command
 
 
 @prod.command()
