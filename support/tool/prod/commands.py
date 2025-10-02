@@ -121,7 +121,9 @@ def build(*, patty_version: str | None, action: Action) -> None:
     for part, target in find_parts(action):
         print(part)
         print("-" * len(part))
-        subprocess.run(make_build_command(patty_version=patty_version, target=target, part=part, action=action), check=True)
+        subprocess.run(
+            make_build_command(patty_version=patty_version, target=target, part=part, action=action), check=True
+        )
 
 
 def find_parts(action: Action) -> typing.Iterable[tuple[str, str]]:
@@ -131,13 +133,12 @@ def find_parts(action: Action) -> typing.Iterable[tuple[str, str]]:
         part_pattern = re.compile(r"^FROM .* AS (?P<target>final-(?P<part>\S+))$")
 
     with open("support/prod/docker/Dockerfile") as f:
-        parts = []
         for line in f:
             if m := part_pattern.match(line):
                 yield (m.group("part"), m.group("target"))
 
 
-def make_build_command(*, patty_version: str | None , target: str, part: str, action: Action) -> list[str]:
+def make_build_command(*, patty_version: str | None, target: str, part: str, action: Action) -> list[str]:
     command = [
         "docker",
         "buildx",
@@ -156,12 +157,7 @@ def make_build_command(*, patty_version: str | None , target: str, part: str, ac
     if patty_version is None:
         assert action == "pre-warm"
     else:
-        command += [
-            "--build-arg",
-            f"PATTY_VERSION={patty_version}",
-            "--tag",
-            f"jacquev6/patty:{patty_version}-{part}",
-        ]
+        command += ["--build-arg", f"PATTY_VERSION={patty_version}", "--tag", f"jacquev6/patty:{patty_version}-{part}"]
 
     if action == "pre-warm":
         command += ["--tag", f"jacquev6/patty:latest-{part}-dependencies", "--push"]
