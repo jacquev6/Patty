@@ -112,7 +112,8 @@ def run_or_exec_in_container(
 
     if not quiet:
         print(
-            f"{run_or_exec.title()}-ing {shlex.join(command)!r} in {container}{workdir_string}{mount_string}{env_string}{capture_string}"
+            f"{run_or_exec.title()}-ing {shlex.join(command)!r} in {container}{workdir_string}{mount_string}{env_string}{capture_string}",
+            flush=True,
         )
 
     return subprocess.run(
