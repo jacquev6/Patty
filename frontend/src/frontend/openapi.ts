@@ -1832,7 +1832,13 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'mistral-large-2411' | 'mistral-small-2501'
+      name:
+        | 'mistral-large-2411'
+        | 'mistral-medium-2505'
+        | 'mistral-medium-2508'
+        | 'mistral-small-2501'
+        | 'mistral-small-2503'
+        | 'mistral-small-2506'
       /**
        * Provider
        * @constant
@@ -1890,7 +1896,12 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+      name:
+        | 'gpt-4o-2024-08-06'
+        | 'gpt-4o-mini-2024-07-18'
+        | 'gpt-4.1-2025-04-14'
+        | 'gpt-4.1-mini-2025-04-14'
+        | 'gpt-4.1-nano-2025-04-14'
       /**
        * Provider
        * @constant

@@ -31,7 +31,14 @@ client = mistralai.Mistral(api_key=settings.MISTRALAI_API_KEY)
 
 class MistralAiModel(Model):
     provider: Literal["mistralai"]
-    name: Literal["mistral-large-2411", "mistral-small-2501"]
+    name: Literal[
+        "mistral-large-2411",
+        "mistral-medium-2505",
+        "mistral-medium-2508",
+        "mistral-small-2501",
+        "mistral-small-2503",
+        "mistral-small-2506",
+    ]
 
     async def do_complete(
         self,

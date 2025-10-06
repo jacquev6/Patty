@@ -37,9 +37,16 @@ def get_available_adaptation_llm_models() -> list[adaptation.llm.ConcreteModel]:
             adaptation.llm.DummyModel(provider="dummy", name="dummy-3"),
             adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
             adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2505"),
+            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2508"),
             adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2503"),
+            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2506"),
             adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
             adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
+            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-2025-04-14"),
+            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-mini-2025-04-14"),
+            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-nano-2025-04-14"),
         ]
     else:
         return [
