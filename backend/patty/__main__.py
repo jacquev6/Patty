@@ -173,6 +173,7 @@ def python_dependency_graph() -> None:
         ("patty", "any_json"),
         ("patty", "api_utils"),
         ("patty", "database_utils"),
+        ("patty", "logs"),
         ("patty", "settings"),
         ("patty", "version"),
         # Little interest, decrease readability
@@ -827,6 +828,71 @@ def migrate_data(dry_run: bool) -> None:
         data_migration.validate(session)
         if not dry_run:
             session.commit()
+
+
+@main.group()
+def issue_129() -> None:
+    pass
+
+
+@issue_129.command()
+@click.argument("adaptation_ids", type=int, nargs=-1)
+def show_settings_ids(adaptation_ids: list[int]) -> None:
+    from . import adaptation
+    from . import database_utils
+
+    settings.INVESTIGATING_ISSUE_129 = True
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        adaptations = [session.get_one(adaptation.Adaptation, adaptation_id) for adaptation_id in adaptation_ids]
+
+        for adaptation_ in adaptations:
+            print(f"Adaptation {adaptation_.id}: settings {adaptation_.settings_id}")
+
+
+@issue_129.command()
+@click.option("--force-model", type=str, nargs=2)
+@click.option("--repeat-all", type=int, default=1)
+@click.option("--repeat-each", type=int, default=1)
+@click.option("--prompt-prefix-format", type=str, default="")
+@click.option("--exercise-prefix-format", type=str, default="")
+@click.argument("adaptation_ids", type=int, nargs=-1)
+def rerun_adaptations(
+    force_model: tuple[str, str] | None,
+    repeat_all: int,
+    repeat_each: int,
+    prompt_prefix_format: str,
+    exercise_prefix_format: str,
+    adaptation_ids: list[int],
+) -> None:
+    from . import adaptation
+    from . import database_utils
+
+    settings.INVESTIGATING_ISSUE_129 = True
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    for _index_all in range(repeat_all):
+        for adaptation_id in adaptation_ids:
+            for index_each in range(repeat_each):
+                with database_utils.make_session(database_engine) as session:
+                    adaptation_ = session.get_one(adaptation.Adaptation, adaptation_id)
+
+                    if force_model is not None:
+                        model_provider, model_name = force_model
+                        adaptation_.model = adaptation.llm.validate({"provider": model_provider, "name": model_name})
+
+                    adaptation_.settings.system_prompt = (
+                        prompt_prefix_format.format(adaptation_id) + adaptation_.settings.system_prompt
+                    )
+                    adaptation_.exercise.full_text = (
+                        exercise_prefix_format.format(index_each) + adaptation_.exercise.full_text
+                    )
+
+                    print(adaptation_.settings.system_prompt.splitlines()[0][:80] + " [...]")
+                    print(adaptation_.exercise.full_text.splitlines()[0][:80] + " [...]")
+
+                    asyncio.run(adaptation.submission.submit_adaptation(adaptation_))
 
 
 if __name__ == "__main__":

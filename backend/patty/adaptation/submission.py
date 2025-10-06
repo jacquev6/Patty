@@ -1,4 +1,3 @@
-import datetime
 import traceback
 import typing
 
@@ -8,12 +7,8 @@ from . import assistant_responses
 from . import llm
 from . import orm_models as db
 from .. import database_utils
+from .. import logs
 from .adapted import Exercise
-
-
-def log(message: str) -> None:
-    # @todo Use actual logging
-    print(datetime.datetime.now(), message, flush=True)
 
 
 LlmMessage = (
@@ -33,7 +28,7 @@ def submit_adaptations(session: database_utils.Session, parallelism: int) -> lis
         .all()
     )
     if len(adaptations) > 0:
-        log(
+        logs.log(
             f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
         )
     return [submit_adaptation(adaptation) for adaptation in adaptations]
@@ -50,26 +45,27 @@ async def submit_adaptation(adaptation: db.Adaptation) -> None:
     # All branches must set 'adaptation.initial_assistant_response' to avoid infinite loop
     # (re-submitting failing adaptation again and again)
     try:
-        log(f"Submitting adaptation {adaptation.id}")
-        response = await adaptation.model.complete(messages, response_format)
+        logs.log(f"Submitting adaptation {adaptation.id}")
+        with logs.timer() as t:
+            response = await adaptation.model.complete(messages, response_format)
     except llm.InvalidJsonLlmException as error:
-        log(f"Error 'invalid JSON' on adaptation {adaptation.id}")
+        logs.log(f"Error 'invalid JSON' on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
-        log(f"Error 'not JSON' on adaptation {adaptation.id}")
+        logs.log(f"Error 'not JSON' on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
     except Exception:
-        log(f"UNEXPECTED ERROR on adaptation {adaptation.id}")
+        logs.log(f"UNEXPECTED ERROR on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
         adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
         traceback.print_exc()
     else:
-        log(f"Success on adaptation {adaptation.id}")
+        logs.log(f"Success on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [response.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.Success(
             kind="success", exercise=Exercise.model_validate(response.message.content.model_dump())
