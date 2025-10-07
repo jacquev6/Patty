@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 import fastapi
 import sqlalchemy as sql
@@ -29,33 +30,85 @@ router = fastapi.APIRouter()
 
 
 @router.get("/available-adaptation-llm-models")
-def get_available_adaptation_llm_models() -> list[adaptation.llm.ConcreteModel]:
+def get_available_adaptation_llm_models() -> (
+    list[tuple[adaptation.llm.ConcreteModel, list[typing.Literal["text", "json-object", "json-schema"]]]]
+):
     if PATTY_VERSION == "dev":
         return [
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-1"),
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-2"),
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-3"),
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2505"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2508"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2503"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2506"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-2025-04-14"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-mini-2025-04-14"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-nano-2025-04-14"),
+            (adaptation.llm.DummyModel(provider="dummy", name="dummy-1"), ["text", "json-object", "json-schema"]),
+            (adaptation.llm.DummyModel(provider="dummy", name="dummy-2"), ["text", "json-object", "json-schema"]),
+            (adaptation.llm.DummyModel(provider="dummy", name="dummy-3"), ["text", "json-object", "json-schema"]),
+            (
+                adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2505"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-medium-2508"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2503"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2506"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-2025-04-14"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-mini-2025-04-14"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-nano-2025-04-14"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
         ]
     else:
         return [
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
-            adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
-            adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-1"),
-            adaptation.llm.DummyModel(provider="dummy", name="dummy-2"),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-small-2501"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-2024-08-06"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (
+                adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
+                ["text", "json-object", "json-schema"],
+            ),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
+            (adaptation.llm.DummyModel(provider="dummy", name="dummy-1"), ["text", "json-object", "json-schema"]),
+            (adaptation.llm.DummyModel(provider="dummy", name="dummy-2"), ["text", "json-object", "json-schema"]),
         ]
 
 

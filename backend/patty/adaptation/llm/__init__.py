@@ -16,12 +16,13 @@ from .base import (
     UserMessage as UserMessage,
 )
 from .dummy import DummyModel as DummyModel
+from .gemini import GeminiModel as GeminiModel
 from .mistralai import MistralAiModel as MistralAiModel
 from .openai import OpenAiModel as OpenAiModel
 from .schema import make_schema as make_schema
 
 
-ConcreteModel = DummyModel | MistralAiModel | OpenAiModel
+ConcreteModel = DummyModel | MistralAiModel | OpenAiModel | GeminiModel
 
 
 def validate(obj: Any) -> ConcreteModel:

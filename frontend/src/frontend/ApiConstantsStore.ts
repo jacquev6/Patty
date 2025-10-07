@@ -11,6 +11,7 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
   const ready = ref(false)
   const availableExtractionLlmModels = ref<ExtractionLlmModel[]>([])
   const availableAdaptationLlmModels = ref<AdaptationLlmModel[]>([])
+  const formalismsByAdaptationLlmModel = ref<Record<string, string[]>>({})
   const extractionLlmResponseSchema = ref<Record<string, never>>({})
 
   ;(async () => {
@@ -25,7 +26,10 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
 
     const availableAdaptationLlmModelsResponse = await availableAdaptationLlmModelsPromise
     if (availableAdaptationLlmModelsResponse.data !== undefined) {
-      availableAdaptationLlmModels.value = availableAdaptationLlmModelsResponse.data
+      availableAdaptationLlmModels.value = availableAdaptationLlmModelsResponse.data.map((x) => x[0])
+      formalismsByAdaptationLlmModel.value = Object.fromEntries(
+        availableAdaptationLlmModelsResponse.data.map((x) => [x[0].name, x[1]]),
+      )
     }
 
     const extractionLlmResponseSchemaResponse = await extractionLlmResponseSchemaPromise
@@ -41,5 +45,8 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
     availableExtractionLlmModels: computed(() => availableExtractionLlmModels.value),
     availableAdaptationLlmModels: computed(() => availableAdaptationLlmModels.value),
     extractionLlmResponseSchema: computed(() => extractionLlmResponseSchema.value),
+    formalismIsAvailableForAdaptationLlmModel(llmModel: AdaptationLlmModel, formalism: string) {
+      return formalismsByAdaptationLlmModel.value[llmModel.name].includes(formalism)
+    },
   }
 })

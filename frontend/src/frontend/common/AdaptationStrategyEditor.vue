@@ -145,6 +145,18 @@ const settingsNameSuggestions = computed(() => {
     return makeAdaptationSettingsName(s.identity)
   })
 })
+
+const textFormalismIsDisabled = computed(() => {
+  return !apiConstantsStore.formalismIsAvailableForAdaptationLlmModel(strategy.value.model, 'text')
+})
+
+const jsonObjectFormalismIsDisabled = computed(() => {
+  return !apiConstantsStore.formalismIsAvailableForAdaptationLlmModel(strategy.value.model, 'json-object')
+})
+
+const jsonSchemaFormalismIsDisabled = computed(() => {
+  return !apiConstantsStore.formalismIsAvailableForAdaptationLlmModel(strategy.value.model, 'json-schema')
+})
 </script>
 
 <template>
@@ -174,9 +186,9 @@ const settingsNameSuggestions = computed(() => {
   <p v-else>
     {{ t('llmResponseFormat') }}:
     <select v-model="llmResponseSpecificationFormalism">
-      <option value="text">{{ t('text') }}</option>
-      <option value="json-object">{{ t('jsonNoSchema') }}</option>
-      <option value="json-schema">{{ t('jsonSchema') }}</option>
+      <option value="text" :disabled="textFormalismIsDisabled">{{ t('text') }}</option>
+      <option value="json-object" :disabled="jsonObjectFormalismIsDisabled">{{ t('jsonNoSchema') }}</option>
+      <option value="json-schema" :disabled="jsonSchemaFormalismIsDisabled">{{ t('jsonSchema') }}</option>
     </select>
   </p>
   <template v-if="strategy.settings.responseSpecification.formalism === 'text'">

@@ -316,6 +316,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               }
             ],
             "title": "Model"
@@ -750,6 +753,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               }
             ],
             "title": "Model"
@@ -778,6 +784,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               }
             ],
             "title": "Model"
@@ -2296,6 +2305,9 @@
                 "$ref": "#/components/schemas/OpenAiModel"
               },
               {
+                "$ref": "#/components/schemas/GeminiModel"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -2383,6 +2395,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               },
               {
                 "type": "null"
@@ -3550,6 +3565,9 @@
                 "$ref": "#/components/schemas/OpenAiModel"
               },
               {
+                "$ref": "#/components/schemas/GeminiModel"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -3677,6 +3695,9 @@
                 "$ref": "#/components/schemas/OpenAiModel"
               },
               {
+                "$ref": "#/components/schemas/GeminiModel"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -3784,6 +3805,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               }
             ],
             "title": "Modelforadaptation"
@@ -4070,6 +4094,9 @@
               },
               {
                 "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
               }
             ],
             "title": "Modelforadaptation"
@@ -5770,17 +5797,38 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "anyOf": [
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
                       {
-                        "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
+                          },
+                          {
+                            "$ref": "#/components/schemas/MistralAiModel"
+                          },
+                          {
+                            "$ref": "#/components/schemas/OpenAiModel"
+                          },
+                          {
+                            "$ref": "#/components/schemas/GeminiModel"
+                          }
+                        ]
                       },
                       {
-                        "$ref": "#/components/schemas/MistralAiModel"
-                      },
-                      {
-                        "$ref": "#/components/schemas/OpenAiModel"
+                        "items": {
+                          "enum": [
+                            "text",
+                            "json-object",
+                            "json-schema"
+                          ],
+                          "type": "string"
+                        },
+                        "type": "array"
                       }
-                    ]
+                    ],
+                    "type": "array"
                   },
                   "title": "Response Get Available Adaptation Llm Models Api Available Adaptation Llm Models Get",
                   "type": "array"
@@ -6055,6 +6103,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/OpenAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GeminiModel"
                   }
                 ],
                 "title": "Req"
@@ -6387,6 +6438,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/OpenAiModel"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GeminiModel"
                   }
                 ],
                 "title": "Req"

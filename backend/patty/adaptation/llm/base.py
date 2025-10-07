@@ -72,7 +72,7 @@ class NotJsonLlmException(LlmException):
 
 
 def try_hard_to_json_loads(s: str) -> Any:
-    preprocessed = s
+    preprocessed = s.strip()
     if preprocessed.startswith("```json") and preprocessed.endswith("```"):
         preprocessed = preprocessed[7:-3]
     elif preprocessed.startswith("```") and preprocessed.endswith("```"):
