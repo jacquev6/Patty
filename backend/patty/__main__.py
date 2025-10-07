@@ -617,50 +617,54 @@ def run_submission_daemon(
 ) -> None:
     import requests
 
-    from . import database_utils
     from . import adaptation
     from . import classification
+    from . import database_utils
     from . import extraction
-
-    def log(message: str) -> None:
-        # @todo Use actual logging
-        print(datetime.datetime.now(), message, flush=True)
+    from . import logs
 
     engine = database_utils.create_engine(settings.DATABASE_URL)
 
     async def daemon() -> None:
-        log("Starting")
+        logs.log("Starting")
         last_time = time.monotonic()
         while True:
             try:
                 with database_utils.Session(engine) as session:
-                    # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
-                    go_on = (
+                    # Do only one thing (extract XOR classify XOR adapt)
+                    # in each session to commit progress as soon as possible.
+                    done_something = (
                         len(
                             await asyncio.gather(
                                 *extraction.submission.submit_extractions(session, extraction_parallelism)
                             )
                         )
-                        == 0
+                        != 0
                     )
-                    if go_on:
-                        go_on = not classification.submission.submit_classifications(
+                    if not done_something:
+                        done_something = classification.submission.submit_classifications(
                             session, classification_parallelism
                         )
-                        if go_on:
-                            await asyncio.gather(
-                                *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                    if not done_something:
+                        done_something = (
+                            len(
+                                await asyncio.gather(
+                                    *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                                )
                             )
+                            != 0
+                        )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
-                    log("Calling pulse monitoring URL")
+                    logs.log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
                     requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
-                log("UNEXPECTED ERROR reached daemon level")
+                logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-            log(f"Sleeping for {pause}s...")
-            await asyncio.sleep(pause)
+            if not done_something:
+                logs.log(f"Sleeping for {pause}s...")
+                await asyncio.sleep(pause)
 
     asyncio.run(daemon())
 
