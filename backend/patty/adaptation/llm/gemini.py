@@ -62,16 +62,12 @@ class GeminiModel(Model):
             model=self.name,
             contents=typing.cast(list[google.genai.types.ContentUnion], contents),
             config=google.genai.types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                response_mime_type=response_mime_type,
+                system_instruction=system_instruction, response_mime_type=response_mime_type
             ),
         )
         raw_conversation: dict[str, typing.Any] = dict(
             method="google.genai.Client.models.generate_content",
-            config=dict(
-                system_instruction=system_instruction,
-                response_mime_type=response_mime_type,
-            ),
+            config=dict(system_instruction=system_instruction, response_mime_type=response_mime_type),
             contents=[m.model_dump() for m in contents],
             response=response.model_dump(),
         )
