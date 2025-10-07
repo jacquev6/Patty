@@ -9,6 +9,7 @@ from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import extraction
+from .. import logs
 from .. import sandbox
 from ..any_json import JsonDict
 from ..api_utils import ApiModel, get_by_id, paginate, assert_isinstance
@@ -118,6 +119,7 @@ def create_extraction_batch(
             run_classification=req.run_classification,
             model_for_adaptation=req.model_for_adaptation,
             assistant_response=None,
+            timing=None,
         )
         session.add(page)
 
@@ -144,6 +146,13 @@ class GetExtractionBatchResponse(ApiModel):
 
         exercises: list[Exercise]
 
+        class Timing(ApiModel):
+            extraction: logs.TimingData | None
+            classification: logs.TimingData | None
+            adaptations: list[logs.TimingData | None]
+
+        timing: Timing
+
     pages: list[Page]
 
 
@@ -160,6 +169,15 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
 
         exercises_ = list(page_extraction.fetch_ordered_exercises())
         api_exercises: list[GetExtractionBatchResponse.Page.Exercise] = []
+        timing = GetExtractionBatchResponse.Page.Timing(
+            extraction=page_extraction.timing,
+            classification=(
+                page_extraction.classification_chunk_creations[0].classification_chunk.timing
+                if page_extraction.classification_chunk_creations
+                else None
+            ),
+            adaptations=[],
+        )
 
         for exercise in exercises_:
             assert isinstance(exercise, adaptation.AdaptableExercise)
@@ -170,6 +188,8 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                 if latest_classification is None or latest_classification.exercise_class is None
                 else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
             )
+
+            timing.adaptations.append(latest_adaptation.initial_timing if latest_adaptation is not None else None)
 
             exercise_class = (
                 latest_classification.exercise_class.name
@@ -239,6 +259,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                 },
                 assistant_response=page_extraction.assistant_response,
                 exercises=api_exercises,
+                timing=timing,
             )
         )
 
@@ -298,6 +319,7 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
                         model=classification_chunk.model_for_adaptation,
                         raw_llm_conversations=[],
                         initial_assistant_response=None,
+                        initial_timing=None,
                         adjustments=[],
                         manual_edit=None,
                         approved_by=None,
@@ -320,6 +342,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
         classification_chunk = classification.ClassificationChunk(
             created=extraction.ClassificationChunkCreationByPageExtraction(at=now, page_extraction=page_extraction),
             model_for_adaptation=None,
+            timing=None,
         )
         session.add(classification_chunk)
 
@@ -378,6 +401,7 @@ def put_extraction_batch_model_for_adaptation(
                         model=classification_chunk.model_for_adaptation,
                         raw_llm_conversations=[],
                         initial_assistant_response=None,
+                        initial_timing=None,
                         adjustments=[],
                         manual_edit=None,
                         approved_by=None,

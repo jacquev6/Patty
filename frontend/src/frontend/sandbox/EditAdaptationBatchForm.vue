@@ -18,6 +18,15 @@ const columns = [
   { name: 'col-1', width: 1 },
   { name: 'col-2', width: 2 },
 ]
+
+function showDuration(timing: { start: number; end: number | null } | null): string {
+  if (timing === null || timing.end === null) {
+    return 'N/A'
+  } else {
+    const duration = timing.end - timing.start
+    return `${duration.toFixed(1)}s`
+  }
+}
 </script>
 
 <template>
@@ -50,6 +59,15 @@ const columns = [
           </a>
         </I18nT>
       </p>
+      <details>
+        <summary>{{ t('timing.summary') }}</summary>
+        <ul>
+          <li v-for="(adaptationTiming, index) in adaptationBatch.timing.adaptations">
+            {{ t('timing.adaptation', { index: index + 1 }) }} {{ showDuration(adaptationTiming) }}
+          </li>
+        </ul>
+      </details>
+
       <h1>{{ t('inputs') }}</h1>
       <AdaptableExercisePreview
         v-for="(exercise, index) in adaptationBatch.exercises"
@@ -69,6 +87,9 @@ en:
   download: Download {0} or {1}
   standaloneHtml: standalone HTML
   jsonDataForAdaptedExercises: JSON data for adapted exercises
+  timing:
+    summary: Click to see timing information
+    adaptation: "Adaptation {index}:"
   inputs: Inputs
 fr:
   createdBy: "Créé par :"
@@ -76,5 +97,8 @@ fr:
   download: Télécharger {0} ou {1}
   standaloneHtml: le HTML autonome
   jsonDataForAdaptedExercises: les données JSON des exercices adaptés
+  timing:
+    summary: Cliquez pour voir les informations de chronométrage
+    adaptation: "Adaptation {index} :"
   inputs: Entrées
 </i18n>

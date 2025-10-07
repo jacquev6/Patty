@@ -58,7 +58,9 @@ describe('The extraction batch creation page', () => {
     cy.location('pathname').should('eq', '/extraction-batch-1')
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
     cy.get('h3 span.inProgress:contains("in progress")', { timeout: 10000 }).should('not.exist')
-    cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")', { timeout: 10000 }).should('exist')
+    cy.get('p:contains("Exercise class VraiFaux does not have adaptation settings yet.")', { timeout: 10000 }).should(
+      'exist',
+    )
     cy.get('button:contains("Full screen")').should('have.length', 2)
 
     cy.visit('/new-adaptation-batch')

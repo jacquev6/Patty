@@ -1493,6 +1493,7 @@ export interface components {
       /** Needsrefresh */
       needsRefresh: boolean
       strategy: components['schemas']['ApiStrategy-Output']
+      timing: components['schemas']['patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing']
     }
     /** GetAdaptationBatchesResponse */
     GetAdaptationBatchesResponse: {
@@ -1518,6 +1519,7 @@ export interface components {
         | null
       /** Needsrefresh */
       needsRefresh: boolean
+      timing: components['schemas']['patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing']
     }
     /** GetClassificationBatchesResponse */
     GetClassificationBatchesResponse: {
@@ -2383,6 +2385,13 @@ export interface components {
       /** Text */
       text: string
     }
+    /** TimingData */
+    TimingData: {
+      /** End */
+      end: number | null
+      /** Start */
+      start: number
+    }
     /** UnknownError */
     UnknownError: {
       /**
@@ -2469,6 +2478,11 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
+    /** Timing */
+    patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+    }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
       /** Adaptationstatus */
@@ -2499,6 +2513,12 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
+    /** Timing */
+    patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+      classification: components['schemas']['TimingData'] | null
+    }
     /** Page */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
       /** Assistantresponse */
@@ -2517,6 +2537,7 @@ export interface components {
       }
       /** Pagenumber */
       pageNumber: number
+      timing: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing']
     }
     /** Exercise */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise: {
@@ -2547,6 +2568,13 @@ export interface components {
       }
       /** Pagenumber */
       pageNumber: number | null
+    }
+    /** Timing */
+    patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+      classification: components['schemas']['TimingData'] | null
+      extraction: components['schemas']['TimingData'] | null
     }
     /** Textbook */
     patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {

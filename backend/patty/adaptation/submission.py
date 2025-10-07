@@ -46,27 +46,29 @@ async def submit_adaptation(adaptation: db.Adaptation) -> None:
     # (re-submitting failing adaptation again and again)
     try:
         logs.log(f"Submitting adaptation {adaptation.id}")
-        with logs.timer() as t:
+        with logs.timer() as timing:
             response = await adaptation.model.complete(messages, response_format)
     except llm.InvalidJsonLlmException as error:
-        logs.log(f"Error 'invalid JSON' on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
+        logs.log(f"Error 'invalid JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
-        logs.log(f"Error 'not JSON' on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
+        logs.log(f"Error 'not JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [error.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
     except Exception:
-        logs.log(f"UNEXPECTED ERROR on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
+        logs.log(f"UNEXPECTED ERROR on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
         traceback.print_exc()
     else:
-        logs.log(f"Success on adaptation {adaptation.id} in {t.elapsed:.1f} seconds")
+        logs.log(f"Success on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         adaptation.raw_llm_conversations = [response.raw_conversation]
         adaptation.initial_assistant_response = assistant_responses.Success(
             kind="success", exercise=Exercise.model_validate(response.message.content.model_dump())
         )
+    finally:
+        adaptation.initial_timing = timing

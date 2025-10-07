@@ -43,6 +43,15 @@ async function submitAdaptationsWithRecentSettings() {
 
   emit('batch-updated')
 }
+
+function showDuration(timing: { start: number; end: number | null } | null): string {
+  if (timing === null || timing.end === null) {
+    return 'N/A'
+  } else {
+    const duration = timing.end - timing.start
+    return `${duration.toFixed(1)}s`
+  }
+}
 </script>
 
 <template>
@@ -110,6 +119,16 @@ async function submitAdaptationsWithRecentSettings() {
       </a>
     </I18nT>
   </p>
+  <details>
+    <summary>{{ t('timing.summary') }}</summary>
+    <ul>
+      <li>{{ t('timing.classification') }} {{ showDuration(classificationBatch.timing.classification) }}</li>
+      <li v-for="(adaptationTiming, index) in classificationBatch.timing.adaptations">
+        {{ t('timing.adaptation', { index: index + 1 }) }} {{ showDuration(adaptationTiming) }}
+      </li>
+    </ul>
+  </details>
+
   <h1>{{ t('inputs') }}</h1>
   <template v-for="(exercise, index) in classificationBatch.exercises">
     <AdaptableExercisePreview
@@ -141,6 +160,10 @@ en:
   tsvDataForClassifiedExercises: TSV data for classified exercises
   jsonDataForAdaptedExercises: JSON data for adapted exercises
   inputs: Inputs
+  timing:
+    summary: Click to see timing information
+    classification: "Classification:"
+    adaptation: "Adaptation {index}:"
 fr:
   settings: Paramètres
   createdBy: "Créé par :"
@@ -158,4 +181,8 @@ fr:
   tsvDataForClassifiedExercises: les données TSV des exercices classifiés
   jsonDataForAdaptedExercises: les données JSON des exercices adaptés
   inputs: Entrées
+  timing:
+    summary: Cliquez pour voir les informations de chronométrage
+    classification: "Classification :"
+    adaptation: "Adaptation {index} :"
 </i18n>

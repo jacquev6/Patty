@@ -1,5 +1,4 @@
 import contextlib
-import dataclasses
 import datetime
 import time
 import typing
@@ -7,27 +6,27 @@ import typing
 # @todo Use standard `logging` module
 
 from . import settings
+from .api_utils import ApiModel
 
 
-@dataclasses.dataclass
-class _Timer:
+class TimingData(ApiModel):
     start: float
     end: float | None
 
     @property
-    def elapsed(self) -> float:
+    def elapsed(self) -> float | None:
         if self.end is None:
-            raise RuntimeError("Timer has not been stopped yet")
+            return None
         return self.end - self.start
 
 
 @contextlib.contextmanager
-def timer() -> typing.Generator[_Timer, None, None]:
-    t = _Timer(start=time.perf_counter(), end=None)
+def timer() -> typing.Generator[TimingData, None, None]:
+    t = TimingData(start=time.time(), end=None)
     try:
         yield t
     finally:
-        t.end = time.perf_counter()
+        t.end = time.time()
 
 
 def log(message: str) -> None:

@@ -439,6 +439,7 @@ async def post_textbook_range(
                 run_classification=True,
                 model_for_adaptation=req.model_for_adaptation,
                 assistant_response=None,
+                timing=None,
             )
         )
 

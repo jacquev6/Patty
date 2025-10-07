@@ -7,6 +7,7 @@ from .. import adaptation
 from .. import classification
 from .. import database_utils
 from .. import exercises
+from .. import logs
 from .. import sandbox
 from ..api_utils import ApiModel, get_by_id, paginate, assert_isinstance
 
@@ -46,6 +47,7 @@ def create_classification_batch(
             at=now, sandbox_classification_batch=classification_batch
         ),
         model_for_adaptation=req.model_for_adaptation,
+        timing=None,
     )
     session.add(classification_chunk)
 
@@ -82,6 +84,12 @@ class GetClassificationBatchResponse(ApiModel):
 
     exercises: list[Exercise]
 
+    class Timing(ApiModel):
+        classification: logs.TimingData | None
+        adaptations: list[logs.TimingData | None]
+
+    timing: Timing
+
 
 @router.get("/classification-batches/{id}")
 async def get_classification_batch(
@@ -89,6 +97,10 @@ async def get_classification_batch(
 ) -> GetClassificationBatchResponse:
     classification_batch = get_by_id(session, sandbox.classification.SandboxClassificationBatch, id)
     needs_refresh = False
+
+    timing = GetClassificationBatchResponse.Timing(
+        classification=classification_batch.classification_chunk_creation.classification_chunk.timing, adaptations=[]
+    )
 
     api_exercises: list[GetClassificationBatchResponse.Exercise] = []
     for classification_ in classification_batch.classification_chunk_creation.classification_chunk.classifications:
@@ -101,6 +113,8 @@ async def get_classification_batch(
             if latest_classification is None or latest_classification.exercise_class is None
             else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
         )
+
+        timing.adaptations.append(latest_adaptation.initial_timing if latest_adaptation is not None else None)
 
         exercise_class = (
             latest_classification.exercise_class.name
@@ -165,6 +179,7 @@ async def get_classification_batch(
         created_by=classification_batch.created_by,
         model_for_adaptation=classification_batch.model_for_adaptation,
         exercises=api_exercises,
+        timing=timing,
     )
 
 
@@ -191,6 +206,7 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
                     model=classification_batch.model_for_adaptation,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
+                    initial_timing=None,
                     adjustments=[],
                     manual_edit=None,
                     approved_by=None,
@@ -224,6 +240,7 @@ def put_classification_batch_model_for_adaptation(
                     model=classification_batch.model_for_adaptation,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
+                    initial_timing=None,
                     adjustments=[],
                     manual_edit=None,
                     approved_by=None,

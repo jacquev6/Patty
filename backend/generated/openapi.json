@@ -2227,6 +2227,9 @@
           },
           "strategy": {
             "$ref": "#/components/schemas/ApiStrategy-Output"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing"
           }
         },
         "required": [
@@ -2234,7 +2237,8 @@
           "needsRefresh",
           "createdBy",
           "strategy",
-          "exercises"
+          "exercises",
+          "timing"
         ],
         "title": "GetAdaptationBatchResponse",
         "type": "object"
@@ -2316,6 +2320,9 @@
           "needsRefresh": {
             "title": "Needsrefresh",
             "type": "boolean"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing"
           }
         },
         "required": [
@@ -2323,7 +2330,8 @@
           "needsRefresh",
           "createdBy",
           "modelForAdaptation",
-          "exercises"
+          "exercises",
+          "timing"
         ],
         "title": "GetClassificationBatchResponse",
         "type": "object"
@@ -4574,6 +4582,32 @@
         ],
         "type": "object"
       },
+      "TimingData": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          },
+          "start": {
+            "title": "Start",
+            "type": "number"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "TimingData",
+        "type": "object"
+      },
       "UnknownError": {
         "additionalProperties": false,
         "properties": {
@@ -4790,6 +4824,30 @@
         "title": "Exercise",
         "type": "object"
       },
+      "patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptations": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TimingData"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Adaptations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "adaptations"
+        ],
+        "title": "Timing",
+        "type": "object"
+      },
       "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
         "additionalProperties": false,
         "properties": {
@@ -4886,6 +4944,41 @@
         "title": "Exercise",
         "type": "object"
       },
+      "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptations": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TimingData"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Adaptations",
+            "type": "array"
+          },
+          "classification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimingData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "classification",
+          "adaptations"
+        ],
+        "title": "Timing",
+        "type": "object"
+      },
       "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page": {
         "additionalProperties": false,
         "properties": {
@@ -4929,13 +5022,17 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing"
           }
         },
         "required": [
           "pageNumber",
           "imagesUrls",
           "assistantResponse",
-          "exercises"
+          "exercises",
+          "timing"
         ],
         "title": "Page",
         "type": "object"
@@ -5034,6 +5131,52 @@
           "adaptationStatus"
         ],
         "title": "Exercise",
+        "type": "object"
+      },
+      "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptations": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TimingData"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Adaptations",
+            "type": "array"
+          },
+          "classification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimingData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extraction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimingData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "extraction",
+          "classification",
+          "adaptations"
+        ],
+        "title": "Timing",
         "type": "object"
       },
       "patty__api_router__textbooks__GetTextbookPageResponse__Textbook": {

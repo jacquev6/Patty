@@ -10,6 +10,7 @@ from .. import classification
 from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
+from .. import logs
 from .. import sandbox
 from .. import textbooks
 from ..any_json import JsonDict
@@ -269,6 +270,7 @@ async def post_adaptation_batch(
                 exercise=exercise,
                 raw_llm_conversations=[],
                 initial_assistant_response=None,
+                initial_timing=None,
                 adjustments=[],
                 manual_edit=None,
                 approved_by=None,
@@ -292,12 +294,18 @@ class GetAdaptationBatchResponse(ApiModel):
 
     exercises: list[Exercise]
 
+    class Timing(ApiModel):
+        adaptations: list[logs.TimingData | None]
+
+    timing: Timing
+
 
 @router.get("/adaptation-batches/{id}")
 async def get_adaptation_batch(id: str, session: database_utils.SessionDependable) -> GetAdaptationBatchResponse:
     adaptation_batch = get_by_id(session, sandbox.adaptation.SandboxAdaptationBatch, id)
 
     api_exercises: list[GetAdaptationBatchResponse.Exercise] = []
+    timing = GetAdaptationBatchResponse.Timing(adaptations=[])
     needs_refresh = False
     for adaptation_creation in adaptation_batch.adaptation_creations:
         adaptation_status = previewable_exercise.make_api_adaptation_status(adaptation_creation.exercise_adaptation)
@@ -322,12 +330,15 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
             )
         )
 
+        timing.adaptations.append(adaptation_creation.exercise_adaptation.initial_timing)
+
     return GetAdaptationBatchResponse(
         id=str(adaptation_batch.id),
         needs_refresh=needs_refresh,
         created_by=adaptation_batch.created_by,
         strategy=make_api_strategy(adaptation_batch.settings, adaptation_batch.model),
         exercises=api_exercises,
+        timing=timing,
     )
 
 
@@ -409,6 +420,7 @@ def put_adaptable_exercise_class(
                     exercise=exercise,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
+                    initial_timing=None,
                     adjustments=[],
                     manual_edit=None,
                     approved_by=None,

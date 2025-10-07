@@ -14,6 +14,7 @@ from ..any_json import JsonDict
 from ..classification import ClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises import ExerciseCreation, ExerciseImageCreation, ExerciseLocationMaybePageAndNumber
+from ..logs import TimingData
 
 
 class PdfFile(OrmBase, CreatedByUserMixin):
@@ -99,6 +100,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         run_classification: bool,
         model_for_adaptation: adaptation.llm.ConcreteModel | None,
         assistant_response: assistant_responses.Response | None,
+        timing: TimingData | None,
     ) -> None:
         super().__init__()
         self.created = created
@@ -109,6 +111,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         self.run_classification = run_classification
         self.model_for_adaptation = model_for_adaptation
         self.assistant_response = assistant_response
+        self.timing = timing
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -152,6 +155,22 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
             self._assistant_response = sql.null()
         else:
             self._assistant_response = value.model_dump()
+
+    _timing: orm.Mapped[JsonDict | None] = orm.mapped_column("timing", sql.JSON, nullable=True)
+
+    @property
+    def timing(self) -> TimingData | None:
+        if self._timing is None:
+            return None
+        else:
+            return TimingData.model_validate(self._timing)
+
+    @timing.setter
+    def timing(self, value: TimingData | None) -> None:
+        if value is None:
+            self._timing = sql.null()
+        else:
+            self._timing = value.model_dump()
 
     exercise_creations__unordered: orm.Mapped[list[ExerciseCreationByPageExtraction]] = orm.relationship(
         back_populates="page_extraction"
