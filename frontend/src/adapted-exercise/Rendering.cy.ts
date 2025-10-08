@@ -857,7 +857,7 @@ describe('FreeTextInput', () => {
     cy.get('@input').should('have.text', 'Hello, world!')
   })
 
-  it('refuses new lines', () => {
+  it('handles new lines', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -877,7 +877,7 @@ describe('FreeTextInput', () => {
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
     cy.get('br').should('not.exist')
-    cy.get('@input').should('have.text', 'Helloworld')
+    cy.get('@input').should('have.text', 'Hello\nworld\n')
   })
 
   it('allows navigating exercise pages using arrow keys', () => {
