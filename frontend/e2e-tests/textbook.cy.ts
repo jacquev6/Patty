@@ -173,16 +173,15 @@ describe('The edition form for textbooks - with a PDF range', () => {
     loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
+    cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
   })
 
   it('has adaptation pages that look like this', () => {
-    cy.get('li a:contains("40")').click()
     cy.get('a:contains("View details")').eq(0).click()
     screenshot(`adaptation`)
   })
 
   it('fixes exercise class', () => {
-    cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
     cy.get('a:contains("Page 40")').should('have.attr', 'href', '/textbook-1/page-40').click()
@@ -198,7 +197,6 @@ describe('The edition form for textbooks - with a PDF range', () => {
   })
 
   it('removes and re-adds PDF pages', () => {
-    cy.get('li a:contains("40")').click()
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
@@ -214,8 +212,6 @@ describe('The edition form for textbooks - with a PDF range', () => {
   })
 
   it('approves and unapproves exercises', () => {
-    cy.get('li a:contains("40")').click()
-
     // Make sure all exercises are adapted
     cy.get('span.edit').eq(4).click()
     cy.get('select').eq(1).select('CocheMot')
