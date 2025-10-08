@@ -83,7 +83,7 @@ const llmResponseSpecificationFormalism = computed({
             multipleChoicesInput: true,
             selectableInput: true,
             swappableInput: true,
-            editableTextInput: false,
+            editableTextInput: true,
             splitWordInput: true,
           },
           referenceComponents: {
@@ -103,18 +103,11 @@ const llmResponseSpecificationFormalism = computed({
 })
 
 const schema = computedAsync(async () => {
-  if (
-    strategy.value.settings.responseSpecification.format === 'json' &&
-    strategy.value.settings.responseSpecification.formalism === 'json-schema'
-  ) {
-    const response = await client.POST('/api/adaptation-llm-response-schema', {
-      body: strategy.value.settings.responseSpecification,
-    })
-    assert(response.data !== undefined)
-    return response.data
-  } else {
-    return null
-  }
+  const response = await client.POST('/api/adaptation-llm-response-schema', {
+    body: strategy.value.settings.responseSpecification,
+  })
+  assert(response.data !== undefined)
+  return response.data
 }, {})
 
 const settingsName = computed({
@@ -328,11 +321,11 @@ const jsonSchemaFormalismIsDisabled = computed(() => {
         </p>
       </template>
     </FixedColumns>
-    <AdaptedExerciseJsonSchemaDetails v-if="schema !== null" :schema />
   </template>
   <template v-else>
     <p>{{ t('unknownResponseSpec') }}: {{ ((f: never) => f)(strategy.settings.responseSpecification) }}</p>
   </template>
+  <AdaptedExerciseJsonSchemaDetails v-if="schema !== null" :schema />
   <h3>{{ t('systemPrompt') }}</h3>
   <MarkDown v-if="disabled" :markdown="strategy.settings.systemPrompt" />
   <TextArea v-else data-cy="system-prompt" v-model="strategy.settings.systemPrompt"></TextArea>

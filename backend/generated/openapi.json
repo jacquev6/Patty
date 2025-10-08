@@ -5612,7 +5612,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/JsonSchemaLlmResponseSpecification"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/JsonFromTextLlmResponseSpecification"
+                  },
+                  {
+                    "$ref": "#/components/schemas/JsonObjectLlmResponseSpecification"
+                  },
+                  {
+                    "$ref": "#/components/schemas/JsonSchemaLlmResponseSpecification"
+                  }
+                ],
+                "title": "Response Specification"
               }
             }
           },

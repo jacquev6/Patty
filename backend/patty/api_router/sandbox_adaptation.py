@@ -115,7 +115,7 @@ def get_available_adaptation_llm_models() -> (
 
 @router.post("/adaptation-llm-response-schema")
 def make_adaptation_llm_response_schema(
-    response_specification: adaptation.strategy.JsonSchemaLlmResponseSpecification,
+    response_specification: adaptation.strategy.ConcreteLlmResponseSpecification,
 ) -> JsonDict:
     return response_specification.make_response_schema()
 

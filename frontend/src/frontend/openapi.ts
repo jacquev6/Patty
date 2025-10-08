@@ -2813,7 +2813,10 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['JsonSchemaLlmResponseSpecification']
+        'application/json':
+          | components['schemas']['JsonFromTextLlmResponseSpecification']
+          | components['schemas']['JsonObjectLlmResponseSpecification']
+          | components['schemas']['JsonSchemaLlmResponseSpecification']
       }
     }
     responses: {
