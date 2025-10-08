@@ -54,6 +54,7 @@ describe('Patty', () => {
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     cy.get('a:contains("View details")').should('have.attr', 'href', '/adaptation-2')
     checkImagesFrontend(15)
+    cy.wait(500) // Give time to display images
     screenshot('images-sandbox-batch-frontend-1')
     cy.get('.column').eq(1).scrollTo('bottom')
     screenshot('images-sandbox-batch-frontend-2')
@@ -108,7 +109,7 @@ describe('Patty', () => {
     cy.get('li a:contains("1")').click()
     cy.contains('in progress', { timeout: 10000 }).should('not.exist')
     checkImagesFrontend(4)
-    cy.wait(500) // For Firefox
+    cy.wait(500) // Give time to display images
     screenshot('images-textbook-frontend')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
