@@ -2497,15 +2497,11 @@
           "number": {
             "title": "Number",
             "type": "integer"
-          },
-          "textbook": {
-            "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookPageResponse__Textbook"
           }
         },
         "required": [
           "number",
           "needsRefresh",
-          "textbook",
           "exercises"
         ],
         "title": "GetTextbookPageResponse",
@@ -2617,7 +2613,7 @@
         "properties": {
           "textbooks": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbooksResponse__Textbook"
+              "$ref": "#/components/schemas/Textbook"
             },
             "title": "Textbooks",
             "type": "array"
@@ -4582,6 +4578,72 @@
         ],
         "type": "object"
       },
+      "Textbook": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "createdBy": {
+            "title": "Createdby",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "pagesCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagescount"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "title",
+          "publisher",
+          "year",
+          "pagesCount"
+        ],
+        "title": "Textbook",
+        "type": "object"
+      },
       "TimingData": {
         "additionalProperties": false,
         "properties": {
@@ -5179,37 +5241,6 @@
         "title": "Timing",
         "type": "object"
       },
-      "patty__api_router__textbooks__GetTextbookPageResponse__Textbook": {
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "pagesCount": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagescount"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "pagesCount"
-        ],
-        "title": "Textbook",
-        "type": "object"
-      },
       "patty__api_router__textbooks__GetTextbookResponse__Range__Page": {
         "additionalProperties": false,
         "properties": {
@@ -5237,72 +5268,6 @@
           "removedFromTextbook"
         ],
         "title": "Page",
-        "type": "object"
-      },
-      "patty__api_router__textbooks__GetTextbooksResponse__Textbook": {
-        "additionalProperties": false,
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "title": "Createdat",
-            "type": "string"
-          },
-          "createdBy": {
-            "title": "Createdby",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "pagesCount": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagescount"
-          },
-          "publisher": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Publisher"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Year"
-          }
-        },
-        "required": [
-          "id",
-          "createdBy",
-          "createdAt",
-          "title",
-          "publisher",
-          "year",
-          "pagesCount"
-        ],
-        "title": "Textbook",
         "type": "object"
       },
       "patty__extraction__assistant_responses__Success": {

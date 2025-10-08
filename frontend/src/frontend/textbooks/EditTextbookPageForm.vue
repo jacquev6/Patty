@@ -2,13 +2,14 @@
 import { useI18n } from 'vue-i18n'
 import { computed, ref } from 'vue'
 
-import { useAuthenticatedClient, type TextbookPage } from '../ApiClient'
+import { useAuthenticatedClient, type Textbook, type TextbookPage } from '../ApiClient'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 import BugMarker from '@/reusable/BugMarker.vue'
 import WhiteSpace from '@/reusable/WhiteSpace.vue'
 
 const props = defineProps<{
-  textbookPage: TextbookPage
+  textbook: Textbook
+  page: TextbookPage
 }>()
 
 const emit = defineEmits<{
@@ -18,25 +19,33 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const client = useAuthenticatedClient()
 
-const textbook = computed(() => props.textbookPage.textbook)
-
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
-    params: { path: { textbook_id: textbook.value.id, exercise_id }, query: { removed } },
+    params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
 
-const previousPage = computed(() => (props.textbookPage.number <= 1 ? null : { number: props.textbookPage.number - 1 }))
-const nextPage = computed(() =>
-  textbook.value.pagesCount !== null && props.textbookPage.number >= textbook.value.pagesCount
-    ? null
-    : { number: props.textbookPage.number + 1 },
-)
+const previousPage = computed(() => {
+  const pagesWithExercisesBefore = props.textbook.pagesWithExercises.filter((n) => n < props.page.number)
+  if (pagesWithExercisesBefore.length === 0) {
+    return null
+  } else {
+    return { number: Math.max(...pagesWithExercisesBefore) }
+  }
+})
+const nextPage = computed(() => {
+  const pagesWithExercisesAfter = props.textbook.pagesWithExercises.filter((n) => n > props.page.number)
+  if (pagesWithExercisesAfter.length === 0) {
+    return null
+  } else {
+    return { number: Math.min(...pagesWithExercisesAfter) }
+  }
+})
 
 const allExercisesHaveBeenApproved = computed(
   () =>
-    props.textbookPage.exercises.filter(
+    props.page.exercises.filter(
       (e) => e.kind === 'adaptable' && e.adaptationStatus.kind === 'success' && e.adaptationStatus.approved === null,
     ).length === 0,
 )
@@ -52,7 +61,7 @@ const exercisesToShow = computed({
 </script>
 
 <template>
-  <h1>{{ t('titleAndPage', { title: textbook.title, pageNumber: textbookPage.number }) }}</h1>
+  <h1>{{ t('titleAndPage', { title: textbook.title, pageNumber: page.number }) }}</h1>
   <p>
     <span v-if="!previousPage">{{ t('noPreviousPage') }}</span>
     <RouterLink
@@ -87,7 +96,7 @@ const exercisesToShow = computed({
       {{ t('showAllExercises') }}
     </label>
   </p>
-  <template v-for="exercise in textbookPage.exercises">
+  <template v-for="exercise in page.exercises">
     <template
       v-if="
         exercisesToShow === 'all' ||
@@ -131,10 +140,10 @@ label.disabled {
 <i18n>
 en:
   titleAndPage: '{title}, page {pageNumber}'
-  noPreviousPage: 'No previous page'
-  noNextPage: 'No next page'
-  previousPage: 'Previous page: {number}'
-  nextPage: 'Next page: {number}'
+  noPreviousPage: 'No previous page with exercises'
+  noNextPage: 'No next page with exercises'
+  previousPage: 'Previous page with exercises: {number}'
+  nextPage: 'Next page with exercises: {number}'
   showOnlyExercisesNotYetApproved: 'Show only exercises not yet approved'
   showAllExercises: 'Show all exercises'
   exercise: Exercise
@@ -143,10 +152,10 @@ en:
   removed: removed
 fr:
   titleAndPage: '{title}, page {pageNumber}'
-  noPreviousPage: 'Pas de page précédente'
-  previousPage: 'Page précédente : {number}'
-  noNextPage: 'Pas de page suivante'
-  nextPage: 'Page suivante : {number}'
+  noPreviousPage: 'Pas de page précédente avec des exercices'
+  previousPage: 'Page précédente avec des exercices : {number}'
+  noNextPage: 'Pas de page suivante avec des exercices'
+  nextPage: 'Page suivante avec des exercices : {number}'
   showOnlyExercisesNotYetApproved: 'Afficher uniquement les exercices pas encore validés'
   showAllExercises: 'Afficher tous les exercices'
   exercise: Exercice

@@ -1569,7 +1569,6 @@ export interface components {
       needsRefresh: boolean
       /** Number */
       number: number
-      textbook: components['schemas']['patty__api_router__textbooks__GetTextbookPageResponse__Textbook']
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1599,7 +1598,7 @@ export interface components {
     /** GetTextbooksResponse */
     GetTextbooksResponse: {
       /** Textbooks */
-      textbooks: components['schemas']['patty__api_router__textbooks__GetTextbooksResponse__Textbook'][]
+      textbooks: components['schemas']['Textbook'][]
     }
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -2385,6 +2384,26 @@ export interface components {
       /** Text */
       text: string
     }
+    /** Textbook */
+    Textbook: {
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Createdby */
+      createdBy: string
+      /** Id */
+      id: string
+      /** Pagescount */
+      pagesCount: number | null
+      /** Publisher */
+      publisher: string | null
+      /** Title */
+      title: string
+      /** Year */
+      year: number | null
+    }
     /** TimingData */
     TimingData: {
       /** End */
@@ -2576,15 +2595,6 @@ export interface components {
       classification: components['schemas']['TimingData'] | null
       extraction: components['schemas']['TimingData'] | null
     }
-    /** Textbook */
-    patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {
-      /** Id */
-      id: string
-      /** Pagescount */
-      pagesCount: number | null
-      /** Title */
-      title: string
-    }
     /** Page */
     patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
       /** Id */
@@ -2595,26 +2605,6 @@ export interface components {
       pageNumber: number
       /** Removedfromtextbook */
       removedFromTextbook: boolean
-    }
-    /** Textbook */
-    patty__api_router__textbooks__GetTextbooksResponse__Textbook: {
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Createdby */
-      createdBy: string
-      /** Id */
-      id: string
-      /** Pagescount */
-      pagesCount: number | null
-      /** Publisher */
-      publisher: string | null
-      /** Title */
-      title: string
-      /** Year */
-      year: number | null
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {

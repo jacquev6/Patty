@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type TextbookPage, useAuthenticatedClient } from '@/frontend/ApiClient'
+import { type Textbook, type TextbookPage, useAuthenticatedClient } from '@/frontend/ApiClient'
 import EditTextbookPageForm from './EditTextbookPageForm.vue'
 import assert from '$/assert'
 import AutoRefresh from '@/frontend/basic/AutoRefresh.vue'
@@ -11,19 +11,31 @@ const props = defineProps<{
 
 const client = useAuthenticatedClient()
 
+type Data = {
+  textbook: Textbook
+  page: TextbookPage
+  needsRefresh: boolean
+}
+
 async function load() {
-  const response = await client.GET(`/api/textbooks/{id}/pages/{number}`, {
+  const textbookPromise = client.GET('/api/textbooks/{id}', {
+    params: { path: { id: props.textbookId } },
+  })
+  const pagePromise = client.GET(`/api/textbooks/{id}/pages/{number}`, {
     params: { path: { id: props.textbookId, number: props.pageNumber } },
   })
-  if (response.response.status === 404) {
+
+  const [textbookResponse, pageResponse] = await Promise.all([textbookPromise, pagePromise])
+  if (textbookResponse.response.status === 404 || pageResponse.response.status === 404) {
     return null
   } else {
-    assert(response.data !== undefined)
-    return response.data
+    assert(textbookResponse.data !== undefined)
+    assert(pageResponse.data !== undefined)
+    return { textbook: textbookResponse.data, page: pageResponse.data, needsRefresh: pageResponse.data.needsRefresh }
   }
 }
 
-function breadcrumbs({ textbook: { title } }: TextbookPage) {
+function breadcrumbs({ textbook: { title } }: Data) {
   return [
     { textKey: 'textbooks' },
     { textKey: 'existingTextbook', textArgs: { title }, to: { name: 'textbook', params: { id: props.textbookId } } },
@@ -34,8 +46,8 @@ function breadcrumbs({ textbook: { title } }: TextbookPage) {
 
 <template>
   <AutoRefresh :reloadOnChanges="{ textbookId, pageNumber }" :load :breadcrumbs>
-    <template v-slot="{ data: textbookPage, refresh }">
-      <EditTextbookPageForm :textbookPage @textbookUpdated="refresh" />
+    <template v-slot="{ data: { textbook, page }, refresh }">
+      <EditTextbookPageForm :textbook :page @textbookUpdated="refresh" />
     </template>
   </AutoRefresh>
 </template>
