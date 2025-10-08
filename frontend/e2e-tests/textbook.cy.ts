@@ -213,7 +213,7 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('a:contains("Dummy Textbook Title")').click()
   })
 
-  it('approves exercises', () => {
+  it('approves and unapproves exercises', () => {
     cy.get('li a:contains("40")').click()
 
     // Make sure all exercises are adapted
@@ -230,6 +230,11 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('h2:contains("Exercise")').should('have.length', 3)
     cy.get('label:contains("Show all exercises") input').check()
     cy.get('h2:contains("Exercise")').should('have.length', 4)
+    cy.get('button:contains("Unapprove")').eq(0).click()
+    cy.get('label:contains("Show only exercises not yet approved") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 4)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('h2:contains("Exercise")').should('have.length', 3)
     cy.get('div.main').scrollTo('top')
     screenshot('approved-exercise')
     cy.get('label:contains("Show only exercises not yet approved") input').check()

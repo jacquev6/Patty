@@ -56,10 +56,10 @@ const pageNumber = computed(() => props.exercise.pageNumber)
 
 const exerciseNumber = computed(() => props.exercise.exerciseNumber)
 
-async function approve(adaptationId: string) {
+async function approve(adaptationId: string, approved: boolean) {
   await client.PUT('/api/adaptations/{id}/approved', {
     params: { path: { id: adaptationId } },
-    body: { approved: true, by: identifiedUser.identifier },
+    body: { approved, by: identifiedUser.identifier },
   })
   emit('batch-updated')
 }
@@ -118,15 +118,12 @@ async function approve(adaptationId: string) {
     </template>
   </component>
 
-  <template
-    v-if="
-      context === 'textbookByBatch' &&
-      exercise.adaptationStatus.kind === 'success' &&
-      exercise.adaptationStatus.approved === null
-    "
-  >
-    <p>
-      <button @click="approve(exercise.adaptationStatus.id)">{{ t('approve') }}</button>
+  <template v-if="context === 'textbookByBatch' && exercise.adaptationStatus.kind === 'success'">
+    <p v-if="exercise.adaptationStatus.approved === null">
+      <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>
+    </p>
+    <p v-else>
+      <button @click="approve(exercise.adaptationStatus.id, false)">{{ t('unapprove') }}</button>
     </p>
   </template>
 
@@ -182,6 +179,7 @@ en:
   viewDetails: View details and make adjustments
   remove: Remove
   approve: Approve
+  unapprove: Unapprove
   approved: "Approved by {by}"
 fr:
   input: Entrée
@@ -194,5 +192,6 @@ fr:
   viewDetails: Voir les détails et faire des ajustements
   remove: Enlever
   approve: Valider
+  unapprove: Invalider
   approved: "Validé par {by}"
 </i18n>
