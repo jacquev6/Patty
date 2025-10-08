@@ -60,6 +60,15 @@ const columns = [
   { name: 'col-1', width: 1 },
   { name: 'col-2', width: 2 },
 ]
+
+function showDuration(timing: { start: number; end: number | null } | null): string {
+  if (timing === null || timing.end === null) {
+    return 'N/A'
+  } else {
+    const duration = timing.end - timing.start
+    return `${duration.toFixed(1)}s`
+  }
+}
 </script>
 
 <template>
@@ -162,6 +171,21 @@ const columns = [
         </template>
       </p>
       <h1>{{ t('result') }}</h1>
+      <details>
+        <summary>{{ t('timing.summary') }}</summary>
+        <ul>
+          <li v-for="page in extractionBatch.pages">
+            {{ t('page', page) }}
+            <ul>
+              <li>{{ t('timing.extraction') }} {{ showDuration(page.timing.extraction) }}</li>
+              <li>{{ t('timing.classification') }} {{ showDuration(page.timing.classification) }}</li>
+              <li v-for="(adaptationTiming, index) in page.timing.adaptations">
+                {{ t('timing.adaptation', { index: index + 1 }) }} {{ showDuration(adaptationTiming) }}
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </details>
       <template v-for="page in extractionBatch.pages" :key="page.pageNumber">
         <h2>
           {{ t('page', page) }}
@@ -236,6 +260,11 @@ en:
   runAdaptationUsingModel: "and model"
   no: no
   result: Result
+  timing:
+    summary: Click to see timing information
+    extraction: "Extraction:"
+    classification: "Classification:"
+    adaptation: "Adaptation {index}:"
   page: Page {pageNumber}
   images: Images
   noImages: "None."
@@ -266,6 +295,11 @@ fr:
   runAdaptationUsingModel: "et modèle"
   no: non
   result: Résultat
+  timing:
+    summary: Cliquez pour voir les informations de chronométrage
+    extraction: "Extraction :"
+    classification: "Classification :"
+    adaptation: "Adaptation {index} :"
   page: Page {pageNumber}
   images: Images
   noImages: "Aucune."

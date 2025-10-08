@@ -5,6 +5,7 @@ import unittest
 import mistralai
 import pydantic
 
+from ... import logs
 from ... import settings
 from ...any_json import JsonDict
 from ...test_utils import costs_money
@@ -31,7 +32,14 @@ client = mistralai.Mistral(api_key=settings.MISTRALAI_API_KEY)
 
 class MistralAiModel(Model):
     provider: Literal["mistralai"]
-    name: Literal["mistral-large-2411", "mistral-small-2501"]
+    name: Literal[
+        "mistral-large-2411",
+        "mistral-medium-2505",
+        "mistral-medium-2508",
+        "mistral-small-2501",
+        "mistral-small-2503",
+        "mistral-small-2506",
+    ]
 
     async def do_complete(
         self,
@@ -42,7 +50,11 @@ class MistralAiModel(Model):
     ) -> tuple[JsonDict, str]:
         messages = list(self.__make_messages(messages_))
         response_format = self.__make_response_format(response_format_)
-        response = await client.chat.complete_async(model=self.name, messages=messages, response_format=response_format)
+        with logs.timer() as t:
+            response = await client.chat.complete_async(
+                model=self.name, messages=messages, response_format=response_format
+            )
+        logs.log_for_issue_129(f"'mistralai.Mistral.chat.complete_async' took {t.elapsed:.1f} seconds")
         raw_conversation = dict(
             method="mistralai.Mistral.chat.complete_async",
             messages=[m.model_dump() for m in messages],

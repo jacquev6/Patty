@@ -13,6 +13,7 @@ from . import strategy
 from ..any_json import JsonDict, JsonList
 from ..database_utils import CreatedByUserMixin, OrmBase, OrderBy, annotate_new_tables
 from ..exercises import Exercise, ExerciseCreation, ExerciseLocation
+from ..logs import TimingData
 
 if typing.TYPE_CHECKING:
     from ..classification import ExerciseClassCreation, Classification
@@ -146,6 +147,7 @@ class Adaptation(OrmBase):
         settings: AdaptationSettings,
         raw_llm_conversations: JsonList,
         initial_assistant_response: assistant_responses.Response | None,
+        initial_timing: TimingData | None,
         adjustments: list[assistant_responses.Adjustment],
         manual_edit: adapted.Exercise | None,
         approved_by: str | None,
@@ -158,6 +160,7 @@ class Adaptation(OrmBase):
         self.settings = settings
         self.raw_llm_conversations = raw_llm_conversations
         self.initial_assistant_response = initial_assistant_response
+        self.initial_timing = initial_timing
         self.adjustments = adjustments
         self.manual_edit = manual_edit
         self.approved_by = approved_by
@@ -204,6 +207,22 @@ class Adaptation(OrmBase):
             self._initial_assistant_response = sql.null()
         else:
             self._initial_assistant_response = value.model_dump()
+
+    _initial_timing: orm.Mapped[JsonDict | None] = orm.mapped_column("initial_timing", sql.JSON, nullable=True)
+
+    @property
+    def initial_timing(self) -> TimingData | None:
+        if self._initial_timing is None:
+            return None
+        else:
+            return TimingData.model_validate(self._initial_timing)
+
+    @initial_timing.setter
+    def initial_timing(self, value: TimingData | None) -> None:
+        if value is None:
+            self._initial_timing = sql.null()
+        else:
+            self._initial_timing = value.model_dump()
 
     _adjustments: orm.Mapped[JsonList] = orm.mapped_column("adjustments", sql.JSON)
 

@@ -173,6 +173,7 @@ def python_dependency_graph() -> None:
         ("patty", "any_json"),
         ("patty", "api_utils"),
         ("patty", "database_utils"),
+        ("patty", "logs"),
         ("patty", "settings"),
         ("patty", "version"),
         # Little interest, decrease readability
@@ -616,50 +617,54 @@ def run_submission_daemon(
 ) -> None:
     import requests
 
-    from . import database_utils
     from . import adaptation
     from . import classification
+    from . import database_utils
     from . import extraction
-
-    def log(message: str) -> None:
-        # @todo Use actual logging
-        print(datetime.datetime.now(), message, flush=True)
+    from . import logs
 
     engine = database_utils.create_engine(settings.DATABASE_URL)
 
     async def daemon() -> None:
-        log("Starting")
+        logs.log("Starting")
         last_time = time.monotonic()
         while True:
             try:
                 with database_utils.Session(engine) as session:
-                    # Do only one thing (extract OR classify OR adapt): it's easier to understand logs that way
-                    go_on = (
+                    # Do only one thing (extract XOR classify XOR adapt)
+                    # in each session to commit progress as soon as possible.
+                    done_something = (
                         len(
                             await asyncio.gather(
                                 *extraction.submission.submit_extractions(session, extraction_parallelism)
                             )
                         )
-                        == 0
+                        != 0
                     )
-                    if go_on:
-                        go_on = not classification.submission.submit_classifications(
+                    if not done_something:
+                        done_something = classification.submission.submit_classifications(
                             session, classification_parallelism
                         )
-                        if go_on:
-                            await asyncio.gather(
-                                *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                    if not done_something:
+                        done_something = (
+                            len(
+                                await asyncio.gather(
+                                    *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
+                                )
                             )
+                            != 0
+                        )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
-                    log("Calling pulse monitoring URL")
+                    logs.log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
                     requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
-                log("UNEXPECTED ERROR reached daemon level")
+                logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-            log(f"Sleeping for {pause}s...")
-            await asyncio.sleep(pause)
+            if not done_something:
+                logs.log(f"Sleeping for {pause}s...")
+                await asyncio.sleep(pause)
 
     asyncio.run(daemon())
 
@@ -736,7 +741,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20250929-121602.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251006-031603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -827,6 +832,71 @@ def migrate_data(dry_run: bool) -> None:
         data_migration.validate(session)
         if not dry_run:
             session.commit()
+
+
+@main.group()
+def issue_129() -> None:
+    pass
+
+
+@issue_129.command()
+@click.argument("adaptation_ids", type=int, nargs=-1)
+def show_settings_ids(adaptation_ids: list[int]) -> None:
+    from . import adaptation
+    from . import database_utils
+
+    settings.INVESTIGATING_ISSUE_129 = True
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    with database_utils.make_session(database_engine) as session:
+        adaptations = [session.get_one(adaptation.Adaptation, adaptation_id) for adaptation_id in adaptation_ids]
+
+        for adaptation_ in adaptations:
+            print(f"Adaptation {adaptation_.id}: settings {adaptation_.settings_id}")
+
+
+@issue_129.command()
+@click.option("--force-model", type=str, nargs=2)
+@click.option("--repeat-all", type=int, default=1)
+@click.option("--repeat-each", type=int, default=1)
+@click.option("--prompt-prefix-format", type=str, default="")
+@click.option("--exercise-prefix-format", type=str, default="")
+@click.argument("adaptation_ids", type=int, nargs=-1)
+def rerun_adaptations(
+    force_model: tuple[str, str] | None,
+    repeat_all: int,
+    repeat_each: int,
+    prompt_prefix_format: str,
+    exercise_prefix_format: str,
+    adaptation_ids: list[int],
+) -> None:
+    from . import adaptation
+    from . import database_utils
+
+    settings.INVESTIGATING_ISSUE_129 = True
+
+    database_engine = database_utils.create_engine(settings.DATABASE_URL)
+    for _index_all in range(repeat_all):
+        for adaptation_id in adaptation_ids:
+            for index_each in range(repeat_each):
+                with database_utils.make_session(database_engine) as session:
+                    adaptation_ = session.get_one(adaptation.Adaptation, adaptation_id)
+
+                    if force_model is not None:
+                        model_provider, model_name = force_model
+                        adaptation_.model = adaptation.llm.validate({"provider": model_provider, "name": model_name})
+
+                    adaptation_.settings.system_prompt = (
+                        prompt_prefix_format.format(adaptation_id) + adaptation_.settings.system_prompt
+                    )
+                    adaptation_.exercise.full_text = (
+                        exercise_prefix_format.format(index_each) + adaptation_.exercise.full_text
+                    )
+
+                    print(adaptation_.settings.system_prompt.splitlines()[0][:80] + " [...]")
+                    print(adaptation_.exercise.full_text.splitlines()[0][:80] + " [...]")
+
+                    asyncio.run(adaptation.submission.submit_adaptation(adaptation_))
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from .. import adaptation
 from ..adaptation import ExerciseClass, AdaptableExercise, AdaptationCreation
 from ..any_json import JsonDict
 from ..database_utils import OrmBase, annotate_new_tables
+from ..logs import TimingData
 
 
 class ModelForAdaptationMixin:
@@ -104,17 +105,38 @@ class ClassificationChunk(OrmBase, ModelForAdaptationMixin):
     __tablename__ = "classification_chunks"
 
     def __init__(
-        self, *, created: ClassificationChunkCreation, model_for_adaptation: adaptation.llm.ConcreteModel | None
+        self,
+        *,
+        created: ClassificationChunkCreation,
+        model_for_adaptation: adaptation.llm.ConcreteModel | None,
+        timing: TimingData | None,
     ) -> None:
         super().__init__()
         self.created = created
         self.model_for_adaptation = model_for_adaptation
+        self.timing = timing
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     created: orm.Mapped[ClassificationChunkCreation] = orm.relationship(back_populates="classification_chunk")
 
     classifications: orm.Mapped[list[ClassificationByChunk]] = orm.relationship(back_populates="classification_chunk")
+
+    _timing: orm.Mapped[JsonDict | None] = orm.mapped_column("timing", sql.JSON, nullable=True)
+
+    @property
+    def timing(self) -> TimingData | None:
+        if self._timing is None:
+            return None
+        else:
+            return TimingData.model_validate(self._timing)
+
+    @timing.setter
+    def timing(self, value: TimingData | None) -> None:
+        if value is None:
+            self._timing = sql.null()
+        else:
+            self._timing = value.model_dump()
 
 
 class ClassificationChunkCreation(OrmBase):

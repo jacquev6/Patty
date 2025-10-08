@@ -18,7 +18,6 @@ type Status = { kind: 'loading' } | { kind: 'notFound' } | { kind: 'loaded'; val
 
 const data = ref<Status>({ kind: 'loading' })
 let unmounted: boolean
-let refreshes: number
 let timerId: number | null
 
 async function refresh() {
@@ -29,18 +28,13 @@ async function refresh() {
   } else {
     data.value = { kind: 'loaded', val: val }
     if (val.needsRefresh && !unmounted) {
-      refreshes += 1
-      const duration = 500 * Math.pow(1.1, refreshes)
-      timerId = window.setTimeout(refresh, duration)
-    } else {
-      refreshes = 0
+      timerId = window.setTimeout(refresh, 1000)
     }
   }
 }
 
 onMounted(() => {
   unmounted = false
-  refreshes = 0
   timerId = null
   refresh()
 })
@@ -50,7 +44,6 @@ watch(
   () => {
     if (!unmounted) {
       data.value = { kind: 'loading' }
-      refreshes = 0
       if (timerId !== null) {
         window.clearTimeout(timerId)
         timerId = null

@@ -121,6 +121,8 @@ async def post_adaptation_adjustment(
 ) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     assert exercise_adaptation.initial_assistant_response is not None
+    exercise_adaptation.approved_by = None
+    exercise_adaptation.approved_at = None
 
     def make_assistant_message(
         assistant_response: adaptation.assistant_responses.Response,
@@ -179,6 +181,8 @@ async def post_adaptation_adjustment(
 @router.delete("/adaptations/{id}/last-adjustment")
 def delete_adaptation_last_adjustment(id: str, session: database_utils.SessionDependable) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
+    exercise_adaptation.approved_by = None
+    exercise_adaptation.approved_at = None
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)
     raw_llm_conversations.pop()
@@ -195,12 +199,16 @@ def put_adaptation_manual_edit(
 ) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     exercise_adaptation.manual_edit = req
+    exercise_adaptation.approved_by = None
+    exercise_adaptation.approved_at = None
 
 
 @router.delete("/adaptations/{id}/manual-edit")
 def delete_adaptation_manual_edit(id: str, session: database_utils.SessionDependable) -> None:
     exercise_adaptation = get_by_id(session, adaptation.Adaptation, id)
     exercise_adaptation.manual_edit = None
+    exercise_adaptation.approved_by = None
+    exercise_adaptation.approved_at = None
 
 
 class ApprovalRequest(ApiModel):

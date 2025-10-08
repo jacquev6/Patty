@@ -110,8 +110,6 @@ onBeforeUpdate(updateContent)
 
 function filterKeyDown(event: KeyboardEvent) {
   if (
-    // We don't want new lines in student answers
-    event.key === 'Enter' ||
     // Arrows are used to change the page (in 'PageNavigationControls')
     event.key === 'ArrowLeft' ||
     event.key === 'ArrowRight'

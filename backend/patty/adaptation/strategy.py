@@ -19,12 +19,18 @@ class JsonFromTextLlmResponseSpecification(JsonLlmResponseSpecification):
     def make_response_format(self) -> llm.JsonFromTextResponseFormat[adapted.Exercise]:
         return llm.JsonFromTextResponseFormat(response_type=adapted.Exercise)
 
+    def make_response_schema(self) -> JsonDict:
+        return llm.make_schema(adapted.Exercise)
+
 
 class JsonObjectLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["json-object"]
 
     def make_response_format(self) -> llm.JsonObjectResponseFormat[adapted.Exercise]:
         return llm.JsonObjectResponseFormat(response_type=adapted.Exercise)
+
+    def make_response_schema(self) -> JsonDict:
+        return llm.make_schema(adapted.Exercise)
 
 
 class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):

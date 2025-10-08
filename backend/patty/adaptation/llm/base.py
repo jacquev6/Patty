@@ -4,6 +4,7 @@ import json
 
 import pydantic
 
+from ... import logs
 from ...any_json import JsonDict
 
 
@@ -71,7 +72,7 @@ class NotJsonLlmException(LlmException):
 
 
 def try_hard_to_json_loads(s: str) -> Any:
-    preprocessed = s
+    preprocessed = s.strip()
     if preprocessed.startswith("```json") and preprocessed.endswith("```"):
         preprocessed = preprocessed[7:-3]
     elif preprocessed.startswith("```") and preprocessed.endswith("```"):
@@ -90,6 +91,8 @@ class Model(abc.ABC, pydantic.BaseModel):
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> CompletionResponse[T]:
         (raw_conversation, response) = await self.do_complete(messages, response_format)
+
+        logs.log_for_issue_129(f"Raw conversation: {json.dumps(raw_conversation)}")
 
         try:
             parsed_content = try_hard_to_json_loads(response)

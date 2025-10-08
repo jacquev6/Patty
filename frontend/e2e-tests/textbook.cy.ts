@@ -173,32 +173,36 @@ describe('The edition form for textbooks - with a PDF range', () => {
     loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
+    cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
   })
 
   it('has adaptation pages that look like this', () => {
-    cy.get('li a:contains("40")').click()
     cy.get('a:contains("View details")').eq(0).click()
     screenshot(`adaptation`)
   })
 
   it('fixes exercise class', () => {
-    cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-1').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
     cy.get('a:contains("Page 40")').should('have.attr', 'href', '/textbook-1/page-40').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("Unapprove")').should('have.length', 1)
     cy.get('span.edit').eq(1).click()
     cy.get('[data-cy="exercise-class"]').should('have.value', 'QCM')
     cy.get('[data-cy="exercise-class"]').select('CochePhrase')
     cy.get('[data-cy="exercise-class"]').should('not.exist')
     cy.get('div.busy', { timeout: 10000 }).should('exist') // This fails sometimes. @todo Fix it. There might be a race condition.
     cy.get('div.busy').should('not.exist')
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Unapprove")').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
     cy.get('a:contains("Page 40")').should('have.attr', 'href', '/textbook-1/page-40')
   })
 
   it('removes and re-adds PDF pages', () => {
-    cy.get('li a:contains("40")').click()
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
@@ -213,9 +217,7 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('a:contains("Dummy Textbook Title")').click()
   })
 
-  it('approves exercises', () => {
-    cy.get('li a:contains("40")').click()
-
+  it('approves and unapproves exercises', () => {
     // Make sure all exercises are adapted
     cy.get('span.edit').eq(4).click()
     cy.get('select').eq(1).select('CocheMot')
@@ -230,6 +232,12 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('h2:contains("Exercise")').should('have.length', 3)
     cy.get('label:contains("Show all exercises") input').check()
     cy.get('h2:contains("Exercise")').should('have.length', 4)
+    cy.get('button:contains("Unapprove")').eq(0).click()
+    cy.get('label:contains("Show only exercises not yet approved") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 4)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('h2:contains("Exercise")').should('have.length', 3)
+    cy.get('label:contains("Show all exercises") input').check()
     cy.get('div.main').scrollTo('top')
     screenshot('approved-exercise')
     cy.get('label:contains("Show only exercises not yet approved") input').check()
@@ -245,5 +253,76 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('label:contains("Show all exercises") input').should('be.checked')
     cy.get('h2:contains("Exercise")').should('have.length', 4)
     cy.get('button:contains("Approve")').should('have.length', 0)
+  })
+
+  it('unapproves an exercise when an adjustment is made or deleted', () => {
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('[data-cy="user-prompt"]').click().type('Adjust!', { delay: 0 })
+    cy.get('[data-cy="submit-adjustment"]').click()
+    cy.get('p:contains("Adjust!")').should('exist')
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('div:contains("❌")').last().click()
+    cy.get('p:contains("Adjust!")').should('not.exist')
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+  })
+
+  it('unapproves an exercise when its JSON is set manually or reset', () => {
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('[data-cy="manual-edition"]').type('{selectAll}Not JSON', { delay: 0, force: true })
+    cy.get(':contains("Syntax error")').should('exist')
+    cy.wait(500)
+    // Not saved => not invalidated
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('[data-cy="manual-edition"]')
+      .type('{selectAll}', { delay: 0, force: true })
+      .type('{}', { delay: 0, force: true, parseSpecialCharSequences: false })
+    cy.get(':contains("Validation errors")').should('exist')
+    cy.wait(500)
+    // Not saved => not invalidated
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('button:contains("Reset")').should('be.disabled')
+    cy.get('[data-cy="manual-edition"]')
+      .type('{selectAll}', { delay: 0, force: true })
+      .type(
+        '{"format":"v1","instruction":{"lines":[]},"example":null,"hint":null,"statement":{"pages":[]},"reference":null}',
+        { delay: 0, force: true, parseSpecialCharSequences: false },
+      )
+    cy.get('button:contains("Reset")').should('be.enabled')
+    cy.wait(500)
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("View details")').eq(0).click()
+    cy.get('button:contains("Reset")').click()
+    cy.get('button:contains("Reset")').should('be.disabled')
+    cy.wait(500)
+    cy.get('a:contains("Page 40")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+  })
+
+  it('unapproves an exercise when it is removed and re-added', () => {
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("Remove")').eq(0).click()
+    cy.get('button:contains("Re-add")').should('have.length', 1)
+    cy.get('button:contains("Re-add")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
   })
 })

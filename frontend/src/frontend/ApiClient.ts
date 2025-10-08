@@ -27,7 +27,7 @@ export type ExtractionStrategy =
   paths['/api/latest-extraction-strategy']['get']['responses']['200']['content']['application/json']
 
 export type AdaptationLlmModel =
-  paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number]
+  paths['/api/available-adaptation-llm-models']['get']['responses']['200']['content']['application/json'][number][0]
 export type BaseAdaptationBatch =
   paths['/api/base-adaptation-batch']['get']['responses']['200']['content']['application/json']
 

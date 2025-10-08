@@ -178,13 +178,6 @@ class GetTextbookPageResponse(ApiModel):
     number: int
     needs_refresh: bool
 
-    class Textbook(ApiModel):
-        id: str
-        title: str
-        pages_count: int | None
-
-    textbook: Textbook
-
     class AdaptableExercise(previewable_exercise.PreviewableExercise):
         kind: Literal["adaptable"]
         removed_from_textbook: bool
@@ -287,14 +280,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
         else:
             assert False
 
-    return GetTextbookPageResponse(
-        number=number,
-        needs_refresh=needs_refresh,
-        textbook=GetTextbookPageResponse.Textbook(
-            id=str(textbook.id), title=textbook.title, pages_count=textbook.pages_count
-        ),
-        exercises=exercises_,
-    )
+    return GetTextbookPageResponse(number=number, needs_refresh=needs_refresh, exercises=exercises_)
 
 
 class GetTextbooksResponse(ApiModel):
@@ -375,6 +361,13 @@ def put_textbook_exercises_removed(
     assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
     assert exercise.location.textbook == textbook
     exercise.location.removed_from_textbook = removed
+    if isinstance(exercise, adaptation.AdaptableExercise):
+        classification = exercise.classifications[-1] if exercise.classifications else None
+        if classification is not None and classification.exercise_class is not None:
+            adaptation_ = exercise.fetch_latest_adaptation(classification.exercise_class)
+            if adaptation_ is not None:
+                adaptation_.approved_by = None
+                adaptation_.approved_at = None
 
 
 class PostTextbookRangeRequest(ApiModel):
@@ -439,6 +432,7 @@ async def post_textbook_range(
                 run_classification=True,
                 model_for_adaptation=req.model_for_adaptation,
                 assistant_response=None,
+                timing=None,
             )
         )
 

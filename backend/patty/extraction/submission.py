@@ -17,6 +17,7 @@ from .. import adaptation
 from .. import classification
 from .. import database_utils
 from .. import exercises
+from .. import logs
 from .. import settings
 from .images_detection import detect_images
 from .llm import InvalidJsonLlmException, NotJsonLlmException
@@ -97,23 +98,26 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
     # (re-submitting failing extraction again and again)
     try:
         log(f"Submitting page extraction {page_extraction.id}")
-        extracted_exercises = page_extraction.model.extract(page_extraction.settings.prompt, annotated_pdf_page_image)
+        with logs.timer() as timing:
+            extracted_exercises = page_extraction.model.extract(
+                page_extraction.settings.prompt, annotated_pdf_page_image
+            )
     except InvalidJsonLlmException as error:
-        log(f"Error 'invalid JSON' on page extraction {page_extraction.id}")
+        log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         page_extraction.assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except NotJsonLlmException as error:
-        log(f"Error 'not JSON' on page extraction {page_extraction.id}")
+        log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         page_extraction.assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
     except Exception:
-        log(f"UNEXPECTED ERROR on page extraction {page_extraction.id}")
+        log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         traceback.print_exc()
         page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     else:
-        log(f"Success on page extraction {page_extraction.id}")
+        log(f"Success on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
 
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 
@@ -121,6 +125,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
             classification_chunk = classification.ClassificationChunk(
                 created=db.ClassificationChunkCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
                 model_for_adaptation=page_extraction.model_for_adaptation,
+                timing=None,
             )
             session.add(classification_chunk)
         else:
@@ -184,6 +189,8 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     )
 
         page_extraction.assistant_response = assistant_responses.Success(kind="success", exercises=extracted_exercises)
+    finally:
+        page_extraction.timing = timing
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

@@ -768,6 +768,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
       strategySettingsIdentity: components['schemas']['Identity'] | null
     }
     /** AdaptationInProgress */
@@ -926,6 +927,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
       settings: components['schemas']['ApiStrategySettings-Input']
     }
     /** ApiStrategy */
@@ -935,6 +937,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
       settings: components['schemas']['ApiStrategySettings-Output']
     }
     /** ApiStrategySettings */
@@ -1490,6 +1493,7 @@ export interface components {
       /** Needsrefresh */
       needsRefresh: boolean
       strategy: components['schemas']['ApiStrategy-Output']
+      timing: components['schemas']['patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing']
     }
     /** GetAdaptationBatchesResponse */
     GetAdaptationBatchesResponse: {
@@ -1511,9 +1515,11 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
         | null
       /** Needsrefresh */
       needsRefresh: boolean
+      timing: components['schemas']['patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing']
     }
     /** GetClassificationBatchesResponse */
     GetClassificationBatchesResponse: {
@@ -1538,6 +1544,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
         | null
       /** Needsrefresh */
       needsRefresh: boolean
@@ -1562,7 +1569,6 @@ export interface components {
       needsRefresh: boolean
       /** Number */
       number: number
-      textbook: components['schemas']['patty__api_router__textbooks__GetTextbookPageResponse__Textbook']
     }
     /** GetTextbookResponse */
     GetTextbookResponse: {
@@ -1592,7 +1598,7 @@ export interface components {
     /** GetTextbooksResponse */
     GetTextbooksResponse: {
       /** Textbooks */
-      textbooks: components['schemas']['patty__api_router__textbooks__GetTextbooksResponse__Textbook'][]
+      textbooks: components['schemas']['Textbook'][]
     }
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -1832,7 +1838,13 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'mistral-large-2411' | 'mistral-small-2501'
+      name:
+        | 'mistral-large-2411'
+        | 'mistral-medium-2505'
+        | 'mistral-medium-2508'
+        | 'mistral-small-2501'
+        | 'mistral-small-2503'
+        | 'mistral-small-2506'
       /**
        * Provider
        * @constant
@@ -1890,7 +1902,12 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'gpt-4o-2024-08-06' | 'gpt-4o-mini-2024-07-18'
+      name:
+        | 'gpt-4o-2024-08-06'
+        | 'gpt-4o-mini-2024-07-18'
+        | 'gpt-4.1-2025-04-14'
+        | 'gpt-4.1-mini-2025-04-14'
+        | 'gpt-4.1-nano-2025-04-14'
       /**
        * Provider
        * @constant
@@ -1976,6 +1993,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
         | null
     }
     /** PostClassificationBatchResponse */
@@ -2015,6 +2033,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
         | null
       /** Pagescount */
       pagesCount: number
@@ -2054,6 +2073,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
       /** Modelforextraction */
       modelForExtraction:
         | components['schemas']['patty__extraction__llm__dummy__DummyModel']
@@ -2149,6 +2169,7 @@ export interface components {
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
         | components['schemas']['MistralAiModel']
         | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
       /** Modelforextraction */
       modelForExtraction:
         | components['schemas']['patty__extraction__llm__dummy__DummyModel']
@@ -2363,6 +2384,33 @@ export interface components {
       /** Text */
       text: string
     }
+    /** Textbook */
+    Textbook: {
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Createdby */
+      createdBy: string
+      /** Id */
+      id: string
+      /** Pagescount */
+      pagesCount: number | null
+      /** Publisher */
+      publisher: string | null
+      /** Title */
+      title: string
+      /** Year */
+      year: number | null
+    }
+    /** TimingData */
+    TimingData: {
+      /** End */
+      end: number | null
+      /** Start */
+      start: number
+    }
     /** UnknownError */
     UnknownError: {
       /**
@@ -2449,6 +2497,11 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
+    /** Timing */
+    patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+    }
     /** Exercise */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
       /** Adaptationstatus */
@@ -2479,6 +2532,12 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
+    /** Timing */
+    patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+      classification: components['schemas']['TimingData'] | null
+    }
     /** Page */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
       /** Assistantresponse */
@@ -2497,6 +2556,7 @@ export interface components {
       }
       /** Pagenumber */
       pageNumber: number
+      timing: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing']
     }
     /** Exercise */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise: {
@@ -2528,14 +2588,12 @@ export interface components {
       /** Pagenumber */
       pageNumber: number | null
     }
-    /** Textbook */
-    patty__api_router__textbooks__GetTextbookPageResponse__Textbook: {
-      /** Id */
-      id: string
-      /** Pagescount */
-      pagesCount: number | null
-      /** Title */
-      title: string
+    /** Timing */
+    patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing: {
+      /** Adaptations */
+      adaptations: (components['schemas']['TimingData'] | null)[]
+      classification: components['schemas']['TimingData'] | null
+      extraction: components['schemas']['TimingData'] | null
     }
     /** Page */
     patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
@@ -2547,26 +2605,6 @@ export interface components {
       pageNumber: number
       /** Removedfromtextbook */
       removedFromTextbook: boolean
-    }
-    /** Textbook */
-    patty__api_router__textbooks__GetTextbooksResponse__Textbook: {
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Createdby */
-      createdBy: string
-      /** Id */
-      id: string
-      /** Pagescount */
-      pagesCount: number | null
-      /** Publisher */
-      publisher: string | null
-      /** Title */
-      title: string
-      /** Year */
-      year: number | null
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {
@@ -2765,7 +2803,10 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['JsonSchemaLlmResponseSpecification']
+        'application/json':
+          | components['schemas']['JsonFromTextLlmResponseSpecification']
+          | components['schemas']['JsonObjectLlmResponseSpecification']
+          | components['schemas']['JsonSchemaLlmResponseSpecification']
       }
     }
     responses: {
@@ -3002,11 +3043,15 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': (
-            | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
-            | components['schemas']['MistralAiModel']
-            | components['schemas']['OpenAiModel']
-          )[]
+          'application/json': [
+            (
+              | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
+              | components['schemas']['MistralAiModel']
+              | components['schemas']['OpenAiModel']
+              | components['schemas']['GeminiModel']
+            ),
+            ('text' | 'json-object' | 'json-schema')[],
+          ][]
         }
       }
     }
@@ -3176,6 +3221,7 @@ export interface operations {
           | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
           | components['schemas']['MistralAiModel']
           | components['schemas']['OpenAiModel']
+          | components['schemas']['GeminiModel']
       }
     }
     responses: {
@@ -3413,6 +3459,7 @@ export interface operations {
           | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
           | components['schemas']['MistralAiModel']
           | components['schemas']['OpenAiModel']
+          | components['schemas']['GeminiModel']
       }
     }
     responses: {

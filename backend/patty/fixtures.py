@@ -522,6 +522,7 @@ class FixturesCreator:
                         }
                     ),
                 ),
+                initial_timing=None,
                 adjustments=[],
                 manual_edit=None,
                 approved_by=None,
@@ -545,6 +546,7 @@ class FixturesCreator:
                 exercise=exercise,
                 raw_llm_conversations=[{"initial": "conversation"}],
                 initial_assistant_response=None,
+                initial_timing=None,
                 adjustments=[],
                 manual_edit=None,
                 approved_by=None,
@@ -574,6 +576,7 @@ class FixturesCreator:
                 initial_assistant_response=adaptation.assistant_responses.InvalidJsonError(
                     kind="error", error="invalid-json", parsed={}
                 ),
+                initial_timing=None,
                 adjustments=[],
                 manual_edit=None,
                 approved_by=None,
@@ -599,6 +602,7 @@ class FixturesCreator:
                 initial_assistant_response=adaptation.assistant_responses.NotJsonError(
                     kind="error", error="not-json", text="This is not JSON."
                 ),
+                initial_timing=None,
                 adjustments=[],
                 manual_edit=None,
                 approved_by=None,
@@ -817,6 +821,7 @@ class FixturesCreator:
                         ),
                     ],
                 ),
+                timing=None,
             )
         )
         exercise_4_page_40 = self.add(
@@ -895,6 +900,7 @@ class FixturesCreator:
                     at=created_at, page_extraction=page_40_extraction
                 ),
                 model_for_adaptation=model_for_adaptation,
+                timing=None,
             )
         )
         self.add(
@@ -1060,6 +1066,7 @@ class FixturesCreator:
                         ),
                     ],
                 ),
+                timing=None,
             )
         )
         exercise_5_page_42 = self.add(
@@ -1140,6 +1147,7 @@ class FixturesCreator:
                     at=created_at, page_extraction=page_42_extraction
                 ),
                 model_for_adaptation=model_for_adaptation,
+                timing=None,
             )
         )
         self.add(
@@ -1273,6 +1281,7 @@ class FixturesCreator:
                     at=created_at, sandbox_classification_batch=batch
                 ),
                 model_for_adaptation=model_for_adaptation,
+                timing=None,
             )
         )
         exe1 = self.add(

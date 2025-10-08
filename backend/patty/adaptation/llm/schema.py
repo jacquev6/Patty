@@ -1,12 +1,12 @@
-from typing import TypeVar
+import typing
 
-from pydantic import BaseModel
 import openai.lib._parsing._completions
+import pydantic
 
 from ...any_json import JsonDict
 
 
-CustomPydanticModel = TypeVar("CustomPydanticModel", bound=BaseModel)
+CustomPydanticModel = typing.TypeVar("CustomPydanticModel", bound=pydantic.BaseModel)
 
 
 def make_schema(model: type[CustomPydanticModel]) -> JsonDict:

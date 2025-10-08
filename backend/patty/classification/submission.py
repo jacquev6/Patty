@@ -18,6 +18,7 @@ import transformers  # type: ignore[import-untyped]
 from . import orm_models as db
 from .. import adaptation
 from .. import database_utils
+from .. import logs
 from .. import settings
 from .models import SingleBert
 
@@ -60,7 +61,9 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
             }
             for classification in chunk.classifications
         )
-        classify(dataframe)
+        with logs.timer() as timing:
+            classify(dataframe)
+        chunk.timing = timing
         now = datetime.datetime.now(tz=datetime.timezone.utc)
         for classification, (_, row) in zip(chunk.classifications, dataframe.iterrows()):
             exercise_class_name = row["predicted_label"]
@@ -85,6 +88,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
                     model=chunk.model_for_adaptation,
                     raw_llm_conversations=[],
                     initial_assistant_response=None,
+                    initial_timing=None,
                     adjustments=[],
                     manual_edit=None,
                     approved_by=None,

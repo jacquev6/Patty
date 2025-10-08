@@ -6,3 +6,5 @@ from typing import Any
 JsonDict = dict[str, Any]
 
 JsonList = list[Any]
+
+JsonType = str | int | float | bool | None | JsonDict | JsonList
