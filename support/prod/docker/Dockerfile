@@ -10,29 +10,31 @@ ADD frontend/package-lock.json .
 
 RUN npm install
 
+FROM $FRONTEND_DEPENDENCIES_IMAGE AS frontend-code
+
 RUN mkdir -p /backend/generated
 ADD backend/generated/adapted-exercise-schema.json /backend/generated
 ADD frontend .
 
 
-FROM $FRONTEND_DEPENDENCIES_IMAGE AS frontend-builder
+FROM frontend-code AS frontend-builder
 ENV PATTY_ENTRY_POINT_NAME=frontend
 RUN test ! -e src/frontend/public/pdf.worker.min.js
 RUN cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs src/frontend/public/pdf.worker.min.js
 RUN npx vite build
 
 
-FROM $FRONTEND_DEPENDENCIES_IMAGE AS adaptation-export-template-builder
+FROM frontend-code AS adaptation-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/adaptation
 RUN npx vite build
 
 
-FROM $FRONTEND_DEPENDENCIES_IMAGE AS batch-export-template-builder
+FROM frontend-code AS batch-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/batch
 RUN npx vite build
 
 
-FROM $FRONTEND_DEPENDENCIES_IMAGE AS textbook-export-template-builder
+FROM frontend-code AS textbook-export-template-builder
 ENV PATTY_ENTRY_POINT_NAME=export/textbook
 RUN npx vite build
 
