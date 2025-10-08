@@ -375,6 +375,13 @@ def put_textbook_exercises_removed(
     assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
     assert exercise.location.textbook == textbook
     exercise.location.removed_from_textbook = removed
+    if isinstance(exercise, adaptation.AdaptableExercise):
+        classification = exercise.classifications[-1] if exercise.classifications else None
+        if classification is not None and classification.exercise_class is not None:
+            adaptation_ = exercise.fetch_latest_adaptation(classification.exercise_class)
+            if adaptation_ is not None:
+                adaptation_.approved_by = None
+                adaptation_.approved_at = None
 
 
 class PostTextbookRangeRequest(ApiModel):

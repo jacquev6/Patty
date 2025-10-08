@@ -314,4 +314,14 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('a:contains("Page 40")').click()
     cy.get('button:contains("Approve")').should('have.length', 3)
   })
+
+  it('unapproves an exercise when it is removed and re-added', () => {
+    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').eq(0).click()
+    cy.get('button:contains("Approve")').should('have.length', 2)
+    cy.get('button:contains("Remove")').eq(0).click()
+    cy.get('button:contains("Re-add")').should('have.length', 1)
+    cy.get('button:contains("Re-add")').click()
+    cy.get('button:contains("Approve")').should('have.length', 3)
+  })
 })
