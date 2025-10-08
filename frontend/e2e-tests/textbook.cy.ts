@@ -237,6 +237,7 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('h2:contains("Exercise")').should('have.length', 4)
     cy.get('button:contains("Approve")').eq(0).click()
     cy.get('h2:contains("Exercise")').should('have.length', 3)
+    cy.get('label:contains("Show all exercises") input').check()
     cy.get('div.main').scrollTo('top')
     screenshot('approved-exercise')
     cy.get('label:contains("Show only exercises not yet approved") input').check()
