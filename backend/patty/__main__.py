@@ -629,6 +629,7 @@ def run_submission_daemon(
         logs.log("Starting")
         last_time = time.monotonic()
         while True:
+            done_something = False
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
