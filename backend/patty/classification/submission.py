@@ -1,11 +1,8 @@
 import datetime
 import os
 import typing
-import urllib.parse
 
 from sqlalchemy import orm
-import boto3
-import botocore
 import datasets  # type: ignore[import-untyped]
 import numpy as np
 import pandas as pd
@@ -23,11 +20,6 @@ from .. import settings
 from .models import SingleBert
 
 MAX_SEQUENCE_LENGTH = 256
-
-
-def log(message: str) -> None:
-    # @todo Use actual logging
-    print(datetime.datetime.now(), message, flush=True)
 
 
 def submit_classifications(session: database_utils.Session, parallelism: int) -> bool:
@@ -50,7 +42,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
     if chunk is None:
         return False
     else:
-        log(
+        logs.log(
             f"Classifying {len(chunk.classifications)} exercises from chunk {chunk.id}: {' '.join(str(classification.exercise.id) for classification in chunk.classifications)}"
         )
         dataframe = pd.DataFrame(
@@ -67,7 +59,7 @@ def submit_classifications(session: database_utils.Session, parallelism: int) ->
         now = datetime.datetime.now(tz=datetime.timezone.utc)
         for classification, (_, row) in zip(chunk.classifications, dataframe.iterrows()):
             exercise_class_name = row["predicted_label"]
-            log(f"Classified exercise {classification.exercise.id}: {exercise_class_name}")
+            logs.log(f"Classified exercise {classification.exercise.id}: {exercise_class_name}")
             exercise_class = exercise_classes_by_name.get(exercise_class_name, None)
             if exercise_class is None:
                 exercise_class = adaptation.ExerciseClass(
@@ -106,14 +98,10 @@ def classify(dataframe: pd.DataFrame) -> None:
     global model
 
     if model is None:
-        model_url = urllib.parse.urlparse(settings.CLASSIFICATION_CAMEMBERT_2025_05_20_URL)
-        model_path = os.path.join(settings.CLASSIFICATION_MODELS_DIRECTORY_PATH, os.path.basename(model_url.path))
-        if not os.path.isfile(model_path):
-            log(f"Downloading classification model from {model_url.geturl()} to {model_path}")
-            s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
-            s3.download_file(Bucket=model_url.netloc, Key=model_url.path[1:], Filename=model_path)
-        log(f"Loading classification model from {model_path}")
-        model_: SingleBert = torch.load(model_path, weights_only=False, map_location=device)
+        logs.log(f"Loading classification model from {settings.CLASSIFICATION_CAMEMBERT_2025_05_20_PATH}")
+        model_: SingleBert = torch.load(
+            settings.CLASSIFICATION_CAMEMBERT_2025_05_20_PATH, weights_only=False, map_location=device
+        )
         model = model_
         model.to(device)
         model.eval()

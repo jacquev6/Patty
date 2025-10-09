@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Literal
 import datetime
-import urllib.parse
 
 import fastapi
 import sqlalchemy as sql
@@ -13,10 +12,9 @@ from .. import database_utils
 from .. import exercises
 from .. import external_exercises
 from .. import extraction
-from .. import settings
+from .. import file_storage
 from .. import textbooks
 from ..api_utils import ApiModel, get_by_id
-from .s3_client import s3
 
 
 router = fastapi.APIRouter()
@@ -343,7 +341,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     page_number=exercise.location.page_number,
                     exercise_number=exercise.location.exercise_number,
                     full_text=exercise.full_text,
-                    images_urls=previewable_exercise.gather_images_urls("s3", exercise),
+                    images_urls=previewable_exercise.gather_images_urls("http", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
                     removed_from_textbook=exercise.location.removed_from_textbook,
@@ -416,11 +414,8 @@ def post_textbook_external_exercises(
     )
     session.add(external_exercise)
     session.flush()
-    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
     return PostTextbookExternalExercisesResponse(
-        put_url=s3.generate_presigned_url(
-            "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
-        )
+        put_url=file_storage.external_exercises.get_put_url(str(external_exercise.id))
     )
 
 

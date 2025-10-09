@@ -1,9 +1,5 @@
 import datetime
-import os.path
-import urllib.parse
 
-import boto3
-import botocore
 import cv2
 import numpy as np
 import PIL.Image
@@ -26,14 +22,8 @@ def detect_images(
     global model
 
     if model is None:
-        model_url = urllib.parse.urlparse(settings.IMAGES_DETECTION_MODEL_2025_09_15_URL)
-        model_path = os.path.join(settings.IMAGES_DETECTION_MODELS_DIRECTORY_PATH, os.path.basename(model_url.path))
-        if not os.path.isfile(model_path):
-            log(f"Downloading images detection model from {model_url.geturl()} to {model_path}")
-            s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
-            s3.download_file(Bucket=model_url.netloc, Key=model_url.path[1:], Filename=model_path)
-        log(f"Loading images detection model from {model_path}")
-        model = ultralytics.models.YOLO(model_path)
+        log(f"Loading images detection model from {settings.IMAGES_DETECTION_MODEL_2025_09_15_PATH}")
+        model = ultralytics.models.YOLO(settings.IMAGES_DETECTION_MODEL_2025_09_15_PATH)
 
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.8

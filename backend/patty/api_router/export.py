@@ -6,7 +6,6 @@ import hashlib
 import io
 import json
 import os
-import urllib.parse
 
 import fastapi
 
@@ -18,11 +17,10 @@ from .. import database_utils
 from .. import exercises
 from .. import external_exercises
 from .. import sandbox
-from .. import settings
+from .. import file_storage
 from .. import textbooks
 from ..any_json import JsonDict
 from ..api_utils import get_by_id
-from .s3_client import s3
 
 
 router = fastapi.APIRouter(dependencies=[fastapi.Depends(authentication.auth_param_dependable)])
@@ -374,12 +372,9 @@ def make_adapted_exercise_data(exercise_adaptation: adaptation.Adaptation) -> Js
 def make_external_exercise_data(external_exercise: external_exercises.ExternalExercise) -> JsonDict:
     location = external_exercise.location
     assert isinstance(location, textbooks.ExerciseLocationTextbook)
-    exercise_id = f"P{location.page_number}Ex{location.exercise_number}"
-    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
-    object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
-    data = base64.b64encode(object["Body"].read()).decode("ascii")
+    data = base64.b64encode(file_storage.external_exercises.load_sync(str(external_exercise.id))).decode("ascii")
     return {
-        "exerciseId": exercise_id,
+        "exerciseId": f"P{location.page_number}Ex{location.exercise_number}",
         "pageNumber": location.page_number,
         "exerciseNumber": location.exercise_number,
         "kind": "external",

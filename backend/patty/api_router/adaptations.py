@@ -280,7 +280,7 @@ def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdapta
         manual_edit=exercise_adaptation.manual_edit,
         removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
         and exercise_adaptation.exercise.location.removed_from_textbook,
-        images_urls=previewable_exercise.gather_images_urls("s3", exercise_adaptation.exercise),
+        images_urls=previewable_exercise.gather_images_urls("http", exercise_adaptation.exercise),
         llm_status=llm_status,
         status=status,
     )

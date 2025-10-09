@@ -3,10 +3,7 @@ import io
 import subprocess
 import traceback
 import typing
-import urllib.parse
 
-import boto3
-import botocore
 import cachetools
 import PIL.Image
 import sqlalchemy as sql
@@ -17,18 +14,12 @@ from .. import adaptation
 from .. import classification
 from .. import database_utils
 from .. import exercises
+from .. import file_storage
 from .. import logs
 from .. import settings
 from .images_detection import detect_images
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 
-
-def log(message: str) -> None:
-    # @todo Use actual logging
-    print(datetime.datetime.now(), message, flush=True)
-
-
-s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", signature_version="s3v4"))
 
 pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 
@@ -42,7 +33,7 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
         .all()
     )
     if len(extractions) > 0:
-        log(
+        logs.log(
             f"Found {len(extractions)} pending page extractions: {' '.join(str(extraction.id) for extraction in extractions)}"
         )
     return [submit_extraction(session, extraction) for extraction in extractions]
@@ -55,12 +46,11 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
     assert page_extraction.pdf_file_range is not None
     sha256 = page_extraction.pdf_file_range.pdf_file.sha256
     if sha256 in pdf_data_cache:
-        log(f"Found PDF data for page extraction {page_extraction.id} in cache")
+        logs.log(f"Found PDF data for page extraction {page_extraction.id} in cache")
         pdf_data = pdf_data_cache[sha256]
     else:
-        target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{sha256}")
-        log(f"Fetching PDF data for page extraction {page_extraction.id} from {target.geturl()}")
-        pdf_data = s3.get_object(Bucket=target.netloc, Key=target.path[1:])["Body"].read()
+        logs.log(f"Loading PDF data for page extraction {page_extraction.id}")
+        pdf_data = file_storage.pdf_files.load_sync(sha256)
         pdf_data_cache[sha256] = pdf_data
     pdf_page_image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
 
@@ -88,36 +78,35 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         extracted_images.append((extracted_image, image))
     session.flush()  # To get all extracted image ids
     for extracted_image, image in extracted_images:
-        target = urllib.parse.urlparse(f"{settings.EXERCISE_IMAGES_URL}/{extracted_image.id}.png")
         image_bytes = io.BytesIO()
         image.save(image_bytes, format="PNG")
         image_bytes.seek(0)
-        s3.put_object(Bucket=target.netloc, Key=target.path[1:], Body=image_bytes, ContentType="image/png")
+        file_storage.exercise_images.store_sync(f"{extracted_image.id}.png", image_bytes.getvalue())
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
-        log(f"Submitting page extraction {page_extraction.id}")
+        logs.log(f"Submitting page extraction {page_extraction.id}")
         with logs.timer() as timing:
             extracted_exercises = page_extraction.model.extract(
                 page_extraction.settings.prompt, annotated_pdf_page_image
             )
     except InvalidJsonLlmException as error:
-        log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        logs.log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         page_extraction.assistant_response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except NotJsonLlmException as error:
-        log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        logs.log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         page_extraction.assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
     except Exception:
-        log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         traceback.print_exc()
         page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     else:
-        log(f"Success on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        logs.log(f"Success on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
 
         created_at = datetime.datetime.now(tz=datetime.timezone.utc)
 

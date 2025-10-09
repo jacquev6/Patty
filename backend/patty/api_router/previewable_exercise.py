@@ -1,14 +1,12 @@
 import base64
 import datetime
-import urllib.parse
 import typing
 
 from .. import adaptation
 from .. import dispatching as dispatch
 from .. import exercises
-from .. import settings
+from .. import file_storage
 from ..api_utils import ApiModel
-from .s3_client import s3
 
 
 class NotRequested(ApiModel):
@@ -158,25 +156,19 @@ def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.A
         yield from _gather_required_image_identifiers_from_adapted_exercise(adaptation_.manual_edit)
 
 
-def make_image_url(kind: typing.Literal["s3", "data"], image: exercises.ExerciseImage) -> str:
-    target = urllib.parse.urlparse(f"{settings.EXERCISE_IMAGES_URL}/{image.id}.png")
+def make_image_url(kind: typing.Literal["http", "data"], image: exercises.ExerciseImage) -> str:
+    file_name = f"{image.id}.png"
     if kind == "data":
-        object = s3.get_object(Bucket=target.netloc, Key=target.path[1:])
-        data = base64.b64encode(object["Body"].read()).decode("ascii")
+        data = base64.b64encode(file_storage.exercise_images.load_sync(file_name)).decode("ascii")
         return f"data:image/png;base64,{data}"
-    elif kind == "s3":
-        return typing.cast(
-            str,
-            s3.generate_presigned_url(
-                "get_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=3600
-            ),
-        )
+    elif kind == "http":
+        return file_storage.exercise_images.get_get_url(file_name)
     else:
         assert False
 
 
 def gather_images_urls(
-    kind: typing.Literal["s3", "data"], exercise: adaptation.AdaptableExercise
+    kind: typing.Literal["http", "data"], exercise: adaptation.AdaptableExercise
 ) -> adaptation.adapted.ImagesUrls:
     available_images = dispatch.exercise_creation(
         exercise.created,

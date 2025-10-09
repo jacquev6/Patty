@@ -324,7 +324,7 @@ async def get_adaptation_batch(id: str, session: database_utils.SessionDependabl
                 page_number=exercise.location.page_number,
                 exercise_number=exercise.location.exercise_number,
                 full_text=exercise.full_text,
-                images_urls=previewable_exercise.gather_images_urls("s3", exercise),
+                images_urls=previewable_exercise.gather_images_urls("http", exercise),
                 classification_status=previewable_exercise.NotRequested(kind="notRequested"),
                 adaptation_status=adaptation_status,
             )

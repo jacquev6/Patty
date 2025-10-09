@@ -1,16 +1,13 @@
 import datetime
-import urllib.parse
 
-import botocore
 import fastapi
 import fastapi.testclient
 import requests
 
 from .. import database_utils
 from .. import extraction
-from .. import settings
+from .. import file_storage
 from ..api_utils import ApiModel
-from .s3_client import s3
 
 
 router = fastapi.APIRouter()
@@ -46,18 +43,10 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
     if req.file_name not in pdf_file.known_file_names:
         pdf_file.known_file_names = pdf_file.known_file_names + [req.file_name]
 
-    target = urllib.parse.urlparse(f"{settings.PDF_FILES_URL}/{pdf_file.sha256}")
-    try:
-        s3.head_object(Bucket=target.netloc, Key=target.path[1:])
-    except botocore.exceptions.ClientError as error:
-        if error.response["Error"]["Code"] == "404":
-            upload_url = s3.generate_presigned_url(
-                "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
-            )
-        else:
-            raise
-    else:
+    if file_storage.pdf_files.has(pdf_file.sha256):
         upload_url = None
+    else:
+        upload_url = file_storage.pdf_files.get_put_url(pdf_file.sha256)
 
     return CreatePdfFileResponse(upload_url=upload_url)
 
@@ -76,10 +65,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
     def test_create_the_same_pdf_file_several_times(self) -> None:
         sha = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-        try:
-            s3.delete_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
-        except botocore.exceptions.ClientError:
-            pass
+        file_storage.pdf_files.delete_sync(sha)
 
         r = self.client.post(
             "/pdf-files",
@@ -97,7 +83,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         upload_url = r.json()["uploadUrl"]
         self.assertIsNotNone(upload_url)
         requests.put(upload_url, data=b"")
-        s3.head_object(Bucket="jacquev6", Key=f"patty/dev/pdf-files/{sha}")
+        self.assertTrue(file_storage.pdf_files.has(sha))
         self.assertEqual(self.get_model(extraction.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
 
         r = self.client.post(
