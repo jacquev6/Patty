@@ -695,6 +695,7 @@ class FixturesCreator:
                 year=None,
                 isbn=None,
                 pages_count=None,
+                single_pdf_file=None,
             )
         )
 

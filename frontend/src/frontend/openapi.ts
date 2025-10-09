@@ -1590,6 +1590,8 @@ export interface components {
       publisher: string | null
       /** Ranges */
       ranges: components['schemas']['Range'][]
+      /** Singlepdf */
+      singlePdf: boolean
       /** Title */
       title: string
       /** Year */
@@ -2097,6 +2099,7 @@ export interface components {
       pagesCount: number | null
       /** Publisher */
       publisher: string | null
+      singlePdf: components['schemas']['SinglePdf'] | null
       /** Title */
       title: string
       /** Year */
@@ -2285,6 +2288,27 @@ export interface components {
        * @constant
        */
       kind: 'selectableInput'
+    }
+    /** SinglePdf */
+    SinglePdf: {
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
+      /** Modelforextraction */
+      modelForExtraction:
+        | components['schemas']['patty__extraction__llm__dummy__DummyModel']
+        | components['schemas']['GeminiModel']
+      /** Pagescount */
+      pagesCount: number
+      /** Pdffilesha256 */
+      pdfFileSha256: string
+      /** Pdffirstpagenumber */
+      pdfFirstPageNumber: number
+      /** Textbookfirstpagenumber */
+      textbookFirstPageNumber: number
     }
     SplitWordInput: {
       /**
