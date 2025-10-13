@@ -2,7 +2,6 @@ import datetime
 
 import fastapi
 import fastapi.testclient
-import requests
 
 from .. import database_utils
 from .. import extraction
@@ -52,13 +51,14 @@ def create_pdf_file(req: CreatePdfFileRequest, session: database_utils.SessionDe
 
 
 class ApiTestCase(database_utils.TestCaseWithDatabase):
-
     def setUp(self) -> None:
         from .. import authentication
+        from ..file_storage import file_system_engine
 
         super().setUp()
         self.app = fastapi.FastAPI(database_engine=self.engine)
         self.app.include_router(router)
+        self.app.include_router(file_system_engine.router)
         access_token = authentication.login(authentication.PostTokenRequest(password="password")).access_token
         self.client = fastapi.testclient.TestClient(self.app, headers={"Authorization": f"Bearer {access_token}"})
 
@@ -82,7 +82,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
         self.assertEqual(r.status_code, 200, r.text)
         upload_url = r.json()["uploadUrl"]
         self.assertIsNotNone(upload_url)
-        requests.put(upload_url, data=b"")
+        self.client.put(upload_url, content=b"")
         self.assertTrue(file_storage.pdf_files.has(sha))
         self.assertEqual(self.get_model(extraction.PdfFile, sha).known_file_names, ["foo.pdf", "bar.pdf"])
 
