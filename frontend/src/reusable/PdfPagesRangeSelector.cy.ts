@@ -39,7 +39,7 @@ describe('PdfPagesRangeSelector', () => {
   it('reduces first page when setting last page too low', () => {
     mountThen(() => {
       cy.get('input').eq(0).clear().type('8')
-      cy.get('input').eq(2).clear().type('5')
+      cy.get('input').eq(2).clear().type('5').blur()
       cy.get('input').eq(0).should('have.value', '5')
     })
   })
@@ -47,7 +47,7 @@ describe('PdfPagesRangeSelector', () => {
   it('increases last page when setting first page too high', () => {
     mountThen(() => {
       cy.get('input').eq(2).clear().type('5')
-      cy.get('input').eq(0).clear().type('8')
+      cy.get('input').eq(0).clear().type('8').blur()
       cy.get('input').eq(2).should('have.value', '8')
     })
   })
@@ -55,8 +55,8 @@ describe('PdfPagesRangeSelector', () => {
   it('reproduces issue 132', () => {
     mountThen(() => {
       cy.get('input').eq(0).clear().type('10')
-      cy.get('input').eq(2).clear().type('25')
-      cy.get('input').eq(0).should('have.value', '2') // This should still be 10
+      cy.get('input').eq(2).clear().type('25').blur()
+      cy.get('input').eq(0).should('have.value', '10')
     })
   })
 })

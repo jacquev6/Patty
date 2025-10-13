@@ -79,7 +79,7 @@ describe('The edition form for textbooks - empty', () => {
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
     cy.get('p:contains("i.e. 2 in textbook")').should('exist')
-    cy.get('input[type="number"]').eq(1).type('{selectAll}6')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}6').blur()
     cy.get('p:contains("i.e. 7 in textbook")').should('exist')
     cy.get('[data-cy="extraction"] [data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="extraction"] [data-cy="llm-name"]').select('dummy-1')

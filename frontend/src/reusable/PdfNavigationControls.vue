@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   pagesCount: number | null
 }>()
 
 const pageNumber = defineModel<number>('page', { default: 1 })
-const requestedPageNumber = ref('')
 
-function resetRequestedPageNumber() {
-  requestedPageNumber.value = pageNumber.value.toString()
-}
-
-watch(pageNumber, resetRequestedPageNumber, { immediate: true })
-
-watch(requestedPageNumber, () => {
-  const page = Number.parseInt(requestedPageNumber.value, 10)
-  if (Number.isInteger(page) && page >= 1 && (props.pagesCount === null || page <= props.pagesCount)) {
-    pageNumber.value = page
-  }
+const pageNumberProxy = computed({
+  get: () => pageNumber.value.toString(),
+  set: (value_: string) => {
+    const value = Number.parseInt(value_, 10)
+    if (Number.isInteger(value)) {
+      if (value < 1) {
+        pageNumber.value = 1
+      } else if (props.pagesCount !== null && value > props.pagesCount) {
+        pageNumber.value = props.pagesCount
+      } else {
+        pageNumber.value = value
+      }
+    }
+  },
 })
 </script>
 
@@ -31,8 +33,7 @@ watch(requestedPageNumber, () => {
         min="1"
         :max="pagesCount === null ? undefined : pagesCount"
         size="4"
-        v-model="requestedPageNumber"
-        @blur="resetRequestedPageNumber"
+        v-model.lazy="pageNumberProxy"
       />
     </label>
     <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>
