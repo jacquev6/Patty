@@ -496,7 +496,7 @@ describe('AdaptableExercisePreview', () => {
       setActivePinia(createPinia())
       useIdentifiedUserStore().identifier = 'Alice'
       useAuthenticationTokenStore().set('1234567890abcdef', new Date(Date.now() + 1000 * 60 * 60 * 24))
-      cy.viewport(1000, 500)
+      cy.viewport(1200, 500)
       cy.mount(AdaptableExercisePreview, {
         props: {
           headerLevel: 2,
