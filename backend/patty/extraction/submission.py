@@ -50,7 +50,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         pdf_data = pdf_data_cache[sha256]
     else:
         logs.log(f"Loading PDF data for page extraction {page_extraction.id}")
-        pdf_data = file_storage.pdf_files.load_sync(sha256)
+        pdf_data = file_storage.pdf_files.load(sha256)
         pdf_data_cache[sha256] = pdf_data
     pdf_page_image = pdf_page_as_image(pdf_data, page_extraction.pdf_page_number)
 
@@ -81,7 +81,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         image_bytes = io.BytesIO()
         image.save(image_bytes, format="PNG")
         image_bytes.seek(0)
-        file_storage.exercise_images.store_sync(f"{extracted_image.id}.png", image_bytes.getvalue())
+        file_storage.exercise_images.store(f"{extracted_image.id}.png", image_bytes.getvalue())
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)

@@ -372,7 +372,7 @@ def make_adapted_exercise_data(exercise_adaptation: adaptation.Adaptation) -> Js
 def make_external_exercise_data(external_exercise: external_exercises.ExternalExercise) -> JsonDict:
     location = external_exercise.location
     assert isinstance(location, textbooks.ExerciseLocationTextbook)
-    data = base64.b64encode(file_storage.external_exercises.load_sync(str(external_exercise.id))).decode("ascii")
+    data = base64.b64encode(file_storage.external_exercises.load(str(external_exercise.id))).decode("ascii")
     return {
         "exerciseId": f"P{location.page_number}Ex{location.exercise_number}",
         "pageNumber": location.page_number,

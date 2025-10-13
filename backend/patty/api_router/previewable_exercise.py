@@ -159,7 +159,7 @@ def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.A
 def make_image_url(kind: typing.Literal["http", "data"], image: exercises.ExerciseImage) -> str:
     file_name = f"{image.id}.png"
     if kind == "data":
-        data = base64.b64encode(file_storage.exercise_images.load_sync(file_name)).decode("ascii")
+        data = base64.b64encode(file_storage.exercise_images.load(file_name)).decode("ascii")
         return f"data:image/png;base64,{data}"
     elif kind == "http":
         return file_storage.exercise_images.get_get_url(file_name)

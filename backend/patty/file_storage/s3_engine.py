@@ -15,10 +15,10 @@ class S3FileStorageEngine:
         assert target.scheme == "s3"
         self.bucket = target.netloc
         assert target.path.startswith("/")
+        assert not target.path.endswith("/")
         self.prefix = target.path[1:]
-        assert not self.prefix.endswith("/")
 
-    def store_sync(self, key: str, data: bytes) -> None:
+    def store(self, key: str, data: bytes) -> None:
         file = io.BytesIO(data)
         s3.put_object(Bucket=self.bucket, Key=self.__make_key(key), Body=file)
 
@@ -40,7 +40,7 @@ class S3FileStorageEngine:
             else:
                 raise
 
-    def load_sync(self, key: str) -> bytes:
+    def load(self, key: str) -> bytes:
         object = s3.get_object(Bucket=self.bucket, Key=self.__make_key(key))
         return typing.cast(bytes, object["Body"].read())
 
@@ -52,7 +52,7 @@ class S3FileStorageEngine:
             ),
         )
 
-    def delete_sync(self, key: str) -> None:
+    def delete(self, key: str) -> None:
         try:
             s3.delete_object(Bucket=self.bucket, Key=self.__make_key(key))
         except botocore.exceptions.ClientError as error:
@@ -62,7 +62,7 @@ class S3FileStorageEngine:
                 raise
 
     def delete_all(self) -> None:
-        assert "patty/dev" in self.prefix
+        assert "patty/dev" in self.prefix  # Avoid accidental use outside the development environment
         for batch in itertools.batched(
             (
                 {"Key": obj["Key"]}

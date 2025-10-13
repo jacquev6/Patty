@@ -65,7 +65,7 @@ class ApiTestCase(database_utils.TestCaseWithDatabase):
     def test_create_the_same_pdf_file_several_times(self) -> None:
         sha = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 
-        file_storage.pdf_files.delete_sync(sha)
+        file_storage.pdf_files.delete(sha)
 
         r = self.client.post(
             "/pdf-files",
