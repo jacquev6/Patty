@@ -42,21 +42,9 @@ watch(lastPdfPageNumber, (newValue) => {
   }
 })
 
-const firstPage = computedAsync(async () => {
-  if (props.document === null) {
-    return null
-  } else {
-    return await props.document.getPage(firstPdfPageNumber.value)
-  }
-}, null)
+const firstPage = computedAsync(() => props.document.getPage(firstPdfPageNumber.value), null)
 
-const lastPage = computedAsync(async () => {
-  if (props.document === null) {
-    return null
-  } else {
-    return await props.document.getPage(lastPdfPageNumber.value)
-  }
-}, null)
+const lastPage = computedAsync(() => props.document.getPage(lastPdfPageNumber.value), null)
 </script>
 
 <template>
