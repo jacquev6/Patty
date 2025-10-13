@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import os
 
@@ -38,8 +39,24 @@ assert not PDF_FILES_URL.endswith("/")
 EXERCISE_IMAGES_URL = os.environ["PATTY_EXERCISE_IMAGES_URL"]
 assert not EXERCISE_IMAGES_URL.endswith("/")
 
-MAIL_SENDER = os.environ["PATTY_MAIL_SENDER"]
-SMTP_HOST = os.environ["PATTY_SMTP_HOST"]
-SMTP_PORT = int(os.environ["PATTY_SMTP_PORT"])
-SMTP_USER = os.environ["PATTY_SMTP_USER"]
-SMTP_PASSWORD = os.environ["PATTY_SMTP_PASSWORD"]
+
+@dataclasses.dataclass
+class OutboundMailingSettings:
+    MAIL_SENDER: str
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASSWORD: str
+
+
+OUTBOUND_MAILING: OutboundMailingSettings | None
+try:
+    OUTBOUND_MAILING = OutboundMailingSettings(
+        MAIL_SENDER=os.environ["PATTY_MAIL_SENDER"],
+        SMTP_HOST=os.environ["PATTY_SMTP_HOST"],
+        SMTP_PORT=int(os.environ["PATTY_SMTP_PORT"]),
+        SMTP_USER=os.environ["PATTY_SMTP_USER"],
+        SMTP_PASSWORD=os.environ["PATTY_SMTP_PASSWORD"],
+    )
+except KeyError:
+    OUTBOUND_MAILING = None
