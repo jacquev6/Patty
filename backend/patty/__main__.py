@@ -657,9 +657,10 @@ def run_submission_daemon(
                         )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
-                    logs.log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
-                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                        logs.log("Calling pulse monitoring URL")
+                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
@@ -731,10 +732,11 @@ def backup_database() -> None:
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
-    requests.post(
-        settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
-        json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
-    )
+    if settings.DATABASE_BACKUP_PULSE_MONITORING_URL is not None:
+        requests.post(
+            settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
+            json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
+        )
     print(
         f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr
     )
