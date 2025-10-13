@@ -33,7 +33,7 @@ def make_url(operation: typing.Literal["put", "get"], prefix: str, key: str) -> 
 
 def check_token(raw_token: str, operation: typing.Literal["put", "get"], key: str) -> Token:
     try:
-        token = Token(**jwt.decode(raw_token, settings.SECRET_JWT_KEY, algorithms=["HS256"]))
+        token = Token.model_validate(jwt.decode(raw_token, settings.SECRET_JWT_KEY, algorithms=["HS256"]))
     except jwt.exceptions.InvalidTokenError:
         raise fastapi.HTTPException(status_code=fastapi.status.HTTP_404_NOT_FOUND, detail="File not found")
     else:

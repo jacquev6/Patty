@@ -146,8 +146,8 @@ class GeminiModelTestCase(unittest.IsolatedAsyncioTestCase):
                 }
             ],
         )
-        content = Response(
-            **json.loads(response.raw_conversation["response"]["candidates"][0]["content"]["parts"][0]["text"])
+        content = Response.model_validate(
+            json.loads(response.raw_conversation["response"]["candidates"][0]["content"]["parts"][0]["text"])
         )
         self.assertEqual(response.message.content, content)
 
@@ -240,8 +240,8 @@ class GeminiModelTestCase(unittest.IsolatedAsyncioTestCase):
                 }
             ],
         )
-        content = Response(
-            **try_hard_to_json_loads(
+        content = Response.model_validate(
+            try_hard_to_json_loads(
                 response.raw_conversation["response"]["candidates"][0]["content"]["parts"][0]["text"]
             )
         )
