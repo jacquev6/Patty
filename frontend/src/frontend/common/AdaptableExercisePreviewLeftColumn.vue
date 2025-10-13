@@ -99,15 +99,16 @@ async function approve(adaptationId: string, approved: boolean) {
           <WhiteSpace />
           <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
         </template>
-        <template
-          v-if="
-            context === 'textbookByBatch' &&
-            exercise.adaptationStatus.kind === 'success' &&
-            exercise.adaptationStatus.approved !== null
-          "
-        >
+        <template v-if="context === 'textbookByBatch' && exercise.adaptationStatus.kind === 'success'">
           <WhiteSpace />
-          <span :title="t('approved', exercise.adaptationStatus.approved)" style="font-size: 130%">✅</span>
+          <template v-if="exercise.adaptationStatus.approved === null">
+            <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>
+          </template>
+          <template v-else>
+            <button @click="approve(exercise.adaptationStatus.id, false)">{{ t('unapprove') }}</button>
+            <WhiteSpace />
+            <span :title="t('approved', exercise.adaptationStatus.approved)" style="font-size: 130%">✅</span>
+          </template>
         </template>
       </template>
     </template>
@@ -117,15 +118,6 @@ async function approve(adaptationId: string, approved: boolean) {
       <span class="inProgress">({{ t('inProgress') }})</span>
     </template>
   </component>
-
-  <template v-if="context === 'textbookByBatch' && exercise.adaptationStatus.kind === 'success'">
-    <p v-if="exercise.adaptationStatus.approved === null">
-      <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>
-    </p>
-    <p v-else>
-      <button @click="approve(exercise.adaptationStatus.id, false)">{{ t('unapprove') }}</button>
-    </p>
-  </template>
 
   <p v-if="context === 'adaptation' || context === 'classification'">
     {{ t('pageAndExercise', { pageNumber: pageNumber ?? 'N/A', exerciseNumber: exerciseNumber ?? 'N/A' }) }}
