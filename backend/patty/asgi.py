@@ -6,6 +6,7 @@ from . import authentication
 from . import database_utils
 from . import errors
 from . import settings
+from .file_storage import file_system_engine
 
 
 openapi_router = fastapi.APIRouter()
@@ -28,3 +29,4 @@ def get_health(session: database_utils.SessionDependable) -> dict[str, str]:
 
 app.include_router(openapi_router)
 app.include_router(api_router.export_router, prefix="/api/export")
+app.include_router(file_system_engine.router)

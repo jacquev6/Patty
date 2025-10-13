@@ -7,24 +7,15 @@ function checkImagesFrontend(length: number) {
   cy.get('img')
     .eq(length - 4)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/3\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/3\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 3)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/2\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/2\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 2)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/1\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/1\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 1)
     .should('have.attr', 'src', '/src/adapted-exercise/arrow.png')

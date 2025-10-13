@@ -10,8 +10,7 @@ s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3", s
 
 
 class S3FileStorageEngine:
-    def __init__(self, prefix_url: str) -> None:
-        target = urllib.parse.urlparse(prefix_url)
+    def __init__(self, target: urllib.parse.ParseResult) -> None:
         assert target.scheme == "s3"
         self.bucket = target.netloc
         assert target.path.startswith("/")

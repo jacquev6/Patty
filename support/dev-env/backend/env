@@ -1,11 +1,11 @@
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
 PATTY_DATABASE_BACKUPS_URL=file:///app/support/dev-env/db/backups
-PATTY_EXTERNAL_EXERCISES_URL=s3://jacquev6/patty/dev/external-exercises
-PATTY_PDF_FILES_URL=s3://jacquev6/patty/dev/pdf-files
+PATTY_EXTERNAL_EXERCISES_URL=file:///app/support/dev-env/backend/external-exercises
+PATTY_PDF_FILES_URL=file:///app/support/dev-env/backend/pdf-files
 PATTY_2025_05_20_CLASSIFICATION_CAMEMBERT_PT_PATH=/app/support/dev-env/backend/classification-models/2025-05-20-classification_camembert.pt
 PATTY_2025_09_15_IMAGES_DETECTION_PT_PATH=/app/support/dev-env/backend/images-detection-models/2025-09-15-detImages.pt
 PATTY_DETECTED_IMAGES_SAVE_PATH=/app/support/dev-env/backend/annotated-pdf-pages
-PATTY_EXERCISE_IMAGES_URL=s3://jacquev6/patty/dev/exercise-images
+PATTY_EXERCISE_IMAGES_URL=file:///app/support/dev-env/backend/exercise-images
 PATTY_SECRET_JWT_KEY=not-so-secret
 # Hashed version of: password
 PATTY_HASHED_PASSWORD='$argon2id$v=19$m=65536,t=3,p=4$6i6V3Ldj3HOl5tY334Co3g$C/N8pcUFK9xofd9GkzsQLs/2iY2c7PnXKg2HM105uec'
