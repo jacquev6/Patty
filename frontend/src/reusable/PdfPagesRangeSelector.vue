@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { type PDFDocumentProxy } from './pdfjs'
 import { useI18n } from 'vue-i18n'
-
+import { computed } from 'vue'
 import { computedAsync } from '@vueuse/core'
+
 import PdfNavigationControls from './PdfNavigationControls.vue'
 import PdfPageRenderer from './PdfPageRenderer.vue'
-import { computed, watch } from 'vue'
 
 const props = defineProps<{
   document: PDFDocumentProxy
@@ -30,17 +30,17 @@ const lastTextbookPageNumber = computed(() => {
   return lastPdfPageNumber.value + (firstTextbookPageNumber.value - firstPdfPageNumber.value)
 })
 
-watch(firstPdfPageNumber, (newValue) => {
-  if (newValue > lastPdfPageNumber.value) {
-    lastPdfPageNumber.value = newValue
+function ensureLastPageIsAboveFirst() {
+  if (firstPdfPageNumberProxy.value > lastPdfPageNumber.value) {
+    lastPdfPageNumber.value = firstPdfPageNumberProxy.value
   }
-})
+}
 
-watch(lastPdfPageNumber, (newValue) => {
-  if (newValue < firstPdfPageNumberProxy.value) {
-    firstPdfPageNumberProxy.value = newValue
+function ensureFirstPageIsBelowLast() {
+  if (lastPdfPageNumber.value < firstPdfPageNumberProxy.value) {
+    firstPdfPageNumberProxy.value = lastPdfPageNumber.value
   }
-})
+}
 
 const firstPage = computedAsync(() => props.document.getPage(firstPdfPageNumber.value), null)
 
@@ -54,13 +54,17 @@ const lastPage = computedAsync(() => props.document.getPage(lastPdfPageNumber.va
         <p>
           <I18nT keypath="inPdfIeInTextbook">
             <template #pdfPage>
-              <PdfNavigationControls v-model:page="firstPdfPageNumberProxy" :pagesCount="document.numPages" />
+              <PdfNavigationControls
+                v-model="firstPdfPageNumberProxy"
+                :pagesCount="document.numPages"
+                @blur="ensureLastPageIsAboveFirst"
+              />
             </template>
             <template #ie>
               <i>{{ t('ie') }}</i>
             </template>
             <template #textbookPage>
-              <PdfNavigationControls v-model:page="firstTextbookPageNumber" :pagesCount="null" />
+              <PdfNavigationControls v-model="firstTextbookPageNumber" :pagesCount="null" />
             </template>
           </I18nT>
         </p>
@@ -72,7 +76,11 @@ const lastPage = computedAsync(() => props.document.getPage(lastPdfPageNumber.va
         <p>
           <I18nT keypath="inPdfIeInTextbook">
             <template #pdfPage>
-              <PdfNavigationControls v-model:page="lastPdfPageNumber" :pagesCount="document.numPages" />
+              <PdfNavigationControls
+                v-model="lastPdfPageNumber"
+                :pagesCount="document.numPages"
+                @blur="ensureFirstPageIsBelowLast"
+              />
             </template>
             <template #ie>
               <i>{{ t('ie') }}</i>

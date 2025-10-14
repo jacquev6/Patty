@@ -5,7 +5,11 @@ const props = defineProps<{
   pagesCount: number | null
 }>()
 
-const pageNumber = defineModel<number>('page', { default: 1 })
+const pageNumber = defineModel<number>({ required: true })
+
+const emit = defineEmits<{
+  (e: 'blur'): void
+}>()
 
 const pageNumberProxy = computed({
   get: () => pageNumber.value.toString(),
@@ -33,7 +37,8 @@ const pageNumberProxy = computed({
         min="1"
         :max="pagesCount === null ? undefined : pagesCount"
         size="4"
-        v-model.lazy="pageNumberProxy"
+        v-model="pageNumberProxy"
+        @blur="emit('blur')"
       />
     </label>
     <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>

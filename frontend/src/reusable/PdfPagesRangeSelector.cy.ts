@@ -33,13 +33,24 @@ describe('PdfPagesRangeSelector', () => {
       cy.get('input').eq(0).should('have.value', '1')
       cy.get('input').eq(1).should('have.value', '1')
       cy.get('input').eq(2).should('have.value', '35')
+      cy.get(':contains("35 in textbook")').should('exist')
     })
   })
 
   it('reduces first page when setting last page too low', () => {
     mountThen(() => {
-      cy.get('input').eq(0).clear().type('8')
-      cy.get('input').eq(2).clear().type('5').blur()
+      cy.get('input').eq(0).clear()
+      cy.get('input').eq(1).should('have.value', '1') // Not updated by clear
+      cy.get('input').eq(0).type('8')
+      cy.get('input').eq(1).should('have.value', '8') // Updated before blur: required to display the right page
+      cy.get('input').eq(0).blur()
+      cy.get(':contains("35 in textbook")').should('exist')
+      cy.get('input').eq(2).clear()
+      cy.get(':contains("35 in textbook")').should('exist') // Not updated by clear
+      cy.get('input').eq(2).type('5')
+      cy.get(':contains("5 in textbook")').should('exist') // Updated before blur
+      cy.get('input').eq(0).should('have.value', '8') // Not fixed before blur
+      cy.get('input').eq(2).blur()
       cy.get('input').eq(0).should('have.value', '5')
     })
   })

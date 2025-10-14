@@ -181,13 +181,13 @@ const columns = [
         <I18nT keypath="pages" tag="p">
           <template #from>
             <span class="pagePreview">
-              <PdfNavigationControls v-model:page="firstPageNumber" :pagesCount="document.numPages" />
+              <PdfNavigationControls v-model="firstPageNumber" :pagesCount="document.numPages" />
               <PdfPageRenderer v-if="firstPage !== null" :page="firstPage" />
             </span>
           </template>
           <template #to>
             <span class="pagePreview">
-              <PdfNavigationControls v-model:page="lastPageNumber" :pagesCount="document.numPages" />
+              <PdfNavigationControls v-model="lastPageNumber" :pagesCount="document.numPages" />
               <PdfPageRenderer v-if="lastPage !== null" :page="lastPage" />
             </span>
           </template>
