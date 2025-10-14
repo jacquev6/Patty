@@ -230,10 +230,9 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
+    cy.get('li a:contains("40")').should('exist')
     cy.get('li:contains("40") button:contains("Remove")').should('have.length', 1).click()
-    cy.get('li a:contains("40")').click()
-    cy.get('h2').should('have.length', 0)
-    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('li a:contains("40")').should('not.exist')
 
     cy.get('li:contains("40") button:contains("Re-add")').should('have.length', 1).click()
     cy.get('li a:contains("40")').click()

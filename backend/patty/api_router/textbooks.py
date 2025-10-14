@@ -196,23 +196,32 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
             in_progress = page_extraction_creation.page_extraction.assistant_response is None
             if in_progress:
                 needs_refresh = True
+            page_number = (
+                extraction_batch.first_textbook_page_number
+                + page_extraction_creation.page_extraction.pdf_page_number
+                - extraction_batch.pdf_file_range.first_page_number
+            )
             pages.append(
                 GetTextbookResponse.Range.Page(
                     id=str(page_extraction_creation.id),
-                    page_number=extraction_batch.first_textbook_page_number
-                    + page_extraction_creation.page_extraction.pdf_page_number
-                    - extraction_batch.pdf_file_range.first_page_number,
+                    page_number=page_number,
                     in_progress=in_progress,
                     removed_from_textbook=page_extraction_creation.removed_from_textbook,
                 )
             )
-
-        pages_with_exercises.update(
-            range(
-                extraction_batch.first_textbook_page_number,
-                extraction_batch.first_textbook_page_number + extraction_batch.pdf_file_range.pages_count,
-            )
-        )
+            if (
+                not extraction_batch.removed_from_textbook
+                and not page_extraction_creation.removed_from_textbook
+                and isinstance(
+                    page_extraction_creation.page_extraction.assistant_response,
+                    (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                )
+            ):
+                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__unordered:
+                    assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
+                    if not exercise_creation.exercise.location.removed_from_textbook:
+                        pages_with_exercises.add(page_number)
+                        break
 
         ranges.append(
             GetTextbookResponse.Range(
