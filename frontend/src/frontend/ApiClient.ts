@@ -18,8 +18,6 @@ export function useAuthenticatedClient() {
   })
 }
 
-export type PostTextbookRequestBody = paths['/api/textbooks']['post']['requestBody']['content']['application/json']
-
 export type ErrorCaughtByFrontend =
   paths['/api/errors-caught-by-frontend']['get']['responses']['200']['content']['application/json']['errors'][number]
 

@@ -2576,10 +2576,6 @@
             "title": "Ranges",
             "type": "array"
           },
-          "singlePdf": {
-            "title": "Singlepdf",
-            "type": "boolean"
-          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -2606,7 +2602,6 @@
           "isbn",
           "pagesCount",
           "pagesWithExercises",
-          "singlePdf",
           "externalExercises",
           "ranges"
         ],
@@ -3901,16 +3896,6 @@
             ],
             "title": "Publisher"
           },
-          "singlePdf": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SinglePdf"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -3933,8 +3918,7 @@
           "publisher",
           "year",
           "isbn",
-          "pagesCount",
-          "singlePdf"
+          "pagesCount"
         ],
         "title": "PostTextbookRequest",
         "type": "object"
@@ -4390,65 +4374,6 @@
           "kind",
           "colorIndex"
         ],
-        "type": "object"
-      },
-      "SinglePdf": {
-        "additionalProperties": false,
-        "properties": {
-          "modelForAdaptation": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/MistralAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/OpenAiModel"
-              },
-              {
-                "$ref": "#/components/schemas/GeminiModel"
-              }
-            ],
-            "title": "Modelforadaptation"
-          },
-          "modelForExtraction": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
-              },
-              {
-                "$ref": "#/components/schemas/GeminiModel"
-              }
-            ],
-            "title": "Modelforextraction"
-          },
-          "pagesCount": {
-            "title": "Pagescount",
-            "type": "integer"
-          },
-          "pdfFileSha256": {
-            "title": "Pdffilesha256",
-            "type": "string"
-          },
-          "pdfFirstPageNumber": {
-            "title": "Pdffirstpagenumber",
-            "type": "integer"
-          },
-          "textbookFirstPageNumber": {
-            "title": "Textbookfirstpagenumber",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "pdfFileSha256",
-          "pdfFirstPageNumber",
-          "textbookFirstPageNumber",
-          "pagesCount",
-          "modelForExtraction",
-          "modelForAdaptation"
-        ],
-        "title": "SinglePdf",
         "type": "object"
       },
       "SplitWordInput": {

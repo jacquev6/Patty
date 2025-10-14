@@ -67,67 +67,65 @@ function download() {
       </RouterLink>
     </li>
   </ul>
-  <template v-if="!textbook.singlePdf">
-    <h2>{{ t('newTextbookPdf') }}</h2>
-    <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
-    <h2>{{ t('existingTextbookPdfs') }}</h2>
-    <template v-for="range in textbook.ranges">
-      <h3>
-        <span :class="{ removed: range.removedFromTextbook }">
-          {{
-            t('pages', {
-              textbookFrom: range.textbookFirstPageNumber,
-              textbookTo: range.textbookFirstPageNumber + range.pagesCount - 1,
-              pdfName: range.pdfFileNames[0],
-              pdfFrom: range.pdfFirstPageNumber,
-              pdfTo: range.pdfFirstPageNumber + range.pagesCount - 1,
-            })
-          }}
-        </span>
-        <template v-if="range.removedFromTextbook">
-          ({{ t('removed') }})
-          <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
-        </template>
-        <template v-else>
-          <WhiteSpace />
-          <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
-        </template>
-      </h3>
-      <template v-if="!range.removedFromTextbook">
-        <p>
-          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
-            <template #provider>{{ t('modelForExtraction') }}</template></LlmModelSelector
-          >,
-          <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
-            <template #provider>{{ t('modelForAdaptation') }}</template>
-          </LlmModelSelector>
-        </p>
-        <p>{{ t('extractedPagesHeader') }}</p>
-        <ul class="rangePages">
-          <li v-for="page in range.pages">
-            <span :class="{ removed: page.removedFromTextbook }">
-              {{ page.pageNumber }}
-              <!-- <RouterLink
-                :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
-              >
-                {{ t('viewDetails') }}
-              </RouterLink> -->
-            </span>
-            <template v-if="page.inProgress">
-              <WhiteSpace />
-              <span class="inProgress">{{ t('inProgress') }}</span>
-            </template>
-            <template v-else-if="page.removedFromTextbook">
-              ({{ t('removed') }})
-              <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
-            </template>
-            <template v-else>
-              <WhiteSpace />
-              <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
-            </template>
-          </li>
-        </ul>
+  <h2>{{ t('newTextbookPdf') }}</h2>
+  <EditTextbookFormAddPdfRangeForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
+  <h2>{{ t('existingTextbookPdfs') }}</h2>
+  <template v-for="range in textbook.ranges">
+    <h3>
+      <span :class="{ removed: range.removedFromTextbook }">
+        {{
+          t('pages', {
+            textbookFrom: range.textbookFirstPageNumber,
+            textbookTo: range.textbookFirstPageNumber + range.pagesCount - 1,
+            pdfName: range.pdfFileNames[0],
+            pdfFrom: range.pdfFirstPageNumber,
+            pdfTo: range.pdfFirstPageNumber + range.pagesCount - 1,
+          })
+        }}
+      </span>
+      <template v-if="range.removedFromTextbook">
+        ({{ t('removed') }})
+        <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
       </template>
+      <template v-else>
+        <WhiteSpace />
+        <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
+      </template>
+    </h3>
+    <template v-if="!range.removedFromTextbook">
+      <p>
+        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
+          <template #provider>{{ t('modelForExtraction') }}</template></LlmModelSelector
+        >,
+        <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForAdaptation">
+          <template #provider>{{ t('modelForAdaptation') }}</template>
+        </LlmModelSelector>
+      </p>
+      <p>{{ t('extractedPagesHeader') }}</p>
+      <ul class="rangePages">
+        <li v-for="page in range.pages">
+          <span :class="{ removed: page.removedFromTextbook }">
+            {{ page.pageNumber }}
+            <!-- <RouterLink
+              :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
+            >
+              {{ t('viewDetails') }}
+            </RouterLink> -->
+          </span>
+          <template v-if="page.inProgress">
+            <WhiteSpace />
+            <span class="inProgress">{{ t('inProgress') }}</span>
+          </template>
+          <template v-else-if="page.removedFromTextbook">
+            ({{ t('removed') }})
+            <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
+          </template>
+          <template v-else>
+            <WhiteSpace />
+            <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
+          </template>
+        </li>
+      </ul>
     </template>
   </template>
   <h2 id="external-exercises">{{ t('newExternalExercises') }}</h2>

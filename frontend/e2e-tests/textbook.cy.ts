@@ -3,67 +3,41 @@ import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from '
 describe('The creation form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-branch', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-branch'])
     ignoreResizeObserverLoopError()
-    visit('/new-textbook')
+    visit('/')
   })
 
-  it('creates a multi-PDFs textbook with only a title', () => {
+  it('creates a textbook with only a title', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('[data-cy="textbook-title"]').type('Mutli-PDFs', { delay: 0 })
-    cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('label:contains("Single PDF") input').should('not.be.checked')
-    cy.get('label:contains("Multiple PDFs") input').should('not.be.checked').check()
+    cy.get('[data-cy="textbook-title"]').type('Dummy title', { delay: 0 })
     cy.get('button:contains("Submit")').should('be.enabled').click()
+
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1 span').should('have.text', 'Mutli-PDFs')
-    cy.get('h2:contains("New textbook PDF")').should('exist')
-    cy.get('h2:contains("Existing textbook PDFs")').should('exist')
+    cy.get('h1').should('have.text', 'Dummy title')
 
     cy.visit('/')
-    cy.get('li:contains("Mutli-PDFs")').should('exist').should('contain', 'Mutli-PDFs (created by Alice on')
+    cy.get('li:contains("Dummy title")').should('exist').should('contain', 'Dummy title (created by Alice on')
   })
 
-  it('creates a multi-PDFs textbook with all fields', () => {
+  it('creates a textbook with all fields', () => {
     cy.get('[data-cy="textbook-title"]').type('The title', { delay: 0 })
     cy.get('[data-cy="textbook-publisher"]').type('Dummy publisher', { delay: 0 })
     cy.get('[data-cy="textbook-year"]').type('2023', { delay: 0 })
     cy.get('[data-cy="textbook-isbn"]').type('978-3-16-148410-0', { delay: 0 })
     cy.get('[data-cy="textbook-pages-count"]').type('76', { delay: 0 })
-    cy.get('label:contains("Multiple PDFs") input').check()
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1 span').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
-    cy.get('h2:contains("New textbook PDF")').should('exist')
+    cy.get('h1').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
 
     cy.visit('/')
     cy.get('li:contains("The title")')
       .should('exist')
       .should('contain', 'The title (76 pages), Dummy publisher, 2023 (created by Alice on')
   })
-
-  it('creates a single-PDF textbook with only a title', () => {
-    cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('[data-cy="textbook-title"]').type('Single-PDF', { delay: 0 })
-    cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('label:contains("Multiple PDFs") input').should('not.be.checked')
-    cy.get('label:contains("Single PDF") input').should('not.be.checked').check()
-    cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
-    cy.get('button:contains("Submit")').should('be.enabled').click()
-    cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1 span').should('have.text', 'Single-PDF')
-    cy.get('h2:contains("New textbook PDF")').should('not.exist')
-    cy.get('h2:contains("Existing textbook PDFs")').should('not.exist')
-    cy.get('li a:contains("2")').should('exist')
-    screenshot('single-pdf-textbook')
-
-    cy.visit('/')
-    cy.get('li:contains("Single-PDF")').should('exist').should('contain', 'Single-PDF (created by Alice on')
-  })
 })
 
-describe('The edition form for multi-PDFs textbooks - empty', () => {
+describe('The edition form for textbooks - empty', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
@@ -71,8 +45,13 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     visit('/textbook-1')
   })
 
+  function screenshots(name: string) {
+    cy.get('div.main').scrollTo('top', { ensureScrollable: false })
+    screenshot(name)
+  }
+
   it('adds and removes PDF ranges', () => {
-    screenshot('multi-pdfs-textbook--empty')
+    screenshots('empty-textbook')
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
     cy.get('p:contains("i.e. 2 in textbook")').should('exist')
@@ -108,7 +87,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('button:contains("Remove")').should('have.length', 3)
 
-    screenshot('multi-pdfs-textbook--with-pdf-ranges')
+    screenshots('textbook-with-pdf-ranges')
 
     // Remove batch
     cy.visit('/textbook-1/page-6')
@@ -161,7 +140,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('h2').eq(0).should('contain', 'Exercise 1').should('not.contain', 'removed')
     cy.get('h2').eq(1).should('contain', 'Exercise 7').should('not.contain', 'removed')
     cy.get('label:contains("Show only exercises not yet approved") input').should('be.disabled')
-    screenshot('multi-pdfs-textbook--page-with-external-exercises')
+    screenshots('textbook-page-with-external-exercises')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('button:contains("Remove")').should('have.length', 2)
@@ -184,11 +163,11 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('h2').eq(1).should('contain', 'Exercise 7').should('contain', 'removed')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
-    screenshot('multi-pdfs-textbook--with-external-exercises')
+    screenshots('textbook-with-external-exercises')
   })
 })
 
-describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
+describe('The edition form for textbooks - with a PDF range', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])

@@ -12,7 +12,7 @@ from .. import extraction
 from ..any_json import JsonDict
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises import Exercise, ExerciseLocation
-from ..extraction import PdfFile, PdfFileRange, PageExtractionCreation
+from ..extraction import PdfFileRange, PageExtractionCreation
 
 
 class Textbook(OrmBase, CreatedByUserMixin):
@@ -28,7 +28,6 @@ class Textbook(OrmBase, CreatedByUserMixin):
         year: int | None,
         isbn: str | None,
         pages_count: int | None,
-        single_pdf_file: PdfFile | None,
     ) -> None:
         super().__init__()
         self.created_at = created_at
@@ -38,7 +37,6 @@ class Textbook(OrmBase, CreatedByUserMixin):
         self.year = year
         self.isbn = isbn
         self.pages_count = pages_count
-        self.single_pdf_file = single_pdf_file
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -47,10 +45,6 @@ class Textbook(OrmBase, CreatedByUserMixin):
     year: orm.Mapped[int | None]
     isbn: orm.Mapped[str | None]
     pages_count: orm.Mapped[int | None]
-    single_pdf_file_sha256: orm.Mapped[str | None] = orm.mapped_column(sql.ForeignKey(PdfFile.sha256))
-    single_pdf_file: orm.Mapped[PdfFile | None] = orm.relationship(
-        foreign_keys=[single_pdf_file_sha256], remote_side=[PdfFile.sha256]
-    )
 
     @staticmethod
     def make_ordered_exercises_request(id: int) -> sql.Select[tuple[Exercise]]:
