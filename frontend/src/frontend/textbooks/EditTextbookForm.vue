@@ -51,7 +51,9 @@ function download() {
   <h1>
     <span>
       {{ textbook.title
-      }}<template v-if="textbook.pagesCount !== null"> ({{ t('pagesCount', { count: textbook.pagesCount }) }})</template>
+      }}<template v-if="textbook.pagesCount !== null">
+        ({{ t('pagesCount', { count: textbook.pagesCount }) }})</template
+      >
       <template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template>
       <template v-if="textbook.year !== null">, {{ textbook.year }}</template>
       <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
