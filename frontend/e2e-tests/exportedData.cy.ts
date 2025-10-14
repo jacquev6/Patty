@@ -377,9 +377,9 @@ describe('The autonomous HTML for a textbook', () => {
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title.html`).should('not.exist')
 
     visit('/textbook-1')
-    cy.get('a:contains("standalone HTML")').click()
+    cy.get('button:contains("Download")').click()
     cy.wait(1000)
-    cy.get('a:contains("standalone HTML")').should('exist')
+    cy.get('button:contains("Download")').should('exist')
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title.html`)
   })
 

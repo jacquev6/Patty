@@ -16,7 +16,7 @@ describe('The creation form for textbooks', () => {
     cy.get('label:contains("Multiple PDFs") input').should('not.be.checked').check()
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'Mutli-PDFs')
+    cy.get('h1 span').should('have.text', 'Mutli-PDFs')
     cy.get('h2:contains("New textbook PDF")').should('exist')
     cy.get('h2:contains("Existing textbook PDFs")').should('exist')
 
@@ -33,7 +33,7 @@ describe('The creation form for textbooks', () => {
     cy.get('label:contains("Multiple PDFs") input').check()
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
+    cy.get('h1 span').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
     cy.get('h2:contains("New textbook PDF")').should('exist')
 
     cy.visit('/')
@@ -52,7 +52,7 @@ describe('The creation form for textbooks', () => {
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'Single-PDF')
+    cy.get('h1 span').should('have.text', 'Single-PDF')
     cy.get('h2:contains("New textbook PDF")').should('not.exist')
     cy.get('h2:contains("Existing textbook PDFs")').should('not.exist')
     cy.get('li a:contains("2")').should('exist')

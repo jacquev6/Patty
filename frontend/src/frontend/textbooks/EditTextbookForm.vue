@@ -41,21 +41,24 @@ async function removeRange(range_id: string, removed: boolean) {
   })
   emit('textbook-updated')
 }
+
+function download() {
+  window.location.href = `/api/export/textbook/${props.textbook.id}.html?token=${authenticationTokenStore.token}`
+}
 </script>
 
 <template>
   <h1>
-    {{ textbook.title
-    }}<template v-if="textbook.pagesCount !== null"> ({{ t('pagesCount', { count: textbook.pagesCount }) }})</template>
-    <template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template>
-    <template v-if="textbook.year !== null">, {{ textbook.year }}</template>
-    <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
+    <span>
+      {{ textbook.title
+      }}<template v-if="textbook.pagesCount !== null"> ({{ t('pagesCount', { count: textbook.pagesCount }) }})</template>
+      <template v-if="textbook.publisher !== null">, {{ textbook.publisher }}</template>
+      <template v-if="textbook.year !== null">, {{ textbook.year }}</template>
+      <template v-if="textbook.isbn !== null"> ({{ t('isbn') }}: {{ textbook.isbn }})</template>
+    </span>
+    <WhiteSpace />
+    <button @click="download">{{ t('downloadHtml') }}</button>
   </h1>
-  <p>
-    <a :href="`/api/export/textbook/${textbook.id}.html?token=${authenticationTokenStore.token}`">
-      {{ t('downloadHtml') }}
-    </a>
-  </p>
   <h2>{{ t('pagesWithExercises') }}</h2>
   <ul class="rangePages">
     <li v-for="pageNumber in textbook.pagesWithExercises">
@@ -169,7 +172,7 @@ ul.rangePages li {
 en:
   isbn: ISBN
   pagesCount: "{count} pages"
-  downloadHtml: Download standalone HTML
+  downloadHtml: Download
   pagesWithExercises: "Pages with exercises"
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
@@ -189,7 +192,7 @@ en:
 fr:
   isbn: ISBN
   pagesCount: "{count} pages"
-  downloadHtml: Télécharger le HTML autonome
+  downloadHtml: Télécharger
   pagesWithExercises: "Pages avec des exercices"
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
