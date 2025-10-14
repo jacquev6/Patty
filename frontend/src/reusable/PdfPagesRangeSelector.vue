@@ -57,7 +57,7 @@ const lastPage = computedAsync(() => props.document.getPage(lastPdfPageNumber.va
               <PdfNavigationControls
                 v-model="firstPdfPageNumberProxy"
                 :pagesCount="document.numPages"
-                @blur="ensureLastPageIsAboveFirst"
+                @commit="ensureLastPageIsAboveFirst"
               />
             </template>
             <template #ie>
@@ -79,7 +79,7 @@ const lastPage = computedAsync(() => props.document.getPage(lastPdfPageNumber.va
               <PdfNavigationControls
                 v-model="lastPdfPageNumber"
                 :pagesCount="document.numPages"
-                @blur="ensureFirstPageIsBelowLast"
+                @commit="ensureFirstPageIsBelowLast"
               />
             </template>
             <template #ie>

@@ -8,7 +8,7 @@ const props = defineProps<{
 const pageNumber = defineModel<number>({ required: true })
 
 const emit = defineEmits<{
-  (e: 'blur'): void
+  (e: 'commit'): void
 }>()
 
 const pageNumberProxy = computed({
@@ -26,11 +26,21 @@ const pageNumberProxy = computed({
     }
   },
 })
+
+async function decrement() {
+  --pageNumber.value
+  emit('commit')
+}
+
+async function increment() {
+  ++pageNumber.value
+  emit('commit')
+}
 </script>
 
 <template>
   <span>
-    <button sm primary :disabled="pageNumber <= 1" @click="--pageNumber">&lt;</button>
+    <button sm primary :disabled="pageNumber <= 1" @click="decrement">&lt;</button>
     <label>
       <input
         type="number"
@@ -38,10 +48,10 @@ const pageNumberProxy = computed({
         :max="pagesCount === null ? undefined : pagesCount"
         size="4"
         v-model="pageNumberProxy"
-        @blur="emit('blur')"
+        @blur="emit('commit')"
       />
     </label>
-    <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>
+    <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="increment">&gt;</button>
     <slot></slot>
   </span>
 </template>
