@@ -25,6 +25,9 @@ services:
     volumes:
       - ./backend/classification-models:/classification-models
       - ./backend/images-detection-models:/images-detection-models
+      - ./backend/external-exercises:/external-exercises
+      - ./backend/pdf-files:/pdf-files
+      - ./backend/exercise-images:/exercise-images
     env_file:
       - backend/env
       - backend/secrets.env
@@ -38,6 +41,9 @@ services:
     volumes:
       - ./backend/classification-models:/classification-models
       - ./backend/images-detection-models:/images-detection-models
+      - ./backend/external-exercises:/external-exercises
+      - ./backend/pdf-files:/pdf-files
+      - ./backend/exercise-images:/exercise-images
     env_file:
       - backend/env
       - backend/secrets.env
