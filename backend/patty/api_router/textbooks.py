@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Literal
 import datetime
-import urllib.parse
 
 import fastapi
 import sqlalchemy as sql
@@ -13,10 +12,9 @@ from .. import database_utils
 from .. import exercises
 from .. import external_exercises
 from .. import extraction
-from .. import settings
+from .. import file_storage
 from .. import textbooks
 from ..api_utils import ApiModel, get_by_id
-from .s3_client import s3
 
 
 router = fastapi.APIRouter()
@@ -127,23 +125,32 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
             in_progress = page_extraction_creation.page_extraction.assistant_response is None
             if in_progress:
                 needs_refresh = True
+            page_number = (
+                extraction_batch.first_textbook_page_number
+                + page_extraction_creation.page_extraction.pdf_page_number
+                - extraction_batch.pdf_file_range.first_page_number
+            )
             pages.append(
                 GetTextbookResponse.Range.Page(
                     id=str(page_extraction_creation.id),
-                    page_number=extraction_batch.first_textbook_page_number
-                    + page_extraction_creation.page_extraction.pdf_page_number
-                    - extraction_batch.pdf_file_range.first_page_number,
+                    page_number=page_number,
                     in_progress=in_progress,
                     removed_from_textbook=page_extraction_creation.removed_from_textbook,
                 )
             )
-
-        pages_with_exercises.update(
-            range(
-                extraction_batch.first_textbook_page_number,
-                extraction_batch.first_textbook_page_number + extraction_batch.pdf_file_range.pages_count,
-            )
-        )
+            if (
+                not extraction_batch.removed_from_textbook
+                and not page_extraction_creation.removed_from_textbook
+                and isinstance(
+                    page_extraction_creation.page_extraction.assistant_response,
+                    (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                )
+            ):
+                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__unordered:
+                    assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
+                    if not exercise_creation.exercise.location.removed_from_textbook:
+                        pages_with_exercises.add(page_number)
+                        break
 
         ranges.append(
             GetTextbookResponse.Range(
@@ -271,7 +278,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     page_number=exercise.location.page_number,
                     exercise_number=exercise.location.exercise_number,
                     full_text=exercise.full_text,
-                    images_urls=previewable_exercise.gather_images_urls("s3", exercise),
+                    images_urls=previewable_exercise.gather_images_urls("http", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
                     removed_from_textbook=exercise.location.removed_from_textbook,
@@ -344,11 +351,8 @@ def post_textbook_external_exercises(
     )
     session.add(external_exercise)
     session.flush()
-    target = urllib.parse.urlparse(f"{settings.EXTERNAL_EXERCISES_URL}/{external_exercise.id}")
     return PostTextbookExternalExercisesResponse(
-        put_url=s3.generate_presigned_url(
-            "put_object", Params={"Bucket": target.netloc, "Key": target.path[1:]}, ExpiresIn=300
-        )
+        put_url=file_storage.external_exercises.get_put_url(str(external_exercise.id))
     )
 
 

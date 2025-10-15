@@ -180,7 +180,9 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
                 },
             },
         )
-        content1 = Response(**json.loads(response1.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        content1 = Response.model_validate(
+            json.loads(response1.raw_conversation["response"]["choices"][0]["message"]["content"])
+        )
         self.assertEqual(response1.message.content, content1)
 
         messages.append(response1.message)
@@ -228,7 +230,9 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
                 },
             },
         )
-        content2 = Response(**json.loads(response2.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        content2 = Response.model_validate(
+            json.loads(response2.raw_conversation["response"]["choices"][0]["message"]["content"])
+        )
         self.assertEqual(response2.message.content, content2)
 
         self.assertNotEqual(response2.message.content.structured.cheese, response1.message.content.structured.cheese)
@@ -260,7 +264,9 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             ],
         )
         self.assertEqual(response.raw_conversation["response_format"], {"type": "json_object"})
-        content = Response(**json.loads(response.raw_conversation["response"]["choices"][0]["message"]["content"]))
+        content = Response.model_validate(
+            json.loads(response.raw_conversation["response"]["choices"][0]["message"]["content"])
+        )
         self.assertEqual(response.message.content, content)
 
     @costs_money
@@ -324,8 +330,8 @@ class MistralAiModelTestCase(unittest.IsolatedAsyncioTestCase):
             ],
         )
         self.assertEqual(response.raw_conversation["response_format"], {"type": "text"})
-        content = Response(
-            **try_hard_to_json_loads(response.raw_conversation["response"]["choices"][0]["message"]["content"])
+        content = Response.model_validate(
+            try_hard_to_json_loads(response.raw_conversation["response"]["choices"][0]["message"]["content"])
         )
         self.assertEqual(response.message.content, content)
 

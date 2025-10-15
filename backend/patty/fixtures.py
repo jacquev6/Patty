@@ -1,10 +1,7 @@
-import itertools
 from typing import Iterable, TypeVar
 import datetime
 import textwrap
 
-import boto3
-import botocore
 import compact_json  # type: ignore[import-untyped]
 import fastapi
 import sqlalchemy.orm
@@ -16,6 +13,7 @@ from . import errors  # noqa: F401 to populate the metadata
 from . import exercises
 from . import external_exercises  # noqa: F401 to populate the metadata
 from . import extraction
+from . import file_storage
 from . import sandbox
 from . import settings
 from . import textbooks
@@ -1363,18 +1361,9 @@ def load(session: database_utils.Session, truncate: bool, fixtures: Iterable[str
 
     if truncate:
         database_utils.truncate_all_tables(session)
-
-        s3 = boto3.client("s3", config=botocore.client.Config(region_name="eu-west-3"))
-        for batch in itertools.batched(
-            (
-                {"Key": obj["Key"]}
-                for page in s3.get_paginator("list_objects_v2").paginate(Bucket="jacquev6", Prefix="patty/dev")
-                if "Contents" in page
-                for obj in page["Contents"]
-            ),
-            1000,
-        ):
-            s3.delete_objects(Bucket="jacquev6", Delete={"Objects": batch})
+        file_storage.exercise_images.delete_all()
+        file_storage.external_exercises.delete_all()
+        file_storage.pdf_files.delete_all()
 
     for fixture in fixtures:
         available_fixtures[fixture]()

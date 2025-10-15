@@ -54,7 +54,7 @@ def login(req: PostTokenRequest) -> PostTokenResponse:
 
 def check_token_validity(token: str) -> typing.Literal[True]:
     try:
-        token_ = Token(**jwt.decode(token, settings.SECRET_JWT_KEY, algorithms=["HS256"]))
+        token_ = Token.model_validate(jwt.decode(token, settings.SECRET_JWT_KEY, algorithms=["HS256"]))
     except jwt.exceptions.InvalidTokenError:
         raise fastapi.HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
     else:
@@ -129,7 +129,7 @@ class AuthenticationApiTestCase(unittest.TestCase):
         response = self.client.post("http://server/token", json={"password": "password", "validity": "PT0S"})
         after = datetime.datetime.now(tz=datetime.timezone.utc)
         self.assertEqual(response.status_code, 200, response.json())
-        json_response = PostTokenResponse(**response.json())
+        json_response = PostTokenResponse.model_validate(response.json())
         self.assertGreater(json_response.valid_until, before)
         self.assertLess(json_response.valid_until, after)
         token = json_response.access_token
@@ -148,13 +148,13 @@ class AuthenticationApiTestCase(unittest.TestCase):
         response = self.client.post("http://server/token", json={"password": "password", "validity": "P1D"})
         after = datetime.datetime.now(tz=datetime.timezone.utc)
         self.assertEqual(response.status_code, 200, response.json())
-        json_response = PostTokenResponse(**response.json())
+        json_response = PostTokenResponse.model_validate(response.json())
 
         # Validity is the default one despite the tempering attempt
         self.assertGreater(json_response.valid_until, before + datetime.timedelta(hours=3))
         self.assertLess(json_response.valid_until, after + datetime.timedelta(hours=3))
         token_string = json_response.access_token
-        token = Token(**jwt.decode(token_string, options={"verify_signature": False}))
+        token = Token.model_validate(jwt.decode(token_string, options={"verify_signature": False}))
         self.assertGreater(token.valid_until, before + datetime.timedelta(hours=3))
         self.assertLess(token.valid_until, after + datetime.timedelta(hours=3))
 

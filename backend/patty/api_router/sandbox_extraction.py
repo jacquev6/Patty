@@ -244,7 +244,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
                         exercise.location, exercises.ExerciseLocationMaybePageAndNumber
                     ).exercise_number,
                     full_text=exercise.full_text,
-                    images_urls=previewable_exercise.gather_images_urls("s3", exercise),
+                    images_urls=previewable_exercise.gather_images_urls("http", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
                 )
@@ -254,7 +254,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             GetExtractionBatchResponse.Page(
                 page_number=page_extraction.pdf_page_number,
                 images_urls={
-                    creation.image.local_identifier: previewable_exercise.make_image_url("s3", creation.image)
+                    creation.image.local_identifier: previewable_exercise.make_image_url("http", creation.image)
                     for creation in page_extraction.extracted_images
                 },
                 assistant_response=page_extraction.assistant_response,

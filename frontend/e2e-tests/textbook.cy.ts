@@ -55,7 +55,7 @@ describe('The edition form for textbooks - empty', () => {
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
     cy.get('p:contains("i.e. 2 in textbook")').should('exist')
-    cy.get('input[type="number"]').eq(1).type('{selectAll}6')
+    cy.get('input[type="number"]').eq(1).type('{selectAll}6').blur()
     cy.get('p:contains("i.e. 7 in textbook")').should('exist')
     cy.get('[data-cy="extraction"] [data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="extraction"] [data-cy="llm-name"]').select('dummy-1')
@@ -206,10 +206,9 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('h2').should('have.length', 4)
     cy.get('a:contains("Dummy Textbook Title")').click()
 
+    cy.get('li a:contains("40")').should('exist')
     cy.get('li:contains("40") button:contains("Remove")').should('have.length', 1).click()
-    cy.get('li a:contains("40")').click()
-    cy.get('h2').should('have.length', 0)
-    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('li a:contains("40")').should('not.exist')
 
     cy.get('li:contains("40") button:contains("Re-add")').should('have.length', 1).click()
     cy.get('li a:contains("40")').click()

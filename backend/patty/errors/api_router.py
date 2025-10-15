@@ -7,7 +7,7 @@ from .. import authentication
 from ..api_utils import ApiModel
 from ..database_utils import SessionDependable
 from ..mailing import send_mail
-from ..settings import MAIL_SENDER
+from .. import settings
 from ..version import PATTY_VERSION
 from .orm_models import ErrorCaughtByFrontend
 
@@ -34,9 +34,9 @@ class PostErrorsCaughtByFrontendResponse(ApiModel):
 def create_error(
     req: PostErrorsCaughtByFrontendRequest, session: SessionDependable
 ) -> PostErrorsCaughtByFrontendResponse:
-    if PATTY_VERSION != "dev" and req.github_issue_number is None:
+    if settings.OUTBOUND_MAILING is not None and req.github_issue_number is None:
         send_mail(
-            to=MAIL_SENDER,
+            to=settings.OUTBOUND_MAILING.MAIL_SENDER,
             subject=f"Patty version {PATTY_VERSION}: error caught by frontend",
             body=req.model_dump_json(indent=2),
         )

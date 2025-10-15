@@ -100,7 +100,7 @@ class Model(abc.ABC, pydantic.BaseModel):
             raise NotJsonLlmException(response, raw_conversation)
 
         try:
-            validated_content = response_format.response_type(**parsed_content)
+            validated_content = response_format.response_type.model_validate(parsed_content)
         except pydantic.ValidationError:
             raise InvalidJsonLlmException(parsed_content, raw_conversation)
 

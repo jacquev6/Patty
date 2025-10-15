@@ -629,6 +629,7 @@ def run_submission_daemon(
         logs.log("Starting")
         last_time = time.monotonic()
         while True:
+            done_something = False
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
@@ -656,9 +657,10 @@ def run_submission_daemon(
                         )
                     session.commit()
                 if time.monotonic() >= last_time + 60:
-                    logs.log("Calling pulse monitoring URL")
                     last_time = time.monotonic()
-                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                        logs.log("Calling pulse monitoring URL")
+                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
@@ -730,10 +732,11 @@ def backup_database() -> None:
     else:
         raise NotImplementedError(f"Unsupported database backup URL scheme: {parsed_database_backups_url.scheme}")
 
-    requests.post(
-        settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
-        json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
-    )
+    if settings.DATABASE_BACKUP_PULSE_MONITORING_URL is not None:
+        requests.post(
+            settings.DATABASE_BACKUP_PULSE_MONITORING_URL,
+            json={"archive_url": f"{settings.DATABASE_BACKUPS_URL}/{archive_name}"},
+        )
     print(
         f"Backed up database {settings.DATABASE_URL} to {settings.DATABASE_BACKUPS_URL}/{archive_name}", file=sys.stderr
     )
@@ -741,7 +744,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251006-031603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251014-041602.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

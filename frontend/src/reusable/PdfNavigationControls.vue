@@ -1,41 +1,57 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   pagesCount: number | null
 }>()
 
-const pageNumber = defineModel<number>('page', { default: 1 })
-const requestedPageNumber = ref('')
+const pageNumber = defineModel<number>({ required: true })
 
-function resetRequestedPageNumber() {
-  requestedPageNumber.value = pageNumber.value.toString()
+const emit = defineEmits<{
+  (e: 'commit'): void
+}>()
+
+const pageNumberProxy = computed({
+  get: () => pageNumber.value.toString(),
+  set: (value_: string) => {
+    const value = Number.parseInt(value_, 10)
+    if (Number.isInteger(value)) {
+      if (value < 1) {
+        pageNumber.value = 1
+      } else if (props.pagesCount !== null && value > props.pagesCount) {
+        pageNumber.value = props.pagesCount
+      } else {
+        pageNumber.value = value
+      }
+    }
+  },
+})
+
+async function decrement() {
+  --pageNumber.value
+  emit('commit')
 }
 
-watch(pageNumber, resetRequestedPageNumber, { immediate: true })
-
-watch(requestedPageNumber, () => {
-  const page = Number.parseInt(requestedPageNumber.value, 10)
-  if (Number.isInteger(page) && page >= 1 && (props.pagesCount === null || page <= props.pagesCount)) {
-    pageNumber.value = page
-  }
-})
+async function increment() {
+  ++pageNumber.value
+  emit('commit')
+}
 </script>
 
 <template>
   <span>
-    <button sm primary :disabled="pageNumber <= 1" @click="--pageNumber">&lt;</button>
+    <button sm primary :disabled="pageNumber <= 1" @click="decrement">&lt;</button>
     <label>
       <input
         type="number"
         min="1"
         :max="pagesCount === null ? undefined : pagesCount"
         size="4"
-        v-model="requestedPageNumber"
-        @blur="resetRequestedPageNumber"
+        v-model="pageNumberProxy"
+        @blur="emit('commit')"
       />
     </label>
-    <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="++pageNumber">&gt;</button>
+    <button sm primary :disabled="pagesCount !== null && pageNumber >= pagesCount" @click="increment">&gt;</button>
     <slot></slot>
   </span>
 </template>

@@ -7,24 +7,15 @@ function checkImagesFrontend(length: number) {
   cy.get('img')
     .eq(length - 4)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/3\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/3\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 3)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/2\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/2\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 2)
     .should('have.attr', 'src')
-    .and(
-      'match',
-      /^https:\/\/jacquev6\.s3\.amazonaws\.com\/patty\/dev\/exercise-images\/1\.png\?X-Amz-Algorithm=AWS4-HMAC-SHA256/,
-    )
+    .and('match', /^\/api\/files\/1\.png\?token=.*$/)
   cy.get('img')
     .eq(length - 1)
     .should('have.attr', 'src', '/src/adapted-exercise/arrow.png')
@@ -38,7 +29,21 @@ function checkImagesExport() {
   cy.get('img').eq(3).should('have.attr', 'src').and('match', dataUriRegex)
 }
 
+let token = ''
+
+function visitExport(url: string) {
+  cy.visit(`${url}?download=false&token=${token}`)
+}
+
+function login() {
+  cy.request('POST', '/api/token', { password: 'password' }).then((response) => {
+    token = response.body.accessToken
+  })
+}
+
 describe('Patty', () => {
+  before(login)
+
   beforeEach(() => {
     ignoreResizeObserverLoopError()
   })
@@ -113,11 +118,7 @@ describe('Patty', () => {
     screenshot('images-textbook-frontend')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
-    cy.get('a:contains("standalone HTML")')
-      .should('have.attr', 'href')
-      .then((href) => {
-        cy.visit(href + '&download=false')
-      })
+    visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('1')
     cy.get('a:contains("Exercice 1")').invoke('removeAttr', 'target').click()
     checkImagesExport()
