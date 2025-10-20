@@ -14,7 +14,7 @@ describe('The creation form for textbooks', () => {
     cy.get('button:contains("Submit")').should('be.enabled').click()
 
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'Dummy title')
+    cy.get('h1 span').should('have.text', 'Dummy title')
 
     cy.visit('/')
     cy.get('li:contains("Dummy title")').should('exist').should('contain', 'Dummy title (created by Alice on')
@@ -28,7 +28,7 @@ describe('The creation form for textbooks', () => {
     cy.get('[data-cy="textbook-pages-count"]').type('76', { delay: 0 })
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
+    cy.get('h1 span').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
 
     cy.visit('/')
     cy.get('li:contains("The title")')

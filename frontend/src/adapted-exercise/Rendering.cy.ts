@@ -877,7 +877,11 @@ describe('FreeTextInput', () => {
     cy.get('[data-cy="freeTextInput"]').as('input')
     cy.get('@input').type('Hello{enter}world')
     cy.get('br').should('not.exist')
-    cy.get('@input').should('have.text', 'Hello\nworld\n')
+    if (Cypress.browser.name === 'firefox') {
+      cy.get('@input').should('have.text', 'Hello\nworld')
+    } else {
+      cy.get('@input').should('have.text', 'Hello\nworld\n')
+    }
   })
 
   it('allows navigating exercise pages using arrow keys', () => {
