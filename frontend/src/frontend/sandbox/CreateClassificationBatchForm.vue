@@ -21,7 +21,7 @@ const client = useAuthenticatedClient()
 
 const identifiedUser = useIdentifiedUserStore()
 
-const runAdaptationAsString = ref('yes')
+const runAdaptationAsString = ref<'yes' | 'no'>('no')
 
 const llmModel = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 
