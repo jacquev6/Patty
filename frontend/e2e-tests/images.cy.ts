@@ -53,6 +53,7 @@ describe('Patty', () => {
     visit('/new-extraction-batch')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/images.pdf')
     cy.get('[data-cy="llm-name"]').eq(0).select('dummy-for-images')
+    cy.get('[data-cy="run-adaptation"]').select('yes')
     cy.get('[data-cy="llm-name"]').eq(1).select('dummy-for-images')
     cy.get('button:contains("Submit")').click()
     cy.contains('in progress').should('exist')

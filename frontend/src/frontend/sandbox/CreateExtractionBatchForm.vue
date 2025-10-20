@@ -41,10 +41,10 @@ watch(
   },
 )
 
-const runClassificationAsString = ref('yes')
+const runClassificationAsString = ref<'yes' | 'no'>('yes')
 const runClassification = computed(() => runClassificationAsString.value === 'yes')
 
-const runAdaptationAsString = ref('yes')
+const runAdaptationAsString = ref<'yes' | 'no'>('no')
 const modelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 const runAdaptation = computed(() => runClassification.value && runAdaptationAsString.value === 'yes')
 
