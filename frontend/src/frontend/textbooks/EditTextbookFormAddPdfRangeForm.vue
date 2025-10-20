@@ -1,61 +1,56 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
-import { type PDFDocumentProxy } from '$/pdfjs'
-import UploadPdfForm from '@/frontend/UploadPdfForm.vue'
-import PdfPagesRangeSelector from '$/PdfPagesRangeSelector.vue'
-import { useAuthenticatedClient } from '@/frontend/ApiClient'
+import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import assert from '$/assert'
 import { useIdentifiedUserStore } from '@/frontend/basic/IdentifiedUserStore'
-import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
+import PdfRangeFormInputs from './PdfRangesFormInputs.vue'
 
 const props = defineProps<{
-  textbookId: string
-}>()
-
-const emit = defineEmits<{
-  (e: 'textbook-updated'): void
+  textbook: Textbook
 }>()
 
 const client = useAuthenticatedClient()
 const { t } = useI18n()
 const identifiedUser = useIdentifiedUserStore()
 const apiConstantsStore = useApiConstantsStore()
+const router = useRouter()
 
 const uploadedFileSha256 = ref<string | null>(null)
-const document = shallowRef<PDFDocumentProxy | null>(null)
-const firstPdfPageNumber = ref(1)
-const lastPdfPageNumber = ref(1)
-const firstTextbookPageNumber = ref(1)
-
-function fileSelected() {
-  uploadedFileSha256.value = null
-  document.value = null
-  firstPdfPageNumber.value = 1
-  lastPdfPageNumber.value = 1
-  firstTextbookPageNumber.value = 1
-}
-
-function documentOpened(doc: PDFDocumentProxy) {
-  document.value = doc
-  firstPdfPageNumber.value = 1
-  lastPdfPageNumber.value = doc.numPages
-  firstTextbookPageNumber.value = 1
-}
-
-function fileUploaded(sha256: string) {
-  uploadedFileSha256.value = sha256
-}
-
+const matchesExpectations = ref(false)
+const pdfToTextbookPageNumbersDelta = ref(0)
+const textbookPagesRangesToImport = ref<[number, number][]>([])
 const modelForExtraction = ref(apiConstantsStore.availableExtractionLlmModels[0])
 const modelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 
-const disabled = computed(() => uploadedFileSha256.value === null)
+const disabled = computed(
+  () =>
+    uploadedFileSha256.value === null || !matchesExpectations.value || textbookPagesRangesToImport.value.length === 0,
+)
 
 const busy = ref(false)
-const uploadForm = useTemplateRef('uploadForm')
+const rangeInputs = useTemplateRef('rangeInputs')
+
+const pdfToTextbookPageNumbersFixedDelta = computed(() => {
+  if (props.textbook.singlePdf !== null) {
+    return props.textbook.singlePdf.pdfToTextbookPageNumbersDelta
+  } else if (uploadedFileSha256.value !== null && uploadedFileSha256.value in props.textbook.knownPdfs) {
+    return props.textbook.knownPdfs[uploadedFileSha256.value].pdfToTextbookPageNumbersDelta
+  } else {
+    return null
+  }
+})
+
+const knownPages = computed(() => {
+  if (uploadedFileSha256.value === null || !(uploadedFileSha256.value in props.textbook.knownPdfs)) {
+    return []
+  } else {
+    return props.textbook.knownPdfs[uploadedFileSha256.value].extractedTextbookPages
+  }
+})
 
 async function submit() {
   busy.value = true
@@ -63,61 +58,57 @@ async function submit() {
   assert(uploadedFileSha256.value !== null)
 
   const response = await client.POST('/api/textbooks/{id}/ranges', {
-    params: { path: { id: props.textbookId } },
+    params: { path: { id: props.textbook.id } },
     body: {
       creator: identifiedUser.identifier,
       pdfFileSha256: uploadedFileSha256.value,
-      pdfFirstPageNumber: firstPdfPageNumber.value,
-      textbookFirstPageNumber: firstTextbookPageNumber.value,
-      pagesCount: lastPdfPageNumber.value - firstPdfPageNumber.value + 1,
+      pdfToTextbookPageNumbersDelta: pdfToTextbookPageNumbersDelta.value,
+      textbookPagesRanges: textbookPagesRangesToImport.value,
       modelForExtraction: modelForExtraction.value,
       modelForAdaptation: modelForAdaptation.value,
     },
   })
   assert(response.response.status === 200)
 
-  emit('textbook-updated')
+  router.push({
+    name: 'textbook-page',
+    params: { textbookId: props.textbook.id, pageNumber: textbookPagesRangesToImport.value[0][0] },
+  })
   busy.value = false
-  assert(uploadForm.value !== null)
-  uploadForm.value.reset()
+  assert(rangeInputs.value !== null)
+  rangeInputs.value.reset()
 }
 </script>
 
 <template>
-  <p>
-    {{ t('open') }}
-    <UploadPdfForm
-      ref="uploadForm"
-      @fileSelected="fileSelected"
-      @documentOpened="documentOpened"
-      @fileUploaded="fileUploaded"
-    />
-  </p>
-  <PdfPagesRangeSelector
-    v-if="document !== null"
-    v-model:firstInPdf="firstPdfPageNumber"
-    v-model:lastInPdf="lastPdfPageNumber"
-    v-model:firstInTextbook="firstTextbookPageNumber"
-    :document="document"
-  />
-  <p data-cy="extraction">
-    <LlmModelSelector
-      :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
-      :disabled="false"
-      v-model="modelForExtraction"
-    >
-      <template #provider>{{ t('modelForExtraction') }}</template>
-    </LlmModelSelector>
-  </p>
-  <p data-cy="adaptation">
-    <LlmModelSelector
-      :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
-      :disabled="false"
-      v-model="modelForAdaptation"
-    >
-      <template #provider>{{ t('modelForAdaptation') }}</template>
-    </LlmModelSelector>
-  </p>
+  <PdfRangeFormInputs
+    ref="rangeInputs"
+    :expectedSha256="textbook.singlePdf === null ? null : textbook.singlePdf.sha256"
+    :pdfToTextbookPageNumbersFixedDelta
+    :knownPages
+    v-model:matchesExpectations="matchesExpectations"
+    v-model:sha256="uploadedFileSha256"
+    v-model:pdfToTextbookPageNumbersDelta="pdfToTextbookPageNumbersDelta"
+    v-model:textbookPagesRangesToImport="textbookPagesRangesToImport"
+    v-model:modelForExtraction="modelForExtraction"
+    v-model:modelForAdaptation="modelForAdaptation"
+  >
+    <template #openPdf>
+      <template v-if="textbook.singlePdf === null">
+        {{ t('openAPdf') }}
+      </template>
+      <template v-else>
+        <i18n-t keypath="openThePdf">
+          <template #names>
+            <template v-for="(name, index) in textbook.singlePdf.knownNames">
+              <template v-if="index > 0">, </template>
+              <code>{{ name }}</code>
+            </template>
+          </template>
+        </i18n-t>
+      </template>
+    </template>
+  </PdfRangeFormInputs>
   <p>
     <button @click="submit" :disabled>{{ t('submit') }}</button>
   </p>
@@ -125,12 +116,14 @@ async function submit() {
 
 <i18n>
 en:
-  open: "Open a PDF file containing the textbook (or a part of it):"
+  openThePdf: "Open the PDF file containing the textbook ({names}):"
+  openAPdf: "Open a PDF file containing the textbook (or a part of it):"
   modelForExtraction: "Model provider for extraction:"
   modelForAdaptation: "Model provider for adaptation:"
   submit: "Submit"
 fr:
-  open: "Ouvrir un fichier PDF contenant le manuel (ou une partie de celui-ci) :"
+  openThePdf: "Ouvrir le fichier PDF contenant le manuel ({names}) :"
+  openAPdf: "Ouvrir un fichier PDF contenant le manuel (ou une partie de celui-ci) :"
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
   modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
   submit: "Soumettre"

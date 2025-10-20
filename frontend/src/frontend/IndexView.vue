@@ -12,7 +12,6 @@ import {
 import assert from '$/assert'
 import WhiteSpace from '$/WhiteSpace.vue'
 import FixedColumns from '$/FixedColumns.vue'
-import CreateTextbookForm from './textbooks/CreateTextbookForm.vue'
 import { makeAdaptationSettingsName } from '@/frontend/common/AdaptationStrategyEditor.vue'
 
 const client = useAuthenticatedClient()
@@ -182,7 +181,9 @@ function textbookSummary(textbook: Textbooks['textbooks'][number]) {
       <template #col-2>
         <h1>{{ t('textbooks') }}</h1>
         <h2>{{ t('newTextbook') }}</h2>
-        <CreateTextbookForm />
+        <p>
+          <RouterLink :to="{ name: 'create-textbook' }">{{ t('newTextbook') }}</RouterLink>
+        </p>
         <h2>{{ t('existingTextbooks') }}</h2>
         <ul>
           <li v-for="textbook in textbooks">

@@ -3,41 +3,123 @@ import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from '
 describe('The creation form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-branch'])
+    loadFixtures(['dummy-branch', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
-    visit('/')
+    visit('/new-textbook')
   })
 
-  it('creates a textbook with only a title', () => {
+  it('creates a multi-PDFs textbook with only a title', () => {
     cy.get('button:contains("Submit")').should('be.disabled')
-    cy.get('[data-cy="textbook-title"]').type('Dummy title', { delay: 0 })
+    cy.get('[data-cy="textbook-title"]').type('Mutli-PDFs', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('label:contains("Single PDF") input').should('not.be.checked')
+    cy.get('label:contains("Multiple PDFs") input').should('not.be.checked').check()
     cy.get('button:contains("Submit")').should('be.enabled').click()
-
     cy.location('pathname').should('equal', '/textbook-1')
-    cy.get('h1 span').should('have.text', 'Dummy title')
+    cy.get('h1 span').should('have.text', 'Mutli-PDFs')
+    cy.get('h2:contains("New textbook PDF")').should('exist')
+    cy.get('h2:contains("Existing textbook PDFs")').should('exist')
 
     cy.visit('/')
-    cy.get('li:contains("Dummy title")').should('exist').should('contain', 'Dummy title (created by Alice on')
+    cy.get('li:contains("Mutli-PDFs")').should('exist').should('contain', 'Mutli-PDFs (created by Alice on')
   })
 
-  it('creates a textbook with all fields', () => {
+  it('creates a multi-PDFs textbook with all fields', () => {
     cy.get('[data-cy="textbook-title"]').type('The title', { delay: 0 })
     cy.get('[data-cy="textbook-publisher"]').type('Dummy publisher', { delay: 0 })
     cy.get('[data-cy="textbook-year"]').type('2023', { delay: 0 })
     cy.get('[data-cy="textbook-isbn"]').type('978-3-16-148410-0', { delay: 0 })
     cy.get('[data-cy="textbook-pages-count"]').type('76', { delay: 0 })
+    cy.get('label:contains("Multiple PDFs") input').check()
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('equal', '/textbook-1')
     cy.get('h1 span').should('have.text', 'The title (76 pages), Dummy publisher, 2023 (ISBN: 978-3-16-148410-0)')
+    cy.get('h2:contains("New textbook PDF")').should('exist')
 
     cy.visit('/')
     cy.get('li:contains("The title")')
       .should('exist')
       .should('contain', 'The title (76 pages), Dummy publisher, 2023 (created by Alice on')
   })
+
+  it('creates a single-PDF textbook with only a title', () => {
+    screenshot('create-form--initial')
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('label:contains("Multiple PDFs") input').should('not.be.checked')
+    cy.get('label:contains("Single PDF") input').should('not.be.checked').check()
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("Pages mapping:") input').eq(1).clear().type('6').blur()
+    cy.get('canvas[data-cy-rendered-page="1"]').should('exist')
+    cy.get('div.main').scrollTo('top')
+    screenshot('create-form--single-pdf-with-file--top')
+    cy.get('div.main').scrollTo('bottom')
+    screenshot('create-form--single-pdf-with-file--bottom')
+    cy.get('button:contains("Submit")').should('be.enabled').click()
+    cy.location('pathname').should('equal', '/textbook-1')
+    cy.get('h1 span').should('have.text', 'Single-PDF')
+    cy.get('h2:contains("New textbook PDF")').should('not.exist')
+    cy.get('h2:contains("Existing textbook PDFs")').should('not.exist')
+    cy.contains('Open the PDF file containing the textbook (test.pdf):').should('exist')
+    cy.get('li a').should('not.exist')
+
+    cy.visit('/')
+    cy.get('li:contains("Single-PDF")').should('exist').should('contain', 'Single-PDF (created by Alice on')
+  })
+
+  it('creates a single-PDF textbook with a range', () => {
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF with range', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("6-10") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('li a:contains("6")').should('exist')
+    cy.get('li a:contains("10")').should('exist')
+  })
+
+  it('creates a single-PDF textbook with a range with a positive delta', () => {
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("Pages mapping:") input').eq(1).clear().type('6').blur()
+    cy.get('label:contains("6-7") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('li a:contains("6")').should('exist')
+    cy.get('li a:contains("7")').should('exist')
+
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('p:contains("None (all imported)")').should('exist')
+  })
+
+  it('creates a single-PDF textbook with a range with a negative delta', () => {
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('p:contains("Pages mapping:") input').eq(0).clear().type('4').blur()
+    cy.get('p:contains("Pages mapping:") input').eq(1).clear().type('1').blur()
+    cy.get('label:contains("31-32") input[type="checkbox"]').check()
+    cy.get('label:contains("-0")').should('not.exist')
+    cy.get('button:contains("Submit")').click()
+    cy.get('li a:contains("32")').should('exist')
+  })
+
+  it('creates a single-PDF textbook with two ranges', () => {
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF with range', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("6-10") input[type="checkbox"]').check()
+    cy.get('label:contains("21-25") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('li a:contains("6")').should('exist')
+    cy.get('li a:contains("10")').should('exist')
+    cy.get('li a:contains("21")').should('exist')
+    cy.get('li a:contains("25")').should('exist')
+  })
 })
 
-describe('The edition form for textbooks - empty', () => {
+describe('The edition form for multi-PDFs textbooks - empty', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
@@ -45,30 +127,23 @@ describe('The edition form for textbooks - empty', () => {
     visit('/textbook-1')
   })
 
-  function screenshots(name: string) {
-    cy.get('div.main').scrollTo('top', { ensureScrollable: false })
-    screenshot(name)
-  }
-
   it('adds and removes PDF ranges', () => {
-    screenshots('empty-textbook')
+    screenshot('multi-pdfs-textbook--empty')
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
-    cy.get('p:contains("i.e. 2 in textbook")').should('exist')
     cy.get('input[type="number"]').eq(1).type('{selectAll}6').blur()
-    cy.get('p:contains("i.e. 7 in textbook")').should('exist')
+    cy.get('label:contains("6-7") input[type="checkbox"]').check()
     cy.get('[data-cy="extraction"] [data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="extraction"] [data-cy="llm-name"]').select('dummy-1')
     cy.get('[data-cy="adaptation"] [data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="adaptation"] [data-cy="llm-name"]').select('dummy-3')
     cy.get('button:contains("Submit")').click()
-    cy.get('input[type="file"]').eq(0).should('have.value', '')
-    cy.get('input[type="number"]').should('not.exist')
+    cy.location('pathname').should('equal', '/textbook-1/page-6')
+    cy.get('h2:contains("Exercise 1")').should('exist')
+    cy.visit('/textbook-1')
     cy.get('h3:contains("Pages 6 to 7 (from test.pdf pages 1 to 2)")').should('exist')
     cy.get('li:contains("6")').should('exist')
     cy.get('li:contains("7")').should('exist')
-    cy.get('li span.inProgress:contains("in progress")').should('have.length', 2)
-    cy.get('li span.inProgress:contains("in progress")', { timeout: 10000 }).should('not.exist')
     cy.get(':contains("in progress")').should('not.exist')
     cy.get('div.busy').should('not.exist')
 
@@ -87,7 +162,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('button:contains("Remove")').should('have.length', 3)
 
-    screenshots('textbook-with-pdf-ranges')
+    screenshot('multi-pdfs-textbook--with-pdf-ranges')
 
     // Remove batch
     cy.visit('/textbook-1/page-6')
@@ -140,7 +215,7 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h2').eq(0).should('contain', 'Exercise 1').should('not.contain', 'removed')
     cy.get('h2').eq(1).should('contain', 'Exercise 7').should('not.contain', 'removed')
     cy.get('label:contains("Show only exercises not yet approved") input').should('be.disabled')
-    screenshots('textbook-page-with-external-exercises')
+    screenshot('multi-pdfs-textbook--page-with-external-exercises')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('button:contains("Remove")').should('have.length', 2)
@@ -163,11 +238,40 @@ describe('The edition form for textbooks - empty', () => {
     cy.get('h2').eq(1).should('contain', 'Exercise 7').should('contain', 'removed')
 
     cy.get('a:contains("Dummy Textbook Title")').click()
-    screenshots('textbook-with-external-exercises')
+    screenshot('multi-pdfs-textbook--with-external-exercises')
+  })
+
+  it('adds several ranges from the same PDF', () => {
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('input[type="number"]').eq(0).clear().type('3').blur()
+    cy.get('input[type="number"]').eq(1).clear().type('1').blur()
+    cy.get('label:contains("6-10") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('h2:contains("Exercise 1")').should('exist')
+    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('input[type="number"]').should('have.length', 1)
+    cy.contains('in pdf is page -1 in textbook').should('exist')
+    cy.get('label:contains("1-5")').should('exist')
+    cy.get('label:contains("6-10")').should('not.exist')
+    cy.get('label:contains("11-15")').should('exist')
+  })
+
+  it('adds several ranges from the different PDFs', () => {
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('input[type="number"]').eq(0).clear().type('3').blur()
+    cy.get('input[type="number"]').eq(1).clear().type('1').blur()
+    cy.get('label:contains("1-5") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('h2:contains("Exercise 1")').should('exist')
+    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('input[type="number"]').should('have.length', 2)
+    cy.get('label:contains("1-2")').should('exist')
   })
 })
 
-describe('The edition form for textbooks - with a PDF range', () => {
+describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
@@ -323,5 +427,54 @@ describe('The edition form for textbooks - with a PDF range', () => {
     cy.get('button:contains("Re-add")').should('have.length', 1)
     cy.get('button:contains("Re-add")').click()
     cy.get('button:contains("Approve")').should('have.length', 3)
+  })
+})
+
+describe('The edition form for single-PDF textbooks', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-single-pdf-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    ignoreResizeObserverLoopError()
+    visit('/textbook-1')
+    cy.get('li a:contains("8")').should('exist')
+  })
+
+  it('looks like this', () => {
+    screenshot('single-pdf-textbook')
+  })
+
+  it('removes a page, adds a PDF range, ...', () => {
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get(':contains("This is not the PDF used to create this textbook.")').should('exist')
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get(':contains("This is not the PDF used to create this textbook.")').should('not.exist')
+    cy.get('label:contains("4-5")').should('exist')
+    cy.get('label:contains("6-10 (except 7, 8)")').should('exist')
+    cy.get('a:contains("7")').click()
+    cy.get('button:contains("Remove")').eq(0).click()
+    cy.location('pathname').should('equal', '/textbook-1')
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("6-10 (except 8)")').should('exist')
+    cy.get('input[type="number"]').clear().type('6').blur()
+    cy.get('p:contains("is page 9 in textbook")').should('exist')
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('label:contains("11-15") input').check()
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('label:contains("21-25") input').check()
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/textbook-1/page-11')
+    cy.get('h2:contains("Exercise 1")', { timeout: 10000 }).should('exist')
+
+    cy.visit('/textbook-1')
+    cy.get('li a:contains("8")').should('exist')
+    cy.get('li a:contains("11")').should('exist')
+    cy.get('li a:contains("15")').should('exist')
+    cy.get('li a:contains("21")').should('exist')
+    cy.get('li a:contains("25")').should('exist')
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("36-38")').should('exist')
+    cy.get('label:contains("6-10 (except 8)")').should('exist')
+    cy.get('label:contains("11-15")').should('not.exist')
+    cy.get('label:contains("21-25")').should('not.exist')
   })
 })

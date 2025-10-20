@@ -67,17 +67,17 @@ class FileSystemStorageEngine:
         os.makedirs(self.prefix, exist_ok=True)
 
     def store(self, key: str, data: bytes) -> None:
-        with open(self.__make_path(key), "wb") as file:
+        with open(self._make_path(key), "wb") as file:
             file.write(data)
 
     def get_put_url(self, key: str) -> str:
         return make_url("put", self.prefix, key)
 
     def has(self, key: str) -> bool:
-        return os.path.exists(self.__make_path(key))
+        return os.path.exists(self._make_path(key))
 
     def load(self, key: str) -> bytes:
-        with open(self.__make_path(key), "rb") as file:
+        with open(self._make_path(key), "rb") as file:
             return file.read()
 
     def get_get_url(self, key: str) -> str:
@@ -85,7 +85,7 @@ class FileSystemStorageEngine:
 
     def delete(self, key: str) -> None:
         try:
-            os.remove(self.__make_path(key))
+            os.remove(self._make_path(key))
         except FileNotFoundError:
             pass
 
@@ -94,5 +94,5 @@ class FileSystemStorageEngine:
         for filename in os.listdir(self.prefix):
             os.remove(os.path.join(self.prefix, filename))
 
-    def __make_path(self, key: str) -> str:
+    def _make_path(self, key: str) -> str:
         return make_path(self.prefix, key)

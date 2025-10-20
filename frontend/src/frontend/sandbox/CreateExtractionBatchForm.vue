@@ -175,7 +175,12 @@ const columns = [
       <h1>{{ t('input') }}</h1>
       <p>
         {{ t('pdfFile') }}
-        <UploadPdfForm @fileSelected="fileSelected" @documentOpened="documentOpened" @fileUploaded="fileUploaded" />
+        <UploadPdfForm
+          :expectedSha256="null"
+          @fileSelected="fileSelected"
+          @documentOpened="documentOpened"
+          @fileUploaded="fileUploaded"
+        />
       </p>
       <template v-if="document !== null">
         <I18nT keypath="pages" tag="p">

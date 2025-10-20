@@ -1,3 +1,4 @@
+import os
 from typing import Iterable, TypeVar
 import datetime
 import textwrap
@@ -693,6 +694,7 @@ class FixturesCreator:
                 year=None,
                 isbn=None,
                 pages_count=None,
+                single_pdf_file=None,
             )
         )
 
@@ -1221,6 +1223,89 @@ class FixturesCreator:
             settings=mcq_exercise_class.latest_strategy_settings,
             model=model_for_adaptation,
             exercise=exercise_text_page_42,
+        )
+
+    def create_dummy_single_pdf_textbook(self) -> None:
+        pdf_file = self.add(
+            extraction.PdfFile(
+                created_by="Patty",
+                created_at=created_at,
+                sha256="044c5caf34cba74e1e4cb6a498485923a8dbf28b74d414155586f18236da78b4",
+                bytes_count=37223,
+                pages_count=35,
+                known_file_names=["long.pdf"],
+            )
+        )
+        assert isinstance(file_storage.pdf_files, file_storage.file_system_engine.FileSystemStorageEngine)
+        os.link(
+            os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "e2e-tests", "inputs", "long.pdf"),
+            file_storage.pdf_files._make_path("044c5caf34cba74e1e4cb6a498485923a8dbf28b74d414155586f18236da78b4"),
+        )
+
+        textbook = self.add(
+            textbooks.Textbook(
+                created_by="Patty",
+                created_at=created_at,
+                title="Single-PDF",
+                publisher=None,
+                year=None,
+                isbn=None,
+                pages_count=None,
+                single_pdf_file=pdf_file,
+            )
+        )
+
+        model_for_extraction = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
+        model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
+        pdf_file_range = self.add(
+            extraction.PdfFileRange(
+                created_by="Patty", created_at=created_at, pdf_file=pdf_file, first_page_number=4, pages_count=2
+            )
+        )
+        extraction_batch = self.add(
+            textbooks.TextbookExtractionBatch(
+                created_by="Patty",
+                created_at=created_at,
+                pdf_file_range=pdf_file_range,
+                textbook=textbook,
+                first_textbook_page_number=7,
+                model_for_extraction=model_for_extraction,
+                model_for_adaptation=model_for_adaptation,
+                removed_from_textbook=False,
+            )
+        )
+        extraction_settings = self.add(
+            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+        )
+        self.add(
+            extraction.PageExtraction(
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                ),
+                pdf_file_range=pdf_file_range,
+                pdf_page_number=4,
+                settings=extraction_settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+                assistant_response=None,
+                timing=None,
+            )
+        )
+        self.add(
+            extraction.PageExtraction(
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                ),
+                pdf_file_range=pdf_file_range,
+                pdf_page_number=5,
+                settings=extraction_settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+                assistant_response=None,
+                timing=None,
+            )
         )
 
     def create_dummy_coche_exercise_classes(self) -> None:

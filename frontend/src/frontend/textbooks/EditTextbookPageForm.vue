@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { useAuthenticatedClient, type Textbook, type TextbookPage } from '../ApiClient'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 import BugMarker from '@/reusable/BugMarker.vue'
 import WhiteSpace from '@/reusable/WhiteSpace.vue'
+import assert from '$/assert'
 
 const props = defineProps<{
   textbook: Textbook
@@ -18,12 +20,21 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const client = useAuthenticatedClient()
+const router = useRouter()
 
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
   })
   emit('textbook-updated')
+}
+
+async function removePage() {
+  assert(props.page.id !== null)
+  await client.PUT('/api/textbooks/{textbook_id}/pages/{page_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, page_id: props.page.id }, query: { removed: true } },
+  })
+  router.push({ name: 'textbook', params: { id: props.textbook.id } })
 }
 
 const previousPage = computed(() => {
@@ -61,7 +72,14 @@ const exercisesToShow = computed({
 </script>
 
 <template>
-  <h1>{{ t('titleAndPage', { title: textbook.title, pageNumber: page.number }) }}</h1>
+  <h1>
+    {{ t('titleAndPage', { title: textbook.title, pageNumber: page.number }) }}
+    <span v-if="page.needsRefresh" class="inProgress"> ({{ t('inProgress') }})</span>
+    <template v-if="textbook.singlePdf !== null">
+      <WhiteSpace />
+      <button @click="removePage">{{ t('remove') }}</button>
+    </template>
+  </h1>
   <p>
     <span v-if="!previousPage">{{ t('noPreviousPage') }}</span>
     <RouterLink
@@ -132,6 +150,11 @@ const exercisesToShow = computed({
 </template>
 
 <style scoped>
+span.inProgress {
+  color: grey;
+  font-size: 80%;
+}
+
 label.disabled {
   color: gray;
 }
@@ -140,6 +163,7 @@ label.disabled {
 <i18n>
 en:
   titleAndPage: '{title}, page {pageNumber}'
+  inProgress: in progress, will refresh
   noPreviousPage: 'No previous page with exercises'
   noNextPage: 'No next page with exercises'
   previousPage: 'Previous page with exercises: {number}'
@@ -152,6 +176,7 @@ en:
   removed: removed
 fr:
   titleAndPage: '{title}, page {pageNumber}'
+  inProgress: en cours, se mettra à jour
   noPreviousPage: 'Pas de page précédente avec des exercices'
   previousPage: 'Page précédente avec des exercices : {number}'
   noNextPage: 'Pas de page suivante avec des exercices'

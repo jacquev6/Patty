@@ -92,6 +92,7 @@ describe('Patty', () => {
 
     cy.visit('/adaptation-2')
     checkImagesFrontend(4)
+    cy.wait(500) // Give time to display images
     screenshot('images-sandbox-adaptation-frontend')
 
     cy.get('a:contains("standalone HTML")')
@@ -104,9 +105,12 @@ describe('Patty', () => {
   })
 
   it('extracts images in textbooks', () => {
-    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class', 'dummy-textbook'])
-    visit('/textbook-1')
+    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class'])
+    visit('/new-textbook')
+    cy.get('[data-cy="textbook-title"]').type('Images Textbook', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/images.pdf')
+    cy.get('label:contains("1-1") input[type="checkbox"]').check()
     cy.get('[data-cy="llm-name"]').eq(0).select('dummy-for-images')
     cy.get('[data-cy="llm-name"]').eq(1).select('dummy-for-images')
     cy.get('button:contains("Submit")').click()
@@ -118,7 +122,7 @@ describe('Patty', () => {
     cy.wait(500) // Give time to display images
     screenshot('images-textbook-frontend')
 
-    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('a:contains("Images Textbook")').click()
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('1')
     cy.get('a:contains("Exercice 1")').invoke('removeAttr', 'target').click()
