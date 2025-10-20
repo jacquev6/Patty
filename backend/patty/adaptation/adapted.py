@@ -87,6 +87,7 @@ class Formatted(BaseModel):
 
 class Image(BaseModel):
     kind: Literal["image"]
+    height: str
     identifier: str
 
 

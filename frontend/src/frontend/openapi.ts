@@ -1651,6 +1651,8 @@ export interface components {
       version: 'current' | 'previous' | 'older'
     }
     Image: {
+      /** Height */
+      height: string
       /** Identifier */
       identifier: string
       /**

@@ -31,7 +31,7 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
-    .with({ kind: 'image' }, ({ url }) => h(ImageRenderer, { url }))
+    .with({ kind: 'image' }, ({ url, height }) => h(ImageRenderer, { url, height }))
     .exhaustive()
 }
 </script>
