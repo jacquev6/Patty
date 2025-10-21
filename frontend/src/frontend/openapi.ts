@@ -2693,7 +2693,7 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images'
+      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises'
       /**
        * Provider
        * @constant

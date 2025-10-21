@@ -31,6 +31,7 @@ def get_available_extraction_llm_models() -> list[extraction.llm.ConcreteModel]:
             extraction.llm.DummyModel(provider="dummy", name="dummy-1"),
             extraction.llm.DummyModel(provider="dummy", name="dummy-2"),
             extraction.llm.DummyModel(provider="dummy", name="dummy-for-images"),
+            extraction.llm.DummyModel(provider="dummy", name="dummy-for-textually-numbered-exercises"),
             extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"),
         ]
     else:
