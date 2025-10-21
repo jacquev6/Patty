@@ -68,20 +68,31 @@ def annotate_new_tables(*annotations: str) -> None:
 def truncate_all_tables(session: Session) -> None:
     session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 
-    for table in reversed(OrmBase.metadata.sorted_tables):
-        try:
-            with session.begin_nested():
-                session.execute(table.delete())
-        except sqlalchemy.exc.ProgrammingError:
-            # E.g. when the table does not exist yet
-            pass
+    attempts_count = 0
+    retry = True
+    while retry:
+        retry = False
+        attempts_count += 1
+        for table in reversed(OrmBase.metadata.sorted_tables):
+            try:
+                with session.begin_nested():
+                    session.execute(table.delete())
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table does not exist yet
+                pass
+            except sqlalchemy.exc.IntegrityError:
+                # E.g. when the submission daemon creates a classification chunk referencing a page extraction we're trying to delete
+                if attempts_count < 5:
+                    retry = True
+                else:
+                    raise
 
-        try:
-            with session.begin_nested():
-                session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
-        except sqlalchemy.exc.ProgrammingError:
-            # E.g. when the table has no auto-incremented ID
-            pass
+            try:
+                with session.begin_nested():
+                    session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table has no auto-incremented ID
+                pass
 
 
 def _db_engine_dependable(request: Request) -> Engine:

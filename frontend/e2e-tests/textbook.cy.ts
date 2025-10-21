@@ -333,7 +333,7 @@ describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
     cy.get('[data-cy="exercise-class"]').should('not.exist')
     cy.get('div.busy', { timeout: 10000 }).should('exist') // This fails sometimes. @todo Fix it. There might be a race condition.
     cy.get('div.busy').should('not.exist')
-    cy.get('button:contains("Approve")').should('have.length', 3)
+    cy.get('button:contains("Approve")').should('have.length', 3) // This also fails sometimes
     cy.get('button:contains("Unapprove")').should('not.exist')
     cy.get('a:contains("View details")').eq(0).should('have.attr', 'href', '/adaptation-4').click()
     cy.get('a:contains("Dummy Textbook Title")').should('have.attr', 'href', '/textbook-1')
