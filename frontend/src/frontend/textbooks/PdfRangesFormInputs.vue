@@ -62,9 +62,10 @@ import UploadPdfForm from '@/frontend/UploadPdfForm.vue'
 import PdfToTextbookPagesDeltaEditor from '@/frontend/textbooks/PdfToTextbookPagesDeltaEditor.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
-import WhiteSpace from '@/reusable/WhiteSpace.vue'
+import WhiteSpace from '$/WhiteSpace.vue'
 import { type ExtractionLlmModel, type AdaptationLlmModel } from '@/frontend/ApiClient'
 import FixedColumns from '$/FixedColumns.vue'
+import ThreeStatesCheckbox from '$/ThreeStatesCheckbox.vue'
 
 const props = defineProps<{
   expectedSha256: string | null
@@ -139,6 +140,27 @@ watch(
   { immediate: true, deep: true },
 )
 
+const importAllGroups = computed({
+  get: () => {
+    if (groupsToImport.value.size === pageGroups.value.length) {
+      return true
+    } else if (groupsToImport.value.size === 0) {
+      return false
+    } else {
+      return null
+    }
+  },
+  set: (value: boolean | null) => {
+    if (value === true) {
+      groupsToImport.value = new Set(pageGroups.value.map((_, index) => index))
+    } else if (value === false) {
+      groupsToImport.value = new Set()
+    } else {
+      // Nothing to do
+    }
+  },
+})
+
 defineExpose({
   reset: () => {
     uploadForm.value?.reset()
@@ -173,19 +195,24 @@ defineExpose({
       <template #col-2>
         <h3>{{ t('textbookPagesToImport') }}</h3>
         <p v-if="pageGroups.length === 0">{{ t('noneAllImported') }}</p>
-        <p v-for="(group, groupIndex) in pageGroups">
-          <label>
-            <input type="checkbox" v-model="groupsToImport" :value="groupIndex" />
-            <WhiteSpace />
-            <strong>{{ group.first }}-{{ group.last }}</strong>
-            <template v-if="group.excluded.length !== 0">
-              ({{ t('except') }}
-              <template v-for="(page, index) in group.excluded">
-                <template v-if="index > 0">, </template>{{ page }} </template
-              >)
-            </template>
-          </label>
-        </p>
+        <template v-else>
+          <p>
+            <label><ThreeStatesCheckbox v-model="importAllGroups" /><WhiteSpace />{{ t('allPages') }}</label>
+          </p>
+          <p v-for="(group, groupIndex) in pageGroups">
+            <label>
+              <input type="checkbox" v-model="groupsToImport" :value="groupIndex" />
+              <WhiteSpace />
+              <strong>{{ group.first }}-{{ group.last }}</strong>
+              <template v-if="group.excluded.length !== 0">
+                ({{ t('except') }}
+                <template v-for="(page, index) in group.excluded">
+                  <template v-if="index > 0">, </template>{{ page }} </template
+                >)
+              </template>
+            </label>
+          </p>
+        </template>
       </template>
     </FixedColumns>
     <p data-cy="extraction">
@@ -215,7 +242,8 @@ defineExpose({
 <i18n>
 en:
   pagesMapping: "Pages mapping:"
-  textbookPagesToImport: "Textbook pages to import"
+  textbookPagesToImport: Textbook pages to import
+  allPages: All pages
   except: except
   noneAllImported: "None (all imported)"
   modelForExtraction: "Model provider for extraction:"
@@ -223,7 +251,8 @@ en:
   theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne: This is not the PDF used to create this textbook. Patty can only work with the exact original file.
 fr:
   pagesMapping: "Correspondance des pages :"
-  textbookPagesToImport: "Pages du manuel à importer"
+  textbookPagesToImport: Pages du manuel à importer
+  allPages: Toutes les pages
   except: sauf
   noneAllImported: "Aucune (toutes importées)"
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
