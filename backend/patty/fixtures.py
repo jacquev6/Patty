@@ -790,12 +790,12 @@ class FixturesCreator:
                             ),
                         ),
                         extraction.extracted.Exercise(
-                            id="p40_ex8",
+                            id="p40_ex10",
                             type="exercice",
                             images=False,
                             type_images="none",
                             properties=extraction.extracted.Exercise.Properties(
-                                numero="8",
+                                numero="10",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
                                 exemple=None,
@@ -805,12 +805,12 @@ class FixturesCreator:
                             ),
                         ),
                         extraction.extracted.Exercise(
-                            id="p40_ex10",
+                            id="p40_ex8",
                             type="exercice",
                             images=False,
                             type_images="none",
                             properties=extraction.extracted.Exercise.Properties(
-                                numero="10",
+                                numero="8",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
                                 exemple=None,
@@ -1311,6 +1311,12 @@ class FixturesCreator:
     def create_dummy_coche_exercise_classes(self) -> None:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
+
+    def create_dummy_expression_ecrite_exercise_class(self) -> None:
+        self.create_dummy_branch(name="ExpressionEcrite", system_prompt="Blah blah expression écrite.")
+
+    def create_dummy_transforme_mot_exercise_class(self) -> None:
+        self.create_dummy_branch(name="TransformeMot", system_prompt="Blah blah transforme mot.")
 
     def create_dummy_rcimage_exercise_class(self) -> None:
         self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")

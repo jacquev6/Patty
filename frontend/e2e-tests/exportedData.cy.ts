@@ -1,20 +1,6 @@
-import { ignoreResizeObserverLoopError, visit, screenshot, loadFixtures } from './utils'
-
-let token = ''
-
-function visitExport(url: string) {
-  cy.visit(`${url}?download=false&token=${token}`)
-}
-
-function login() {
-  cy.request('POST', '/api/token', { password: 'password' }).then((response) => {
-    token = response.body.accessToken
-  })
-}
+import { ignoreResizeObserverLoopError, visit, visitExport, screenshot, loadFixtures } from './utils'
 
 describe('The autonomous HTML for a single adaptation', () => {
-  before(login)
-
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-adaptation'])
@@ -196,8 +182,6 @@ describe('The autonomous HTML for a single adaptation', () => {
 })
 
 describe('The exported data for an adaptation batch', () => {
-  before(login)
-
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['mixed-dummy-adaptation-batch'])
@@ -245,8 +229,6 @@ describe('The exported data for an adaptation batch', () => {
 })
 
 describe('The exported data for a classification batch', () => {
-  before(login)
-
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-classification-batch'])
@@ -292,8 +274,6 @@ describe('The exported data for a classification batch', () => {
 })
 
 describe('The exported data for an extraction batch', () => {
-  before(login)
-
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['empty-extraction-batch'])
@@ -365,8 +345,6 @@ describe('The exported data for an extraction batch', () => {
 })
 
 describe('The autonomous HTML for a textbook', () => {
-  before(login)
-
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures(['dummy-textbook-with-text-exercise-numbers'])

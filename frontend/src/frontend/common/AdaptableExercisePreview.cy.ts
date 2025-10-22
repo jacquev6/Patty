@@ -116,6 +116,36 @@ const exercises: Record<string, PreviewableExercise> = {
     },
     imagesUrls: {},
   },
+  'adaptation - success - textually-numbered exercise': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: 'Not a number',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: null,
+    },
+    imagesUrls: {},
+  },
   'classification - classification not requested': {
     id: 'ex-id',
     pageNumber: 37,
@@ -125,7 +155,7 @@ const exercises: Record<string, PreviewableExercise> = {
     adaptationStatus: { kind: 'notRequested' },
     imagesUrls: {},
   },
-  'classification - classification in progress - 1': {
+  'classification - classification in progress': {
     id: 'ex-id',
     pageNumber: 37,
     exerciseNumber: '24',
@@ -266,6 +296,36 @@ const exercises: Record<string, PreviewableExercise> = {
     },
     imagesUrls: {},
   },
+  'classification - adaptation success - textually-numbered exercise': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: 'Not a number',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: null,
+    },
+    imagesUrls: {},
+  },
   'classification - reclassified': {
     id: 'ex-id',
     pageNumber: 37,
@@ -308,7 +368,76 @@ const exercises: Record<string, PreviewableExercise> = {
     } as unknown as PreviewableExercise['adaptationStatus'],
     imagesUrls: {},
   },
-  'textbook - classification in progress - 1': {
+  'extraction - classification not requested': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'notRequested' },
+    adaptationStatus: { kind: 'notRequested' },
+    imagesUrls: {},
+  },
+  'extraction - success': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: '24',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: null,
+    },
+    imagesUrls: {},
+  },
+  'extraction - success - textually-numbered exercise': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: 'Not a number',
+    fullText: 'This is the full text of the exercise.\nIt has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: null,
+    },
+    imagesUrls: {},
+  },
+  'textbook - classification in progress': {
     id: 'ex-id',
     pageNumber: 37,
     exerciseNumber: '32',
@@ -431,6 +560,36 @@ const exercises: Record<string, PreviewableExercise> = {
     },
     imagesUrls: {},
   },
+  'textbook - adaptation success - textually-numbered exercise': {
+    id: 'ex-id',
+    pageNumber: 37,
+    exerciseNumber: 'Not a number',
+    fullText: 'This is the full text of the exercise. It has multiple lines.',
+    classificationStatus: { kind: 'byModel', exerciseClass: 'Blah', classHasSettings: true },
+    adaptationStatus: {
+      kind: 'success',
+      success: 'llm',
+      id: 'ad-id',
+      adaptedExercise: {
+        format: 'v1',
+        instruction: {
+          lines: [{ contents: [{ kind: 'text', text: 'This is the instructions.' }] }],
+        },
+        example: null,
+        hint: null,
+        statement: {
+          pages: [
+            {
+              lines: [{ contents: [{ kind: 'text', text: 'This is the statement.' }] }],
+            },
+          ],
+        },
+        reference: null,
+      },
+      approved: null,
+    },
+    imagesUrls: {},
+  },
   'textbook - adaptation success - approved': {
     id: 'ex-id',
     pageNumber: 37,
@@ -485,6 +644,8 @@ describe('AdaptableExercisePreview', () => {
         return ['adaptation', 42] as const
       } else if (title.startsWith('classification - ')) {
         return ['classification', 42] as const
+      } else if (title.startsWith('extraction - ')) {
+        return ['extraction', null] as const
       } else {
         assert(title.startsWith('textbook - '))
         return ['textbookByBatch', null] as const

@@ -262,7 +262,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                     (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
                 )
             ):
-                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__unordered:
+                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__ordered_by_id:
                     assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
                     if not exercise_creation.exercise.location.removed_from_textbook:
                         pages_with_exercises.add(page_number)
@@ -348,6 +348,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
 
     needs_refresh = False
 
+    page_extractions: list[extraction.PageExtraction] = []
     for extraction_batch in textbook.extraction_batches:
         if extraction_batch.removed_from_textbook:
             continue
@@ -371,24 +372,14 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
             continue
         if page_extraction_creation.page_extraction.assistant_response is None:
             needs_refresh = True
+        page_extractions.append(page_extraction_creation.page_extraction)
 
-    page_extraction_ids = set()
     exercises_: list[GetTextbookPageResponse.AdaptableExercise | GetTextbookPageResponse.ExternalExercise] = []
-    for exercise in textbook.fetch_ordered_exercises_on_page(number):
-        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
-
-        if isinstance(exercise, external_exercises.ExternalExercise):
-            exercises_.append(
-                GetTextbookPageResponse.ExternalExercise(
-                    kind="external",
-                    id=str(exercise.id),
-                    page_number=exercise.location.page_number,
-                    exercise_number=exercise.location.exercise_number,
-                    original_file_name=exercise.original_file_name,
-                    removed_from_textbook=exercise.location.removed_from_textbook,
-                )
-            )
-        elif isinstance(exercise, adaptation.AdaptableExercise):
+    for page_extraction in page_extractions:
+        for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
+            exercise = exercise_creation.exercise
+            assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+            assert isinstance(exercise, adaptation.AdaptableExercise)
             assert isinstance(exercise.created, extraction.ExerciseCreationByPageExtraction)
             assert isinstance(exercise.created.page_extraction.created, textbooks.PageExtractionCreationByTextbook)
             if exercise.created.page_extraction.created.removed_from_textbook:
@@ -437,7 +428,6 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
             if adaptation_status.kind == "inProgress":
                 needs_refresh = True
 
-            page_extraction_ids.add(str(exercise.created.page_extraction.created.id))
             exercises_.append(
                 GetTextbookPageResponse.AdaptableExercise(
                     kind="adaptable",
@@ -451,10 +441,22 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     removed_from_textbook=exercise.location.removed_from_textbook,
                 )
             )
-        else:
-            assert False
 
-    page_id = page_extraction_ids.pop() if len(page_extraction_ids) == 1 else None
+    for exercise in textbook.fetch_ordered_exercises_on_page(number):
+        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+        if isinstance(exercise, external_exercises.ExternalExercise):
+            exercises_.append(
+                GetTextbookPageResponse.ExternalExercise(
+                    kind="external",
+                    id=str(exercise.id),
+                    page_number=exercise.location.page_number,
+                    exercise_number=exercise.location.exercise_number,
+                    original_file_name=exercise.original_file_name,
+                    removed_from_textbook=exercise.location.removed_from_textbook,
+                )
+            )
+
+    page_id = str(page_extractions.pop().id) if len(page_extractions) == 1 else None
 
     return GetTextbookPageResponse(id=page_id, number=number, needs_refresh=needs_refresh, exercises=exercises_)
 

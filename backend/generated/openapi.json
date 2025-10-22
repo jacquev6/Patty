@@ -5521,7 +5521,8 @@
             "enum": [
               "dummy-1",
               "dummy-2",
-              "dummy-for-images"
+              "dummy-for-images",
+              "dummy-for-textually-numbered-exercises"
             ],
             "title": "Name",
             "type": "string"
