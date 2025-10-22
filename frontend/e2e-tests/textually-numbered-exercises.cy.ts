@@ -93,7 +93,7 @@ describe('Textbooks', () => {
     cy.get('li a:contains("1")').click()
     cy.get('h2').should('have.length', 3)
     cy.get('h2').eq(0).should('contain', 'Exercise 5')
-    cy.get('h2').eq(1).should('contain', 'Exercise 6') // Should be 'Not a number'
-    cy.get('h2').eq(2).should('contain', 'Not a number') // Should be 'Exercise 6'
+    cy.get('h2').eq(1).should('contain', 'Not a number')
+    cy.get('h2').eq(2).should('contain', 'Exercise 6')
   })
 })

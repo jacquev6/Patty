@@ -356,7 +356,7 @@ describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
 
   it('approves and unapproves exercises', () => {
     // Make sure all exercises are adapted
-    cy.get('span.edit').eq(4).click()
+    cy.get('span.edit').eq(3).click()
     cy.get('select').eq(1).select('CocheMot')
     cy.get('button:contains("Approve")', { timeout: 10000 }).should('have.length', 4)
     cy.get('div.main').scrollTo('top')

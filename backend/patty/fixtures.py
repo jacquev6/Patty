@@ -790,12 +790,12 @@ class FixturesCreator:
                             ),
                         ),
                         extraction.extracted.Exercise(
-                            id="p40_ex8",
+                            id="p40_ex10",
                             type="exercice",
                             images=False,
                             type_images="none",
                             properties=extraction.extracted.Exercise.Properties(
-                                numero="8",
+                                numero="10",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
                                 exemple=None,
@@ -805,12 +805,12 @@ class FixturesCreator:
                             ),
                         ),
                         extraction.extracted.Exercise(
-                            id="p40_ex10",
+                            id="p40_ex8",
                             type="exercice",
                             images=False,
                             type_images="none",
                             properties=extraction.extracted.Exercise.Properties(
-                                numero="10",
+                                numero="8",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
                                 exemple=None,
