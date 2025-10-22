@@ -204,3 +204,42 @@ class TestCaseWithDatabase(unittest.TestCase):
         assert isinstance(cm.exception.orig, psycopg2.errors.IntegrityError)
         self.assertEqual(cm.exception.orig.diag.constraint_name, name)
         self.session.rollback()
+
+
+class ExerciseNumberCollationTestCase(TestCaseWithDatabase):
+    def test_numerical_numbers_with_default_collation(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val")
+            ).all(),
+            [("1",), ("10",), ("2",)],
+        )
+
+    def test_numerical_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val COLLATE exercise_number")
+            ).all(),
+            [("1",), ("2",), ("10",)],
+        )
+
+    def test_textual_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text(
+                    "SELECT val FROM (VALUES ('Exprime toi!'), ('À toi de jouer'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
+                )
+            ).all(),
+            [("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
+        )
+
+    def test_mixed_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text(
+                    "SELECT val FROM (VALUES ('Exprime toi!'), ('1'), ('À toi de jouer'), ('2'), ('10'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
+                )
+            ).all(),
+            # This is not the order we want. We want letters first.
+            [("1",), ("2",), ("10",), ("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
+        )

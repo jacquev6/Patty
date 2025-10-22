@@ -1312,6 +1312,12 @@ class FixturesCreator:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
 
+    def create_dummy_expression_ecrite_exercise_class(self) -> None:
+        self.create_dummy_branch(name="ExpressionEcrite", system_prompt="Blah blah expression écrite.")
+
+    def create_dummy_transforme_mot_exercise_class(self) -> None:
+        self.create_dummy_branch(name="TransformeMot", system_prompt="Blah blah transforme mot.")
+
     def create_dummy_rcimage_exercise_class(self) -> None:
         self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
