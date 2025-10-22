@@ -512,8 +512,8 @@ export interface paths {
     }
     get?: never
     put?: never
-    /** Post Textbook Range */
-    post: operations['post_textbook_range_api_textbooks__id__ranges_post']
+    /** Post Textbook Ranges */
+    post: operations['post_textbook_ranges_api_textbooks__id__ranges_post']
     delete?: never
     options?: never
     head?: never
@@ -1565,6 +1565,8 @@ export interface components {
     GetTextbookPageResponse: {
       /** Exercises */
       exercises: (components['schemas']['AdaptableExercise'] | components['schemas']['ExternalExercise'])[]
+      /** Id */
+      id: string | null
       /** Needsrefresh */
       needsRefresh: boolean
       /** Number */
@@ -1580,6 +1582,10 @@ export interface components {
       id: string
       /** Isbn */
       isbn: string | null
+      /** Knownpdfs */
+      knownPdfs: {
+        [key: string]: components['schemas']['KnownPdf']
+      }
       /** Needsrefresh */
       needsRefresh: boolean
       /** Pagescount */
@@ -1590,6 +1596,7 @@ export interface components {
       publisher: string | null
       /** Ranges */
       ranges: components['schemas']['Range'][]
+      singlePdf: components['schemas']['SinglePdf-Output'] | null
       /** Title */
       title: string
       /** Year */
@@ -1644,6 +1651,8 @@ export interface components {
       version: 'current' | 'previous' | 'older'
     }
     Image: {
+      /** Height */
+      height: string
       /** Identifier */
       identifier: string
       /**
@@ -1748,6 +1757,13 @@ export interface components {
       instructionComponents: components['schemas']['InstructionComponents']
       referenceComponents: components['schemas']['ReferenceComponents']
       statementComponents: components['schemas']['StatementComponents']
+    }
+    /** KnownPdf */
+    KnownPdf: {
+      /** Extractedtextbookpages */
+      extractedTextbookPages: number[]
+      /** Pdftotextbookpagenumbersdelta */
+      pdfToTextbookPageNumbersDelta: number
     }
     'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Contents */
@@ -2064,8 +2080,8 @@ export interface components {
       /** Puturl */
       putUrl: string
     }
-    /** PostTextbookRangeRequest */
-    PostTextbookRangeRequest: {
+    /** PostTextbookRangesRequest */
+    PostTextbookRangesRequest: {
       /** Creator */
       creator: string
       /** Modelforadaptation */
@@ -2078,14 +2094,12 @@ export interface components {
       modelForExtraction:
         | components['schemas']['patty__extraction__llm__dummy__DummyModel']
         | components['schemas']['GeminiModel']
-      /** Pagescount */
-      pagesCount: number
       /** Pdffilesha256 */
       pdfFileSha256: string
-      /** Pdffirstpagenumber */
-      pdfFirstPageNumber: number
-      /** Textbookfirstpagenumber */
-      textbookFirstPageNumber: number
+      /** Pdftotextbookpagenumbersdelta */
+      pdfToTextbookPageNumbersDelta: number
+      /** Textbookpagesranges */
+      textbookPagesRanges: [number, number][]
     }
     /** PostTextbookRequest */
     PostTextbookRequest: {
@@ -2097,6 +2111,7 @@ export interface components {
       pagesCount: number | null
       /** Publisher */
       publisher: string | null
+      singlePdf: components['schemas']['SinglePdf-Input'] | null
       /** Title */
       title: string
       /** Year */
@@ -2285,6 +2300,36 @@ export interface components {
        * @constant
        */
       kind: 'selectableInput'
+    }
+    /** SinglePdf */
+    'SinglePdf-Input': {
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
+      /** Modelforextraction */
+      modelForExtraction:
+        | components['schemas']['patty__extraction__llm__dummy__DummyModel']
+        | components['schemas']['GeminiModel']
+      /** Pdffilesha256 */
+      pdfFileSha256: string
+      /** Pdftotextbookpagenumbersdelta */
+      pdfToTextbookPageNumbersDelta: number
+      /** Textbookpagesranges */
+      textbookPagesRanges: [number, number][]
+    }
+    /** SinglePdf */
+    'SinglePdf-Output': {
+      /** Knownnames */
+      knownNames: string[]
+      /** Pagescount */
+      pagesCount: number
+      /** Pdftotextbookpagenumbersdelta */
+      pdfToTextbookPageNumbersDelta: number
+      /** Sha256 */
+      sha256: string
     }
     SplitWordInput: {
       /**
@@ -2648,7 +2693,7 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images'
+      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises'
       /**
        * Provider
        * @constant
@@ -3734,7 +3779,7 @@ export interface operations {
       }
     }
   }
-  post_textbook_range_api_textbooks__id__ranges_post: {
+  post_textbook_ranges_api_textbooks__id__ranges_post: {
     parameters: {
       query?: never
       header?: never
@@ -3745,7 +3790,7 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': components['schemas']['PostTextbookRangeRequest']
+        'application/json': components['schemas']['PostTextbookRangesRequest']
       }
     }
     responses: {

@@ -68,20 +68,31 @@ def annotate_new_tables(*annotations: str) -> None:
 def truncate_all_tables(session: Session) -> None:
     session.execute(OrmBase.metadata.tables["exercise_classes"].update().values(latest_strategy_settings_id=None))
 
-    for table in reversed(OrmBase.metadata.sorted_tables):
-        try:
-            with session.begin_nested():
-                session.execute(table.delete())
-        except sqlalchemy.exc.ProgrammingError:
-            # E.g. when the table does not exist yet
-            pass
+    attempts_count = 0
+    retry = True
+    while retry:
+        retry = False
+        attempts_count += 1
+        for table in reversed(OrmBase.metadata.sorted_tables):
+            try:
+                with session.begin_nested():
+                    session.execute(table.delete())
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table does not exist yet
+                pass
+            except sqlalchemy.exc.IntegrityError:
+                # E.g. when the submission daemon creates a classification chunk referencing a page extraction we're trying to delete
+                if attempts_count < 5:
+                    retry = True
+                else:
+                    raise
 
-        try:
-            with session.begin_nested():
-                session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
-        except sqlalchemy.exc.ProgrammingError:
-            # E.g. when the table has no auto-incremented ID
-            pass
+            try:
+                with session.begin_nested():
+                    session.execute(sqlalchemy.text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
+            except sqlalchemy.exc.ProgrammingError:
+                # E.g. when the table has no auto-incremented ID
+                pass
 
 
 def _db_engine_dependable(request: Request) -> Engine:
@@ -193,3 +204,42 @@ class TestCaseWithDatabase(unittest.TestCase):
         assert isinstance(cm.exception.orig, psycopg2.errors.IntegrityError)
         self.assertEqual(cm.exception.orig.diag.constraint_name, name)
         self.session.rollback()
+
+
+class ExerciseNumberCollationTestCase(TestCaseWithDatabase):
+    def test_numerical_numbers_with_default_collation(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val")
+            ).all(),
+            [("1",), ("10",), ("2",)],
+        )
+
+    def test_numerical_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val COLLATE exercise_number")
+            ).all(),
+            [("1",), ("2",), ("10",)],
+        )
+
+    def test_textual_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text(
+                    "SELECT val FROM (VALUES ('Exprime toi!'), ('À toi de jouer'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
+                )
+            ).all(),
+            [("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
+        )
+
+    def test_mixed_numbers(self) -> None:
+        self.assertEqual(
+            self.session.execute(
+                sql.text(
+                    "SELECT val FROM (VALUES ('Exprime toi!'), ('1'), ('À toi de jouer'), ('2'), ('10'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
+                )
+            ).all(),
+            # This is not the order we want. We want letters first.
+            [("1",), ("2",), ("10",), ("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
+        )

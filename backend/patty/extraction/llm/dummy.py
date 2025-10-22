@@ -10,15 +10,17 @@ from .base import Model
 
 class DummyModel(Model):
     provider: Literal["dummy"]
-    name: Literal["dummy-1", "dummy-2", "dummy-for-images"]
+    name: Literal["dummy-1", "dummy-2", "dummy-for-images", "dummy-for-textually-numbered-exercises"]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
         if self.name == "dummy-for-images":
-            return self.do_extract_for_images(prompt, image)
+            return self.do_extract_for_images()
+        elif self.name == "dummy-for-textually-numbered-exercises":
+            return self.do_extract_for_textually_numbered_exercises()
         else:
             return self.do_extract_standard(prompt, image)
 
-    def do_extract_for_images(self, prompt: str, image: PIL.Image.Image) -> str:
+    def do_extract_for_images(self) -> str:
         return json.dumps(
             [
                 Exercise(
@@ -44,6 +46,57 @@ class DummyModel(Model):
                         autre=None,
                     ),
                 ).model_dump()
+            ]
+        )
+
+    def do_extract_for_textually_numbered_exercises(self) -> str:
+        return json.dumps(
+            [
+                Exercise(
+                    id=None,
+                    type="exercice",
+                    images=False,
+                    type_images="none",
+                    properties=Exercise.Properties(
+                        numero="5",
+                        consignes=["Instruction 5"],
+                        conseil=None,
+                        exemple=None,
+                        enonce="Statement 5",
+                        references=None,
+                        autre=None,
+                    ),
+                ).model_dump(),
+                Exercise(
+                    id=None,
+                    type="exercice",
+                    images=False,
+                    type_images="none",
+                    properties=Exercise.Properties(
+                        numero="Not a number",
+                        consignes=["Instruction Not a number"],
+                        conseil=None,
+                        exemple=None,
+                        enonce="Statement Not a number",
+                        references=None,
+                        autre=None,
+                    ),
+                ).model_dump(),
+                Exercise(
+                    id=None,
+                    type="exercice",
+                    images=False,
+                    type_images="none",
+                    properties=Exercise.Properties(
+                        numero="6",
+                        consignes=["Instruction 6"],
+                        conseil=None,
+                        exemple=None,
+                        enonce="Statement 6",
+                        references=None,
+                        autre=None,
+                    ),
+                ).model_dump(),
             ]
         )
 

@@ -63,13 +63,19 @@ async function approve(adaptationId: string, approved: boolean) {
   })
   emit('batch-updated')
 }
+
+function isStringyInt(value: string): boolean {
+  return !isNaN(Number.parseInt(value))
+}
 </script>
 
 <template>
   <component :is="header" style="margin-top: 0">
-    <template v-if="context === 'extraction' && index !== null">{{ t('exercise') }} {{ index + 1 }}</template>
-    <template v-else-if="index !== null">{{ t('input') }} {{ index + 1 }}</template>
-    <template v-else>{{ t('exercise') }} {{ exercise.exerciseNumber }}</template>
+    <template v-if="index !== null">{{ t('input') }} {{ index + 1 }}</template>
+    <template v-else-if="exercise.exerciseNumber !== null && isStringyInt(exercise.exerciseNumber)">
+      {{ t('exercise') }} {{ exercise.exerciseNumber }}
+    </template>
+    <template v-else>{{ exercise.exerciseNumber }}</template>
 
     <template v-if="exercise.classificationStatus.kind !== 'notRequested'">
       <template v-if="exercise.classificationStatus.kind === 'inProgress'">

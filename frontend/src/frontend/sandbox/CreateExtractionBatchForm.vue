@@ -41,10 +41,10 @@ watch(
   },
 )
 
-const runClassificationAsString = ref('yes')
+const runClassificationAsString = ref<'yes' | 'no'>('yes')
 const runClassification = computed(() => runClassificationAsString.value === 'yes')
 
-const runAdaptationAsString = ref('yes')
+const runAdaptationAsString = ref<'yes' | 'no'>('no')
 const modelForAdaptation = ref(apiConstantsStore.availableAdaptationLlmModels[0])
 const runAdaptation = computed(() => runClassification.value && runAdaptationAsString.value === 'yes')
 
@@ -175,7 +175,12 @@ const columns = [
       <h1>{{ t('input') }}</h1>
       <p>
         {{ t('pdfFile') }}
-        <UploadPdfForm @fileSelected="fileSelected" @documentOpened="documentOpened" @fileUploaded="fileUploaded" />
+        <UploadPdfForm
+          :expectedSha256="null"
+          @fileSelected="fileSelected"
+          @documentOpened="documentOpened"
+          @fileUploaded="fileUploaded"
+        />
       </p>
       <template v-if="document !== null">
         <I18nT keypath="pages" tag="p">

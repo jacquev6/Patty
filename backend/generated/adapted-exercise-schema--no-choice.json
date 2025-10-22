@@ -566,6 +566,10 @@
           "title": "Kind",
           "type": "string"
         },
+        "height": {
+          "title": "Height",
+          "type": "string"
+        },
         "identifier": {
           "title": "Identifier",
           "type": "string"
@@ -573,6 +577,7 @@
       },
       "required": [
         "kind",
+        "height",
         "identifier"
       ],
       "type": "object",

@@ -9,5 +9,6 @@ existingClassificationBatch: Classification batch {id}
 newAdaptationBatch: New adaptation batch
 existingAdaptationBatch: Adaptation batch {id}
 existingAdaptation: Adaptation {id}
+newTextbook: New textbook
 existingTextbook: '{title}'
 textbookPage: 'Page {number}'

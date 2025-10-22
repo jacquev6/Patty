@@ -152,6 +152,7 @@ type FormattedRenderable = {
 
 type ImageRenderable = {
   kind: 'image'
+  height: string
   url: string
 }
 
@@ -246,7 +247,9 @@ function makeRenderableFromFormattedTextComponent(
     .with({ kind: 'whitespace' }, () => [{ kind: 'whitespace' }])
     .with({ kind: 'text' }, (c) => [{ kind: 'text', text: c.text }])
     .with({ kind: 'arrow' }, () => [{ kind: 'text', text: '→' }])
-    .with({ kind: 'image' }, (c) => [{ kind: 'image', url: makeRenderableUrl(imagesUrls[c.identifier]) }])
+    .with({ kind: 'image' }, (c) => [
+      { kind: 'image', height: c.height, url: makeRenderableUrl(imagesUrls[c.identifier]) },
+    ])
     .with({ kind: 'formatted' }, (c) => [
       {
         kind: 'formatted',

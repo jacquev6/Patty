@@ -21,6 +21,7 @@ import EditTextbookPageView from './textbooks/EditTextbookPageView.vue'
 import EditClassificationBatchView from './sandbox/EditClassificationBatchView.vue'
 import { useBreadcrumbsStore } from './basic/BreadcrumbsStore'
 import ErrorsView from './basic/ErrorsView.vue'
+import CreateTextbookView from './textbooks/CreateTextbookView.vue'
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
@@ -71,6 +72,11 @@ const router = createRouter({
       name: 'adaptation',
       component: EditAdaptationView,
       props: true,
+    },
+    {
+      path: '/new-textbook',
+      name: 'create-textbook',
+      component: CreateTextbookView,
     },
     {
       path: '/textbook-:id',

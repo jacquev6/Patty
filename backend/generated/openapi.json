@@ -2490,6 +2490,17 @@
             "title": "Exercises",
             "type": "array"
           },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
           "needsRefresh": {
             "title": "Needsrefresh",
             "type": "boolean"
@@ -2500,6 +2511,7 @@
           }
         },
         "required": [
+          "id",
           "number",
           "needsRefresh",
           "exercises"
@@ -2535,6 +2547,13 @@
               }
             ],
             "title": "Isbn"
+          },
+          "knownPdfs": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/KnownPdf"
+            },
+            "title": "Knownpdfs",
+            "type": "object"
           },
           "needsRefresh": {
             "title": "Needsrefresh",
@@ -2576,6 +2595,16 @@
             "title": "Ranges",
             "type": "array"
           },
+          "singlePdf": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SinglePdf-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -2602,6 +2631,8 @@
           "isbn",
           "pagesCount",
           "pagesWithExercises",
+          "singlePdf",
+          "knownPdfs",
           "externalExercises",
           "ranges"
         ],
@@ -2703,6 +2734,10 @@
       },
       "Image": {
         "properties": {
+          "height": {
+            "title": "Height",
+            "type": "string"
+          },
           "identifier": {
             "title": "Identifier",
             "type": "string"
@@ -2715,6 +2750,7 @@
         },
         "required": [
           "kind",
+          "height",
           "identifier"
         ],
         "type": "object"
@@ -2884,6 +2920,28 @@
           "referenceComponents"
         ],
         "title": "JsonSchemaLlmResponseSpecification",
+        "type": "object"
+      },
+      "KnownPdf": {
+        "additionalProperties": false,
+        "properties": {
+          "extractedTextbookPages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Extractedtextbookpages",
+            "type": "array"
+          },
+          "pdfToTextbookPageNumbersDelta": {
+            "title": "Pdftotextbookpagenumbersdelta",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pdfToTextbookPageNumbersDelta",
+          "extractedTextbookPages"
+        ],
+        "title": "KnownPdf",
         "type": "object"
       },
       "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
@@ -3792,7 +3850,7 @@
         "title": "PostTextbookExternalExercisesResponse",
         "type": "object"
       },
-      "PostTextbookRangeRequest": {
+      "PostTextbookRangesRequest": {
         "additionalProperties": false,
         "properties": {
           "creator": {
@@ -3827,33 +3885,41 @@
             ],
             "title": "Modelforextraction"
           },
-          "pagesCount": {
-            "title": "Pagescount",
-            "type": "integer"
-          },
           "pdfFileSha256": {
             "title": "Pdffilesha256",
             "type": "string"
           },
-          "pdfFirstPageNumber": {
-            "title": "Pdffirstpagenumber",
+          "pdfToTextbookPageNumbersDelta": {
+            "title": "Pdftotextbookpagenumbersdelta",
             "type": "integer"
           },
-          "textbookFirstPageNumber": {
-            "title": "Textbookfirstpagenumber",
-            "type": "integer"
+          "textbookPagesRanges": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Textbookpagesranges",
+            "type": "array"
           }
         },
         "required": [
           "creator",
           "pdfFileSha256",
-          "pdfFirstPageNumber",
-          "textbookFirstPageNumber",
-          "pagesCount",
+          "pdfToTextbookPageNumbersDelta",
+          "textbookPagesRanges",
           "modelForExtraction",
           "modelForAdaptation"
         ],
-        "title": "PostTextbookRangeRequest",
+        "title": "PostTextbookRangesRequest",
         "type": "object"
       },
       "PostTextbookRequest": {
@@ -3896,6 +3962,16 @@
             ],
             "title": "Publisher"
           },
+          "singlePdf": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SinglePdf-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -3918,7 +3994,8 @@
           "publisher",
           "year",
           "isbn",
-          "pagesCount"
+          "pagesCount",
+          "singlePdf"
         ],
         "title": "PostTextbookRequest",
         "type": "object"
@@ -4374,6 +4451,105 @@
           "kind",
           "colorIndex"
         ],
+        "type": "object"
+      },
+      "SinglePdf-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforadaptation"
+          },
+          "modelForExtraction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__extraction__llm__dummy__DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforextraction"
+          },
+          "pdfFileSha256": {
+            "title": "Pdffilesha256",
+            "type": "string"
+          },
+          "pdfToTextbookPageNumbersDelta": {
+            "title": "Pdftotextbookpagenumbersdelta",
+            "type": "integer"
+          },
+          "textbookPagesRanges": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Textbookpagesranges",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pdfFileSha256",
+          "pdfToTextbookPageNumbersDelta",
+          "textbookPagesRanges",
+          "modelForExtraction",
+          "modelForAdaptation"
+        ],
+        "title": "SinglePdf",
+        "type": "object"
+      },
+      "SinglePdf-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "knownNames": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Knownnames",
+            "type": "array"
+          },
+          "pagesCount": {
+            "title": "Pagescount",
+            "type": "integer"
+          },
+          "pdfToTextbookPageNumbersDelta": {
+            "title": "Pdftotextbookpagenumbersdelta",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256",
+          "knownNames",
+          "pagesCount",
+          "pdfToTextbookPageNumbersDelta"
+        ],
+        "title": "SinglePdf",
         "type": "object"
       },
       "SplitWordInput": {
@@ -5345,7 +5521,8 @@
             "enum": [
               "dummy-1",
               "dummy-2",
-              "dummy-for-images"
+              "dummy-for-images",
+              "dummy-for-textually-numbered-exercises"
             ],
             "title": "Name",
             "type": "string"
@@ -6933,7 +7110,7 @@
     },
     "/api/textbooks/{id}/ranges": {
       "post": {
-        "operationId": "post_textbook_range_api_textbooks__id__ranges_post",
+        "operationId": "post_textbook_ranges_api_textbooks__id__ranges_post",
         "parameters": [
           {
             "in": "path",
@@ -6949,7 +7126,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostTextbookRangeRequest"
+                "$ref": "#/components/schemas/PostTextbookRangesRequest"
               }
             }
           },
@@ -6960,7 +7137,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Post Textbook Range Api Textbooks  Id  Ranges Post",
+                  "title": "Response Post Textbook Ranges Api Textbooks  Id  Ranges Post",
                   "type": "null"
                 }
               }
@@ -6983,7 +7160,7 @@
             "OAuth2PasswordBearer": []
           }
         ],
-        "summary": "Post Textbook Range"
+        "summary": "Post Textbook Ranges"
       }
     },
     "/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed": {

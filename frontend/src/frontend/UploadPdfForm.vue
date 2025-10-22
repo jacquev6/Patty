@@ -8,9 +8,14 @@ import assert from '$/assert'
 import { useAuthenticatedClient } from './ApiClient'
 import { useIdentifiedUserStore } from './basic/IdentifiedUserStore'
 
+const props = defineProps<{
+  expectedSha256: string | null
+}>()
+
 const emit = defineEmits<{
+  // @todo Accept models instead of emiting events?
   (e: 'file-selected'): void
-  (e: 'document-opened', document: PDFDocumentProxy): void
+  (e: 'document-opened', document: PDFDocumentProxy, matchesExpectations: boolean): void
   (e: 'file-uploaded', sha256: string): void
 }>()
 
@@ -39,26 +44,29 @@ async function openFile(event: Event) {
     // We could use documentTask.onProgress to report progress to the user
     const document = await documentTask.promise
     console.info(`Loaded ${file.name} in ${Math.round(performance.now() - startTime)}ms`)
-    emit('document-opened', document)
+    const matchesExpectations = props.expectedSha256 === null || sha256 === props.expectedSha256
+    emit('document-opened', document, matchesExpectations)
 
-    const response = await client.POST('/api/pdf-files', {
-      body: {
-        sha256,
-        creator: identifiedUser.identifier,
-        fileName: file.name,
-        bytesCount: file.size,
-        pagesCount: document.numPages,
-      },
-    })
-    assert(response.data !== undefined)
-    const uploadUrl = response.data.uploadUrl
-    if (uploadUrl !== null) {
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
+    if (matchesExpectations) {
+      const response = await client.POST('/api/pdf-files', {
+        body: {
+          sha256,
+          creator: identifiedUser.identifier,
+          fileName: file.name,
+          bytesCount: file.size,
+          pagesCount: document.numPages,
+        },
       })
-      assert(uploadResponse.status === 200)
+      assert(response.data !== undefined)
+      const uploadUrl = response.data.uploadUrl
+      if (uploadUrl !== null) {
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        })
+        assert(uploadResponse.status === 200)
+      }
     }
     uploading.value = false
     uploaded.value = true

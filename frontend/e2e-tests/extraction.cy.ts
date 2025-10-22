@@ -53,6 +53,7 @@ describe('The extraction batch creation page', () => {
 
   it('creates an extraction batch with classification and adaptation, refreshes it until it is done, then creates settings for the unknown class, then requests the adaptation and refreshes until it is done', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-adaptation"]').select('yes')
     cy.get('[data-cy="llm-name"]').eq(1).select('dummy-3')
     cy.get('button:contains("Submit")').should('be.enabled').click()
     cy.location('pathname').should('eq', '/extraction-batch-1')

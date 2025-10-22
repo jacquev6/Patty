@@ -31,3 +31,9 @@ export function loadFixtures(fixtures_: string[]) {
   const fixtures = fixtures_.join(',')
   cy.request('POST', `http://fixtures-loader/load?fixtures=${fixtures}`)
 }
+
+export function visitExport(url: string) {
+  cy.request('POST', '/api/token', { password: 'password' }).then((response) => {
+    cy.visit(`${url}?download=false&token=${response.body.accessToken}`)
+  })
+}

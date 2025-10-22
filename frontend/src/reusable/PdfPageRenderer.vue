@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const container = useTemplateRef('container')
 const containerSize = useElementSize(container, { width: 0, height: 0 })
-const containerWidth = computed(() => Math.round(containerSize.width.value))
+const containerWidth = computed(() => Math.round(containerSize.width.value) - 3)
 const canvas = useTemplateRef('canvas')
 
 const width = ref(210)
@@ -83,3 +83,9 @@ onMounted(async () => {
     </div>
   </BusyBox>
 </template>
+
+<style scoped>
+canvas {
+  border: 1px solid black;
+}
+</style>

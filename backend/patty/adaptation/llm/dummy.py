@@ -64,21 +64,21 @@ class DummyModel(Model):
                                 lines=[
                                     adapted.StatementLine(
                                         contents=[
-                                            adapted.Image(kind="image", identifier="p1c3"),
+                                            adapted.Image(kind="image", height="5em", identifier="p1c3"),
                                             adapted.Whitespace(kind="whitespace"),
                                             adapted.FreeTextInput(kind="freeTextInput"),
                                         ]
                                     ),
                                     adapted.StatementLine(
                                         contents=[
-                                            adapted.Image(kind="image", identifier="p1c2"),
+                                            adapted.Image(kind="image", height="5em", identifier="p1c2"),
                                             adapted.Whitespace(kind="whitespace"),
                                             adapted.FreeTextInput(kind="freeTextInput"),
                                         ]
                                     ),
                                     adapted.StatementLine(
                                         contents=[
-                                            adapted.Image(kind="image", identifier="p1c1"),
+                                            adapted.Image(kind="image", height="5em", identifier="p1c1"),
                                             adapted.Whitespace(kind="whitespace"),
                                             adapted.FreeTextInput(kind="freeTextInput"),
                                         ]

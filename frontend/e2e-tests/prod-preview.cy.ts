@@ -15,7 +15,6 @@ describe('Patty', () => {
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
     cy.get('button:contains("Submit")').click()
     cy.get(':contains("in progress")').should('exist')
-    cy.get('div.busy', { timeout: 30000 }).should('exist')
 
     cy.get('a:contains("Patty home")').click()
     cy.get('li:contains("created by Alice") a:contains("Batch E")').should('exist')
