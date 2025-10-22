@@ -1,4 +1,4 @@
-import { loadFixtures, visit, ignoreResizeObserverLoopError, screenshot } from './utils'
+import { loadFixtures, visit, visitExport, ignoreResizeObserverLoopError, screenshot } from './utils'
 
 const dataUriRegex = /^data:image\/png;base64,/
 
@@ -29,21 +29,7 @@ function checkImagesExport() {
   cy.get('img').eq(3).should('have.attr', 'src').and('match', dataUriRegex)
 }
 
-let token = ''
-
-function visitExport(url: string) {
-  cy.visit(`${url}?download=false&token=${token}`)
-}
-
-function login() {
-  cy.request('POST', '/api/token', { password: 'password' }).then((response) => {
-    token = response.body.accessToken
-  })
-}
-
 describe('Patty', () => {
-  before(login)
-
   beforeEach(() => {
     ignoreResizeObserverLoopError()
   })

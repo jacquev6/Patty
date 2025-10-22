@@ -82,6 +82,5 @@ const filtered = computed(() => {
 <i18n>
 fr:
   pageNumberFilter: 'Numéro de page :'
-  exerciseNumberFilter: 'Quel exercice ?'
   noSuchPage: La page {page} n'existe pas.
 </i18n>
