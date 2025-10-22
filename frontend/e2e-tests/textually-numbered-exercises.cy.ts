@@ -69,9 +69,9 @@ describe('Extraction batches', () => {
     cy.get('input[type="number"]').eq(1).clear().type('1')
     cy.get('button:contains("Submit")').click()
     cy.get('h3').should('have.length', 5)
-    cy.get('h3').eq(2).should('have.text', 'Exercise 1') // Should be 'Exercise 5'
-    cy.get('h3').eq(3).should('have.text', 'Exercise 2') // Should be 'Not a number'
-    cy.get('h3').eq(4).should('have.text', 'Exercise 3') // Should be 'Exercise 6'
+    cy.get('h3').eq(2).should('have.text', 'Exercise 5')
+    cy.get('h3').eq(3).should('have.text', 'Exercise 6') // Should be 'Not a number'
+    cy.get('h3').eq(4).should('have.text', 'Not a number') // Should be 'Exercise 6'
   })
 })
 
@@ -94,6 +94,6 @@ describe('Textbooks', () => {
     cy.get('h2').should('have.length', 3)
     cy.get('h2').eq(0).should('contain', 'Exercise 5')
     cy.get('h2').eq(1).should('contain', 'Exercise 6') // Should be 'Not a number'
-    cy.get('h2').eq(2).should('contain', 'Exercise Not a number') // Should be 'Exercise 6'
+    cy.get('h2').eq(2).should('contain', 'Not a number') // Should be 'Exercise 6'
   })
 })

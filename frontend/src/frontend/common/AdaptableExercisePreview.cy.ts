@@ -645,7 +645,7 @@ describe('AdaptableExercisePreview', () => {
       } else if (title.startsWith('classification - ')) {
         return ['classification', 42] as const
       } else if (title.startsWith('extraction - ')) {
-        return ['extraction', 42] as const
+        return ['extraction', null] as const
       } else {
         assert(title.startsWith('textbook - '))
         return ['textbookByBatch', null] as const

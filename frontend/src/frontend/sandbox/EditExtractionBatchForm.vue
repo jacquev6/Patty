@@ -208,11 +208,11 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           <template
             v-if="page.assistantResponse.kind === 'success' || page.assistantResponse.kind === 'success-without-images'"
           >
-            <template v-for="(exercise, index) in page.exercises" :key="exercise.exerciseNumber">
+            <template v-for="exercise in page.exercises" :key="exercise.exerciseNumber">
               <AdaptableExercisePreview
                 :headerLevel="3"
                 context="extraction"
-                :index
+                :index="null"
                 :exercise
                 @batchUpdated="emit('batch-updated')"
                 @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
