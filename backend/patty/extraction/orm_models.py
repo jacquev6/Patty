@@ -172,8 +172,8 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         else:
             self._timing = value.model_dump()
 
-    exercise_creations__unordered: orm.Mapped[list[ExerciseCreationByPageExtraction]] = orm.relationship(
-        back_populates="page_extraction"
+    exercise_creations__ordered_by_id: orm.Mapped[list[ExerciseCreationByPageExtraction]] = orm.relationship(
+        back_populates="page_extraction", order_by="ExerciseCreationByPageExtraction.id"
     )
 
     classification_chunk_creations: orm.Mapped[list[ClassificationChunkCreationByPageExtraction]] = orm.relationship(
@@ -209,10 +209,10 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         )
 
     def fetch_ordered_exercises(self) -> typing.Iterable[AdaptableExercise]:
-        if len(self.exercise_creations__unordered) == 0:
+        if len(self.exercise_creations__ordered_by_id) == 0:
             return []
         else:
-            first_location = self.exercise_creations__unordered[0].exercise.location
+            first_location = self.exercise_creations__ordered_by_id[0].exercise.location
             # A page extraction creates all its exercises with the same type of ExerciseLocation
             if isinstance(first_location, ExerciseLocationMaybePageAndNumber):
                 request = self.make_ordered_exercises_request__maybe_page_and_number(self.id)
@@ -255,7 +255,7 @@ class ExerciseCreationByPageExtraction(ExerciseCreation):
     page_extraction: orm.Mapped[PageExtraction] = orm.relationship(
         foreign_keys=[page_extraction_id],
         remote_side=[PageExtraction.id],
-        back_populates="exercise_creations__unordered",
+        back_populates="exercise_creations__ordered_by_id",
     )
 
 

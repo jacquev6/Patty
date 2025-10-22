@@ -262,7 +262,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                     (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
                 )
             ):
-                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__unordered:
+                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__ordered_by_id:
                     assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
                     if not exercise_creation.exercise.location.removed_from_textbook:
                         pages_with_exercises.add(page_number)

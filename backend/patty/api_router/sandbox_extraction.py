@@ -168,7 +168,6 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         if page_extraction.assistant_response is None:
             needs_refresh = True
 
-        exercises_ = list(page_extraction.fetch_ordered_exercises())
         api_exercises: list[GetExtractionBatchResponse.Page.Exercise] = []
         timing = GetExtractionBatchResponse.Page.Timing(
             extraction=page_extraction.timing,
@@ -180,7 +179,8 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             adaptations=[],
         )
 
-        for exercise in exercises_:
+        for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
+            exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
             latest_classification = exercise.classifications[-1] if exercise.classifications else None
 
@@ -297,7 +297,7 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
         )
         assert classification_chunk is not None
         assert classification_chunk.model_for_adaptation is not None
-        for exercise_creation in page_extraction.exercise_creations__unordered:
+        for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
 
@@ -347,7 +347,7 @@ def put_extraction_batch_run_classification(id: str, session: database_utils.Ses
         )
         session.add(classification_chunk)
 
-        for exercise_creation in page_extraction.exercise_creations__unordered:
+        for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
             session.add(
@@ -379,7 +379,7 @@ def put_extraction_batch_model_for_adaptation(
         assert classification_chunk is not None
         assert classification_chunk.model_for_adaptation is None
         classification_chunk.model_for_adaptation = req
-        for exercise_creation in page_extraction.exercise_creations__unordered:
+        for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
 

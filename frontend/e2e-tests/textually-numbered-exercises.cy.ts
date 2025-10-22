@@ -70,8 +70,8 @@ describe('Extraction batches', () => {
     cy.get('button:contains("Submit")').click()
     cy.get('h3').should('have.length', 5)
     cy.get('h3').eq(2).should('have.text', 'Exercise 5')
-    cy.get('h3').eq(3).should('have.text', 'Exercise 6') // Should be 'Not a number'
-    cy.get('h3').eq(4).should('have.text', 'Not a number') // Should be 'Exercise 6'
+    cy.get('h3').eq(3).should('have.text', 'Not a number')
+    cy.get('h3').eq(4).should('have.text', 'Exercise 6')
   })
 })
 
