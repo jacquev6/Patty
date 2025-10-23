@@ -103,9 +103,8 @@ describe('Textbooks', () => {
     cy.get('button:contains("Approve")', { timeout: 10000 }).should('have.length', 3)
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('1')
-    // Order is not yet correct: we want textually-numbered exercises before numerically-numbered ones
-    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 5') // Should be "Not a number"
-    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 6') // Should be "Exercice 5"
-    cy.get('div.exercise').eq(2).should('contain.text', 'Not a number') // Should be "Exercice 6"
+    cy.get('div.exercise').eq(0).should('contain.text', 'Not a number')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 5')
+    cy.get('div.exercise').eq(2).should('contain.text', 'Exercice 6')
   })
 })

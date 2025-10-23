@@ -79,8 +79,7 @@ class ExerciseLocationMaybePageAndNumber(ExerciseLocation):
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
     page_number: orm.Mapped[int | None]
-    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
-    exercise_number: orm.Mapped[str | None] = orm.mapped_column(sql.String(collation="exercise_number"))
+    exercise_number: orm.Mapped[str | None]
 
 
 class ExerciseImage(OrmBase):

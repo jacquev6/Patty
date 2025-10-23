@@ -29,12 +29,6 @@ def make_session(engine: Engine) -> Session:
     return Session(engine)
 
 
-# Custom collation: https://dba.stackexchange.com/a/285230
-create_exercise_number_collation = sql.text(
-    "CREATE COLLATION exercise_number (provider = icu, locale = 'en-u-kn-true')"
-)
-
-
 class OrmBase(orm.DeclarativeBase):
     metadata = sqlalchemy.MetaData(
         naming_convention=dict(
@@ -145,9 +139,6 @@ class TestCaseWithDatabase(unittest.TestCase):
         # So the unit test for this constraint was passing using 'OrmBase.metadata.create_all',
         # but would have failed in production.
         if test_utils.skip_migrations:
-            with cls.engine.connect() as conn:
-                conn.execute(create_exercise_number_collation)
-                conn.commit()
             OrmBase.metadata.create_all(cls.engine)
         else:
             # This way of doing it is hacky (chdir, write to settings...), but is worth it as explained above.
@@ -204,42 +195,3 @@ class TestCaseWithDatabase(unittest.TestCase):
         assert isinstance(cm.exception.orig, psycopg2.errors.IntegrityError)
         self.assertEqual(cm.exception.orig.diag.constraint_name, name)
         self.session.rollback()
-
-
-class ExerciseNumberCollationTestCase(TestCaseWithDatabase):
-    def test_numerical_numbers_with_default_collation(self) -> None:
-        self.assertEqual(
-            self.session.execute(
-                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val")
-            ).all(),
-            [("1",), ("10",), ("2",)],
-        )
-
-    def test_numerical_numbers(self) -> None:
-        self.assertEqual(
-            self.session.execute(
-                sql.text("SELECT val FROM (VALUES ('2'), ('10'), ('1')) AS t(val) ORDER BY val COLLATE exercise_number")
-            ).all(),
-            [("1",), ("2",), ("10",)],
-        )
-
-    def test_textual_numbers(self) -> None:
-        self.assertEqual(
-            self.session.execute(
-                sql.text(
-                    "SELECT val FROM (VALUES ('Exprime toi!'), ('À toi de jouer'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
-                )
-            ).all(),
-            [("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
-        )
-
-    def test_mixed_numbers(self) -> None:
-        self.assertEqual(
-            self.session.execute(
-                sql.text(
-                    "SELECT val FROM (VALUES ('Exprime toi!'), ('1'), ('À toi de jouer'), ('2'), ('10'), ('Défis langue')) AS t(val) ORDER BY val COLLATE exercise_number"
-                )
-            ).all(),
-            # This is not the order we want. We want letters first.
-            [("1",), ("2",), ("10",), ("À toi de jouer",), ("Défis langue",), ("Exprime toi!",)],
-        )

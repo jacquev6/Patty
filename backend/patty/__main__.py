@@ -306,47 +306,6 @@ def python_dependency_graph() -> None:
 
 
 @main.command()
-def tricky_sql_requests() -> None:
-    import sqlparse  # type: ignore[import-untyped]
-
-    from . import database_utils
-    from . import extraction
-    from . import textbooks
-
-    database_engine = database_utils.create_engine(settings.DATABASE_URL)
-
-    request: typing.Any
-    for title, request in [
-        ("Textbook.fetch_ordered_exercises", textbooks.Textbook.make_ordered_exercises_request(42)),
-        ("Textbook.fetch_ordered_external_exercises", textbooks.Textbook.make_ordered_external_exercises_request(42)),
-        (
-            "PageExtraction.fetch_ordered_exercises (page and number)",
-            extraction.PageExtraction.make_ordered_exercises_request__maybe_page_and_number(42),
-        ),
-        (
-            "PageExtraction.fetch_ordered_exercises (textbook)",
-            extraction.PageExtraction.make_ordered_exercises_request__textbook(42),
-        ),
-        (
-            "Textbook.make_ordered_exercises_on_page_request",
-            textbooks.Textbook.make_ordered_exercises_on_page_request(42, 57),
-        ),
-    ]:
-        print(f"{title}:")
-        print("=" * len(title))
-        print(
-            sqlparse.format(
-                str(request.compile(database_engine, compile_kwargs={"literal_binds": True})),
-                reindent=True,
-                compact=False,
-                keyword_case="upper",
-                wrap_after=1,
-            )
-        )
-        print()
-
-
-@main.command()
 @click.option("--choice/--no-choice", default=True, is_flag=True)
 @click.option("--free-text-input/--no-free-text-input", default=True, is_flag=True)
 @click.option("--multiple-choices-input/--no-multiple-choices-input", default=True, is_flag=True)
@@ -744,7 +703,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251020-131603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251022-141603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

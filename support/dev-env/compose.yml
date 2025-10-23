@@ -45,7 +45,6 @@ services:
       "backend/generated/openapi.json",
       "backend/generated/patty_json_to_html.py",
       "backend/generated/python-dependency-graph.png",
-      "backend/generated/tricky-sql-requests.txt",
       "backend/patty/export/templates/adaptation/index.html",
       "backend/patty/export/templates/batch/index.html",
       "backend/patty/export/templates/textbook/index.html",
@@ -539,24 +538,6 @@ services:
       - backend/secrets.env
     init: true
     command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "python-dependency-graph.png", "python -m patty python-dependency-graph"]
-    depends_on:
-      generated-files-cleaner:
-        condition: service_completed_successfully
-      pip-installer:
-        condition: service_completed_successfully
-  tricky-sql-requests-generator:
-    image: jacquev6/patty:dev-backend
-    pull_policy: never
-    volumes:
-      - ../..:/app
-      - ./backend/home-local:/home/patty/.local
-      - ./backend/home-config:/home/patty/.config
-    working_dir: /app/backend
-    env_file:
-      - backend/env
-      - backend/secrets.env
-    init: true
-    command: ["../support/dev-env/backend/regenerate-when-code-changes.sh", "tricky-sql-requests.txt", "python -m patty tricky-sql-requests"]
     depends_on:
       generated-files-cleaner:
         condition: service_completed_successfully

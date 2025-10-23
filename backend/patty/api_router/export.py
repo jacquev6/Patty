@@ -8,9 +8,11 @@ import json
 import os
 
 import fastapi
+import sqlalchemy as sql
 
 from . import previewable_exercise
 from .. import adaptation
+from .. import alpha_numerical_sorting as alnum
 from .. import authentication
 from .. import classification
 from .. import database_utils
@@ -77,7 +79,8 @@ def export_extraction_batch_extracted_exercises_tsv(
     headers = ("page", "num", "instruction_hint_example", "statement")
     data = []
     for page in batch.page_extraction_creations:
-        for exercise in page.page_extraction.fetch_ordered_exercises():
+        for ec in page.page_extraction.exercise_creations__ordered_by_id:
+            exercise = ec.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
             assert isinstance(exercise.location, exercises.ExerciseLocationMaybePageAndNumber)
             data.append(
@@ -133,9 +136,10 @@ def get_extraction_batch_adaptations(
 ) -> Iterable[adaptation.Adaptation | None]:
     batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
     return [
-        exercise.adaptations[-1] if len(exercise.adaptations) > 0 else None
-        for creation in batch.page_extraction_creations
-        for exercise in creation.page_extraction.fetch_ordered_exercises()
+        ec.exercise.adaptations[-1] if len(ec.exercise.adaptations) > 0 else None
+        for pec in batch.page_extraction_creations
+        for ec in pec.page_extraction.exercise_creations__ordered_by_id
+        if isinstance(ec.exercise, adaptation.AdaptableExercise)
     ]
 
 
@@ -304,9 +308,13 @@ def export_textbook(
     textbook = get_by_id(session, textbooks.Textbook, id)
 
     exercises: list[JsonDict] = []
-    for exercise in textbook.fetch_ordered_exercises():
-        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
-        if not exercise.location.removed_from_textbook:
+    for location in session.execute(
+        sql.select(textbooks.ExerciseLocationTextbook)
+        .where(textbooks.ExerciseLocationTextbook.textbook == textbook)
+        .order_by(textbooks.ExerciseLocationTextbook.id)
+    ).scalars():
+        if not location.removed_from_textbook:
+            exercise = location.exercise
             if isinstance(exercise, adaptation.AdaptableExercise):
                 if len(exercise.adaptations) != 0:
                     adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
@@ -317,7 +325,10 @@ def export_textbook(
             else:
                 assert False
 
-    data = dict(title=textbook.title, exercises=exercises)
+    data = dict(
+        title=textbook.title,
+        exercises=sorted(exercises, key=lambda ex: (ex["pageNumber"], alnum.key(ex["exerciseNumber"]))),
+    )
 
     content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
 
