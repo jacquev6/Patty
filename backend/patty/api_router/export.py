@@ -18,6 +18,7 @@ from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import external_exercises
+from .. import extraction
 from .. import sandbox
 from .. import file_storage
 from .. import textbooks
@@ -313,17 +314,25 @@ def export_textbook(
         .where(textbooks.ExerciseLocationTextbook.textbook == textbook)
         .order_by(textbooks.ExerciseLocationTextbook.id)
     ).scalars():
-        if not location.removed_from_textbook:
-            exercise = location.exercise
-            if isinstance(exercise, adaptation.AdaptableExercise):
-                if len(exercise.adaptations) != 0:
-                    adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
-                    if adapted_exercise_data is not None:
-                        exercises.append(adapted_exercise_data)
-            elif isinstance(exercise, external_exercises.ExternalExercise):
-                exercises.append(make_external_exercise_data(exercise))
-            else:
-                assert False
+        if location.removed_from_textbook:
+            continue
+        exercise = location.exercise
+        if isinstance(exercise, adaptation.AdaptableExercise):
+            assert isinstance(exercise.created, extraction.ExerciseCreationByPageExtraction)
+            page_extraction = exercise.created.page_extraction
+            assert isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook)
+            if page_extraction.created.removed_from_textbook:
+                continue
+            if page_extraction.created.textbook_extraction_batch.removed_from_textbook:
+                continue
+            if len(exercise.adaptations) != 0:
+                adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
+                if adapted_exercise_data is not None:
+                    exercises.append(adapted_exercise_data)
+        elif isinstance(exercise, external_exercises.ExternalExercise):
+            exercises.append(make_external_exercise_data(exercise))
+        else:
+            assert False
 
     data = dict(
         title=textbook.title,
