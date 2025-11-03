@@ -31,7 +31,7 @@ client = google.genai.Client(api_key=settings.GEMINIAI_KEY)
 
 class GeminiModel(Model):
     provider: typing.Literal["gemini"]
-    name: typing.Literal["gemini-2.0-flash"]
+    name: typing.Literal["gemini-2.0-flash", "gemini-2.5-flash"]
 
     async def do_complete(
         self,
@@ -106,12 +106,58 @@ class GeminiModelTestCase(unittest.IsolatedAsyncioTestCase):
     maxDiff = None
 
     @costs_money
-    async def test_json_object(self) -> None:
+    async def test_json_object_2_0_flash(self) -> None:
         class Response(pydantic.BaseModel):
             a: int
             b: int
 
         model = GeminiModel(provider="gemini", name="gemini-2.0-flash")
+
+        messages: list[
+            SystemMessage
+            | UserMessage
+            | AssistantMessage[Response]
+            | InvalidJsonAssistantMessage
+            | NotJsonAssistantMessage
+        ] = [UserMessage(content="Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.")]
+        response = await model.complete(messages, JsonObjectResponseFormat(response_type=Response))
+        self.assertEqual(response.raw_conversation["method"], "google.genai.Client.models.generate_content")
+        self.assertIsNone(response.raw_conversation["config"]["system_instruction"])
+        self.assertEqual(response.raw_conversation["config"]["response_mime_type"], "application/json")
+        self.assertEqual(
+            response.raw_conversation["contents"],
+            [
+                {
+                    "parts": [
+                        {
+                            "video_metadata": None,
+                            "thought": None,
+                            "inline_data": None,
+                            "file_data": None,
+                            "thought_signature": None,
+                            "code_execution_result": None,
+                            "executable_code": None,
+                            "function_call": None,
+                            "function_response": None,
+                            "text": "Donne-moi un objet JSON avec deux champs, `a` et `b`, contenant des entiers.",
+                        }
+                    ],
+                    "role": "user",
+                }
+            ],
+        )
+        content = Response.model_validate(
+            json.loads(response.raw_conversation["response"]["candidates"][0]["content"]["parts"][0]["text"])
+        )
+        self.assertEqual(response.message.content, content)
+
+    @costs_money
+    async def test_json_object_2_5_flash(self) -> None:
+        class Response(pydantic.BaseModel):
+            a: int
+            b: int
+
+        model = GeminiModel(provider="gemini", name="gemini-2.5-flash")
 
         messages: list[
             SystemMessage

@@ -2007,7 +2007,10 @@
       "GeminiModel": {
         "properties": {
           "name": {
-            "const": "gemini-2.0-flash",
+            "enum": [
+              "gemini-2.0-flash",
+              "gemini-2.5-flash"
+            ],
             "title": "Name",
             "type": "string"
           },
