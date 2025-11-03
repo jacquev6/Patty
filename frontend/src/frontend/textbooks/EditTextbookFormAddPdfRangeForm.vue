@@ -108,10 +108,10 @@ async function submit() {
         </i18n-t>
       </template>
     </template>
+    <template #pdfUploaded>
+      <button @click="submit" :disabled>{{ t('submit') }}</button>
+    </template>
   </PdfRangeFormInputs>
-  <p>
-    <button @click="submit" :disabled>{{ t('submit') }}</button>
-  </p>
 </template>
 
 <i18n>

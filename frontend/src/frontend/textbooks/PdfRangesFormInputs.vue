@@ -175,12 +175,32 @@ defineExpose({
     <UploadPdfForm
       ref="uploadForm"
       :expectedSha256
+      :showUploaded="false"
       @fileSelected="fileSelected"
       @documentOpened="documentOpened"
       @fileUploaded="fileUploaded"
     />
+    <slot name="pdfUploaded"></slot>
   </p>
   <template v-if="document !== null && matchesExpectations">
+    <p data-cy="extraction">
+      <LlmModelSelector
+        :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
+        :disabled="false"
+        v-model="modelForExtraction"
+      >
+        <template #provider>{{ t('modelForExtraction') }}</template>
+      </LlmModelSelector>
+    </p>
+    <p data-cy="adaptation">
+      <LlmModelSelector
+        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+        :disabled="false"
+        v-model="modelForAdaptation"
+      >
+        <template #provider>{{ t('modelForAdaptation') }}</template>
+      </LlmModelSelector>
+    </p>
     <FixedColumns :columns="[1, 1]">
       <template #col-1>
         <PdfToTextbookPagesDeltaEditor
@@ -215,24 +235,6 @@ defineExpose({
         </template>
       </template>
     </FixedColumns>
-    <p data-cy="extraction">
-      <LlmModelSelector
-        :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
-        :disabled="false"
-        v-model="modelForExtraction"
-      >
-        <template #provider>{{ t('modelForExtraction') }}</template>
-      </LlmModelSelector>
-    </p>
-    <p data-cy="adaptation">
-      <LlmModelSelector
-        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
-        :disabled="false"
-        v-model="modelForAdaptation"
-      >
-        <template #provider>{{ t('modelForAdaptation') }}</template>
-      </LlmModelSelector>
-    </p>
   </template>
   <p v-else-if="document !== null && !matchesExpectations" class="error">
     {{ t('theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne') }}

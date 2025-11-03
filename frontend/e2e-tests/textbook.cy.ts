@@ -362,6 +362,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('div.exercise').eq(3).should('not.be.visible')
 
     cy.visit('/textbook-1')
+    cy.get('button:contains("Remove")').should('have.length', 1)
     screenshot('multi-pdfs-textbook--with-external-exercises')
   })
 
