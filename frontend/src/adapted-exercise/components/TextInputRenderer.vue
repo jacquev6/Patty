@@ -108,13 +108,10 @@ function updateContent() {
 onMounted(updateContent)
 onBeforeUpdate(updateContent)
 
-function filterKeyDown(event: KeyboardEvent) {
-  if (
-    // Arrows are used to change the page (in 'PageNavigationControls')
-    event.key === 'ArrowLeft' ||
-    event.key === 'ArrowRight'
-  ) {
-    event.preventDefault()
+function onKeyDown(event: KeyboardEvent) {
+  assert(span.value !== null)
+  if (event.key === 'Escape') {
+    span.value.blur()
   }
 }
 
@@ -134,7 +131,7 @@ defineExpose({
     data-cy="freeTextInput"
     contenteditable
     @input="input"
-    @keydown="filterKeyDown"
+    @keydown.stop="onKeyDown"
     class="main"
     :class="{ empty, notAlone: !props.aloneOnLine, increaseHorizontalSpace }"
   ></span>
