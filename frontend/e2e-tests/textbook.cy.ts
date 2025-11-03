@@ -282,7 +282,6 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('div.exercise').eq(3).should('not.be.visible')
 
     cy.visit('/textbook-1/page-6')
-    cy.get('li a:contains("6")').click()
     cy.get('button:contains("View details")').eq(0).click()
     cy.get('h1:contains("Adapted exercise")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').should('exist').should('have.attr', 'href', '/textbook-1')
