@@ -117,7 +117,9 @@ async function submit() {
       v-model:modelForAdaptation="modelForAdaptation"
     >
       <template #openPdf>{{ t('open') }}</template>
-      <template #pdfUploaded><button @click="submit" :disabled>{{ t('submit') }}</button></template>
+      <template #pdfUploaded
+        ><button @click="submit" :disabled>{{ t('submit') }}</button></template
+      >
     </PdfRangeFormInputs>
   </template>
   <template v-else>
