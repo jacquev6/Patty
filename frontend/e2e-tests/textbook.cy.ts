@@ -426,6 +426,21 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('input[type="number"]').should('have.length', 4)
     cy.get('label:contains("1-2")').should('exist')
   })
+
+  it('reproduces issue #145', () => {
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("6-10") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('a:contains("Dummy Textbook Title")').click()
+    cy.get('li a:contains("10")', {timeout: 10000}).should('exist')
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
+    cy.get('label:contains("1-5")').should('exist')
+    cy.get('label:contains("6-10")').should('not.exist')
+    cy.get('button:contains("Remove")').should('have.length', 6)
+    cy.get('button:contains("Remove")').eq(0).click()
+    cy.get('button:contains("Remove")').should('not.exist')
+    cy.get('label:contains("6-10")').should('not.exist') // Actually, it should exist!
+  })
 })
 
 describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
