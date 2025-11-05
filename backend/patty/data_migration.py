@@ -12,25 +12,7 @@ from . import textbooks
 
 
 def migrate(session: database_utils.Session) -> None:
-    add_images_heights(session)
-
-
-def add_images_heights(session: database_utils.Session) -> None:
-    def recurse(obj: typing.Any) -> typing.Any:
-        if isinstance(obj, dict):
-            obj = dict(obj)
-            if obj.get("kind") == "image" and "height" not in obj:
-                obj["height"] = "5em"
-            return {k: recurse(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [recurse(item) for item in obj]
-        else:
-            return obj
-
-    for adaptation_ in session.execute(sql.select(adaptation.Adaptation)).scalars():
-        adaptation_._initial_assistant_response = recurse(adaptation_._initial_assistant_response)
-        adaptation_._manual_edit = recurse(adaptation_._manual_edit)
-        adaptation_._adjustments = recurse(adaptation_._adjustments)
+    pass
 
 
 def validate(session: database_utils.Session) -> None:
