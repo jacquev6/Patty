@@ -653,6 +653,120 @@ describe('SelectableInput', () => {
     })
     cy.get('@input').click()
     screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Jusqu' },
+                          { kind: 'text', text: "'" },
+                        ],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'à' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'point' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: '.' }],
+                        colors: ['grey'],
+                        boxed: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+    cy.get('@input').click({ multiple: true })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'selectableInput',
+                        contents: [
+                          { kind: 'text', text: 'Jusqu' },
+                          { kind: 'text', text: "'" },
+                        ],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'à' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                      { kind: 'whitespace' },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: 'point' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                      {
+                        kind: 'selectableInput',
+                        contents: [{ kind: 'text', text: '.' }],
+                        colors: ['grey'],
+                        boxed: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+    cy.get('@input').click({ multiple: true })
+    screenshot()
   })
 
   it('renders nested selectable inputs', () => {
@@ -884,7 +998,7 @@ describe('FreeTextInput', () => {
     }
   })
 
-  it('allows navigating exercise pages using arrow keys', () => {
+  it('handles arrow keys normally, blurs on Escape to navigate pages', () => {
     cy.mount(AdaptedExerciseRenderer, {
       props: {
         navigateUsingArrowKeys: true,
@@ -954,8 +1068,11 @@ describe('FreeTextInput', () => {
     cy.get('p').should('contain.text', 'Page 1')
     cy.get('@input').type('One')
     cy.get('p').should('have.text', 'Page 1 One')
-    cy.get('@input').type('{leftArrow}{leftArrow}ONE') // Arrows are ignored
-    cy.get('p').should('have.text', 'Page 1 OneONE')
+    cy.get('@input').type('{leftArrow}{leftArrow}TWO')
+    cy.get('p').should('have.text', 'Page 1 OTWOne')
+    cy.document().trigger('keydown', { key: 'Escape' })
+    cy.document().trigger('keyup', { key: 'Escape' })
+    cy.get('p').should('contain.text', 'Page 1')
     pressAndRelease('ArrowRight')
     cy.get('p').should('contain.text', 'Page 2')
     pressAndRelease('ArrowRight')

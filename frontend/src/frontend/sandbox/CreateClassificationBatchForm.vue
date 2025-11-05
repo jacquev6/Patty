@@ -75,8 +75,8 @@ async function submit() {
   <p>
     {{ t('runAdaptation') }}
     <select data-cy="run-adaptation" v-model="runAdaptationAsString">
-      <option>{{ t('yes') }}</option>
-      <option>{{ t('no') }}</option>
+      <option value="yes">{{ t('yes') }}</option>
+      <option value="no">{{ t('no') }}</option>
     </select>
     <template v-if="runAdaptation">
       <WhiteSpace />

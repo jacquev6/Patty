@@ -382,10 +382,10 @@ describe('The autonomous HTML for a textbook', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
     cy.get('a').should('have.length', 4)
-    cy.get('a').eq(0).should('have.text', 'Exercice 5')
-    cy.get('a').eq(1).should('have.text', 'Exercice 6')
-    cy.get('a').eq(2).should('have.text', 'Auto-dictée')
-    cy.get('a').eq(3).should('have.text', 'Exo identifié par texte / 5')
+    cy.get('a').eq(0).should('have.text', 'Auto-dictée')
+    cy.get('a').eq(1).should('have.text', 'Exo identifié par texte / 5')
+    cy.get('a').eq(2).should('have.text', 'Exercice 5')
+    cy.get('a').eq(3).should('have.text', 'Exercice 6')
 
     cy.get('[data-cy="page-number-filter"]').type('{selectAll}40')
     cy.get('a').should('have.length', 3)
@@ -397,7 +397,7 @@ describe('The autonomous HTML for a textbook', () => {
   it('has working links', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('a').eq(1).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
+    cy.get('a').eq(3).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
     cy.location('hash').should('eq', '#/P42Ex6?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })
@@ -405,7 +405,7 @@ describe('The autonomous HTML for a textbook', () => {
   it('has working links - even when the exercice number has URL-incompatible characters', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
-    cy.get('a').eq(3).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
+    cy.get('a').eq(1).should('have.attr', 'target', '_blank').invoke('removeAttr', 'target').click()
     cy.location('hash').should('eq', '#/P42ExExo%20identifi%C3%A9%20par%20texte%20%2F%205?closable=true')
     cy.get(':contains("Complète avec")').should('exist')
   })

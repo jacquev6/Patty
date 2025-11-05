@@ -1414,9 +1414,9 @@ export interface components {
     GeminiModel: {
       /**
        * Name
-       * @constant
+       * @enum {string}
        */
-      name: 'gemini-2.0-flash'
+      name: 'gemini-2.0-flash' | 'gemini-2.5-flash'
       /**
        * Provider
        * @constant

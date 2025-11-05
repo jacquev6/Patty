@@ -28,14 +28,15 @@ export function makePagesGroups(
 }
 
 export function mergePagesGroups(groups: PagesGroup[]): [number, number][] {
-  const sortedPages = []
+  const pagesSet = new Set<number>()
   for (const group of groups) {
     for (let i = group.first; i <= group.last; i++) {
       if (!group.excluded.includes(i)) {
-        sortedPages.push(i)
+        pagesSet.add(i)
       }
     }
   }
+  const sortedPages = Array.from(pagesSet).sort((a, b) => a - b)
   if (sortedPages.length === 0) {
     return []
   } else {
@@ -131,15 +132,6 @@ const pageGroups = computed(() => {
 
 const groupsToImport = ref<Set<number>>(new Set())
 
-watch(
-  groupsToImport,
-  (groupIndexes) => {
-    const groups = pageGroups.value.filter((_, index) => groupIndexes.has(index))
-    rangesModel.value = mergePagesGroups(groups)
-  },
-  { immediate: true, deep: true },
-)
-
 const importAllGroups = computed({
   get: () => {
     if (groupsToImport.value.size === pageGroups.value.length) {
@@ -161,6 +153,55 @@ const importAllGroups = computed({
   },
 })
 
+const importManualGroup = ref(false)
+const importManualGroupProxy = computed({
+  get: () => !importAllGroups.value && importManualGroup.value,
+  set: (value: boolean) => {
+    importManualGroup.value = value
+  },
+})
+const manualGroupFirstPage = ref(1)
+const manualGroupFirstPageProxy = computed({
+  get: () => (importManualGroupProxy.value ? manualGroupFirstPage.value : ''),
+  set: (value: number | '') => {
+    if (value !== '') {
+      manualGroupFirstPage.value = value
+    }
+  },
+})
+const manualGroupLastPage = ref(1)
+const manualGroupLastPageProxy = computed({
+  get: () => (importManualGroupProxy.value ? manualGroupLastPage.value : ''),
+  set: (value: number | '') => {
+    if (value !== '') {
+      manualGroupLastPage.value = value
+    }
+  },
+})
+const excludedFromManualGroup = computed(() => {
+  if (importManualGroupProxy.value) {
+    return props.knownPages.filter((page) => page >= manualGroupFirstPage.value && page <= manualGroupLastPage.value)
+  } else {
+    return []
+  }
+})
+
+watch(
+  [groupsToImport, importManualGroupProxy, manualGroupFirstPage, manualGroupLastPage],
+  ([groupIndexes, importManualGroup, manualGroupFirstPage, manualGroupLastPage]) => {
+    const groups = pageGroups.value.filter((_, index) => groupIndexes.has(index))
+    if (importManualGroup) {
+      groups.push({
+        first: manualGroupFirstPage,
+        last: manualGroupLastPage,
+        excluded: excludedFromManualGroup.value,
+      })
+    }
+    rangesModel.value = mergePagesGroups(groups)
+  },
+  { immediate: true, deep: true },
+)
+
 defineExpose({
   reset: () => {
     uploadForm.value?.reset()
@@ -175,12 +216,32 @@ defineExpose({
     <UploadPdfForm
       ref="uploadForm"
       :expectedSha256
+      :showUploaded="false"
       @fileSelected="fileSelected"
       @documentOpened="documentOpened"
       @fileUploaded="fileUploaded"
     />
+    <slot name="pdfUploaded"></slot>
   </p>
   <template v-if="document !== null && matchesExpectations">
+    <p data-cy="extraction">
+      <LlmModelSelector
+        :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
+        :disabled="false"
+        v-model="modelForExtraction"
+      >
+        <template #provider>{{ t('modelForExtraction') }}</template>
+      </LlmModelSelector>
+    </p>
+    <p data-cy="adaptation">
+      <LlmModelSelector
+        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
+        :disabled="false"
+        v-model="modelForAdaptation"
+      >
+        <template #provider>{{ t('modelForAdaptation') }}</template>
+      </LlmModelSelector>
+    </p>
     <FixedColumns :columns="[1, 1]">
       <template #col-1>
         <PdfToTextbookPagesDeltaEditor
@@ -196,6 +257,35 @@ defineExpose({
         <h3>{{ t('textbookPagesToImport') }}</h3>
         <p v-if="pageGroups.length === 0">{{ t('noneAllImported') }}</p>
         <template v-else>
+          <p>
+            <label :class="{ disabled: importAllGroups }">
+              <ThreeStatesCheckbox v-model="importManualGroupProxy" :disabled="importAllGroups" />
+              <WhiteSpace />
+              {{ t('manualPages') }}
+            </label>
+            <WhiteSpace />
+            <input
+              type="number"
+              :min="1 + (props.pdfToTextbookPageNumbersFixedDelta ?? pdfToTextbookPageNumbersDelta)"
+              :max="document.numPages + (props.pdfToTextbookPageNumbersFixedDelta ?? pdfToTextbookPageNumbersDelta)"
+              v-model.number="manualGroupFirstPageProxy"
+              :disabled="!importManualGroupProxy"
+            />
+            <span :class="{ disabled: !importManualGroupProxy }"> - </span>
+            <input
+              type="number"
+              :min="1 + (props.pdfToTextbookPageNumbersFixedDelta ?? pdfToTextbookPageNumbersDelta)"
+              :max="document.numPages + (props.pdfToTextbookPageNumbersFixedDelta ?? pdfToTextbookPageNumbersDelta)"
+              v-model.number="manualGroupLastPageProxy"
+              :disabled="!importManualGroupProxy"
+            />
+            <template v-if="excludedFromManualGroup.length !== 0">
+              ({{ t('except') }}
+              <template v-for="(page, index) in excludedFromManualGroup">
+                <template v-if="index > 0">, </template>{{ page }} </template
+              >)
+            </template>
+          </p>
           <p>
             <label><ThreeStatesCheckbox v-model="importAllGroups" /><WhiteSpace />{{ t('allPages') }}</label>
           </p>
@@ -215,35 +305,24 @@ defineExpose({
         </template>
       </template>
     </FixedColumns>
-    <p data-cy="extraction">
-      <LlmModelSelector
-        :availableLlmModels="apiConstantsStore.availableExtractionLlmModels"
-        :disabled="false"
-        v-model="modelForExtraction"
-      >
-        <template #provider>{{ t('modelForExtraction') }}</template>
-      </LlmModelSelector>
-    </p>
-    <p data-cy="adaptation">
-      <LlmModelSelector
-        :availableLlmModels="apiConstantsStore.availableAdaptationLlmModels"
-        :disabled="false"
-        v-model="modelForAdaptation"
-      >
-        <template #provider>{{ t('modelForAdaptation') }}</template>
-      </LlmModelSelector>
-    </p>
   </template>
   <p v-else-if="document !== null && !matchesExpectations" class="error">
     {{ t('theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne') }}
   </p>
 </template>
 
+<style scoped>
+.disabled {
+  color: gray;
+}
+</style>
+
 <i18n>
 en:
   pagesMapping: "Pages mapping:"
   textbookPagesToImport: Textbook pages to import
   allPages: All pages
+  manualPages: "Specific pages:"
   except: except
   noneAllImported: "None (all imported)"
   modelForExtraction: "Model provider for extraction:"
@@ -253,6 +332,7 @@ fr:
   pagesMapping: "Correspondance des pages :"
   textbookPagesToImport: Pages du manuel à importer
   allPages: Toutes les pages
+  manualPages: "Pages spécifiques :"
   except: sauf
   noneAllImported: "Aucune (toutes importées)"
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"

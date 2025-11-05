@@ -206,19 +206,24 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
     pages_with_exercises: set[int] = set()
 
     external_exercises_: list[GetTextbookResponse.ExternalExercise] = []
-    for exercise in textbook.fetch_ordered_external_exercises():
-        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
-        pages_with_exercises.add(exercise.location.page_number)
-        external_exercises_.append(
-            GetTextbookResponse.ExternalExercise(
-                kind="external",
-                id=str(exercise.id),
-                page_number=exercise.location.page_number,
-                exercise_number=exercise.location.exercise_number,
-                original_file_name=exercise.original_file_name,
-                removed_from_textbook=exercise.location.removed_from_textbook,
+    for location in session.execute(
+        sql.select(textbooks.ExerciseLocationTextbook)
+        .where(textbooks.ExerciseLocationTextbook.textbook == textbook)
+        .order_by(textbooks.ExerciseLocationTextbook.id)
+    ).scalars():
+        exercise = location.exercise
+        if isinstance(exercise, external_exercises.ExternalExercise):
+            pages_with_exercises.add(location.page_number)
+            external_exercises_.append(
+                GetTextbookResponse.ExternalExercise(
+                    kind="external",
+                    id=str(exercise.id),
+                    page_number=location.page_number,
+                    exercise_number=location.exercise_number,
+                    original_file_name=exercise.original_file_name,
+                    removed_from_textbook=location.removed_from_textbook,
+                )
             )
-        )
 
     needs_refresh = False
     ranges = []
@@ -442,17 +447,24 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                 )
             )
 
-    for exercise in textbook.fetch_ordered_exercises_on_page(number):
-        assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
+    for location in session.execute(
+        sql.select(textbooks.ExerciseLocationTextbook)
+        .where(
+            textbooks.ExerciseLocationTextbook.textbook == textbook,
+            textbooks.ExerciseLocationTextbook.page_number == number,
+        )
+        .order_by(textbooks.ExerciseLocationTextbook.id)
+    ).scalars():
+        exercise = location.exercise
         if isinstance(exercise, external_exercises.ExternalExercise):
             exercises_.append(
                 GetTextbookPageResponse.ExternalExercise(
                     kind="external",
                     id=str(exercise.id),
-                    page_number=exercise.location.page_number,
-                    exercise_number=exercise.location.exercise_number,
+                    page_number=location.page_number,
+                    exercise_number=location.exercise_number,
                     original_file_name=exercise.original_file_name,
-                    removed_from_textbook=exercise.location.removed_from_textbook,
+                    removed_from_textbook=location.removed_from_textbook,
                 )
             )
 

@@ -177,6 +177,7 @@ const columns = [
         {{ t('pdfFile') }}
         <UploadPdfForm
           :expectedSha256="null"
+          :showUploaded="true"
           @fileSelected="fileSelected"
           @documentOpened="documentOpened"
           @fileUploaded="fileUploaded"

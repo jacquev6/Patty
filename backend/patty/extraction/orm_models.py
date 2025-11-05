@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import typing
 
 from sqlalchemy import orm
 import sqlalchemy as sql
@@ -9,11 +8,10 @@ import sqlalchemy as sql
 from . import assistant_responses
 from . import llm
 from .. import adaptation
-from ..adaptation import AdaptableExercise
 from ..any_json import JsonDict
 from ..classification import ClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..exercises import ExerciseCreation, ExerciseImageCreation, ExerciseLocationMaybePageAndNumber
+from ..exercises import ExerciseCreation, ExerciseImageCreation
 from ..logs import TimingData
 
 
@@ -183,44 +181,6 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
     extracted_images: orm.Mapped[list[ExerciseImageCreationByPageExtraction]] = orm.relationship(
         back_populates="page_extraction"
     )
-
-    @staticmethod
-    def make_ordered_exercises_request__maybe_page_and_number(id: int) -> sql.Select[tuple[AdaptableExercise]]:
-        return (
-            sql.select(AdaptableExercise)
-            .join(ExerciseCreationByPageExtraction)
-            .join(ExerciseLocationMaybePageAndNumber)
-            .where(ExerciseCreationByPageExtraction.page_extraction_id == id)
-            .order_by(
-                ExerciseLocationMaybePageAndNumber.page_number, ExerciseLocationMaybePageAndNumber.exercise_number
-            )
-        )
-
-    @staticmethod
-    def make_ordered_exercises_request__textbook(id: int) -> sql.Select[tuple[AdaptableExercise]]:
-        from ..textbooks import ExerciseLocationTextbook
-
-        return (
-            sql.select(AdaptableExercise)
-            .join(ExerciseCreationByPageExtraction)
-            .join(ExerciseLocationTextbook)
-            .where(ExerciseCreationByPageExtraction.page_extraction_id == id)
-            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
-        )
-
-    def fetch_ordered_exercises(self) -> typing.Iterable[AdaptableExercise]:
-        if len(self.exercise_creations__ordered_by_id) == 0:
-            return []
-        else:
-            first_location = self.exercise_creations__ordered_by_id[0].exercise.location
-            # A page extraction creates all its exercises with the same type of ExerciseLocation
-            if isinstance(first_location, ExerciseLocationMaybePageAndNumber):
-                request = self.make_ordered_exercises_request__maybe_page_and_number(self.id)
-            else:
-                request = self.make_ordered_exercises_request__textbook(self.id)
-            session = orm.object_session(self)
-            assert session is not None
-            return session.execute(request).scalars().all()
 
 
 class PageExtractionCreation(OrmBase):

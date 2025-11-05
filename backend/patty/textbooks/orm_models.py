@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 import datetime
-import typing
 
 from sqlalchemy import orm
 import sqlalchemy as sql
 
 from .. import adaptation
-from .. import external_exercises
 from .. import extraction
 from ..any_json import JsonDict
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
-from ..exercises import Exercise, ExerciseLocation
+from ..exercises import ExerciseLocation
 from ..extraction import PdfFile, PdfFileRange, PageExtractionCreation
 
 
@@ -52,49 +50,6 @@ class Textbook(OrmBase, CreatedByUserMixin):
         foreign_keys=[single_pdf_file_sha256], remote_side=[PdfFile.sha256]
     )
 
-    @staticmethod
-    def make_ordered_exercises_request(id: int) -> sql.Select[tuple[Exercise]]:
-        return (
-            sql.select(Exercise)
-            .join(ExerciseLocationTextbook)
-            .where(ExerciseLocationTextbook.textbook_id == id)
-            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
-        )
-
-    def fetch_ordered_exercises(self) -> typing.Iterable[Exercise]:
-        session = orm.object_session(self)
-        assert session is not None
-        return session.execute(self.make_ordered_exercises_request(self.id)).scalars().all()
-
-    @staticmethod
-    def make_ordered_external_exercises_request(id: int) -> sql.Select[tuple[external_exercises.ExternalExercise]]:
-        return (
-            sql.select(external_exercises.ExternalExercise)
-            .join(ExerciseLocationTextbook)
-            .where(ExerciseLocationTextbook.textbook_id == id)
-            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
-        )
-
-    def fetch_ordered_external_exercises(self) -> typing.Iterable[external_exercises.ExternalExercise]:
-        session = orm.object_session(self)
-        assert session is not None
-        return session.execute(self.make_ordered_external_exercises_request(self.id)).scalars().all()
-
-    @staticmethod
-    def make_ordered_exercises_on_page_request(id: int, page_number: int) -> sql.Select[tuple[Exercise]]:
-        return (
-            sql.select(Exercise)
-            .join(ExerciseLocationTextbook)
-            .where(ExerciseLocationTextbook.textbook_id == id)
-            .where(ExerciseLocationTextbook.page_number == page_number)
-            .order_by(ExerciseLocationTextbook.page_number, ExerciseLocationTextbook.exercise_number)
-        )
-
-    def fetch_ordered_exercises_on_page(self, page_number: int) -> typing.Iterable[Exercise]:
-        session = orm.object_session(self)
-        assert session is not None
-        return session.execute(self.make_ordered_exercises_on_page_request(self.id, page_number)).scalars().all()
-
     extraction_batches: orm.Mapped[list[TextbookExtractionBatch]] = orm.relationship(back_populates="textbook")
 
 
@@ -117,8 +72,7 @@ class ExerciseLocationTextbook(ExerciseLocation):
     textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
 
     page_number: orm.Mapped[int]
-    # Custom collation: migrations/versions/429d2fb463dd_exercise_number_collation.py
-    exercise_number: orm.Mapped[str] = orm.mapped_column(sql.String(collation="exercise_number"))
+    exercise_number: orm.Mapped[str]
     removed_from_textbook: orm.Mapped[bool]
 
 

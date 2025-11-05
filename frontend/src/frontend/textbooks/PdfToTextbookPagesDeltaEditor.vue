@@ -6,6 +6,7 @@ import { computedAsync } from '@vueuse/core'
 
 import PdfNavigationControls from '$/PdfNavigationControls.vue'
 import PdfPageRenderer from '$/PdfPageRenderer.vue'
+import WhiteSpace from '@/reusable/WhiteSpace.vue'
 
 const props = defineProps<{
   document: PDFDocumentProxy
@@ -33,6 +34,7 @@ const page = computedAsync(() => props.document.getPage(pdfPageNumber.value), nu
   <span class="pagePreview">
     <p>
       <slot name="label"></slot>
+      <WhiteSpace />
       <I18nT keypath="inPdfIeInTextbook">
         <template #pdfPage>
           <PdfNavigationControls v-model="pdfPageNumberProxy" :pagesCount="document.numPages" />

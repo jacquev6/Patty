@@ -413,12 +413,21 @@ function makeRenderableFromEditableTextInput(
 
 function markConsecutiveSelectableInputs(contents: AnyRenderable[]): AnyRenderable[] {
   const ret: AnyRenderable[] = deepCopy(contents)
-  for (let i = 1; i < ret.length; i++) {
-    const a = ret[i - 1]
-    const b = ret[i]
-    if (a.kind === 'selectableInput' && b.kind === 'selectableInput') {
-      a.mayBeSingleLetter = true
-      b.mayBeSingleLetter = true
+  let mayBeSingleLetters = true
+  for (let i = 0; i < ret.length; i++) {
+    const c = ret[i]
+    if (
+      c.kind === 'selectableInput' &&
+      (c.contents.length !== 1 || c.contents[0].kind !== 'text' || c.contents[0].text.length !== 1)
+    ) {
+      mayBeSingleLetters = false
+      break
+    }
+  }
+  for (let i = 0; i < ret.length; i++) {
+    const c = ret[i]
+    if (c.kind === 'selectableInput') {
+      c.mayBeSingleLetter = mayBeSingleLetters
     }
   }
   return ret

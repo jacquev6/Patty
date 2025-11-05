@@ -10,6 +10,7 @@ import { useIdentifiedUserStore } from './basic/IdentifiedUserStore'
 
 const props = defineProps<{
   expectedSha256: string | null
+  showUploaded: boolean
 }>()
 
 const emit = defineEmits<{
@@ -89,7 +90,7 @@ defineExpose({
   <span>
     <input ref="input" type="file" lang="fr" @change="openFile" accept=".pdf" :disabled="uploading" />
     <template v-if="uploading"> ({{ t('uploading') }})</template>
-    <template v-if="uploaded"> ({{ t('uploaded') }})</template>
+    <template v-if="uploaded && showUploaded"> ({{ t('uploaded') }})</template>
   </span>
 </template>
 
