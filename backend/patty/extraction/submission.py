@@ -150,7 +150,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                         + page_extraction.pdf_page_number
                         - extraction_batch.pdf_file_range.first_page_number,
                         exercise_number=extracted_exercise.properties.numero,
-                        removed_from_textbook=False,
+                        marked_as_removed=False,
                     )
                 else:
                     location = exercises.ExerciseLocationMaybePageAndNumber(

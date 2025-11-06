@@ -123,7 +123,7 @@ const exercisesToShow = computed({
         exercise.adaptationStatus.approved === null
       "
     >
-      <h2 v-if="exercise.removedFromTextbook">
+      <h2 v-if="exercise.markedAsRemoved">
         <span class="removed">{{ t('exercise') }} {{ exercise.exerciseNumber }}</span>
         ({{ t('removed') }})
         <button @click="removeExercise(exercise.id, false)">{{ t('reAdd') }}</button>

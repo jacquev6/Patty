@@ -737,10 +737,10 @@ export interface components {
        * @constant
        */
       kind: 'adaptable'
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Pagenumber */
       pageNumber: number | null
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
     }
     /** AdaptationApproval */
     AdaptationApproval: {
@@ -880,10 +880,10 @@ export interface components {
         | components['schemas']['UnknownError']
         | components['schemas']['LlmSuccess']
       manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
       /** Status */
       status:
         | components['schemas']['InProgress']
@@ -1270,12 +1270,12 @@ export interface components {
        * @constant
        */
       kind: 'external'
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Originalfilename */
       originalFileName: string
       /** Pagenumber */
       pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
     }
     /** ExtractionBatch */
     ExtractionBatch: {
@@ -2179,6 +2179,8 @@ export interface components {
     Range: {
       /** Id */
       id: string
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Modelforadaptation */
       modelForAdaptation:
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
@@ -2197,8 +2199,6 @@ export interface components {
       pdfFileNames: string[]
       /** Pdffirstpagenumber */
       pdfFirstPageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
       /** Textbookfirstpagenumber */
       textbookFirstPageNumber: number
     }
@@ -2646,10 +2646,10 @@ export interface components {
       id: string
       /** Inprogress */
       inProgress: boolean
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Pagenumber */
       pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {

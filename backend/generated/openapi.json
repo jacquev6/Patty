@@ -240,6 +240,10 @@
             "title": "Kind",
             "type": "string"
           },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
           "pageNumber": {
             "anyOf": [
               {
@@ -250,10 +254,6 @@
               }
             ],
             "title": "Pagenumber"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
           }
         },
         "required": [
@@ -265,7 +265,7 @@
           "classificationStatus",
           "adaptationStatus",
           "kind",
-          "removedFromTextbook"
+          "markedAsRemoved"
         ],
         "title": "AdaptableExercise",
         "type": "object"
@@ -581,14 +581,14 @@
               }
             ]
           },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
           "rawLlmConversations": {
             "items": {},
             "title": "Rawllmconversations",
             "type": "array"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
           },
           "status": {
             "anyOf": [
@@ -623,7 +623,7 @@
           "imagesUrls",
           "adjustmentPrompts",
           "manualEdit",
-          "removedFromTextbook",
+          "markedAsRemoved",
           "llmStatus",
           "status"
         ],
@@ -1724,6 +1724,10 @@
             "title": "Kind",
             "type": "string"
           },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
           "originalFileName": {
             "title": "Originalfilename",
             "type": "string"
@@ -1731,10 +1735,6 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
           }
         },
         "required": [
@@ -1743,7 +1743,7 @@
           "pageNumber",
           "exerciseNumber",
           "originalFileName",
-          "removedFromTextbook"
+          "markedAsRemoved"
         ],
         "title": "ExternalExercise",
         "type": "object"
@@ -4168,6 +4168,10 @@
             "title": "Id",
             "type": "string"
           },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
           "modelForAdaptation": {
             "anyOf": [
               {
@@ -4218,10 +4222,6 @@
             "title": "Pdffirstpagenumber",
             "type": "integer"
           },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
-          },
           "textbookFirstPageNumber": {
             "title": "Textbookfirstpagenumber",
             "type": "integer"
@@ -4236,7 +4236,7 @@
           "modelForExtraction",
           "modelForAdaptation",
           "pages",
-          "removedFromTextbook"
+          "markedAsRemoved"
         ],
         "title": "Range",
         "type": "object"
@@ -5431,20 +5431,20 @@
             "title": "Inprogress",
             "type": "boolean"
           },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
-          },
-          "removedFromTextbook": {
-            "title": "Removedfromtextbook",
-            "type": "boolean"
           }
         },
         "required": [
           "id",
           "pageNumber",
           "inProgress",
-          "removedFromTextbook"
+          "markedAsRemoved"
         ],
         "title": "Page",
         "type": "object"

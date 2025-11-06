@@ -1,5 +1,3 @@
-import typing
-
 import sqlalchemy as sql
 
 from . import adaptation

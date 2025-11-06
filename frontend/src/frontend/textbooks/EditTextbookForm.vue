@@ -78,7 +78,7 @@ function download() {
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
-        <span :class="{ removed: range.removedFromTextbook }">
+        <span :class="{ removed: range.markedAsRemoved }">
           {{
             t('pages', {
               textbookFrom: range.textbookFirstPageNumber,
@@ -89,7 +89,7 @@ function download() {
             })
           }}
         </span>
-        <template v-if="range.removedFromTextbook">
+        <template v-if="range.markedAsRemoved">
           ({{ t('removed') }})
           <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
         </template>
@@ -98,7 +98,7 @@ function download() {
           <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
         </template>
       </h3>
-      <template v-if="!range.removedFromTextbook">
+      <template v-if="!range.markedAsRemoved">
         <p>
           <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
             <template #provider>{{ t('modelForExtraction') }}</template></LlmModelSelector
@@ -110,7 +110,7 @@ function download() {
         <p>{{ t('extractedPagesHeader') }}</p>
         <ul class="rangePages">
           <li v-for="page in range.pages">
-            <span :class="{ removed: page.removedFromTextbook }">
+            <span :class="{ removed: page.markedAsRemoved }">
               {{ page.pageNumber }}
               <!-- <RouterLink
                 :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
@@ -122,7 +122,7 @@ function download() {
               <WhiteSpace />
               <span class="inProgress">{{ t('inProgress') }}</span>
             </template>
-            <template v-else-if="page.removedFromTextbook">
+            <template v-else-if="page.markedAsRemoved">
               ({{ t('removed') }})
               <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
             </template>
@@ -139,7 +139,7 @@ function download() {
   <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
   <h2>{{ t('existingExternalExercises') }}</h2>
   <template v-for="externalExercise in textbook.externalExercises">
-    <h3 v-if="externalExercise.removedFromTextbook">
+    <h3 v-if="externalExercise.markedAsRemoved">
       <span class="removed">{{ externalExercise.originalFileName }}</span> ({{ t('removed') }})
       <button @click="removeExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
     </h3>
