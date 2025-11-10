@@ -118,7 +118,7 @@ function download() {
                 {{ t('viewDetails') }}
               </RouterLink> -->
             </span>
-            <template v-if="page.inProgress">
+            <template v-if="page.status.kind === 'in-progress'">
               <WhiteSpace />
               <span class="inProgress">{{ t('inProgress') }}</span>
             </template>
@@ -127,6 +127,14 @@ function download() {
               <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
             </template>
             <template v-else>
+              <template v-if="page.status.kind === 'error'">
+                <WhiteSpace />
+                <span class="error">
+                  <template v-if="page.status.error === 'invalid-json'">{{ t('invalidJson') }}</template>
+                  <template v-else-if="page.status.error === 'not-json'">{{ t('notJson') }}</template>
+                  <template v-else-if="page.status.error === 'unknown'">{{ t('unknownError') }}</template>
+                </span>
+              </template>
               <WhiteSpace />
               <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
             </template>
@@ -153,6 +161,10 @@ function download() {
 <style scoped>
 .removed {
   text-decoration: line-through;
+}
+
+span.error {
+  font-weight: bold;
 }
 
 span.inProgress {
@@ -183,6 +195,9 @@ en:
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
   inProgress: "(in progress, will refresh when done)"
+  invalidJson: Invalid JSON
+  notJson: Not JSON
+  unknownError: Unknown error
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
   exercise: Exercise
@@ -204,6 +219,9 @@ fr:
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
   inProgress: "(en cours, se mettra à jour quand terminé)"
+  invalidJson: JSON invalide
+  notJson: Pas du JSON
+  unknownError: Erreur inconnue
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
   exercise: Exercice

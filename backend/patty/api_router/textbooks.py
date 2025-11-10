@@ -190,8 +190,19 @@ class GetTextbookResponse(ApiModel):
         class Page(ApiModel):
             id: str
             page_number: int
-            in_progress: bool
             marked_as_removed: bool
+
+            class InProgress(ApiModel):
+                kind: Literal["in-progress"]
+
+            class Success(ApiModel):
+                kind: Literal["success"]
+
+            class Error(ApiModel):
+                kind: Literal["error"]
+                error: Literal["not-json", "invalid-json", "unknown"]
+
+            status: InProgress | Success | Error
 
         pages: list[Page]
         marked_as_removed: bool
@@ -239,9 +250,25 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
 
         pages = []
         for page_extraction_creation in extraction_batch.page_extraction_creations:
-            in_progress = page_extraction_creation.page_extraction.assistant_response is None
-            if in_progress:
+            status: (
+                GetTextbookResponse.Range.Page.InProgress
+                | GetTextbookResponse.Range.Page.Success
+                | GetTextbookResponse.Range.Page.Error
+            )
+            if page_extraction_creation.page_extraction.assistant_response is None:
                 needs_refresh = True
+                status = GetTextbookResponse.Range.Page.InProgress(kind="in-progress")
+            elif isinstance(
+                page_extraction_creation.page_extraction.assistant_response,
+                (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+            ):
+                status = GetTextbookResponse.Range.Page.Success(kind="success")
+            else:
+                assert page_extraction_creation.page_extraction.assistant_response.kind == "error"
+                status = GetTextbookResponse.Range.Page.Error(
+                    kind="error", error=page_extraction_creation.page_extraction.assistant_response.error
+                )
+
             page_number = (
                 extraction_batch.first_textbook_page_number
                 + page_extraction_creation.page_extraction.pdf_page_number
@@ -251,7 +278,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 GetTextbookResponse.Range.Page(
                     id=str(page_extraction_creation.id),
                     page_number=page_number,
-                    in_progress=in_progress,
+                    status=status,
                     marked_as_removed=page_extraction_creation.marked_as_removed,
                 )
             )

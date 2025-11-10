@@ -554,7 +554,7 @@
           "llmStatus": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/InProgress"
+                "$ref": "#/components/schemas/patty__api_router__adaptations__ApiAdaptation__InProgress"
               },
               {
                 "$ref": "#/components/schemas/InvalidJsonError"
@@ -593,7 +593,7 @@
           "status": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/InProgress"
+                "$ref": "#/components/schemas/patty__api_router__adaptations__ApiAdaptation__InProgress"
               },
               {
                 "$ref": "#/components/schemas/InvalidJsonError"
@@ -1318,92 +1318,6 @@
           "showOriginalText",
           "contents"
         ],
-        "type": "object"
-      },
-      "Error": {
-        "additionalProperties": false,
-        "properties": {
-          "caughtBy": {
-            "title": "Caughtby",
-            "type": "string"
-          },
-          "codeLocation": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Codelocation"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "title": "Createdat",
-            "type": "string"
-          },
-          "createdBy": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Createdby"
-          },
-          "githubIssueNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Githubissuenumber"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "message": {
-            "title": "Message",
-            "type": "string"
-          },
-          "pattyVersion": {
-            "title": "Pattyversion",
-            "type": "string"
-          },
-          "url": {
-            "title": "Url",
-            "type": "string"
-          },
-          "userAgent": {
-            "title": "Useragent",
-            "type": "string"
-          },
-          "windowSize": {
-            "title": "Windowsize",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "createdBy",
-          "createdAt",
-          "pattyVersion",
-          "userAgent",
-          "windowSize",
-          "url",
-          "caughtBy",
-          "message",
-          "codeLocation",
-          "githubIssueNumber"
-        ],
-        "title": "Error",
         "type": "object"
       },
       "ExampleComponents": {
@@ -2373,7 +2287,7 @@
         "properties": {
           "errors": {
             "items": {
-              "$ref": "#/components/schemas/Error"
+              "$ref": "#/components/schemas/patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error"
             },
             "title": "Errors",
             "type": "array"
@@ -2756,21 +2670,6 @@
           "height",
           "identifier"
         ],
-        "type": "object"
-      },
-      "InProgress": {
-        "additionalProperties": false,
-        "properties": {
-          "kind": {
-            "const": "inProgress",
-            "title": "Kind",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kind"
-        ],
-        "title": "InProgress",
         "type": "object"
       },
       "InstructionComponents": {
@@ -4941,6 +4840,21 @@
         "title": "DummyModel",
         "type": "object"
       },
+      "patty__api_router__adaptations__ApiAdaptation__InProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "inProgress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "InProgress",
+        "type": "object"
+      },
       "patty__api_router__adaptations__ApiAdaptation__Success": {
         "additionalProperties": false,
         "properties": {
@@ -5427,10 +5341,6 @@
             "title": "Id",
             "type": "string"
           },
-          "inProgress": {
-            "title": "Inprogress",
-            "type": "boolean"
-          },
           "markedAsRemoved": {
             "title": "Markedasremoved",
             "type": "boolean"
@@ -5438,15 +5348,170 @@
           "pageNumber": {
             "title": "Pagenumber",
             "type": "integer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress"
+              },
+              {
+                "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success"
+              },
+              {
+                "$ref": "#/components/schemas/patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error"
+              }
+            ],
+            "title": "Status"
           }
         },
         "required": [
           "id",
           "pageNumber",
-          "inProgress",
-          "markedAsRemoved"
+          "markedAsRemoved",
+          "status"
         ],
         "title": "Page",
+        "type": "object"
+      },
+      "patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "enum": [
+              "not-json",
+              "invalid-json",
+              "unknown"
+            ],
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "in-progress",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "InProgress",
+        "type": "object"
+      },
+      "patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Success",
+        "type": "object"
+      },
+      "patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error": {
+        "additionalProperties": false,
+        "properties": {
+          "caughtBy": {
+            "title": "Caughtby",
+            "type": "string"
+          },
+          "codeLocation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codelocation"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdby"
+          },
+          "githubIssueNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Githubissuenumber"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "pattyVersion": {
+            "title": "Pattyversion",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "userAgent": {
+            "title": "Useragent",
+            "type": "string"
+          },
+          "windowSize": {
+            "title": "Windowsize",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "createdBy",
+          "createdAt",
+          "pattyVersion",
+          "userAgent",
+          "windowSize",
+          "url",
+          "caughtBy",
+          "message",
+          "codeLocation",
+          "githubIssueNumber"
+        ],
+        "title": "Error",
         "type": "object"
       },
       "patty__extraction__assistant_responses__Success": {
@@ -5525,7 +5590,8 @@
               "dummy-1",
               "dummy-2",
               "dummy-for-images",
-              "dummy-for-textually-numbered-exercises"
+              "dummy-for-textually-numbered-exercises",
+              "dummy-for-errors"
             ],
             "title": "Name",
             "type": "string"

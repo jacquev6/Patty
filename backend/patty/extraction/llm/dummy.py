@@ -10,13 +10,17 @@ from .base import Model
 
 class DummyModel(Model):
     provider: Literal["dummy"]
-    name: Literal["dummy-1", "dummy-2", "dummy-for-images", "dummy-for-textually-numbered-exercises"]
+    name: Literal[
+        "dummy-1", "dummy-2", "dummy-for-images", "dummy-for-textually-numbered-exercises", "dummy-for-errors"
+    ]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
         if self.name == "dummy-for-images":
             return self.do_extract_for_images()
         elif self.name == "dummy-for-textually-numbered-exercises":
             return self.do_extract_for_textually_numbered_exercises()
+        elif self.name == "dummy-for-errors":
+            return self.do_extract_for_errors(prompt, image)
         else:
             return self.do_extract_standard(prompt, image)
 
@@ -99,6 +103,17 @@ class DummyModel(Model):
                 ).model_dump(),
             ]
         )
+
+    def do_extract_for_errors(self, prompt: str, image: PIL.Image.Image) -> str:
+        color = image.getpixel((image.size[0] // 2, image.size[1] // 2))
+        if color == (255, 0, 0):
+            return "Not JSON"
+        elif color == (0, 128, 0):
+            return "{}"
+        elif color == (0, 0, 255):
+            raise Exception("Simulated unknown error")
+        else:
+            return self.do_extract_standard(prompt, image)
 
     def do_extract_standard(self, prompt: str, image: PIL.Image.Image) -> str:
         def raise_exception() -> str:

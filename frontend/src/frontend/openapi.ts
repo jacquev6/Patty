@@ -874,7 +874,7 @@ export interface components {
       input: components['schemas']['ApiInputOut']
       /** Llmstatus */
       llmStatus:
-        | components['schemas']['InProgress']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__InProgress']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
@@ -886,7 +886,7 @@ export interface components {
       rawLlmConversations: unknown[]
       /** Status */
       status:
-        | components['schemas']['InProgress']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__InProgress']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
@@ -1136,34 +1136,6 @@ export interface components {
       kind: 'editableTextInput'
       /** Showoriginaltext */
       showOriginalText: boolean
-    }
-    /** Error */
-    Error: {
-      /** Caughtby */
-      caughtBy: string
-      /** Codelocation */
-      codeLocation: string | null
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Createdby */
-      createdBy: string | null
-      /** Githubissuenumber */
-      githubIssueNumber: number | null
-      /** Id */
-      id: string
-      /** Message */
-      message: string
-      /** Pattyversion */
-      pattyVersion: string
-      /** Url */
-      url: string
-      /** Useragent */
-      userAgent: string
-      /** Windowsize */
-      windowSize: string
     }
     /** ExampleComponents */
     ExampleComponents: {
@@ -1531,7 +1503,7 @@ export interface components {
     /** GetErrorsCaughtByFrontendResponse */
     GetErrorsCaughtByFrontendResponse: {
       /** Errors */
-      errors: components['schemas']['Error'][]
+      errors: components['schemas']['patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error'][]
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -1660,14 +1632,6 @@ export interface components {
        * @constant
        */
       kind: 'image'
-    }
-    /** InProgress */
-    InProgress: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'inProgress'
     }
     /** InstructionComponents */
     InstructionComponents: {
@@ -2498,6 +2462,14 @@ export interface components {
        */
       provider: 'dummy'
     }
+    /** InProgress */
+    patty__api_router__adaptations__ApiAdaptation__InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
+    }
     /** Success */
     patty__api_router__adaptations__ApiAdaptation__Success: {
       adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
@@ -2644,12 +2616,72 @@ export interface components {
     patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
       /** Id */
       id: string
-      /** Inprogress */
-      inProgress: boolean
       /** Markedasremoved */
       markedAsRemoved: boolean
       /** Pagenumber */
       pageNumber: number
+      /** Status */
+      status:
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress']
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success']
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error']
+    }
+    /** Error */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error: {
+      /**
+       * Error
+       * @enum {string}
+       */
+      error: 'not-json' | 'invalid-json' | 'unknown'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+    }
+    /** InProgress */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'in-progress'
+    }
+    /** Success */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+    }
+    /** Error */
+    patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error: {
+      /** Caughtby */
+      caughtBy: string
+      /** Codelocation */
+      codeLocation: string | null
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Createdby */
+      createdBy: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
+      /** Id */
+      id: string
+      /** Message */
+      message: string
+      /** Pattyversion */
+      pattyVersion: string
+      /** Url */
+      url: string
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {
@@ -2693,7 +2725,7 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises'
+      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises' | 'dummy-for-errors'
       /**
        * Provider
        * @constant
