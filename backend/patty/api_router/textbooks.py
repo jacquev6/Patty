@@ -315,7 +315,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         pages_count=textbook.pages_count,
         pages_with_exercises=sorted(pages_with_exercises),
         external_exercises=external_exercises_,
-        ranges=ranges,
+        ranges=sorted(ranges, key=lambda r: (r.textbook_first_page_number, r.pages_count, r.id)),
         single_pdf=single_pdf,
         known_pdfs=known_pdfs,
     )
