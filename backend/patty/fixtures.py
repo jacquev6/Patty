@@ -718,10 +718,10 @@ class FixturesCreator:
             extraction.PdfFile(
                 created_by="Patty",
                 created_at=created_at,
-                sha256="dummy_sha256",
-                bytes_count=123456,
-                pages_count=30,
-                known_file_names=["dummy_textbook.pdf"],
+                sha256="044c5caf34cba74e1e4cb6a498485923a8dbf28b74d414155586f18236da78b4",
+                bytes_count=37223,
+                pages_count=35,
+                known_file_names=["long.pdf"],
             )
         )
         pdf_file_range = self.add(

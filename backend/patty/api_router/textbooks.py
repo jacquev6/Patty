@@ -259,15 +259,17 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 extracted_textbook_pages_by_pdf.setdefault(extraction_batch.pdf_file_range.pdf_file.sha256, set()).add(
                     page_number
                 )
-                if isinstance(
-                    page_extraction_creation.page_extraction.assistant_response,
-                    (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                if (
+                    isinstance(
+                        page_extraction_creation.page_extraction.assistant_response,
+                        (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                    )
+                    and not page_extraction_creation.effectively_removed
                 ):
                     for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__ordered_by_id:
                         assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
-                        if not exercise_creation.exercise.location.effectively_removed:
-                            pages_with_exercises.add(page_number)
-                            break
+                        pages_with_exercises.add(page_number)
+                        break
 
         ranges.append(
             GetTextbookResponse.Range(
