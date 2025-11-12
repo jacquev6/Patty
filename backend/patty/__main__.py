@@ -12,7 +12,6 @@ import re
 import subprocess
 import sys
 import tarfile
-import textwrap
 import time
 import traceback
 import typing
@@ -427,28 +426,6 @@ def json_to_html_script() -> None:
         ),
         reference=None,
     )
-    usage = subprocess.run(
-        ["black", "--line-length", "80", "--skip-magic-trailing-comma", "-"],
-        input=textwrap.dedent(
-            f"""\
-        from patty_json_to_html import exercise_to_html, textbook_to_html
-
-        exercise = {example_exercise.model_dump()!r}
-
-        print(exercise_to_html(exercise))
-
-        textbook = {{
-            "title": "Example Textbook",
-            "exercises": [{{"page": 12, "number": "23", "exercise": exercise}}],
-        }}
-
-        print(textbook_to_html(textbook))
-        """
-        ),
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
 
     def gen() -> typing.Iterable[str]:
         yield "# This file is *generated* by Patty. Do not edit it directly."
@@ -456,26 +433,55 @@ def json_to_html_script() -> None:
         yield '"""'
         yield "Example usage (note that `exercise_to_html` also accepts an instance of `Exercise`, and `textbook_to_html` an instance of `Textbook`):"
         yield ""
-        continuation = False
-        for line in usage.splitlines():
+        yield ">>> import os, shutil"
+        yield ""
+        yield ">>> from patty_json_to_html import exercise_to_html, textbook_to_html"
+        yield ""
+        exercise_lines = subprocess.run(
+            ["black", "--line-length", "80", "--skip-magic-trailing-comma", "-"],
+            input=f"exercise = {example_exercise.model_dump()!r}",
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.splitlines()
+        for line_index, line in enumerate(exercise_lines):
             line = line.rstrip()
-            if line == "":
-                yield ""
-                continuation = False
-            elif continuation:
-                yield f"... {line}"
-            else:
+            if line_index == 0:
                 yield f">>> {line}"
-                continuation = True
-            if line.startswith("print"):
-                yield "<!doctype html>"
-                yield '<html lang="">'
-                yield "  ..."
-                yield "</html>"
+            else:
+                yield f"... {line}"
+        yield ""
+        yield ">>> print(exercise_to_html(exercise))"
+        yield "<!doctype html>"
+        yield '<html lang="">'
+        yield "  ..."
+        yield "</html>"
+        yield ""
+        yield ">>> textbook = {"
+        yield '...     "title": "Example Textbook",'
+        yield '...     "exercises": [{"page": 12, "number": "23", "exercise": exercise}],'
+        yield "... }"
+        yield ""
+        yield ">>> print(textbook_to_html(textbook))"
+        yield "<!doctype html>"
+        yield '<html lang="">'
+        yield "  ..."
+        yield "</html>"
+        yield ""
+        yield '>>> shutil.rmtree("/tmp/batch-exercises-output", ignore_errors=True)'
+        yield '>>> adapted_exercises_json_file_to_directory("test-inputs/sandbox-adaptation-batch-1-adapted-exercises.json", "/tmp/batch-exercises-output")'
+        yield '>>> os.listdir("/tmp/batch-exercises-output")'
+        yield "['P42Ex5.json']"
+        yield ""
+        yield '>>> shutil.rmtree("/tmp/textbook-exercises-output", ignore_errors=True)'
+        yield '>>> textbook_autonomous_html_file_to_directory("test-inputs/Dummy Textbook Title.html", "/tmp/textbook-exercises-output")'
+        yield '>>> os.listdir("/tmp/textbook-exercises-output")'
+        yield "['P40Ex6.json', 'P40Ex8.json', 'P40Ex4.json']"
         yield '"""'
         yield ""
         yield ""
         yield "from __future__ import annotations"
+        yield "import os"
         yield "from typing import Any, Literal"
         yield "import hashlib"
         yield "import json"
@@ -544,6 +550,40 @@ def json_to_html_script() -> None:
         yield '        "##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##",'
         yield "        json.dumps(data).replace('\\\\', '\\\\\\\\').replace('\\\"', '\\\\\"'),"
         yield "    )"
+        yield ""
+        yield ""
+        yield "def adapted_exercises_json_file_to_directory(input_json_file_name: str, output_directory_name: str) -> None:"
+        yield '    """'
+        yield '    Convert the file one gets from the "JSON data for adapted exercises" link'
+        yield '    to the contents of the file one gets from the "JSON/ZIP data for adapted exercises" link.'
+        yield '    """'
+        yield ""
+        yield "    with open(input_json_file_name) as f:"
+        yield "        exercises = json.load(f)"
+        yield ""
+        yield "    os.makedirs(output_directory_name)"
+        yield "    for exercise in exercises:"
+        yield '        with open(os.path.join(output_directory_name, f"{exercise[\'exerciseId\']}.json"), "w") as f:'
+        yield '            json.dump(exercise["adaptedExercise"], f, ensure_ascii=False, indent=2)'
+        yield ""
+        yield ""
+        yield "def textbook_autonomous_html_file_to_directory(input_html_file_name: str, output_directory_name: str) -> None:"
+        yield '    """'
+        yield "    Convert an autonomous HTML file for a textbook"
+        yield '    to the contents of the file one gets from the "JSON/ZIP data for adapted exercises" link.'
+        yield '    """'
+        yield ""
+        yield "    with open(input_html_file_name) as f:"
+        yield "        textbook = f.read()"
+        yield ""
+        yield "    start_index = textbook.find('JSON.parse(\"') + 12"
+        yield '    textbook = textbook[start_index:].replace(\'\\\\"\', \'"\').replace("\\\\\\\\", "\\\\")'
+        yield '    exercises = json.JSONDecoder().raw_decode(textbook)[0]["exercises"]'
+        yield ""
+        yield "    os.makedirs(output_directory_name)"
+        yield "    for exercise in exercises:"
+        yield '        with open(os.path.join(output_directory_name, f"{exercise[\'exerciseId\']}.json"), "w") as f:'
+        yield '            json.dump(exercise["adaptedExercise"], f, ensure_ascii=False, indent=2)'
 
     subprocess.run(
         ["black", "--line-length", "120", "--skip-magic-trailing-comma", "-"],
