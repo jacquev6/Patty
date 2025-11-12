@@ -61,6 +61,13 @@ function download() {
     <WhiteSpace />
     <button @click="download">{{ t('downloadHtml') }}</button>
   </h1>
+  <p>
+    <I18nT keypath="download">
+      <a :href="`/api/export/textbook/${textbook.id}-adapted-exercises.zip?token=${authenticationTokenStore.token}`">
+        {{ t('zipDataForAdaptedExercises') }}
+      </a>
+    </I18nT>
+  </p>
   <h2>
     {{ t('pagesWithExercises') }} <span v-if="textbook.needsRefresh" class="inProgress">{{ t('inProgress') }}</span>
   </h2>
@@ -190,6 +197,8 @@ en:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Download
+  download: Download {0}
+  zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   pagesWithExercises: "Pages with exercises"
   importNewPages: Import new pages (PDF)
   newTextbookPdf: New textbook PDF
@@ -214,6 +223,8 @@ fr:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Télécharger
+  download: Télécharger {0}
+  zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   pagesWithExercises: "Pages avec des exercices"
   importNewPages: Importer de nouvelles pages (PDF)
   newTextbookPdf: Nouveau PDF de manuel

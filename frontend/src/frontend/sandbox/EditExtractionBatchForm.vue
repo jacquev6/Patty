@@ -111,6 +111,11 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           >
             {{ t('jsonDataForAdaptedExercises') }}
           </a>
+          <a
+            :href="`/api/export/sandbox-extraction-batch-${extractionBatch.id}-adapted-exercises.zip?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('zipDataForAdaptedExercises') }}
+          </a>
         </I18nT>
       </p>
       <h1>{{ t('followUps') }}</h1>
@@ -245,12 +250,13 @@ en:
   llmModel: LLM model
   settings: Settings
   prompt: Prompt
-  download: Download {0}, {1}, {2}, {3}, or {4}
+  download: Download {0}, {1}, {2}, {3}, {4}, or {5}
   standaloneHtml: standalone HTML
   jsonDataForExtractedExercises: JSON data for extracted exercises
   tsvDataForExtractedExercises: TSV data for extracted exercises
   tsvDataForClassifiedExercises: TSV data for classified exercises
   jsonDataForAdaptedExercises: JSON data for adapted exercises
+  zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
   runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
@@ -280,12 +286,13 @@ fr:
   llmModel: Modèle LLM
   settings: Paramètres
   prompt: Invite
-  download: Télécharger {0}, {1}, {2}, {3}, ou {4}
+  download: Télécharger {0}, {1}, {2}, {3}, {4}, ou {5}
   standaloneHtml: le HTML autonome
   jsonDataForExtractedExercises: les données JSON des exercices extraits
   tsvDataForExtractedExercises: les données TSV des exercices extraits
   tsvDataForClassifiedExercises: les données TSV des exercices classifiés
   jsonDataForAdaptedExercises: les données JSON des exercices adaptés
+  zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
   runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"
