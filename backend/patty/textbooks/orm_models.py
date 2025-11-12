@@ -57,14 +57,12 @@ class ExerciseLocationTextbook(ExerciseLocation):
     __tablename__ = "exercise_locations__textbook"
     __mapper_args__ = {"polymorphic_identity": "textbook"}
 
-    def __init__(
-        self, *, textbook: Textbook, page_number: int, exercise_number: str, removed_from_textbook: bool
-    ) -> None:
+    def __init__(self, *, textbook: Textbook, page_number: int, exercise_number: str, marked_as_removed: bool) -> None:
         super().__init__()
         self.textbook = textbook
         self.page_number = page_number
         self.exercise_number = exercise_number
-        self.removed_from_textbook = removed_from_textbook
+        self.marked_as_removed = marked_as_removed
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(ExerciseLocation.id), primary_key=True)
 
@@ -73,7 +71,18 @@ class ExerciseLocationTextbook(ExerciseLocation):
 
     page_number: orm.Mapped[int]
     exercise_number: orm.Mapped[str]
-    removed_from_textbook: orm.Mapped[bool]
+    marked_as_removed: orm.Mapped[bool] = orm.mapped_column("removed_from_textbook")
+
+    @property
+    def effectively_removed(self) -> bool:
+        if self.marked_as_removed:
+            return True
+        if isinstance(self.exercise, adaptation.AdaptableExercise):
+            assert isinstance(self.exercise.created, extraction.ExerciseCreationByPageExtraction)
+            assert isinstance(self.exercise.created.page_extraction.created, PageExtractionCreationByTextbook)
+            return self.exercise.created.page_extraction.created.effectively_removed
+        else:
+            return False
 
 
 class TextbookExtractionBatch(OrmBase, CreatedByUserMixin):
@@ -86,7 +95,7 @@ class TextbookExtractionBatch(OrmBase, CreatedByUserMixin):
         created_by: str,
         pdf_file_range: PdfFileRange,
         textbook: Textbook,
-        removed_from_textbook: bool,
+        marked_as_removed: bool,
         first_textbook_page_number: int,
         model_for_extraction: extraction.llm.ConcreteModel,
         model_for_adaptation: adaptation.llm.ConcreteModel,
@@ -96,7 +105,7 @@ class TextbookExtractionBatch(OrmBase, CreatedByUserMixin):
         self.created_by = created_by
         self.pdf_file_range = pdf_file_range
         self.textbook = textbook
-        self.removed_from_textbook = removed_from_textbook
+        self.marked_as_removed = marked_as_removed
         self.first_textbook_page_number = first_textbook_page_number
         self.model_for_extraction = model_for_extraction
         self.model_for_adaptation = model_for_adaptation
@@ -112,7 +121,11 @@ class TextbookExtractionBatch(OrmBase, CreatedByUserMixin):
     textbook: orm.Mapped[Textbook] = orm.relationship(
         foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="extraction_batches"
     )
-    removed_from_textbook: orm.Mapped[bool]
+    marked_as_removed: orm.Mapped[bool] = orm.mapped_column("removed_from_textbook")
+
+    @property
+    def effectively_removed(self) -> bool:
+        return self.marked_as_removed
 
     first_textbook_page_number: orm.Mapped[int]
 
@@ -146,11 +159,11 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
     __mapper_args__ = {"polymorphic_identity": "by_textbook"}
 
     def __init__(
-        self, *, at: datetime.datetime, textbook_extraction_batch: TextbookExtractionBatch, removed_from_textbook: bool
+        self, *, at: datetime.datetime, textbook_extraction_batch: TextbookExtractionBatch, marked_as_removed: bool
     ) -> None:
         super().__init__(at=at)
         self.textbook_extraction_batch = textbook_extraction_batch
-        self.removed_from_textbook = removed_from_textbook
+        self.marked_as_removed = marked_as_removed
 
     id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(PageExtractionCreation.id), primary_key=True)
 
@@ -160,7 +173,11 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
         remote_side=[TextbookExtractionBatch.id],
         back_populates="page_extraction_creations",
     )
-    removed_from_textbook: orm.Mapped[bool] = orm.mapped_column(server_default="false")
+    marked_as_removed: orm.Mapped[bool] = orm.mapped_column("removed_from_textbook", server_default="false")
+
+    @property
+    def effectively_removed(self) -> bool:
+        return self.marked_as_removed or self.textbook_extraction_batch.effectively_removed
 
 
 annotate_new_tables("textbooks")

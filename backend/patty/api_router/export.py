@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import zipfile
 
 import fastapi
 import sqlalchemy as sql
@@ -18,7 +19,6 @@ from .. import classification
 from .. import database_utils
 from .. import exercises
 from .. import external_exercises
-from .. import extraction
 from .. import sandbox
 from .. import file_storage
 from .. import textbooks
@@ -132,6 +132,13 @@ def export_extraction_batch_adapted_exercises_json(
     )
 
 
+@router.get("/sandbox-extraction-batch-{id}-adapted-exercises.zip")
+def export_extraction_batch_adapted_exercises_zip(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.StreamingResponse:
+    return export_batch_adapted_exercises_zip("extraction", id, get_extraction_batch_adaptations(session, id), download)
+
+
 def get_extraction_batch_adaptations(
     session: database_utils.Session, id: str
 ) -> Iterable[adaptation.Adaptation | None]:
@@ -171,6 +178,15 @@ def export_classification_batch_adapted_exercises_json(
     )
 
 
+@router.get("/sandbox-classification-batch-{id}-adapted-exercises.zip")
+def export_classification_batch_adapted_exercises_zip(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.StreamingResponse:
+    return export_batch_adapted_exercises_zip(
+        "classification", id, get_classification_batch_adaptations(session, id), download
+    )
+
+
 def get_classification_batch_adaptations(
     session: database_utils.Session, id: str
 ) -> Iterable[adaptation.Adaptation | None]:
@@ -196,6 +212,13 @@ def export_adaptation_batch_adapted_exercises_json(
     return export_batch_adapted_exercises_json(
         "adaptation", id, get_adaptation_batch_adaptations(session, id), download
     )
+
+
+@router.get("/sandbox-adaptation-batch-{id}-adapted-exercises.zip")
+def export_adaptation_batch_adapted_exercises_zip(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.StreamingResponse:
+    return export_batch_adapted_exercises_zip("adaptation", id, get_adaptation_batch_adaptations(session, id), download)
 
 
 def get_adaptation_batch_adaptations(
@@ -253,6 +276,37 @@ def export_batch_adapted_exercises_json(
     )
 
 
+def export_batch_adapted_exercises_zip(
+    kind: Literal["extraction", "classification", "adaptation"],
+    id: str,
+    adaptations: Iterable[adaptation.Adaptation | None],
+    download: bool,
+) -> fastapi.responses.StreamingResponse:
+    exercises = list(
+        adapted_exercise_data
+        for adapted_exercise_data in (
+            make_adapted_exercise_data(adaptation) for adaptation in adaptations if adaptation is not None
+        )
+        if adapted_exercise_data is not None
+    )
+
+    zip_bytes = io.BytesIO()
+    with zipfile.ZipFile(zip_bytes, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for exercise in exercises:
+            if exercise["kind"] == "adapted":
+                zip_file.writestr(
+                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"]).encode("utf-8")
+                )
+
+    zip_bytes.seek(0)
+    return fastapi.responses.StreamingResponse(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Length": str(zip_bytes.getbuffer().nbytes)}
+        | make_export_header(download, f"sandbox-{kind}-batch-{id}-adapted-exercises.zip"),
+    )
+
+
 def export_batch_classified_exercises_tsv(
     kind: Literal["extraction", "classification"],
     id: str,
@@ -306,6 +360,39 @@ export_textbook_template_file_path = os.path.join(
 def export_textbook(
     id: str, session: database_utils.SessionDependable, download: bool = True
 ) -> fastapi.responses.HTMLResponse:
+    data = get_textbook_data(id, session)
+
+    content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
+
+    return fastapi.responses.HTMLResponse(
+        content=content, headers=make_export_header(download, f"{data['title']}.html")
+    )
+
+
+@router.get("/textbook/{id}-adapted-exercises.zip")
+def export_textbook_adapted_exercises_zip(
+    id: str, session: database_utils.SessionDependable, download: bool = True
+) -> fastapi.responses.StreamingResponse:
+    data = get_textbook_data(id, session)
+
+    zip_bytes = io.BytesIO()
+    with zipfile.ZipFile(zip_bytes, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for exercise in data["exercises"]:
+            if exercise["kind"] == "adapted":
+                zip_file.writestr(
+                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"]).encode("utf-8")
+                )
+
+    zip_bytes.seek(0)
+    return fastapi.responses.StreamingResponse(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Length": str(zip_bytes.getbuffer().nbytes)}
+        | make_export_header(download, f"{data['title']}-adapted-exercises.zip"),
+    )
+
+
+def get_textbook_data(id: str, session: database_utils.Session) -> JsonDict:
     textbook = get_by_id(session, textbooks.Textbook, id)
 
     exercises: list[JsonDict] = []
@@ -314,35 +401,21 @@ def export_textbook(
         .where(textbooks.ExerciseLocationTextbook.textbook == textbook)
         .order_by(textbooks.ExerciseLocationTextbook.id)
     ).scalars():
-        if location.removed_from_textbook:
-            continue
-        exercise = location.exercise
-        if isinstance(exercise, adaptation.AdaptableExercise):
-            assert isinstance(exercise.created, extraction.ExerciseCreationByPageExtraction)
-            page_extraction = exercise.created.page_extraction
-            assert isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook)
-            if page_extraction.created.removed_from_textbook:
-                continue
-            if page_extraction.created.textbook_extraction_batch.removed_from_textbook:
-                continue
-            if len(exercise.adaptations) != 0:
-                adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
-                if adapted_exercise_data is not None:
-                    exercises.append(adapted_exercise_data)
-        elif isinstance(exercise, external_exercises.ExternalExercise):
-            exercises.append(make_external_exercise_data(exercise))
-        else:
-            assert False
+        if not location.effectively_removed:
+            exercise = location.exercise
+            if isinstance(exercise, adaptation.AdaptableExercise):
+                if len(exercise.adaptations) != 0:
+                    adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
+                    if adapted_exercise_data is not None:
+                        exercises.append(adapted_exercise_data)
+            elif isinstance(exercise, external_exercises.ExternalExercise):
+                exercises.append(make_external_exercise_data(exercise))
+            else:
+                assert False
 
-    data = dict(
+    return dict(
         title=textbook.title,
         exercises=sorted(exercises, key=lambda ex: (ex["pageNumber"], alnum.key(ex["exerciseNumber"]))),
-    )
-
-    content = render_template(export_textbook_template_file_path, "TEXTBOOK_EXPORT_DATA", data)
-
-    return fastapi.responses.HTMLResponse(
-        content=content, headers=make_export_header(download, f"{textbook.title}.html")
     )
 
 

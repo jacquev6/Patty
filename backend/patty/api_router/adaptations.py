@@ -73,7 +73,7 @@ class ApiAdaptation(ApiModel):
     images_urls: adaptation.adapted.ImagesUrls
     adjustment_prompts: list[str]
     manual_edit: adaptation.adapted.Exercise | None
-    removed_from_textbook: bool
+    marked_as_removed: bool
 
     class InProgress(ApiModel):
         kind: Literal["inProgress"]
@@ -278,8 +278,8 @@ def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdapta
         raw_llm_conversations=exercise_adaptation.raw_llm_conversations,
         adjustment_prompts=[prompt.user_prompt for prompt in exercise_adaptation.adjustments],
         manual_edit=exercise_adaptation.manual_edit,
-        removed_from_textbook=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
-        and exercise_adaptation.exercise.location.removed_from_textbook,
+        marked_as_removed=isinstance(exercise_adaptation.exercise.location, textbooks.ExerciseLocationTextbook)
+        and exercise_adaptation.exercise.location.marked_as_removed,
         images_urls=previewable_exercise.gather_images_urls("http", exercise_adaptation.exercise),
         llm_status=llm_status,
         status=status,

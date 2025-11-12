@@ -27,16 +27,22 @@ def clean(force: bool) -> None:
         if any(
             candidate.startswith(prefix)
             for prefix in [
-                ".ruff_cache/",
                 ".mypy_cache/",
+                ".ruff_cache/",
                 "backend/",
                 "frontend/",
-                "support/dev-env/backend/home-local/",
-                "support/dev-env/backend/home-config/",
                 "support/dev-env/backend/annotated-pdf-pages/",
+                "support/dev-env/backend/exercise-images/",
+                "support/dev-env/backend/external-exercises/",
+                "support/dev-env/backend/home-config/",
+                "support/dev-env/backend/home-local/",
+                "support/dev-env/backend/pdf-files/",
                 "support/dev-env/db/backups/",
                 "support/dev-env/db/dumps/",
                 "support/dev-env/frontend/cache/",
+                "support/prod/backend/exercise-images/",
+                "support/prod/backend/external-exercises/",
+                "support/prod/backend/pdf-files/",
             ]
         ):
             remove = True

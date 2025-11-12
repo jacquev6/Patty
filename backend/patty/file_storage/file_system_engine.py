@@ -92,7 +92,8 @@ class FileSystemStorageEngine:
     def delete_all(self) -> None:
         assert "support/dev-env" in self.prefix  # Avoid accidental use outside the development environment
         for filename in os.listdir(self.prefix):
-            os.remove(os.path.join(self.prefix, filename))
+            if filename != ".gitignore":
+                os.remove(os.path.join(self.prefix, filename))
 
     def _make_path(self, key: str) -> str:
         return make_path(self.prefix, key)

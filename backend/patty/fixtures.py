@@ -718,10 +718,10 @@ class FixturesCreator:
             extraction.PdfFile(
                 created_by="Patty",
                 created_at=created_at,
-                sha256="dummy_sha256",
-                bytes_count=123456,
-                pages_count=30,
-                known_file_names=["dummy_textbook.pdf"],
+                sha256="044c5caf34cba74e1e4cb6a498485923a8dbf28b74d414155586f18236da78b4",
+                bytes_count=37223,
+                pages_count=35,
+                known_file_names=["long.pdf"],
             )
         )
         pdf_file_range = self.add(
@@ -738,7 +738,7 @@ class FixturesCreator:
                 first_textbook_page_number=40,
                 model_for_extraction=model_for_extraction,
                 model_for_adaptation=model_for_adaptation,
-                removed_from_textbook=False,
+                marked_as_removed=False,
             )
         )
 
@@ -748,7 +748,7 @@ class FixturesCreator:
         page_40_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                    at=created_at, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=10,  # Page 40 in the textbook
@@ -828,7 +828,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=40, exercise_number="4", removed_from_textbook=False
+                    textbook=textbook, page_number=40, exercise_number="4", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -845,7 +845,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=40, exercise_number="6", removed_from_textbook=False
+                    textbook=textbook, page_number=40, exercise_number="6", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -862,7 +862,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=40, exercise_number="10", removed_from_textbook=False
+                    textbook=textbook, page_number=40, exercise_number="10", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -879,7 +879,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=40, exercise_number="8", removed_from_textbook=False
+                    textbook=textbook, page_number=40, exercise_number="8", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -993,7 +993,7 @@ class FixturesCreator:
         page_42_extraction = self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                    at=created_at, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=12,  # Page 42 in the textbook
@@ -1073,7 +1073,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=42, exercise_number="5", removed_from_textbook=False
+                    textbook=textbook, page_number=42, exercise_number="5", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -1090,7 +1090,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=42, exercise_number="6", removed_from_textbook=False
+                    textbook=textbook, page_number=42, exercise_number="6", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -1107,7 +1107,7 @@ class FixturesCreator:
             adaptation.AdaptableExercise(
                 created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_42_extraction),
                 location=textbooks.ExerciseLocationTextbook(
-                    textbook=textbook, page_number=42, exercise_number="Auto-dictée", removed_from_textbook=False
+                    textbook=textbook, page_number=42, exercise_number="Auto-dictée", marked_as_removed=False
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -1127,7 +1127,7 @@ class FixturesCreator:
                     textbook=textbook,
                     page_number=42,
                     exercise_number="Exo identifié par texte / 5",
-                    removed_from_textbook=False,
+                    marked_as_removed=False,
                 ),
                 full_text=textwrap.dedent(
                     """\
@@ -1271,7 +1271,7 @@ class FixturesCreator:
                 first_textbook_page_number=7,
                 model_for_extraction=model_for_extraction,
                 model_for_adaptation=model_for_adaptation,
-                removed_from_textbook=False,
+                marked_as_removed=False,
             )
         )
         extraction_settings = self.add(
@@ -1280,7 +1280,7 @@ class FixturesCreator:
         self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                    at=created_at, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=4,
@@ -1295,7 +1295,7 @@ class FixturesCreator:
         self.add(
             extraction.PageExtraction(
                 created=textbooks.PageExtractionCreationByTextbook(
-                    at=created_at, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                    at=created_at, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                 ),
                 pdf_file_range=pdf_file_range,
                 pdf_page_number=5,

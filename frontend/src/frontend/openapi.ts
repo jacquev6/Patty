@@ -737,10 +737,10 @@ export interface components {
        * @constant
        */
       kind: 'adaptable'
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Pagenumber */
       pageNumber: number | null
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
     }
     /** AdaptationApproval */
     AdaptationApproval: {
@@ -874,19 +874,19 @@ export interface components {
       input: components['schemas']['ApiInputOut']
       /** Llmstatus */
       llmStatus:
-        | components['schemas']['InProgress']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__InProgress']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
         | components['schemas']['LlmSuccess']
       manualEdit: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output'] | null
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Rawllmconversations */
       rawLlmConversations: unknown[]
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
       /** Status */
       status:
-        | components['schemas']['InProgress']
+        | components['schemas']['patty__api_router__adaptations__ApiAdaptation__InProgress']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
@@ -1137,34 +1137,6 @@ export interface components {
       /** Showoriginaltext */
       showOriginalText: boolean
     }
-    /** Error */
-    Error: {
-      /** Caughtby */
-      caughtBy: string
-      /** Codelocation */
-      codeLocation: string | null
-      /**
-       * Createdat
-       * Format: date-time
-       */
-      createdAt: string
-      /** Createdby */
-      createdBy: string | null
-      /** Githubissuenumber */
-      githubIssueNumber: number | null
-      /** Id */
-      id: string
-      /** Message */
-      message: string
-      /** Pattyversion */
-      pattyVersion: string
-      /** Url */
-      url: string
-      /** Useragent */
-      userAgent: string
-      /** Windowsize */
-      windowSize: string
-    }
     /** ExampleComponents */
     ExampleComponents: {
       /**
@@ -1270,12 +1242,12 @@ export interface components {
        * @constant
        */
       kind: 'external'
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Originalfilename */
       originalFileName: string
       /** Pagenumber */
       pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
     }
     /** ExtractionBatch */
     ExtractionBatch: {
@@ -1531,7 +1503,7 @@ export interface components {
     /** GetErrorsCaughtByFrontendResponse */
     GetErrorsCaughtByFrontendResponse: {
       /** Errors */
-      errors: components['schemas']['Error'][]
+      errors: components['schemas']['patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error'][]
     }
     /** GetExtractionBatchResponse */
     GetExtractionBatchResponse: {
@@ -1660,14 +1632,6 @@ export interface components {
        * @constant
        */
       kind: 'image'
-    }
-    /** InProgress */
-    InProgress: {
-      /**
-       * Kind
-       * @constant
-       */
-      kind: 'inProgress'
     }
     /** InstructionComponents */
     InstructionComponents: {
@@ -2179,6 +2143,8 @@ export interface components {
     Range: {
       /** Id */
       id: string
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Modelforadaptation */
       modelForAdaptation:
         | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
@@ -2197,8 +2163,6 @@ export interface components {
       pdfFileNames: string[]
       /** Pdffirstpagenumber */
       pdfFirstPageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
       /** Textbookfirstpagenumber */
       textbookFirstPageNumber: number
     }
@@ -2498,6 +2462,14 @@ export interface components {
        */
       provider: 'dummy'
     }
+    /** InProgress */
+    patty__api_router__adaptations__ApiAdaptation__InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'inProgress'
+    }
     /** Success */
     patty__api_router__adaptations__ApiAdaptation__Success: {
       adaptedExercise: components['schemas']['RootModel_Union_ExerciseV1__ExerciseV2__-Output']
@@ -2644,12 +2616,72 @@ export interface components {
     patty__api_router__textbooks__GetTextbookResponse__Range__Page: {
       /** Id */
       id: string
-      /** Inprogress */
-      inProgress: boolean
+      /** Markedasremoved */
+      markedAsRemoved: boolean
       /** Pagenumber */
       pageNumber: number
-      /** Removedfromtextbook */
-      removedFromTextbook: boolean
+      /** Status */
+      status:
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress']
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success']
+        | components['schemas']['patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error']
+    }
+    /** Error */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Error: {
+      /**
+       * Error
+       * @enum {string}
+       */
+      error: 'not-json' | 'invalid-json' | 'unknown'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+    }
+    /** InProgress */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__InProgress: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'in-progress'
+    }
+    /** Success */
+    patty__api_router__textbooks__GetTextbookResponse__Range__Page__Success: {
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+    }
+    /** Error */
+    patty__errors__api_router__GetErrorsCaughtByFrontendResponse__Error: {
+      /** Caughtby */
+      caughtBy: string
+      /** Codelocation */
+      codeLocation: string | null
+      /**
+       * Createdat
+       * Format: date-time
+       */
+      createdAt: string
+      /** Createdby */
+      createdBy: string | null
+      /** Githubissuenumber */
+      githubIssueNumber: number | null
+      /** Id */
+      id: string
+      /** Message */
+      message: string
+      /** Pattyversion */
+      pattyVersion: string
+      /** Url */
+      url: string
+      /** Useragent */
+      userAgent: string
+      /** Windowsize */
+      windowSize: string
     }
     /** Success */
     patty__extraction__assistant_responses__Success: {
@@ -2693,7 +2725,7 @@ export interface components {
        * Name
        * @enum {string}
        */
-      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises'
+      name: 'dummy-1' | 'dummy-2' | 'dummy-for-images' | 'dummy-for-textually-numbered-exercises' | 'dummy-for-errors'
       /**
        * Provider
        * @constant

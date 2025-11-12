@@ -61,6 +61,13 @@ function download() {
     <WhiteSpace />
     <button @click="download">{{ t('downloadHtml') }}</button>
   </h1>
+  <p>
+    <I18nT keypath="download">
+      <a :href="`/api/export/textbook/${textbook.id}-adapted-exercises.zip?token=${authenticationTokenStore.token}`">
+        {{ t('zipDataForAdaptedExercises') }}
+      </a>
+    </I18nT>
+  </p>
   <h2>
     {{ t('pagesWithExercises') }} <span v-if="textbook.needsRefresh" class="inProgress">{{ t('inProgress') }}</span>
   </h2>
@@ -78,7 +85,7 @@ function download() {
     <h2>{{ t('existingTextbookPdfs') }}</h2>
     <template v-for="range in textbook.ranges">
       <h3>
-        <span :class="{ removed: range.removedFromTextbook }">
+        <span :class="{ removed: range.markedAsRemoved }">
           {{
             t('pages', {
               textbookFrom: range.textbookFirstPageNumber,
@@ -89,7 +96,7 @@ function download() {
             })
           }}
         </span>
-        <template v-if="range.removedFromTextbook">
+        <template v-if="range.markedAsRemoved">
           ({{ t('removed') }})
           <button @click="removeRange(range.id, false)">{{ t('reAdd') }}</button>
         </template>
@@ -98,7 +105,7 @@ function download() {
           <button @click="removeRange(range.id, true)">{{ t('remove') }}</button>
         </template>
       </h3>
-      <template v-if="!range.removedFromTextbook">
+      <template v-if="!range.markedAsRemoved">
         <p>
           <LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="range.modelForExtraction">
             <template #provider>{{ t('modelForExtraction') }}</template></LlmModelSelector
@@ -110,7 +117,7 @@ function download() {
         <p>{{ t('extractedPagesHeader') }}</p>
         <ul class="rangePages">
           <li v-for="page in range.pages">
-            <span :class="{ removed: page.removedFromTextbook }">
+            <span :class="{ removed: page.markedAsRemoved }">
               {{ page.pageNumber }}
               <!-- <RouterLink
                 :to="{ name: 'textbook-page', params: { textbookId: textbook.id, pageNumber: page.pageNumber } }"
@@ -118,15 +125,23 @@ function download() {
                 {{ t('viewDetails') }}
               </RouterLink> -->
             </span>
-            <template v-if="page.inProgress">
+            <template v-if="page.status.kind === 'in-progress'">
               <WhiteSpace />
               <span class="inProgress">{{ t('inProgress') }}</span>
             </template>
-            <template v-else-if="page.removedFromTextbook">
+            <template v-else-if="page.markedAsRemoved">
               ({{ t('removed') }})
               <button @click="removePage(page.id, false)">{{ t('reAdd') }}</button>
             </template>
             <template v-else>
+              <template v-if="page.status.kind === 'error'">
+                <WhiteSpace />
+                <span class="error">
+                  <template v-if="page.status.error === 'invalid-json'">{{ t('invalidJson') }}</template>
+                  <template v-else-if="page.status.error === 'not-json'">{{ t('notJson') }}</template>
+                  <template v-else-if="page.status.error === 'unknown'">{{ t('unknownError') }}</template>
+                </span>
+              </template>
               <WhiteSpace />
               <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
             </template>
@@ -139,7 +154,7 @@ function download() {
   <EditTextbookFormCreateExternalExerciseForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
   <h2>{{ t('existingExternalExercises') }}</h2>
   <template v-for="externalExercise in textbook.externalExercises">
-    <h3 v-if="externalExercise.removedFromTextbook">
+    <h3 v-if="externalExercise.markedAsRemoved">
       <span class="removed">{{ externalExercise.originalFileName }}</span> ({{ t('removed') }})
       <button @click="removeExercise(externalExercise.id, false)">{{ t('reAdd') }}</button>
     </h3>
@@ -153,6 +168,10 @@ function download() {
 <style scoped>
 .removed {
   text-decoration: line-through;
+}
+
+span.error {
+  font-weight: bold;
 }
 
 span.inProgress {
@@ -178,11 +197,16 @@ en:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Download
+  download: Download {0}
+  zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   pagesWithExercises: "Pages with exercises"
   importNewPages: Import new pages (PDF)
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
   inProgress: "(in progress, will refresh when done)"
+  invalidJson: Invalid JSON
+  notJson: Not JSON
+  unknownError: Unknown error
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
   exercise: Exercise
@@ -199,11 +223,16 @@ fr:
   isbn: ISBN
   pagesCount: "{count} pages"
   downloadHtml: Télécharger
+  download: Télécharger {0}
+  zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   pagesWithExercises: "Pages avec des exercices"
   importNewPages: Importer de nouvelles pages (PDF)
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
   inProgress: "(en cours, se mettra à jour quand terminé)"
+  invalidJson: JSON invalide
+  notJson: Pas du JSON
+  unknownError: Erreur inconnue
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
   exercise: Exercice

@@ -117,6 +117,11 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       >
         {{ t('jsonDataForAdaptedExercises') }}
       </a>
+      <a
+        :href="`/api/export/sandbox-classification-batch-${classificationBatch.id}-adapted-exercises.zip?token=${authenticationTokenStore.token}`"
+      >
+        {{ t('zipDataForAdaptedExercises') }}
+      </a>
     </I18nT>
   </p>
   <details>
@@ -155,10 +160,11 @@ en:
   runAdaptationUsingModel: and model
   no: no
   submit: Submit
-  download: Download {0}, {1}, or {2}
+  download: Download {0}, {1}, {2}, or {3}
   standaloneHtml: standalone HTML
   tsvDataForClassifiedExercises: TSV data for classified exercises
   jsonDataForAdaptedExercises: JSON data for adapted exercises
+  zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   inputs: Inputs
   timing:
     summary: Click to see timing information
@@ -176,10 +182,11 @@ fr:
   runAdaptationUsingModel: et modèle
   no: non
   submit: Soumettre
-  download: Télécharger {0}, {1}, ou {2}
+  download: Télécharger {0}, {1}, {2}, ou {3}
   standaloneHtml: le HTML autonome
   tsvDataForClassifiedExercises: les données TSV des exercices classifiés
   jsonDataForAdaptedExercises: les données JSON des exercices adaptés
+  zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   inputs: Entrées
   timing:
     summary: Cliquez pour voir les informations de chronométrage

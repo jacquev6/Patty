@@ -57,6 +57,11 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           >
             {{ t('jsonDataForAdaptedExercises') }}
           </a>
+          <a
+            :href="`/api/export/sandbox-adaptation-batch-${adaptationBatch.id}-adapted-exercises.zip?token=${authenticationTokenStore.token}`"
+          >
+            {{ t('zipDataForAdaptedExercises') }}
+          </a>
         </I18nT>
       </p>
       <details>
@@ -84,9 +89,10 @@ function showDuration(timing: { start: number; end: number | null } | null): str
 en:
   createdBy: "Created by:"
   newBatchBasedOnThisOne: New batch based on this one
-  download: Download {0} or {1}
+  download: Download {0}, {1}, or {2}
   standaloneHtml: standalone HTML
   jsonDataForAdaptedExercises: JSON data for adapted exercises
+  zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   timing:
     summary: Click to see timing information
     adaptation: "Adaptation {index}:"
@@ -94,9 +100,10 @@ en:
 fr:
   createdBy: "Créé par :"
   newBatchBasedOnThisOne: Nouveau batch basé sur celui-ci
-  download: Télécharger {0} ou {1}
+  download: Télécharger {0}, {1}, ou {2}
   standaloneHtml: le HTML autonome
   jsonDataForAdaptedExercises: les données JSON des exercices adaptés
+  zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   timing:
     summary: Cliquez pour voir les informations de chronométrage
     adaptation: "Adaptation {index} :"

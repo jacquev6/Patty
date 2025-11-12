@@ -96,7 +96,7 @@ def post_textbook(
                     first_textbook_page_number=first_textbook_page,
                     model_for_extraction=req.single_pdf.model_for_extraction,
                     model_for_adaptation=req.single_pdf.model_for_adaptation,
-                    removed_from_textbook=False,
+                    marked_as_removed=False,
                 )
                 session.add(extraction_batch)
 
@@ -106,7 +106,7 @@ def post_textbook(
                     session.add(
                         extraction.PageExtraction(
                             created=textbooks.PageExtractionCreationByTextbook(
-                                at=now, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                                at=now, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                             ),
                             pdf_file_range=pdf_file_range,
                             pdf_page_number=page_number,
@@ -133,7 +133,7 @@ def post_textbook(
                 first_textbook_page_number=1 + req.single_pdf.pdf_to_textbook_page_numbers_delta,
                 model_for_extraction=req.single_pdf.model_for_extraction,
                 model_for_adaptation=req.single_pdf.model_for_adaptation,
-                removed_from_textbook=False,
+                marked_as_removed=False,
             )
             session.add(extraction_batch)
 
@@ -174,7 +174,7 @@ class GetTextbookResponse(ApiModel):
         page_number: int
         exercise_number: str
         original_file_name: str
-        removed_from_textbook: bool
+        marked_as_removed: bool
 
     external_exercises: list[ExternalExercise]
 
@@ -190,11 +190,22 @@ class GetTextbookResponse(ApiModel):
         class Page(ApiModel):
             id: str
             page_number: int
-            in_progress: bool
-            removed_from_textbook: bool
+            marked_as_removed: bool
+
+            class InProgress(ApiModel):
+                kind: Literal["in-progress"]
+
+            class Success(ApiModel):
+                kind: Literal["success"]
+
+            class Error(ApiModel):
+                kind: Literal["error"]
+                error: Literal["not-json", "invalid-json", "unknown"]
+
+            status: InProgress | Success | Error
 
         pages: list[Page]
-        removed_from_textbook: bool
+        marked_as_removed: bool
 
     ranges: list[Range]
 
@@ -221,7 +232,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                     page_number=location.page_number,
                     exercise_number=location.exercise_number,
                     original_file_name=exercise.original_file_name,
-                    removed_from_textbook=location.removed_from_textbook,
+                    marked_as_removed=location.marked_as_removed,
                 )
             )
 
@@ -239,9 +250,25 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
 
         pages = []
         for page_extraction_creation in extraction_batch.page_extraction_creations:
-            in_progress = page_extraction_creation.page_extraction.assistant_response is None
-            if in_progress:
+            status: (
+                GetTextbookResponse.Range.Page.InProgress
+                | GetTextbookResponse.Range.Page.Success
+                | GetTextbookResponse.Range.Page.Error
+            )
+            if page_extraction_creation.page_extraction.assistant_response is None:
                 needs_refresh = True
+                status = GetTextbookResponse.Range.Page.InProgress(kind="in-progress")
+            elif isinstance(
+                page_extraction_creation.page_extraction.assistant_response,
+                (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+            ):
+                status = GetTextbookResponse.Range.Page.Success(kind="success")
+            else:
+                assert page_extraction_creation.page_extraction.assistant_response.kind == "error"
+                status = GetTextbookResponse.Range.Page.Error(
+                    kind="error", error=page_extraction_creation.page_extraction.assistant_response.error
+                )
+
             page_number = (
                 extraction_batch.first_textbook_page_number
                 + page_extraction_creation.page_extraction.pdf_page_number
@@ -251,25 +278,23 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 GetTextbookResponse.Range.Page(
                     id=str(page_extraction_creation.id),
                     page_number=page_number,
-                    in_progress=in_progress,
-                    removed_from_textbook=page_extraction_creation.removed_from_textbook,
+                    status=status,
+                    marked_as_removed=page_extraction_creation.marked_as_removed,
                 )
             )
-            if not page_extraction_creation.removed_from_textbook:
+            if not page_extraction_creation.effectively_removed:
                 extracted_textbook_pages_by_pdf.setdefault(extraction_batch.pdf_file_range.pdf_file.sha256, set()).add(
                     page_number
                 )
-            if (
-                not extraction_batch.removed_from_textbook
-                and not page_extraction_creation.removed_from_textbook
-                and isinstance(
-                    page_extraction_creation.page_extraction.assistant_response,
-                    (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
-                )
-            ):
-                for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__ordered_by_id:
-                    assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
-                    if not exercise_creation.exercise.location.removed_from_textbook:
+                if (
+                    isinstance(
+                        page_extraction_creation.page_extraction.assistant_response,
+                        (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                    )
+                    and not page_extraction_creation.effectively_removed
+                ):
+                    for exercise_creation in page_extraction_creation.page_extraction.exercise_creations__ordered_by_id:
+                        assert isinstance(exercise_creation.exercise.location, textbooks.ExerciseLocationTextbook)
                         pages_with_exercises.add(page_number)
                         break
 
@@ -283,7 +308,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 model_for_extraction=extraction_batch.model_for_extraction,
                 model_for_adaptation=extraction_batch.model_for_adaptation,
                 pages=pages,
-                removed_from_textbook=extraction_batch.removed_from_textbook,
+                marked_as_removed=extraction_batch.marked_as_removed,
             )
         )
 
@@ -319,7 +344,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         pages_count=textbook.pages_count,
         pages_with_exercises=sorted(pages_with_exercises),
         external_exercises=external_exercises_,
-        ranges=ranges,
+        ranges=sorted(ranges, key=lambda r: (r.textbook_first_page_number, r.pages_count, r.id)),
         single_pdf=single_pdf,
         known_pdfs=known_pdfs,
     )
@@ -332,7 +357,7 @@ class GetTextbookPageResponse(ApiModel):
 
     class AdaptableExercise(previewable_exercise.PreviewableExercise):
         kind: Literal["adaptable"]
-        removed_from_textbook: bool
+        marked_as_removed: bool
 
     class ExternalExercise(ApiModel):
         kind: Literal["external"]
@@ -340,7 +365,7 @@ class GetTextbookPageResponse(ApiModel):
         page_number: int
         exercise_number: str
         original_file_name: str
-        removed_from_textbook: bool
+        marked_as_removed: bool
 
     exercises: list[AdaptableExercise | ExternalExercise]
 
@@ -355,7 +380,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
 
     page_extractions: list[extraction.PageExtraction] = []
     for extraction_batch in textbook.extraction_batches:
-        if extraction_batch.removed_from_textbook:
+        if extraction_batch.effectively_removed:
             continue
         if number < extraction_batch.first_textbook_page_number:
             continue
@@ -371,9 +396,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
             ),
             None,
         )
-        if page_extraction_creation is None:
-            continue
-        if page_extraction_creation.removed_from_textbook:
+        if page_extraction_creation is None or page_extraction_creation.effectively_removed:
             continue
         if page_extraction_creation.page_extraction.assistant_response is None:
             needs_refresh = True
@@ -387,9 +410,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
             assert isinstance(exercise, adaptation.AdaptableExercise)
             assert isinstance(exercise.created, extraction.ExerciseCreationByPageExtraction)
             assert isinstance(exercise.created.page_extraction.created, textbooks.PageExtractionCreationByTextbook)
-            if exercise.created.page_extraction.created.removed_from_textbook:
-                continue
-            if exercise.created.page_extraction.created.textbook_extraction_batch.removed_from_textbook:
+            if exercise.created.page_extraction.created.effectively_removed:
                 continue
 
             latest_classification = exercise.classifications[-1] if exercise.classifications else None
@@ -443,7 +464,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     images_urls=previewable_exercise.gather_images_urls("http", exercise),
                     classification_status=classification_status,
                     adaptation_status=adaptation_status,
-                    removed_from_textbook=exercise.location.removed_from_textbook,
+                    marked_as_removed=exercise.location.marked_as_removed,
                 )
             )
 
@@ -464,7 +485,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     page_number=location.page_number,
                     exercise_number=location.exercise_number,
                     original_file_name=exercise.original_file_name,
-                    removed_from_textbook=location.removed_from_textbook,
+                    marked_as_removed=location.marked_as_removed,
                 )
             )
 
@@ -525,10 +546,7 @@ def post_textbook_external_exercises(
     external_exercise = external_exercises.ExternalExercise(
         created=exercises.ExerciseCreationByUser(at=now, username=req.creator),
         location=textbooks.ExerciseLocationTextbook(
-            textbook=textbook,
-            page_number=req.page_number,
-            exercise_number=req.exercise_number,
-            removed_from_textbook=False,
+            textbook=textbook, page_number=req.page_number, exercise_number=req.exercise_number, marked_as_removed=False
         ),
         original_file_name=req.original_file_name,
     )
@@ -547,7 +565,7 @@ def put_textbook_exercises_removed(
     exercise = get_by_id(session, exercises.Exercise, exercise_id)
     assert isinstance(exercise.location, textbooks.ExerciseLocationTextbook)
     assert exercise.location.textbook == textbook
-    exercise.location.removed_from_textbook = removed
+    exercise.location.marked_as_removed = removed
     if isinstance(exercise, adaptation.AdaptableExercise):
         classification = exercise.classifications[-1] if exercise.classifications else None
         if classification is not None and classification.exercise_class is not None:
@@ -600,7 +618,7 @@ async def post_textbook_ranges(
             first_textbook_page_number=first_textbook_page,
             model_for_extraction=req.model_for_extraction,
             model_for_adaptation=req.model_for_adaptation,
-            removed_from_textbook=False,
+            marked_as_removed=False,
         )
         session.add(extraction_batch)
 
@@ -610,7 +628,7 @@ async def post_textbook_ranges(
             session.add(
                 extraction.PageExtraction(
                     created=textbooks.PageExtractionCreationByTextbook(
-                        at=now, textbook_extraction_batch=extraction_batch, removed_from_textbook=False
+                        at=now, textbook_extraction_batch=extraction_batch, marked_as_removed=False
                     ),
                     pdf_file_range=pdf_file_range,
                     pdf_page_number=page_number,
@@ -631,7 +649,7 @@ def put_textbook_ranges_removed(
     textbook = get_by_id(session, textbooks.Textbook, textbook_id)
     batch = get_by_id(session, textbooks.TextbookExtractionBatch, range_id)
     assert batch.textbook == textbook
-    batch.removed_from_textbook = removed
+    batch.marked_as_removed = removed
 
 
 @router.put("/textbooks/{textbook_id}/pages/{page_id}/removed")
@@ -641,4 +659,4 @@ def put_textbook_pages_removed(
     textbook = get_by_id(session, textbooks.Textbook, textbook_id)
     page = get_by_id(session, textbooks.PageExtractionCreationByTextbook, page_id)
     assert page.textbook_extraction_batch.textbook == textbook
-    page.removed_from_textbook = removed
+    page.marked_as_removed = removed
