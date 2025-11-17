@@ -3908,6 +3908,7 @@ en:
     '--vertical-space-between-statement-lines': 'Vertical space between lines in the statement'
     '--vertical-space-between-border-and-choices': 'Vertical space between the border and choices in a <code>"kind": "multipleChoicesInput"</code>'
     '--vertical-space-between-choices-lines': 'Vertical space between lines in the choices of a <code>"kind": "multipleChoicesInput"</code>'
+    '--clickable-padding-around-next-page-arrow': 'Vertical and horizontal space that can be clicked around the "next page" arrow'
   examples: Examples
 fr:
   spacing: Espacement et dimensions
@@ -3926,5 +3927,6 @@ fr:
     '--vertical-space-between-statement-lines': 'Espace vertical entre les lignes de l’énoncé'
     '--vertical-space-between-border-and-choices': 'Espace vertical entre le cadre et les choix dans un <code>"kind": "multipleChoicesInput"</code>'
     '--vertical-space-between-choices-lines': 'Espace vertical entre les lignes des choix dans un <code>"kind": "multipleChoicesInput"</code>'
+    '--clickable-padding-around-next-page-arrow': 'Espace vertical et horizontal cliquable autour de la flèche "page suivante"'
   examples: Exemples
 </i18n>
