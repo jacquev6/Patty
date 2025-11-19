@@ -168,15 +168,25 @@ def python_dependency_graph() -> None:
     import graphviz
 
     ignored_packages = {
-        # Imported many times, clutter the graph
+        # Packages of little interest, that decrease readability
+        # or imported many times, that clutter the graph
+        ("patty", "__init__"),
+        ("patty", "alpha_numerical_sorting"),
         ("patty", "any_json"),
         ("patty", "api_utils"),
+        ("patty", "authentication"),
+        ("patty", "data_migration"),
         ("patty", "database_utils"),
+        ("patty", "dispatching"),
+        ("patty", "errors"),
+        ("patty", "file_storage"),
+        ("patty", "fixtures"),
         ("patty", "logs"),
+        ("patty", "mailing"),
+        ("patty", "migrations"),
         ("patty", "settings"),
+        ("patty", "test_utils"),
         ("patty", "version"),
-        # Little interest, decrease readability
-        ("patty", "migrations", "versions"),
     }
 
     def make_module_path(file_name: str) -> tuple[str, ...]:

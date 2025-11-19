@@ -1,6 +1,7 @@
 import dataclasses
 import glob
 import os
+import re
 import shutil
 import subprocess
 import typing
@@ -39,6 +40,9 @@ class DevelopmentCycle:
             raise DevelopmentCycleError()
 
     def do_run(self) -> None:
+        if self.do_lint:
+            self._check_readme_literals()
+
         if self.do_backend:
             if self.do_migration:
                 exec_in_backend_container(
@@ -204,6 +208,48 @@ class DevelopmentCycle:
 
                 if e2e_failures:
                     raise DevelopmentCycleError()
+
+    def _check_readme_literals(self) -> None:
+        literal_regex = re.compile(r'`.*?`')
+
+        with open("README.md") as f:
+            for line_index, line in enumerate(f):
+                for match in literal_regex.findall(line):
+                    literal = match.strip('`')
+                    if literal == "":
+                        assert line.strip() in ["```", "```mermaid"]
+                    elif literal.startswith("./"):
+                        if literal.startswith("./dev.sh ") or literal.startswith("./prod.sh "):
+                            literal = literal.split(' ')[0]
+                        if literal.endswith("/"):
+                            assert os.path.isdir(literal), f"Line {line_index + 1}: '{literal}' is not a directory"
+                        else:
+                            assert os.path.isfile(literal), f"Line {line_index + 1}: '{literal}' is not a file"
+                    else:
+                        assert literal in [
+                            "*.cy.ts.screenshots/",
+                            "*.cy.ts",
+                            "/api/",
+                            "AWS_ACCESS_KEY_ID",
+                            "AWS_SECRET_ACCESS_KEY",
+                            "backup_database",
+                            "dev",
+                            "docker compose",
+                            "orm_models.py",
+                            "password",
+                            "PATTY_EXTERNAL_EXERCISES_URL",
+                            "PATTY_IMAGES_DETECTION_MODEL_2025_09_15_PATH",
+                            "PATTY_MISTRALAI_API_KEY",
+                            "PATTY_SMTP_*",
+                            "PATTY_SUBMISSION_DAEMON_PULSE_MONITORING_URL",
+                            "prod",
+                            "random.shuffle",
+                            "restore_database",
+                            "run_submission_daemon",
+                            "unittest",
+                            "uvicorn",
+                            "venv",
+                        ], f"Line {line_index + 1}: '{literal}' is not known"
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:
