@@ -295,7 +295,7 @@ def export_batch_adapted_exercises_zip(
         for exercise in exercises:
             if exercise["kind"] == "adapted":
                 zip_file.writestr(
-                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"]).encode("utf-8")
+                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"], indent=2).encode("utf-8")
                 )
 
     zip_bytes.seek(0)
@@ -380,7 +380,7 @@ def export_textbook_adapted_exercises_zip(
         for exercise in data["exercises"]:
             if exercise["kind"] == "adapted":
                 zip_file.writestr(
-                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"]).encode("utf-8")
+                    f"{exercise['exerciseId']}.json", json.dumps(exercise["adaptedExercise"], indent=2).encode("utf-8")
                 )
 
     zip_bytes.seek(0)

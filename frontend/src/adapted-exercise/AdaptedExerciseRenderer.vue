@@ -123,6 +123,7 @@ export const defaultSpacingVariables = () => ({
   '--vertical-space-between-statement-lines': 3.6,
   '--vertical-space-between-border-and-choices': 1.15,
   '--vertical-space-between-choices-lines': 3.05,
+  '--clickable-padding-around-next-page-arrow': 2.0,
 })
 
 export type SpacingVariables = ReturnType<typeof defaultSpacingVariables>
@@ -773,6 +774,7 @@ p.arrow {
 }
 p.arrow img {
   cursor: pointer;
+  padding: var(--clickable-padding-around-next-page-arrow);
 }
 </style>
 

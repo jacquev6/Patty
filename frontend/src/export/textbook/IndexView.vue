@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { match, P } from 'ts-pattern'
 import { useI18n } from 'vue-i18n'
 
@@ -9,6 +9,7 @@ import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
 import VirtualEraser from './VirtualEraser.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
 import type { Data, Exercise } from './RootView.vue'
+import assert from '$/assert'
 
 const props = defineProps<{
   data: Data
@@ -17,6 +18,8 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const pageNumberFilter = ref<string>('')
+
+const pageNumberInput = useTemplateRef('pageNumberInput')
 
 type Filtered = { kind: 'nothing' } | { kind: 'noSuchPage' } | { kind: 'exercises'; exercises: Exercise[] }
 
@@ -35,12 +38,18 @@ const filtered = computed(() => {
     })
     .exhaustive()
 })
+
+onMounted(() => {
+  assert(pageNumberInput.value !== null)
+  pageNumberInput.value.$el.focus()
+})
 </script>
 
 <template>
   <p class="title">{{ data.title }}</p>
   <p>
     {{ t('pageNumberFilter') }} <wbr /><TriColoredInput
+      ref="pageNumberInput"
       :digitsOnly="true"
       v-model="pageNumberFilter"
       data-cy="page-number-filter"

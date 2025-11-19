@@ -168,15 +168,25 @@ def python_dependency_graph() -> None:
     import graphviz
 
     ignored_packages = {
-        # Imported many times, clutter the graph
+        # Packages of little interest, that decrease readability
+        # or imported many times, that clutter the graph
+        ("patty", "__init__"),
+        ("patty", "alpha_numerical_sorting"),
         ("patty", "any_json"),
         ("patty", "api_utils"),
+        ("patty", "authentication"),
+        ("patty", "data_migration"),
         ("patty", "database_utils"),
+        ("patty", "dispatching"),
+        ("patty", "errors"),
+        ("patty", "file_storage"),
+        ("patty", "fixtures"),
         ("patty", "logs"),
+        ("patty", "mailing"),
+        ("patty", "migrations"),
         ("patty", "settings"),
+        ("patty", "test_utils"),
         ("patty", "version"),
-        # Little interest, decrease readability
-        ("patty", "migrations", "versions"),
     }
 
     def make_module_path(file_name: str) -> tuple[str, ...]:
@@ -743,7 +753,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251106-101604.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251117-101603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

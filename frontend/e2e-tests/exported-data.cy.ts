@@ -456,6 +456,11 @@ describe('The exported data for a textbook', () => {
     cy.get('a').eq(2).should('have.text', 'Exercice 8')
   })
 
+  it('gives focus to the page number filter input', () => {
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').should('have.focus')
+  })
+
   it('has working links', () => {
     visitExport('/api/export/textbook/1.html')
     cy.get('[data-cy="page-number-filter"]').type('42')
