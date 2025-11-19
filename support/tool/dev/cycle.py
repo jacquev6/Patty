@@ -210,17 +210,17 @@ class DevelopmentCycle:
                     raise DevelopmentCycleError()
 
     def _check_readme_literals(self) -> None:
-        literal_regex = re.compile(r'`.*?`')
+        literal_regex = re.compile(r"`.*?`")
 
         with open("README.md") as f:
             for line_index, line in enumerate(f):
                 for match in literal_regex.findall(line):
-                    literal = match.strip('`')
+                    literal = match.strip("`")
                     if literal == "":
                         assert line.strip() in ["```", "```mermaid"]
                     elif literal.startswith("./"):
                         if literal.startswith("./dev.sh ") or literal.startswith("./prod.sh "):
-                            literal = literal.split(' ')[0]
+                            literal = literal.split(" ")[0]
                         if literal.endswith("/"):
                             assert os.path.isdir(literal), f"Line {line_index + 1}: '{literal}' is not a directory"
                         else:
@@ -235,6 +235,7 @@ class DevelopmentCycle:
                             "backup_database",
                             "dev",
                             "docker compose",
+                            "git",
                             "orm_models.py",
                             "password",
                             "PATTY_EXTERNAL_EXERCISES_URL",
