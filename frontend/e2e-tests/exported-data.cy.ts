@@ -118,6 +118,7 @@ describe('The autonomous HTML for a single adaptation', () => {
                             ]
                           }
                         ],
+                        "reducedLineSpacing": false,
                         "showChoicesByDefault": false
                       }
                     ]
@@ -155,6 +156,7 @@ describe('The autonomous HTML for a single adaptation', () => {
                             ]
                           }
                         ],
+                        "reducedLineSpacing": false,
                         "showChoicesByDefault": false
                       }
                     ]
