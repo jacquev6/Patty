@@ -132,6 +132,7 @@ class MultipleChoicesInput(BaseModel):
     kind: Literal["multipleChoicesInput"]
     choices: list[FormattedTextContainer]
     showChoicesByDefault: bool
+    reducedLineSpacing: bool = False
 
 
 class SelectableInput(BaseModel):

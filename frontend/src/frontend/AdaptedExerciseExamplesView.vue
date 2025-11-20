@@ -69,6 +69,110 @@ export const examples: Example[] = [
   //   },
   // },
   {
+    title: 'QCM avec interligne simple',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Choisis' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'le' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'signe' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ponctuation' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'qui' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'convient' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'à' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'chaque' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'phrase' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+          {
+            contents: [
+              { kind: 'text', text: 'Indique' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'le' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'type' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'de' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'chaque' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'phrase' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'text', text: 'a' },
+                  { kind: 'text', text: '.' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'Veux' },
+                  { kind: 'text', text: '-' },
+                  { kind: 'text', text: 'tu' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'venir' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'avec' },
+                  { kind: 'whitespace' },
+                  { kind: 'text', text: 'moi' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: '.' }] },
+                      { contents: [{ kind: 'text', text: '?' }] },
+                      { contents: [{ kind: 'text', text: '!' }] },
+                    ],
+                    showChoicesByDefault: false,
+                    reducedLineSpacing: true,
+                  },
+                ],
+              },
+              {
+                contents: [
+                  { kind: 'arrow' },
+                  { kind: 'whitespace' },
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      { contents: [{ kind: 'text', text: 'déclarative' }] },
+                      { contents: [{ kind: 'text', text: 'impérative' }] },
+                      { contents: [{ kind: 'text', text: 'interrogative' }] },
+                    ],
+                    showChoicesByDefault: false,
+                    reducedLineSpacing: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
+  {
     title: 'ExpressionEcrite avec image',
     exercise: {
       format: 'v1',

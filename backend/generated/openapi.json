@@ -3134,6 +3134,11 @@
             "title": "Kind",
             "type": "string"
           },
+          "reducedLineSpacing": {
+            "default": false,
+            "title": "Reducedlinespacing",
+            "type": "boolean"
+          },
           "showChoicesByDefault": {
             "title": "Showchoicesbydefault",
             "type": "boolean"
@@ -3159,6 +3164,11 @@
             "const": "multipleChoicesInput",
             "title": "Kind",
             "type": "string"
+          },
+          "reducedLineSpacing": {
+            "default": false,
+            "title": "Reducedlinespacing",
+            "type": "boolean"
           },
           "showChoicesByDefault": {
             "title": "Showchoicesbydefault",

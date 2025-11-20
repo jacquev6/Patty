@@ -173,6 +173,7 @@ type MultipleChoicesInputRenderable = {
     contents: PassiveRenderable[]
   }[]
   showChoicesByDefault: boolean
+  reducedLineSpacing: boolean
 }
 
 export type SelectableInputRenderable = {
@@ -353,7 +354,7 @@ function makeRenderableFromStatementComponent(
 ): AnyRenderable[] {
   return match(component)
     .returnType<AnyRenderable[]>()
-    .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault }) => [
+    .with({ kind: 'multipleChoicesInput' }, ({ choices, showChoicesByDefault, reducedLineSpacing }) => [
       {
         kind: 'multipleChoicesInput',
         path,
@@ -361,6 +362,7 @@ function makeRenderableFromStatementComponent(
           contents: contents.flatMap((x) => makeRenderableFromFormattedTextComponent(imagesUrls, x)),
         })),
         showChoicesByDefault,
+        reducedLineSpacing: reducedLineSpacing === undefined ? false : reducedLineSpacing,
       },
     ])
     .with({ kind: 'selectableInput' }, ({ boxed, colors, contents }) => [

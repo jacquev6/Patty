@@ -34,11 +34,12 @@ function render() {
         aloneOnLine: props.aloneOnLine,
       }),
     )
-    .with({ kind: 'multipleChoicesInput' }, ({ path, choices, showChoicesByDefault }) =>
+    .with({ kind: 'multipleChoicesInput' }, ({ path, choices, showChoicesByDefault, reducedLineSpacing }) =>
       h(MultipleChoicesInputRenderer, {
         path,
         choices,
         showChoicesByDefault,
+        reducedLineSpacing,
         tricolorable: props.tricolorable,
       }),
     )

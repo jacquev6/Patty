@@ -1583,6 +1583,59 @@ describe('MultipleChoicesInput', () => {
     screenshot()
   })
 
+  it('does not move next lines down', () => {
+    cy.viewport(600, 800)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Hello' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, reducedLineSpacing: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Good' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bye' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    screenshot()
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
+    screenshot()
+  })
+
   it('does not render choices over the page navigation controls', () => {
     cy.viewport(543, 780)
 

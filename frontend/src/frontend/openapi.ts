@@ -1839,6 +1839,11 @@ export interface components {
        * @constant
        */
       kind: 'multipleChoicesInput'
+      /**
+       * Reducedlinespacing
+       * @default false
+       */
+      reducedLineSpacing?: boolean
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -1850,6 +1855,11 @@ export interface components {
        * @constant
        */
       kind: 'multipleChoicesInput'
+      /**
+       * Reducedlinespacing
+       * @default false
+       */
+      reducedLineSpacing?: boolean
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }

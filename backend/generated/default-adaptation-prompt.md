@@ -86,7 +86,8 @@ Alors une adaptation possible est :
                     ]
                   }
                 ],
-                "showChoicesByDefault": false
+                "showChoicesByDefault": false,
+                "reducedLineSpacing": false
               }
             ]
           },
@@ -120,7 +121,8 @@ Alors une adaptation possible est :
                     ]
                   }
                 ],
-                "showChoicesByDefault": false
+                "showChoicesByDefault": false,
+                "reducedLineSpacing": false
               }
             ]
           }

@@ -686,12 +686,18 @@
         "showChoicesByDefault": {
           "title": "Showchoicesbydefault",
           "type": "boolean"
+        },
+        "reducedLineSpacing": {
+          "default": false,
+          "title": "Reducedlinespacing",
+          "type": "boolean"
         }
       },
       "required": [
         "kind",
         "choices",
-        "showChoicesByDefault"
+        "showChoicesByDefault",
+        "reducedLineSpacing"
       ],
       "type": "object",
       "additionalProperties": false
