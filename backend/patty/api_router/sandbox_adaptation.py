@@ -119,7 +119,7 @@ def get_available_adaptation_llm_models() -> (
 def make_adaptation_llm_response_schema(
     response_specification: adaptation.strategy.ConcreteLlmResponseSpecification,
 ) -> JsonDict:
-    return response_specification.make_response_schema()
+    return response_specification.make_response_type().model_json_schema()
 
 
 class BaseAdaptationBatch(ApiModel):

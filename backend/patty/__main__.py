@@ -360,7 +360,7 @@ def adapted_exercise_schema(
             ),
         )
     )
-    schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)
+    schema = json.dumps(exercise_type.model_json_schema(), indent=2)
     assert ('"choice"' in schema) == choice
     assert ('"freeTextInput"' in schema) == free_text_input
     assert ('"multipleChoicesInput"' in schema) == multiple_choices_input

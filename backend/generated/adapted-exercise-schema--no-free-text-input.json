@@ -11,8 +11,7 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Choice": {
       "properties": {
@@ -49,8 +48,7 @@
         "kind",
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "EditableTextInput": {
       "properties": {
@@ -86,11 +84,9 @@
       "required": [
         "kind",
         "showOriginalText",
-        "contents",
-        "increaseHorizontalSpace"
+        "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "ExampleLine": {
       "properties": {
@@ -121,8 +117,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "ExamplePage": {
       "properties": {
@@ -137,8 +132,7 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "ExerciseV1": {
       "properties": {
@@ -192,8 +186,7 @@
         "statement",
         "reference"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "ExerciseV2": {
       "properties": {
@@ -225,8 +218,7 @@
         "phases",
         "reference"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Formatted": {
       "properties": {
@@ -282,6 +274,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Highlighted"
         },
         "boxed": {
@@ -302,17 +295,9 @@
       },
       "required": [
         "kind",
-        "contents",
-        "bold",
-        "italic",
-        "underlined",
-        "highlighted",
-        "boxed",
-        "superscript",
-        "subscript"
+        "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "FormattedTextContainer": {
       "properties": {
@@ -343,8 +328,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "GeneratedPages": {
       "properties": {
@@ -355,8 +339,7 @@
       "required": [
         "generated"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Generator": {
       "properties": {
@@ -376,8 +359,7 @@
         "itemsPerPage",
         "template"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "GeneratorTemplate": {
       "properties": {
@@ -426,8 +408,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "GeneratorTemplatePlaceholder": {
       "properties": {
@@ -440,8 +421,7 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "HintLine": {
       "properties": {
@@ -472,8 +452,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "HintPage": {
       "properties": {
@@ -488,8 +467,7 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Image": {
       "properties": {
@@ -516,6 +494,7 @@
               "type": "null"
             }
           ],
+          "default": null,
           "title": "Align"
         },
         "identifier": {
@@ -526,11 +505,9 @@
       "required": [
         "kind",
         "height",
-        "align",
         "identifier"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "InstructionLine": {
       "properties": {
@@ -564,8 +541,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "InstructionPage": {
       "properties": {
@@ -580,8 +556,7 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "MultipleChoicesInput": {
       "properties": {
@@ -610,11 +585,9 @@
       "required": [
         "kind",
         "choices",
-        "showChoicesByDefault",
-        "reducedLineSpacing"
+        "showChoicesByDefault"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Phase": {
       "properties": {
@@ -659,8 +632,7 @@
         "hint",
         "statement"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "ReferenceLine": {
       "properties": {
@@ -691,8 +663,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SelectableInput": {
       "properties": {
@@ -745,8 +716,7 @@
         "colors",
         "boxed"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SelectableInputGeneratorItems": {
       "properties": {
@@ -764,8 +734,7 @@
         "kind",
         "colorIndex"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SplitWordInput": {
       "properties": {
@@ -783,8 +752,7 @@
         "kind",
         "word"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "StatementLine": {
       "properties": {
@@ -830,8 +798,7 @@
       "required": [
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "StatementPage": {
       "properties": {
@@ -846,8 +813,7 @@
       "required": [
         "lines"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "StatementPages": {
       "properties": {
@@ -862,8 +828,7 @@
       "required": [
         "pages"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "SwappableInput": {
       "properties": {
@@ -900,8 +865,7 @@
         "kind",
         "contents"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Text": {
       "properties": {
@@ -919,8 +883,7 @@
         "kind",
         "text"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     },
     "Whitespace": {
       "properties": {
@@ -933,8 +896,7 @@
       "required": [
         "kind"
       ],
-      "type": "object",
-      "additionalProperties": false
+      "type": "object"
     }
   },
   "anyOf": [

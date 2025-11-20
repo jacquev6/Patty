@@ -5,7 +5,6 @@ import pydantic
 
 from . import adapted
 from . import llm
-from ..any_json import JsonDict
 from ..api_utils import ApiModel
 
 
@@ -17,20 +16,20 @@ class JsonFromTextLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["text"]
 
     def make_response_format(self) -> llm.JsonFromTextResponseFormat[adapted.Exercise]:
-        return llm.JsonFromTextResponseFormat(response_type=adapted.Exercise)
+        return llm.JsonFromTextResponseFormat(response_type=self.make_response_type())
 
-    def make_response_schema(self) -> JsonDict:
-        return llm.make_schema(adapted.Exercise)
+    def make_response_type(self) -> type[adapted.Exercise]:
+        return adapted.Exercise
 
 
 class JsonObjectLlmResponseSpecification(JsonLlmResponseSpecification):
     formalism: Literal["json-object"]
 
     def make_response_format(self) -> llm.JsonObjectResponseFormat[adapted.Exercise]:
-        return llm.JsonObjectResponseFormat(response_type=adapted.Exercise)
+        return llm.JsonObjectResponseFormat(response_type=self.make_response_type())
 
-    def make_response_schema(self) -> JsonDict:
-        return llm.make_schema(adapted.Exercise)
+    def make_response_type(self) -> type[adapted.Exercise]:
+        return adapted.Exercise
 
 
 class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
@@ -54,9 +53,6 @@ class JsonSchemaLlmResponseSpecification(JsonLlmResponseSpecification):
                 reference=self.reference_components,
             )
         )
-
-    def make_response_schema(self) -> JsonDict:
-        return llm.make_schema(self.make_response_type())
 
 
 ConcreteLlmResponseSpecification = (

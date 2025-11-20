@@ -632,6 +632,19 @@ describe('The adaptation edition page', () => {
 
     cy.get('a:contains("Adaptation batch 1")').should('have.attr', 'href', '/adaptation-batch-1')
   })
+
+  it('allows manual JSON without optional fields', () => {
+    visit('/adaptation-1')
+    // No attribute "reducedLineSpacing" in the multiple-choices input
+    cy.get('[data-cy="manual-edition"]')
+      .clear({ force: true })
+      .type(
+        '{"format": "v1","instruction": {"lines": []},"example": null,"hint": null,"statement": {"pages": [{"lines": [{"contents": [{"kind": "multipleChoicesInput","choices": [{"contents": [{"kind": "text", "text": "alpha"}]},{"contents": [{"kind": "text", "text": "bravo"}]}],"showChoicesByDefault": false}]}]}]},"reference": null}',
+        { delay: 0, parseSpecialCharSequences: false },
+      )
+    cy.get('button[data-cy="reformat-manual-edition"]').should('be.enabled')
+    cy.get('span.tricolorable:contains("....")').should('exist')
+  })
 })
 
 function setUpAliases() {
