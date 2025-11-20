@@ -2252,4 +2252,118 @@ describe('Images', () => {
 
     screenshot()
   })
+
+  it('aligns', () => {
+    function makeProps(align: 'left' | 'center' | 'right' | undefined) {
+      return {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1' as const,
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'image' as const,
+                    height: '3em',
+                    align,
+                    identifier: 'img1',
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'image' as const,
+                        height: '3em',
+                        align,
+                        identifier: 'img1',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {
+          img1: image,
+        },
+      }
+    }
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps(undefined) })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('left') })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('center') })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('right') })
+    screenshot()
+  })
+
+  it('does not align', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      global,
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1' as const,
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'image' as const,
+                    height: '3em',
+                    align: 'right',
+                    identifier: 'img1',
+                  },
+                  { kind: 'text' as const, text: 'blah' },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'image' as const,
+                        height: '3em',
+                        align: 'right',
+                        identifier: 'img1',
+                      },
+                      { kind: 'text' as const, text: 'blah' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {
+          img1: image,
+        },
+      },
+    })
+    screenshot()
+  })
 })

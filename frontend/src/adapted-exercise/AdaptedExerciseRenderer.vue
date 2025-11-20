@@ -151,9 +151,10 @@ type FormattedRenderable = {
   subscript: boolean
 }
 
-type ImageRenderable = {
+export type ImageRenderable = {
   kind: 'image'
   height: string
+  align: 'left' | 'center' | 'right' | undefined
   url: string
 }
 
@@ -208,7 +209,6 @@ export type AnyRenderable = PassiveRenderable | ActiveRenderable
 
 type StatementLine = {
   contents: AnyRenderable[]
-  alone: boolean
 }
 
 type StatementRenderablePage = {
@@ -250,7 +250,12 @@ function makeRenderableFromFormattedTextComponent(
     .with({ kind: 'text' }, (c) => [{ kind: 'text', text: c.text }])
     .with({ kind: 'arrow' }, () => [{ kind: 'text', text: '→' }])
     .with({ kind: 'image' }, (c) => [
-      { kind: 'image', height: c.height, url: makeRenderableUrl(imagesUrls[c.identifier]) },
+      {
+        kind: 'image',
+        height: c.height,
+        align: c.align === undefined || c.align == null ? undefined : c.align,
+        url: makeRenderableUrl(imagesUrls[c.identifier]),
+      },
     ])
     .with({ kind: 'formatted' }, (c) => [
       {
@@ -494,7 +499,7 @@ function makeRenderableExercise(
               const contents = components.flatMap((c) =>
                 makeRenderableFromStatementComponent(imagesUrls, `${path}-ecrire`, c),
               )
-              statement.push({ contents, alone: false })
+              statement.push({ contents })
             }
             pages.push({ kind: 'statement', instruction, statement })
           }
@@ -508,10 +513,6 @@ function makeRenderableExercise(
           const statement: StatementLine[] = []
 
           for (const [lineIndex, { contents }] of page.lines.entries()) {
-            const alone =
-              contents.length === 1 &&
-              (contents[0].kind === 'editableTextInput' || contents[0].kind === 'freeTextInput')
-
             statement.push({
               contents: markConsecutiveSelectableInputs(
                 Array.from(contents.entries()).flatMap(([componentIndex, c]) =>
@@ -522,7 +523,6 @@ function makeRenderableExercise(
                   ),
                 ),
               ),
-              alone,
             })
             for (const [componentIndex, component] of contents.entries()) {
               if (component.kind === 'editableTextInput' && component.showOriginalText) {
@@ -535,7 +535,6 @@ function makeRenderableExercise(
                       component,
                     ),
                   ],
-                  alone: false,
                 })
               }
             }
@@ -573,6 +572,7 @@ import AloneFreeTextInput from './dispatch/AloneFreeTextInput.vue'
 import PassiveSequenceComponent from './dispatch/PassiveSequenceComponent.vue'
 import PageNavigationControls from './PageNavigationControls.vue'
 import TriColorLines from './TriColorLines.vue'
+import AloneImage from './dispatch/AloneImage.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -679,18 +679,22 @@ const spacingVariables = computed(() =>
     <div ref="container" class="container" spellcheck="false" :style="spacingVariables">
       <template v-if="page.kind === 'statement'">
         <div class="instruction">
-          <p v-for="{ contents } in page.instruction">
-            <PassiveSequenceComponent :contents :tricolorable="false" />
-          </p>
+          <template v-for="{ contents } in page.instruction">
+            <AloneImage v-if="contents.length == 1 && contents[0].kind === 'image'" :component="contents[0]" />
+            <p v-else>
+              <PassiveSequenceComponent :contents :tricolorable="false" />
+            </p>
+          </template>
         </div>
         <div ref="statement" class="statement" v-if="page.statement.length !== 0">
           <TriColorLines ref="tricolor">
-            <template v-for="{ contents, alone } in page.statement">
+            <template v-for="{ contents } in page.statement">
               <AloneFreeTextInput
-                v-if="alone && contents[0].kind === 'textInput'"
+                v-if="contents.length == 1 && contents[0].kind === 'textInput'"
                 :component="contents[0]"
                 :tricolorable="true"
               />
+              <AloneImage v-else-if="contents.length == 1 && contents[0].kind === 'image'" :component="contents[0]" />
               <p v-else>
                 <AnySequenceComponent :contents :tricolorable="true" />
               </p>

@@ -1623,6 +1623,8 @@ export interface components {
       version: 'current' | 'previous' | 'older'
     }
     Image: {
+      /** Align */
+      align?: ('left' | 'center' | 'right') | null
       /** Height */
       height: string
       /** Identifier */

@@ -88,6 +88,7 @@ class Formatted(BaseModel):
 class Image(BaseModel):
     kind: Literal["image"]
     height: str
+    align: Literal["left", "center", "right"] | None = None
     identifier: str
 
 

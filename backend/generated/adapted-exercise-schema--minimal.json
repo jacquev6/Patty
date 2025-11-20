@@ -377,6 +377,22 @@
           "title": "Height",
           "type": "string"
         },
+        "align": {
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Align"
+        },
         "identifier": {
           "title": "Identifier",
           "type": "string"
@@ -385,6 +401,7 @@
       "required": [
         "kind",
         "height",
+        "align",
         "identifier"
       ],
       "type": "object",

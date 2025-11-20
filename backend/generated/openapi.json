@@ -2651,6 +2651,22 @@
       },
       "Image": {
         "properties": {
+          "align": {
+            "anyOf": [
+              {
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Align"
+          },
           "height": {
             "title": "Height",
             "type": "string"
