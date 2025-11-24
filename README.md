@@ -292,8 +292,13 @@ Use `./dev.sh --help` to list other commands available.
 
 `./prod.sh preview` runs a production-like environment locally.
 
-Currently, *Patty* uses images owned by [@jacquev6](https://hub.docker.com/repositories/jacquev6).
-You'll need to change that and publish images elsewhere.
+Currently, *Patty* uses Docker images owned by [@jacquev6](https://hub.docker.com/repositories/jacquev6).
+For future deployments of Patty you'll need to change that and publish your new equivalent Docker images elsewhere.
+
+All current Patty Docker images are named `jacquev6/patty`, and tagged according to their role and versions:
+- `jacquev6/patty:preview-backend` and `jacquev6/patty:preview-frontend` for the preview environment, built during `./prod.sh preview`
+- `jacquev6/patty:YYYYMMDD-HHMMSS-backend` and `jacquev6/patty:YYYYMMDD-HHMMSS-frontend` for production, where `YYYYMMDD-HHMMSS` is the timestamp of the build, built and published during `./prod.sh publish` (see below)
+- (and `jacquev6/patty:dev-backend` and `jacquev6/patty:dev-frontend` for the development environment, built during `./dev.sh run`)
 
 `./prod.sh pre-warm-build-cache` pulls base Docker images and installs dependencies, keeping result in cache.
 It lets you choose when you want to run the long part of the build.
