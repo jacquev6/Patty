@@ -455,6 +455,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('li:contains("1")').should('contain.text', 'Not JSON')
     cy.get('li:contains("2")').should('contain.text', 'Invalid JSON')
     cy.get('li:contains("3")').should('contain.text', 'Unknown error')
+    screenshot('extraction-errors')
   })
 })
 
