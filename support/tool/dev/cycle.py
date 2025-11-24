@@ -226,6 +226,8 @@ class DevelopmentCycle:
                         else:
                             assert os.path.isfile(literal), f"Line {line_index + 1}: '{literal}' is not a file"
                     else:
+                        if literal.startswith("jacquev6/patty:"):
+                            literal = "jacquev6/patty"
                         assert literal in [
                             "*.cy.ts.screenshots/",
                             "*.cy.ts",
@@ -236,6 +238,7 @@ class DevelopmentCycle:
                             "dev",
                             "docker compose",
                             "git",
+                            "jacquev6/patty",
                             "orm_models.py",
                             "password",
                             "PATTY_EXTERNAL_EXERCISES_URL",
@@ -250,6 +253,7 @@ class DevelopmentCycle:
                             "unittest",
                             "uvicorn",
                             "venv",
+                            "YYYYMMDD-HHMMSS",
                         ], f"Line {line_index + 1}: '{literal}' is not known"
 
 
