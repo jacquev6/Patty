@@ -10,6 +10,7 @@ import VirtualEraser from './VirtualEraser.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
 import type { Data, Exercise } from './RootView.vue'
 import assert from '$/assert'
+import { useDisplayPreferences } from './displayPreferences'
 
 const props = defineProps<{
   data: Data
@@ -39,6 +40,15 @@ const filtered = computed(() => {
     .exhaustive()
 })
 
+const { tricolored } = useDisplayPreferences()
+
+const tricoloredProxy = computed<'true' | 'false'>({
+  get: () => (tricolored.value ? 'true' : 'false'),
+  set: (value: string) => {
+    tricolored.value = value === 'true'
+  },
+})
+
 onMounted(() => {
   assert(pageNumberInput.value !== null)
   pageNumberInput.value.$el.focus()
@@ -46,27 +56,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <p class="title">{{ data.title }}</p>
-  <p>
-    {{ t('pageNumberFilter') }} <wbr /><TriColoredInput
-      ref="pageNumberInput"
-      :digitsOnly="true"
-      v-model="pageNumberFilter"
-      data-cy="page-number-filter"
-    />
-  </p>
-  <p>
-    <VirtualNumericalKeyboard />
-    <WhiteSpace />
-    <VirtualEraser />
-  </p>
+  <div class="container">
+    <p class="title">{{ data.title }}</p>
+    <p>
+      <label><input type="radio" value="false" v-model="tricoloredProxy" /> {{ t('textInBlack') }}</label>
+    </p>
+    <p>
+      <label><input type="radio" value="true" v-model="tricoloredProxy" /> {{ t('linesInColor') }}</label>
+    </p>
+    <p>
+      {{ t('pageNumberFilter') }} <wbr /><TriColoredInput
+        ref="pageNumberInput"
+        :digitsOnly="true"
+        v-model="pageNumberFilter"
+        data-cy="page-number-filter"
+      />
+    </p>
+    <p>
+      <VirtualNumericalKeyboard />
+      <WhiteSpace />
+      <VirtualEraser />
+    </p>
 
-  <template v-if="filtered.kind === 'nothing'"></template>
-  <p class="message" v-else-if="filtered.kind === 'noSuchPage'">{{ t('noSuchPage', { page: pageNumberFilter }) }}</p>
-  <template v-else-if="filtered.kind === 'exercises'">
-    <TextbookExportExercisesList :exercises="filtered.exercises" />
-  </template>
-  <template v-else>{{ ((status: never) => status)(filtered) }}</template>
+    <template v-if="filtered.kind === 'nothing'"></template>
+    <p class="message" v-else-if="filtered.kind === 'noSuchPage'">{{ t('noSuchPage', { page: pageNumberFilter }) }}</p>
+    <template v-else-if="filtered.kind === 'exercises'">
+      <TextbookExportExercisesList :exercises="filtered.exercises" />
+    </template>
+    <template v-else>{{ ((status: never) => status)(filtered) }}</template>
+  </div>
 </template>
 
 <style scoped>
@@ -76,6 +94,11 @@ onMounted(() => {
   font-size: 32px;
   word-spacing: 0.26em;
   white-space-collapse: preserve;
+}
+
+.container {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
 }
 
 .title {
@@ -92,4 +115,6 @@ onMounted(() => {
 fr:
   pageNumberFilter: 'Numéro de page :'
   noSuchPage: La page {page} n'existe pas.
+  textInBlack: "Texte en noir"
+  linesInColor: "Lignes en couleur"
 </i18n>

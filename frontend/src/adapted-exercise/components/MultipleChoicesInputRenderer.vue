@@ -24,6 +24,7 @@ const props = defineProps<{
   path: string
   choices: FormattedTextContainer[]
   showChoicesByDefault: boolean
+  reducedLineSpacing: boolean
   tricolorable: boolean
 }>()
 
@@ -156,7 +157,7 @@ watch(tricolorablesRevisionIndex, recolor, { immediate: true })
       <PassiveSequenceComponent :contents="currentChoice.contents" :tricolorable />
     </p>
     <!-- Ensure the floating choices does not cover next line -->
-    <div class="hidden choices">
+    <div v-if="!reducedLineSpacing" class="hidden choices">
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <p><span class="choice">Alpha</span></p>
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->

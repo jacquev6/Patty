@@ -7,6 +7,7 @@ import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreate
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -45,6 +46,17 @@ async function removeRange(range_id: string, removed: boolean) {
 function download() {
   window.location.href = `/api/export/textbook/${props.textbook.id}.html?token=${authenticationTokenStore.token}`
 }
+
+const retryablePages = computed(
+  () =>
+    props.textbook.ranges
+      .filter(({ markedAsRemoved }) => !markedAsRemoved)
+      .flatMap(({ pages }) => pages)
+      .filter(({ markedAsRemoved }) => !markedAsRemoved)
+      .filter(({ status }) => status.kind === 'error') as ((typeof props.textbook.ranges)[0]['pages'][0] & {
+      status: { kind: 'error' }
+    })[],
+)
 </script>
 
 <template>
@@ -69,7 +81,10 @@ function download() {
     </I18nT>
   </p>
   <h2>
-    {{ t('pagesWithExercises') }} <span v-if="textbook.needsRefresh" class="inProgress">{{ t('inProgress') }}</span>
+    {{ t('pagesWithExercises')
+    }}<template v-if="textbook.needsRefresh">
+      <span class="inProgress">{{ t('inProgress') }}</span></template
+    >
   </h2>
   <ul class="rangePages">
     <li v-for="pageNumber in textbook.pagesWithExercises">
@@ -78,6 +93,23 @@ function download() {
       </RouterLink>
     </li>
   </ul>
+  <template v-if="retryablePages.length !== 0">
+    <h2>{{ t('pagesWithErrors') }}</h2>
+    <p>{{ t('instructionsForPagesWithErrors') }}</p>
+    <ul class="rangePages">
+      <li v-for="page in retryablePages">
+        {{ page.pageNumber }}
+        <WhiteSpace />
+        <span class="error">
+          <template v-if="page.status.error === 'invalid-json'">{{ t('invalidJson') }}</template>
+          <template v-else-if="page.status.error === 'not-json'">{{ t('notJson') }}</template>
+          <template v-else-if="page.status.error === 'unknown'">{{ t('unknownError') }}</template>
+        </span>
+        <WhiteSpace />
+        <button @click="removePage(page.id, true)">{{ t('remove') }}</button>
+      </li>
+    </ul>
+  </template>
   <h2 v-if="textbook.singlePdf === null">{{ t('newTextbookPdf') }}</h2>
   <h2 v-else>{{ t('importNewPages') }}</h2>
   <EditTextbookFormAddPdfRangeForm :textbook />
@@ -200,6 +232,8 @@ en:
   download: Download {0}
   zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   pagesWithExercises: "Pages with exercises"
+  pagesWithErrors: "Pages with extraction errors"
+  instructionsForPagesWithErrors: You can try removing these pages then start the extraction again.
   importNewPages: Import new pages (PDF)
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
@@ -226,6 +260,8 @@ fr:
   download: Télécharger {0}
   zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   pagesWithExercises: "Pages avec des exercices"
+  pagesWithErrors: "Pages avec des erreurs d'extraction"
+  instructionsForPagesWithErrors: "Vous pouvez essayer d'enlever ces pages puis d'en recommencer l'extraction."
   importNewPages: Importer de nouvelles pages (PDF)
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants

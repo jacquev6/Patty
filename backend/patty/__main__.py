@@ -360,7 +360,7 @@ def adapted_exercise_schema(
             ),
         )
     )
-    schema = json.dumps(adaptation.llm.make_schema(exercise_type), indent=2)
+    schema = json.dumps(exercise_type.model_json_schema(), indent=2)
     assert ('"choice"' in schema) == choice
     assert ('"freeTextInput"' in schema) == free_text_input
     assert ('"multipleChoicesInput"' in schema) == multiple_choices_input
@@ -753,7 +753,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251117-101603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251124-081603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

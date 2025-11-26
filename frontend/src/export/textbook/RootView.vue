@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
+import { provideDisplayPreferences } from './displayPreferences'
 
 // WARNING: changing these types requires changing the export code in the backend
 export type Exercise =
@@ -27,6 +28,8 @@ export type Data = {
 }
 
 const data = JSON.parse('##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##') as Data
+
+provideDisplayPreferences()
 </script>
 
 <template>

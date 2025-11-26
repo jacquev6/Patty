@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import assert from '$/assert'
 import type { Data } from './RootView.vue'
+import { useDisplayPreferences } from './displayPreferences'
 
 const props = defineProps<{
   id: string
@@ -20,8 +21,10 @@ const exercise = computed(() => {
   assert(exercise.kind === 'adapted')
   return exercise
 })
+
+const { tricolored } = useDisplayPreferences()
 </script>
 
 <template>
-  <AdaptedExerciseRenderer :navigateUsingArrowKeys="true" v-bind="exercise" style="height: 100vh" />
+  <AdaptedExerciseRenderer :navigateUsingArrowKeys="true" v-bind="exercise" style="height: 100vh" :tricolored />
 </template>

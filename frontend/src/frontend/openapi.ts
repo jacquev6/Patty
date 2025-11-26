@@ -1623,6 +1623,8 @@ export interface components {
       version: 'current' | 'previous' | 'older'
     }
     Image: {
+      /** Align */
+      align?: ('left' | 'center' | 'right') | null
       /** Height */
       height: string
       /** Identifier */
@@ -1839,6 +1841,11 @@ export interface components {
        * @constant
        */
       kind: 'multipleChoicesInput'
+      /**
+       * Reducedlinespacing
+       * @default false
+       */
+      reducedLineSpacing?: boolean
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }
@@ -1850,6 +1857,11 @@ export interface components {
        * @constant
        */
       kind: 'multipleChoicesInput'
+      /**
+       * Reducedlinespacing
+       * @default false
+       */
+      reducedLineSpacing?: boolean
       /** Showchoicesbydefault */
       showChoicesByDefault: boolean
     }

@@ -88,6 +88,7 @@ class Formatted(BaseModel):
 class Image(BaseModel):
     kind: Literal["image"]
     height: str
+    align: Literal["left", "center", "right"] | None = None
     identifier: str
 
 
@@ -132,6 +133,7 @@ class MultipleChoicesInput(BaseModel):
     kind: Literal["multipleChoicesInput"]
     choices: list[FormattedTextContainer]
     showChoicesByDefault: bool
+    reducedLineSpacing: bool = False
 
 
 class SelectableInput(BaseModel):

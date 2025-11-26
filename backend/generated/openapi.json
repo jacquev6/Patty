@@ -2651,6 +2651,22 @@
       },
       "Image": {
         "properties": {
+          "align": {
+            "anyOf": [
+              {
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Align"
+          },
           "height": {
             "title": "Height",
             "type": "string"
@@ -3134,6 +3150,11 @@
             "title": "Kind",
             "type": "string"
           },
+          "reducedLineSpacing": {
+            "default": false,
+            "title": "Reducedlinespacing",
+            "type": "boolean"
+          },
           "showChoicesByDefault": {
             "title": "Showchoicesbydefault",
             "type": "boolean"
@@ -3159,6 +3180,11 @@
             "const": "multipleChoicesInput",
             "title": "Kind",
             "type": "string"
+          },
+          "reducedLineSpacing": {
+            "default": false,
+            "title": "Reducedlinespacing",
+            "type": "boolean"
           },
           "showChoicesByDefault": {
             "title": "Showchoicesbydefault",

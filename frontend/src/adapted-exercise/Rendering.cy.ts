@@ -1583,6 +1583,59 @@ describe('MultipleChoicesInput', () => {
     screenshot()
   })
 
+  it('does not move next lines down', () => {
+    cy.viewport(600, 800)
+
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: {
+            lines: [],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Hello' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false, reducedLineSpacing: true },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                  {
+                    contents: [
+                      { kind: 'text', text: 'Good' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bye' },
+                      { kind: 'text', text: ',' },
+                      { kind: 'whitespace' },
+                      { kind: 'multipleChoicesInput', choices, showChoicesByDefault: false },
+                      { kind: 'text', text: '!' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    screenshot()
+    cy.get('[data-cy="multipleChoicesInput"]').eq(0).click()
+    screenshot()
+  })
+
   it('does not render choices over the page navigation controls', () => {
     cy.viewport(543, 780)
 
@@ -1699,7 +1752,25 @@ describe('TriColorLines', () => {
   it('renders lines in alternating colors', () => {
     cy.viewport(180, 340)
 
-    cy.mount(TriColorLines, {
+    // Work around weird typing issue: props and slots seem incompatible; I don't want to prioritize investigation now.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p>',
+      },
+    })
+
+    screenshot()
+  })
+
+  it('renders lines in black', () => {
+    cy.viewport(180, 340)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: false },
       slots: {
         default:
           '<p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p>',
@@ -1712,10 +1783,123 @@ describe('TriColorLines', () => {
   it('warns about nested tricolorables', () => {
     cy.viewport(300, 110)
 
-    cy.mount(TriColorLines, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
       slots: {
         default: '<p><span class="tricolorable">B<span><span class="tricolorable">la</span></span>h</span></p>',
       },
+    })
+
+    screenshot()
+  })
+
+  it('renders in tricolored mode', () => {
+    cy.viewport(500, 600)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey: 'answers',
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'alpha' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bravo' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'charlie' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'delta' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'echo' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'foxtrot' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'golf' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'hotel' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'india' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'juliet' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'kilo' },
+                      { kind: 'whitespace' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    screenshot()
+  })
+
+  it('renders in black mode', () => {
+    cy.viewport(500, 600)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey: 'answers',
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'text', text: 'alpha' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'bravo' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'charlie' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'delta' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'echo' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'foxtrot' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'golf' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'hotel' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'india' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'juliett' },
+                      { kind: 'whitespace' },
+                      { kind: 'text', text: 'kilo' },
+                      { kind: 'whitespace' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+        tricolored: false,
+      },
+      global,
     })
 
     screenshot()
@@ -2197,6 +2381,120 @@ describe('Images', () => {
       global,
     })
 
+    screenshot()
+  })
+
+  it('aligns', () => {
+    function makeProps(align: 'left' | 'center' | 'right' | undefined) {
+      return {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1' as const,
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'image' as const,
+                    height: '3em',
+                    align,
+                    identifier: 'img1',
+                  },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'image' as const,
+                        height: '3em',
+                        align,
+                        identifier: 'img1',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {
+          img1: image,
+        },
+      }
+    }
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps(undefined) })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('left') })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('center') })
+    screenshot()
+
+    cy.mount(AdaptedExerciseRenderer, { global, props: makeProps('right') })
+    screenshot()
+  })
+
+  it('does not align', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      global,
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1' as const,
+          instruction: {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'image' as const,
+                    height: '3em',
+                    align: 'right',
+                    identifier: 'img1',
+                  },
+                  { kind: 'text' as const, text: 'blah' },
+                ],
+              },
+            ],
+          },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'image' as const,
+                        height: '3em',
+                        align: 'right',
+                        identifier: 'img1',
+                      },
+                      { kind: 'text' as const, text: 'blah' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {
+          img1: image,
+        },
+      },
+    })
     screenshot()
   })
 })
