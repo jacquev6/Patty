@@ -513,4 +513,32 @@ describe('The exported data for a textbook', () => {
     })
     cy.get('a:contains("JSON/ZIP data for adapted exercises")').should('exist')
   })
+
+  it('displays exercises in black or colored text depending on the setting', () => {
+    // Cypress does not support file:// URLs, so we cannot test how local storage works for autonomous HTML files.
+    // It's been tested manually.
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('label:contains("Lignes en couleur") input').should('be.checked')
+    cy.get('label:contains("Texte en noir") input').should('not.be.checked')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('a:contains("Exercice 4")').invoke('removeAttr', 'target').click()
+    cy.get('span.tricolorable').eq(0).should('have.attr', 'style', 'color: rgb(0, 0, 255);')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('label:contains("Lignes en couleur") input').should('be.checked')
+    cy.get('label:contains("Texte en noir") input').should('not.be.checked').check()
+    cy.get('label:contains("Lignes en couleur") input').should('not.be.checked')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('a:contains("Exercice 4")').invoke('removeAttr', 'target').click()
+    cy.get('span.tricolorable').eq(0).should('not.have.attr', 'style')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('label:contains("Texte en noir") input').should('be.checked')
+    cy.get('label:contains("Lignes en couleur") input').should('not.be.checked').check()
+    cy.get('label:contains("Texte en noir") input').should('not.be.checked')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('a:contains("Exercice 4")').invoke('removeAttr', 'target').click()
+    cy.get('span.tricolorable').eq(0).should('have.attr', 'style', 'color: rgb(0, 0, 255);')
+  })
 })

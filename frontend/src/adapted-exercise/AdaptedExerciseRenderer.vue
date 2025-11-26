@@ -581,8 +581,9 @@ const props = withDefaults(
     adaptedExercise: AdaptedExercise
     imagesUrls: ImagesUrls
     spacingVariables?: SpacingVariables
+    tricolored?: boolean
   }>(),
-  { studentAnswersStorageKey: null, spacingVariables: defaultSpacingVariables },
+  { studentAnswersStorageKey: null, spacingVariables: defaultSpacingVariables, tricolored: true },
 )
 
 provide('adaptedExerciseContainerDiv', useTemplateRef('container'))
@@ -687,7 +688,7 @@ const spacingVariables = computed(() =>
           </template>
         </div>
         <div ref="statement" class="statement" v-if="page.statement.length !== 0">
-          <TriColorLines ref="tricolor">
+          <TriColorLines ref="tricolor" :tricolored>
             <template v-for="{ contents } in page.statement">
               <AloneFreeTextInput
                 v-if="contents.length == 1 && contents[0].kind === 'textInput'"

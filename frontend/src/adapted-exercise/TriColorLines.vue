@@ -7,6 +7,10 @@ export const colors: [string, string, string] = ['rgb(0, 0, 255)', 'rgb(255, 0, 
 import { useElementSize } from '@vueuse/core'
 import { nextTick, onMounted, onUpdated, provide, ref, useTemplateRef, watch } from 'vue'
 
+const props = defineProps<{
+  tricolored: boolean
+}>()
+
 const container = useTemplateRef('container')
 const { width } = useElementSize(container)
 watch(width, () => nextTick(recolor))
@@ -23,39 +27,50 @@ provide('tricolorablesRevisionIndex', tricolorablesRevisionIndex)
 
 function recolor() {
   if (container.value !== null) {
+    let somethingChanged = false
+
     const tricolorables = Array.from(
       container.value.getElementsByClassName('tricolorable') as HTMLCollectionOf<HTMLElement>,
     )
 
-    type Line = { top: number; bottom: number; tricolorables: HTMLElement[] }
-    const lines: Line[] = []
+    if (props.tricolored) {
+      type Line = { top: number; bottom: number; tricolorables: HTMLElement[] }
+      const lines: Line[] = []
 
-    tricolorables.forEach((element) => {
-      const { top, bottom } = element.getBoundingClientRect()
-      const line = lines.find(
-        (line) => (line.top <= top && line.bottom >= bottom) || (line.top >= top && line.bottom <= bottom),
-      )
-      if (line) {
-        line.top = Math.min(line.top, top)
-        line.bottom = Math.max(line.bottom, bottom)
-        line.tricolorables.push(element)
-      } else {
-        lines.push({ top, bottom, tricolorables: [element] })
-      }
-    })
-
-    lines.sort((a, b) => a.top - b.top)
-
-    let somethingChanged = false
-    lines.forEach((line, i) => {
-      const color = colors[i % colors.length]
-      line.tricolorables.forEach((element) => {
-        if (element.style.color !== color) {
-          somethingChanged = true
-          element.style.color = color
+      tricolorables.forEach((element) => {
+        const { top, bottom } = element.getBoundingClientRect()
+        const line = lines.find(
+          (line) => (line.top <= top && line.bottom >= bottom) || (line.top >= top && line.bottom <= bottom),
+        )
+        if (line) {
+          line.top = Math.min(line.top, top)
+          line.bottom = Math.max(line.bottom, bottom)
+          line.tricolorables.push(element)
+        } else {
+          lines.push({ top, bottom, tricolorables: [element] })
         }
       })
-    })
+
+      lines.sort((a, b) => a.top - b.top)
+
+      lines.forEach((line, i) => {
+        const color = colors[i % colors.length]
+        line.tricolorables.forEach((element) => {
+          if (element.style.color !== color) {
+            somethingChanged = true
+            element.style.color = color
+          }
+        })
+      })
+    } else {
+      tricolorables.forEach((element) => {
+        if (element.style.color !== '') {
+          somethingChanged = true
+          element.style.color = ''
+        }
+      })
+    }
+
     if (somethingChanged) {
       tricolorablesRevisionIndex.value += 1
     }
