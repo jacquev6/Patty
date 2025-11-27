@@ -10,7 +10,15 @@ from . import textbooks
 
 
 def migrate(session: database_utils.Session) -> None:
-    pass
+    for page_extraction in session.execute(sql.select(extraction.PageExtraction)).scalars():
+        if page_extraction._assistant_response is not None:
+            response = dict(page_extraction._assistant_response)
+            if response["kind"] == "success" and "version" not in response:
+                response["version"] = "v2"
+            elif response["kind"] == "success-without-images":
+                response["kind"] = "success"
+                response["version"] = "v1"
+            page_extraction._assistant_response = response
 
 
 def validate(session: database_utils.Session) -> None:

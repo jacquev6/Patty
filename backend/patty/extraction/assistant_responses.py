@@ -2,19 +2,22 @@ from typing import Any, Literal
 
 import pydantic
 
-from .extracted import Exercise, ExerciseWithoutImages
+from .extracted import ExerciseV2, ExerciseV1
 from ..api_utils import ApiModel
 
 
-# Legacy, before #92
-class SuccessWithoutImages(ApiModel):
-    kind: Literal["success-without-images"]
-    exercises: list[ExerciseWithoutImages]
-
-
-class Success(ApiModel):
+# Legacy
+class SuccessV1(ApiModel):
     kind: Literal["success"]
-    exercises: list[Exercise]
+    version: Literal["v1"]
+    exercises: list[ExerciseV1]
+
+
+# Starting with #92
+class SuccessV2(ApiModel):
+    kind: Literal["success"]
+    version: Literal["v2"]
+    exercises: list[ExerciseV2]
 
 
 class InvalidJsonError(ApiModel):
@@ -34,7 +37,7 @@ class UnknownError(ApiModel):
     error: Literal["unknown"]
 
 
-Response = SuccessWithoutImages | Success | InvalidJsonError | NotJsonError | UnknownError
+Response = SuccessV1 | SuccessV2 | InvalidJsonError | NotJsonError | UnknownError
 
 
 def validate(obj: Any) -> Response:

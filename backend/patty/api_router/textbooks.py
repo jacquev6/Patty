@@ -260,7 +260,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 status = GetTextbookResponse.Range.Page.InProgress(kind="in-progress")
             elif isinstance(
                 page_extraction_creation.page_extraction.assistant_response,
-                (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                (extraction.assistant_responses.SuccessV1 | extraction.assistant_responses.SuccessV2),
             ):
                 status = GetTextbookResponse.Range.Page.Success(kind="success")
             else:
@@ -289,7 +289,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                 if (
                     isinstance(
                         page_extraction_creation.page_extraction.assistant_response,
-                        (extraction.assistant_responses.SuccessWithoutImages | extraction.assistant_responses.Success),
+                        (extraction.assistant_responses.SuccessV1 | extraction.assistant_responses.SuccessV2),
                     )
                     and not page_extraction_creation.effectively_removed
                 ):

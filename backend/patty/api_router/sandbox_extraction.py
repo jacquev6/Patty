@@ -21,7 +21,7 @@ router = fastapi.APIRouter()
 
 @router.get("/extraction-llm-response-schema")
 def get_extraction_llm_response_schema() -> JsonDict:
-    return extraction.extracted.ExercisesList.model_json_schema()
+    return extraction.extracted.ExercisesV2List.model_json_schema()
 
 
 @router.get("/available-extraction-llm-models")

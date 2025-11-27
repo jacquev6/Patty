@@ -25,7 +25,7 @@ class NotJsonLlmException(LlmException):
 
 
 class Model(abc.ABC, pydantic.BaseModel):
-    def extract(self, prompt: str, image: PIL.Image.Image) -> list[extracted.Exercise]:
+    def extract(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV2]:
         response = self.do_extract(prompt, image)
 
         cleaned_response = response.strip()
@@ -40,7 +40,7 @@ class Model(abc.ABC, pydantic.BaseModel):
             raise NotJsonLlmException(text=response)
 
         try:
-            return extracted.ExercisesList(parsed).root
+            return extracted.ExercisesV2List(parsed).root
         except pydantic.ValidationError:
             raise InvalidJsonLlmException(parsed=parsed)
 

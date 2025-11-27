@@ -180,7 +180,7 @@ def make_default_adaptation_prompt() -> str:
 
 
 def make_default_extraction_prompt() -> str:
-    exercise = extraction.extracted.Exercise.model_validate(
+    exercise = extraction.extracted.ExerciseV2.model_validate(
         {
             "id": "p47_ex4",
             "type": "exercice",
@@ -756,15 +756,16 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction.assistant_responses.Success(
+                assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
+                    version="v2",
                     exercises=[
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex4",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="4",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -774,12 +775,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex6",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="6",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -789,12 +790,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex10",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="10",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -804,12 +805,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex8",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="8",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1001,15 +1002,16 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction.assistant_responses.Success(
+                assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
+                    version="v2",
                     exercises=[
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex5",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="5",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1019,12 +1021,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex6",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="6",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1034,12 +1036,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_exAutoDictée",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="Auto-dictée",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1049,12 +1051,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex6Texte",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="Exo identifié par texte / 5",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,

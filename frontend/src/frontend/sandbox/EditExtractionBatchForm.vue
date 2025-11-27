@@ -210,9 +210,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           </template>
         </p>
         <template v-if="page.assistantResponse !== null">
-          <template
-            v-if="page.assistantResponse.kind === 'success' || page.assistantResponse.kind === 'success-without-images'"
-          >
+          <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="exercise in page.exercises" :key="exercise.exerciseNumber">
               <AdaptableExercisePreview
                 :headerLevel="3"

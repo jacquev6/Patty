@@ -177,7 +177,9 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                         )
                     )
 
-        page_extraction.assistant_response = assistant_responses.Success(kind="success", exercises=extracted_exercises)
+        page_extraction.assistant_response = assistant_responses.SuccessV2(
+            kind="success", version="v2", exercises=extracted_exercises
+        )
     finally:
         page_extraction.timing = timing
 

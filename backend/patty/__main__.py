@@ -374,7 +374,7 @@ def adapted_exercise_schema(
 def extracted_exercise_schema() -> None:
     from . import extraction
 
-    print(json.dumps(extraction.extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+    print(json.dumps(extraction.extracted.ExercisesV2List.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
