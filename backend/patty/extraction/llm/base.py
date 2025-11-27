@@ -25,7 +25,23 @@ class NotJsonLlmException(LlmException):
 
 
 class Model(abc.ABC, pydantic.BaseModel):
-    def extract(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV2]:
+    def extract_v2(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV2]:
+        parsed = self._extract(prompt, image)
+
+        try:
+            return extracted.ExercisesV2List(parsed).root
+        except pydantic.ValidationError:
+            raise InvalidJsonLlmException(parsed=parsed)
+
+    def extract_v3(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV3]:
+        parsed = self._extract(prompt, image)
+
+        try:
+            return extracted.ExercisesV3List(parsed).root
+        except pydantic.ValidationError:
+            raise InvalidJsonLlmException(parsed=parsed)
+
+    def _extract(self, prompt: str, image: PIL.Image.Image) -> typing.Any:
         response = self.do_extract(prompt, image)
 
         cleaned_response = response.strip()
@@ -35,14 +51,9 @@ class Model(abc.ABC, pydantic.BaseModel):
             cleaned_response = cleaned_response[:-3].strip()
 
         try:
-            parsed = json.loads(cleaned_response)
+            return json.loads(cleaned_response)
         except json.JSONDecodeError:
             raise NotJsonLlmException(text=response)
-
-        try:
-            return extracted.ExercisesV2List(parsed).root
-        except pydantic.ValidationError:
-            raise InvalidJsonLlmException(parsed=parsed)
 
     @abc.abstractmethod
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str: ...

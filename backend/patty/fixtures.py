@@ -319,7 +319,10 @@ class FixturesCreator:
     def create_extraction_seed_data(self) -> None:
         self.add(
             extraction.ExtractionSettings(
-                created_by="Patty", created_at=created_at, prompt=make_default_extraction_prompt()
+                created_by="Patty",
+                created_at=created_at,
+                prompt=make_default_extraction_prompt(),
+                output_schema_version="v2",
             )
         )
 
@@ -743,7 +746,9 @@ class FixturesCreator:
         )
 
         extraction_settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty", created_at=created_at, prompt="Blah blah blah.", output_schema_version="v2"
+            )
         )
         page_40_extraction = self.add(
             extraction.PageExtraction(
@@ -1277,7 +1282,9 @@ class FixturesCreator:
             )
         )
         extraction_settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty", created_at=created_at, prompt="Blah blah blah.", output_schema_version="v2"
+            )
         )
         self.add(
             extraction.PageExtraction(
@@ -1324,7 +1331,11 @@ class FixturesCreator:
         self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
     def create_dummy_extraction_strategy(self) -> None:
-        self.add(extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah."))
+        self.add(
+            extraction.ExtractionSettings(
+                created_by="Patty", created_at=created_at, prompt="Blah blah blah.", output_schema_version="v2"
+            )
+        )
 
     def make_adaptation_batches(self, count: int) -> None:
         model = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
@@ -1430,7 +1441,9 @@ class FixturesCreator:
             )
         )
         settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty", created_at=created_at, prompt="Blah blah blah.", output_schema_version="v2"
+            )
         )
         self.add(
             sandbox.extraction.SandboxExtractionBatch(

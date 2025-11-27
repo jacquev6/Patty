@@ -1,4 +1,5 @@
 import datetime
+import typing
 
 import fastapi
 import sqlalchemy as sql
@@ -20,8 +21,11 @@ router = fastapi.APIRouter()
 
 
 @router.get("/extraction-llm-response-schema")
-def get_extraction_llm_response_schema() -> JsonDict:
-    return extraction.extracted.ExercisesV2List.model_json_schema()
+def get_extraction_llm_response_schema(version: typing.Literal["v2", "v3"]) -> JsonDict:
+    if version == "v2":
+        return extraction.extracted.ExercisesV2List.model_json_schema()
+    else:
+        return extraction.extracted.ExercisesV3List.model_json_schema()
 
 
 @router.get("/available-extraction-llm-models")
@@ -49,6 +53,7 @@ class ApiExtractionStrategy(ApiModel):
     id: str
     model: extraction.llm.ConcreteModel
     prompt: str
+    output_schema_version: typing.Literal["v2", "v3"]
 
 
 @router.get("/latest-extraction-strategy")
@@ -63,7 +68,9 @@ def get_latest_extraction_strategy(session: database_utils.SessionDependable) ->
         model: extraction.llm.ConcreteModel = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
     else:
         model = extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash")
-    return ApiExtractionStrategy(id=str(settings.id), model=model, prompt=settings.prompt)
+    return ApiExtractionStrategy(
+        id=str(settings.id), model=model, prompt=settings.prompt, output_schema_version=settings.output_schema_version
+    )
 
 
 class PostExtractionBatchRequest(ApiModel):
@@ -98,7 +105,12 @@ def create_extraction_batch(
     session.add(pdf_file_range)
     settings = session.get(extraction.ExtractionSettings, req.strategy.id)
     if settings is None or settings.prompt != req.strategy.prompt:
-        settings = extraction.ExtractionSettings(created_by=req.creator, created_at=now, prompt=req.strategy.prompt)
+        settings = extraction.ExtractionSettings(
+            created_by=req.creator,
+            created_at=now,
+            prompt=req.strategy.prompt,
+            output_schema_version=req.strategy.output_schema_version,
+        )
         session.add(settings)
     model = req.strategy.model
     extraction_batch = sandbox.extraction.SandboxExtractionBatch(
@@ -272,7 +284,10 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         needs_refresh=needs_refresh,
         created_by=extraction_batch.created_by,
         strategy=ApiExtractionStrategy(
-            id=str(extraction_batch.settings.id), model=extraction_batch.model, prompt=extraction_batch.settings.prompt
+            id=str(extraction_batch.settings.id),
+            model=extraction_batch.model,
+            prompt=extraction_batch.settings.prompt,
+            output_schema_version=extraction_batch.settings.output_schema_version,
         ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,

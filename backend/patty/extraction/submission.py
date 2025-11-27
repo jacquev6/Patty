@@ -40,7 +40,6 @@ def submit_extractions(session: database_utils.Session, parallelism: int) -> lis
 
 
 async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
-    from .. import textbooks
     from ..sandbox import extraction as sandbox_extraction  # noqa: F401 to populate ORM metadata
 
     assert page_extraction.pdf_file_range is not None
@@ -83,12 +82,24 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         image_bytes.seek(0)
         file_storage.exercise_images.store(f"{extracted_image.id}.png", image_bytes.getvalue())
 
+    if page_extraction.settings.output_schema_version == "v2":
+        submit_extraction_v2(session, page_extraction, annotated_pdf_page_image)
+    elif page_extraction.settings.output_schema_version == "v3":
+        submit_extraction_v3(session, page_extraction, annotated_pdf_page_image)
+    else:
+        assert False
+
+
+def submit_extraction_v2(
+    session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
+) -> None:
+
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         logs.log(f"Submitting page extraction {page_extraction.id}")
         with logs.timer() as timing:
-            extracted_exercises = page_extraction.model.extract(
+            extracted_exercises = page_extraction.model.extract_v2(
                 page_extraction.settings.prompt, annotated_pdf_page_image
             )
     except InvalidJsonLlmException as error:
@@ -108,18 +119,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
     else:
         logs.log(f"Success on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
 
-        created_at = datetime.datetime.now(tz=datetime.timezone.utc)
-
-        if page_extraction.run_classification:
-            classification_chunk = classification.ClassificationChunk(
-                created=db.ClassificationChunkCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
-                model_for_adaptation=page_extraction.model_for_adaptation,
-                timing=None,
-            )
-            session.add(classification_chunk)
-        else:
-            classification_chunk = None
-
+        extracted_exercises_parts = []
         for extracted_exercise in extracted_exercises:
             instruction_hint_example_text = "\n".join(
                 filter(
@@ -139,49 +139,150 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     ],
                 )
             )
-
-            if extracted_exercise.properties.numero is not None:
-                location: exercises.ExerciseLocation
-                if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
-                    extraction_batch = page_extraction.created.textbook_extraction_batch
-                    location = textbooks.ExerciseLocationTextbook(
-                        textbook=extraction_batch.textbook,
-                        page_number=extraction_batch.first_textbook_page_number
-                        + page_extraction.pdf_page_number
-                        - extraction_batch.pdf_file_range.first_page_number,
-                        exercise_number=extracted_exercise.properties.numero,
-                        marked_as_removed=False,
-                    )
-                else:
-                    location = exercises.ExerciseLocationMaybePageAndNumber(
-                        page_number=page_extraction.pdf_page_number,
-                        exercise_number=extracted_exercise.properties.numero,
-                    )
-
-                exercise = adaptation.AdaptableExercise(
-                    created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
-                    location=location,
-                    full_text=full_text,
-                    instruction_hint_example_text=instruction_hint_example_text,
-                    statement_text=extracted_exercise.properties.enonce,
+            extracted_exercises_parts.append(
+                (
+                    extracted_exercise.properties.numero,
+                    instruction_hint_example_text,
+                    extracted_exercise.properties.enonce,
+                    full_text,
                 )
-                session.add(exercise)
+            )
 
-                if classification_chunk is not None:
-                    session.add(
-                        classification.ClassificationByChunk(
-                            exercise=exercise,
-                            at=created_at,
-                            classification_chunk=classification_chunk,
-                            exercise_class=None,
-                        )
-                    )
+        submit_follow_ups(session, page_extraction, extracted_exercises_parts)
 
         page_extraction.assistant_response = assistant_responses.SuccessV2(
             kind="success", version="v2", exercises=extracted_exercises
         )
     finally:
         page_extraction.timing = timing
+
+
+def submit_extraction_v3(
+    session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
+) -> None:
+
+    # All branches must set 'extraction.assistant_response' to avoid infinite loop
+    # (re-submitting failing extraction again and again)
+    try:
+        logs.log(f"Submitting page extraction {page_extraction.id}")
+        with logs.timer() as timing:
+            extracted_exercises = page_extraction.model.extract_v3(
+                page_extraction.settings.prompt, annotated_pdf_page_image
+            )
+    except InvalidJsonLlmException as error:
+        logs.log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        page_extraction.assistant_response = assistant_responses.InvalidJsonError(
+            kind="error", error="invalid-json", parsed=error.parsed
+        )
+    except NotJsonLlmException as error:
+        logs.log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        page_extraction.assistant_response = assistant_responses.NotJsonError(
+            kind="error", error="not-json", text=error.text
+        )
+    except Exception:
+        logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+        traceback.print_exc()
+        page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
+    else:
+        logs.log(f"Success on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+
+        extracted_exercises_parts = []
+        for extracted_exercise in extracted_exercises:
+            instruction_hint_example_text = "\n".join(
+                filter(
+                    None,
+                    [
+                        extracted_exercise.properties.instruction,
+                        (
+                            f"Catégories: {', '.join(extracted_exercise.properties.labels)}"
+                            if extracted_exercise.properties.labels
+                            else ""
+                        ),
+                        extracted_exercise.properties.hint,
+                        extracted_exercise.properties.example,
+                    ],
+                )
+            )
+            full_text = "\n".join(
+                filter(
+                    None,
+                    [
+                        instruction_hint_example_text,
+                        extracted_exercise.properties.statement,
+                        extracted_exercise.properties.references,
+                    ],
+                )
+            )
+            extracted_exercises_parts.append(
+                (
+                    extracted_exercise.properties.number,
+                    instruction_hint_example_text,
+                    extracted_exercise.properties.statement,
+                    full_text,
+                )
+            )
+
+        submit_follow_ups(session, page_extraction, extracted_exercises_parts)
+
+        page_extraction.assistant_response = assistant_responses.SuccessV3(
+            kind="success", version="v3", exercises=extracted_exercises
+        )
+    finally:
+        page_extraction.timing = timing
+
+
+def submit_follow_ups(
+    session: database_utils.Session,
+    page_extraction: db.PageExtraction,
+    extracted_exercises_parts: list[tuple[str | None, str, str | None, str]],
+) -> None:
+    from .. import textbooks
+
+    created_at = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    if page_extraction.run_classification:
+        classification_chunk = classification.ClassificationChunk(
+            created=db.ClassificationChunkCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+            model_for_adaptation=page_extraction.model_for_adaptation,
+            timing=None,
+        )
+        session.add(classification_chunk)
+    else:
+        classification_chunk = None
+
+    for number, instruction_hint_example_text, statement_text, full_text in extracted_exercises_parts:
+        if number is not None:
+            location: exercises.ExerciseLocation
+            if isinstance(page_extraction.created, textbooks.PageExtractionCreationByTextbook):
+                extraction_batch = page_extraction.created.textbook_extraction_batch
+                location = textbooks.ExerciseLocationTextbook(
+                    textbook=extraction_batch.textbook,
+                    page_number=extraction_batch.first_textbook_page_number
+                    + page_extraction.pdf_page_number
+                    - extraction_batch.pdf_file_range.first_page_number,
+                    exercise_number=number,
+                    marked_as_removed=False,
+                )
+            else:
+                location = exercises.ExerciseLocationMaybePageAndNumber(
+                    page_number=page_extraction.pdf_page_number, exercise_number=number
+                )
+
+            exercise = adaptation.AdaptableExercise(
+                created=db.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_extraction),
+                location=location,
+                full_text=full_text,
+                instruction_hint_example_text=instruction_hint_example_text,
+                statement_text=statement_text,
+            )
+            session.add(exercise)
+
+            if classification_chunk is not None:
+                session.add(
+                    classification.ClassificationByChunk(
+                        exercise=exercise, at=created_at, classification_chunk=classification_chunk, exercise_class=None
+                    )
+                )
 
 
 def pdf_page_as_image(pdf_data: bytes, page_number: int) -> PIL.Image.Image:

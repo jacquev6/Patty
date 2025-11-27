@@ -41,6 +41,14 @@ watch(
   },
 )
 
+const schema = computedAsync(async () => {
+  const response = await client.GET('/api/extraction-llm-response-schema', {
+    params: { query: { version: strategy.outputSchemaVersion } },
+  })
+  assert(response.data !== undefined)
+  return response.data
+}, {})
+
 const runClassificationAsString = ref<'yes' | 'no'>('yes')
 const runClassification = computed(() => runClassificationAsString.value === 'yes')
 
@@ -131,7 +139,7 @@ const columns = [
         />
       </p>
       <h2>{{ t('settings') }}</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
+      <AdaptedExerciseJsonSchemaDetails :schema />
       <h3>{{ t('prompt') }}</h3>
       <TextArea data-cy="prompt" v-model="strategy.prompt"></TextArea>
     </template>

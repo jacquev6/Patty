@@ -899,6 +899,11 @@ export interface components {
       id: string
       /** Model */
       model: components['schemas']['patty__extraction__llm__dummy__DummyModel'] | components['schemas']['GeminiModel']
+      /**
+       * Outputschemaversion
+       * @enum {string}
+       */
+      outputSchemaVersion: 'v2' | 'v3'
       /** Prompt */
       prompt: string
     }
@@ -1216,6 +1221,32 @@ export interface components {
       /** Phases */
       phases: components['schemas']['Phase-Input'][]
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
+    }
+    /** ExerciseV3 */
+    ExerciseV3: {
+      /** Id */
+      id?: string | null
+      /**
+       * Image Type
+       * @default none
+       * @enum {string}
+       */
+      image_type?: 'none' | 'single' | 'ordered' | 'unordered' | 'composite'
+      /**
+       * Images
+       * @default false
+       */
+      images?: boolean
+      /** @default {
+       *       "labels": []
+       *     } */
+      properties?: components['schemas']['patty__extraction__extracted__ExerciseV3__Properties']
+      /**
+       * Type
+       * @default exercise
+       * @constant
+       */
+      type?: 'exercise'
     }
     /** ExternalExercise */
     ExternalExercise: {
@@ -2110,26 +2141,6 @@ export interface components {
        */
       validUntil: string
     }
-    /** Properties */
-    Properties: {
-      /** Autre */
-      autre?: string | null
-      /** Conseil */
-      conseil?: string | null
-      /**
-       * Consignes
-       * @default []
-       */
-      consignes?: string[]
-      /** Enonce */
-      enonce?: string | null
-      /** Exemple */
-      exemple?: string | null
-      /** Numero */
-      numero?: string | null
-      /** References */
-      references?: string | null
-    }
     /** PutAdaptableExerciseClassRequest */
     PutAdaptableExerciseClassRequest: {
       /** Classname */
@@ -2372,6 +2383,21 @@ export interface components {
        */
       version: 'v2'
     }
+    /** SuccessV3 */
+    SuccessV3: {
+      /** Exercises */
+      exercises: components['schemas']['ExerciseV3'][]
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
+    }
     'SwappableInput-Input': {
       /** Contents */
       contents: (
@@ -2541,6 +2567,7 @@ export interface components {
       assistantResponse:
         | components['schemas']['SuccessV1']
         | components['schemas']['SuccessV2']
+        | components['schemas']['SuccessV3']
         | components['schemas']['InvalidJsonError']
         | components['schemas']['NotJsonError']
         | components['schemas']['UnknownError']
@@ -2667,7 +2694,7 @@ export interface components {
       /** @default {
        *       "consignes": []
        *     } */
-      properties?: components['schemas']['Properties']
+      properties?: components['schemas']['patty__extraction__extracted__ExerciseV2__Properties']
       /**
        * Type
        * @default exercice
@@ -2680,6 +2707,46 @@ export interface components {
        * @enum {string}
        */
       type_images?: 'none' | 'unique' | 'ordered' | 'unordered' | 'composite'
+    }
+    /** Properties */
+    patty__extraction__extracted__ExerciseV2__Properties: {
+      /** Autre */
+      autre?: string | null
+      /** Conseil */
+      conseil?: string | null
+      /**
+       * Consignes
+       * @default []
+       */
+      consignes?: string[]
+      /** Enonce */
+      enonce?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Numero */
+      numero?: string | null
+      /** References */
+      references?: string | null
+    }
+    /** Properties */
+    patty__extraction__extracted__ExerciseV3__Properties: {
+      /** Example */
+      example?: string | null
+      /** Hint */
+      hint?: string | null
+      /** Instruction */
+      instruction?: string | null
+      /**
+       * Labels
+       * @default []
+       */
+      labels?: string[]
+      /** Number */
+      number?: string | null
+      /** References */
+      references?: string | null
+      /** Statement */
+      statement?: string | null
     }
     /** DummyModel */
     patty__extraction__llm__dummy__DummyModel: {
@@ -3586,7 +3653,9 @@ export interface operations {
   }
   get_extraction_llm_response_schema_api_extraction_llm_response_schema_get: {
     parameters: {
-      query?: never
+      query: {
+        version: 'v2' | 'v3'
+      }
       header?: never
       path?: never
       cookie?: never
@@ -3600,6 +3669,15 @@ export interface operations {
         }
         content: {
           'application/json': Record<string, never>
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

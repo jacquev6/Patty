@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import typing
 
 from sqlalchemy import orm
 import sqlalchemy as sql
@@ -73,15 +74,32 @@ class PdfFileRange(OrmBase, CreatedByUserMixin):
 class ExtractionSettings(OrmBase, CreatedByUserMixin):
     __tablename__ = "extraction_settings"
 
-    def __init__(self, *, created_by: str, created_at: datetime.datetime, prompt: str) -> None:
+    def __init__(
+        self,
+        *,
+        created_by: str,
+        created_at: datetime.datetime,
+        prompt: str,
+        output_schema_version: typing.Literal["v2", "v3"],
+    ) -> None:
         super().__init__()
         self.created_by = created_by
         self.created_at = created_at
         self.prompt = prompt
+        self.output_schema_version = output_schema_version
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     prompt: orm.Mapped[str]
+    output_schema_version_: orm.Mapped[str] = orm.mapped_column("output_schema_version", server_default="v2")
+
+    @property
+    def output_schema_version(self) -> typing.Literal["v2", "v3"]:
+        return typing.cast(typing.Literal["v2", "v3"], self.output_schema_version_)
+
+    @output_schema_version.setter
+    def output_schema_version(self, value: typing.Literal["v2", "v3"]) -> None:
+        self.output_schema_version_ = value
 
 
 class PageExtraction(OrmBase, ModelForAdaptationMixin):

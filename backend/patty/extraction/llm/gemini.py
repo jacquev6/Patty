@@ -140,7 +140,7 @@ class GeminiModelTestCase(unittest.TestCase):
         from ...fixtures import make_default_extraction_prompt
         from ..submission import pdf_page_as_image
 
-        exercises = GeminiModel(provider="gemini", name="gemini-2.0-flash").extract(
+        exercises = GeminiModel(provider="gemini", name="gemini-2.0-flash").extract_v2(
             make_default_extraction_prompt(), pdf_page_as_image(self.pdf_data, 2)
         )
         actual_ids = tuple(exercise.id for exercise in exercises)
@@ -151,7 +151,7 @@ class GeminiModelTestCase(unittest.TestCase):
         from ...fixtures import make_default_extraction_prompt
         from ..submission import pdf_page_as_image
 
-        exercises = GeminiModel(provider="gemini", name="gemini-2.5-flash").extract(
+        exercises = GeminiModel(provider="gemini", name="gemini-2.5-flash").extract_v2(
             make_default_extraction_prompt(), pdf_page_as_image(self.pdf_data, 2)
         )
         actual_ids = tuple(exercise.id for exercise in exercises)

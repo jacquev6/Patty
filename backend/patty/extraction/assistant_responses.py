@@ -2,7 +2,7 @@ from typing import Any, Literal
 
 import pydantic
 
-from .extracted import ExerciseV2, ExerciseV1
+from .extracted import ExerciseV1, ExerciseV2, ExerciseV3
 from ..api_utils import ApiModel
 
 
@@ -18,6 +18,13 @@ class SuccessV2(ApiModel):
     kind: Literal["success"]
     version: Literal["v2"]
     exercises: list[ExerciseV2]
+
+
+# Starting with #176
+class SuccessV3(ApiModel):
+    kind: Literal["success"]
+    version: Literal["v3"]
+    exercises: list[ExerciseV3]
 
 
 class InvalidJsonError(ApiModel):
@@ -37,7 +44,7 @@ class UnknownError(ApiModel):
     error: Literal["unknown"]
 
 
-Response = SuccessV1 | SuccessV2 | InvalidJsonError | NotJsonError | UnknownError
+Response = SuccessV1 | SuccessV2 | SuccessV3 | InvalidJsonError | NotJsonError | UnknownError
 
 
 def validate(obj: Any) -> Response:

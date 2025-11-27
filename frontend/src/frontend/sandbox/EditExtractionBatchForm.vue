@@ -2,6 +2,7 @@
 import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
 import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
+import { computedAsync } from '@vueuse/core'
 
 import { useAuthenticatedClient, type ExtractionBatch } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
@@ -13,6 +14,7 @@ import MarkDown from '$/MarkDown.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
+import assert from '$/assert'
 
 const props = defineProps<{
   extractionBatch: ExtractionBatch
@@ -49,6 +51,14 @@ async function submitAdaptation() {
   emit('batch-updated')
 }
 
+const schema = computedAsync(async () => {
+  const response = await client.GET('/api/extraction-llm-response-schema', {
+    params: { query: { version: props.extractionBatch.strategy.outputSchemaVersion } },
+  })
+  assert(response.data !== undefined)
+  return response.data
+}, {})
+
 async function submitAdaptationsWithRecentSettings() {
   await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
     params: { path: { id: props.extractionBatch.id } },
@@ -79,7 +89,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       <h2>{{ t('llmModel') }}</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
       <h2>{{ t('settings') }}</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
+      <AdaptedExerciseJsonSchemaDetails :schema />
       <h3>{{ t('prompt') }}</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
     </template>

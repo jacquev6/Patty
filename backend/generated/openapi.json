@@ -648,6 +648,14 @@
             ],
             "title": "Model"
           },
+          "outputSchemaVersion": {
+            "enum": [
+              "v2",
+              "v3"
+            ],
+            "title": "Outputschemaversion",
+            "type": "string"
+          },
           "prompt": {
             "title": "Prompt",
             "type": "string"
@@ -656,7 +664,8 @@
         "required": [
           "id",
           "model",
-          "prompt"
+          "prompt",
+          "outputSchemaVersion"
         ],
         "title": "ApiExtractionStrategy",
         "type": "object"
@@ -1539,6 +1548,52 @@
           "phases",
           "reference"
         ],
+        "type": "object"
+      },
+      "ExerciseV3": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "image_type": {
+            "default": "none",
+            "enum": [
+              "none",
+              "single",
+              "ordered",
+              "unordered",
+              "composite"
+            ],
+            "title": "Image Type",
+            "type": "string"
+          },
+          "images": {
+            "default": false,
+            "title": "Images",
+            "type": "boolean"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV3__Properties",
+            "default": {
+              "labels": []
+            }
+          },
+          "type": {
+            "const": "exercise",
+            "default": "exercise",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "ExerciseV3",
         "type": "object"
       },
       "ExternalExercise": {
@@ -3906,86 +3961,6 @@
         "title": "PostTokenResponse",
         "type": "object"
       },
-      "Properties": {
-        "properties": {
-          "autre": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Autre"
-          },
-          "conseil": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Conseil"
-          },
-          "consignes": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Consignes",
-            "type": "array"
-          },
-          "enonce": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enonce"
-          },
-          "exemple": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exemple"
-          },
-          "numero": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Numero"
-          },
-          "references": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "References"
-          }
-        },
-        "title": "Properties",
-        "type": "object"
-      },
       "PutAdaptableExerciseClassRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4544,6 +4519,35 @@
         "title": "SuccessV2",
         "type": "object"
       },
+      "SuccessV3": {
+        "additionalProperties": false,
+        "properties": {
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseV3"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "exercises"
+        ],
+        "title": "SuccessV3",
+        "type": "object"
+      },
       "SwappableInput-Input": {
         "properties": {
           "contents": {
@@ -5020,6 +5024,9 @@
                 "$ref": "#/components/schemas/SuccessV2"
               },
               {
+                "$ref": "#/components/schemas/SuccessV3"
+              },
+              {
                 "$ref": "#/components/schemas/InvalidJsonError"
               },
               {
@@ -5402,7 +5409,7 @@
             "type": "boolean"
           },
           "properties": {
-            "$ref": "#/components/schemas/Properties",
+            "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV2__Properties",
             "default": {
               "consignes": []
             }
@@ -5427,6 +5434,166 @@
           }
         },
         "title": "ExerciseV2",
+        "type": "object"
+      },
+      "patty__extraction__extracted__ExerciseV2__Properties": {
+        "properties": {
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "consignes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Consignes",
+            "type": "array"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          }
+        },
+        "title": "Properties",
+        "type": "object"
+      },
+      "patty__extraction__extracted__ExerciseV3__Properties": {
+        "properties": {
+          "example": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Example"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          },
+          "labels": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "title": "Properties",
         "type": "object"
       },
       "patty__extraction__llm__dummy__DummyModel": {
@@ -6775,6 +6942,21 @@
     "/api/extraction-llm-response-schema": {
       "get": {
         "operationId": "get_extraction_llm_response_schema_api_extraction_llm_response_schema_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "v2",
+                "v3"
+              ],
+              "title": "Version",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -6786,6 +6968,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
