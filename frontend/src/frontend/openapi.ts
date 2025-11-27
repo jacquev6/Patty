@@ -895,6 +895,8 @@ export interface components {
     }
     /** ApiExtractionStrategy */
     ApiExtractionStrategy: {
+      /** Appendtextandstylestoprompt */
+      appendTextAndStylesToPrompt: boolean
       /** Id */
       id: string
       /** Model */

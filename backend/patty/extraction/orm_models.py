@@ -81,12 +81,14 @@ class ExtractionSettings(OrmBase, CreatedByUserMixin):
         created_at: datetime.datetime,
         prompt: str,
         output_schema_version: typing.Literal["v2", "v3"],
+        append_text_and_styles_to_prompt: bool,
     ) -> None:
         super().__init__()
         self.created_by = created_by
         self.created_at = created_at
         self.prompt = prompt
         self.output_schema_version = output_schema_version
+        self.append_text_and_styles_to_prompt = append_text_and_styles_to_prompt
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
@@ -100,6 +102,8 @@ class ExtractionSettings(OrmBase, CreatedByUserMixin):
     @output_schema_version.setter
     def output_schema_version(self, value: typing.Literal["v2", "v3"]) -> None:
         self.output_schema_version_ = value
+
+    append_text_and_styles_to_prompt: orm.Mapped[bool] = orm.mapped_column(server_default="false")
 
 
 class PageExtraction(OrmBase, ModelForAdaptationMixin):

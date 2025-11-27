@@ -15,4 +15,8 @@ def upgrade() -> None:
     op.add_column(
         "extraction_settings", sa.Column("output_schema_version", sa.String(), server_default="v2", nullable=False)
     )
+    op.add_column(
+        "extraction_settings",
+        sa.Column("append_text_and_styles_to_prompt", sa.Boolean(), server_default="false", nullable=False),
+    )
     # ### end Alembic commands ###

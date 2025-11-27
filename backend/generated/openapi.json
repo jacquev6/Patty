@@ -633,6 +633,10 @@
       "ApiExtractionStrategy": {
         "additionalProperties": false,
         "properties": {
+          "appendTextAndStylesToPrompt": {
+            "title": "Appendtextandstylestoprompt",
+            "type": "boolean"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -665,7 +669,8 @@
           "id",
           "model",
           "prompt",
-          "outputSchemaVersion"
+          "outputSchemaVersion",
+          "appendTextAndStylesToPrompt"
         ],
         "title": "ApiExtractionStrategy",
         "type": "object"

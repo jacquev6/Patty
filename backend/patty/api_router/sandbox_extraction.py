@@ -54,6 +54,7 @@ class ApiExtractionStrategy(ApiModel):
     model: extraction.llm.ConcreteModel
     prompt: str
     output_schema_version: typing.Literal["v2", "v3"]
+    append_text_and_styles_to_prompt: bool
 
 
 @router.get("/latest-extraction-strategy")
@@ -69,7 +70,11 @@ def get_latest_extraction_strategy(session: database_utils.SessionDependable) ->
     else:
         model = extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash")
     return ApiExtractionStrategy(
-        id=str(settings.id), model=model, prompt=settings.prompt, output_schema_version=settings.output_schema_version
+        id=str(settings.id),
+        model=model,
+        prompt=settings.prompt,
+        output_schema_version=settings.output_schema_version,
+        append_text_and_styles_to_prompt=settings.append_text_and_styles_to_prompt,
     )
 
 
@@ -110,6 +115,7 @@ def create_extraction_batch(
             created_at=now,
             prompt=req.strategy.prompt,
             output_schema_version=req.strategy.output_schema_version,
+            append_text_and_styles_to_prompt=req.strategy.append_text_and_styles_to_prompt,
         )
         session.add(settings)
     model = req.strategy.model
@@ -288,6 +294,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             model=extraction_batch.model,
             prompt=extraction_batch.settings.prompt,
             output_schema_version=extraction_batch.settings.output_schema_version,
+            append_text_and_styles_to_prompt=extraction_batch.settings.append_text_and_styles_to_prompt,
         ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,
