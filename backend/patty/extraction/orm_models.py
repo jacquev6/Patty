@@ -71,6 +71,9 @@ class PdfFileRange(OrmBase, CreatedByUserMixin):
     pdf_file: orm.Mapped[PdfFile] = orm.relationship(foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256])
 
 
+OutputSchemaVersion = typing.Literal["v2", "v3"]
+
+
 class ExtractionSettings(OrmBase, CreatedByUserMixin):
     __tablename__ = "extraction_settings"
 
@@ -80,7 +83,7 @@ class ExtractionSettings(OrmBase, CreatedByUserMixin):
         created_by: str,
         created_at: datetime.datetime,
         prompt: str,
-        output_schema_version: typing.Literal["v2", "v3"],
+        output_schema_version: OutputSchemaVersion,
         append_text_and_styles_to_prompt: bool,
     ) -> None:
         super().__init__()
@@ -96,11 +99,11 @@ class ExtractionSettings(OrmBase, CreatedByUserMixin):
     output_schema_version_: orm.Mapped[str] = orm.mapped_column("output_schema_version", server_default="v2")
 
     @property
-    def output_schema_version(self) -> typing.Literal["v2", "v3"]:
-        return typing.cast(typing.Literal["v2", "v3"], self.output_schema_version_)
+    def output_schema_version(self) -> OutputSchemaVersion:
+        return typing.cast(OutputSchemaVersion, self.output_schema_version_)
 
     @output_schema_version.setter
-    def output_schema_version(self, value: typing.Literal["v2", "v3"]) -> None:
+    def output_schema_version(self, value: OutputSchemaVersion) -> None:
         self.output_schema_version_ = value
 
     append_text_and_styles_to_prompt: orm.Mapped[bool] = orm.mapped_column(server_default="false")

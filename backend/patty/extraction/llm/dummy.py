@@ -4,7 +4,7 @@ import textwrap
 
 import PIL.Image
 
-from ..extracted import ExerciseV2
+from ..extracted import ExerciseV2, ExerciseV3
 from .base import Model
 
 
@@ -127,6 +127,54 @@ class DummyModel(Model):
 
         if special_response is not None:
             return special_response()
+        elif '"statement"' in prompt:
+            return json.dumps(
+                [
+                    ExerciseV3(
+                        id=None,
+                        type="exercise",
+                        images=False,
+                        image_type="none",
+                        properties=ExerciseV3.Properties(
+                            number="1",
+                            instruction="Recopie les deux mots de chaque phrase qui se prononcent de la même façon.",
+                            labels=[],
+                            hint=None,
+                            example=None,
+                            statement=textwrap.dedent(
+                                """\
+                                a. Il a gagné le gros lot à la kermesse des écoles.
+                                b. À la fin du film, il y a une bonne surprise.
+                                c. Il a garé sa voiture dans le parking, à droite de la nôtre.
+                                d. Il m'a invité à venir chez lui.
+                                e. Mon oncle a un vélo à vendre.
+                                """
+                            ),
+                            references=None,
+                        ),
+                    ).model_dump(),
+                    ExerciseV3(
+                        id=None,
+                        type="exercise",
+                        images=False,
+                        image_type="none",
+                        properties=ExerciseV3.Properties(
+                            number="2",
+                            instruction="Réponds par vrai ou faux.",
+                            labels=[],
+                            hint=None,
+                            example=None,
+                            statement=textwrap.dedent(
+                                """\
+                                a. Bleu est une couleur
+                                b. Un triangle a quatre côtés
+                                """
+                            ),
+                            references=None,
+                        ),
+                    ).model_dump(),
+                ]
+            )
         else:
             return json.dumps(
                 [

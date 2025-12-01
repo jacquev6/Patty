@@ -1,5 +1,4 @@
 import datetime
-import typing
 
 import fastapi
 import sqlalchemy as sql
@@ -21,10 +20,11 @@ router = fastapi.APIRouter()
 
 
 @router.get("/extraction-llm-response-schema")
-def get_extraction_llm_response_schema(version: typing.Literal["v2", "v3"]) -> JsonDict:
+def get_extraction_llm_response_schema(version: extraction.OutputSchemaVersion) -> JsonDict:
     if version == "v2":
         return extraction.extracted.ExercisesV2List.model_json_schema()
     else:
+        assert version == "v3"
         return extraction.extracted.ExercisesV3List.model_json_schema()
 
 
@@ -53,7 +53,7 @@ class ApiExtractionStrategy(ApiModel):
     id: str
     model: extraction.llm.ConcreteModel
     prompt: str
-    output_schema_version: typing.Literal["v2", "v3"]
+    output_schema_version: extraction.OutputSchemaVersion
     append_text_and_styles_to_prompt: bool
 
 

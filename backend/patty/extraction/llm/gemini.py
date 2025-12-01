@@ -137,22 +137,22 @@ class GeminiModelTestCase(unittest.TestCase):
 
     @costs_money
     def test_extract_2_0_flash(self) -> None:
-        from ...fixtures import make_default_extraction_prompt
+        from ...fixtures import make_default_extraction_prompt_v2
         from ..submission import pdf_page_as_image
 
         exercises = GeminiModel(provider="gemini", name="gemini-2.0-flash").extract_v2(
-            make_default_extraction_prompt(), pdf_page_as_image(self.pdf_data, 2)
+            make_default_extraction_prompt_v2(), pdf_page_as_image(self.pdf_data, 2)
         )
         actual_ids = tuple(exercise.id for exercise in exercises)
         self.assertIn(actual_ids, self.possible_expected_ids)
 
     @costs_money
     def test_extract_2_5_flash(self) -> None:
-        from ...fixtures import make_default_extraction_prompt
+        from ...fixtures import make_default_extraction_prompt_v2
         from ..submission import pdf_page_as_image
 
         exercises = GeminiModel(provider="gemini", name="gemini-2.5-flash").extract_v2(
-            make_default_extraction_prompt(), pdf_page_as_image(self.pdf_data, 2)
+            make_default_extraction_prompt_v2(), pdf_page_as_image(self.pdf_data, 2)
         )
         actual_ids = tuple(exercise.id for exercise in exercises)
         self.assertIn(actual_ids, self.possible_expected_ids)

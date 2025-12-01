@@ -388,7 +388,15 @@ def default_adaptation_prompt() -> None:
 def default_extraction_prompt() -> None:
     from . import fixtures
 
-    print(fixtures.make_default_extraction_prompt())
+    print("Prompt v2")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v2())
+    print()
+    print("Prompt v3")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v3())
 
 
 @main.command()

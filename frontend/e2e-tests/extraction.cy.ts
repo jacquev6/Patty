@@ -150,3 +150,20 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("The LLM caused an unknown error.")').should('exist')
   })
 })
+
+describe('The extraction batch creation page with LLM output format v3', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-adaptation', 'extraction-seed-data-v3', 'dummy-coche-exercise-classes'])
+    ignoreResizeObserverLoopError()
+    visit('/new-extraction-batch')
+  })
+
+  it('passes text and styles to the LLM', () => {
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('button:contains("Submit")', { timeout: 10000 }).should('be.enabled').click()
+    cy.location('pathname').should('eq', '/extraction-batch-1')
+    cy.get('.inProgress', { timeout: 10000 }).should('not.exist')
+  })
+})

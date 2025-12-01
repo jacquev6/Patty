@@ -83,8 +83,12 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         image_bytes.seek(0)
         file_storage.exercise_images.store(f"{extracted_image.id}.png", image_bytes.getvalue())
 
+    # For now, these two settings are tightly coupled:
+    assert (
+        page_extraction.settings.output_schema_version == "v3"
+    ) == page_extraction.settings.append_text_and_styles_to_prompt
+
     if page_extraction.settings.append_text_and_styles_to_prompt:
-        assert page_extraction.settings.output_schema_version == "v3"
         text_and_styles = extract_text_and_styles_from_pdf_page(pdf_data, page_extraction.pdf_page_number)
         if settings.DETECTED_IMAGES_SAVE_PATH is not None:
             with open(
