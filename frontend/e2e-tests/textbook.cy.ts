@@ -470,6 +470,7 @@ describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
 
   it('has adaptation pages that look like this', () => {
     cy.get('a:contains("View details")').eq(0).click()
+    cy.get('h1:contains("Adapted exercise")').should('exist')
     screenshot(`adaptation`)
   })
 
