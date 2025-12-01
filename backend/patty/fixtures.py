@@ -864,6 +864,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
                     version="v2",
@@ -1110,6 +1111,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
                     version="v2",
@@ -1404,6 +1406,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=None,
                 timing=None,
             )
@@ -1419,6 +1422,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=None,
                 timing=None,
             )

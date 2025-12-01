@@ -19,4 +19,5 @@ def upgrade() -> None:
         "extraction_settings",
         sa.Column("append_text_and_styles_to_prompt", sa.Boolean(), server_default="false", nullable=False),
     )
+    op.add_column("page_extractions", sa.Column("extracted_text_and_styles", sa.String(), nullable=True))
     # ### end Alembic commands ###

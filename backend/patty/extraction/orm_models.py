@@ -122,6 +122,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         model: llm.ConcreteModel,
         run_classification: bool,
         model_for_adaptation: adaptation.llm.ConcreteModel | None,
+        extracted_text_and_styles: str | None,
         assistant_response: assistant_responses.Response | None,
         timing: TimingData | None,
     ) -> None:
@@ -133,6 +134,7 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         self.model = model
         self.run_classification = run_classification
         self.model_for_adaptation = model_for_adaptation
+        self.extracted_text_and_styles = extracted_text_and_styles
         self.assistant_response = assistant_response
         self.timing = timing
 
@@ -162,6 +164,8 @@ class PageExtraction(OrmBase, ModelForAdaptationMixin):
         self._model = value.model_dump()
 
     run_classification: orm.Mapped[bool]
+
+    extracted_text_and_styles: orm.Mapped[str | None]
 
     _assistant_response: orm.Mapped[JsonDict | None] = orm.mapped_column("assistant_response", sql.JSON)
 

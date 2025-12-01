@@ -140,6 +140,7 @@ def create_extraction_batch(
             model=model,
             run_classification=req.run_classification,
             model_for_adaptation=req.model_for_adaptation,
+            extracted_text_and_styles=None,
             assistant_response=None,
             timing=None,
         )

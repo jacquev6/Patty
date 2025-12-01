@@ -89,21 +89,23 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
     ) == page_extraction.settings.append_text_and_styles_to_prompt
 
     if page_extraction.settings.append_text_and_styles_to_prompt:
-        text_and_styles = extract_text_and_styles_from_pdf_page(pdf_data, page_extraction.pdf_page_number)
+        page_extraction.extracted_text_and_styles = extract_text_and_styles_from_pdf_page(
+            pdf_data, page_extraction.pdf_page_number
+        )
         if settings.DETECTED_IMAGES_SAVE_PATH is not None:
             with open(
                 f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.text_and_styles.csv",
                 "w",
                 encoding="utf-8",
             ) as f:
-                f.write(text_and_styles)
+                f.write(page_extraction.extracted_text_and_styles)
     else:
-        text_and_styles = None
+        page_extraction.extracted_text_and_styles = None
 
     if page_extraction.settings.output_schema_version == "v2":
         submit_extraction_v2(session, page_extraction, annotated_pdf_page_image)
     elif page_extraction.settings.output_schema_version == "v3":
-        submit_extraction_v3(session, page_extraction, text_and_styles, annotated_pdf_page_image)
+        submit_extraction_v3(session, page_extraction, annotated_pdf_page_image)
     else:
         assert False
 
@@ -176,15 +178,12 @@ def submit_extraction_v2(
 
 
 def submit_extraction_v3(
-    session: database_utils.Session,
-    page_extraction: db.PageExtraction,
-    text_and_styles: str | None,
-    annotated_pdf_page_image: PIL.Image.Image,
+    session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
 ) -> None:
-    if text_and_styles is None:
+    if page_extraction.extracted_text_and_styles is None:
         prompt = page_extraction.settings.prompt
     else:
-        prompt = f'{page_extraction.settings.prompt}\n\n--- {{ CSV input :  "\n{text_and_styles}\n"}}'
+        prompt = f'{page_extraction.settings.prompt}\n\n--- {{ CSV input :  "\n{page_extraction.extracted_text_and_styles}\n"}}'
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)

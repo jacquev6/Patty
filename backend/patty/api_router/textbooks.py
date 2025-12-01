@@ -114,6 +114,7 @@ def post_textbook(
                             model=req.single_pdf.model_for_extraction,
                             run_classification=True,
                             model_for_adaptation=req.single_pdf.model_for_adaptation,
+                            extracted_text_and_styles=None,
                             assistant_response=None,
                             timing=None,
                         )
@@ -636,6 +637,7 @@ async def post_textbook_ranges(
                     model=req.model_for_extraction,
                     run_classification=True,
                     model_for_adaptation=req.model_for_adaptation,
+                    extracted_text_and_styles=None,
                     assistant_response=None,
                     timing=None,
                 )
