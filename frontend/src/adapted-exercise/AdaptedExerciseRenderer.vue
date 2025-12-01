@@ -599,6 +599,14 @@ const studentAnswers =
 provide('adaptedExerciseStudentAnswers', studentAnswers)
 
 const exerciseV2 = computed(() => ensureV2(props.adaptedExercise))
+watch(
+  exerciseV2,
+  () => {
+    // Reset answers when the exercise changes (only for preview mode where props.studentAnswersStorageKey === null)
+    studentAnswers.value = {}
+  },
+  { deep: true, immediate: false /* Do not reset answers on load. */ },
+)
 
 const renderableExercise = computed(() =>
   makeRenderableExercise(props.imagesUrls, exerciseV2.value, studentAnswers.value),
