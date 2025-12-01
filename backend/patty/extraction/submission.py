@@ -217,8 +217,8 @@ def submit_extraction_v3(
                         extracted_exercise.properties.instruction,
                         (
                             f"Catégories: {', '.join(extracted_exercise.properties.labels)}"
-                            if extracted_exercise.properties.labels
-                            else ""
+                            if len(extracted_exercise.properties.labels) > 0
+                            else None
                         ),
                         extracted_exercise.properties.hint,
                         extracted_exercise.properties.example,
