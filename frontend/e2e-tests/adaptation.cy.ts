@@ -647,7 +647,7 @@ describe('The adaptation edition page', () => {
     cy.get('span.tricolorable:contains("....")').should('exist')
   })
 
-  it('reproduces issue #181', () => {
+  it('does not reproduce issue #181', () => {
     visit('/adaptation-1')
 
     const exerciseBefore: AdaptedExercise = {
@@ -717,7 +717,8 @@ describe('The adaptation edition page', () => {
       .type('{selectAll}', { force: true })
       .type(JSON.stringify(exerciseAfter), { delay: 0, parseSpecialCharSequences: false, force: true })
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.wait(100)
+    cy.get('h1:contains("There was a bug")').should('not.exist')
   })
 })
 
