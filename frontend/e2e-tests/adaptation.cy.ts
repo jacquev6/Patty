@@ -1,3 +1,4 @@
+import type { AdaptedExercise } from '@/frontend/ApiClient'
 import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit } from './utils'
 
 describe('The adaptation batch creation page', () => {
@@ -644,6 +645,79 @@ describe('The adaptation edition page', () => {
       )
     cy.get('button[data-cy="reformat-manual-edition"]').should('be.enabled')
     cy.get('span.tricolorable:contains("....")').should('exist')
+  })
+
+  it('reproduces issue #181', () => {
+    visit('/adaptation-1')
+
+    const exerciseBefore: AdaptedExercise = {
+      format: 'v1',
+      instruction: {
+        lines: [],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'multipleChoicesInput',
+                    choices: [
+                      {
+                        contents: [{ kind: 'text', text: 'alpha' }],
+                      },
+                      {
+                        contents: [{ kind: 'text', text: 'bravo' }],
+                      },
+                    ],
+                    showChoicesByDefault: false,
+                    reducedLineSpacing: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    }
+
+    cy.get('[data-cy="manual-edition"]')
+      .clear({ force: true })
+      .type(JSON.stringify(exerciseBefore), { delay: 0, parseSpecialCharSequences: false, force: true })
+
+    cy.get('[data-cy="multipleChoicesInput"]').click()
+    cy.get('[data-cy="choice0"]').click()
+
+    const exerciseAfter: AdaptedExercise = {
+      format: 'v1',
+      instruction: {
+        lines: [],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [{ kind: 'freeTextInput' }],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    }
+
+    cy.get('[data-cy="manual-edition"]')
+      .type('{selectAll}', { force: true })
+      .type(JSON.stringify(exerciseAfter), { delay: 0, parseSpecialCharSequences: false, force: true })
+
+    cy.get('h1:contains("There was a bug")').should('exist')
   })
 })
 
