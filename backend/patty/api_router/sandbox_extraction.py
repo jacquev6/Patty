@@ -58,12 +58,13 @@ class ApiExtractionStrategy(ApiModel):
 
 
 @router.get("/latest-extraction-strategy")
-def get_latest_extraction_strategy(session: database_utils.SessionDependable) -> ApiExtractionStrategy:
-    settings = (
-        session.execute(sql.select(extraction.ExtractionSettings).order_by(-extraction.ExtractionSettings.id))
-        .scalars()
-        .first()
-    )
+def get_latest_extraction_strategy(
+    session: database_utils.SessionDependable, version: extraction.OutputSchemaVersion | None = None
+) -> ApiExtractionStrategy:
+    query = sql.select(extraction.ExtractionSettings)
+    if version is not None:
+        query = query.where(extraction.ExtractionSettings.output_schema_version_ == version)
+    settings = session.execute(query.order_by(-extraction.ExtractionSettings.id)).scalars().first()
     assert settings is not None
     if PATTY_VERSION == "dev":
         model: extraction.llm.ConcreteModel = extraction.llm.DummyModel(provider="dummy", name="dummy-1")

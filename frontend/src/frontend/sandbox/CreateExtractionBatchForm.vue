@@ -40,6 +40,17 @@ watch(
     Object.assign(strategy, deepCopy(newValue))
   },
 )
+watch(
+  () => strategy.outputSchemaVersion,
+  async () => {
+    const response = await client.GET('/api/latest-extraction-strategy', {
+      params: { query: { version: strategy.outputSchemaVersion } },
+    })
+    if (response.data !== undefined) {
+      Object.assign(strategy, deepCopy(response.data))
+    }
+  },
+)
 
 const schema = computedAsync(async () => {
   const response = await client.GET('/api/extraction-llm-response-schema', {
@@ -139,6 +150,18 @@ const columns = [
         />
       </p>
       <h2>{{ t('settings') }}</h2>
+      <p>
+        <label>
+          {{ t('outputSchemaVersion') }}
+          <select v-model="strategy.outputSchemaVersion">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <option value="v2">v2</option>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <option value="v3">v3</option>
+          </select>
+        </label>
+        {{ t(`outputSchemaVersionDescriptions.${strategy.outputSchemaVersion}`) }}
+      </p>
       <AdaptedExerciseJsonSchemaDetails :schema />
       <h3>{{ t('prompt') }}</h3>
       <TextArea data-cy="prompt" v-model="strategy.prompt"></TextArea>
@@ -220,6 +243,10 @@ en:
   strategy: Strategy
   llmModel: LLM model
   settings: Settings
+  outputSchemaVersion: "Output schema:"
+  outputSchemaVersionDescriptions:
+    v2: "fields in French (e.g. 'consignes', 'autre'), text and styles ignored"
+    v3: "fields in English (e.g. 'instruction', 'labels'), text and styles extracted and added to prompt"
   prompt: Prompt
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
@@ -241,6 +268,10 @@ fr:
   llmModel: Modèle LLM
   settings: Paramètres
   prompt: Invite
+  outputSchemaVersion: "Schéma de sortie :"
+  outputSchemaVersionDescriptions:
+    v2: "champs en français (e.g. 'consignes', 'autre'), texte et styles ignorés"
+    v3: "champs en anglais (e.g. 'instruction', 'labels'), texte et styles extraits et ajoutés à l'invite"
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
   runClassificationUsing: "avec {0}, fourni par {1} par e-mail le {2}"

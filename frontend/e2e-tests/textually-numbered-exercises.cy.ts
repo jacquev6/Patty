@@ -64,7 +64,7 @@ describe('Extraction batches', () => {
   it('handle textually-numbered exercises', () => {
     visit('/new-extraction-batch')
     cy.get('select').eq(2).select('dummy-for-textually-numbered-exercises')
-    cy.get('select').eq(3).select('no')
+    cy.get('select').eq(4).select('no')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
     cy.get('input[type="number"]').eq(1).clear().type('1')
     cy.get('button:contains("Submit")').click()

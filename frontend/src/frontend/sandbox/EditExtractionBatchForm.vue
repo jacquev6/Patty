@@ -89,6 +89,11 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       <h2>{{ t('llmModel') }}</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
       <h2>{{ t('settings') }}</h2>
+      <p>
+        {{ t('outputSchemaVersion') }}
+        {{ extractionBatch.strategy.outputSchemaVersion }}
+        {{ t(`outputSchemaVersionDescriptions.${extractionBatch.strategy.outputSchemaVersion}`) }}
+      </p>
       <AdaptedExerciseJsonSchemaDetails :schema />
       <h3>{{ t('prompt') }}</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
@@ -257,6 +262,10 @@ en:
   strategy: Strategy
   llmModel: LLM model
   settings: Settings
+  outputSchemaVersion: "Output schema:"
+  outputSchemaVersionDescriptions:
+    v2: "fields in French (e.g. 'consignes', 'autre'), text and styles ignored"
+    v3: "fields in English (e.g. 'instruction', 'labels'), text and styles extracted and added to prompt"
   prompt: Prompt
   download: Download {0}, {1}, {2}, {3}, {4}, or {5}
   standaloneHtml: standalone HTML
@@ -293,6 +302,10 @@ fr:
   strategy: Stratégie
   llmModel: Modèle LLM
   settings: Paramètres
+  outputSchemaVersion: "Schéma de sortie :"
+  outputSchemaVersionDescriptions:
+    v2: "champs en français (e.g. 'consignes', 'autre'), texte et styles ignorés"
+    v3: "champs en anglais (e.g. 'instruction', 'labels'), texte et styles extraits et ajoutés à l'invite"
   prompt: Invite
   download: Télécharger {0}, {1}, {2}, {3}, {4}, ou {5}
   standaloneHtml: le HTML autonome
