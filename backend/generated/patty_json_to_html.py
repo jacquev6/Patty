@@ -77,7 +77,7 @@ Example usage (note that `exercise_to_html` also accepts an instance of `Exercis
 
 from __future__ import annotations
 import os
-from typing import Any, Literal
+from typing import Any, Iterable, Literal
 import hashlib
 import json
 
@@ -138,9 +138,15 @@ class Text(BaseModel):
     kind: Literal["text"]
     text: str
 
+    def flat_contents(self) -> Iterable[Text]:
+        yield self
+
 
 class Whitespace(BaseModel):
     kind: Literal["whitespace"]
+
+    def flat_contents(self) -> Iterable[Whitespace]:
+        yield self
 
 
 class Formatted(BaseModel):
@@ -154,12 +160,20 @@ class Formatted(BaseModel):
     superscript: bool = False
     subscript: bool = False
 
+    def flat_contents(self) -> Iterable[FormattedText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
+
 
 class Image(BaseModel):
     kind: Literal["image"]
     height: str
     align: Literal["left", "center", "right"] | None = None
     identifier: str
+
+    def flat_contents(self) -> Iterable[Image]:
+        yield self
 
 
 class ActiveFormatted(BaseModel):
@@ -173,14 +187,27 @@ class ActiveFormatted(BaseModel):
     superscript: bool = False
     subscript: bool = False
 
+    def flat_contents(self) -> Iterable[ActiveFormattedText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
+
 
 class Arrow(BaseModel):
     kind: Literal["arrow"]
+
+    def flat_contents(self) -> Iterable[Arrow]:
+        yield self
 
 
 class Choice(BaseModel):
     kind: Literal["choice"]
     contents: list[FormattedText]
+
+    def flat_contents(self) -> Iterable[Choice | FormattedText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
 
 
 PlainText = Text | Whitespace
@@ -190,6 +217,9 @@ FormattedText = PlainText | Arrow | Formatted | Image
 
 class FreeTextInput(BaseModel):
     kind: Literal["freeTextInput"]
+
+    def flat_contents(self) -> Iterable[FreeTextInput]:
+        yield self
 
 
 ActiveFormattedText = PlainText | Arrow | ActiveFormatted | Image | FreeTextInput
@@ -205,6 +235,12 @@ class MultipleChoicesInput(BaseModel):
     showChoicesByDefault: bool
     reducedLineSpacing: bool = False
 
+    def flat_contents(self) -> Iterable[MultipleChoicesInput | FormattedText]:
+        yield self
+        for choice in self.choices:
+            for content in choice.contents:
+                yield from content.flat_contents()
+
 
 class SelectableInput(BaseModel):
     kind: Literal["selectableInput"]
@@ -212,10 +248,20 @@ class SelectableInput(BaseModel):
     colors: list[str]
     boxed: bool
 
+    def flat_contents(self) -> Iterable[SelectableInput | FormattedText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
+
 
 class SwappableInput(BaseModel):
     kind: Literal["swappableInput"]
     contents: list[FormattedText]
+
+    def flat_contents(self) -> Iterable[SwappableInput | FormattedText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
 
 
 class EditableTextInput(BaseModel):
@@ -224,10 +270,18 @@ class EditableTextInput(BaseModel):
     contents: list[PlainText]
     increaseHorizontalSpace: bool = False
 
+    def flat_contents(self) -> Iterable[EditableTextInput | PlainText]:
+        yield self
+        for content in self.contents:
+            yield from content.flat_contents()
+
 
 class SplitWordInput(BaseModel):
     kind: Literal["splitWordInput"]
     word: str
+
+    def flat_contents(self) -> Iterable[SplitWordInput]:
+        yield self
 
 
 class GeneratedPages(BaseModel):

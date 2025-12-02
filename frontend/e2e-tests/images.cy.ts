@@ -1,3 +1,4 @@
+import type { AdaptedExercise } from '@/frontend/ApiClient'
 import { loadFixtures, visit, visitExport, ignoreResizeObserverLoopError, screenshot } from './utils'
 
 const dataUriRegex = /^data:image\/png;base64,/
@@ -114,5 +115,69 @@ describe('Patty', () => {
     cy.get('a:contains("Exercice 1")').invoke('removeAttr', 'target').click()
     checkImagesExport()
     screenshot('images-textbook-export')
+  })
+
+  it('can show images that are nested *and* were previously not used in an exercise (issue #184)', () => {
+    if (Cypress.config('browser').name !== 'firefox' || !Cypress.config('isInteractive')) {
+      // I can't understand why this test crashes Cypress *except* in interactive Firefox.
+      // This is an problem because I mostly run Cypress with Electron, headless.
+      return
+    }
+
+    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class'])
+    visit('/new-extraction-batch')
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/images.pdf')
+    cy.get('[data-cy="llm-name"]').eq(0).select('dummy-for-images')
+    cy.get('[data-cy="run-adaptation"]').select('yes')
+    cy.get('[data-cy="llm-name"]').eq(1).select('dummy-for-images')
+    cy.get('button:contains("Submit")').click()
+    cy.contains('in progress').should('exist')
+    cy.contains('in progress', { timeout: 10000 }).should('not.exist')
+    cy.get('a:contains("View details")').should('have.attr', 'href', '/adaptation-2').click()
+
+    const emptyExercise: AdaptedExercise = {
+      format: 'v1',
+      instruction: { lines: [] },
+      statement: { pages: [] },
+      example: null,
+      hint: null,
+      reference: null,
+    }
+    cy.get('[data-cy="manual-edition"]')
+      .type('{selectAll}', { force: true })
+      .type(JSON.stringify(emptyExercise), { delay: 0, parseSpecialCharSequences: false, force: true })
+    cy.get('img').should('have.length', 1)
+    cy.wait(1000)
+
+    const exerciseWithOtherExerciseAndNestedImage: AdaptedExercise = {
+      format: 'v1',
+      instruction: {
+        lines: [
+          { contents: [{ kind: 'formatted', contents: [{ kind: 'image', identifier: 'p1c4', height: '2em' }] }] },
+        ],
+      },
+      statement: { pages: [] },
+      example: null,
+      hint: null,
+      reference: null,
+    }
+    cy.get('[data-cy="manual-edition"]')
+      .type('{selectAll}', { force: true })
+      .type(JSON.stringify(exerciseWithOtherExerciseAndNestedImage), {
+        delay: 0,
+        parseSpecialCharSequences: false,
+        force: true,
+      })
+    cy.get('img').should('have.length', 2)
+    screenshot('images-nested-frontend')
+
+    cy.get('a:contains("standalone HTML")')
+      .should('have.attr', 'href')
+      .then((href) => {
+        cy.visit(href + '&download=false')
+      })
+
+    cy.get('img').should('have.length', 2)
+    screenshot('images-nested-export')
   })
 })

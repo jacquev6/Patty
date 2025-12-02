@@ -140,8 +140,9 @@ def _gather_required_image_identifiers_from_adapted_exercise(
 ) -> typing.Iterable[str]:
     for line in _gather_lines_of_exercise(exercise.root):
         for component in line.contents:
-            if isinstance(component, adaptation.adapted.Image):
-                yield component.identifier
+            for inner_component in component.flat_contents():
+                if isinstance(inner_component, adaptation.adapted.Image):
+                    yield inner_component.identifier
 
 
 def _gather_required_image_identifiers_from_adaptation(adaptation_: adaptation.Adaptation) -> typing.Iterable[str]:
@@ -176,18 +177,23 @@ def gather_images_urls(
         by_page_extraction=lambda ec: [creation.image for creation in ec.page_extraction.extracted_images],
     )
 
-    required_image_identifiers = {
-        identifier
-        for adaptation_ in exercise.adaptations
-        for identifier in _gather_required_image_identifiers_from_adaptation(adaptation_)
-    }
-
-    urls: adaptation.adapted.ImagesUrls = {}
-    for image in available_images:
-        if image.local_identifier in required_image_identifiers:
-            urls[image.local_identifier] = make_image_url(kind, image)
-
-    return urls
+    if kind == "http":
+        # HTTP URLs are small and used during adjustments and manual edits, so we return all of them
+        return {image.local_identifier: make_image_url(kind, image) for image in available_images}
+    elif kind == "data":
+        # Data URLs are large and used only for the export, so we return only the required ones
+        required_image_identifiers = {
+            identifier
+            for adaptation_ in exercise.adaptations
+            for identifier in _gather_required_image_identifiers_from_adaptation(adaptation_)
+        }
+        return {
+            image.local_identifier: make_image_url(kind, image)
+            for image in available_images
+            if image.local_identifier in required_image_identifiers
+        }
+    else:
+        assert False
 
 
 def make_api_adaptation_status(exercise_adaptation: adaptation.Adaptation) -> AdaptationStatus:
