@@ -18,7 +18,7 @@ from .. import file_storage
 from .. import logs
 from .. import settings
 from .images_detection import detect_images
-from .postprocessing import cleanup_slashes
+from .postprocessing import cleanup_slashes, remove_styles
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 from .text_and_styles_extraction import extract_text_and_styles_from_pdf_page
 
@@ -254,8 +254,12 @@ def submit_extraction_v3(
             extracted_exercises_parts.append(
                 (
                     extracted_exercise.properties.number,
-                    instruction_hint_example_text,
-                    extracted_exercise.properties.statement,
+                    remove_styles(instruction_hint_example_text),
+                    (
+                        None
+                        if extracted_exercise.properties.statement is None
+                        else remove_styles(extracted_exercise.properties.statement)
+                    ),
                     full_text,
                 )
             )
