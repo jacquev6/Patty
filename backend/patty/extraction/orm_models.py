@@ -3,13 +3,16 @@ from __future__ import annotations
 import datetime
 import typing
 
+import pydantic
 from sqlalchemy import orm
 import sqlalchemy as sql
+import sqlalchemy.dialects.postgresql
 
 from . import assistant_responses
 from . import llm
 from .. import adaptation
 from ..any_json import JsonDict
+from ..api_utils import ApiModel
 from ..classification import ClassificationChunkCreation, ModelForAdaptationMixin
 from ..database_utils import OrmBase, CreatedByUserMixin, annotate_new_tables
 from ..exercises import ExerciseCreation, ExerciseImageCreation
@@ -71,6 +74,18 @@ class PdfFileRange(OrmBase, CreatedByUserMixin):
     pdf_file: orm.Mapped[PdfFile] = orm.relationship(foreign_keys=[pdf_file_sha256], remote_side=[PdfFile.sha256])
 
 
+class OutputSchemaDescriptionV2(ApiModel):
+    version: typing.Literal["v2"]
+
+
+class OutputSchemaDescriptionV3(ApiModel):
+    version: typing.Literal["v3"]
+    append_text_and_styles_to_prompt: typing.Literal[True]
+    cleanup_slashes: typing.Literal[True]
+
+
+OutputSchemaDescription = OutputSchemaDescriptionV2 | OutputSchemaDescriptionV3
+
 OutputSchemaVersion = typing.Literal["v2", "v3"]
 
 
@@ -83,30 +98,28 @@ class ExtractionSettings(OrmBase, CreatedByUserMixin):
         created_by: str,
         created_at: datetime.datetime,
         prompt: str,
-        output_schema_version: OutputSchemaVersion,
-        append_text_and_styles_to_prompt: bool,
+        output_schema_description: OutputSchemaDescription,
     ) -> None:
         super().__init__()
         self.created_by = created_by
         self.created_at = created_at
         self.prompt = prompt
-        self.output_schema_version = output_schema_version
-        self.append_text_and_styles_to_prompt = append_text_and_styles_to_prompt
+        self.output_schema_description = output_schema_description
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
 
     prompt: orm.Mapped[str]
-    output_schema_version_: orm.Mapped[str] = orm.mapped_column("output_schema_version", server_default="v2")
+    output_schema_description_: orm.Mapped[JsonDict] = orm.mapped_column(
+        "output_schema_description", sqlalchemy.dialects.postgresql.JSON, server_default='{"version": "v2"}'
+    )
 
     @property
-    def output_schema_version(self) -> OutputSchemaVersion:
-        return typing.cast(OutputSchemaVersion, self.output_schema_version_)
+    def output_schema_description(self) -> OutputSchemaDescription:
+        return pydantic.RootModel[OutputSchemaDescription].model_validate(self.output_schema_description_).root
 
-    @output_schema_version.setter
-    def output_schema_version(self, value: OutputSchemaVersion) -> None:
-        self.output_schema_version_ = value
-
-    append_text_and_styles_to_prompt: orm.Mapped[bool] = orm.mapped_column(server_default="false")
+    @output_schema_description.setter
+    def output_schema_description(self, value: OutputSchemaDescription) -> None:
+        self.output_schema_description_ = value.model_dump()
 
 
 class PageExtraction(OrmBase, ModelForAdaptationMixin):

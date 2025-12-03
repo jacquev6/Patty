@@ -409,8 +409,7 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt=make_default_extraction_prompt_v2(),
-                output_schema_version="v2",
-                append_text_and_styles_to_prompt=False,
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
             )
         )
 
@@ -420,8 +419,9 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt=make_default_extraction_prompt_v3(),
-                output_schema_version="v3",
-                append_text_and_styles_to_prompt=True,
+                output_schema_description=extraction.OutputSchemaDescriptionV3(
+                    version="v3", append_text_and_styles_to_prompt=True, cleanup_slashes=True
+                ),
             )
         )
 
@@ -849,8 +849,7 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt="Blah blah blah.",
-                output_schema_version="v2",
-                append_text_and_styles_to_prompt=False,
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
             )
         )
         page_40_extraction = self.add(
@@ -1391,8 +1390,7 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt="Blah blah blah.",
-                output_schema_version="v2",
-                append_text_and_styles_to_prompt=False,
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
             )
         )
         self.add(
@@ -1447,8 +1445,7 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt="Blah blah blah.",
-                output_schema_version="v2",
-                append_text_and_styles_to_prompt=False,
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
             )
         )
 
@@ -1560,8 +1557,7 @@ class FixturesCreator:
                 created_by="Patty",
                 created_at=created_at,
                 prompt="Blah blah blah.",
-                output_schema_version="v2",
-                append_text_and_styles_to_prompt=False,
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
             )
         )
         self.add(

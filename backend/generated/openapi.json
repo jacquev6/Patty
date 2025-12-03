@@ -633,10 +633,6 @@
       "ApiExtractionStrategy": {
         "additionalProperties": false,
         "properties": {
-          "appendTextAndStylesToPrompt": {
-            "title": "Appendtextandstylestoprompt",
-            "type": "boolean"
-          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -669,8 +665,7 @@
           "id",
           "model",
           "prompt",
-          "outputSchemaVersion",
-          "appendTextAndStylesToPrompt"
+          "outputSchemaVersion"
         ],
         "title": "ApiExtractionStrategy",
         "type": "object"
@@ -2736,6 +2731,78 @@
         "title": "InvalidJsonError",
         "type": "object"
       },
+      "InvalidJsonErrorV2": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "invalid-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "parsed": {
+            "title": "Parsed"
+          },
+          "version": {
+            "const": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "parsed"
+        ],
+        "title": "InvalidJsonErrorV2",
+        "type": "object"
+      },
+      "InvalidJsonErrorV3": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
+          "error": {
+            "const": "invalid-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "parsed": {
+            "title": "Parsed"
+          },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "rawResponse",
+          "cleanedResponse",
+          "parsed"
+        ],
+        "title": "InvalidJsonErrorV3",
+        "type": "object"
+      },
       "JsonFromTextLlmResponseSpecification": {
         "additionalProperties": false,
         "properties": {
@@ -3201,6 +3268,75 @@
           "text"
         ],
         "title": "NotJsonError",
+        "type": "object"
+      },
+      "NotJsonErrorV2": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "not-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "version": {
+            "const": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "text"
+        ],
+        "title": "NotJsonErrorV2",
+        "type": "object"
+      },
+      "NotJsonErrorV3": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
+          "error": {
+            "const": "not-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "rawResponse",
+          "cleanedResponse"
+        ],
+        "title": "NotJsonErrorV3",
         "type": "object"
       },
       "NotRequested": {
@@ -4527,6 +4663,10 @@
       "SuccessV3": {
         "additionalProperties": false,
         "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
           "exercises": {
             "items": {
               "$ref": "#/components/schemas/ExerciseV3"
@@ -4539,6 +4679,10 @@
             "title": "Kind",
             "type": "string"
           },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
           "version": {
             "const": "v3",
             "title": "Version",
@@ -4548,6 +4692,8 @@
         "required": [
           "kind",
           "version",
+          "rawResponse",
+          "cleanedResponse",
           "exercises"
         ],
         "title": "SuccessV3",
@@ -5032,10 +5178,16 @@
                 "$ref": "#/components/schemas/SuccessV3"
               },
               {
-                "$ref": "#/components/schemas/InvalidJsonError"
+                "$ref": "#/components/schemas/InvalidJsonErrorV2"
               },
               {
-                "$ref": "#/components/schemas/NotJsonError"
+                "$ref": "#/components/schemas/InvalidJsonErrorV3"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonErrorV2"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonErrorV3"
               },
               {
                 "$ref": "#/components/schemas/UnknownError"

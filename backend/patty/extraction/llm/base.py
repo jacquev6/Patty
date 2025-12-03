@@ -13,47 +13,57 @@ class LlmException(RuntimeError):
 
 
 class InvalidJsonLlmException(LlmException):
-    def __init__(self, parsed: typing.Any) -> None:
+    def __init__(self, raw_response: str, cleaned_response: str, parsed: typing.Any) -> None:
         super().__init__("Failed to validate JSON response")
+        self.raw_response = raw_response
+        self.cleaned_response = cleaned_response
         self.parsed = parsed
 
 
 class NotJsonLlmException(LlmException):
-    def __init__(self, text: str) -> None:
+    def __init__(self, raw_response: str, cleaned_response: str) -> None:
         super().__init__("Failed to parse JSON response")
-        self.text = text
+        self.raw_response = raw_response
+        self.cleaned_response = cleaned_response
 
 
 class Model(abc.ABC, pydantic.BaseModel):
     def extract_v2(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV2]:
-        parsed = self._extract(prompt, image)
+        return self._extract(extracted.ExercisesV2List, prompt, image, lambda s: s)[2]
 
-        try:
-            return extracted.ExercisesV2List(parsed).root
-        except pydantic.ValidationError:
-            raise InvalidJsonLlmException(parsed=parsed)
+    def extract_v3(
+        self, prompt: str, image: PIL.Image.Image, pre_cleanup: typing.Callable[[str], str]
+    ) -> tuple[str, str, list[extracted.ExerciseV3]]:
+        return self._extract(extracted.ExercisesV3List, prompt, image, pre_cleanup)
 
-    def extract_v3(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV3]:
-        parsed = self._extract(prompt, image)
+    def _extract[T](
+        self,
+        t: type[pydantic.RootModel[T]],
+        prompt: str,
+        image: PIL.Image.Image,
+        pre_cleanup: typing.Callable[[str], str],
+    ) -> tuple[str, str, T]:
+        raw_response = self.do_extract(prompt, image)
 
-        try:
-            return extracted.ExercisesV3List(parsed).root
-        except pydantic.ValidationError:
-            raise InvalidJsonLlmException(parsed=parsed)
-
-    def _extract(self, prompt: str, image: PIL.Image.Image) -> typing.Any:
-        response = self.do_extract(prompt, image)
-
-        cleaned_response = response.strip()
+        cleaned_response = raw_response.strip()
         if cleaned_response.startswith("```json"):
-            cleaned_response = cleaned_response.replace("```json", "").strip()
+            cleaned_response = cleaned_response[7:].strip()
+        if cleaned_response.startswith("```"):
+            cleaned_response = cleaned_response[3:].strip()
         if cleaned_response.endswith("```"):
             cleaned_response = cleaned_response[:-3].strip()
+        cleaned_response = pre_cleanup(cleaned_response)
 
         try:
-            return json.loads(cleaned_response)
+            parsed = json.loads(cleaned_response)
         except json.JSONDecodeError:
-            raise NotJsonLlmException(text=response)
+            raise NotJsonLlmException(raw_response=raw_response, cleaned_response=cleaned_response)
+
+        try:
+            validated = t(parsed).root
+            return raw_response, cleaned_response, validated
+        except pydantic.ValidationError:
+            raise InvalidJsonLlmException(raw_response=raw_response, cleaned_response=cleaned_response, parsed=parsed)
 
     @abc.abstractmethod
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str: ...

@@ -24,19 +24,40 @@ class SuccessV2(ApiModel):
 class SuccessV3(ApiModel):
     kind: Literal["success"]
     version: Literal["v3"]
+    raw_response: str
+    cleaned_response: str
     exercises: list[ExerciseV3]
 
 
-class InvalidJsonError(ApiModel):
+class InvalidJsonErrorV2(ApiModel):
     kind: Literal["error"]
     error: Literal["invalid-json"]
+    version: Literal["v2"]
     parsed: Any
 
 
-class NotJsonError(ApiModel):
+class InvalidJsonErrorV3(ApiModel):
+    kind: Literal["error"]
+    error: Literal["invalid-json"]
+    version: Literal["v3"]
+    raw_response: str
+    cleaned_response: str
+    parsed: Any
+
+
+class NotJsonErrorV2(ApiModel):
     kind: Literal["error"]
     error: Literal["not-json"]
+    version: Literal["v2"]
     text: str
+
+
+class NotJsonErrorV3(ApiModel):
+    kind: Literal["error"]
+    error: Literal["not-json"]
+    version: Literal["v3"]
+    raw_response: str
+    cleaned_response: str
 
 
 class UnknownError(ApiModel):
@@ -44,7 +65,16 @@ class UnknownError(ApiModel):
     error: Literal["unknown"]
 
 
-Response = SuccessV1 | SuccessV2 | SuccessV3 | InvalidJsonError | NotJsonError | UnknownError
+Response = (
+    SuccessV1
+    | SuccessV2
+    | SuccessV3
+    | InvalidJsonErrorV2
+    | InvalidJsonErrorV3
+    | NotJsonErrorV2
+    | NotJsonErrorV3
+    | UnknownError
+)
 
 
 def validate(obj: Any) -> Response:

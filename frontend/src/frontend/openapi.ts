@@ -895,8 +895,6 @@ export interface components {
     }
     /** ApiExtractionStrategy */
     ApiExtractionStrategy: {
-      /** Appendtextandstylestoprompt */
-      appendTextAndStylesToPrompt: boolean
       /** Id */
       id: string
       /** Model */
@@ -1699,6 +1697,50 @@ export interface components {
       /** Parsed */
       parsed: unknown
     }
+    /** InvalidJsonErrorV2 */
+    InvalidJsonErrorV2: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Parsed */
+      parsed: unknown
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v2'
+    }
+    /** InvalidJsonErrorV3 */
+    InvalidJsonErrorV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Parsed */
+      parsed: unknown
+      /** Rawresponse */
+      rawResponse: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
+    }
     /** JsonFromTextLlmResponseSpecification */
     JsonFromTextLlmResponseSpecification: {
       /**
@@ -1898,6 +1940,48 @@ export interface components {
       kind: 'error'
       /** Text */
       text: string
+    }
+    /** NotJsonErrorV2 */
+    NotJsonErrorV2: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Text */
+      text: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v2'
+    }
+    /** NotJsonErrorV3 */
+    NotJsonErrorV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Rawresponse */
+      rawResponse: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
     }
     /** NotRequested */
     NotRequested: {
@@ -2387,6 +2471,8 @@ export interface components {
     }
     /** SuccessV3 */
     SuccessV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
       /** Exercises */
       exercises: components['schemas']['ExerciseV3'][]
       /**
@@ -2394,6 +2480,8 @@ export interface components {
        * @constant
        */
       kind: 'success'
+      /** Rawresponse */
+      rawResponse: string
       /**
        * Version
        * @constant
@@ -2570,8 +2658,10 @@ export interface components {
         | components['schemas']['SuccessV1']
         | components['schemas']['SuccessV2']
         | components['schemas']['SuccessV3']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
+        | components['schemas']['InvalidJsonErrorV2']
+        | components['schemas']['InvalidJsonErrorV3']
+        | components['schemas']['NotJsonErrorV2']
+        | components['schemas']['NotJsonErrorV3']
         | components['schemas']['UnknownError']
         | null
       /** Exercises */

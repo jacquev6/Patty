@@ -18,6 +18,7 @@ from .. import file_storage
 from .. import logs
 from .. import settings
 from .images_detection import detect_images
+from .postprocessing import cleanup_slashes
 from .llm import InvalidJsonLlmException, NotJsonLlmException
 from .text_and_styles_extraction import extract_text_and_styles_from_pdf_page
 
@@ -83,28 +84,22 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         image_bytes.seek(0)
         file_storage.exercise_images.store(f"{extracted_image.id}.png", image_bytes.getvalue())
 
-    # For now, these two settings are tightly coupled:
-    assert (
-        page_extraction.settings.output_schema_version == "v3"
-    ) == page_extraction.settings.append_text_and_styles_to_prompt
-
-    if page_extraction.settings.append_text_and_styles_to_prompt:
-        page_extraction.extracted_text_and_styles = extract_text_and_styles_from_pdf_page(
-            pdf_data, page_extraction.pdf_page_number
-        )
-        if settings.DETECTED_IMAGES_SAVE_PATH is not None:
-            with open(
-                f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.text_and_styles.csv",
-                "w",
-                encoding="utf-8",
-            ) as f:
-                f.write(page_extraction.extracted_text_and_styles)
-    else:
-        page_extraction.extracted_text_and_styles = None
-
-    if page_extraction.settings.output_schema_version == "v2":
+    if page_extraction.settings.output_schema_description.version == "v2":
         submit_extraction_v2(session, page_extraction, annotated_pdf_page_image)
-    elif page_extraction.settings.output_schema_version == "v3":
+    elif page_extraction.settings.output_schema_description.version == "v3":
+        if page_extraction.settings.output_schema_description.append_text_and_styles_to_prompt:
+            page_extraction.extracted_text_and_styles = extract_text_and_styles_from_pdf_page(
+                pdf_data, page_extraction.pdf_page_number
+            )
+            if settings.DETECTED_IMAGES_SAVE_PATH is not None:
+                with open(
+                    f"{settings.DETECTED_IMAGES_SAVE_PATH}/{sha256}.p{page_extraction.pdf_page_number}.text_and_styles.csv",
+                    "w",
+                    encoding="utf-8",
+                ) as f:
+                    f.write(page_extraction.extracted_text_and_styles)
+        else:
+            page_extraction.extracted_text_and_styles = None
         submit_extraction_v3(session, page_extraction, annotated_pdf_page_image)
     else:
         assert False
@@ -113,7 +108,6 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
 def submit_extraction_v2(
     session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
 ) -> None:
-
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
@@ -124,13 +118,13 @@ def submit_extraction_v2(
             )
     except InvalidJsonLlmException as error:
         logs.log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
-        page_extraction.assistant_response = assistant_responses.InvalidJsonError(
-            kind="error", error="invalid-json", parsed=error.parsed
+        page_extraction.assistant_response = assistant_responses.InvalidJsonErrorV2(
+            kind="error", error="invalid-json", version="v2", parsed=error.parsed
         )
     except NotJsonLlmException as error:
         logs.log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
-        page_extraction.assistant_response = assistant_responses.NotJsonError(
-            kind="error", error="not-json", text=error.text
+        page_extraction.assistant_response = assistant_responses.NotJsonErrorV2(
+            kind="error", error="not-json", version="v2", text=error.raw_response
         )
     except Exception:
         logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
@@ -180,26 +174,48 @@ def submit_extraction_v2(
 def submit_extraction_v3(
     session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
 ) -> None:
-    if page_extraction.extracted_text_and_styles is None:
-        prompt = page_extraction.settings.prompt
-    else:
+    assert page_extraction.settings.output_schema_description.version == "v3"
+
+    if page_extraction.settings.output_schema_description.append_text_and_styles_to_prompt:
+        assert page_extraction.extracted_text_and_styles is not None
         prompt = f'{page_extraction.settings.prompt}\n\n--- {{ CSV input :  "\n{page_extraction.extracted_text_and_styles}\n"}}'
+    else:
+        assert page_extraction.extracted_text_and_styles is None
+        prompt = page_extraction.settings.prompt
+
+    if page_extraction.settings.output_schema_description.cleanup_slashes:
+        pre_cleanup = cleanup_slashes
+    else:
+
+        def pre_cleanup(s: str, /) -> str:
+            return s
 
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
     try:
         logs.log(f"Submitting page extraction {page_extraction.id}")
         with logs.timer() as timing:
-            extracted_exercises = page_extraction.model.extract_v3(prompt, annotated_pdf_page_image)
+            raw_response, cleaned_response, extracted_exercises = page_extraction.model.extract_v3(
+                prompt, annotated_pdf_page_image, pre_cleanup
+            )
     except InvalidJsonLlmException as error:
         logs.log(f"Error 'invalid JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
-        page_extraction.assistant_response = assistant_responses.InvalidJsonError(
-            kind="error", error="invalid-json", parsed=error.parsed
+        page_extraction.assistant_response = assistant_responses.InvalidJsonErrorV3(
+            kind="error",
+            error="invalid-json",
+            version="v3",
+            raw_response=error.raw_response,
+            cleaned_response=error.cleaned_response,
+            parsed=error.parsed,
         )
     except NotJsonLlmException as error:
         logs.log(f"Error 'not JSON' on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
-        page_extraction.assistant_response = assistant_responses.NotJsonError(
-            kind="error", error="not-json", text=error.text
+        page_extraction.assistant_response = assistant_responses.NotJsonErrorV3(
+            kind="error",
+            error="not-json",
+            version="v3",
+            raw_response=error.raw_response,
+            cleaned_response=error.cleaned_response,
         )
     except Exception:
         logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
@@ -247,7 +263,11 @@ def submit_extraction_v3(
         submit_follow_ups(session, page_extraction, extracted_exercises_parts)
 
         page_extraction.assistant_response = assistant_responses.SuccessV3(
-            kind="success", version="v3", exercises=extracted_exercises
+            kind="success",
+            version="v3",
+            raw_response=raw_response,
+            cleaned_response=cleaned_response,
+            exercises=extracted_exercises,
         )
     finally:
         page_extraction.timing = timing

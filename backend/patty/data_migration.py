@@ -18,6 +18,10 @@ def migrate(session: database_utils.Session) -> None:
             elif response["kind"] == "success-without-images":
                 response["kind"] = "success"
                 response["version"] = "v1"
+            elif response["kind"] == "error" and response["error"] == "invalid-json" and "version" not in response:
+                response["version"] = "v2"
+            elif response["kind"] == "error" and response["error"] == "not-json" and "version" not in response:
+                response["version"] = "v2"
             page_extraction._assistant_response = response
 
 

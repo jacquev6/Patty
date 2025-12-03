@@ -54,7 +54,6 @@ class ApiExtractionStrategy(ApiModel):
     model: extraction.llm.ConcreteModel
     prompt: str
     output_schema_version: extraction.OutputSchemaVersion
-    append_text_and_styles_to_prompt: bool
 
 
 @router.get("/latest-extraction-strategy")
@@ -63,7 +62,7 @@ def get_latest_extraction_strategy(
 ) -> ApiExtractionStrategy:
     query = sql.select(extraction.ExtractionSettings)
     if version is not None:
-        query = query.where(extraction.ExtractionSettings.output_schema_version_ == version)
+        query = query.where(extraction.ExtractionSettings.output_schema_description_["version"].astext == version)
     settings = session.execute(query.order_by(-extraction.ExtractionSettings.id)).scalars().first()
     assert settings is not None
     if PATTY_VERSION == "dev":
@@ -74,8 +73,7 @@ def get_latest_extraction_strategy(
         id=str(settings.id),
         model=model,
         prompt=settings.prompt,
-        output_schema_version=settings.output_schema_version,
-        append_text_and_styles_to_prompt=settings.append_text_and_styles_to_prompt,
+        output_schema_version=settings.output_schema_description.version,
     )
 
 
@@ -111,12 +109,20 @@ def create_extraction_batch(
     session.add(pdf_file_range)
     settings = session.get(extraction.ExtractionSettings, req.strategy.id)
     if settings is None or settings.prompt != req.strategy.prompt:
+        if req.strategy.output_schema_version == "v2":
+            output_schema_description: extraction.OutputSchemaDescription = extraction.OutputSchemaDescriptionV2(
+                version="v2"
+            )
+        else:
+            assert req.strategy.output_schema_version == "v3"
+            output_schema_description = extraction.OutputSchemaDescriptionV3(
+                version="v3", append_text_and_styles_to_prompt=True, cleanup_slashes=True
+            )
         settings = extraction.ExtractionSettings(
             created_by=req.creator,
             created_at=now,
             prompt=req.strategy.prompt,
-            output_schema_version=req.strategy.output_schema_version,
-            append_text_and_styles_to_prompt=req.strategy.append_text_and_styles_to_prompt,
+            output_schema_description=output_schema_description,
         )
         session.add(settings)
     model = req.strategy.model
@@ -295,8 +301,7 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
             id=str(extraction_batch.settings.id),
             model=extraction_batch.model,
             prompt=extraction_batch.settings.prompt,
-            output_schema_version=extraction_batch.settings.output_schema_version,
-            append_text_and_styles_to_prompt=extraction_batch.settings.append_text_and_styles_to_prompt,
+            output_schema_version=extraction_batch.settings.output_schema_description.version,
         ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,
