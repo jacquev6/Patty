@@ -500,7 +500,7 @@ def json_to_html_script() -> None:
         yield ""
         yield "from __future__ import annotations"
         yield "import os"
-        yield "from typing import Any, Literal"
+        yield "from typing import Any, Iterable, Literal"
         yield "import hashlib"
         yield "import json"
         yield ""
@@ -761,7 +761,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251127-081602.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251202-101603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
