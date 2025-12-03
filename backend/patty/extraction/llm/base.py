@@ -4,6 +4,7 @@ import typing
 
 import PIL.Image
 import pydantic
+import json_repair
 
 from .. import extracted
 
@@ -29,12 +30,12 @@ class NotJsonLlmException(LlmException):
 
 class Model(abc.ABC, pydantic.BaseModel):
     def extract_v2(self, prompt: str, image: PIL.Image.Image) -> list[extracted.ExerciseV2]:
-        return self._extract(extracted.ExercisesV2List, prompt, image, lambda s: s)[2]
+        return self._extract(extracted.ExercisesV2List, prompt, image, lambda s: s, json.loads)[2]
 
     def extract_v3(
         self, prompt: str, image: PIL.Image.Image, pre_cleanup: typing.Callable[[str], str]
     ) -> tuple[str, str, list[extracted.ExerciseV3]]:
-        return self._extract(extracted.ExercisesV3List, prompt, image, pre_cleanup)
+        return self._extract(extracted.ExercisesV3List, prompt, image, pre_cleanup, json_repair.loads)
 
     def _extract[T](
         self,
@@ -42,6 +43,7 @@ class Model(abc.ABC, pydantic.BaseModel):
         prompt: str,
         image: PIL.Image.Image,
         pre_cleanup: typing.Callable[[str], str],
+        json_loads: typing.Callable[[str], typing.Any],
     ) -> tuple[str, str, T]:
         raw_response = self.do_extract(prompt, image)
 
@@ -55,12 +57,14 @@ class Model(abc.ABC, pydantic.BaseModel):
         cleaned_response = pre_cleanup(cleaned_response)
 
         try:
-            parsed = json.loads(cleaned_response)
+            parsed = json_loads(cleaned_response)
+            if parsed == "":
+                raise NotJsonLlmException(raw_response=raw_response, cleaned_response=cleaned_response)
         except json.JSONDecodeError:
             raise NotJsonLlmException(raw_response=raw_response, cleaned_response=cleaned_response)
 
         try:
-            validated = t(parsed).root
+            validated = t.model_validate(parsed).root
             return raw_response, cleaned_response, validated
         except pydantic.ValidationError:
             raise InvalidJsonLlmException(raw_response=raw_response, cleaned_response=cleaned_response, parsed=parsed)

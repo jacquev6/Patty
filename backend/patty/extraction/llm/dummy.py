@@ -116,17 +116,12 @@ class DummyModel(Model):
             return self.do_extract_standard(prompt, image)
 
     def do_extract_standard(self, prompt: str, image: PIL.Image.Image) -> str:
-        def raise_exception() -> str:
+        if prompt.startswith("Not JSON"):
+            return "This is not JSON."
+        elif prompt.startswith("Invalid JSON"):
+            return "{}"
+        elif prompt.startswith("Unknown error"):
             raise Exception("Unknown error from DummyModel")
-
-        special_response = {
-            "Not JSON": lambda: "This is not JSON.",
-            "Invalid JSON": lambda: "{}",
-            "Unknown error": raise_exception,
-        }.get(prompt)
-
-        if special_response is not None:
-            return special_response()
         elif '"statement"' in prompt:
             return json.dumps(
                 [

@@ -249,7 +249,15 @@ function showDuration(timing: { start: number; end: number | null } | null): str
             </template>
             <template v-else-if="page.assistantResponse.error === 'invalid-json'">
               <p>{{ t('invalidJsonError') }}</p>
-              <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
+              <pre v-if="page.assistantResponse.version === 'v2'">
+                {{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}
+              </pre>
+              <template v-else-if="page.assistantResponse.version === 'v3'">
+                <pre>{{ page.assistantResponse.rawResponse }}</pre>
+                <pre>{{ page.assistantResponse.cleanedResponse }}</pre>
+                <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
+              </template>
+              <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
             </template>
             <p v-else-if="page.assistantResponse.error === 'unknown'">{{ t('unknownError') }}</p>
             <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>

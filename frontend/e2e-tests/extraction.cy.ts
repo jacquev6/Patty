@@ -166,6 +166,16 @@ describe('The extraction batch creation page with LLM output format v3', () => {
     cy.location('pathname').should('eq', '/extraction-batch-1')
     cy.get('p:contains("Adaptation was not requested.")', { timeout: 10000 }).should('have.length', 4)
   })
+
+  it('handles non-JSON response from the LLM', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('[data-cy="prompt"]').type('{selectAll}Not JSON', { force: true })
+    cy.get('input[type="number"]').eq(1).type('{selectAll}1')
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("The LLM returned a response that is not correct JSON.")').should('exist')
+    cy.get('pre:contains("This is not JSON.")').should('exist')
+  })
 })
 
 describe('The extraction batch creation page with both LLM output formats', () => {
