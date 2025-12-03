@@ -5,6 +5,7 @@ joblib
 joblib-stubs
 mypy
 pandas-stubs
+pymupdf-stubs
 ruff
 sqlparse
 types-boto3

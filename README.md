@@ -49,6 +49,10 @@ flowchart
   PDF --> convert_pdf_to_images
   PAGE_IMAGES[Page images]
   convert_pdf_to_images --> PAGE_IMAGES
+  extract_text_and_styles[[Extract text and styles]]
+  PDF --> extract_text_and_styles
+  PAGE_TEXT_AND_STYLES[Page text and styles]
+  extract_text_and_styles --> PAGE_TEXT_AND_STYLES
   detect_illustrations[[Detect illustrations]]
   DETECTION_MODEL[\Detection model/]
   DETECTION_MODEL --> detect_illustrations
@@ -59,6 +63,7 @@ flowchart
   detect_illustrations --> EXTRACTED_ILLUSTRATIONS
   extract_exercises[[Extract exercises]]
   EXTRACTION_PROMPT[\Extraction prompt/]
+  PAGE_TEXT_AND_STYLES --> extract_exercises
   ANNOTATED_PAGE_IMAGES --> extract_exercises
   EXTRACTION_PROMPT --> extract_exercises
   EXTRACTED_EXERCISES["Extracted exercises"]
@@ -99,9 +104,13 @@ Some exercises may have illustrations (*e.g.* when the pupils have to describe o
 Illustrations are extracted and stored for later use in the "export" step.
 They are also annotated on the page images, to let the extraction LLM (in next step) know about them.
 
+## Text and styles extraction
+
+The text and styles (fonts, sizes, colors, *etc.*) are extracted from the PDF file using [PyMuPdf](https://pymupdf.readthedocs.io/en/latest/).
+
 ## Extraction
 
-Annotated page images are then processed by an LLM with a prompt designed to extract exercises.
+Annotated page images, and text and styles extracted from the PDF, are then processed by an LLM with a prompt designed to extract exercises.
 The LLM outputs a JSON structure describing the exercises found on each page.
 
 ## Classification

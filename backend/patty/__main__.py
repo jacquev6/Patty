@@ -374,7 +374,7 @@ def adapted_exercise_schema(
 def extracted_exercise_schema() -> None:
     from . import extraction
 
-    print(json.dumps(extraction.extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+    print(json.dumps(extraction.extracted.ExercisesV3List.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
@@ -388,7 +388,15 @@ def default_adaptation_prompt() -> None:
 def default_extraction_prompt() -> None:
     from . import fixtures
 
-    print(fixtures.make_default_extraction_prompt())
+    print("Prompt v2")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v2())
+    print()
+    print("Prompt v3")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v3())
 
 
 @main.command()

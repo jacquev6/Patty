@@ -20,8 +20,12 @@ router = fastapi.APIRouter()
 
 
 @router.get("/extraction-llm-response-schema")
-def get_extraction_llm_response_schema() -> JsonDict:
-    return extraction.extracted.ExercisesList.model_json_schema()
+def get_extraction_llm_response_schema(version: extraction.OutputSchemaVersion) -> JsonDict:
+    if version == "v2":
+        return extraction.extracted.ExercisesV2List.model_json_schema()
+    else:
+        assert version == "v3"
+        return extraction.extracted.ExercisesV3List.model_json_schema()
 
 
 @router.get("/available-extraction-llm-models")
@@ -49,21 +53,28 @@ class ApiExtractionStrategy(ApiModel):
     id: str
     model: extraction.llm.ConcreteModel
     prompt: str
+    output_schema_version: extraction.OutputSchemaVersion
 
 
 @router.get("/latest-extraction-strategy")
-def get_latest_extraction_strategy(session: database_utils.SessionDependable) -> ApiExtractionStrategy:
-    settings = (
-        session.execute(sql.select(extraction.ExtractionSettings).order_by(-extraction.ExtractionSettings.id))
-        .scalars()
-        .first()
-    )
+def get_latest_extraction_strategy(
+    session: database_utils.SessionDependable, version: extraction.OutputSchemaVersion | None = None
+) -> ApiExtractionStrategy:
+    query = sql.select(extraction.ExtractionSettings)
+    if version is not None:
+        query = query.where(extraction.ExtractionSettings.output_schema_description_["version"].astext == version)
+    settings = session.execute(query.order_by(-extraction.ExtractionSettings.id)).scalars().first()
     assert settings is not None
     if PATTY_VERSION == "dev":
         model: extraction.llm.ConcreteModel = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
     else:
         model = extraction.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash")
-    return ApiExtractionStrategy(id=str(settings.id), model=model, prompt=settings.prompt)
+    return ApiExtractionStrategy(
+        id=str(settings.id),
+        model=model,
+        prompt=settings.prompt,
+        output_schema_version=settings.output_schema_description.version,
+    )
 
 
 class PostExtractionBatchRequest(ApiModel):
@@ -98,7 +109,21 @@ def create_extraction_batch(
     session.add(pdf_file_range)
     settings = session.get(extraction.ExtractionSettings, req.strategy.id)
     if settings is None or settings.prompt != req.strategy.prompt:
-        settings = extraction.ExtractionSettings(created_by=req.creator, created_at=now, prompt=req.strategy.prompt)
+        if req.strategy.output_schema_version == "v2":
+            output_schema_description: extraction.OutputSchemaDescription = extraction.OutputSchemaDescriptionV2(
+                version="v2"
+            )
+        else:
+            assert req.strategy.output_schema_version == "v3"
+            output_schema_description = extraction.OutputSchemaDescriptionV3(
+                version="v3", append_text_and_styles_to_prompt=True, cleanup_slashes=True
+            )
+        settings = extraction.ExtractionSettings(
+            created_by=req.creator,
+            created_at=now,
+            prompt=req.strategy.prompt,
+            output_schema_description=output_schema_description,
+        )
         session.add(settings)
     model = req.strategy.model
     extraction_batch = sandbox.extraction.SandboxExtractionBatch(
@@ -122,6 +147,7 @@ def create_extraction_batch(
             model=model,
             run_classification=req.run_classification,
             model_for_adaptation=req.model_for_adaptation,
+            extracted_text_and_styles=None,
             assistant_response=None,
             timing=None,
         )
@@ -272,7 +298,10 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         needs_refresh=needs_refresh,
         created_by=extraction_batch.created_by,
         strategy=ApiExtractionStrategy(
-            id=str(extraction_batch.settings.id), model=extraction_batch.model, prompt=extraction_batch.settings.prompt
+            id=str(extraction_batch.settings.id),
+            model=extraction_batch.model,
+            prompt=extraction_batch.settings.prompt,
+            output_schema_version=extraction_batch.settings.output_schema_description.version,
         ),
         run_classification=extraction_batch.run_classification,
         model_for_adaptation=extraction_batch.model_for_adaptation,

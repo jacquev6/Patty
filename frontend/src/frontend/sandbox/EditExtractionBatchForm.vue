@@ -2,6 +2,7 @@
 import jsonStringifyPrettyCompact from 'json-stringify-pretty-compact'
 import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
+import { computedAsync } from '@vueuse/core'
 
 import { useAuthenticatedClient, type ExtractionBatch } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
@@ -13,6 +14,7 @@ import MarkDown from '$/MarkDown.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
+import assert from '$/assert'
 
 const props = defineProps<{
   extractionBatch: ExtractionBatch
@@ -49,6 +51,14 @@ async function submitAdaptation() {
   emit('batch-updated')
 }
 
+const schema = computedAsync(async () => {
+  const response = await client.GET('/api/extraction-llm-response-schema', {
+    params: { query: { version: props.extractionBatch.strategy.outputSchemaVersion } },
+  })
+  assert(response.data !== undefined)
+  return response.data
+}, {})
+
 async function submitAdaptationsWithRecentSettings() {
   await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
     params: { path: { id: props.extractionBatch.id } },
@@ -79,7 +89,12 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       <h2>{{ t('llmModel') }}</h2>
       <p><LlmModelSelector :availableLlmModels="[]" :disabled="true" :modelValue="extractionBatch.strategy.model" /></p>
       <h2>{{ t('settings') }}</h2>
-      <AdaptedExerciseJsonSchemaDetails :schema="apiConstantsStore.extractionLlmResponseSchema" />
+      <p>
+        {{ t('outputSchemaVersion') }}
+        {{ extractionBatch.strategy.outputSchemaVersion }}
+        {{ t(`outputSchemaVersionDescriptions.${extractionBatch.strategy.outputSchemaVersion}`) }}
+      </p>
+      <AdaptedExerciseJsonSchemaDetails :schema />
       <h3>{{ t('prompt') }}</h3>
       <MarkDown :markdown="extractionBatch.strategy.prompt" />
     </template>
@@ -210,9 +225,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           </template>
         </p>
         <template v-if="page.assistantResponse !== null">
-          <template
-            v-if="page.assistantResponse.kind === 'success' || page.assistantResponse.kind === 'success-without-images'"
-          >
+          <template v-if="page.assistantResponse.kind === 'success'">
             <template v-for="exercise in page.exercises" :key="exercise.exerciseNumber">
               <AdaptableExercisePreview
                 :headerLevel="3"
@@ -227,11 +240,24 @@ function showDuration(timing: { start: number; end: number | null } | null): str
           <template v-else-if="page.assistantResponse.kind === 'error'">
             <template v-if="page.assistantResponse.error === 'not-json'">
               <p>{{ t('notJsonError') }}</p>
-              <pre>{{ page.assistantResponse.text }}</pre>
+              <pre v-if="page.assistantResponse.version === 'v2'">{{ page.assistantResponse.text }}</pre>
+              <template v-else-if="page.assistantResponse.version === 'v3'">
+                <pre>{{ page.assistantResponse.rawResponse }}</pre>
+                <pre>{{ page.assistantResponse.cleanedResponse }}</pre>
+              </template>
+              <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
             </template>
             <template v-else-if="page.assistantResponse.error === 'invalid-json'">
               <p>{{ t('invalidJsonError') }}</p>
-              <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
+              <pre v-if="page.assistantResponse.version === 'v2'">
+                {{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}
+              </pre>
+              <template v-else-if="page.assistantResponse.version === 'v3'">
+                <pre>{{ page.assistantResponse.rawResponse }}</pre>
+                <pre>{{ page.assistantResponse.cleanedResponse }}</pre>
+                <pre>{{ jsonStringifyPrettyCompact(page.assistantResponse.parsed) }}</pre>
+              </template>
+              <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
             </template>
             <p v-else-if="page.assistantResponse.error === 'unknown'">{{ t('unknownError') }}</p>
             <p v-else>BUG: {{ ((r: never) => r)(page.assistantResponse) }}</p>
@@ -249,6 +275,10 @@ en:
   strategy: Strategy
   llmModel: LLM model
   settings: Settings
+  outputSchemaVersion: "Output schema:"
+  outputSchemaVersionDescriptions:
+    v2: "fields in French (e.g. 'consignes', 'autre'), text and styles ignored"
+    v3: "fields in English (e.g. 'instruction', 'labels'), text and styles extracted and added to prompt"
   prompt: Prompt
   download: Download {0}, {1}, {2}, {3}, {4}, or {5}
   standaloneHtml: standalone HTML
@@ -285,6 +315,10 @@ fr:
   strategy: Stratégie
   llmModel: Modèle LLM
   settings: Paramètres
+  outputSchemaVersion: "Schéma de sortie :"
+  outputSchemaVersionDescriptions:
+    v2: "champs en français (e.g. 'consignes', 'autre'), texte et styles ignorés"
+    v3: "champs en anglais (e.g. 'instruction', 'labels'), texte et styles extraits et ajoutés à l'invite"
   prompt: Invite
   download: Télécharger {0}, {1}, {2}, {3}, {4}, ou {5}
   standaloneHtml: le HTML autonome

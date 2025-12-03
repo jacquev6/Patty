@@ -4,7 +4,7 @@ import textwrap
 
 import PIL.Image
 
-from ..extracted import Exercise
+from ..extracted import ExerciseV2, ExerciseV3
 from .base import Model
 
 
@@ -27,12 +27,12 @@ class DummyModel(Model):
     def do_extract_for_images(self) -> str:
         return json.dumps(
             [
-                Exercise(
+                ExerciseV2(
                     id=None,
                     type="exercice",
                     images=False,
                     type_images="none",
-                    properties=Exercise.Properties(
+                    properties=ExerciseV2.Properties(
                         numero="1",
                         consignes=["Écris les noms représentés par les dessins."],
                         conseil=None,
@@ -56,12 +56,12 @@ class DummyModel(Model):
     def do_extract_for_textually_numbered_exercises(self) -> str:
         return json.dumps(
             [
-                Exercise(
+                ExerciseV2(
                     id=None,
                     type="exercice",
                     images=False,
                     type_images="none",
-                    properties=Exercise.Properties(
+                    properties=ExerciseV2.Properties(
                         numero="5",
                         consignes=["Instruction 5"],
                         conseil=None,
@@ -71,12 +71,12 @@ class DummyModel(Model):
                         autre=None,
                     ),
                 ).model_dump(),
-                Exercise(
+                ExerciseV2(
                     id=None,
                     type="exercice",
                     images=False,
                     type_images="none",
-                    properties=Exercise.Properties(
+                    properties=ExerciseV2.Properties(
                         numero="Not a number",
                         consignes=["Instruction Not a number"],
                         conseil=None,
@@ -86,12 +86,12 @@ class DummyModel(Model):
                         autre=None,
                     ),
                 ).model_dump(),
-                Exercise(
+                ExerciseV2(
                     id=None,
                     type="exercice",
                     images=False,
                     type_images="none",
-                    properties=Exercise.Properties(
+                    properties=ExerciseV2.Properties(
                         numero="6",
                         consignes=["Instruction 6"],
                         conseil=None,
@@ -116,26 +116,69 @@ class DummyModel(Model):
             return self.do_extract_standard(prompt, image)
 
     def do_extract_standard(self, prompt: str, image: PIL.Image.Image) -> str:
-        def raise_exception() -> str:
+        if prompt.startswith("Not JSON"):
+            return "This is not JSON."
+        elif prompt.startswith("Invalid JSON"):
+            return "{}"
+        elif prompt.startswith("Unknown error"):
             raise Exception("Unknown error from DummyModel")
-
-        special_response = {
-            "Not JSON": lambda: "This is not JSON.",
-            "Invalid JSON": lambda: "{}",
-            "Unknown error": raise_exception,
-        }.get(prompt)
-
-        if special_response is not None:
-            return special_response()
+        elif '"statement"' in prompt:
+            return json.dumps(
+                [
+                    ExerciseV3(
+                        id=None,
+                        type="exercise",
+                        images=False,
+                        image_type="none",
+                        properties=ExerciseV3.Properties(
+                            number="1",
+                            instruction="Recopie les deux mots de chaque phrase qui se prononcent de la même façon.",
+                            labels=[],
+                            hint=None,
+                            example=None,
+                            statement=textwrap.dedent(
+                                """\
+                                a. Il a gagné le gros lot à la kermesse des écoles.
+                                b. À la fin du film, il y a une bonne surprise.
+                                c. Il a garé sa voiture dans le parking, à droite de la nôtre.
+                                d. Il m'a invité à venir chez lui.
+                                e. Mon oncle a un vélo à vendre.
+                                """
+                            ),
+                            references=None,
+                        ),
+                    ).model_dump(),
+                    ExerciseV3(
+                        id=None,
+                        type="exercise",
+                        images=False,
+                        image_type="none",
+                        properties=ExerciseV3.Properties(
+                            number="2",
+                            instruction="Réponds par vrai ou faux.",
+                            labels=[],
+                            hint=None,
+                            example=None,
+                            statement=textwrap.dedent(
+                                """\
+                                a. Bleu est une couleur
+                                b. Un triangle a quatre côtés
+                                """
+                            ),
+                            references=None,
+                        ),
+                    ).model_dump(),
+                ]
+            )
         else:
             return json.dumps(
                 [
-                    Exercise(
+                    ExerciseV2(
                         id=None,
                         type="exercice",
                         images=False,
                         type_images="none",
-                        properties=Exercise.Properties(
+                        properties=ExerciseV2.Properties(
                             numero="1",
                             consignes=["Recopie les deux mots de chaque phrase qui se prononcent de la même façon."],
                             conseil=None,
@@ -153,12 +196,12 @@ class DummyModel(Model):
                             autre=None,
                         ),
                     ).model_dump(),
-                    Exercise(
+                    ExerciseV2(
                         id=None,
                         type="exercice",
                         images=False,
                         type_images="none",
-                        properties=Exercise.Properties(
+                        properties=ExerciseV2.Properties(
                             numero="2",
                             consignes=["Réponds par vrai ou faux."],
                             conseil=None,

@@ -12,12 +12,10 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
   const availableExtractionLlmModels = ref<ExtractionLlmModel[]>([])
   const availableAdaptationLlmModels = ref<AdaptationLlmModel[]>([])
   const formalismsByAdaptationLlmModel = ref<Record<string, string[]>>({})
-  const extractionLlmResponseSchema = ref<Record<string, never>>({})
 
   ;(async () => {
     const availableExtractionLlmModelsPromise = client.GET('/api/available-extraction-llm-models')
     const availableAdaptationLlmModelsPromise = client.GET('/api/available-adaptation-llm-models')
-    const extractionLlmResponseSchemaPromise = client.GET('/api/extraction-llm-response-schema')
 
     const availableExtractionLlmModelsResponse = await availableExtractionLlmModelsPromise
     if (availableExtractionLlmModelsResponse.data !== undefined) {
@@ -32,11 +30,6 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
       )
     }
 
-    const extractionLlmResponseSchemaResponse = await extractionLlmResponseSchemaPromise
-    if (extractionLlmResponseSchemaResponse.data !== undefined) {
-      extractionLlmResponseSchema.value = extractionLlmResponseSchemaResponse.data
-    }
-
     ready.value = true
   })()
 
@@ -44,7 +37,6 @@ export const useApiConstantsStore = defineStore('api-constant', () => {
     ready: computed(() => ready.value),
     availableExtractionLlmModels: computed(() => availableExtractionLlmModels.value),
     availableAdaptationLlmModels: computed(() => availableAdaptationLlmModels.value),
-    extractionLlmResponseSchema: computed(() => extractionLlmResponseSchema.value),
     formalismIsAvailableForAdaptationLlmModel(llmModel: AdaptationLlmModel, formalism: string) {
       return formalismsByAdaptationLlmModel.value[llmModel.name].includes(formalism)
     },

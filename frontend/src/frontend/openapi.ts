@@ -899,6 +899,11 @@ export interface components {
       id: string
       /** Model */
       model: components['schemas']['patty__extraction__llm__dummy__DummyModel'] | components['schemas']['GeminiModel']
+      /**
+       * Outputschemaversion
+       * @enum {string}
+       */
+      outputSchemaVersion: 'v2' | 'v3'
       /** Prompt */
       prompt: string
     }
@@ -1165,6 +1170,36 @@ export interface components {
        */
       whitespace: true
     }
+    /** Exercise */
+    Exercise: {
+      /** Adaptationstatus */
+      adaptationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['AdaptationNotStarted']
+        | components['schemas']['AdaptationInProgress']
+        | components['schemas']['AdaptationInvalidJsonError']
+        | components['schemas']['AdaptationNotJsonError']
+        | components['schemas']['AdaptationUnknownError']
+        | components['schemas']['AdaptationSuccess']
+      /** Classificationstatus */
+      classificationStatus:
+        | components['schemas']['NotRequested']
+        | components['schemas']['ClassificationInProgress']
+        | components['schemas']['ClassifiedByModel']
+        | components['schemas']['ReclassifiedByUser']
+      /** Exercisenumber */
+      exerciseNumber: string | null
+      /** Fulltext */
+      fullText: string
+      /** Id */
+      id: string
+      /** Imagesurls */
+      imagesUrls: {
+        [key: string]: string
+      }
+      /** Pagenumber */
+      pageNumber: number | null
+    }
     'ExerciseV1-Input': {
       example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
       /**
@@ -1177,18 +1212,6 @@ export interface components {
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
       statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input']
     }
-    'ExerciseV1-Output': {
-      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v1'
-      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
-      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output']
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
-      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
-    }
     'ExerciseV2-Input': {
       /**
        * Format
@@ -1199,37 +1222,31 @@ export interface components {
       phases: components['schemas']['Phase-Input'][]
       reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Input'] | null
     }
-    'ExerciseV2-Output': {
-      /**
-       * Format
-       * @constant
-       */
-      format: 'v2'
-      /** Phases */
-      phases: components['schemas']['Phase-Output'][]
-      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
-    }
-    /** ExerciseWithoutImages */
-    ExerciseWithoutImages: {
-      /** Autre */
-      autre?: string | null
-      /** Conseil */
-      conseil?: string | null
-      /**
-       * Consignes
-       * @default []
-       */
-      consignes?: string[]
-      /** Enonce */
-      enonce?: string | null
-      /** Exemple */
-      exemple?: string | null
+    /** ExerciseV3 */
+    ExerciseV3: {
       /** Id */
       id?: string | null
-      /** Numero */
-      numero?: string | null
-      /** References */
-      references?: string | null
+      /**
+       * Image Type
+       * @default none
+       * @enum {string}
+       */
+      image_type?: 'none' | 'single' | 'ordered' | 'unordered' | 'composite'
+      /**
+       * Images
+       * @default false
+       */
+      images?: boolean
+      /** @default {
+       *       "labels": []
+       *     } */
+      properties?: components['schemas']['patty__extraction__extracted__ExerciseV3__Properties']
+      /**
+       * Type
+       * @default exercise
+       * @constant
+       */
+      type?: 'exercise'
     }
     /** ExternalExercise */
     ExternalExercise: {
@@ -1459,7 +1476,7 @@ export interface components {
       /** Createdby */
       createdBy: string
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise'][]
+      exercises: components['schemas']['Exercise'][]
       /** Id */
       id: string
       /** Needsrefresh */
@@ -1479,7 +1496,7 @@ export interface components {
       /** Createdby */
       createdBy: string | null
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise'][]
+      exercises: components['schemas']['Exercise'][]
       /** Id */
       id: string
       /** Modelforadaptation */
@@ -1680,6 +1697,50 @@ export interface components {
       /** Parsed */
       parsed: unknown
     }
+    /** InvalidJsonErrorV2 */
+    InvalidJsonErrorV2: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Parsed */
+      parsed: unknown
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v2'
+    }
+    /** InvalidJsonErrorV3 */
+    InvalidJsonErrorV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
+      /**
+       * Error
+       * @constant
+       */
+      error: 'invalid-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Parsed */
+      parsed: unknown
+      /** Rawresponse */
+      rawResponse: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
+    }
     /** JsonFromTextLlmResponseSpecification */
     JsonFromTextLlmResponseSpecification: {
       /**
@@ -1879,6 +1940,48 @@ export interface components {
       kind: 'error'
       /** Text */
       text: string
+    }
+    /** NotJsonErrorV2 */
+    NotJsonErrorV2: {
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Text */
+      text: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v2'
+    }
+    /** NotJsonErrorV3 */
+    NotJsonErrorV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
+      /**
+       * Error
+       * @constant
+       */
+      error: 'not-json'
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'error'
+      /** Rawresponse */
+      rawResponse: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
     }
     /** NotRequested */
     NotRequested: {
@@ -2124,26 +2227,6 @@ export interface components {
        */
       validUntil: string
     }
-    /** Properties */
-    Properties: {
-      /** Autre */
-      autre?: string | null
-      /** Conseil */
-      conseil?: string | null
-      /**
-       * Consignes
-       * @default []
-       */
-      consignes?: string[]
-      /** Enonce */
-      enonce?: string | null
-      /** Exemple */
-      exemple?: string | null
-      /** Numero */
-      numero?: string | null
-      /** References */
-      references?: string | null
-    }
     /** PutAdaptableExerciseClassRequest */
     PutAdaptableExerciseClassRequest: {
       /** Classname */
@@ -2226,8 +2309,8 @@ export interface components {
       | components['schemas']['ExerciseV2-Input']
     /** RootModel[Union[ExerciseV1, ExerciseV2]] */
     'RootModel_Union_ExerciseV1__ExerciseV2__-Output':
-      | components['schemas']['ExerciseV1-Output']
-      | components['schemas']['ExerciseV2-Output']
+      | components['schemas']['patty__adaptation__adapted__ExerciseV1-Output']
+      | components['schemas']['patty__adaptation__adapted__ExerciseV2-Output']
     'SelectableInput-Input': {
       /** Boxed */
       boxed: boolean
@@ -2356,15 +2439,54 @@ export interface components {
        */
       whitespace: true
     }
-    /** SuccessWithoutImages */
-    SuccessWithoutImages: {
+    /** SuccessV1 */
+    SuccessV1: {
       /** Exercises */
-      exercises: components['schemas']['ExerciseWithoutImages'][]
+      exercises: components['schemas']['patty__extraction__extracted__ExerciseV1'][]
       /**
        * Kind
        * @constant
        */
-      kind: 'success-without-images'
+      kind: 'success'
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v1'
+    }
+    /** SuccessV2 */
+    SuccessV2: {
+      /** Exercises */
+      exercises: components['schemas']['patty__extraction__extracted__ExerciseV2'][]
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v2'
+    }
+    /** SuccessV3 */
+    SuccessV3: {
+      /** Cleanedresponse */
+      cleanedResponse: string
+      /** Exercises */
+      exercises: components['schemas']['ExerciseV3'][]
+      /**
+       * Kind
+       * @constant
+       */
+      kind: 'success'
+      /** Rawresponse */
+      rawResponse: string
+      /**
+       * Version
+       * @constant
+       */
+      version: 'v3'
     }
     'SwappableInput-Input': {
       /** Contents */
@@ -2461,6 +2583,28 @@ export interface components {
        */
       kind: 'whitespace'
     }
+    'patty__adaptation__adapted__ExerciseV1-Output': {
+      example: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v1'
+      hint: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      instruction: components['schemas']['Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output']
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+      statement: components['schemas']['Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output']
+    }
+    'patty__adaptation__adapted__ExerciseV2-Output': {
+      /**
+       * Format
+       * @constant
+       */
+      format: 'v2'
+      /** Phases */
+      phases: components['schemas']['Phase-Output'][]
+      reference: components['schemas']['Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output'] | null
+    }
     /** DummyModel */
     patty__adaptation__llm__dummy__DummyModel: {
       /**
@@ -2496,70 +2640,10 @@ export interface components {
        */
       success: 'llm' | 'manual'
     }
-    /** Exercise */
-    patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /** Pagenumber */
-      pageNumber: number | null
-    }
     /** Timing */
     patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing: {
       /** Adaptations */
       adaptations: (components['schemas']['TimingData'] | null)[]
-    }
-    /** Exercise */
-    patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /** Pagenumber */
-      pageNumber: number | null
     }
     /** Timing */
     patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing: {
@@ -2571,14 +2655,17 @@ export interface components {
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page: {
       /** Assistantresponse */
       assistantResponse:
-        | components['schemas']['SuccessWithoutImages']
-        | components['schemas']['patty__extraction__assistant_responses__Success']
-        | components['schemas']['InvalidJsonError']
-        | components['schemas']['NotJsonError']
+        | components['schemas']['SuccessV1']
+        | components['schemas']['SuccessV2']
+        | components['schemas']['SuccessV3']
+        | components['schemas']['InvalidJsonErrorV2']
+        | components['schemas']['InvalidJsonErrorV3']
+        | components['schemas']['NotJsonErrorV2']
+        | components['schemas']['NotJsonErrorV3']
         | components['schemas']['UnknownError']
         | null
       /** Exercises */
-      exercises: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise'][]
+      exercises: components['schemas']['Exercise'][]
       /** Imagesurls */
       imagesUrls: {
         [key: string]: string
@@ -2586,36 +2673,6 @@ export interface components {
       /** Pagenumber */
       pageNumber: number
       timing: components['schemas']['patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing']
-    }
-    /** Exercise */
-    patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise: {
-      /** Adaptationstatus */
-      adaptationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['AdaptationNotStarted']
-        | components['schemas']['AdaptationInProgress']
-        | components['schemas']['AdaptationInvalidJsonError']
-        | components['schemas']['AdaptationNotJsonError']
-        | components['schemas']['AdaptationUnknownError']
-        | components['schemas']['AdaptationSuccess']
-      /** Classificationstatus */
-      classificationStatus:
-        | components['schemas']['NotRequested']
-        | components['schemas']['ClassificationInProgress']
-        | components['schemas']['ClassifiedByModel']
-        | components['schemas']['ReclassifiedByUser']
-      /** Exercisenumber */
-      exerciseNumber: string | null
-      /** Fulltext */
-      fullText: string
-      /** Id */
-      id: string
-      /** Imagesurls */
-      imagesUrls: {
-        [key: string]: string
-      }
-      /** Pagenumber */
-      pageNumber: number | null
     }
     /** Timing */
     patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing: {
@@ -2695,18 +2752,30 @@ export interface components {
       /** Windowsize */
       windowSize: string
     }
-    /** Success */
-    patty__extraction__assistant_responses__Success: {
-      /** Exercises */
-      exercises: components['schemas']['patty__extraction__extracted__Exercise'][]
+    /** ExerciseV1 */
+    patty__extraction__extracted__ExerciseV1: {
+      /** Autre */
+      autre?: string | null
+      /** Conseil */
+      conseil?: string | null
       /**
-       * Kind
-       * @constant
+       * Consignes
+       * @default []
        */
-      kind: 'success'
+      consignes?: string[]
+      /** Enonce */
+      enonce?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Id */
+      id?: string | null
+      /** Numero */
+      numero?: string | null
+      /** References */
+      references?: string | null
     }
-    /** Exercise */
-    patty__extraction__extracted__Exercise: {
+    /** ExerciseV2 */
+    patty__extraction__extracted__ExerciseV2: {
       /** Id */
       id?: string | null
       /**
@@ -2717,7 +2786,7 @@ export interface components {
       /** @default {
        *       "consignes": []
        *     } */
-      properties?: components['schemas']['Properties']
+      properties?: components['schemas']['patty__extraction__extracted__ExerciseV2__Properties']
       /**
        * Type
        * @default exercice
@@ -2730,6 +2799,46 @@ export interface components {
        * @enum {string}
        */
       type_images?: 'none' | 'unique' | 'ordered' | 'unordered' | 'composite'
+    }
+    /** Properties */
+    patty__extraction__extracted__ExerciseV2__Properties: {
+      /** Autre */
+      autre?: string | null
+      /** Conseil */
+      conseil?: string | null
+      /**
+       * Consignes
+       * @default []
+       */
+      consignes?: string[]
+      /** Enonce */
+      enonce?: string | null
+      /** Exemple */
+      exemple?: string | null
+      /** Numero */
+      numero?: string | null
+      /** References */
+      references?: string | null
+    }
+    /** Properties */
+    patty__extraction__extracted__ExerciseV3__Properties: {
+      /** Example */
+      example?: string | null
+      /** Hint */
+      hint?: string | null
+      /** Instruction */
+      instruction?: string | null
+      /**
+       * Labels
+       * @default []
+       */
+      labels?: string[]
+      /** Number */
+      number?: string | null
+      /** References */
+      references?: string | null
+      /** Statement */
+      statement?: string | null
     }
     /** DummyModel */
     patty__extraction__llm__dummy__DummyModel: {
@@ -3636,7 +3745,9 @@ export interface operations {
   }
   get_extraction_llm_response_schema_api_extraction_llm_response_schema_get: {
     parameters: {
-      query?: never
+      query: {
+        version: 'v2' | 'v3'
+      }
       header?: never
       path?: never
       cookie?: never
@@ -3652,11 +3763,22 @@ export interface operations {
           'application/json': Record<string, never>
         }
       }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
     }
   }
   get_latest_extraction_strategy_api_latest_extraction_strategy_get: {
     parameters: {
-      query?: never
+      query?: {
+        version?: ('v2' | 'v3') | null
+      }
       header?: never
       path?: never
       cookie?: never
@@ -3670,6 +3792,15 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['ApiExtractionStrategy']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
         }
       }
     }

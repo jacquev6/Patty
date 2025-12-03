@@ -648,6 +648,14 @@
             ],
             "title": "Model"
           },
+          "outputSchemaVersion": {
+            "enum": [
+              "v2",
+              "v3"
+            ],
+            "title": "Outputschemaversion",
+            "type": "string"
+          },
           "prompt": {
             "title": "Prompt",
             "type": "string"
@@ -656,7 +664,8 @@
         "required": [
           "id",
           "model",
-          "prompt"
+          "prompt",
+          "outputSchemaVersion"
         ],
         "title": "ApiExtractionStrategy",
         "type": "object"
@@ -1359,6 +1368,102 @@
         "title": "ExampleComponents",
         "type": "object"
       },
+      "Exercise": {
+        "additionalProperties": false,
+        "properties": {
+          "adaptationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotStarted"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationNotJsonError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationUnknownError"
+              },
+              {
+                "$ref": "#/components/schemas/AdaptationSuccess"
+              }
+            ],
+            "title": "Adaptationstatus"
+          },
+          "classificationStatus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotRequested"
+              },
+              {
+                "$ref": "#/components/schemas/ClassificationInProgress"
+              },
+              {
+                "$ref": "#/components/schemas/ClassifiedByModel"
+              },
+              {
+                "$ref": "#/components/schemas/ReclassifiedByUser"
+              }
+            ],
+            "title": "Classificationstatus"
+          },
+          "exerciseNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercisenumber"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "imagesUrls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Imagesurls",
+            "type": "object"
+          },
+          "pageNumber": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pagenumber"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "exerciseNumber",
+          "fullText",
+          "imagesUrls",
+          "classificationStatus",
+          "adaptationStatus"
+        ],
+        "title": "Exercise",
+        "type": "object"
+      },
       "ExerciseV1-Input": {
         "properties": {
           "example": {
@@ -1413,60 +1518,6 @@
         ],
         "type": "object"
       },
-      "ExerciseV1-Output": {
-        "properties": {
-          "example": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "format": {
-            "const": "v1",
-            "title": "Format",
-            "type": "string"
-          },
-          "hint": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "instruction": {
-            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "statement": {
-            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
-          }
-        },
-        "required": [
-          "format",
-          "instruction",
-          "example",
-          "hint",
-          "statement",
-          "reference"
-        ],
-        "type": "object"
-      },
       "ExerciseV2-Input": {
         "properties": {
           "format": {
@@ -1499,92 +1550,8 @@
         ],
         "type": "object"
       },
-      "ExerciseV2-Output": {
+      "ExerciseV3": {
         "properties": {
-          "format": {
-            "const": "v2",
-            "title": "Format",
-            "type": "string"
-          },
-          "phases": {
-            "items": {
-              "$ref": "#/components/schemas/Phase-Output"
-            },
-            "title": "Phases",
-            "type": "array"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "format",
-          "phases",
-          "reference"
-        ],
-        "type": "object"
-      },
-      "ExerciseWithoutImages": {
-        "properties": {
-          "autre": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Autre"
-          },
-          "conseil": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Conseil"
-          },
-          "consignes": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Consignes",
-            "type": "array"
-          },
-          "enonce": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enonce"
-          },
-          "exemple": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exemple"
-          },
           "id": {
             "anyOf": [
               {
@@ -1596,30 +1563,37 @@
             ],
             "title": "Id"
           },
-          "numero": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "image_type": {
+            "default": "none",
+            "enum": [
+              "none",
+              "single",
+              "ordered",
+              "unordered",
+              "composite"
             ],
-            "title": "Numero"
+            "title": "Image Type",
+            "type": "string"
           },
-          "references": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "References"
+          "images": {
+            "default": false,
+            "title": "Images",
+            "type": "boolean"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV3__Properties",
+            "default": {
+              "labels": []
+            }
+          },
+          "type": {
+            "const": "exercise",
+            "default": "exercise",
+            "title": "Type",
+            "type": "string"
           }
         },
-        "title": "ExerciseWithoutImages",
+        "title": "ExerciseV3",
         "type": "object"
       },
       "ExternalExercise": {
@@ -2129,7 +2103,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise"
+              "$ref": "#/components/schemas/Exercise"
             },
             "title": "Exercises",
             "type": "array"
@@ -2205,7 +2179,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise"
+              "$ref": "#/components/schemas/Exercise"
             },
             "title": "Exercises",
             "type": "array"
@@ -2757,6 +2731,78 @@
         "title": "InvalidJsonError",
         "type": "object"
       },
+      "InvalidJsonErrorV2": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "invalid-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "parsed": {
+            "title": "Parsed"
+          },
+          "version": {
+            "const": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "parsed"
+        ],
+        "title": "InvalidJsonErrorV2",
+        "type": "object"
+      },
+      "InvalidJsonErrorV3": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
+          "error": {
+            "const": "invalid-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "parsed": {
+            "title": "Parsed"
+          },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "rawResponse",
+          "cleanedResponse",
+          "parsed"
+        ],
+        "title": "InvalidJsonErrorV3",
+        "type": "object"
+      },
       "JsonFromTextLlmResponseSpecification": {
         "additionalProperties": false,
         "properties": {
@@ -3222,6 +3268,75 @@
           "text"
         ],
         "title": "NotJsonError",
+        "type": "object"
+      },
+      "NotJsonErrorV2": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "const": "not-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "version": {
+            "const": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "text"
+        ],
+        "title": "NotJsonErrorV2",
+        "type": "object"
+      },
+      "NotJsonErrorV3": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
+          "error": {
+            "const": "not-json",
+            "title": "Error",
+            "type": "string"
+          },
+          "kind": {
+            "const": "error",
+            "title": "Kind",
+            "type": "string"
+          },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "error",
+          "version",
+          "rawResponse",
+          "cleanedResponse"
+        ],
+        "title": "NotJsonErrorV3",
         "type": "object"
       },
       "NotRequested": {
@@ -3987,86 +4102,6 @@
         "title": "PostTokenResponse",
         "type": "object"
       },
-      "Properties": {
-        "properties": {
-          "autre": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Autre"
-          },
-          "conseil": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Conseil"
-          },
-          "consignes": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Consignes",
-            "type": "array"
-          },
-          "enonce": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enonce"
-          },
-          "exemple": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exemple"
-          },
-          "numero": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Numero"
-          },
-          "references": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "References"
-          }
-        },
-        "title": "Properties",
-        "type": "object"
-      },
       "PutAdaptableExerciseClassRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4249,10 +4284,10 @@
       "RootModel_Union_ExerciseV1__ExerciseV2__-Output": {
         "anyOf": [
           {
-            "$ref": "#/components/schemas/ExerciseV1-Output"
+            "$ref": "#/components/schemas/patty__adaptation__adapted__ExerciseV1-Output"
           },
           {
-            "$ref": "#/components/schemas/ExerciseV2-Output"
+            "$ref": "#/components/schemas/patty__adaptation__adapted__ExerciseV2-Output"
           }
         ],
         "title": "RootModel[Union[ExerciseV1, ExerciseV2]]"
@@ -4567,27 +4602,101 @@
         "title": "StatementComponents",
         "type": "object"
       },
-      "SuccessWithoutImages": {
+      "SuccessV1": {
         "additionalProperties": false,
         "properties": {
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/ExerciseWithoutImages"
+              "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV1"
             },
             "title": "Exercises",
             "type": "array"
           },
           "kind": {
-            "const": "success-without-images",
+            "const": "success",
             "title": "Kind",
+            "type": "string"
+          },
+          "version": {
+            "const": "v1",
+            "title": "Version",
             "type": "string"
           }
         },
         "required": [
           "kind",
+          "version",
           "exercises"
         ],
-        "title": "SuccessWithoutImages",
+        "title": "SuccessV1",
+        "type": "object"
+      },
+      "SuccessV2": {
+        "additionalProperties": false,
+        "properties": {
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV2"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "version": {
+            "const": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "exercises"
+        ],
+        "title": "SuccessV2",
+        "type": "object"
+      },
+      "SuccessV3": {
+        "additionalProperties": false,
+        "properties": {
+          "cleanedResponse": {
+            "title": "Cleanedresponse",
+            "type": "string"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseV3"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "kind": {
+            "const": "success",
+            "title": "Kind",
+            "type": "string"
+          },
+          "rawResponse": {
+            "title": "Rawresponse",
+            "type": "string"
+          },
+          "version": {
+            "const": "v3",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "rawResponse",
+          "cleanedResponse",
+          "exercises"
+        ],
+        "title": "SuccessV3",
         "type": "object"
       },
       "SwappableInput-Input": {
@@ -4841,6 +4950,92 @@
         ],
         "type": "object"
       },
+      "patty__adaptation__adapted__ExerciseV1-Output": {
+        "properties": {
+          "example": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "format": {
+            "const": "v1",
+            "title": "Format",
+            "type": "string"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "instruction": {
+            "$ref": "#/components/schemas/Page_Union_Text__Whitespace__Arrow__Formatted__Image__Choice__-Output"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement": {
+            "$ref": "#/components/schemas/Pages_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Output"
+          }
+        },
+        "required": [
+          "format",
+          "instruction",
+          "example",
+          "hint",
+          "statement",
+          "reference"
+        ],
+        "type": "object"
+      },
+      "patty__adaptation__adapted__ExerciseV2-Output": {
+        "properties": {
+          "format": {
+            "const": "v2",
+            "title": "Format",
+            "type": "string"
+          },
+          "phases": {
+            "items": {
+              "$ref": "#/components/schemas/Phase-Output"
+            },
+            "title": "Phases",
+            "type": "array"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Line_Union_Text__Whitespace__Arrow__Formatted__Image__-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "format",
+          "phases",
+          "reference"
+        ],
+        "type": "object"
+      },
       "patty__adaptation__llm__dummy__DummyModel": {
         "properties": {
           "name": {
@@ -4909,102 +5104,6 @@
         "title": "Success",
         "type": "object"
       },
-      "patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus"
-        ],
-        "title": "Exercise",
-        "type": "object"
-      },
       "patty__api_router__sandbox_adaptation__GetAdaptationBatchResponse__Timing": {
         "additionalProperties": false,
         "properties": {
@@ -5027,102 +5126,6 @@
           "adaptations"
         ],
         "title": "Timing",
-        "type": "object"
-      },
-      "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus"
-        ],
-        "title": "Exercise",
         "type": "object"
       },
       "patty__api_router__sandbox_classification__GetClassificationBatchResponse__Timing": {
@@ -5166,16 +5169,25 @@
           "assistantResponse": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/SuccessWithoutImages"
+                "$ref": "#/components/schemas/SuccessV1"
               },
               {
-                "$ref": "#/components/schemas/patty__extraction__assistant_responses__Success"
+                "$ref": "#/components/schemas/SuccessV2"
               },
               {
-                "$ref": "#/components/schemas/InvalidJsonError"
+                "$ref": "#/components/schemas/SuccessV3"
               },
               {
-                "$ref": "#/components/schemas/NotJsonError"
+                "$ref": "#/components/schemas/InvalidJsonErrorV2"
+              },
+              {
+                "$ref": "#/components/schemas/InvalidJsonErrorV3"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonErrorV2"
+              },
+              {
+                "$ref": "#/components/schemas/NotJsonErrorV3"
               },
               {
                 "$ref": "#/components/schemas/UnknownError"
@@ -5188,7 +5200,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise"
+              "$ref": "#/components/schemas/Exercise"
             },
             "title": "Exercises",
             "type": "array"
@@ -5216,102 +5228,6 @@
           "timing"
         ],
         "title": "Page",
-        "type": "object"
-      },
-      "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Exercise": {
-        "additionalProperties": false,
-        "properties": {
-          "adaptationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotStarted"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationInvalidJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationNotJsonError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationUnknownError"
-              },
-              {
-                "$ref": "#/components/schemas/AdaptationSuccess"
-              }
-            ],
-            "title": "Adaptationstatus"
-          },
-          "classificationStatus": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NotRequested"
-              },
-              {
-                "$ref": "#/components/schemas/ClassificationInProgress"
-              },
-              {
-                "$ref": "#/components/schemas/ClassifiedByModel"
-              },
-              {
-                "$ref": "#/components/schemas/ReclassifiedByUser"
-              }
-            ],
-            "title": "Classificationstatus"
-          },
-          "exerciseNumber": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Exercisenumber"
-          },
-          "fullText": {
-            "title": "Fulltext",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "imagesUrls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Imagesurls",
-            "type": "object"
-          },
-          "pageNumber": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pagenumber"
-          }
-        },
-        "required": [
-          "id",
-          "pageNumber",
-          "exerciseNumber",
-          "fullText",
-          "imagesUrls",
-          "classificationStatus",
-          "adaptationStatus"
-        ],
-        "title": "Exercise",
         "type": "object"
       },
       "patty__api_router__sandbox_extraction__GetExtractionBatchResponse__Page__Timing": {
@@ -5540,30 +5456,98 @@
         "title": "Error",
         "type": "object"
       },
-      "patty__extraction__assistant_responses__Success": {
-        "additionalProperties": false,
+      "patty__extraction__extracted__ExerciseV1": {
         "properties": {
-          "exercises": {
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "consignes": {
+            "default": [],
             "items": {
-              "$ref": "#/components/schemas/patty__extraction__extracted__Exercise"
+              "type": "string"
             },
-            "title": "Exercises",
+            "title": "Consignes",
             "type": "array"
           },
-          "kind": {
-            "const": "success",
-            "title": "Kind",
-            "type": "string"
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
           }
         },
-        "required": [
-          "kind",
-          "exercises"
-        ],
-        "title": "Success",
+        "title": "ExerciseV1",
         "type": "object"
       },
-      "patty__extraction__extracted__Exercise": {
+      "patty__extraction__extracted__ExerciseV2": {
         "properties": {
           "id": {
             "anyOf": [
@@ -5582,7 +5566,7 @@
             "type": "boolean"
           },
           "properties": {
-            "$ref": "#/components/schemas/Properties",
+            "$ref": "#/components/schemas/patty__extraction__extracted__ExerciseV2__Properties",
             "default": {
               "consignes": []
             }
@@ -5606,7 +5590,167 @@
             "type": "string"
           }
         },
-        "title": "Exercise",
+        "title": "ExerciseV2",
+        "type": "object"
+      },
+      "patty__extraction__extracted__ExerciseV2__Properties": {
+        "properties": {
+          "autre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Autre"
+          },
+          "conseil": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conseil"
+          },
+          "consignes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Consignes",
+            "type": "array"
+          },
+          "enonce": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enonce"
+          },
+          "exemple": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exemple"
+          },
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          }
+        },
+        "title": "Properties",
+        "type": "object"
+      },
+      "patty__extraction__extracted__ExerciseV3__Properties": {
+        "properties": {
+          "example": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Example"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          },
+          "labels": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "references": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "References"
+          },
+          "statement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statement"
+          }
+        },
+        "title": "Properties",
         "type": "object"
       },
       "patty__extraction__llm__dummy__DummyModel": {
@@ -6955,6 +7099,21 @@
     "/api/extraction-llm-response-schema": {
       "get": {
         "operationId": "get_extraction_llm_response_schema_api_extraction_llm_response_schema_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "v2",
+                "v3"
+              ],
+              "title": "Version",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -6966,6 +7125,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -6979,6 +7148,28 @@
     "/api/latest-extraction-strategy": {
       "get": {
         "operationId": "get_latest_extraction_strategy_api_latest_extraction_strategy_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "v2",
+                    "v3"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -6989,6 +7180,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [

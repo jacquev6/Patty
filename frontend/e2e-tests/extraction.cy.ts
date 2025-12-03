@@ -150,3 +150,59 @@ describe('The extraction batch creation page', () => {
     cy.get('p:contains("The LLM caused an unknown error.")').should('exist')
   })
 })
+
+describe('The extraction batch creation page with LLM output format v3', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-adaptation', 'extraction-seed-data-v3'])
+    ignoreResizeObserverLoopError()
+    visit('/new-extraction-batch')
+  })
+
+  it('passes text and styles to the LLM', () => {
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('button:contains("Submit")', { timeout: 10000 }).should('be.enabled').click()
+    cy.location('pathname').should('eq', '/extraction-batch-1')
+    cy.get('p:contains("Adaptation was not requested.")', { timeout: 10000 }).should('have.length', 4)
+  })
+
+  it('handles non-JSON response from the LLM', () => {
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('[data-cy="prompt"]').type('{selectAll}Not JSON', { force: true })
+    cy.get('input[type="number"]').eq(1).type('{selectAll}1')
+    cy.get('button:contains("Submit")').click()
+    cy.get('p:contains("The LLM returned a response that is not correct JSON.")').should('exist')
+    cy.get('pre:contains("This is not JSON.")').should('exist')
+  })
+})
+
+describe('The extraction batch creation page with both LLM output formats', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-adaptation', 'extraction-seed-data-v2', 'extraction-seed-data-v3'])
+    ignoreResizeObserverLoopError()
+    visit('/new-extraction-batch')
+    cy.get('[data-cy="run-classification"]').select('no')
+    cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')
+  })
+
+  it('loads latest prompt for v2', () => {
+    cy.get('[data-cy="prompt"]').invoke('val').should('contain', '"statement"')
+    cy.get('select').eq(3).select('v2')
+    cy.get('[data-cy="prompt"]').invoke('val').should('contain', '"enonce"')
+    cy.get('button:contains("Submit")', { timeout: 10000 }).click()
+    cy.get('p:contains("Adaptation was not requested.")', { timeout: 10000 }).should('have.length', 4)
+  })
+
+  it('loads latest prompt for v3', () => {
+    cy.get('[data-cy="prompt"]').invoke('val').should('contain', '"statement"')
+    cy.get('select').eq(3).select('v2')
+    cy.get('[data-cy="prompt"]').invoke('val').should('contain', '"enonce"')
+    cy.get('select').eq(3).select('v3')
+    cy.get('[data-cy="prompt"]').invoke('val').should('contain', '"statement"')
+    cy.get('button:contains("Submit")', { timeout: 10000 }).click()
+    cy.get('p:contains("Adaptation was not requested.")', { timeout: 10000 }).should('have.length', 4)
+  })
+})

@@ -33,10 +33,10 @@ function checkImagesExport() {
 describe('Patty', () => {
   beforeEach(() => {
     ignoreResizeObserverLoopError()
+    loadFixtures(['extraction-seed-data-v2', 'adaptation-seed-data', 'dummy-rcimage-exercise-class'])
   })
 
   it('extracts images in sandbox', () => {
-    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class'])
     visit('/new-extraction-batch')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/images.pdf')
     cy.get('[data-cy="llm-name"]').eq(0).select('dummy-for-images')
@@ -92,7 +92,6 @@ describe('Patty', () => {
   })
 
   it('extracts images in textbooks', () => {
-    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class'])
     visit('/new-textbook')
     cy.get('[data-cy="textbook-title"]').type('Images Textbook', { delay: 0 })
     cy.get('label:contains("Single PDF") input').check()
@@ -124,7 +123,6 @@ describe('Patty', () => {
       return
     }
 
-    loadFixtures(['seed-data', 'dummy-rcimage-exercise-class'])
     visit('/new-extraction-batch')
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/images.pdf')
     cy.get('[data-cy="llm-name"]').eq(0).select('dummy-for-images')
