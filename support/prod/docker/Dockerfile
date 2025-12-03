@@ -72,6 +72,9 @@ COPY --from=frontend-builder /app/dist /usr/share/nginx/templates/frontend
 
 FROM $BACKEND_DEPENDENCIES_IMAGE AS final-backend
 
+# @todo Run `./prod.sh pre-warm-build-cache` and remove next line
+RUN pip install json-repair==0.54.2 PyMuPDF==1.26.6
+
 ADD backend .
 ARG PATTY_VERSION
 RUN echo "PATTY_VERSION = \"${PATTY_VERSION}\"" >patty/version.py
