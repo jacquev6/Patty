@@ -4,7 +4,7 @@ describe('Patty', () => {
   beforeEach(() => {
     ignoreResizeObserverLoopError()
     if (Cypress.env('PATTY_UNIT_TESTING')) {
-      loadFixtures(['seed-data'])
+      loadFixtures(['extraction-seed-data-v3', 'adaptation-seed-data'])
     }
     cy.viewport(1600, 800)
     visit('/')

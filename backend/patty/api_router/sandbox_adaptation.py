@@ -43,6 +43,8 @@ def get_available_adaptation_llm_models() -> (
                 adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
                 ["text", "json-object", "json-schema"],
             ),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
             (
                 adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
                 ["text", "json-object", "json-schema"],
@@ -87,11 +89,11 @@ def get_available_adaptation_llm_models() -> (
                 adaptation.llm.OpenAiModel(provider="openai", name="gpt-4.1-nano-2025-04-14"),
                 ["text", "json-object", "json-schema"],
             ),
-            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
-            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
         ]
     else:
         return [
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
             (
                 adaptation.llm.MistralAiModel(provider="mistralai", name="mistral-large-2411"),
                 ["text", "json-object", "json-schema"],
@@ -108,8 +110,6 @@ def get_available_adaptation_llm_models() -> (
                 adaptation.llm.OpenAiModel(provider="openai", name="gpt-4o-mini-2024-07-18"),
                 ["text", "json-object", "json-schema"],
             ),
-            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
-            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
             (adaptation.llm.DummyModel(provider="dummy", name="dummy-1"), ["text", "json-object", "json-schema"]),
             (adaptation.llm.DummyModel(provider="dummy", name="dummy-2"), ["text", "json-object", "json-schema"]),
         ]

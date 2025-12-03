@@ -11,4 +11,8 @@ from .orm_models import (
     PageExtractionCreation as PageExtractionCreation,
     PdfFile as PdfFile,
     PdfFileRange as PdfFileRange,
+    OutputSchemaVersion as OutputSchemaVersion,
+    OutputSchemaDescription as OutputSchemaDescription,
+    OutputSchemaDescriptionV2 as OutputSchemaDescriptionV2,
+    OutputSchemaDescriptionV3 as OutputSchemaDescriptionV3,
 )

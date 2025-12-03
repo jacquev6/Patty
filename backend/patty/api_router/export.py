@@ -58,6 +58,7 @@ def export_extraction_batch_extracted_exercises_json(
         content.append(
             {
                 "pdfPageNumber": page.pdf_page_number,
+                "extractedTextAndStyles": page.extracted_text_and_styles,
                 "response": page.assistant_response.model_dump(),
                 "imagesUrls": {
                     creation.image.local_identifier: previewable_exercise.make_image_url("data", creation.image)

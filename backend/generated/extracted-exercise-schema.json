@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "Exercise": {
+    "ExerciseV3": {
       "properties": {
         "id": {
           "anyOf": [
@@ -15,8 +15,8 @@
           "title": "Id"
         },
         "type": {
-          "const": "exercice",
-          "default": "exercice",
+          "const": "exercise",
+          "default": "exercise",
           "title": "Type",
           "type": "string"
         },
@@ -25,37 +25,37 @@
           "title": "Images",
           "type": "boolean"
         },
-        "type_images": {
+        "image_type": {
           "default": "none",
           "enum": [
             "none",
-            "unique",
+            "single",
             "ordered",
             "unordered",
             "composite"
           ],
-          "title": "Type Images",
+          "title": "Image Type",
           "type": "string"
         },
         "properties": {
           "$ref": "#/$defs/Properties",
           "default": {
-            "numero": null,
-            "consignes": [],
-            "enonce": null,
-            "conseil": null,
-            "exemple": null,
-            "references": null,
-            "autre": null
+            "number": null,
+            "instruction": null,
+            "labels": [],
+            "statement": null,
+            "hint": null,
+            "example": null,
+            "references": null
           }
         }
       },
-      "title": "Exercise",
+      "title": "ExerciseV3",
       "type": "object"
     },
     "Properties": {
       "properties": {
-        "numero": {
+        "number": {
           "anyOf": [
             {
               "type": "string"
@@ -65,17 +65,29 @@
             }
           ],
           "default": null,
-          "title": "Numero"
+          "title": "Number"
         },
-        "consignes": {
+        "instruction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instruction"
+        },
+        "labels": {
           "default": [],
           "items": {
             "type": "string"
           },
-          "title": "Consignes",
+          "title": "Labels",
           "type": "array"
         },
-        "enonce": {
+        "statement": {
           "anyOf": [
             {
               "type": "string"
@@ -85,9 +97,9 @@
             }
           ],
           "default": null,
-          "title": "Enonce"
+          "title": "Statement"
         },
-        "conseil": {
+        "hint": {
           "anyOf": [
             {
               "type": "string"
@@ -97,9 +109,9 @@
             }
           ],
           "default": null,
-          "title": "Conseil"
+          "title": "Hint"
         },
-        "exemple": {
+        "example": {
           "anyOf": [
             {
               "type": "string"
@@ -109,7 +121,7 @@
             }
           ],
           "default": null,
-          "title": "Exemple"
+          "title": "Example"
         },
         "references": {
           "anyOf": [
@@ -122,18 +134,6 @@
           ],
           "default": null,
           "title": "References"
-        },
-        "autre": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Autre"
         }
       },
       "title": "Properties",
@@ -141,8 +141,8 @@
     }
   },
   "items": {
-    "$ref": "#/$defs/Exercise"
+    "$ref": "#/$defs/ExerciseV3"
   },
-  "title": "RootModel[list[Exercise]]",
+  "title": "RootModel[list[ExerciseV3]]",
   "type": "array"
 }

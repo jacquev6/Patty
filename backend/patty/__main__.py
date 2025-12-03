@@ -374,7 +374,7 @@ def adapted_exercise_schema(
 def extracted_exercise_schema() -> None:
     from . import extraction
 
-    print(json.dumps(extraction.extracted.ExercisesList.model_json_schema(), indent=2, ensure_ascii=False))
+    print(json.dumps(extraction.extracted.ExercisesV3List.model_json_schema(), indent=2, ensure_ascii=False))
 
 
 @main.command()
@@ -388,7 +388,15 @@ def default_adaptation_prompt() -> None:
 def default_extraction_prompt() -> None:
     from . import fixtures
 
-    print(fixtures.make_default_extraction_prompt())
+    print("Prompt v2")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v2())
+    print()
+    print("Prompt v3")
+    print("=========")
+    print()
+    print(fixtures.make_default_extraction_prompt_v3())
 
 
 @main.command()
@@ -492,7 +500,7 @@ def json_to_html_script() -> None:
         yield ""
         yield "from __future__ import annotations"
         yield "import os"
-        yield "from typing import Any, Literal"
+        yield "from typing import Any, Iterable, Literal"
         yield "import hashlib"
         yield "import json"
         yield ""
@@ -753,7 +761,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251124-081603.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251202-101603.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:

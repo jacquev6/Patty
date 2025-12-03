@@ -179,8 +179,8 @@ def make_default_adaptation_prompt() -> str:
     )
 
 
-def make_default_extraction_prompt() -> str:
-    exercise = extraction.extracted.Exercise.model_validate(
+def make_default_extraction_prompt_v2() -> str:
+    exercise = extraction.extracted.ExerciseV2.model_validate(
         {
             "id": "p47_ex4",
             "type": "exercice",
@@ -248,6 +248,97 @@ def make_default_extraction_prompt() -> str:
     )
 
 
+def make_default_extraction_prompt_v3() -> str:
+    # The schema presented to the LLM has only required attributes and no default values,
+    # so it cannot be easily derived from `patty.extraction.extracted.ExerciseV3`.
+
+    return textwrap.dedent(
+        """\
+        {
+          "ROLE": "You are an expert in extracting and structuring educational exercises from textbook images and corresponding CSV text data.",
+          "INSTRUCTION": "You must output ONLY a JSON array compliant with the schema below. No markdown formatting, no comments.",
+
+          "INPUT_DATA": {
+            "Image": "Textbook page (French). CRITICAL USE: Determine Strict Visual Boundaries between exercises, detect colored boxes/bubbles (hints), and identify structure (e.g., 'Cherchons' blocks).",
+            "CSV": "Contains the ground-truth text. You MUST extract text segments from this CSV ONLY. Copy exact characters."
+          },
+
+          "OUTPUT_SCHEMA": {
+            "$defs": {
+              "Exercise": {
+                "properties": {
+                  "id": {"type": "string"},
+                  "type": {"const": "exercise", "type": "string"},
+                  "images": {"type": "boolean"},
+                  "image_type": {"type": "string", "enum": ["none","single","ordered","unordered","composite"]},
+                  "properties": {"$ref": "#/$defs/Properties"}
+                },
+                "type": "object"
+              },
+              "Properties": {
+                "properties": {
+                  "number": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                  "instruction": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                  "labels": {"type": "array","items": {"type": "string"}},
+                  "statement": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                  "hint": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                  "example": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+                  "references": {"anyOf": [{"type": "string"}, {"type": "null"}]}
+                },
+                "type": "object"
+              }
+            },
+            "items": {"$ref": "#/$defs/Exercise"},
+            "type": "array"
+          },
+
+          "STRICT_FIDELITY_RULES": [
+            "SOURCE TRUTH: The CSV text is the absolute truth.",
+            "NO EDITING: Do not normalize text. Copy exactly as appearing in the CSV.",
+            "LINE BREAKS: Preserve line breaks from the CSV, specifically for word lists. Join lines with \\\\n.",
+            "SYMBOLS: Keep all arrows (➞, →, ▶), bullets, and item letters (a., b.) inside the 'statement'.",
+            "NO DUPLICATION: Text assigned to 'instruction', 'labels', 'hint', or 'example' MUST NOT be repeated in 'statement'."
+          ],
+
+          "SPATIAL_BOUNDARIES_RULES": {
+            "ISOLATION": "Each exercise is a CLOSED BOX. Never grab text, hints, or labels from a neighboring exercise block.",
+            "VISUAL_CONTAINMENT": "A hint belongs to an exercise ONLY IF it is physically inside the exercise's graphical boundary or immediately adjacent to its number. Do not attribute a hint from the bottom of the page to an exercise at the top.",
+            "GHOST_TAGS_DEFINITION": "Terms like 'À l'oral', 'J'écris', 'Défi langue', 'Cherchons' are markers. They are NOT content."
+          },
+
+          "ID_GENERATION_RULES": {
+            "HIERARCHY": "Strict priority:",
+            "PRIORITY_1": "If Number exists -> ID: 'p{PageNumber}_ex{Number}'. (The Ghost Tag is completely IGNORED/DELETED).",
+            "PRIORITY_2": "If NO Number -> ID: 'p{PageNumber}_{GhostTag_SnakeCase}' (Use the Ghost Tag text for ID, then DELETE it from content)."
+          },
+
+          "CONTENT_MAPPING": {
+            "labels": "Extract here:\\n1. Structural table headers.\\n2. WORD BANKS: Horizontal or vertical lists of isolated words provided for the student to choose from (e.g., a list of verbs to conjugate).\\n3. EXCLUSION: Do NOT put Ghost Tags here.",
+
+            "instruction": "The directive text.\\nTYPE 'CHERCHONS': In 'Cherchons' blocks, the instruction is the list of questions (usually bullet points) found at the bottom of the block.\\nTYPE STANDARD: The bold text at the start. \\nCLEANING: Always remove Ghost Tags ('À l'oral', etc.) from the instruction string.",
+
+            "hint": "Auxiliary text providing HELP, RULES, or TIPS. \\nVISUALS: Look for distinct graphic containers (yellow boxes, sticky notes, side-notes) or MASCOTS (e.g., fox character) speaking via speech bubbles.\\nCONSTRAINT: The hint MUST be visually anchored to the specific exercise.",
+
+            "example": "Text demonstrating the task. \\nEXPLICIT: Labeled with 'Exemple', 'Modèle'.\\nIMPLICIT: Text showing a transformation (arrows '➞') or sample answer, visually distinct (color/italics), immediately following the instruction.",
+
+            "statement": "The REMAINING content.\\nTYPE 'CHERCHONS': The narrative text describing the scene and the context image (usually at the top of the block).\\nTYPE STANDARD: The exercise items, sentences to transform, dialogues, etc."
+          },
+
+          "IMAGE_HANDLING": {
+            "detection": "Look for black labels in the image (e.g., pXXcY).",
+            "insertion": "Insert \\\\image{id} into the 'statement' where it logically belongs."
+          },
+
+          "EXCLUSIONS": [
+            "Do NOT extract lesson headers (e.g., 'Je retiens', 'Observons').",
+            "Do NOT extract SECTION BANNERS/RIBBONS (colored bands often starting with 'Utiliser...', 'Reconnaître...'). These are titles, not hints.",
+            "Do NOT extract ISBNs or dates."
+          ]
+        }
+        """
+    )
+
+
 class FixturesCreator:
     def __init__(self, session: database_utils.Session) -> None:
         self.__session = session
@@ -257,10 +348,6 @@ class FixturesCreator:
     def add(self, instance: Model) -> Model:
         self.__session.add(instance)
         return instance
-
-    def create_seed_data(self) -> None:
-        self.create_adaptation_seed_data()
-        self.create_extraction_seed_data()
 
     def create_adaptation_seed_data(self) -> None:
         settings = self.add(
@@ -316,10 +403,25 @@ class FixturesCreator:
             exercise=self.create_default_adaptation_input(),
         )
 
-    def create_extraction_seed_data(self) -> None:
+    def create_extraction_seed_data_v2(self) -> None:
         self.add(
             extraction.ExtractionSettings(
-                created_by="Patty", created_at=created_at, prompt=make_default_extraction_prompt()
+                created_by="Patty",
+                created_at=created_at,
+                prompt=make_default_extraction_prompt_v2(),
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
+        )
+
+    def create_extraction_seed_data_v3(self) -> None:
+        self.add(
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt=make_default_extraction_prompt_v3(),
+                output_schema_description=extraction.OutputSchemaDescriptionV3(
+                    version="v3", append_text_and_styles_to_prompt=True, cleanup_slashes=True
+                ),
             )
         )
 
@@ -743,7 +845,12 @@ class FixturesCreator:
         )
 
         extraction_settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt="Blah blah blah.",
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
         )
         page_40_extraction = self.add(
             extraction.PageExtraction(
@@ -756,15 +863,17 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction.assistant_responses.Success(
+                extracted_text_and_styles=None,
+                assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
+                    version="v2",
                     exercises=[
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex4",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="4",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -774,12 +883,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex6",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="6",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -789,12 +898,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex10",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="10",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -804,12 +913,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p40_ex8",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="8",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1001,15 +1110,17 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
-                assistant_response=extraction.assistant_responses.Success(
+                extracted_text_and_styles=None,
+                assistant_response=extraction.assistant_responses.SuccessV2(
                     kind="success",
+                    version="v2",
                     exercises=[
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex5",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="5",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1019,12 +1130,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex6",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="6",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1034,12 +1145,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_exAutoDictée",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="Auto-dictée",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1049,12 +1160,12 @@ class FixturesCreator:
                                 autre=None,
                             ),
                         ),
-                        extraction.extracted.Exercise(
+                        extraction.extracted.ExerciseV2(
                             id="p42_ex6Texte",
                             type="exercice",
                             images=False,
                             type_images="none",
-                            properties=extraction.extracted.Exercise.Properties(
+                            properties=extraction.extracted.ExerciseV2.Properties(
                                 numero="Exo identifié par texte / 5",
                                 consignes=['Complète avec "le vent" ou "la pluie"'],
                                 conseil=None,
@@ -1275,7 +1386,12 @@ class FixturesCreator:
             )
         )
         extraction_settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt="Blah blah blah.",
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
         )
         self.add(
             extraction.PageExtraction(
@@ -1288,6 +1404,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=None,
                 timing=None,
             )
@@ -1303,6 +1420,7 @@ class FixturesCreator:
                 model=model_for_extraction,
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
                 assistant_response=None,
                 timing=None,
             )
@@ -1322,7 +1440,14 @@ class FixturesCreator:
         self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
     def create_dummy_extraction_strategy(self) -> None:
-        self.add(extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah."))
+        self.add(
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt="Blah blah blah.",
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
+        )
 
     def make_adaptation_batches(self, count: int) -> None:
         model = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
@@ -1428,7 +1553,12 @@ class FixturesCreator:
             )
         )
         settings = self.add(
-            extraction.ExtractionSettings(created_by="Patty", created_at=created_at, prompt="Blah blah blah.")
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt="Blah blah blah.",
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
         )
         self.add(
             sandbox.extraction.SandboxExtractionBatch(
