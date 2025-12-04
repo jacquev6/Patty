@@ -3977,6 +3977,35 @@ export const examples: Example[] = [
       reference: null,
     },
   },
+  {
+    title: 'Issue 179',
+    exercise: {
+      format: 'v1',
+      instruction: { lines: [] },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  {
+                    kind: 'editableTextInput',
+                    showOriginalText: false,
+                    contents: [{ kind: 'text', text: 'saucisson' }],
+                    increaseHorizontalSpace: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+    imagesUrls: {},
+  },
 ]
 </script>
 
