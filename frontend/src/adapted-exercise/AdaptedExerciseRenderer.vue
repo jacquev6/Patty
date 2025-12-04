@@ -699,7 +699,11 @@ const spacingVariables = computed(() =>
           <TriColorLines ref="tricolor" :tricolored>
             <template v-for="{ contents } in page.statement">
               <AloneFreeTextInput
-                v-if="contents.length == 1 && contents[0].kind === 'textInput'"
+                v-if="
+                  contents.length == 1 &&
+                  contents[0].kind === 'textInput' &&
+                  contents[0].increaseHorizontalSpace === false
+                "
                 :component="contents[0]"
                 :tricolorable="true"
               />
