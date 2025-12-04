@@ -1,7 +1,7 @@
 import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 
-import { examples } from './AdaptedExerciseExamplesView.vue'
+import { examples } from './AdaptedExerciseExamples'
 import { ensureV2 } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
