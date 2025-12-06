@@ -3,7 +3,7 @@ import { ignoreResizeObserverLoopError, loadFixtures, visit, screenshot } from '
 describe('The extraction batch creation page', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-adaptation', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-adaptation', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-extraction-batch')
   })

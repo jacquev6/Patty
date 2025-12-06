@@ -167,7 +167,7 @@ services:
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["python", "-m", "patty", "load-fixtures", "--truncate", "dummy-adaptation", "dummy-extraction-strategy"]
+    command: ["python", "-m", "patty", "load-fixtures", "--truncate", "dummy-adaptation", "dummy-extraction-strategy-v2", "dummy-extraction-strategy-v3"]
     depends_on:
       migrator:
         condition: service_completed_successfully

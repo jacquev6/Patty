@@ -10,6 +10,14 @@ describe('Patty', () => {
     visit('/')
   })
 
+  if (!Cypress.env('PATTY_UNIT_TESTING')) {
+    it('loads a textbook', () => {
+      cy.get('a:contains("Outils pour le français CE2 2019")').click()
+      cy.location('pathname').should('eq', '/textbook-1')
+      cy.get('h1:contains("Outils pour le français CE2 2019")').should('exist')
+    })
+  }
+
   it('creates an extraction batch', () => {
     cy.get('a:contains("New extraction batch")').click()
     cy.get('input[type="file"]').selectFile('e2e-tests/inputs/test.pdf')

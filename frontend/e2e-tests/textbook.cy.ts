@@ -3,7 +3,7 @@ import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit, visitEx
 describe('The creation form for textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-branch', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-branch', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/new-textbook')
   })
@@ -183,10 +183,29 @@ describe('The creation form for textbooks', () => {
   })
 })
 
+describe('The creation form for textbooks with "v3" extraction strategy', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['dummy-branch', 'dummy-extraction-strategy-v3', 'dummy-coche-exercise-classes'])
+    ignoreResizeObserverLoopError()
+    visit('/new-textbook')
+  })
+
+  it('creates a single-PDF textbook with a range', () => {
+    cy.get('[data-cy="textbook-title"]').type('Single-PDF with range', { delay: 0 })
+    cy.get('label:contains("Single PDF") input').check()
+    cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
+    cy.get('label:contains("All pages") input[type="checkbox"]').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get('li a:contains("1")').should('exist')
+    cy.get('li a:contains("2")').should('exist')
+  })
+})
+
 describe('The edition form for multi-PDFs textbooks - empty', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-textbook', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
   })
@@ -462,7 +481,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
 describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-textbook-with-pdf-range', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
     cy.get('li a:contains("40")').should('have.attr', 'href', '/textbook-1/page-40').click()
@@ -645,7 +664,7 @@ describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
 describe('The edition form for single-PDF textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-single-pdf-textbook', 'dummy-extraction-strategy', 'dummy-coche-exercise-classes'])
+    loadFixtures(['dummy-single-pdf-textbook', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
     cy.get('li a:contains("8")').should('exist')
