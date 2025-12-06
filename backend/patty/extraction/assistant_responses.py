@@ -65,16 +65,13 @@ class UnknownError(ApiModel):
     error: Literal["unknown"]
 
 
-Response = (
-    SuccessV1
-    | SuccessV2
-    | SuccessV3
-    | InvalidJsonErrorV2
-    | InvalidJsonErrorV3
-    | NotJsonErrorV2
-    | NotJsonErrorV3
-    | UnknownError
-)
+Success = SuccessV1 | SuccessV2 | SuccessV3
+
+InvalidJsonError = InvalidJsonErrorV2 | InvalidJsonErrorV3
+
+NotJsonError = NotJsonErrorV2 | NotJsonErrorV3
+
+Response = Success | InvalidJsonError | NotJsonError | UnknownError
 
 
 def validate(obj: Any) -> Response:

@@ -57,7 +57,7 @@ describe('Classification batches', () => {
 describe('Extraction batches', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-extraction-strategy'])
+    loadFixtures(['dummy-extraction-strategy-v2'])
     ignoreResizeObserverLoopError()
   })
 
@@ -79,7 +79,7 @@ describe('Textbooks', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
     loadFixtures([
-      'dummy-extraction-strategy',
+      'dummy-extraction-strategy-v2',
       'dummy-expression-ecrite-exercise-class',
       'dummy-transforme-mot-exercise-class',
     ])

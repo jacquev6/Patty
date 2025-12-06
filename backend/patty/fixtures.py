@@ -1439,13 +1439,25 @@ class FixturesCreator:
     def create_dummy_rcimage_exercise_class(self) -> None:
         self.create_dummy_branch(name="RCImage", system_prompt="Blah blah RC image.")
 
-    def create_dummy_extraction_strategy(self) -> None:
+    def create_dummy_extraction_strategy_v2(self) -> None:
         self.add(
             extraction.ExtractionSettings(
                 created_by="Patty",
                 created_at=created_at,
                 prompt="Blah blah blah.",
                 output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
+        )
+
+    def create_dummy_extraction_strategy_v3(self) -> None:
+        self.add(
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt='Blah blah blah "statement".',
+                output_schema_description=extraction.OutputSchemaDescriptionV3(
+                    version="v3", append_text_and_styles_to_prompt=True, cleanup_slashes=True
+                ),
             )
         )
 
