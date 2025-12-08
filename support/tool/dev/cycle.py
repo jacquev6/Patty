@@ -144,7 +144,10 @@ class DevelopmentCycle:
                                     "--spec",
                                     spec[9:],
                                 ],
-                                env={"CYPRESS_PATTY_UNIT_TESTING": "true"},
+                                env={
+                                    "CYPRESS_PATTY_UNIT_TESTING": "true",
+                                    # "ELECTRON_ENABLE_LOGGING": "true",
+                                },
                                 check=False,
                                 capture=True,
                                 mount=mounts,
@@ -160,6 +163,7 @@ class DevelopmentCycle:
                     ):
                         if result.returncode == 0:
                             print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: OK")
+                            # print(result.stdout, result.stderr)
                         else:
                             component_failures.append(result)
                             print(f"{os.path.join('frontend', result.args[-1])} {result.args[-3]}: FAILED")
