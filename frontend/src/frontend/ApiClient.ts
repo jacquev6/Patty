@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import createClient from 'openapi-fetch'
 
 import type { paths } from '@/frontend/openapi'

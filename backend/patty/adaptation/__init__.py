@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from . import adapted as adapted
 from . import assistant_responses as assistant_responses
 from . import llm as llm

@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, loadFixtures, visit, screenshot } from './utils'
 
 describe('The extraction batch creation page', () => {

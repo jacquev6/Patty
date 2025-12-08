@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import VirtualNumericalKeyboardTestComponent from './VirtualNumericalKeyboardTestComponent.vue'
 import assert from '$/assert'
 

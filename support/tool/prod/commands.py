@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 import glob
 import os
@@ -42,13 +44,15 @@ def preview(with_jacquev6_s3: bool) -> None:
         )
         print("Patty prod preview: started (close with Ctrl+C)")
         try:
-            subprocess.run(["docker", "compose", "logs", "--follow"], cwd="support/prod", env=env,check=False)
+            subprocess.run(["docker", "compose", "logs", "--follow"], cwd="support/prod", env=env, check=False)
         except KeyboardInterrupt:
             pass
     finally:
         print("Patty prod preview: clean-up")
-        subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/prod", env=env,check=True)
-        subprocess.run(["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/prod", env=env,check=True)
+        subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/prod", env=env, check=True)
+        subprocess.run(
+            ["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/prod", env=env, check=True
+        )
 
 
 @prod.command()

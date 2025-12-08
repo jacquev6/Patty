@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from typing import Any, Literal, TypeVar
 import abc
 import json

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 *Patty* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
 
 This README is designed to be read linearly once, from start to end.

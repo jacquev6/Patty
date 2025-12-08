@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit, visitExport } from './utils'
 
 describe('The creation form for textbooks', () => {

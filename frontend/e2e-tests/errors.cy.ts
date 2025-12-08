@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { visit, loadFixtures } from './utils'
 
 describe("Patty's error catcher", () => {

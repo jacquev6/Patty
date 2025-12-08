@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <!--
 Rationale: why not use an <input type="text" list="id" /> with a <datalist>?
 

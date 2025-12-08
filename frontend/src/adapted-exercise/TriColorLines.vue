@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 /* Colors provided by client */
 export const colors: [string, string, string] = ['rgb(0, 0, 255)', 'rgb(255, 0, 0)', 'rgb(0, 204, 0)']

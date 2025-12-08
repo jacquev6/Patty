@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 ARG FRONTEND_DEPENDENCIES_IMAGE=frontend-dependencies
 ARG BACKEND_DEPENDENCIES_IMAGE=backend-dependencies
 

@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { createI18n } from 'vue-i18n'
 
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'

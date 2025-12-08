@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from __future__ import annotations
 from typing import Literal
 import datetime

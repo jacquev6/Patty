@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from collections.abc import Iterable
 from typing import Any, Literal
 import base64

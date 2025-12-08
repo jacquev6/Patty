@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import Split from 'split-grid'
 import { onMounted, ref, useTemplateRef, watch } from 'vue'

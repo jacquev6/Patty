@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 

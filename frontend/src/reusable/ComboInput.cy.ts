@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import ComboInput from './ComboInput.vue'
 
 const screenshotsCounts: Record<string, number> = {}

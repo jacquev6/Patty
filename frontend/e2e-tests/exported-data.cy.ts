@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, visit, visitExport, screenshot, loadFixtures } from './utils'
 
 describe('The autonomous HTML for a single adaptation', () => {

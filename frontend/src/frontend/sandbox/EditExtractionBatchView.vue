@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import EditExtractionBatchForm from './EditExtractionBatchForm.vue'
 import { type ExtractionBatch, useAuthenticatedClient } from '@/frontend/ApiClient'

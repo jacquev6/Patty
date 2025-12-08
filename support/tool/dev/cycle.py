@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import dataclasses
 import glob
 import os
@@ -42,6 +44,7 @@ class DevelopmentCycle:
     def do_run(self) -> None:
         if self.do_lint:
             self._check_readme_literals()
+            self.__check_copyright_notices()
 
         if self.do_backend:
             if self.do_migration:
@@ -256,6 +259,38 @@ class DevelopmentCycle:
                             "YYYYMMDD-HHMMSS",
                             "*.pt",
                         ], f"Line {line_index + 1}: '{literal}' is not known"
+
+    def __check_copyright_notices(self) -> None:
+        globally_ok = True
+        for file_path in subprocess.run(["git", "ls-files"], capture_output=True, text=True).stdout.splitlines():
+            file_path = file_path.strip('"')
+            if (
+                file_path.startswith("backend/generated/")
+                or file_path.startswith("frontend/e2e-tests/inputs/")
+                or file_path.endswith(".png")
+                or file_path.endswith(".json")
+                or file_path.endswith("/.gitattributes")
+                or file_path.endswith("/.gitignore")
+                or file_path == ".gitignore"
+                or file_path
+                in [
+                    "backend/test-inputs/Dummy Textbook Title.html",
+                    "frontend/src/frontend/openapi.ts",
+                    "frontend/src/export/adaptation/index.html",
+                    "frontend/src/export/batch/index.html",
+                    "frontend/src/export/textbook/index.html",
+                ]
+            ):
+                continue
+
+            with open(file_path) as f:
+                for line in f:
+                    if "Copyright 2025 Vincent Jacques" in line:
+                        break
+                else:
+                    globally_ok = False
+                    print(f"{file_path}: copyright notice missing")
+        assert globally_ok
 
 
 def make_screenshots_directory(spec: str, browser: str, clear: bool) -> dict[str, str]:

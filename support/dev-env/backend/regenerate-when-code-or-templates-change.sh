@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 set -o errexit
 set -o nounset

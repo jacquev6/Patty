@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import type { PassiveRenderable } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import PassiveSingleComponent from './PassiveSingleComponent.vue'

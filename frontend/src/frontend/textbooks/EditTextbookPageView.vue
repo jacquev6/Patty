@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { type Textbook, type TextbookPage, useAuthenticatedClient } from '@/frontend/ApiClient'
 import EditTextbookPageForm from './EditTextbookPageForm.vue'

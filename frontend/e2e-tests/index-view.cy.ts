@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { loadFixtures, visit } from './utils'
 
 describe('The index view', () => {

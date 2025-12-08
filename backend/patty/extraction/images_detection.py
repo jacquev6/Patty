@@ -1,3 +1,6 @@
+# Copyright 2025 Mohamed-Amine Lasheb <mohamed-amine.lasheb@lecnam.net>
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 
 import cv2

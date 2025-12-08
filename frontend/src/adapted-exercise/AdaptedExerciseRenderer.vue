@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 import type { AdaptedExercise, AdaptedExerciseV2, ImagesUrls } from '@/frontend/ApiClient'
 import { match, P } from 'ts-pattern'

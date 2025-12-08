@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts" setup>
 import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 

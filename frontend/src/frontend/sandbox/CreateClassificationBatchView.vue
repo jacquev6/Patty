@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import CreateClassificationBatchForm from './CreateClassificationBatchForm.vue'
 import { useBreadcrumbsStore } from '@/frontend/basic/BreadcrumbsStore'

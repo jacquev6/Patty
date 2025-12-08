@@ -1,3 +1,6 @@
+# Copyright 2025 Elise Lincker <elise.lincker@lecnam.net>
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 import os
 import typing

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import type { AnyRenderable } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import AnySingleComponent from './AnySingleComponent.vue'
