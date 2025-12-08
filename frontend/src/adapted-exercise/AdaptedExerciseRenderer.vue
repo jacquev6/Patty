@@ -727,13 +727,13 @@ const spacingVariables = computed(() =>
         </div>
       </template>
       <template v-else-if="page.kind === 'end'">
-        <p class="reference">
+        <p class="endPage">
           <button :disabled="!closable" @click="close">{{ t('exit') }}</button>
         </p>
-        <p class="reference">
+        <p class="endPage">
           <button @click="pageIndex = 0">{{ t('back') }}</button>
         </p>
-        <p class="reference">
+        <p class="endPage">
           <button @click="reset">{{ t('reset') }}</button>
         </p>
       </template>
@@ -786,6 +786,16 @@ div.container {
 }
 
 .reference {
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-bottom: 1em;
+  margin-top: calc(
+    var(--vertical-space-between-top-and-instruction) - (var(--vertical-space-between-instruction-lines) - 1em) / 2
+  );
+  line-height: var(--vertical-space-between-instruction-lines);
+}
+
+.endPage {
   padding-left: 6px;
   padding-right: 6px;
   margin-top: 1em;
