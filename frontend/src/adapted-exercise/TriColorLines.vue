@@ -24,6 +24,11 @@ onUpdated(recolor)
 // So, better safe than sorry, let's update the colors periodically.
 setInterval(recolor, 1000)
 
+const tricolorablesTriggerRecoloring = ref(0)
+provide('tricolorablesTriggerRecoloring', tricolorablesTriggerRecoloring)
+
+watch(tricolorablesTriggerRecoloring, () => nextTick(recolor))
+
 const tricolorablesRevisionIndex = ref(0)
 provide('tricolorablesRevisionIndex', tricolorablesRevisionIndex)
 

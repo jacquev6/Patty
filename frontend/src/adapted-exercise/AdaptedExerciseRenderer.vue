@@ -192,6 +192,7 @@ type SwappableInputRenderable = {
   kind: 'swappableInput'
   path: string
   contents: PassiveRenderable[]
+  editable: boolean
 }
 
 export type SplitWordInputRenderable = {
@@ -382,11 +383,12 @@ function makeRenderableFromStatementComponent(
         mayBeSingleLetter: false,
       },
     ])
-    .with({ kind: 'swappableInput' }, ({ contents }) => [
+    .with({ kind: 'swappableInput' }, ({ contents, editable }) => [
       {
         kind: 'swappableInput',
         path,
         contents: contents.flatMap((x) => makeRenderableFromFormattedTextComponent(imagesUrls, x)),
+        editable: editable == undefined ? false : editable,
       },
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)

@@ -189,6 +189,7 @@ class SelectableInput(BaseModel):
 class SwappableInput(BaseModel):
     kind: Literal["swappableInput"]
     contents: list[FormattedText]
+    editable: bool = False
 
     def flat_contents(self) -> Iterable[SwappableInput | FormattedText]:
         yield self

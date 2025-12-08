@@ -916,6 +916,11 @@
           },
           "title": "Contents",
           "type": "array"
+        },
+        "editable": {
+          "default": false,
+          "title": "Editable",
+          "type": "boolean"
         }
       },
       "required": [

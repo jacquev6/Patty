@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import type { AdaptedExercise, ImagesUrls } from './ApiClient'
 
 export type Example = {
@@ -74,6 +76,62 @@ export const examples: Example[] = [
   //     reference: null,
   //   },
   // },
+  {
+    title: 'Editable swappable inputs',
+    exercise: {
+      format: 'v1',
+      instruction: {
+        lines: [
+          {
+            contents: [
+              { kind: 'text', text: 'Forme' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'une' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'phrase' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'corrige' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'ponctuation' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'et' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'typographie' },
+              { kind: 'text', text: '.' },
+            ],
+          },
+        ],
+      },
+      example: null,
+      hint: null,
+      statement: {
+        pages: [
+          {
+            lines: [
+              {
+                contents: [
+                  { kind: 'swappableInput', contents: [{ kind: 'text', text: 'mange' }], editable: true },
+                  {
+                    kind: 'swappableInput',
+                    contents: [{ kind: 'text', text: 'le' }, { kind: 'whitespace' }, { kind: 'text', text: 'chat' }],
+                    editable: true,
+                  },
+                  {
+                    kind: 'swappableInput',
+                    contents: [{ kind: 'text', text: 'la' }, { kind: 'whitespace' }, { kind: 'text', text: 'souris' }],
+                    editable: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      reference: null,
+    },
+  },
   {
     title: 'Image alignées',
     exercise: {

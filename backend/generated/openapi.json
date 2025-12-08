@@ -4724,6 +4724,11 @@
             "title": "Contents",
             "type": "array"
           },
+          "editable": {
+            "default": false,
+            "title": "Editable",
+            "type": "boolean"
+          },
           "kind": {
             "const": "swappableInput",
             "title": "Kind",
@@ -4760,6 +4765,11 @@
             },
             "title": "Contents",
             "type": "array"
+          },
+          "editable": {
+            "default": false,
+            "title": "Editable",
+            "type": "boolean"
           },
           "kind": {
             "const": "swappableInput",

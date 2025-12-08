@@ -2498,6 +2498,11 @@ export interface components {
         | components['schemas']['Image']
       )[]
       /**
+       * Editable
+       * @default false
+       */
+      editable?: boolean
+      /**
        * Kind
        * @constant
        */
@@ -2512,6 +2517,11 @@ export interface components {
         | components['schemas']['Formatted-Output']
         | components['schemas']['Image']
       )[]
+      /**
+       * Editable
+       * @default false
+       */
+      editable?: boolean
       /**
        * Kind
        * @constant

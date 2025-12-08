@@ -55,10 +55,11 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
-    .with({ kind: 'swappableInput' }, ({ path, contents }) =>
+    .with({ kind: 'swappableInput' }, ({ path, contents, editable }) =>
       h(SwappableInputRenderer, {
         path,
         contents,
+        editable,
         tricolorable: props.tricolorable,
       }),
     )

@@ -604,10 +604,10 @@ describe('Adapted exercise answers', () => {
   }
 
   const answersForSwappableInputs: StudentAnswers = {
-    'stmt-pg0-ln0-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln1-ct4' },
-    'stmt-pg0-ln1-ct4': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct6' },
-    'stmt-pg0-ln2-ct2': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
-    'stmt-pg0-ln2-ct6': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
+    'stmt-pg0-ln0-ct2-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln1-ct4' },
+    'stmt-pg0-ln1-ct4-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct6' },
+    'stmt-pg0-ln2-ct2-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
+    'stmt-pg0-ln2-ct6-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
   }
 
   it('are saved for swappable inputs', () => {
@@ -661,6 +661,142 @@ describe('Adapted exercise answers', () => {
     cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'e')
     cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'a')
     cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'f')
+  })
+
+  const exerciseWithEditableSwappableInputs: AdaptedExercise = {
+    format: 'v1',
+    instruction: { lines: [] },
+    example: null,
+    hint: null,
+    statement: {
+      pages: [
+        {
+          lines: [
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'a' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'b' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'c' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'd' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'e' }], editable: true },
+              ],
+            },
+            {
+              contents: [
+                { kind: 'text', text: 'A' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'f' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'B' },
+                { kind: 'whitespace' },
+                { kind: 'swappableInput', contents: [{ kind: 'text', text: 'g' }], editable: true },
+                { kind: 'whitespace' },
+                { kind: 'text', text: 'C' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    reference: null,
+  }
+
+  const answersForEditableSwappableInputs: StudentAnswers = {
+    'stmt-pg0-ln0-ct2-txt': { kind: 'text', text: 'A' },
+    'stmt-pg0-ln0-ct6-txt': { kind: 'text', text: 'B' },
+    'stmt-pg0-ln1-ct0-txt': { kind: 'text', text: 'C' },
+    'stmt-pg0-ln1-ct4-txt': { kind: 'text', text: 'D' },
+    'stmt-pg0-ln1-ct8-txt': { kind: 'text', text: 'E' },
+    'stmt-pg0-ln2-ct2-txt': { kind: 'text', text: 'F' },
+    'stmt-pg0-ln2-ct6-txt': { kind: 'text', text: 'G' },
+    'stmt-pg0-ln1-ct4-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct6' },
+    'stmt-pg0-ln0-ct2-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln1-ct4' },
+    'stmt-pg0-ln2-ct2-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln0-ct2' },
+    'stmt-pg0-ln2-ct6-swp': { kind: 'swappable', contentsFrom: 'stmt-pg0-ln2-ct2' },
+  }
+
+  it('are saved for editable swappable inputs', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithEditableSwappableInputs,
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    getAnswers().should('deep.equal', emptyAnswers)
+
+    cy.get('[data-cy="swappableInput"]').eq(0).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'a').clear().type('A', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(1).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'b').clear().type('B', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(2).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'c').clear().type('C', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(3).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'd').clear().type('D', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(4).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'e').clear().type('E', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(5).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'f').clear().type('F', { delay: 0 }).blur()
+    cy.get('[data-cy="swappableInput"]').eq(6).dblclick()
+    cy.get('[data-cy="freeTextInput"]').should('have.text', 'g').clear().type('G', { delay: 0 }).blur()
+
+    cy.get('[data-cy="swappableInput"]').eq(0).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+    cy.get('[data-cy="swappableInput"]').eq(5).click()
+    cy.get('[data-cy="swappableInput"]').eq(6).click()
+    cy.get('[data-cy="swappableInput"]').eq(3).click()
+
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.text', 'D')
+    cy.get('[data-cy="swappableInput"]').eq(1).should('have.text', 'B')
+    cy.get('[data-cy="swappableInput"]').eq(2).should('have.text', 'C')
+    cy.get('[data-cy="swappableInput"]').eq(3).should('have.text', 'G')
+    cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'E')
+    cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'A')
+    cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'F')
+
+    getAnswers().should('deep.equal', answersForEditableSwappableInputs)
+  })
+
+  it('are loaded for editable swappable inputs', () => {
+    setAnswers(answersForEditableSwappableInputs)
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        studentAnswersStorageKey,
+        adaptedExercise: exerciseWithEditableSwappableInputs,
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).should('have.text', 'D')
+    cy.get('[data-cy="swappableInput"]').eq(1).should('have.text', 'B')
+    cy.get('[data-cy="swappableInput"]').eq(2).should('have.text', 'C')
+    cy.get('[data-cy="swappableInput"]').eq(3).should('have.text', 'G')
+    cy.get('[data-cy="swappableInput"]').eq(4).should('have.text', 'E')
+    cy.get('[data-cy="swappableInput"]').eq(5).should('have.text', 'A')
+    cy.get('[data-cy="swappableInput"]').eq(6).should('have.text', 'F')
   })
 
   const exerciseWithEditableTextInputs: AdaptedExercise = {
