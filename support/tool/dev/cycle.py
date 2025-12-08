@@ -254,6 +254,7 @@ class DevelopmentCycle:
                             "uvicorn",
                             "venv",
                             "YYYYMMDD-HHMMSS",
+                            "*.pt",
                         ], f"Line {line_index + 1}: '{literal}' is not known"
 
 
