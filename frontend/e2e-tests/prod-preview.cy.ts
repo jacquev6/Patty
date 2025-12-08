@@ -24,7 +24,7 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.get(':contains("in progress")').should('exist')
 
-    cy.get('a:contains("Patty home")').click()
+    cy.get('a:contains("Malin home")').click()
     cy.get('li:contains("created by Alice") a:contains("Batch E")').should('exist')
   })
 })

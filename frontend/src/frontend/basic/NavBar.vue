@@ -52,7 +52,7 @@ a {
 
 <i18n>
 en:
-  home: Patty home
+  home: Malin home
 fr:
-  home: "Patty : accueil"
+  home: "Malin : accueil"
 </i18n>

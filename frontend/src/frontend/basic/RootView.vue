@@ -58,8 +58,8 @@ const unavailableUntil = forceAvailable ? null : (fromSubstitution ?? fromQuery)
 <i18n>
 en:
   unavailable: "Unavailable"
-  inProgress: "A maintenance operation is in in progress. Patty should be available again on {datetime}."
+  inProgress: "A maintenance operation is in in progress. Malin should be available again on {datetime}."
 fr:
   unavailable: "Indisponible"
-  inProgress: "Une opération de maintenance est en cours. Patty devrait être de nouveau disponible le {datetime}."
+  inProgress: "Une opération de maintenance est en cours. Malin devrait être de nouveau disponible le {datetime}."
 </i18n>
