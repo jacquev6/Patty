@@ -288,6 +288,9 @@ The first time you run it, it will ask you to create a few files according to te
 These files contain secret environment variables that must not be stored in the repository (API keys, AIM credentials, *etc.*).
 The template files will point you at the documentation about what values to put in these files.
 
+It will also ask you to add some `*.pt` model files in the repository.
+You can get these files from the project maintainers.
+
 You can then visit http://localhost:8080/.
 The password is `password`.
 

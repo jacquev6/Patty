@@ -13,6 +13,19 @@ do
     ok=false
   fi
 done < <(find . -name '*.template' -not -path './.venv/*' -not -path './support/dev-env/backend/home-local/*')
+
+for environment in dev-env prod
+do
+  for model_file in images-detection-models/2025-09-15-detImages.pt classification-models/2025-05-20-classification_camembert.pt
+  do
+    if ! [ -f "support/$environment/backend/$model_file" ]
+    then
+      echo "Please download '$model_file' into 'support/$environment/backend/'"
+      ok=false
+    fi
+  done
+done
+
 $ok
 
 # @todo Evaluate if https://github.com/astral-sh/uv can make this use case easier
