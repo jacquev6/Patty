@@ -28,6 +28,7 @@ services:
       - ./backend/external-exercises:/external-exercises
       - ./backend/pdf-files:/pdf-files
       - ./backend/exercise-images:/exercise-images
+      - ./db/backups:/db-backups
     env_file:
       - backend/env
       - backend/secrets.env
@@ -44,6 +45,7 @@ services:
       - ./backend/external-exercises:/external-exercises
       - ./backend/pdf-files:/pdf-files
       - ./backend/exercise-images:/exercise-images
+      - ./db/backups:/db-backups
     env_file:
       - backend/env
       - backend/secrets.env
@@ -64,10 +66,12 @@ services:
   data-loader:
     image: jacquev6/patty:preview-backend
     pull_policy: never
+    environment:
+      - PATTY_USE_JACQUEV6_S3
     env_file:
       - backend/env
       - backend/secrets.env
-    command: ["bash", "-c", "python -m patty restore-database --patch-according-to-settings --yes && (cd patty; alembic upgrade head) && python -m patty migrate-data"]
+    command: ["bash", "-c", "if [ $PATTY_USE_JACQUEV6_S3 == true ]; then echo 'Restoring prod DB backup' && python -m patty restore-database --patch-according-to-settings --yes && echo 'Upgrading DB schema' && (cd patty && alembic upgrade head) && echo 'Migrating data' && python -m patty migrate-data; else echo 'Creating DB schema' && (cd patty && alembic upgrade head) && echo 'Inserting seed data' && python -m patty load-fixtures dummy-adaptation dummy-extraction-strategy-v2 dummy-extraction-strategy-v3 && sleep 10; fi"]
     depends_on:
       db:
         condition: service_healthy
@@ -79,6 +83,8 @@ services:
     pull_policy: never
     volumes:
       - ../../frontend:/app/frontend
+    environment:
+      - PATTY_USE_JACQUEV6_S3
     working_dir: /app/frontend
     init: true
     command: ["npx", "cypress", "run", "--e2e", "--config", "baseUrl=http://fanout:8090/", "--spec", "e2e-tests/prod-preview.cy.ts"]
@@ -88,6 +94,13 @@ services:
   db-backup:
     image: jacquev6/patty:preview-backend
     pull_policy: never
+    volumes:
+      - ./backend/classification-models:/classification-models
+      - ./backend/images-detection-models:/images-detection-models
+      - ./backend/external-exercises:/external-exercises
+      - ./backend/pdf-files:/pdf-files
+      - ./backend/exercise-images:/exercise-images
+      - ./db/backups:/db-backups
     env_file:
       - backend/env
       - backend/secrets.env

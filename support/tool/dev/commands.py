@@ -43,6 +43,7 @@ def clean(force: bool) -> None:
                 "support/prod/backend/exercise-images/",
                 "support/prod/backend/external-exercises/",
                 "support/prod/backend/pdf-files/",
+                "support/prod/db/backups/",
             ]
         ):
             remove = True

@@ -1,5 +1,5 @@
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
-PATTY_DATABASE_BACKUPS_URL=s3://jacquev6/patty/preview/backups
+PATTY_DATABASE_BACKUPS_URL=file:///db-backups
 PATTY_EXTERNAL_EXERCISES_URL=file:///external-exercises
 PATTY_PDF_FILES_URL=file:///pdf-files
 PATTY_2025_05_20_CLASSIFICATION_CAMEMBERT_PT_PATH=/classification-models/2025-05-20-classification_camembert.pt
