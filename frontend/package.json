@@ -12,7 +12,6 @@
     "deep-copy": "^1.4.2",
     "deep-equal": "^2.2.3",
     "json-stringify-pretty-compact": "^4.0.0",
-    "levenshtein-edit-distance": "^3.0.1",
     "lodash": "^4.17.21",
     "marked": "^15.0.12",
     "modern-normalize": "^3.0.1",
