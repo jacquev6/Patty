@@ -9,7 +9,6 @@ from .orm_models import (
     AdaptableExercise as AdaptableExercise,
     Adaptation as Adaptation,
     AdaptationCreation as AdaptationCreation,
-    AdaptationCreationByUser_ToBeDeleted as AdaptationCreationByUser_ToBeDeleted,
     AdaptationSettings as AdaptationSettings,
     ExerciseClass as ExerciseClass,
 )

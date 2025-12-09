@@ -273,16 +273,4 @@ class AdaptationCreation(OrmBase):
     )
 
 
-# @todo Delete this class (after migration of data with Patty 2025-09-10)
-class AdaptationCreationByUser_ToBeDeleted(AdaptationCreation):
-    __tablename__ = "adaptation_creations__by_user"
-    __mapper_args__ = {"polymorphic_identity": "by_user"}
-
-    def __init__(self) -> None:
-        assert False
-
-    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationCreation.id), primary_key=True)
-    username: orm.Mapped[str] = orm.mapped_column()
-
-
 annotate_new_tables("adaptation")
