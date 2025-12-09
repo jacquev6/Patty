@@ -78,7 +78,7 @@ class Classification(OrmBase):
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(
-        foreign_keys=[exercise_id], remote_side=[AdaptableExercise.id], back_populates="classifications"
+        foreign_keys=[exercise_id], remote_side=[AdaptableExercise.id], back_populates="ordered_classifications"
     )
 
     at: orm.Mapped[datetime.datetime] = orm.mapped_column(sql.DateTime(timezone=True))

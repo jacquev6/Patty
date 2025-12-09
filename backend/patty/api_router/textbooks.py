@@ -415,7 +415,7 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
             if exercise.created.page_extraction.created.effectively_removed:
                 continue
 
-            latest_classification = exercise.classifications[-1] if exercise.classifications else None
+            latest_classification = exercise.latest_classification
 
             exercise_class = (
                 latest_classification.exercise_class.name
@@ -447,11 +447,12 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     kind="byModel", exercise_class=exercise_class, class_has_settings=exercise_class_has_settings
                 )
 
+            latest_adaptation = exercise.latest_adaptation
             adaptation_status: previewable_exercise.AdaptationStatus
-            if len(exercise.adaptations) == 0:
+            if latest_adaptation is None:
                 adaptation_status = previewable_exercise.AdaptationNotStarted(kind="notStarted")
             else:
-                adaptation_status = previewable_exercise.make_api_adaptation_status(exercise.adaptations[-1])
+                adaptation_status = previewable_exercise.make_api_adaptation_status(latest_adaptation)
 
             if adaptation_status.kind == "inProgress":
                 needs_refresh = True
@@ -569,12 +570,9 @@ def put_textbook_exercises_removed(
     assert exercise.location.textbook == textbook
     exercise.location.marked_as_removed = removed
     if isinstance(exercise, adaptation.AdaptableExercise):
-        classification = exercise.classifications[-1] if exercise.classifications else None
-        if classification is not None and classification.exercise_class is not None:
-            adaptation_ = exercise.fetch_latest_adaptation(classification.exercise_class)
-            if adaptation_ is not None:
-                adaptation_.approved_by = None
-                adaptation_.approved_at = None
+        for adaptation_ in exercise.unordered_adaptations:
+            adaptation_.approved_by = None
+            adaptation_.approved_at = None
 
 
 class PostTextbookRangesRequest(ApiModel):

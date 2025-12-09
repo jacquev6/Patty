@@ -147,7 +147,7 @@ def get_extraction_batch_adaptations(
 ) -> Iterable[adaptation.Adaptation | None]:
     batch = get_by_id(session, sandbox.extraction.SandboxExtractionBatch, id)
     return [
-        ec.exercise.adaptations[-1] if len(ec.exercise.adaptations) > 0 else None
+        ec.exercise.latest_adaptation
         for pec in batch.page_extraction_creations
         for ec in pec.page_extraction.exercise_creations__ordered_by_id
         if isinstance(ec.exercise, adaptation.AdaptableExercise)
@@ -194,7 +194,7 @@ def get_classification_batch_adaptations(
     session: database_utils.Session, id: str
 ) -> Iterable[adaptation.Adaptation | None]:
     return [
-        classification.exercise.adaptations[-1] if len(classification.exercise.adaptations) > 0 else None
+        classification.exercise.latest_adaptation
         for classification in get_by_id(
             session, sandbox.classification.SandboxClassificationBatch, id
         ).classification_chunk_creation.classification_chunk.classifications
@@ -228,11 +228,7 @@ def get_adaptation_batch_adaptations(
     session: database_utils.Session, id: str
 ) -> Iterable[adaptation.Adaptation | None]:
     return [
-        (
-            adaptation_creation.exercise_adaptation.exercise.adaptations[-1]
-            if len(adaptation_creation.exercise_adaptation.exercise.adaptations) > 0
-            else None
-        )
+        adaptation_creation.exercise_adaptation.exercise.latest_adaptation
         for adaptation_creation in get_by_id(
             session, sandbox.adaptation.SandboxAdaptationBatch, id
         ).adaptation_creations
@@ -407,8 +403,9 @@ def get_textbook_data(id: str, session: database_utils.Session) -> JsonDict:
         if not location.effectively_removed:
             exercise = location.exercise
             if isinstance(exercise, adaptation.AdaptableExercise):
-                if len(exercise.adaptations) != 0:
-                    adapted_exercise_data = make_adapted_exercise_data(exercise.adaptations[-1])
+                latest_adaptation = exercise.latest_adaptation
+                if latest_adaptation is not None:
+                    adapted_exercise_data = make_adapted_exercise_data(latest_adaptation)
                     if adapted_exercise_data is not None:
                         exercises.append(adapted_exercise_data)
             elif isinstance(exercise, external_exercises.ExternalExercise):

@@ -44,17 +44,23 @@ class AdaptableExercise(Exercise):
     instruction_hint_example_text: orm.Mapped[str | None]
     statement_text: orm.Mapped[str | None]
 
-    adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(back_populates="exercise")
+    unordered_adaptations: orm.Mapped[list[Adaptation]] = orm.relationship(back_populates="exercise")
 
-    def fetch_latest_adaptation(self, exercise_class: ExerciseClass) -> Adaptation | None:
-        # @todo Do this in SQL?
-        adaptations = list(
-            filter(lambda adaptation: adaptation.settings.exercise_class == exercise_class, self.adaptations)
-        )
-        if len(adaptations) == 0:
+    @property
+    def latest_adaptation(self) -> Adaptation | None:
+        if self.latest_classification is None:
+            matching_adaptations = self.unordered_adaptations
+        else:
+            matching_adaptations = [
+                adaptation
+                for adaptation in self.unordered_adaptations
+                if adaptation.settings.exercise_class == self.latest_classification.exercise_class
+            ]
+
+        if len(matching_adaptations) == 0:
             return None
         else:
-            return max(adaptations, key=lambda adaptation: adaptation.created.at)
+            return max(matching_adaptations, key=lambda adaptation: adaptation.created.at)
 
     @staticmethod
     def classifications_order_by() -> OrderBy:
@@ -62,9 +68,16 @@ class AdaptableExercise(Exercise):
 
         return [Classification.at]
 
-    classifications: orm.Mapped[list[Classification]] = orm.relationship(
+    ordered_classifications: orm.Mapped[list[Classification]] = orm.relationship(
         back_populates="exercise", order_by=classifications_order_by
     )
+
+    @property
+    def latest_classification(self) -> Classification | None:
+        if len(self.ordered_classifications) == 0:
+            return None
+        else:
+            return self.ordered_classifications[-1]
 
 
 # @todo Move to 'classification' (requires reversing the foreign key ExerciseAdaptationSettings.exercise_class_id)
@@ -174,7 +187,7 @@ class Adaptation(OrmBase):
 
     exercise_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptableExercise.id))
     exercise: orm.Mapped[AdaptableExercise] = orm.relationship(
-        foreign_keys=[exercise_id], remote_side=lambda: [AdaptableExercise.id], back_populates="adaptations"
+        foreign_keys=[exercise_id], remote_side=lambda: [AdaptableExercise.id], back_populates="unordered_adaptations"
     )
 
     settings_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(AdaptationSettings.id))
