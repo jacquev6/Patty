@@ -159,6 +159,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/adaptations/{id}/retry': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Retry Adaptation */
+    post: operations['retry_adaptation_api_adaptations__id__retry_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/available-adaptation-llm-models': {
     parameters: {
       query?: never
@@ -3206,6 +3223,37 @@ export interface operations {
     }
   }
   delete_adaptation_manual_edit_api_adaptations__id__manual_edit_delete: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': unknown
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  retry_adaptation_api_adaptations__id__retry_post: {
     parameters: {
       query?: never
       header?: never

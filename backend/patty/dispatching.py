@@ -101,12 +101,12 @@ def adaptation_creation(
 
 
 class DispatchingTestCase(unittest.TestCase):
-    def check(self, base: type[OrmBase], fn: typing.Any, missing: set[str] = set(), extra: set[str] = set()) -> None:
+    def check(self, base: type[OrmBase], fn: typing.Any) -> None:
         actual = set(
             name for (name, param) in inspect.signature(fn).parameters.items() if param.kind is param.KEYWORD_ONLY
         )
         expected = set(orm.class_mapper(base).polymorphic_map.keys())
-        self.assertSetEqual(actual | missing, expected | extra)
+        self.assertSetEqual(actual, expected)
 
     def test_exercise_creation(self) -> None:
         self.check(exercises.ExerciseCreation, exercise_creation)
@@ -118,4 +118,4 @@ class DispatchingTestCase(unittest.TestCase):
         self.check(classification.ClassificationChunkCreation, classification_chunk_creation)
 
     def test_adaptation_creation(self) -> None:
-        self.check(adaptation.AdaptationCreation, adaptation_creation, missing={"by_user"})
+        self.check(adaptation.AdaptationCreation, adaptation_creation)

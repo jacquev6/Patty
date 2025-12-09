@@ -6333,6 +6333,48 @@
         "summary": "Put Adaptation Manual Edit"
       }
     },
+    "/api/adaptations/{id}/retry": {
+      "post": {
+        "operationId": "retry_adaptation_api_adaptations__id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "title": "Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Retry Adaptation"
+      }
+    },
     "/api/available-adaptation-llm-models": {
       "get": {
         "operationId": "get_available_adaptation_llm_models_api_available_adaptation_llm_models_get",

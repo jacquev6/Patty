@@ -69,6 +69,11 @@ async function approve(adaptationId: string, approved: boolean) {
 function isStringyInt(value: string): boolean {
   return !isNaN(Number.parseInt(value))
 }
+
+async function retry(adaptationId: string) {
+  await client.POST('/api/adaptations/{id}/retry', { params: { path: { id: adaptationId } } })
+  emit('batch-updated')
+}
 </script>
 
 <template>
@@ -106,16 +111,20 @@ function isStringyInt(value: string): boolean {
           <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
           <WhiteSpace />
           <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
-        </template>
-        <template v-if="context === 'textbook' && exercise.adaptationStatus.kind === 'success'">
-          <WhiteSpace />
-          <template v-if="exercise.adaptationStatus.approved === null">
-            <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>
-          </template>
-          <template v-else>
-            <button @click="approve(exercise.adaptationStatus.id, false)">{{ t('unapprove') }}</button>
+          <template v-if="exercise.adaptationStatus.kind === 'success'">
             <WhiteSpace />
-            <span :title="t('approved', exercise.adaptationStatus.approved)" style="font-size: 130%">✅</span>
+            <template v-if="exercise.adaptationStatus.approved === null">
+              <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>
+            </template>
+            <template v-else>
+              <button @click="approve(exercise.adaptationStatus.id, false)">{{ t('unapprove') }}</button>
+              <WhiteSpace />
+              <span :title="t('approved', exercise.adaptationStatus.approved)" style="font-size: 130%">✅</span>
+            </template>
+          </template>
+          <template v-else-if="exercise.adaptationStatus.kind === 'error'">
+            <WhiteSpace />
+            <button @click="retry(exercise.adaptationStatus.id)">{{ t('retry') }}</button>
           </template>
         </template>
       </template>
@@ -180,6 +189,7 @@ en:
   remove: Remove
   approve: Approve
   unapprove: Unapprove
+  retry: Retry
   approved: "Approved by {by}"
 fr:
   input: Entrée
@@ -193,5 +203,6 @@ fr:
   remove: Enlever
   approve: Valider
   unapprove: Invalider
+  retry: Réessayer
   approved: "Validé par {by}"
 </i18n>

@@ -8,6 +8,8 @@ import fastapi
 
 from . import previewable_exercise
 from .. import adaptation
+from .. import classification
+from ..sandbox import adaptation as sandbox_adaptation
 from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
@@ -227,6 +229,36 @@ def set_adaptation_approved(id: str, session: database_utils.SessionDependable, 
     else:
         exercise_adaptation.approved_by = None
         exercise_adaptation.approved_at = None
+
+
+@router.post("/adaptations/{id}/retry")
+def retry_adaptation(id: str, session: database_utils.SessionDependable) -> None:
+    previous_adaptation = get_by_id(session, adaptation.Adaptation, id)
+    now = datetime.datetime.now()
+    new_created = dispatch.adaptation_creation(
+        previous_adaptation.created,
+        by_chunk=lambda ac: classification.AdaptationCreationByChunk(
+            at=now, classification_chunk=ac.classification_chunk
+        ),
+        by_sandbox_batch=lambda ac: sandbox_adaptation.AdaptationCreationBySandboxBatch(
+            at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
+        ),
+    )
+    new_adaptation = adaptation.Adaptation(
+        created=new_created,
+        exercise=previous_adaptation.exercise,
+        model=previous_adaptation.model,
+        settings=previous_adaptation.settings,
+        raw_llm_conversations=[],
+        initial_assistant_response=None,
+        initial_timing=None,
+        adjustments=[],
+        manual_edit=None,
+        approved_by=None,
+        approved_at=None,
+    )
+    session.add(new_adaptation)
+    session.flush()
 
 
 def make_api_adaptation(exercise_adaptation: adaptation.Adaptation) -> ApiAdaptation:
