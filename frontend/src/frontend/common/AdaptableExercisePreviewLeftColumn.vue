@@ -102,12 +102,12 @@ function isStringyInt(value: string): boolean {
             </span>
           </template>
         </template>
-        <template v-else-if="context === 'textbookByBatch'">
+        <template v-else-if="context === 'textbook'">
           <span class="discrete">(<span class="edit" @click="editingClassification = true">🖊️</span>)</span>
           <WhiteSpace />
           <button @click="emit('exercise-removed')">{{ t('remove') }}</button>
         </template>
-        <template v-if="context === 'textbookByBatch' && exercise.adaptationStatus.kind === 'success'">
+        <template v-if="context === 'textbook' && exercise.adaptationStatus.kind === 'success'">
           <WhiteSpace />
           <template v-if="exercise.adaptationStatus.approved === null">
             <button @click="approve(exercise.adaptationStatus.id, true)">{{ t('approve') }}</button>

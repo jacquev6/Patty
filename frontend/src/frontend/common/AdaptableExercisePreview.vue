@@ -5,7 +5,7 @@ import { type ExtractionBatch } from '@/frontend/ApiClient'
 
 export type PreviewableExercise = ExtractionBatch['pages'][number]['exercises'][number]
 
-export type Context = 'adaptation' | 'classification' | 'extraction' | 'textbookByBatch' | 'textbookByPage'
+export type Context = 'adaptation' | 'classification' | 'extraction' | 'textbook'
 </script>
 
 <script setup lang="ts">

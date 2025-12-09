@@ -650,7 +650,7 @@ describe('AdaptableExercisePreview', () => {
         return ['extraction', null] as const
       } else {
         assert(title.startsWith('textbook - '))
-        return ['textbookByBatch', null] as const
+        return ['textbook', null] as const
       }
     })()
 
