@@ -29,7 +29,7 @@ def extract_text_and_styles_from_pdf_page(pdf_page: bytes, page_number: int) -> 
 
             for span in line.get("spans", []):
                 text = span.get("text", "")
-                if not text.strip():
+                if text == "":
                     continue
                 spans.append(
                     {
@@ -45,7 +45,7 @@ def extract_text_and_styles_from_pdf_page(pdf_page: bytes, page_number: int) -> 
             if not spans:
                 continue
 
-            phrase = " ".join(" ".join(texts).split())
+            phrase = "".join(texts)
             fam_d, tag_d, size_d, col_d = weighted_dominant_style(spans)
 
             overrides = []
@@ -162,7 +162,7 @@ class ExtractTextAndStylesTestCase(unittest.TestCase):
         text_and_styles = extract_text_and_styles_from_pdf_page(pdf_data, 1)
 
         self.assertEqual(
-            text_and_styles[:843],
+            text_and_styles[:851],
             textwrap.dedent(
                 """\
                 phrase;font_family;size;color_hex;style_tag;overrides\r
@@ -170,8 +170,8 @@ class ExtractTextAndStylesTestCase(unittest.TestCase):
                 6;HypatiaSansPro;11;#ec008c;bold;\r
                 Je retiens;FrankfurterSHOP;13;#ffffff;medium;\r
                 ●;ZapfDingbatsStd;8;#4352a3;regular;\r
-                ● La classe grammaticale d’un mot désigne ce qu’il est.;HypatiaSansPro;13;#4352a3;bold;●||0|#000000|regular||classe|HypatiaSansPro|13|#4352a3|black||grammaticale|HypatiaSansPro|13|#4352a3|black\r
-                chercher est un verbe . lune est un nom commun .;HypatiaSansPro;13;#4352a3;bold;chercher|HypatiaSansPro|13|#c40075|bold||verbe.|HypatiaSansPro|13|#4352a3|black||lune|HypatiaSansPro|13|#c40075|bold||nom|HypatiaSansPro|13|#4352a3|black||commun. |HypatiaSansPro|13|#4352a3|black\r
+                ●La classe grammaticale d’un mot désigne ce qu’il est.;HypatiaSansPro;13;#4352a3;bold;●||0|#000000|regular||classe|HypatiaSansPro|13|#4352a3|black||grammaticale|HypatiaSansPro|13|#4352a3|black\r
+                chercher est un verbe.           lune est un nom commun. ;HypatiaSansPro;13;#4352a3;bold;chercher|HypatiaSansPro|13|#c40075|bold||verbe.|HypatiaSansPro|13|#4352a3|black||lune|HypatiaSansPro|13|#c40075|bold||nom|HypatiaSansPro|13|#4352a3|black||commun. |HypatiaSansPro|13|#4352a3|black\r
                 On dit aussi que c’est la nature du mot.;HypatiaSansPro;13;#4352a3;bold;nature|HypatiaSansPro|13|#4352a3|black\r
                 ●;ZapfDingbatsStd;8;#4352a3;regular;\r
                 """
