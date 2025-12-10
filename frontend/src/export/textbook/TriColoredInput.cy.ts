@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import TriColoredInput from './TriColoredInput.vue'
 import assert from '$/assert'
 

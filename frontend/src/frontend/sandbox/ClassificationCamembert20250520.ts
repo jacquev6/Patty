@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 const ClassificationCamembert20250520 = {
   fileName: 'classification_camembert.pt',
   providedBy: 'Elise',

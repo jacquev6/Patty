@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { computed, nextTick, onMounted, useTemplateRef, watch } from 'vue'
 import autosize from 'autosize'

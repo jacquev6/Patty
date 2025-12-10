@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, visit } from './utils'
 
 describe('Patty localization', () => {

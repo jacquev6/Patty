@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 
 import fastapi
@@ -211,13 +213,9 @@ async def get_extraction_batch(id: str, session: database_utils.SessionDependabl
         for exercise_creation in page_extraction.exercise_creations__ordered_by_id:
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
-            latest_classification = exercise.classifications[-1] if exercise.classifications else None
+            latest_classification = exercise.latest_classification
 
-            latest_adaptation = (
-                None
-                if latest_classification is None or latest_classification.exercise_class is None
-                else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
-            )
+            latest_adaptation = exercise.latest_adaptation
 
             timing.adaptations.append(latest_adaptation.initial_timing if latest_adaptation is not None else None)
 
@@ -333,12 +331,12 @@ def submit_adaptations_with_recent_settings_in_extraction_batch(
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
 
-            exercise_classification = exercise.classifications[-1]
+            exercise_classification = exercise.latest_classification
             assert isinstance(exercise_classification, classification.ClassificationByChunk)
             assert exercise_classification.classification_chunk == classification_chunk
 
             if (
-                len(exercise.adaptations) == 0
+                exercise.latest_adaptation is None
                 and exercise_classification.exercise_class is not None
                 and exercise_classification.exercise_class.latest_strategy_settings is not None
             ):
@@ -415,12 +413,12 @@ def put_extraction_batch_model_for_adaptation(
             exercise = exercise_creation.exercise
             assert isinstance(exercise, adaptation.AdaptableExercise)
 
-            exercise_classification = exercise.classifications[-1]
+            exercise_classification = exercise.latest_classification
             assert isinstance(exercise_classification, classification.ClassificationByChunk)
             assert exercise_classification.classification_chunk == classification_chunk
 
             if (
-                len(exercise.adaptations) == 0
+                exercise.latest_adaptation is None
                 and exercise_classification.exercise_class is not None
                 and exercise_classification.exercise_class.latest_strategy_settings is not None
             ):

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 /// <reference types="user-agent-data-types" />
 

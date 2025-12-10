@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 import type { AdaptedExercise, AdaptedExerciseV2, ImagesUrls } from '@/frontend/ApiClient'
 import { match, P } from 'ts-pattern'
@@ -190,6 +192,7 @@ type SwappableInputRenderable = {
   kind: 'swappableInput'
   path: string
   contents: PassiveRenderable[]
+  editable: boolean
 }
 
 export type SplitWordInputRenderable = {
@@ -380,11 +383,12 @@ function makeRenderableFromStatementComponent(
         mayBeSingleLetter: false,
       },
     ])
-    .with({ kind: 'swappableInput' }, ({ contents }) => [
+    .with({ kind: 'swappableInput' }, ({ contents, editable }) => [
       {
         kind: 'swappableInput',
         path,
         contents: contents.flatMap((x) => makeRenderableFromFormattedTextComponent(imagesUrls, x)),
+        editable: editable == undefined ? false : editable,
       },
     ])
     .with({ kind: 'editableTextInput', showOriginalText: true }, (c) => c.contents)
@@ -699,7 +703,11 @@ const spacingVariables = computed(() =>
           <TriColorLines ref="tricolor" :tricolored>
             <template v-for="{ contents } in page.statement">
               <AloneFreeTextInput
-                v-if="contents.length == 1 && contents[0].kind === 'textInput'"
+                v-if="
+                  contents.length == 1 &&
+                  contents[0].kind === 'textInput' &&
+                  contents[0].increaseHorizontalSpace === false
+                "
                 :component="contents[0]"
                 :tricolorable="true"
               />
@@ -719,13 +727,13 @@ const spacingVariables = computed(() =>
         </div>
       </template>
       <template v-else-if="page.kind === 'end'">
-        <p class="reference">
+        <p class="endPage">
           <button :disabled="!closable" @click="close">{{ t('exit') }}</button>
         </p>
-        <p class="reference">
+        <p class="endPage">
           <button @click="pageIndex = 0">{{ t('back') }}</button>
         </p>
-        <p class="reference">
+        <p class="endPage">
           <button @click="reset">{{ t('reset') }}</button>
         </p>
       </template>
@@ -778,6 +786,16 @@ div.container {
 }
 
 .reference {
+  padding-left: 6px;
+  padding-right: 6px;
+  margin-bottom: 1em;
+  margin-top: calc(
+    var(--vertical-space-between-top-and-instruction) - (var(--vertical-space-between-instruction-lines) - 1em) / 2
+  );
+  line-height: var(--vertical-space-between-instruction-lines);
+}
+
+.endPage {
   padding-left: 6px;
   padding-right: 6px;
   margin-top: 1em;

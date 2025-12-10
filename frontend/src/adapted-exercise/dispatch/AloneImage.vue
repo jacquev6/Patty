@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import type { ImageRenderable } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import ImageRenderer from '@/adapted-exercise/components/ImageRenderer.vue'

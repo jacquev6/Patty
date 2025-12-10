@@ -1,7 +1,9 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 
-import { examples } from './AdaptedExerciseExamplesView.vue'
+import { examples } from './AdaptedExerciseExamples'
 import { ensureV2 } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
@@ -74,8 +76,6 @@ describe('Adapted exercises examples', () => {
 
               demoFn()
 
-              // Maybe we could iterate until cy.get('div.control').eq(1) is disabled instead of counting pages?
-              // (would probably be more reliable that computing pagesCount a priori)
               let pagesCount = ensureV2(example.exercise)
                 .phases.map((s) => ('pages' in s.statement ? Math.max(1, s.statement.pages.length) : 1))
                 .reduce((a, b) => a + b, 0)
@@ -98,7 +98,9 @@ describe('Adapted exercises examples', () => {
                       screenshot(screenshotTitle, width, height, pageIndex)
                     }
                   })
-                cy.get('div.control').eq(1).click()
+                if (pageIndex < pagesCount - 1) {
+                  cy.get('div.control').eq(1).click()
+                }
               }
             },
           )

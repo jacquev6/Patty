@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import email.mime.text
 import smtplib
 

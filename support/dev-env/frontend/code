@@ -1,3 +1,4 @@
 #!/bin/bash
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 echo "code" "$@" | sed 's|/app/||'

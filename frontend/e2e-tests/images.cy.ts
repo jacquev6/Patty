@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import type { AdaptedExercise } from '@/frontend/ApiClient'
 import { loadFixtures, visit, visitExport, ignoreResizeObserverLoopError, screenshot } from './utils'
 

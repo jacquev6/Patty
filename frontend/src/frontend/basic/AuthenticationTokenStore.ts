@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage, StorageSerializers } from '@vueuse/core'

@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, loadFixtures, screenshot, visit, visitExport } from './utils'
 
 describe('The creation form for textbooks', () => {
@@ -733,5 +735,26 @@ describe('The edition form for single-PDF textbooks', () => {
     cy.visit('/textbook-1')
     cy.get('li a:contains("6")').should('exist')
     cy.get('li a:contains("9")').should('exist')
+  })
+})
+
+describe('The edition form textbooks - with a failed adaptation', () => {
+  beforeEach(() => {
+    cy.viewport(1600, 800)
+    loadFixtures(['textbook-with-failed-adaptation'])
+    ignoreResizeObserverLoopError()
+    visit('/textbook-1/page-40')
+  })
+
+  it('retries a failed adaptation', () => {
+    cy.get('p:contains("The LLM returned a JSON response that does not validate")').should('exist')
+    cy.get('button:contains("Retry")').click()
+    cy.get('p:contains("The LLM returned a JSON response that does not validate")').should('not.exist')
+    cy.get('button:contains("Retry")').should('not.exist')
+    cy.get('button:contains("Approve")').should('exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 4')
   })
 })

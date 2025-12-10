@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 export function parseExerciseFileName(fileName: string) {
   const match = fileName.match(/P(\d+)Ex(\d+)\..*/)

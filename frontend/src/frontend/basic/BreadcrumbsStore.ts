@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'

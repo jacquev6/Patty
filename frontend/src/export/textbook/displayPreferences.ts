@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { useStorage } from '@vueuse/core'
 import { computed, inject, provide } from 'vue'
 

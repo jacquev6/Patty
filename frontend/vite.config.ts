@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { fileURLToPath, URL } from 'node:url'
 import { promises as fs } from 'fs'
 import path, { dirname } from 'node:path'

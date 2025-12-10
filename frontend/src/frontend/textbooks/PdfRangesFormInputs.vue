@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 import assert from '$/assert'
 
@@ -327,7 +329,7 @@ en:
   noneAllImported: "None (all imported)"
   modelForExtraction: "Model provider for extraction:"
   modelForAdaptation: "Model provider for adaptation:"
-  theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne: This is not the PDF used to create this textbook. Patty can only work with the exact original file.
+  theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne: This is not the PDF used to create this textbook. Malin can only work with the exact original file.
 fr:
   pagesMapping: "Correspondance des pages :"
   textbookPagesToImport: Pages du manuel à importer
@@ -337,5 +339,5 @@ fr:
   noneAllImported: "Aucune (toutes importées)"
   modelForExtraction: "Fournisseur de modèle pour l'extraction :"
   modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
-  theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne: Ceci n'est pas le PDF utilisé pour créer ce manuel. Patty ne peut fonctionner qu'avec le fichier original exact.
+  theSha256OfTheSelectedFileDoesNotMatchTheExpectedOne: Ceci n'est pas le PDF utilisé pour créer ce manuel. Malin ne peut fonctionner qu'avec le fichier original exact.
 </i18n>

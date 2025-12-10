@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { makePagesGroups, mergePagesGroups } from './PdfRangesFormInputs.vue'
 
 describe('PdfRangeFormInputs', () => {

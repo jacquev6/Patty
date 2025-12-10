@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { createRouter, createWebHashHistory } from 'vue-router'
 import _ from 'lodash'
 

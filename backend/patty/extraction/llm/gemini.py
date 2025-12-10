@@ -1,10 +1,15 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from typing import Literal
 import unittest
 
 import google.genai.types
+import google.genai.errors
 import PIL.Image
 
+from ... import logs
 from ... import settings
+from ...retry import RetryableError
 from ...test_utils import costs_money
 from .base import Model
 
@@ -18,9 +23,17 @@ class GeminiModel(Model):
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
         contents: list[google.genai.types.ContentUnion] = [prompt, image]
-        response = client.models.generate_content(model=self.name, contents=contents).text
-        assert response is not None
-        return response
+        try:
+            response = client.models.generate_content(model=self.name, contents=contents).text
+        except google.genai.errors.ClientError as e:
+            if e.code == 429:
+                logs.log("Gemini rate limit exceeded", e)
+                raise RetryableError()
+            else:
+                raise
+        else:
+            assert response is not None
+            return response
 
 
 class GeminiModelTestCase(unittest.TestCase):

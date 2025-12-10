@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <!--
 Rationale: why not use an <input type="text" list="id" /> with a <datalist>?
 
@@ -29,7 +31,6 @@ And I have to provide an ad-hoc implementation.
 import { useElementSize, useFocus } from '@vueuse/core'
 import { computed, useTemplateRef } from 'vue'
 import { useFloating } from '@floating-ui/vue'
-import { levenshteinEditDistance } from 'levenshtein-edit-distance'
 
 const props = defineProps<{
   suggestions: string[]
@@ -48,9 +49,7 @@ const sortedSuggestions = computed(() => {
     return props.suggestions.map((suggestion) => ({ found: 0, index: -1, suggestion }))
   } else {
     return props.suggestions
-      .map((suggestion) => ({ distance: levenshteinEditDistance(needle, suggestion.toLowerCase()), suggestion }))
-      .sort((a, b) => a.distance - b.distance)
-      .map(({ suggestion }) => {
+      .map((suggestion) => {
         const index = suggestion.toLowerCase().indexOf(needle)
         const found = index !== -1 ? 1 : 0
         return { found, index, suggestion }

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 *Patty* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
 
 This README is designed to be read linearly once, from start to end.
@@ -287,6 +289,9 @@ Start by `git`-cloning this repository and navigate to the repository directory.
 The first time you run it, it will ask you to create a few files according to templates.
 These files contain secret environment variables that must not be stored in the repository (API keys, AIM credentials, *etc.*).
 The template files will point you at the documentation about what values to put in these files.
+
+It will also ask you to add some `*.pt` model files in the repository.
+You can get these files from the project maintainers.
 
 You can then visit http://localhost:8080/.
 The password is `password`.

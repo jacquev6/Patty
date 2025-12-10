@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import typing
 
 from sqlalchemy import orm

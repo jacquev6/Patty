@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 
 import fastapi
@@ -106,13 +108,9 @@ async def get_classification_batch(
     for classification_ in classification_batch.classification_chunk_creation.classification_chunk.classifications:
         exercise = classification_.exercise
 
-        latest_classification = exercise.classifications[-1] if exercise.classifications else None
+        latest_classification = exercise.latest_classification
 
-        latest_adaptation = (
-            None
-            if latest_classification is None or latest_classification.exercise_class is None
-            else exercise.fetch_latest_adaptation(latest_classification.exercise_class)
-        )
+        latest_adaptation = exercise.latest_adaptation
 
         timing.adaptations.append(latest_adaptation.initial_timing if latest_adaptation is not None else None)
 
@@ -194,7 +192,7 @@ def submit_adaptations_with_recent_settings_in_classification_batch(
     for exercise_classification in classification_chunk.classifications:
         exercise = exercise_classification.exercise
         if (
-            len(exercise.adaptations) == 0
+            exercise.latest_adaptation is None
             and exercise_classification.exercise_class is not None
             and exercise_classification.exercise_class.latest_strategy_settings is not None
         ):
@@ -228,7 +226,7 @@ def put_classification_batch_model_for_adaptation(
     for exercise_classification in classification_chunk.classifications:
         exercise = exercise_classification.exercise
         if (
-            len(exercise.adaptations) == 0
+            exercise.latest_adaptation is None
             and exercise_classification.exercise_class is not None
             and exercise_classification.exercise_class.latest_strategy_settings is not None
         ):

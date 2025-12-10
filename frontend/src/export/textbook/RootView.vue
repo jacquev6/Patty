@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import type { AdaptedExercise, ImagesUrls } from '@/frontend/ApiClient'
 import { provideDisplayPreferences } from './displayPreferences'

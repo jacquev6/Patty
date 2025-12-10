@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 cp -r /usr/share/nginx/templates/frontend /usr/share/nginx/html/frontend
 

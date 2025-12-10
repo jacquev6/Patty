@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import 'modern-normalize/modern-normalize.css'

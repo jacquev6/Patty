@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { type AdaptationBatch, useAuthenticatedClient } from '@/frontend/ApiClient'
 import assert from '$/assert'

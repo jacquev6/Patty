@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { computed, inject, onBeforeUpdate, onMounted, useTemplateRef, type Ref } from 'vue'
 

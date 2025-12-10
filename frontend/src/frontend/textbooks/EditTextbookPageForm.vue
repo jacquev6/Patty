@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { computed, ref } from 'vue'
@@ -131,7 +133,7 @@ const exercisesToShow = computed({
       <AdaptableExercisePreview
         v-else-if="exercise.kind === 'adaptable'"
         :headerLevel="2"
-        context="textbookByBatch"
+        context="textbook"
         :index="null"
         :exercise
         @exerciseRemoved="() => removeExercise(exercise.id, true)"

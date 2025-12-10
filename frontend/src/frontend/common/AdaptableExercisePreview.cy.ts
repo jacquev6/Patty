@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { createI18n } from 'vue-i18n'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
@@ -648,7 +650,7 @@ describe('AdaptableExercisePreview', () => {
         return ['extraction', null] as const
       } else {
         assert(title.startsWith('textbook - '))
-        return ['textbookByBatch', null] as const
+        return ['textbook', null] as const
       }
     })()
 

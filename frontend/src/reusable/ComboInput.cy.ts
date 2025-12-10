@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import ComboInput from './ComboInput.vue'
 
 const screenshotsCounts: Record<string, number> = {}
@@ -59,14 +61,18 @@ describe('ComboInput', () => {
     cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Bravo')
     cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Charlie')
     cy.get('input').type('h')
+    // Suggestions that contain "h", in alphabetical order:
     cy.get('[data-cy="suggestion"]').eq(0).should('have.text', 'Alpha 1')
     cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Alpha 2')
     cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Charlie')
+    // Suggestions that do not contain "h", in alphabetical order:
     cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Bravo')
     cy.get('input').type('ar')
+    // Suggestions that contain "har", in alphabetical order:
     cy.get('[data-cy="suggestion"]').eq(0).should('have.text', 'Charlie')
-    cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Bravo')
-    cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Alpha 1')
-    cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Alpha 2')
+    // Suggestions that do not contain "har", in alphabetical order:
+    cy.get('[data-cy="suggestion"]').eq(1).should('have.text', 'Alpha 1')
+    cy.get('[data-cy="suggestion"]').eq(2).should('have.text', 'Alpha 2')
+    cy.get('[data-cy="suggestion"]').eq(3).should('have.text', 'Bravo')
   })
 })

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'

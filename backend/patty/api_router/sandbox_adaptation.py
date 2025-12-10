@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 import typing
 
@@ -389,8 +391,9 @@ def put_adaptable_exercise_class(
         adaptation_model: adaptation.llm.ConcreteModel | None = None
         created: adaptation.AdaptationCreation | None = None
 
-        if len(exercise.adaptations) != 0:
-            some_previous_adaptation = exercise.adaptations[0]
+        latest_adaptation = exercise.latest_adaptation
+        if latest_adaptation is not None:
+            some_previous_adaptation = exercise.unordered_adaptations[0]
             adaptation_model = some_previous_adaptation.model
             created = dispatch.adaptation_creation(
                 some_previous_adaptation.created,
@@ -401,9 +404,9 @@ def put_adaptable_exercise_class(
                     at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
                 ),
             )
-        elif len(exercise.classifications) != 0:
+        elif len(exercise.ordered_classifications) != 0:
             automatic_classifications = list(
-                filter(lambda c: isinstance(c, classification.ClassificationByChunk), exercise.classifications)
+                filter(lambda c: isinstance(c, classification.ClassificationByChunk), exercise.ordered_classifications)
             )
             if len(automatic_classifications) != 0:
                 some_classification = automatic_classifications[0]

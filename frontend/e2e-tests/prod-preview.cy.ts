@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { ignoreResizeObserverLoopError, loadFixtures, visit } from './utils'
 
 describe('Patty', () => {
@@ -10,7 +12,7 @@ describe('Patty', () => {
     visit('/')
   })
 
-  if (!Cypress.env('PATTY_UNIT_TESTING')) {
+  if (!Cypress.env('PATTY_UNIT_TESTING') && Cypress.env('PATTY_USE_JACQUEV6_S3')) {
     it('loads a textbook', () => {
       cy.get('a:contains("Outils pour le français CE2 2019")').click()
       cy.location('pathname').should('eq', '/textbook-1')
@@ -24,7 +26,7 @@ describe('Patty', () => {
     cy.get('button:contains("Submit")').click()
     cy.get(':contains("in progress")').should('exist')
 
-    cy.get('a:contains("Patty home")').click()
+    cy.get('a:contains("Malin home")').click()
     cy.get('li:contains("created by Alice") a:contains("Batch E")').should('exist')
   })
 })

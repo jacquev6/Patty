@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { useElementBounding, useWindowSize } from '@vueuse/core'
 import { computed, useTemplateRef, type StyleValue } from 'vue'

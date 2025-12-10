@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 export function ignoreResizeObserverLoopError() {
   Cypress.on('uncaught:exception', (error) => {
     if (error.message.includes('ResizeObserver loop completed with undelivered notifications.')) {

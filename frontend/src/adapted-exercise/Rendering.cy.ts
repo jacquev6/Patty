@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import { createI18n } from 'vue-i18n'
 
 import AdaptedExerciseRenderer from './AdaptedExerciseRenderer.vue'
@@ -2002,43 +2004,43 @@ describe('SwappableInput', () => {
       global,
     })
 
-    cy.get('[data-cy="swappableInput"]').eq(0).as('a')
-    cy.get('[data-cy="swappableInput"]').eq(1).as('b')
-    cy.get('[data-cy="swappableInput"]').eq(2).as('c')
-    cy.get('[data-cy="swappableInput"]').eq(3).as('d')
+    cy.get('[data-cy="swappableInput"]').eq(0).as('sw0')
+    cy.get('[data-cy="swappableInput"]').eq(1).as('sw1')
+    cy.get('[data-cy="swappableInput"]').eq(2).as('sw2')
+    cy.get('[data-cy="swappableInput"]').eq(3).as('sw3')
 
-    cy.get('@a').should('have.text', 'A')
-    cy.get('@b').should('have.text', 'B')
-    cy.get('@c').should('have.text', 'C')
-    cy.get('@d').should('have.text', 'D')
+    cy.get('@sw0').should('have.text', 'A')
+    cy.get('@sw1').should('have.text', 'B')
+    cy.get('@sw2').should('have.text', 'C')
+    cy.get('@sw3').should('have.text', 'D')
 
-    cy.get('@a').click()
-    cy.get('@b').click()
-    cy.get('@a').should('have.text', 'B')
-    cy.get('@b').should('have.text', 'A')
-    cy.get('@c').should('have.text', 'C')
-    cy.get('@d').should('have.text', 'D')
+    cy.get('@sw0').should('have.text', 'A').click()
+    cy.get('@sw1').should('have.text', 'B').click()
+    cy.get('@sw0').should('have.text', 'B')
+    cy.get('@sw1').should('have.text', 'A')
+    cy.get('@sw2').should('have.text', 'C')
+    cy.get('@sw3').should('have.text', 'D')
 
-    cy.get('@a').click()
-    cy.get('@b').click()
-    cy.get('@a').should('have.text', 'A')
-    cy.get('@b').should('have.text', 'B')
-    cy.get('@c').should('have.text', 'C')
-    cy.get('@d').should('have.text', 'D')
+    cy.get('@sw0').should('have.text', 'B').click()
+    cy.get('@sw1').should('have.text', 'A').click()
+    cy.get('@sw0').should('have.text', 'A')
+    cy.get('@sw1').should('have.text', 'B')
+    cy.get('@sw2').should('have.text', 'C')
+    cy.get('@sw3').should('have.text', 'D')
 
-    cy.get('@c').click()
-    cy.get('@b').click()
-    cy.get('@a').should('have.text', 'A')
-    cy.get('@b').should('have.text', 'C')
-    cy.get('@c').should('have.text', 'B')
-    cy.get('@d').should('have.text', 'D')
+    cy.get('@sw2').should('have.text', 'C').click()
+    cy.get('@sw1').should('have.text', 'B').click()
+    cy.get('@sw0').should('have.text', 'A')
+    cy.get('@sw1').should('have.text', 'C')
+    cy.get('@sw2').should('have.text', 'B')
+    cy.get('@sw3').should('have.text', 'D')
 
-    cy.get('@a').click()
-    cy.get('@d').click()
-    cy.get('@a').should('have.text', 'D')
-    cy.get('@b').should('have.text', 'C')
-    cy.get('@c').should('have.text', 'B')
-    cy.get('@d').should('have.text', 'A')
+    cy.get('@sw0').should('have.text', 'A').click()
+    cy.get('@sw3').should('have.text', 'D').click()
+    cy.get('@sw0').should('have.text', 'D')
+    cy.get('@sw1').should('have.text', 'C')
+    cy.get('@sw2').should('have.text', 'B')
+    cy.get('@sw3').should('have.text', 'A')
   })
 
   it('resets selected swappable when page is changed', () => {
@@ -2092,6 +2094,198 @@ describe('SwappableInput', () => {
 
     cy.get('.control').eq(0).click()
     cy.get('[data-cy="swappableInput"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
+  it('is editable when not selected', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [
+                          { kind: 'text', text: 'Edit' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                        ],
+                        editable: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    cy.get('[data-cy="swappableInput"]').should('have.text', 'Edit me').dblclick()
+    cy.get('[data-cy="freeTextInput"]')
+      .should('have.focus')
+      .should('have.text', 'Edit me')
+      .type('{selectAll}Hello World!')
+      .should('have.text', 'Hello World!')
+      .blur()
+      .should('not.exist')
+    cy.get('[data-cy="swappableInput"]').should('have.text', 'Hello World!')
+  })
+
+  it('is editable when selected', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      {
+                        kind: 'swappableInput',
+                        contents: [
+                          { kind: 'text', text: 'Edit' },
+                          { kind: 'whitespace' },
+                          { kind: 'text', text: 'me' },
+                        ],
+                        editable: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    cy.get('[data-cy="swappableInput"]')
+      .should('have.text', 'Edit me')
+      .click()
+      .should('have.css', 'background-color', 'rgb(255, 253, 212)')
+      .dblclick()
+    cy.get('[data-cy="freeTextInput"]')
+      .should('have.focus')
+      .should('have.text', 'Edit me')
+      .type('{selectAll}Hello World!')
+      .should('have.text', 'Hello World!')
+      .blur()
+      .should('not.exist')
+    cy.get('[data-cy="swappableInput"]')
+      .should('have.text', 'Hello World!')
+      .should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
+  it('edits then swaps', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }], editable: true },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }], editable: true },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).as('sw0')
+    cy.get('[data-cy="swappableInput"]').eq(1).as('sw1')
+
+    cy.get('@sw0').should('have.text', 'A').dblclick()
+    cy.get('[data-cy="freeTextInput"]').type('{selectAll}a').blur()
+    cy.get('@sw1').should('have.text', 'B').dblclick()
+    cy.get('[data-cy="freeTextInput"]').type('{selectAll}b').blur()
+
+    cy.get('@sw0').should('have.text', 'a').click()
+    cy.get('@sw1').should('have.text', 'b').click()
+    cy.get('@sw0').should('have.text', 'b')
+    cy.get('@sw1').should('have.text', 'a')
+  })
+
+  it('swaps then edits', () => {
+    cy.mount(AdaptedExerciseRenderer, {
+      props: {
+        navigateUsingArrowKeys: true,
+        adaptedExercise: {
+          format: 'v1',
+          instruction: { lines: [] },
+          example: null,
+          hint: null,
+          statement: {
+            pages: [
+              {
+                lines: [
+                  {
+                    contents: [
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'A' }], editable: true },
+                      { kind: 'whitespace' },
+                      { kind: 'swappableInput', contents: [{ kind: 'text', text: 'B' }], editable: true },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          reference: null,
+        },
+        imagesUrls: {},
+      },
+      global,
+    })
+
+    cy.get('[data-cy="swappableInput"]').eq(0).as('sw0')
+    cy.get('[data-cy="swappableInput"]').eq(1).as('sw1')
+    cy.get('@sw0').should('have.text', 'A')
+    cy.get('@sw1').should('have.text', 'B')
+    cy.get('@sw0').should('have.text', 'A').click()
+    cy.get('@sw1').should('have.text', 'B').click()
+    cy.get('@sw0').should('have.text', 'B').dblclick()
+    cy.get('[data-cy="freeTextInput"]').type('{selectAll}b').blur()
+    cy.get('@sw1').should('have.text', 'A').dblclick()
+    cy.get('[data-cy="freeTextInput"]').type('{selectAll}a').blur()
+    cy.get('@sw0').should('have.text', 'b')
+    cy.get('@sw1').should('have.text', 'a')
   })
 })
 
@@ -2291,7 +2485,28 @@ describe('AdaptedExerciseRenderer', () => {
               },
             ],
           },
-          reference: { contents: [{ kind: 'text', text: 'Reference' }] },
+          reference: {
+            contents: [
+              { kind: 'text', text: 'Reference' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'alpha' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'bravo' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'charlie' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'delta' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'echo' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'foxtrot' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'golf' },
+              { kind: 'whitespace' },
+              { kind: 'text', text: 'hotel' },
+              { kind: 'text', text: '.' },
+            ],
+          },
         },
         imagesUrls: {},
       },

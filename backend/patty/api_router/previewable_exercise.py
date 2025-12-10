@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import base64
 import datetime
 import typing
@@ -184,7 +186,7 @@ def gather_images_urls(
         # Data URLs are large and used only for the export, so we return only the required ones
         required_image_identifiers = {
             identifier
-            for adaptation_ in exercise.adaptations
+            for adaptation_ in exercise.unordered_adaptations
             for identifier in _gather_required_image_identifiers_from_adaptation(adaptation_)
         }
         return {

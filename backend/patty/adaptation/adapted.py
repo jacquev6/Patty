@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from __future__ import annotations
 
 from typing import Any, Literal, Iterable
@@ -187,6 +189,7 @@ class SelectableInput(BaseModel):
 class SwappableInput(BaseModel):
     kind: Literal["swappableInput"]
     contents: list[FormattedText]
+    editable: bool = False
 
     def flat_contents(self) -> Iterable[SwappableInput | FormattedText]:
         yield self

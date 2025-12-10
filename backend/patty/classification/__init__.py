@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from . import submission as submission
 from .orm_models import (
     AdaptationCreationByChunk as AdaptationCreationByChunk,

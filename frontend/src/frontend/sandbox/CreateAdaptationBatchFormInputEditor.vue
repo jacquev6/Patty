@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script lang="ts">
 export type InputWithFile = {
   pageNumber: number | null

@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
@@ -52,7 +54,7 @@ a {
 
 <i18n>
 en:
-  home: Patty home
+  home: Malin home
 fr:
-  home: "Patty : accueil"
+  home: "Malin : accueil"
 </i18n>

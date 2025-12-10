@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import glob
 import os
 import shutil
@@ -43,6 +45,7 @@ def clean(force: bool) -> None:
                 "support/prod/backend/exercise-images/",
                 "support/prod/backend/external-exercises/",
                 "support/prod/backend/pdf-files/",
+                "support/prod/db/backups/",
             ]
         ):
             remove = True

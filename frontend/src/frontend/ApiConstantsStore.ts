@@ -1,3 +1,5 @@
+// Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 // A Pinia store for API responses that don't change during a user session
 
 import { computed, ref } from 'vue'

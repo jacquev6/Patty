@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import os
 from typing import Iterable, TypeVar
 import datetime
@@ -1582,6 +1584,133 @@ class FixturesCreator:
                 run_classification=True,
                 model_for_adaptation=model_for_adaptation,
             )
+        )
+
+    def create_textbook_with_failed_adaptation(self) -> None:
+        model_for_extraction = extraction.llm.DummyModel(provider="dummy", name="dummy-1")
+        model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
+
+        textbook = self.create_dummy_textbook()
+
+        pdf_file = self.add(
+            extraction.PdfFile(
+                created_by="Patty",
+                created_at=created_at,
+                sha256="044c5caf34cba74e1e4cb6a498485923a8dbf28b74d414155586f18236da78b4",
+                bytes_count=37223,
+                pages_count=35,
+                known_file_names=["long.pdf"],
+            )
+        )
+        pdf_file_range = self.add(
+            extraction.PdfFileRange(
+                created_by="Patty", created_at=created_at, pdf_file=pdf_file, first_page_number=10, pages_count=3
+            )
+        )
+        extraction_batch = self.add(
+            textbooks.TextbookExtractionBatch(
+                created_by="Patty",
+                created_at=created_at,
+                pdf_file_range=pdf_file_range,
+                textbook=textbook,
+                first_textbook_page_number=40,
+                model_for_extraction=model_for_extraction,
+                model_for_adaptation=model_for_adaptation,
+                marked_as_removed=False,
+            )
+        )
+
+        extraction_settings = self.add(
+            extraction.ExtractionSettings(
+                created_by="Patty",
+                created_at=created_at,
+                prompt="Blah blah blah.",
+                output_schema_description=extraction.OutputSchemaDescriptionV2(version="v2"),
+            )
+        )
+        page_40_extraction = self.add(
+            extraction.PageExtraction(
+                created=textbooks.PageExtractionCreationByTextbook(
+                    at=created_at, textbook_extraction_batch=extraction_batch, marked_as_removed=False
+                ),
+                pdf_file_range=pdf_file_range,
+                pdf_page_number=10,  # Page 40 in the textbook
+                settings=extraction_settings,
+                model=model_for_extraction,
+                run_classification=True,
+                model_for_adaptation=model_for_adaptation,
+                extracted_text_and_styles=None,
+                assistant_response=extraction.assistant_responses.SuccessV2(
+                    kind="success",
+                    version="v2",
+                    exercises=[
+                        extraction.extracted.ExerciseV2(
+                            id="p40_ex4",
+                            type="exercice",
+                            images=False,
+                            type_images="none",
+                            properties=extraction.extracted.ExerciseV2.Properties(
+                                numero="4",
+                                consignes=['Complète avec "le vent" ou "la pluie"'],
+                                conseil=None,
+                                exemple=None,
+                                enonce="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+                                references=None,
+                                autre=None,
+                            ),
+                        )
+                    ],
+                ),
+                timing=None,
+            )
+        )
+        exercise_4_page_40 = self.add(
+            adaptation.AdaptableExercise(
+                created=extraction.ExerciseCreationByPageExtraction(at=created_at, page_extraction=page_40_extraction),
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=40, exercise_number="4", marked_as_removed=False
+                ),
+                full_text=textwrap.dedent(
+                    """\
+                Complète avec "le vent" ou "la pluie"
+                a. Les feuilles sont chahutées par ...
+                b. Les vitres sont mouillées par ...
+                """
+                ),
+                instruction_hint_example_text='Complète avec "le vent" ou "la pluie"',
+                statement_text="a. Les feuilles sont chahutées par ...\nb. Les vitres sont mouillées par ...",
+            )
+        )
+
+        mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
+        page_40_classification_chunk = self.add(
+            classification.ClassificationChunk(
+                created=extraction.ClassificationChunkCreationByPageExtraction(
+                    at=created_at, page_extraction=page_40_extraction
+                ),
+                model_for_adaptation=model_for_adaptation,
+                timing=None,
+            )
+        )
+        self.add(
+            classification.ClassificationByChunk(
+                exercise=exercise_4_page_40,
+                at=created_at,
+                classification_chunk=page_40_classification_chunk,
+                exercise_class=mcq_exercise_class,
+            )
+        )
+
+        assert mcq_exercise_class.latest_strategy_settings is not None
+        self.make_invalid_json_adaptation(
+            created=self.add(
+                classification.AdaptationCreationByChunk(
+                    at=created_at, classification_chunk=page_40_classification_chunk
+                )
+            ),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_4_page_40,
         )
 
 

@@ -1,3 +1,6 @@
+# Copyright 2025 Elise Lincker <elise.lincker@lecnam.net>
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 import os
 import typing
@@ -22,7 +25,7 @@ from .models import SingleBert
 MAX_SEQUENCE_LENGTH = 256
 
 
-def submit_classifications(session: database_utils.Session, parallelism: int) -> bool:
+def execute_next_classification_chunk(session: database_utils.Session) -> bool:
     exercise_classes_by_name = {
         exercise_class.name: exercise_class
         for exercise_class in session.execute(sql.select(adaptation.ExerciseClass)).scalars().all()

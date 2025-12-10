@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 import datetime
 import glob
 import os
@@ -22,28 +24,35 @@ def pre_warm_build_cache() -> None:
 
 
 @prod.command()
-def preview() -> None:
+@click.option("--with-jacquev6-s3", is_flag=True, default=False, hidden=True)
+def preview(with_jacquev6_s3: bool) -> None:
+    env = os.environ.copy()
+    env["PATTY_USE_JACQUEV6_S3"] = "true" if with_jacquev6_s3 else "false"
+
     print("Patty prod preview: build")
     build(patty_version="preview", action="load")
-    subprocess.run(["docker", "compose", "build"], cwd="support/prod", check=True)
+    subprocess.run(["docker", "compose", "build"], cwd="support/prod", env=env, check=True)
     print("Patty prod preview: pull")
-    subprocess.run(["docker", "compose", "pull", "--ignore-buildable"], cwd="support/prod", check=True)
+    subprocess.run(["docker", "compose", "pull", "--ignore-buildable"], cwd="support/prod", env=env, check=True)
     print("Patty prod preview: start")
     try:
         subprocess.run(
             ["docker", "compose", "up", "--no-build", "--pull", "never", "--remove-orphans", "--detach"],
             cwd="support/prod",
+            env=env,
             check=True,
         )
         print("Patty prod preview: started (close with Ctrl+C)")
         try:
-            subprocess.run(["docker", "compose", "logs", "--follow"], cwd="support/prod", check=False)
+            subprocess.run(["docker", "compose", "logs", "--follow"], cwd="support/prod", env=env, check=False)
         except KeyboardInterrupt:
             pass
     finally:
         print("Patty prod preview: clean-up")
-        subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/prod", check=True)
-        subprocess.run(["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/prod", check=True)
+        subprocess.run(["docker", "compose", "down", "--remove-orphans"], cwd="support/prod", env=env, check=True)
+        subprocess.run(
+            ["docker", "compose", "rm", "--stop", "--volumes", "--force"], cwd="support/prod", env=env, check=True
+        )
 
 
 @prod.command()
@@ -184,4 +193,6 @@ def make_build_command(*, patty_version: str | None, target: str, part: str, act
 @prod.command()
 @click.argument("args", nargs=-1)
 def compose(args: tuple[str, ...]) -> None:
-    subprocess.run(["docker", "compose"] + list(args), cwd="support/prod", check=True)
+    env = os.environ.copy()
+    env["PATTY_USE_JACQUEV6_S3"] = "false"
+    subprocess.run(["docker", "compose"] + list(args), cwd="support/prod", env=env, check=True)

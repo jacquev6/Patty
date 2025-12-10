@@ -1,3 +1,5 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { h, type VNode } from 'vue'
 
@@ -53,10 +55,11 @@ function render() {
         tricolorable: props.tricolorable,
       }),
     )
-    .with({ kind: 'swappableInput' }, ({ path, contents }) =>
+    .with({ kind: 'swappableInput' }, ({ path, contents, editable }) =>
       h(SwappableInputRenderer, {
         path,
         contents,
+        editable,
         tricolorable: props.tricolorable,
       }),
     )

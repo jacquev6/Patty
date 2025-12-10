@@ -1,3 +1,5 @@
+# Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
+
 from typing import Iterable
 import ast
 import asyncio
@@ -184,6 +186,7 @@ def python_dependency_graph() -> None:
         ("patty", "logs"),
         ("patty", "mailing"),
         ("patty", "migrations"),
+        ("patty", "retry"),
         ("patty", "settings"),
         ("patty", "test_utils"),
         ("patty", "version"),
@@ -625,13 +628,9 @@ def load_fixtures(truncate: bool, fixture: Iterable[str]) -> None:
 
 
 @main.command()
-@click.option("--extraction-parallelism", type=int, default=1)
-@click.option("--classification-parallelism", type=int, default=20)
-@click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(
-    extraction_parallelism: int, classification_parallelism: int, adaptation_parallelism: int, pause: float
-) -> None:
+@click.option("--max-retries", type=int, default=6)
+def run_submission_daemon(pause: float, max_retries: int) -> None:
     import requests
 
     from . import adaptation
@@ -639,49 +638,53 @@ def run_submission_daemon(
     from . import database_utils
     from . import extraction
     from . import logs
+    from .retry import RetryableError
 
     engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    default_pause = pause
 
     async def daemon() -> None:
         logs.log("Starting")
         last_time = time.monotonic()
+        current_retries = 0
         while True:
+            if time.monotonic() >= last_time + 60:
+                last_time = time.monotonic()
+                if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                    logs.log("Calling pulse monitoring URL")
+                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+
             done_something = False
+            can_retry = current_retries < max_retries
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
                     # in each session to commit progress as soon as possible.
-                    done_something = (
-                        len(
-                            await asyncio.gather(
-                                *extraction.submission.submit_extractions(session, extraction_parallelism)
-                            )
-                        )
-                        != 0
-                    )
+                    extraction_task = extraction.submission.submit_next_extraction(can_retry, session)
+                    if extraction_task is not None:
+                        await extraction_task
+                        done_something = True
                     if not done_something:
-                        done_something = classification.submission.submit_classifications(
-                            session, classification_parallelism
-                        )
+                        done_something = classification.submission.execute_next_classification_chunk(session)
                     if not done_something:
-                        done_something = (
-                            len(
-                                await asyncio.gather(
-                                    *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
-                                )
-                            )
-                            != 0
-                        )
+                        adaptation_task = adaptation.submission.submit_next_adaptation(can_retry, session)
+                        if adaptation_task is not None:
+                            await adaptation_task
+                            done_something = True
                     session.commit()
-                if time.monotonic() >= last_time + 60:
-                    last_time = time.monotonic()
-                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
-                        logs.log("Calling pulse monitoring URL")
-                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+            except RetryableError:
+                assert not done_something
+                current_retries += 1
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-            if not done_something:
+                assert not done_something
+
+            if done_something:
+                current_retries = 0
+            else:
+                pause = min(default_pause * (2**current_retries), 60)
                 logs.log(f"Sleeping for {pause}s...")
                 await asyncio.sleep(pause)
 
@@ -761,7 +764,7 @@ def backup_database() -> None:
 
 @main.command()
 # @todo Consider always using the most recent backup (and stop changing the default value)
-@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251206-071602.tar.gz")
+@click.argument("backup_url", default="s3://jacquev6/patty/prod/backups/patty-backup-20251210-091605.tar.gz")
 @click.option("--yes", is_flag=True)
 @click.option("--patch-according-to-settings", is_flag=True)
 def restore_database(backup_url: str, yes: bool, patch_according_to_settings: bool) -> None:
@@ -916,7 +919,7 @@ def rerun_adaptations(
                     print(adaptation_.settings.system_prompt.splitlines()[0][:80] + " [...]")
                     print(adaptation_.exercise.full_text.splitlines()[0][:80] + " [...]")
 
-                    asyncio.run(adaptation.submission.submit_adaptation(adaptation_))
+                    asyncio.run(adaptation.submission.submit_adaptation(False, adaptation_))
 
 
 if __name__ == "__main__":

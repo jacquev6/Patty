@@ -1,20 +1,15 @@
+<!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
+
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import jsonStringify from 'json-stringify-pretty-compact'
 import { useMagicKeys } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import type { AdaptedExercise, ImagesUrls } from './ApiClient'
+import type { Example } from './AdaptedExerciseExamples.ts'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer, { type SpacingVariables } from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
 import FixedColumns from '$/FixedColumns.vue'
-
-export type Example = {
-  title: string
-  exercise: AdaptedExercise
-  imagesUrls?: ImagesUrls
-  demos?: Record<string, () => void>
-}
 
 const props = defineProps<{
   example: Example
