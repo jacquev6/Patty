@@ -20,6 +20,7 @@ from .. import exercises
 from .. import file_storage
 from .. import logs
 from .. import settings
+from ..retry import RetryableError
 from .images_detection import detect_images
 from .postprocessing import cleanup_slashes, remove_styles
 from .llm import InvalidJsonLlmException, NotJsonLlmException
@@ -29,7 +30,9 @@ from .text_and_styles_extraction import extract_text_and_styles_from_pdf_page
 pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 
 
-def submit_next_extraction(session: database_utils.Session) -> typing.Coroutine[None, None, None] | None:
+def submit_next_extraction(
+    can_retry: bool, session: database_utils.Session
+) -> typing.Coroutine[None, None, None] | None:
     extraction = (
         session.execute(sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()))
         .scalars()
@@ -39,10 +42,12 @@ def submit_next_extraction(session: database_utils.Session) -> typing.Coroutine[
         return None
     else:
         logs.log(f"Found pending page extraction: {extraction.id}")
-        return submit_extraction(session, extraction)
+        return submit_extraction(can_retry, session, extraction)
 
 
-async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
+async def submit_extraction(
+    can_retry: bool, session: database_utils.Session, page_extraction: db.PageExtraction
+) -> None:
     from ..sandbox import extraction as sandbox_extraction  # noqa: F401 to populate ORM metadata
 
     assert page_extraction.pdf_file_range is not None
@@ -86,7 +91,7 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
         file_storage.exercise_images.store(f"{extracted_image.id}.png", image_bytes.getvalue())
 
     if page_extraction.settings.output_schema_description.version == "v2":
-        submit_extraction_v2(session, page_extraction, annotated_pdf_page_image)
+        submit_extraction_v2(can_retry, session, page_extraction, annotated_pdf_page_image)
     elif page_extraction.settings.output_schema_description.version == "v3":
         if page_extraction.settings.output_schema_description.append_text_and_styles_to_prompt:
             page_extraction.extracted_text_and_styles = extract_text_and_styles_from_pdf_page(
@@ -101,13 +106,16 @@ async def submit_extraction(session: database_utils.Session, page_extraction: db
                     f.write(page_extraction.extracted_text_and_styles)
         else:
             page_extraction.extracted_text_and_styles = None
-        submit_extraction_v3(session, page_extraction, annotated_pdf_page_image)
+        submit_extraction_v3(can_retry, session, page_extraction, annotated_pdf_page_image)
     else:
         assert False
 
 
 def submit_extraction_v2(
-    session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
+    can_retry: bool,
+    session: database_utils.Session,
+    page_extraction: db.PageExtraction,
+    annotated_pdf_page_image: PIL.Image.Image,
 ) -> None:
     # All branches must set 'extraction.assistant_response' to avoid infinite loop
     # (re-submitting failing extraction again and again)
@@ -127,6 +135,15 @@ def submit_extraction_v2(
         page_extraction.assistant_response = assistant_responses.NotJsonErrorV2(
             kind="error", error="not-json", version="v2", text=error.raw_response
         )
+    except RetryableError:
+        if can_retry:
+            logs.log(f"RETRYABLE ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+            raise
+        else:
+            logs.log(
+                f"Too many RETRYABLE ERRORS on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds"
+            )
+            page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     except Exception:
         logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         traceback.print_exc()
@@ -173,7 +190,10 @@ def submit_extraction_v2(
 
 
 def submit_extraction_v3(
-    session: database_utils.Session, page_extraction: db.PageExtraction, annotated_pdf_page_image: PIL.Image.Image
+    can_retry: bool,
+    session: database_utils.Session,
+    page_extraction: db.PageExtraction,
+    annotated_pdf_page_image: PIL.Image.Image,
 ) -> None:
     assert page_extraction.settings.output_schema_description.version == "v3"
 
@@ -218,6 +238,15 @@ def submit_extraction_v3(
             raw_response=error.raw_response,
             cleaned_response=error.cleaned_response,
         )
+    except RetryableError:
+        if can_retry:
+            logs.log(f"RETRYABLE ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
+            raise
+        else:
+            logs.log(
+                f"Too many RETRYABLE ERRORS on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds"
+            )
+            page_extraction.assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     except Exception:
         logs.log(f"UNEXPECTED ERROR on page extraction {page_extraction.id} in {timing.elapsed:.1f} seconds")
         traceback.print_exc()

@@ -5,11 +5,13 @@ import typing
 
 import sqlalchemy as sql
 
+
 from . import assistant_responses
 from . import llm
 from . import orm_models as db
 from .. import database_utils
 from .. import logs
+from ..retry import RetryableError
 from .adapted import Exercise
 
 
@@ -22,7 +24,9 @@ LlmMessage = (
 )
 
 
-def submit_next_adaptation(session: database_utils.Session) -> typing.Coroutine[None, None, None] | None:
+def submit_next_adaptation(
+    can_retry: bool, session: database_utils.Session
+) -> typing.Coroutine[None, None, None] | None:
     adaptation = (
         session.execute(sql.select(db.Adaptation).where(db.Adaptation._initial_assistant_response == sql.null()))
         .scalars()
@@ -33,10 +37,10 @@ def submit_next_adaptation(session: database_utils.Session) -> typing.Coroutine[
         return None
     else:
         logs.log(f"Found pending adaptation: {adaptation.id}")
-        return submit_adaptation(adaptation)
+        return submit_adaptation(can_retry, adaptation)
 
 
-async def submit_adaptation(adaptation: db.Adaptation) -> None:
+async def submit_adaptation(can_retry: bool, adaptation: db.Adaptation) -> None:
     response_format = adaptation.settings.response_specification.make_response_format()
 
     messages: list[LlmMessage] = [
@@ -62,6 +66,13 @@ async def submit_adaptation(adaptation: db.Adaptation) -> None:
         adaptation.initial_assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
+    except RetryableError:
+        if can_retry:
+            logs.log(f"RETRYABLE ERROR on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
+            raise
+        else:
+            logs.log(f"Too many RETRYABLE ERRORS on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
+            adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     except Exception:
         logs.log(f"UNEXPECTED ERROR on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")

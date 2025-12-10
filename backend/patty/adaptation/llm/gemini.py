@@ -6,11 +6,13 @@ import typing
 import unittest
 
 import google.genai.types
+import google.genai.errors
 import pydantic
 
 from ... import logs
 from ... import settings
 from ...any_json import JsonDict
+from ...retry import RetryableError
 from ...test_utils import costs_money
 from .base import (
     AssistantMessage,
@@ -60,22 +62,29 @@ class GeminiModel(Model):
         else:
             assert False
 
-        response = client.models.generate_content(
-            model=self.name,
-            contents=typing.cast(list[google.genai.types.ContentUnion], contents),
-            config=google.genai.types.GenerateContentConfig(
-                system_instruction=system_instruction, response_mime_type=response_mime_type
-            ),
-        )
-        raw_conversation: dict[str, typing.Any] = dict(
-            method="google.genai.Client.models.generate_content",
-            config=dict(system_instruction=system_instruction, response_mime_type=response_mime_type),
-            contents=[m.model_dump() for m in contents],
-            response=response.model_dump(),
-        )
-        response_text = response.text
-        assert isinstance(response_text, str)
-        return raw_conversation, response_text
+        try:
+            response = client.models.generate_content(
+                model=self.name,
+                contents=typing.cast(list[google.genai.types.ContentUnion], contents),
+                config=google.genai.types.GenerateContentConfig(
+                    system_instruction=system_instruction, response_mime_type=response_mime_type
+                ),
+            )
+        except google.genai.errors.ClientError as e:
+            if e.code == 429:
+                raise RetryableError()
+            else:
+                raise
+        else:
+            raw_conversation: dict[str, typing.Any] = dict(
+                method="google.genai.Client.models.generate_content",
+                config=dict(system_instruction=system_instruction, response_mime_type=response_mime_type),
+                contents=[m.model_dump() for m in contents],
+                response=response.model_dump(),
+            )
+            response_text = response.text
+            assert isinstance(response_text, str)
+            return raw_conversation, response_text
 
     def __make_messages(
         self,

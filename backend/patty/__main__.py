@@ -186,6 +186,7 @@ def python_dependency_graph() -> None:
         ("patty", "logs"),
         ("patty", "mailing"),
         ("patty", "migrations"),
+        ("patty", "retry"),
         ("patty", "settings"),
         ("patty", "test_utils"),
         ("patty", "version"),
@@ -628,7 +629,8 @@ def load_fixtures(truncate: bool, fixture: Iterable[str]) -> None:
 
 @main.command()
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(pause: float) -> None:
+@click.option("--max-retries", type=int, default=6)
+def run_submission_daemon(pause: float, max_retries: int) -> None:
     import requests
 
     from . import adaptation
@@ -636,44 +638,53 @@ def run_submission_daemon(pause: float) -> None:
     from . import database_utils
     from . import extraction
     from . import logs
+    from .retry import RetryableError
 
     engine = database_utils.create_engine(settings.DATABASE_URL)
+
+    default_pause = pause
 
     async def daemon() -> None:
         logs.log("Starting")
         last_time = time.monotonic()
+        current_retries = 0
         while True:
+            if time.monotonic() >= last_time + 60:
+                last_time = time.monotonic()
+                if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                    logs.log("Calling pulse monitoring URL")
+                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+
             done_something = False
+            can_retry = current_retries < max_retries
             try:
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
                     # in each session to commit progress as soon as possible.
-
-                    extraction_task = extraction.submission.submit_next_extraction(session)
+                    extraction_task = extraction.submission.submit_next_extraction(can_retry, session)
                     if extraction_task is not None:
                         await extraction_task
                         done_something = True
-
                     if not done_something:
                         done_something = classification.submission.execute_next_classification_chunk(session)
-
                     if not done_something:
-                        adaptation_task = adaptation.submission.submit_next_adaptation(session)
+                        adaptation_task = adaptation.submission.submit_next_adaptation(can_retry, session)
                         if adaptation_task is not None:
                             await adaptation_task
                             done_something = True
-
                     session.commit()
-
-                if time.monotonic() >= last_time + 60:
-                    last_time = time.monotonic()
-                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
-                        logs.log("Calling pulse monitoring URL")
-                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+            except RetryableError:
+                assert not done_something
+                current_retries += 1
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-            if not done_something:
+                assert not done_something
+
+            if done_something:
+                current_retries = 0
+            else:
+                pause = min(default_pause * (2**current_retries), 60)
                 logs.log(f"Sleeping for {pause}s...")
                 await asyncio.sleep(pause)
 
@@ -908,7 +919,7 @@ def rerun_adaptations(
                     print(adaptation_.settings.system_prompt.splitlines()[0][:80] + " [...]")
                     print(adaptation_.exercise.full_text.splitlines()[0][:80] + " [...]")
 
-                    asyncio.run(adaptation.submission.submit_adaptation(adaptation_))
+                    asyncio.run(adaptation.submission.submit_adaptation(False, adaptation_))
 
 
 if __name__ == "__main__":
