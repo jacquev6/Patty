@@ -22,18 +22,18 @@ LlmMessage = (
 )
 
 
-def submit_adaptations(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
-    adaptations = (
-        session.query(db.Adaptation)
-        .filter(db.Adaptation._initial_assistant_response == sql.null())
-        .limit(parallelism)
-        .all()
+def submit_next_adaptation(session: database_utils.Session) -> typing.Coroutine[None, None, None] | None:
+    adaptation = (
+        session.execute(sql.select(db.Adaptation).where(db.Adaptation._initial_assistant_response == sql.null()))
+        .scalars()
+        .first()
     )
-    if len(adaptations) > 0:
-        logs.log(
-            f"Found {len(adaptations)} not-yet-submitted adaptations: {' '.join(str(adaptation.id) for adaptation in adaptations)}"
-        )
-    return [submit_adaptation(adaptation) for adaptation in adaptations]
+
+    if adaptation is None:
+        return None
+    else:
+        logs.log(f"Found pending adaptation: {adaptation.id}")
+        return submit_adaptation(adaptation)
 
 
 async def submit_adaptation(adaptation: db.Adaptation) -> None:

@@ -627,13 +627,8 @@ def load_fixtures(truncate: bool, fixture: Iterable[str]) -> None:
 
 
 @main.command()
-@click.option("--extraction-parallelism", type=int, default=1)
-@click.option("--classification-parallelism", type=int, default=20)
-@click.option("--adaptation-parallelism", type=int, default=1)
 @click.option("--pause", type=float, default=1.0)
-def run_submission_daemon(
-    extraction_parallelism: int, classification_parallelism: int, adaptation_parallelism: int, pause: float
-) -> None:
+def run_submission_daemon(pause: float) -> None:
     import requests
 
     from . import adaptation
@@ -653,28 +648,23 @@ def run_submission_daemon(
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
                     # in each session to commit progress as soon as possible.
-                    done_something = (
-                        len(
-                            await asyncio.gather(
-                                *extraction.submission.submit_extractions(session, extraction_parallelism)
-                            )
-                        )
-                        != 0
-                    )
+
+                    extraction_task = extraction.submission.submit_next_extraction(session)
+                    if extraction_task is not None:
+                        await extraction_task
+                        done_something = True
+
                     if not done_something:
-                        done_something = classification.submission.submit_classifications(
-                            session, classification_parallelism
-                        )
+                        done_something = classification.submission.execute_next_classification_chunk(session)
+
                     if not done_something:
-                        done_something = (
-                            len(
-                                await asyncio.gather(
-                                    *adaptation.submission.submit_adaptations(session, adaptation_parallelism)
-                                )
-                            )
-                            != 0
-                        )
+                        adaptation_task = adaptation.submission.submit_next_adaptation(session)
+                        if adaptation_task is not None:
+                            await adaptation_task
+                            done_something = True
+
                     session.commit()
+
                 if time.monotonic() >= last_time + 60:
                     last_time = time.monotonic()
                     if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:

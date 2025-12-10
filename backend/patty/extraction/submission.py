@@ -29,19 +29,17 @@ from .text_and_styles_extraction import extract_text_and_styles_from_pdf_page
 pdf_data_cache = cachetools.TTLCache[str, bytes](maxsize=5, ttl=60 * 60)
 
 
-def submit_extractions(session: database_utils.Session, parallelism: int) -> list[typing.Coroutine[None, None, None]]:
-    extractions = (
-        session.execute(
-            sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()).limit(parallelism)
-        )
+def submit_next_extraction(session: database_utils.Session) -> typing.Coroutine[None, None, None] | None:
+    extraction = (
+        session.execute(sql.select(db.PageExtraction).where(db.PageExtraction._assistant_response == sql.null()))
         .scalars()
-        .all()
+        .first()
     )
-    if len(extractions) > 0:
-        logs.log(
-            f"Found {len(extractions)} pending page extractions: {' '.join(str(extraction.id) for extraction in extractions)}"
-        )
-    return [submit_extraction(session, extraction) for extraction in extractions]
+    if extraction is None:
+        return None
+    else:
+        logs.log(f"Found pending page extraction: {extraction.id}")
+        return submit_extraction(session, extraction)
 
 
 async def submit_extraction(session: database_utils.Session, page_extraction: db.PageExtraction) -> None:
