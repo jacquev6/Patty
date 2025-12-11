@@ -1906,6 +1906,101 @@ describe('TriColorLines', () => {
 
     screenshot()
   })
+
+  it('renders exponents and indices in the same color as their base', () => {
+    cy.viewport(100, 100)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span class="tricolorable">A</span><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span><span class="tricolorable">A</span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span class="tricolorable">A</span><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span><span class="tricolorable">A</span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span></p>',
+      },
+    })
+    screenshot()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span></p>',
+      },
+    })
+    screenshot()
+
+    cy.viewport(180, 250)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cy.mount(TriColorLines as any, {
+      props: { tricolored: true },
+      slots: {
+        default:
+          '<p><span class="tricolorable">Blah</span> <span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span><span class="tricolorable">blah</span><span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span style="vertical-align: sub; font-size: 0.8em;"><span class="tricolorable">i</span></span><span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p><p><span class="tricolorable">Blah</span> <span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span><span class="tricolorable">blah</span><span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span> <span class="tricolorable">blah</span> <span style="vertical-align: super; font-size: 0.8em;"><span class="tricolorable">e</span></span><span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span> <span class="tricolorable">blah</span><span class="tricolorable">.</span></p>',
+      },
+    })
+    screenshot()
+  })
 })
 
 describe('SwappableInput', () => {
