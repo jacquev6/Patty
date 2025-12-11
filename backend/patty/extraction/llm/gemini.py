@@ -27,7 +27,7 @@ class GeminiModel(Model):
             response = client.models.generate_content(model=self.name, contents=contents).text
         except google.genai.errors.ClientError as e:
             if e.code == 429:
-                logs.log("Gemini rate limit exceeded", e)
+                logs.log(f"Gemini rate limit exceeded {e}")
                 raise RetryableError()
             else:
                 raise
