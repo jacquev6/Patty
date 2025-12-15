@@ -164,18 +164,25 @@ const isSubmitAdjustmentDisabled = computed(
 )
 const busy = ref(false)
 
+const shouldRetryAdjustment = ref(false)
 async function submitAdjustment() {
   busy.value = true
+  shouldRetryAdjustment.value = false
 
   const responsePromise = client.POST(`/api/adaptations/{id}/adjustment`, {
     params: { path: { id: props.adaptation.id } },
     body: { adjustment: adjustmentPrompt.value },
   })
 
-  adjustmentPrompt.value = ''
-  await responsePromise
-
-  emit('adaptation-updated')
+  const response = await responsePromise
+  if (response.response.status === 503) {
+    assert(response.error !== undefined)
+    assert(response.error.detail !== undefined)
+    shouldRetryAdjustment.value = response.error.detail[0].type === 'retryable'
+  } else {
+    adjustmentPrompt.value = ''
+    emit('adaptation-updated')
+  }
 
   busy.value = false
 }
@@ -261,6 +268,7 @@ const columns = computed(() => {
         </template>
         <div class="user-prompt">
           <TextArea data-cy="user-prompt" v-model="adjustmentPrompt" :disabled="isAdjustmentPromptDisabled"></TextArea>
+          <p v-if="shouldRetryAdjustment" style="font-weight: bold; color: red">{{ t('adjustmentFailedRetry') }}</p>
           <p>
             <button data-cy="submit-adjustment" @click="submitAdjustment" :disabled="isSubmitAdjustmentDisabled">
               {{ t('submit') }}
@@ -429,6 +437,7 @@ en:
   na: N/A
   submit: Submit
   adjustments: Adjustments
+  adjustmentFailedRetry: Adjustment failed. Please try again later.
   viewRaw: View the raw conversation with the LLM
   llmError: Error with the LLM
   llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
@@ -461,6 +470,7 @@ fr:
   na: N/D
   submit: Soumettre
   adjustments: Ajustements
+  adjustmentFailedRetry: L'ajustement a échoué. Veuillez réessayer plus tard.
   viewRaw: Voir la conversation brute avec le LLM
   llmError: Erreur avec le LLM
   llmInvalidJson: Le LLM a retourné une réponse JSON qui ne valide pas contre le schéma d'exercice adapté.

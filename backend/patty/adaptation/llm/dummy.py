@@ -8,6 +8,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 import pydantic
 
 from ...any_json import JsonDict
+from ...retry import RetryableError
 from .base import (
     AssistantMessage,
     InvalidJsonAssistantMessage,
@@ -112,8 +113,11 @@ class DummyModel(Model):
         assert messages[-1].role == "user"
         content = messages[-1].content
 
-        def raise_exception() -> str:
+        def raise_unknown_error() -> str:
             raise Exception("Unknown error from DummyModel")
+
+        def raise_retryable_error() -> str:
+            raise RetryableError("Retryable error from DummyModel")
 
         if self.name == "dummy-3":
             MessageTypeFactory.seed_random(42)
@@ -121,7 +125,8 @@ class DummyModel(Model):
         response = {
             "Not JSON": lambda: "This is not JSON.",
             "Invalid JSON": lambda: "{}",
-            "Unknown error": raise_exception,
+            "Unknown error": raise_unknown_error,
+            "Retryable error": raise_retryable_error,
         }.get(content, lambda: MessageTypeFactory.build().model_dump_json())()
 
         duration = 0.1

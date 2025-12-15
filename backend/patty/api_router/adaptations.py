@@ -5,10 +5,12 @@ from typing import Literal
 import typing
 
 import fastapi
+from starlette import status
 
 from . import previewable_exercise
 from .. import adaptation
 from .. import classification
+from ..retry import RetryableError
 from ..sandbox import adaptation as sandbox_adaptation
 from .. import database_utils
 from .. import dispatching as dispatch
@@ -154,6 +156,11 @@ async def post_adaptation_adjustment(
     try:
         response = await exercise_adaptation.model.complete(
             messages, exercise_adaptation.settings.response_specification.make_response_format()
+        )
+    except RetryableError:
+        raise fastapi.HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=[dict(type="retryable", msg="LLM service temporarily unavailable")],
         )
     except adaptation.llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation

@@ -947,6 +947,13 @@ describe('The edition page for an initially successful adaptation', () => {
     cy.get('h1:contains("There was a bug")').should('not.exist')
     cy.get(':contains("TypeError")').should('not.exist')
   })
+
+  it('shows a message when the LLM quota is exceeded', () => {
+    cy.get('@user-prompt').type('Retryable error', { delay: 0 })
+    cy.get('@submit-adjustment').click()
+    cy.get('p:contains("Adjustment failed. Please try again later.")').should('exist')
+    cy.get('@user-prompt').should('have.value', 'Retryable error')
+  })
 })
 
 describe('The edition page for an initially invalid-json adaptation', () => {
