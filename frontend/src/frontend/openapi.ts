@@ -571,6 +571,40 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{textbook_id}/lessons': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Textbook Lessons */
+    post: operations['post_textbook_lessons_api_textbooks__textbook_id__lessons_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/textbooks/{textbook_id}/lessons/{lesson_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Lessons Removed */
+    put: operations['put_textbook_lessons_removed_api_textbooks__textbook_id__lessons__lesson_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{textbook_id}/pages/{page_id}/removed': {
     parameters: {
       query?: never
@@ -1592,6 +1626,8 @@ export interface components {
       knownPdfs: {
         [key: string]: components['schemas']['KnownPdf']
       }
+      /** Lessons */
+      lessons: components['schemas']['Lesson'][]
       /** Needsrefresh */
       needsRefresh: boolean
       /** Pagescount */
@@ -1808,6 +1844,17 @@ export interface components {
       extractedTextbookPages: number[]
       /** Pdftotextbookpagenumbersdelta */
       pdfToTextbookPageNumbersDelta: number
+    }
+    /** Lesson */
+    Lesson: {
+      /** Id */
+      id: string
+      /** Markedasremoved */
+      markedAsRemoved: boolean
+      /** Originalfilename */
+      originalFileName: string
+      /** Pagenumber */
+      pageNumber: number
     }
     'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Contents */
@@ -2173,6 +2220,20 @@ export interface components {
     }
     /** PostTextbookExternalExercisesResponse */
     PostTextbookExternalExercisesResponse: {
+      /** Puturl */
+      putUrl: string
+    }
+    /** PostTextbookLessonRequest */
+    PostTextbookLessonRequest: {
+      /** Creator */
+      creator: string
+      /** Originalfilename */
+      originalFileName: string
+      /** Pagenumber */
+      pageNumber: number
+    }
+    /** PostTextbookLessonResponse */
+    PostTextbookLessonResponse: {
       /** Puturl */
       putUrl: string
     }
@@ -4103,6 +4164,75 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['PostTextbookExternalExercisesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_textbook_lessons_api_textbooks__textbook_id__lessons_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        textbook_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTextbookLessonRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostTextbookLessonResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_lessons_removed_api_textbooks__textbook_id__lessons__lesson_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        lesson_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': null
         }
       }
       /** @description Validation Error */

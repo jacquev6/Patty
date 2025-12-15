@@ -10,7 +10,7 @@ import TriColoredInput from './TriColoredInput.vue'
 import VirtualNumericalKeyboard from './VirtualNumericalKeyboard.vue'
 import VirtualEraser from './VirtualEraser.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
-import type { Data, Exercise } from './RootView.vue'
+import type { Data, Exercise, Lesson } from './RootView.vue'
 import assert from '$/assert'
 import { useDisplayPreferences } from './displayPreferences'
 
@@ -24,7 +24,10 @@ const pageNumberFilter = ref<string>('')
 
 const pageNumberInput = useTemplateRef('pageNumberInput')
 
-type Filtered = { kind: 'nothing' } | { kind: 'noSuchPage' } | { kind: 'exercises'; exercises: Exercise[] }
+type Filtered =
+  | { kind: 'nothing' }
+  | { kind: 'noSuchPage' }
+  | { kind: 'exercises'; lessons: Lesson[]; exercises: Exercise[] }
 
 const filtered = computed(() => {
   return match(pageNumberFilter.value)
@@ -32,11 +35,12 @@ const filtered = computed(() => {
     .with('', () => ({ kind: 'nothing' }))
     .with(P.string, (pageString) => {
       const page = parseInt(pageString, 10)
+      const lessons = props.data.lessons.filter((lesson) => lesson.pageNumber === page)
       const exercises = props.data.exercises.filter((exercise) => exercise.pageNumber === page)
-      if (exercises.length === 0) {
+      if (lessons.length === 0 && exercises.length === 0) {
         return { kind: 'noSuchPage' }
       } else {
-        return { kind: 'exercises', exercises }
+        return { kind: 'exercises', lessons, exercises }
       }
     })
     .exhaustive()
@@ -83,7 +87,7 @@ onMounted(() => {
     <template v-if="filtered.kind === 'nothing'"></template>
     <p class="message" v-else-if="filtered.kind === 'noSuchPage'">{{ t('noSuchPage', { page: pageNumberFilter }) }}</p>
     <template v-else-if="filtered.kind === 'exercises'">
-      <TextbookExportExercisesList :exercises="filtered.exercises" />
+      <TextbookExportExercisesList :lessons="filtered.lessons" :exercises="filtered.exercises" />
     </template>
     <template v-else>{{ ((status: never) => status)(filtered) }}</template>
   </div>

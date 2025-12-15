@@ -212,6 +212,14 @@ class GetTextbookResponse(ApiModel):
 
     ranges: list[Range]
 
+    class Lesson(ApiModel):
+        id: str
+        page_number: int
+        original_file_name: str
+        marked_as_removed: bool
+
+    lessons: list[Lesson]
+
 
 @router.get("/textbooks/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
@@ -335,6 +343,16 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         for sha256, extracted_textbook_pages in extracted_textbook_pages_by_pdf.items()
     }
 
+    lessons = [
+        GetTextbookResponse.Lesson(
+            id=str(lesson.id),
+            page_number=lesson.page_number,
+            original_file_name=lesson.original_file_name,
+            marked_as_removed=lesson.marked_as_removed,
+        )
+        for lesson in textbook.lessons
+    ]
+
     return GetTextbookResponse(
         id=str(textbook.id),
         needs_refresh=needs_refresh,
@@ -347,6 +365,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         pages_with_exercises=sorted(pages_with_exercises),
         external_exercises=external_exercises_,
         ranges=sorted(ranges, key=lambda r: (r.textbook_first_page_number, r.pages_count, r.id)),
+        lessons=lessons,
         single_pdf=single_pdf,
         known_pdfs=known_pdfs,
     )
@@ -573,6 +592,45 @@ def put_textbook_exercises_removed(
         for adaptation_ in exercise.unordered_adaptations:
             adaptation_.approved_by = None
             adaptation_.approved_at = None
+
+
+class PostTextbookLessonRequest(ApiModel):
+    creator: str
+    page_number: int
+    original_file_name: str
+
+
+class PostTextbookLessonResponse(ApiModel):
+    put_url: str
+
+
+@router.post("/textbooks/{textbook_id}/lessons")
+def post_textbook_lessons(
+    textbook_id: str, req: PostTextbookLessonRequest, session: database_utils.SessionDependable
+) -> PostTextbookLessonResponse:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    lesson = textbooks.Lesson(
+        created_at=now,
+        created_by=req.creator,
+        textbook=textbook,
+        page_number=req.page_number,
+        original_file_name=req.original_file_name,
+        marked_as_removed=False,
+    )
+    session.add(lesson)
+    session.flush()
+    return PostTextbookLessonResponse(put_url=file_storage.lessons.get_put_url(str(lesson.id)))
+
+
+@router.put("/textbooks/{textbook_id}/lessons/{lesson_id}/removed")
+def put_textbook_lessons_removed(
+    textbook_id: str, lesson_id: str, removed: bool, session: database_utils.SessionDependable
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    lesson = get_by_id(session, textbooks.Lesson, lesson_id)
+    assert lesson.textbook == textbook
+    lesson.marked_as_removed = removed
 
 
 class PostTextbookRangesRequest(ApiModel):

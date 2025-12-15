@@ -417,6 +417,40 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     screenshot('multi-pdfs-textbook--with-external-exercises')
   })
 
+  it('adds and removes lessons', () => {
+    cy.get("input[data-cy='lessons']").selectFile(['e2e-tests/inputs/P57Leçon.docx', 'e2e-tests/inputs/bad-name.docx'])
+    cy.get('.busy').should('not.exist')
+    cy.get('p:contains("Files must be named like")').should('have.class', 'error')
+
+    cy.get("input[data-cy='lessons']").selectFile(['e2e-tests/inputs/P57Leçon.docx'])
+    cy.get('p:contains("Files must be named like")').should('not.have.class', 'error')
+    cy.get('.busy').should('not.exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Leçon')
+    cy.get('div.exercise').eq(1).should('not.be.visible')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+
+    cy.visit('/textbook-1')
+    cy.get('button:contains("Remove")').should('have.length', 1).click()
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get(':contains("La page 57 n\'existe pas.")').should('exist')
+
+    cy.visit('/textbook-1')
+    cy.get('button:contains("Re-add")').should('have.length', 1).click()
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Leçon')
+    cy.get('div.exercise').eq(1).should('not.be.visible')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+  })
+
   it('adds several ranges from the same PDF', () => {
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
     cy.get('input[type="number"]').should('have.length', 4)

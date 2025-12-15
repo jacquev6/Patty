@@ -2446,6 +2446,13 @@
             "title": "Knownpdfs",
             "type": "object"
           },
+          "lessons": {
+            "items": {
+              "$ref": "#/components/schemas/Lesson"
+            },
+            "title": "Lessons",
+            "type": "array"
+          },
           "needsRefresh": {
             "title": "Needsrefresh",
             "type": "boolean"
@@ -2525,7 +2532,8 @@
           "singlePdf",
           "knownPdfs",
           "externalExercises",
-          "ranges"
+          "ranges",
+          "lessons"
         ],
         "title": "GetTextbookResponse",
         "type": "object"
@@ -2906,6 +2914,35 @@
           "extractedTextbookPages"
         ],
         "title": "KnownPdf",
+        "type": "object"
+      },
+      "Lesson": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "markedAsRemoved": {
+            "title": "Markedasremoved",
+            "type": "boolean"
+          },
+          "originalFileName": {
+            "title": "Originalfilename",
+            "type": "string"
+          },
+          "pageNumber": {
+            "title": "Pagenumber",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "pageNumber",
+          "originalFileName",
+          "markedAsRemoved"
+        ],
+        "title": "Lesson",
         "type": "object"
       },
       "Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input": {
@@ -3891,6 +3928,44 @@
           "putUrl"
         ],
         "title": "PostTextbookExternalExercisesResponse",
+        "type": "object"
+      },
+      "PostTextbookLessonRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "title": "Creator",
+            "type": "string"
+          },
+          "originalFileName": {
+            "title": "Originalfilename",
+            "type": "string"
+          },
+          "pageNumber": {
+            "title": "Pagenumber",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "creator",
+          "pageNumber",
+          "originalFileName"
+        ],
+        "title": "PostTextbookLessonRequest",
+        "type": "object"
+      },
+      "PostTextbookLessonResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "putUrl": {
+            "title": "Puturl",
+            "type": "string"
+          }
+        },
+        "required": [
+          "putUrl"
+        ],
+        "title": "PostTextbookLessonResponse",
         "type": "object"
       },
       "PostTextbookRangesRequest": {
@@ -7626,6 +7701,123 @@
           }
         ],
         "summary": "Post Textbook External Exercises"
+      }
+    },
+    "/api/textbooks/{textbook_id}/lessons": {
+      "post": {
+        "operationId": "post_textbook_lessons_api_textbooks__textbook_id__lessons_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookLessonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostTextbookLessonResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Textbook Lessons"
+      }
+    },
+    "/api/textbooks/{textbook_id}/lessons/{lesson_id}/removed": {
+      "put": {
+        "operationId": "put_textbook_lessons_removed_api_textbooks__textbook_id__lessons__lesson_id__removed_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "removed",
+            "required": true,
+            "schema": {
+              "title": "Removed",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Put Textbook Lessons Removed Api Textbooks  Textbook Id  Lessons  Lesson Id  Removed Put",
+                  "type": "null"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Put Textbook Lessons Removed"
       }
     },
     "/api/textbooks/{textbook_id}/pages/{page_id}/removed": {

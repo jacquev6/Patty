@@ -413,8 +413,14 @@ def get_textbook_data(id: str, session: database_utils.Session) -> JsonDict:
             else:
                 assert False
 
+    lessons: list[JsonDict] = []
+    for lesson in textbook.lessons:
+        if not lesson.effectively_removed:
+            lessons.append(make_lesson_data(lesson))
+
     return dict(
         title=textbook.title,
+        lessons=sorted(lessons, key=lambda lesson: lesson["pageNumber"]),
         exercises=sorted(exercises, key=lambda ex: (ex["pageNumber"], alnum.key(ex["exerciseNumber"]))),
     )
 
@@ -474,6 +480,11 @@ def make_external_exercise_data(external_exercise: external_exercises.ExternalEx
         "originalFileName": external_exercise.original_file_name,
         "data": data,
     }
+
+
+def make_lesson_data(lesson: textbooks.Lesson) -> JsonDict:
+    data = base64.b64encode(file_storage.lessons.load(str(lesson.id))).decode("ascii")
+    return {"pageNumber": lesson.page_number, "originalFileName": lesson.original_file_name, "data": data}
 
 
 def make_export_header(download: bool, filename: str) -> dict[str, str]:

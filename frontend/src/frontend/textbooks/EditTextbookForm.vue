@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
+import EditTextbookFormCreateLessonForm from './EditTextbookFormCreateLessonForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
@@ -27,6 +28,13 @@ const authenticationTokenStore = useAuthenticationTokenStore()
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
+  })
+  emit('textbook-updated')
+}
+
+async function removeLesson(lesson_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/lessons/{lesson_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, lesson_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
@@ -197,6 +205,19 @@ const retryablePages = computed(
       <button @click="removeExercise(externalExercise.id, true)">{{ t('remove') }}</button>
     </h3>
   </template>
+  <h2>{{ t('newLessons') }}</h2>
+  <EditTextbookFormCreateLessonForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
+  <h2>{{ t('existingLessons') }}</h2>
+  <template v-for="lesson in textbook.lessons">
+    <h3 v-if="lesson.markedAsRemoved">
+      <span class="removed">{{ lesson.originalFileName }}</span> ({{ t('removed') }})
+      <button @click="removeLesson(lesson.id, false)">{{ t('reAdd') }}</button>
+    </h3>
+    <h3 v-else>
+      {{ lesson.originalFileName }}
+      <button @click="removeLesson(lesson.id, true)">{{ t('remove') }}</button>
+    </h3>
+  </template>
 </template>
 
 <style scoped>
@@ -245,6 +266,8 @@ en:
   unknownError: Unknown error
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
+  newLessons: New lesson(s)
+  existingLessons: Existing lessons
   exercise: Exercise
   page: Page
   reAdd: Re-add
@@ -273,6 +296,8 @@ fr:
   unknownError: Erreur inconnue
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
+  newLessons: Nouvelle leçon
+  existingLessons: Leçons existantes
   exercise: Exercice
   page: Page
   reAdd: Rajouter

@@ -565,7 +565,7 @@ def json_to_html_script() -> None:
         yield '            "studentAnswersStorageKey": hashlib.md5(json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()).hexdigest(),'
         yield '            "adaptedExercise": exercise_dump,'
         yield "        })"
-        yield '    data = {"title": textbook.title, "exercises": exercises}'
+        yield '    data = {"title": textbook.title, "lessons": [], "exercises": exercises}'
         yield ""
         yield "    return template.replace("
         yield '        "##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##",'

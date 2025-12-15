@@ -85,9 +85,11 @@ flowchart
   adapt_exercises --> ADAPTED_EXERCISES
   export[[Export]]
   EXTERNAL_EXERCISES[\External exercises/]
+  LESSONS[\Lessons/]
   EXTRACTED_ILLUSTRATIONS --> export
   ADAPTED_EXERCISES --> export
   EXTERNAL_EXERCISES --> export
+  LESSONS --> export
   HTML_FILE[/Autonomous HTML file\]
   export --> HTML_FILE
   render[[Render]]
@@ -128,7 +130,7 @@ Different adaptation prompts are used depending on the exercise category determi
 ## Export
 
 Adapted exercises are bundled (in JSON form) into a standalone HTML file.
-Extracted images and external exercises (*e.g.* Microsoft Word or Excel files) are also included in this file.
+Extracted images, external exercises (*e.g.* Microsoft Word or Excel files), and lessons (Microsoft Word or PDF files) are also included in this file.
 
 ## Rendering and use
 
@@ -250,6 +252,7 @@ Several kinds of files are stored durably:
 - uploaded textbook PDFs, to be processed by the daemon
 - extracted illustrations, to be included in the exported HTML files
 - external exercises files (Microsoft Word, Excel, *etc.*), for the same reason
+- lessons files (Microsoft Word or PDF), for the same reason
 
 Conceptually, these files are an extension of the database.
 Technically, they can't be stored in the database itself, so they are stored in an external storage service instead.

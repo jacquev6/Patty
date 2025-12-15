@@ -18,5 +18,6 @@ def make_storage_engine(prefix_url: str) -> S3FileStorageEngine | FileSystemStor
 
 
 external_exercises = make_storage_engine(settings.EXTERNAL_EXERCISES_URL)
+lessons = make_storage_engine(settings.LESSONS_URL)
 pdf_files = make_storage_engine(settings.PDF_FILES_URL)
 exercise_images = make_storage_engine(settings.EXERCISE_IMAGES_URL)
