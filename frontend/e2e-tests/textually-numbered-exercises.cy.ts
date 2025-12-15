@@ -88,7 +88,7 @@ describe('Textbooks', () => {
     ignoreResizeObserverLoopError()
   })
 
-  it('handle textually-numbered exercises', () => {
+  it('handles textually-numbered extracted exercises', () => {
     visit('/new-textbook')
     cy.get('[data-cy="textbook-title"]').type('Title')
     cy.get('label:contains("Single PDF") input').check()
@@ -108,5 +108,25 @@ describe('Textbooks', () => {
     cy.get('div.exercise').eq(0).should('contain.text', 'Not a number')
     cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 5')
     cy.get('div.exercise').eq(2).should('contain.text', 'Exercice 6')
+  })
+
+  it('handles textually-numbered external exercises', () => {
+    visit('/new-textbook')
+    cy.get('[data-cy="textbook-title"]').type('Title')
+    cy.get('label:contains("Multiple PDFs") input').check()
+    cy.get('button:contains("Submit")').click()
+    cy.get("input[data-cy='external-files']").selectFile([
+      'e2e-tests/inputs/P40ExDéfi Langue.docx',
+      "e2e-tests/inputs/P40ExJ'écris.docx",
+      'e2e-tests/inputs/P40ExÀ toi de jouer.xlsx',
+    ])
+    cy.get('li:contains("40")').should('exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').eq(0).should('contain.text', 'Défi Langue - Word')
+    cy.get('div.exercise').eq(1).should('contain.text', "J'écris - Word")
+    cy.get('div.exercise').eq(2).should('contain.text', 'À toi de jouer - Excel')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
   })
 })

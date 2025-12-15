@@ -115,8 +115,8 @@ async function upload() {
 <i18n>
 en:
   open: "Open one or several Word, Excel, PDF or GeoGebra files:"
-  fileNamePattern: "Files must be named like \"P42Ex3.docx\" for exercise 3 page 42."
+  fileNamePattern: "Files must be named like \"P42Ex3.docx\" for exercise 3 page 42 or like \"P40ExÀ toi de jouer.docx\" for \"À toi de jouer\" page 40."
 fr:
   open: "Ouvrir un ou plusieurs fichiers Word, Excel, PDF ou GeoGebra :"
-  fileNamePattern: "Les fichiers doivent être nommés comme \"P42Ex3.docx\" pour l'exercice 3 page 42."
+  fileNamePattern: "Les fichiers doivent être nommés comme \"P42Ex3.docx\" pour l'exercice 3 page 42 ou comme \"P40ExÀ toi de jouer.docx\" pour \"À toi de jouer\" page 40."
 </i18n>
