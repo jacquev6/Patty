@@ -679,7 +679,6 @@ def run_submission_daemon(pause: float, max_retries: int) -> None:
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-                assert not done_something
 
             if done_something:
                 current_retries = 0
