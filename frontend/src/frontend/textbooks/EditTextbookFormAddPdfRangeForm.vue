@@ -120,13 +120,9 @@ async function submit() {
 en:
   openThePdf: "Open the PDF file containing the textbook ({names}):"
   openAPdf: "Open a PDF file containing the textbook (or a part of it):"
-  modelForExtraction: "Model provider for extraction:"
-  modelForAdaptation: "Model provider for adaptation:"
   submit: "Submit"
 fr:
   openThePdf: "Ouvrir le fichier PDF contenant le manuel ({names}) :"
   openAPdf: "Ouvrir un fichier PDF contenant le manuel (ou une partie de celui-ci) :"
-  modelForExtraction: "Fournisseur de modèle pour l'extraction :"
-  modelForAdaptation: "Fournisseur de modèle pour l'adaptation :"
   submit: "Soumettre"
 </i18n>
