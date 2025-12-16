@@ -250,6 +250,7 @@ def retry_adaptation(id: str, session: database_utils.SessionDependable) -> None
         by_sandbox_batch=lambda ac: sandbox_adaptation.AdaptationCreationBySandboxBatch(
             at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
         ),
+        by_textbook=lambda ac: textbooks.AdaptationCreationByTextbook(at=now, textbook=ac.textbook),
     )
     new_adaptation = adaptation.Adaptation(
         created=new_created,
@@ -348,6 +349,14 @@ def make_api_adaptation_belongs_to(
             ),
             by_sandbox_batch=lambda ac: ApiAdaptation.BelongsToAdaptationBatch(
                 kind="adaptation-batch", id=str(ac.sandbox_adaptation_batch.id)
+            ),
+            by_textbook=lambda ac: ApiAdaptation.BelongsToTextbook(
+                kind="textbook",
+                id=str(ac.textbook.id),
+                title=ac.textbook.title,
+                page=dispatch.exercise_location(
+                    adaptation_.exercise.location, textbook=lambda el: el.page_number, maybe_page_and_number=None
+                ),
             ),
         ),
         by_page_extraction=lambda ec: dispatch.page_extraction_creation(

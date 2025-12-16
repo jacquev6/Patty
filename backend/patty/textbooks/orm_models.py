@@ -80,9 +80,11 @@ class ExerciseLocationTextbook(ExerciseLocation):
     def effectively_removed(self) -> bool:
         if self.marked_as_removed:
             return True
-        if isinstance(self.exercise, adaptation.AdaptableExercise):
-            assert isinstance(self.exercise.created, extraction.ExerciseCreationByPageExtraction)
-            assert isinstance(self.exercise.created.page_extraction.created, PageExtractionCreationByTextbook)
+        if (
+            isinstance(self.exercise, adaptation.AdaptableExercise)
+            and isinstance(self.exercise.created, extraction.ExerciseCreationByPageExtraction)
+            and isinstance(self.exercise.created.page_extraction.created, PageExtractionCreationByTextbook)
+        ):
             return self.exercise.created.page_extraction.created.effectively_removed
         else:
             return False
@@ -217,6 +219,20 @@ class Lesson(OrmBase, CreatedByUserMixin):
     @property
     def effectively_removed(self) -> bool:
         return self.marked_as_removed
+
+
+class AdaptationCreationByTextbook(adaptation.AdaptationCreation):
+    __tablename__ = "adaptation_creations__by_textbook"
+    __mapper_args__ = {"polymorphic_identity": "by_textbook"}
+
+    def __init__(self, *, at: datetime.datetime, textbook: Textbook) -> None:
+        super().__init__(at=at)
+        self.textbook = textbook
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.AdaptationCreation.id), primary_key=True)
+
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
 
 
 annotate_new_tables("textbooks")

@@ -246,6 +246,8 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                     marked_as_removed=location.marked_as_removed,
                 )
             )
+        elif isinstance(exercise.created, exercises.ExerciseCreationByUser):
+            pages_with_exercises.add(location.page_number)
 
     needs_refresh = False
     ranges = []
@@ -507,6 +509,62 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     page_number=location.page_number,
                     exercise_number=location.exercise_number,
                     original_file_name=exercise.original_file_name,
+                    marked_as_removed=location.marked_as_removed,
+                )
+            )
+        elif isinstance(exercise, adaptation.AdaptableExercise) and isinstance(
+            exercise.created, exercises.ExerciseCreationByUser
+        ):
+            latest_classification = exercise.latest_classification
+
+            exercise_class = (
+                latest_classification.exercise_class.name
+                if latest_classification is not None and latest_classification.exercise_class is not None
+                else None
+            )
+
+            exercise_class_has_settings = (
+                latest_classification is not None
+                and latest_classification.exercise_class is not None
+                and latest_classification.exercise_class.latest_strategy_settings is not None
+            )
+
+            if exercise_class is None:
+                needs_refresh = True
+
+            if exercise_class is None:
+                classification_status = previewable_exercise.ClassificationInProgress(kind="inProgress")
+            elif isinstance(latest_classification, classification.ClassificationByUser):
+                classification_status = previewable_exercise.ReclassifiedByUser(
+                    kind="byUser",
+                    by=latest_classification.username,
+                    exercise_class=exercise_class,
+                    class_has_settings=exercise_class_has_settings,
+                )
+            else:
+                classification_status = previewable_exercise.ClassifiedByModel(
+                    kind="byModel", exercise_class=exercise_class, class_has_settings=exercise_class_has_settings
+                )
+
+            latest_adaptation = exercise.latest_adaptation
+            if latest_adaptation is None:
+                adaptation_status = previewable_exercise.AdaptationNotStarted(kind="notStarted")
+            else:
+                adaptation_status = previewable_exercise.make_api_adaptation_status(latest_adaptation)
+
+            if adaptation_status.kind == "inProgress":
+                needs_refresh = True
+
+            exercises_.append(
+                GetTextbookPageResponse.AdaptableExercise(
+                    kind="adaptable",
+                    id=str(exercise.id),
+                    page_number=location.page_number,
+                    exercise_number=location.exercise_number,
+                    full_text=exercise.full_text,
+                    images_urls=previewable_exercise.gather_images_urls("http", exercise),
+                    classification_status=classification_status,
+                    adaptation_status=adaptation_status,
                     marked_as_removed=location.marked_as_removed,
                 )
             )

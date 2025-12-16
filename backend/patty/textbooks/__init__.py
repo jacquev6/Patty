@@ -6,4 +6,5 @@ from .orm_models import (
     TextbookExtractionBatch as TextbookExtractionBatch,
     Textbook as Textbook,
     Lesson as Lesson,
+    AdaptationCreationByTextbook as AdaptationCreationByTextbook,
 )

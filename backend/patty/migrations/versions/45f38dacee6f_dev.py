@@ -26,4 +26,18 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["textbook_id"], ["textbooks.id"], name=op.f("fk_lessons_textbook_id_textbooks")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_lessons")),
     )
+    op.create_table(
+        "adaptation_creations__by_textbook",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("textbook_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["id"],
+            ["adaptation_creations.id"],
+            name=op.f("fk_adaptation_creations__by_textbook_id_adaptation_creations"),
+        ),
+        sa.ForeignKeyConstraint(
+            ["textbook_id"], ["textbooks.id"], name=op.f("fk_adaptation_creations__by_textbook_textbook_id_textbooks")
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_adaptation_creations__by_textbook")),
+    )
     # ### end Alembic commands ###

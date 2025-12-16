@@ -403,6 +403,7 @@ def put_adaptable_exercise_class(
                 by_sandbox_batch=lambda ac: sandbox.adaptation.AdaptationCreationBySandboxBatch(
                     at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
                 ),
+                by_textbook=lambda ac: textbooks.AdaptationCreationByTextbook(at=now, textbook=ac.textbook),
             )
         elif len(exercise.ordered_classifications) != 0:
             automatic_classifications = list(
