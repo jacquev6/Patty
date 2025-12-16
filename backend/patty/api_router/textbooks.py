@@ -777,3 +777,72 @@ def put_textbook_pages_removed(
     page = get_by_id(session, textbooks.PageExtractionCreationByTextbook, page_id)
     assert page.textbook_extraction_batch.textbook == textbook
     page.marked_as_removed = removed
+
+
+class PostTextbookManualExercisesChunksRequest(ApiModel):
+    creator: str
+
+    model_for_adaptation: adaptation.llm.ConcreteModel
+
+    class Exercise(ApiModel):
+        page_number: int
+        exercise_number: str
+        exercise_class: str
+        full_text: str
+
+    exercises: list[Exercise]
+
+
+@router.post("/textbooks/{textbook_id}/manual-exercises-chunks")
+def post_textbook_manual_exercises_chunks(
+    textbook_id: str,
+    req: PostTextbookManualExercisesChunksRequest,
+    session: database_utils.SessionDependable = database_utils.SessionDependable(),
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    for exercise_req in req.exercises:
+        exercise = adaptation.AdaptableExercise(
+            created=exercises.ExerciseCreationByUser(at=now, username=req.creator),
+            location=textbooks.ExerciseLocationTextbook(
+                textbook=textbook,
+                page_number=exercise_req.page_number,
+                exercise_number=exercise_req.exercise_number,
+                marked_as_removed=False,
+            ),
+            full_text=exercise_req.full_text,
+            instruction_hint_example_text=None,
+            statement_text=None,
+        )
+        session.add(exercise)
+
+        exercise_class = (
+            session.execute(
+                sql.select(adaptation.ExerciseClass).where(adaptation.ExerciseClass.name == exercise_req.exercise_class)
+            )
+            .scalars()
+            .first()
+        )
+        if exercise_class is None or exercise_class.latest_strategy_settings is None:
+            raise fastapi.HTTPException(status_code=400, detail="Exercise class not found")
+
+        classification_ = classification.ClassificationByUser(
+            exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
+        )
+        session.add(classification_)
+
+        adaptation_ = adaptation.Adaptation(
+            created=textbooks.AdaptationCreationByTextbook(at=now, textbook=textbook),
+            exercise=exercise,
+            model=req.model_for_adaptation,
+            settings=exercise_class.latest_strategy_settings,
+            raw_llm_conversations=[],
+            initial_assistant_response=None,
+            initial_timing=None,
+            adjustments=[],
+            manual_edit=None,
+            approved_by=None,
+            approved_at=None,
+        )
+        session.add(adaptation_)

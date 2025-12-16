@@ -100,6 +100,9 @@ const exercisesToShow = computed({
     </RouterLink>
   </p>
   <p>
+    <button @click="router.push({ name: 'add-manual-exercises' })">{{ t('addMissingExercises') }}</button>
+  </p>
+  <p>
     <label :class="{ disabled: allExercisesHaveBeenApproved }">
       {{ t('showOnlyExercisesNotYetApproved') }}
       <input
@@ -170,6 +173,7 @@ en:
   noNextPage: 'No next page with exercises'
   previousPage: 'Previous page with exercises: {number}'
   nextPage: 'Next page with exercises: {number}'
+  addMissingExercises: 'Add missing exercises'
   showOnlyExercisesNotYetApproved: 'Show only exercises not yet approved'
   showAllExercises: 'Show all exercises'
   exercise: Exercise
@@ -183,6 +187,7 @@ fr:
   previousPage: 'Page précédente avec des exercices : {number}'
   noNextPage: 'Pas de page suivante avec des exercices'
   nextPage: 'Page suivante avec des exercices : {number}'
+  addMissingExercises: Ajouter exercices manquants
   showOnlyExercisesNotYetApproved: 'Afficher uniquement les exercices pas encore validés'
   showAllExercises: 'Afficher tous les exercices'
   exercise: Exercice

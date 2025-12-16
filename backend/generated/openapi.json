@@ -1368,7 +1368,36 @@
         "title": "ExampleComponents",
         "type": "object"
       },
-      "Exercise": {
+      "Exercise-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "exerciseClass": {
+            "title": "Exerciseclass",
+            "type": "string"
+          },
+          "exerciseNumber": {
+            "title": "Exercisenumber",
+            "type": "string"
+          },
+          "fullText": {
+            "title": "Fulltext",
+            "type": "string"
+          },
+          "pageNumber": {
+            "title": "Pagenumber",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pageNumber",
+          "exerciseNumber",
+          "exerciseClass",
+          "fullText"
+        ],
+        "title": "Exercise",
+        "type": "object"
+      },
+      "Exercise-Output": {
         "additionalProperties": false,
         "properties": {
           "adaptationStatus": {
@@ -2103,7 +2132,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/Exercise"
+              "$ref": "#/components/schemas/Exercise-Output"
             },
             "title": "Exercises",
             "type": "array"
@@ -2179,7 +2208,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/Exercise"
+              "$ref": "#/components/schemas/Exercise-Output"
             },
             "title": "Exercises",
             "type": "array"
@@ -3968,6 +3997,46 @@
         "title": "PostTextbookLessonResponse",
         "type": "object"
       },
+      "PostTextbookManualExercisesChunksRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "title": "Creator",
+            "type": "string"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/Exercise-Input"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "required": [
+          "creator",
+          "modelForAdaptation",
+          "exercises"
+        ],
+        "title": "PostTextbookManualExercisesChunksRequest",
+        "type": "object"
+      },
       "PostTextbookRangesRequest": {
         "additionalProperties": false,
         "properties": {
@@ -5285,7 +5354,7 @@
           },
           "exercises": {
             "items": {
-              "$ref": "#/components/schemas/Exercise"
+              "$ref": "#/components/schemas/Exercise-Output"
             },
             "title": "Exercises",
             "type": "array"
@@ -7818,6 +7887,61 @@
           }
         ],
         "summary": "Put Textbook Lessons Removed"
+      }
+    },
+    "/api/textbooks/{textbook_id}/manual-exercises-chunks": {
+      "post": {
+        "operationId": "post_textbook_manual_exercises_chunks_api_textbooks__textbook_id__manual_exercises_chunks_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostTextbookManualExercisesChunksRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Textbook Manual Exercises Chunks Api Textbooks  Textbook Id  Manual Exercises Chunks Post",
+                  "type": "null"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Post Textbook Manual Exercises Chunks"
       }
     },
     "/api/textbooks/{textbook_id}/pages/{page_id}/removed": {
