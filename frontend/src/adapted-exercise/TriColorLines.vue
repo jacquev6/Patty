@@ -8,6 +8,9 @@ export const colors: [string, string, string] = ['rgb(0, 0, 255)', 'rgb(255, 0, 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
 import { nextTick, onMounted, onUpdated, provide, ref, useTemplateRef, watch } from 'vue'
+import _ from 'lodash'
+
+import assert from '$/assert'
 
 const props = defineProps<{
   tricolored: boolean
@@ -43,32 +46,52 @@ function recolor() {
     if (props.tricolored) {
       type Line = { top: number; bottom: number; tricolorables: HTMLElement[] }
       const lines: Line[] = []
-
+      const nonBaselineElements: HTMLElement[] = []
       tricolorables.forEach((element) => {
-        const { top, bottom } = element.getBoundingClientRect()
-        const line = lines.find(
-          (line) => (line.top <= top && line.bottom >= bottom) || (line.top >= top && line.bottom <= bottom),
-        )
-        if (line) {
-          line.top = Math.min(line.top, top)
-          line.bottom = Math.max(line.bottom, bottom)
-          line.tricolorables.push(element)
+        if (isIndexOrExponent(element)) {
+          nonBaselineElements.push(element)
         } else {
-          lines.push({ top, bottom, tricolorables: [element] })
+          const { top, bottom } = element.getBoundingClientRect()
+          const line = lines.find(
+            (line) =>
+              (line.top <= top && line.bottom >= bottom) || // Element fully inside line's height
+              (line.top >= top && line.bottom <= bottom), // or line fully inside element's height
+          )
+          if (line) {
+            line.top = Math.min(line.top, top)
+            line.bottom = Math.max(line.bottom, bottom)
+            line.tricolorables.push(element)
+          } else {
+            lines.push({ top, bottom, tricolorables: [element] })
+          }
         }
       })
-
-      lines.sort((a, b) => a.top - b.top)
-
-      lines.forEach((line, i) => {
-        const color = colors[i % colors.length]
-        line.tricolorables.forEach((element) => {
-          if (element.style.color !== color) {
-            somethingChanged = true
-            element.style.color = color
-          }
+      // `lines` is empty if there is no baseline-aligned tricolorable.
+      // We do not handle this pathological case, and keep the text black.
+      if (lines.length !== 0) {
+        nonBaselineElements.forEach((element) => {
+          const { top, bottom } = element.getBoundingClientRect()
+          const line = _.maxBy(
+            lines,
+            // Portion of element's height overlapping with line
+            (line) => Math.min(bottom, line.bottom) - Math.max(top, line.top),
+          )
+          assert(line !== undefined)
+          line.tricolorables.push(element)
         })
-      })
+
+        lines.sort((a, b) => a.top - b.top)
+
+        lines.forEach((line, i) => {
+          const color = colors[i % colors.length]
+          line.tricolorables.forEach((element) => {
+            if (element.style.color !== color) {
+              somethingChanged = true
+              element.style.color = color
+            }
+          })
+        })
+      }
     } else {
       tricolorables.forEach((element) => {
         if (element.style.color !== '') {
@@ -82,6 +105,21 @@ function recolor() {
       tricolorablesRevisionIndex.value += 1
     }
   }
+}
+
+function isIndexOrExponent(element: HTMLElement): boolean {
+  assert(container.value !== null)
+
+  while (element !== container.value) {
+    const verticalAlign = getComputedStyle(element)['verticalAlign']
+    if (verticalAlign === 'sub' || verticalAlign === 'super') {
+      return true
+    } else {
+      assert(element.parentElement !== null)
+      element = element.parentElement
+    }
+  }
+  return false
 }
 
 defineExpose({ recolor })

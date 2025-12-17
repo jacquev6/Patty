@@ -216,7 +216,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     screenshot('multi-pdfs-textbook--empty')
 
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
-    cy.get('input[type="number"]').eq(1).type('{selectAll}6').blur()
+    cy.get('input[type="number"]').eq(2).type('{selectAll}6').blur()
     cy.get('label:contains("6-7") input[type="checkbox"]').check()
     cy.get('[data-cy="extraction"] [data-cy="llm-provider"]').select('dummy')
     cy.get('[data-cy="extraction"] [data-cy="llm-name"]').select('dummy-1')
@@ -417,17 +417,51 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     screenshot('multi-pdfs-textbook--with-external-exercises')
   })
 
+  it('adds and removes lessons', () => {
+    cy.get("input[data-cy='lessons']").selectFile(['e2e-tests/inputs/P57Leçon.docx', 'e2e-tests/inputs/bad-name.docx'])
+    cy.get('.busy').should('not.exist')
+    cy.get('p:contains("Files must be named like")').should('have.class', 'error')
+
+    cy.get("input[data-cy='lessons']").selectFile(['e2e-tests/inputs/P57Leçon.docx'])
+    cy.get('p:contains("Files must be named like")').should('not.have.class', 'error')
+    cy.get('.busy').should('not.exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Leçon')
+    cy.get('div.exercise').eq(1).should('not.be.visible')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+
+    cy.visit('/textbook-1')
+    cy.get('button:contains("Remove")').should('have.length', 1).click()
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get(':contains("La page 57 n\'existe pas.")').should('exist')
+
+    cy.visit('/textbook-1')
+    cy.get('button:contains("Re-add")').should('have.length', 1).click()
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Leçon')
+    cy.get('div.exercise').eq(1).should('not.be.visible')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+  })
+
   it('adds several ranges from the same PDF', () => {
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
-    cy.get('input[type="number"]').should('have.length', 4)
-    cy.get('input[type="number"]').eq(0).clear().type('3').blur()
-    cy.get('input[type="number"]').eq(1).clear().type('1').blur()
+    cy.get('input[type="number"]').should('have.length', 5)
+    cy.get('input[type="number"]').eq(1).clear().type('3').blur()
+    cy.get('input[type="number"]').eq(2).clear().type('1').blur()
     cy.get('label:contains("6-10") input[type="checkbox"]').check()
     cy.get('button:contains("Submit")').click()
     cy.get('h2:contains("Exercise 1")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
-    cy.get('input[type="number"]').should('have.length', 3)
+    cy.get('input[type="number"]').should('have.length', 4)
     cy.contains('in pdf is page -1 in textbook').should('exist')
     cy.get('label:contains("1-5")').should('exist')
     cy.get('label:contains("6-10")').should('not.exist')
@@ -436,15 +470,15 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
 
   it('adds several ranges from the different PDFs', () => {
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
-    cy.get('input[type="number"]').should('have.length', 4)
-    cy.get('input[type="number"]').eq(0).clear().type('3').blur()
-    cy.get('input[type="number"]').eq(1).clear().type('1').blur()
+    cy.get('input[type="number"]').should('have.length', 5)
+    cy.get('input[type="number"]').eq(1).clear().type('3').blur()
+    cy.get('input[type="number"]').eq(2).clear().type('1').blur()
     cy.get('label:contains("1-5") input[type="checkbox"]').check()
     cy.get('button:contains("Submit")').click()
     cy.get('h2:contains("Exercise 1")').should('exist')
     cy.get('a:contains("Dummy Textbook Title")').click()
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/test.pdf')
-    cy.get('input[type="number"]').should('have.length', 4)
+    cy.get('input[type="number"]').should('have.length', 5)
     cy.get('label:contains("1-2")').should('exist')
   })
 
@@ -477,6 +511,127 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('li:contains("2")').should('contain.text', 'Invalid JSON')
     cy.get('li:contains("3")').should('contain.text', 'Unknown error')
     screenshot('extraction-errors')
+  })
+
+  it('adds and removes manual exercises', () => {
+    cy.get('p:contains("Add missing exercises on page") input').type('40')
+    cy.get('p:contains("Add missing exercises on page") button').click()
+
+    cy.location('pathname').should('equal', '/textbook-1/page-40/new-adaptations')
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-text"]').eq(0).type('This is a manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).clear().type('5').blur()
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).select('CocheMot')
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('[data-cy="input-text"]').eq(1).type('This is another manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).select('CochePhrase')
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-number"]').eq(1).clear().type('7').blur()
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/textbook-1/page-40')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 5')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+
+    cy.visit('/textbook-1/page-40')
+    cy.get('h2:contains("Exercise 5") button:contains("Remove")').click()
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(1).should('not.be.visible')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+
+    cy.visit('/textbook-1/page-40')
+    cy.get('h2:contains("Exercise 5") button:contains("Re-add")').click()
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 5')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(2).should('not.be.visible')
+    cy.get('div.exercise').eq(3).should('not.be.visible')
+  })
+
+  it('fixes manual exercise class', () => {
+    cy.get('p:contains("Add missing exercises on page") input').type('40')
+    cy.get('p:contains("Add missing exercises on page") button').click()
+
+    cy.get('[data-cy="input-exercise-number"]').clear().type('5').blur()
+    cy.get('[data-cy="input-exercise-class"]').select('CocheMot')
+    cy.get('[data-cy="input-text"]').type('This is a manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/textbook-1/page-40')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('span.edit').eq(1).click()
+    cy.get('[data-cy="exercise-class"]').should('have.value', 'CocheMot')
+    cy.get('[data-cy="exercise-class"]').select('CochePhrase')
+    cy.get('[data-cy="exercise-class"]').should('not.exist')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+  })
+
+  it('loads manual exercises from several text files', () => {
+    cy.visit('/textbook-1/page-6/new-adaptations')
+    cy.get('input[type=file]').selectFile([
+      'e2e-tests/inputs/P6Ex8.txt',
+      'e2e-tests/inputs/P6Ex14.txt',
+      'e2e-tests/inputs/P16Ex4.txt', // Ignored because wrong page
+    ])
+    cy.get('h2:contains("Input")').should('have.length', 3)
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '8')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('[data-cy="input-exercise-number"]').eq(1).should('have.value', '14')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+  })
+
+  it('loads manual exercises from a zip file', () => {
+    cy.visit('/textbook-1/page-6/new-adaptations')
+    cy.get('input[type=file]').selectFile('e2e-tests/inputs/test.zip')
+    cy.get('h2:contains("Input")').should('have.length', 3)
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '8')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('[data-cy="input-exercise-number"]').eq(1).should('have.value', '14')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
   })
 })
 
@@ -661,6 +816,89 @@ describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
     cy.get('li a:contains("40")').should('exist')
     cy.get(':contains("except 40")').should('exist')
   })
+
+  it('adds and removes manual exercises', () => {
+    cy.get('button:contains("Add missing exercise")').click()
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-text"]').eq(0).type('This is a manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-number"]').eq(0).clear().type('5').blur()
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).select('CocheMot')
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('[data-cy="input-text"]').eq(1).type('This is another manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).select('QCM')
+    cy.get('button:contains("Submit")').should('be.disabled')
+    cy.get('[data-cy="input-exercise-number"]').eq(1).clear().type('7').blur()
+    cy.get('button:contains("Submit")').should('be.enabled')
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/textbook-1/page-40')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 8)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 4')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 5')
+    cy.get('div.exercise').eq(2).should('contain.text', 'Exercice 6')
+    cy.get('div.exercise').eq(3).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(4).should('contain.text', 'Exercice 8')
+    cy.get('div.exercise').eq(5).should('not.be.visible')
+    cy.get('div.exercise').eq(6).should('not.be.visible')
+    cy.get('div.exercise').eq(7).should('not.be.visible')
+
+    cy.visit('/textbook-1/page-40')
+    cy.get('h2:contains("Exercise 5") button:contains("Remove")').click()
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 4)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 4')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 6')
+    cy.get('div.exercise').eq(2).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(3).should('contain.text', 'Exercice 8')
+
+    cy.visit('/textbook-1/page-40')
+    cy.get('h2:contains("Exercise 5") button:contains("Re-add")').click()
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('40')
+    cy.get('div.exercise').should('have.length', 8)
+    cy.get('div.exercise').eq(0).should('contain.text', 'Exercice 4')
+    cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 5')
+    cy.get('div.exercise').eq(2).should('contain.text', 'Exercice 6')
+    cy.get('div.exercise').eq(3).should('contain.text', 'Exercice 7')
+    cy.get('div.exercise').eq(4).should('contain.text', 'Exercice 8')
+    cy.get('div.exercise').eq(5).should('not.be.visible')
+    cy.get('div.exercise').eq(6).should('not.be.visible')
+    cy.get('div.exercise').eq(7).should('not.be.visible')
+  })
+
+  it('approves and unapproves manual exercises', () => {
+    cy.get('button:contains("Add missing exercise")').click()
+    cy.get('[data-cy="input-exercise-number"]').clear().type('5').blur()
+    cy.get('[data-cy="input-exercise-class"]').select('CocheMot')
+    cy.get('[data-cy="input-text"]').type('This is a manually-added exercise.', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/textbook-1/page-40')
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+
+    cy.get('label:contains("Show only exercises not yet approved") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 5)
+    cy.get('label:contains("Show all exercises") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 5)
+    cy.get('h2:contains("Exercise 5") button:contains("Approve")').click()
+    cy.get('h2:contains("Exercise")').should('have.length', 5)
+    cy.get('label:contains("Show only exercises not yet approved") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 4)
+    cy.get('label:contains("Show all exercises") input').check()
+    cy.get('h2:contains("Exercise 5") button:contains("Unapprove")').click()
+    cy.get('label:contains("Show only exercises not yet approved") input').check()
+    cy.get('h2:contains("Exercise")').should('have.length', 5)
+  })
 })
 
 describe('The edition form for single-PDF textbooks', () => {
@@ -688,7 +926,7 @@ describe('The edition form for single-PDF textbooks', () => {
     cy.location('pathname').should('equal', '/textbook-1')
     cy.get('input[type="file"]').eq(0).selectFile('e2e-tests/inputs/long.pdf')
     cy.get('label:contains("6-10 (except 8)")').should('exist')
-    cy.get('input[type="number"]').eq(0).clear().type('6').blur()
+    cy.get('input[type="number"]').eq(1).clear().type('6').blur()
     cy.get('p:contains("is page 9 in textbook")').should('exist')
     cy.get('button:contains("Submit")').should('be.disabled')
     cy.get('label:contains("11-15") input').check()

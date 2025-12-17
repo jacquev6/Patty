@@ -802,6 +802,36 @@ class FixturesCreator:
             )
         )
 
+    def create_dummy_textbook_with_manual_exercises(self) -> None:
+        model_for_adaptation = adaptation.llm.DummyModel(provider="dummy", name="dummy-1")
+
+        textbook = self.create_dummy_textbook()
+
+        exercise_1 = self.add(
+            adaptation.AdaptableExercise(
+                created=exercises.ExerciseCreationByUser(at=created_at, username="Patty"),
+                location=textbooks.ExerciseLocationTextbook(
+                    textbook=textbook, page_number=12, exercise_number="1", marked_as_removed=False
+                ),
+                full_text="Ceci est un exercice manuel 1.",
+                instruction_hint_example_text=None,
+                statement_text=None,
+            )
+        )
+        mcq_exercise_class = self.create_dummy_branch(name="QCM", system_prompt="Blah blah QCM.")
+        assert mcq_exercise_class.latest_strategy_settings is not None
+        self.add(
+            classification.ClassificationByUser(
+                exercise=exercise_1, at=created_at, username="Patty", exercise_class=mcq_exercise_class
+            )
+        )
+        self.make_successful_adaptation(
+            created=self.add(textbooks.AdaptationCreationByTextbook(at=created_at, textbook=textbook)),
+            settings=mcq_exercise_class.latest_strategy_settings,
+            model=model_for_adaptation,
+            exercise=exercise_1,
+        )
+
     def create_dummy_textbook_with_pdf_range(
         self,
     ) -> tuple[

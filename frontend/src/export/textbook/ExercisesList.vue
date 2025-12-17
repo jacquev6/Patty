@@ -5,8 +5,9 @@ import { computed } from 'vue'
 import _ from 'lodash'
 
 import HorizontalScrollingControls from '@/adapted-exercise/HorizontalScrollingControls.vue'
-import type { Exercise as FullExercise } from './RootView.vue'
+import type { Exercise as FullExercise, Lesson } from './RootView.vue'
 import { match, P } from 'ts-pattern'
+import { useI18n } from 'vue-i18n'
 
 type Exercise =
   | Pick<FullExercise & { kind: 'adapted' }, 'kind' | 'exerciseId' | 'exerciseNumber'>
@@ -14,14 +15,17 @@ type Exercise =
 
 const props = defineProps<{
   exercises: Exercise[]
+  lessons: Lesson[]
 }>()
+
+const { t } = useI18n()
 
 function hasExt(ext: string) {
   return (filename: string) => filename.endsWith(ext)
 }
 
 const columns = computed(() => {
-  const columns: (Exercise | null)[][] = _.chunk(props.exercises, 4)
+  const columns: (Lesson | Exercise | null)[][] = _.chunk([...props.lessons, ...props.exercises], 4)
   const missing = 4 - columns[columns.length - 1]!.length
   for (let i = 0; i < missing; i++) {
     columns[columns.length - 1]!.push(null)
@@ -47,16 +51,24 @@ function makeExerciseTitle(exercise: Exercise) {
     .exhaustive()
 }
 
+function makeLessonSuffix(lesson: Lesson) {
+  return match(lesson.originalFileName)
+    .with(P.string, hasExt('.pdf'), () => 'PDF')
+    .with(P.string, hasExt('.docx'), () => 'Word')
+    .with(P.string, hasExt('.odt'), () => 'LibreOffice Writer')
+    .otherwise(() => 'Logiciel externe')
+}
+
 // Until https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromBase64
 // is widely available:
 function Uint8ArrayFromBase64(base64: string) {
   return Uint8Array.from(Array.from(atob(base64)).map((letter) => letter.charCodeAt(0)))
 }
 
-function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
+function openData(subject: { data: string; originalFileName: string }) {
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([Uint8ArrayFromBase64(exercise.data)]))
-  a.download = exercise.originalFileName
+  a.href = URL.createObjectURL(new Blob([Uint8ArrayFromBase64(subject.data)]))
+  a.download = subject.originalFileName
   a.click()
   URL.revokeObjectURL(a.href)
 }
@@ -66,29 +78,36 @@ function openExternalExercise(exercise: Exercise & { kind: 'external' }) {
   <HorizontalScrollingControls :navigateUsingArrowKeys="true" :scrollBy="250">
     <div class="container">
       <div v-for="(column, columnIndex) in columns">
-        <template v-for="exercise in column">
-          <template v-if="exercise === null">
+        <template v-for="row in column">
+          <template v-if="row === null">
             <div class="exercise" style="visibility: hidden"><p>&nbsp;</p></div>
           </template>
-          <template v-else-if="exercise.kind === 'adapted'">
+          <template v-else-if="row.kind === 'adapted'">
             <RouterLink
-              :to="{ name: 'exercise', params: { id: exercise.exerciseId }, query: { closable: 'true' } }"
+              :to="{ name: 'exercise', params: { id: row.exerciseId }, query: { closable: 'true' } }"
               target="_blank"
             >
               <div class="exercise" :class="`exercise${columnIndex % 3}`">
-                <p>{{ makeExerciseTitle(exercise) }}</p>
+                <p>{{ makeExerciseTitle(row) }}</p>
               </div>
             </RouterLink>
           </template>
-          <template v-else-if="exercise.kind === 'external'">
-            <a @click="openExternalExercise(exercise)">
+          <template v-else-if="row.kind === 'external'">
+            <a @click="openData(row)">
               <div class="exercise" :class="`exercise${columnIndex % 3}`">
-                <p>{{ makeExerciseTitle(exercise) }}</p>
+                <p>{{ makeExerciseTitle(row) }}</p>
+              </div>
+            </a>
+          </template>
+          <template v-else-if="'data' in row">
+            <a @click="openData(row)">
+              <div class="exercise" :class="`exercise${columnIndex % 3}`">
+                <p>{{ t('lesson') }} - {{ makeLessonSuffix(row) }}</p>
               </div>
             </a>
           </template>
           <template v-else>
-            {{ ((e: never) => console.log('Unexpected exercise', e))(exercise) }}
+            {{ ((e: never) => console.log('Unexpected exercise', e))(row) }}
           </template>
         </template>
       </div>
@@ -138,3 +157,8 @@ a {
   --color: #f00;
 }
 </style>
+
+<i18n>
+fr:
+  lesson: Leçon
+</i18n>

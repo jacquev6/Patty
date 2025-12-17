@@ -24,6 +24,7 @@ import EditClassificationBatchView from './sandbox/EditClassificationBatchView.v
 import { useBreadcrumbsStore } from './basic/BreadcrumbsStore'
 import ErrorsView from './basic/ErrorsView.vue'
 import CreateTextbookView from './textbooks/CreateTextbookView.vue'
+import AddManualExercisesToPageView from './textbooks/AddManualExercisesToPageView.vue'
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
@@ -90,6 +91,15 @@ const router = createRouter({
       path: '/textbook-:textbookId/page-:pageNumber',
       name: 'textbook-page',
       component: EditTextbookPageView,
+      props: ({ params: { textbookId, pageNumber } }) => ({
+        textbookId,
+        pageNumber: Number.parseInt(pageNumber as string),
+      }),
+    },
+    {
+      path: '/textbook-:textbookId/page-:pageNumber/new-adaptations',
+      name: 'add-manual-exercises',
+      component: AddManualExercisesToPageView,
       props: ({ params: { textbookId, pageNumber } }) => ({
         textbookId,
         pageNumber: Number.parseInt(pageNumber as string),

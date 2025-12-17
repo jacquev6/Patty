@@ -21,7 +21,6 @@ const emit = defineEmits<{
 }>()
 
 const client = useAuthenticatedClient()
-const { d } = useI18n({ useScope: 'global' })
 const { t } = useI18n()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
@@ -59,13 +58,6 @@ function showDuration(timing: { start: number; end: number | null } | null): str
 <template>
   <h1>{{ t('settings') }}</h1>
   <p>{{ t('createdBy') }} {{ classificationBatch.createdBy }}</p>
-  <p>
-    <I18nT keypath="classificationModel">
-      <code>{{ classificationCamembert20250520.fileName }}</code>
-      <span>{{ classificationCamembert20250520.providedBy }}</span>
-      <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
-    </I18nT>
-  </p>
   <p>
     {{ t('classNamesProduced') }}
     <template v-for="(className, index) in classificationCamembert20250520.classesProduced">
@@ -153,7 +145,6 @@ function showDuration(timing: { start: number; end: number | null } | null): str
 en:
   settings: Settings
   createdBy: "Created by:"
-  classificationModel: "Classification model: {0}, provided by {1} by e-mail on {2}"
   classNamesProduced: "Class names produced:"
   change: 🖊️ change
   runAdaptation: "Run adaptation after classification:"
@@ -175,7 +166,6 @@ en:
 fr:
   settings: Paramètres
   createdBy: "Créé par :"
-  classificationModel: "Modèle de classification : {0}, fourni par {1} par e-mail le {2}"
   classNamesProduced: "Noms de classe produits :"
   change: 🖊️ modifier
   runAdaptation: "Exécuter l'adaptation après la classification :"

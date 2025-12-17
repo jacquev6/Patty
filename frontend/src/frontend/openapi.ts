@@ -571,6 +571,57 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{textbook_id}/lessons': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Textbook Lessons */
+    post: operations['post_textbook_lessons_api_textbooks__textbook_id__lessons_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/textbooks/{textbook_id}/lessons/{lesson_id}/removed': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Put Textbook Lessons Removed */
+    put: operations['put_textbook_lessons_removed_api_textbooks__textbook_id__lessons__lesson_id__removed_put']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/textbooks/{textbook_id}/manual-exercises-chunks': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Textbook Manual Exercises Chunks */
+    post: operations['post_textbook_manual_exercises_chunks_api_textbooks__textbook_id__manual_exercises_chunks_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{textbook_id}/pages/{page_id}/removed': {
     parameters: {
       query?: never
@@ -1188,7 +1239,18 @@ export interface components {
       whitespace: true
     }
     /** Exercise */
-    Exercise: {
+    'Exercise-Input': {
+      /** Exerciseclass */
+      exerciseClass: string
+      /** Exercisenumber */
+      exerciseNumber: string
+      /** Fulltext */
+      fullText: string
+      /** Pagenumber */
+      pageNumber: number
+    }
+    /** Exercise */
+    'Exercise-Output': {
       /** Adaptationstatus */
       adaptationStatus:
         | components['schemas']['NotRequested']
@@ -1493,7 +1555,7 @@ export interface components {
       /** Createdby */
       createdBy: string
       /** Exercises */
-      exercises: components['schemas']['Exercise'][]
+      exercises: components['schemas']['Exercise-Output'][]
       /** Id */
       id: string
       /** Needsrefresh */
@@ -1513,7 +1575,7 @@ export interface components {
       /** Createdby */
       createdBy: string | null
       /** Exercises */
-      exercises: components['schemas']['Exercise'][]
+      exercises: components['schemas']['Exercise-Output'][]
       /** Id */
       id: string
       /** Modelforadaptation */
@@ -1592,6 +1654,8 @@ export interface components {
       knownPdfs: {
         [key: string]: components['schemas']['KnownPdf']
       }
+      /** Lessons */
+      lessons: components['schemas']['Lesson'][]
       /** Needsrefresh */
       needsRefresh: boolean
       /** Pagescount */
@@ -1808,6 +1872,17 @@ export interface components {
       extractedTextbookPages: number[]
       /** Pdftotextbookpagenumbersdelta */
       pdfToTextbookPageNumbersDelta: number
+    }
+    /** Lesson */
+    Lesson: {
+      /** Id */
+      id: string
+      /** Markedasremoved */
+      markedAsRemoved: boolean
+      /** Originalfilename */
+      originalFileName: string
+      /** Pagenumber */
+      pageNumber: number
     }
     'Line_Union_Text__Whitespace__Arrow__ActiveFormatted__Image__FreeTextInput__MultipleChoicesInput__SelectableInput__SwappableInput__EditableTextInput__SplitWordInput__-Input': {
       /** Contents */
@@ -2175,6 +2250,33 @@ export interface components {
     PostTextbookExternalExercisesResponse: {
       /** Puturl */
       putUrl: string
+    }
+    /** PostTextbookLessonRequest */
+    PostTextbookLessonRequest: {
+      /** Creator */
+      creator: string
+      /** Originalfilename */
+      originalFileName: string
+      /** Pagenumber */
+      pageNumber: number
+    }
+    /** PostTextbookLessonResponse */
+    PostTextbookLessonResponse: {
+      /** Puturl */
+      putUrl: string
+    }
+    /** PostTextbookManualExercisesChunksRequest */
+    PostTextbookManualExercisesChunksRequest: {
+      /** Creator */
+      creator: string
+      /** Exercises */
+      exercises: components['schemas']['Exercise-Input'][]
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
     }
     /** PostTextbookRangesRequest */
     PostTextbookRangesRequest: {
@@ -2692,7 +2794,7 @@ export interface components {
         | components['schemas']['UnknownError']
         | null
       /** Exercises */
-      exercises: components['schemas']['Exercise'][]
+      exercises: components['schemas']['Exercise-Output'][]
       /** Imagesurls */
       imagesUrls: {
         [key: string]: string
@@ -4103,6 +4205,110 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['PostTextbookExternalExercisesResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_textbook_lessons_api_textbooks__textbook_id__lessons_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        textbook_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTextbookLessonRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PostTextbookLessonResponse']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  put_textbook_lessons_removed_api_textbooks__textbook_id__lessons__lesson_id__removed_put: {
+    parameters: {
+      query: {
+        removed: boolean
+      }
+      header?: never
+      path: {
+        textbook_id: string
+        lesson_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': null
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  post_textbook_manual_exercises_chunks_api_textbooks__textbook_id__manual_exercises_chunks_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        textbook_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PostTextbookManualExercisesChunksRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': null
         }
       }
       /** @description Validation Error */

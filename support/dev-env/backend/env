@@ -3,6 +3,7 @@
 PATTY_DATABASE_URL=postgresql+psycopg2://admin:password@db/db
 PATTY_DATABASE_BACKUPS_URL=file:///app/support/dev-env/db/backups
 PATTY_EXTERNAL_EXERCISES_URL=file:///app/support/dev-env/backend/external-exercises
+PATTY_LESSONS_URL=file:///app/support/dev-env/backend/lessons
 PATTY_PDF_FILES_URL=file:///app/support/dev-env/backend/pdf-files
 PATTY_2025_05_20_CLASSIFICATION_CAMEMBERT_PT_PATH=/app/support/dev-env/backend/classification-models/2025-05-20-classification_camembert.pt
 PATTY_2025_09_15_IMAGES_DETECTION_PT_PATH=/app/support/dev-env/backend/images-detection-models/2025-09-15-detImages.pt

@@ -53,6 +53,7 @@ class Textbook(OrmBase, CreatedByUserMixin):
     )
 
     extraction_batches: orm.Mapped[list[TextbookExtractionBatch]] = orm.relationship(back_populates="textbook")
+    lessons: orm.Mapped[list[Lesson]] = orm.relationship(back_populates="textbook")
 
 
 class ExerciseLocationTextbook(ExerciseLocation):
@@ -79,9 +80,11 @@ class ExerciseLocationTextbook(ExerciseLocation):
     def effectively_removed(self) -> bool:
         if self.marked_as_removed:
             return True
-        if isinstance(self.exercise, adaptation.AdaptableExercise):
-            assert isinstance(self.exercise.created, extraction.ExerciseCreationByPageExtraction)
-            assert isinstance(self.exercise.created.page_extraction.created, PageExtractionCreationByTextbook)
+        if (
+            isinstance(self.exercise, adaptation.AdaptableExercise)
+            and isinstance(self.exercise.created, extraction.ExerciseCreationByPageExtraction)
+            and isinstance(self.exercise.created.page_extraction.created, PageExtractionCreationByTextbook)
+        ):
             return self.exercise.created.page_extraction.created.effectively_removed
         else:
             return False
@@ -180,6 +183,56 @@ class PageExtractionCreationByTextbook(PageExtractionCreation):
     @property
     def effectively_removed(self) -> bool:
         return self.marked_as_removed or self.textbook_extraction_batch.effectively_removed
+
+
+class Lesson(OrmBase, CreatedByUserMixin):
+    __tablename__ = "lessons"
+
+    def __init__(
+        self,
+        *,
+        created_at: datetime.datetime,
+        created_by: str,
+        textbook: Textbook,
+        page_number: int,
+        original_file_name: str,
+        marked_as_removed: bool,
+    ) -> None:
+        super().__init__()
+        self.created_at = created_at
+        self.created_by = created_by
+        self.textbook = textbook
+        self.page_number = page_number
+        self.original_file_name = original_file_name
+        self.marked_as_removed = marked_as_removed
+
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True, autoincrement=True)
+
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(
+        foreign_keys=[textbook_id], remote_side=[Textbook.id], back_populates="lessons"
+    )
+    page_number: orm.Mapped[int]
+    original_file_name: orm.Mapped[str]
+    marked_as_removed: orm.Mapped[bool] = orm.mapped_column("removed_from_textbook")
+
+    @property
+    def effectively_removed(self) -> bool:
+        return self.marked_as_removed
+
+
+class AdaptationCreationByTextbook(adaptation.AdaptationCreation):
+    __tablename__ = "adaptation_creations__by_textbook"
+    __mapper_args__ = {"polymorphic_identity": "by_textbook"}
+
+    def __init__(self, *, at: datetime.datetime, textbook: Textbook) -> None:
+        super().__init__(at=at)
+        self.textbook = textbook
+
+    id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(adaptation.AdaptationCreation.id), primary_key=True)
+
+    textbook_id: orm.Mapped[int] = orm.mapped_column(sql.ForeignKey(Textbook.id))
+    textbook: orm.Mapped[Textbook] = orm.relationship(foreign_keys=[textbook_id], remote_side=[Textbook.id])
 
 
 annotate_new_tables("textbooks")

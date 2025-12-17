@@ -14,7 +14,6 @@ import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
 import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 import WhiteSpace from '$/WhiteSpace.vue'
 
-const { d } = useI18n({ useScope: 'global' })
 const { t } = useI18n()
 const apiConstantsStore = useApiConstantsStore()
 const router = useRouter()
@@ -61,13 +60,6 @@ async function submit() {
 <template>
   <h1>{{ t('settings') }}</h1>
   <p>
-    <I18nT keypath="classificationModel">
-      <code>{{ classificationCamembert20250520.fileName }}</code>
-      <span>{{ classificationCamembert20250520.providedBy }}</span>
-      <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
-    </I18nT>
-  </p>
-  <p>
     {{ t('classNamesProduced') }}
     <template v-for="(className, index) in classificationCamembert20250520.classesProduced">
       <template v-if="index !== 0">, </template>
@@ -104,7 +96,6 @@ async function submit() {
 <i18n>
 en:
   settings: Settings
-  classificationModel: "Classification model: {0}, provided by {1} by e-mail on {2}"
   classNamesProduced: "Class names produced:"
   runAdaptation: "Run adaptations after classification:"
   runAdaptationYesUsing: "using {0} with the latest settings for each known exercise class"
@@ -116,7 +107,6 @@ en:
   inputs: Inputs
 fr:
   settings: Paramètres
-  classificationModel: "Modèle de classification : {0}, fourni par {1} par e-mail le {2}"
   classNamesProduced: "Noms de classe produits :"
   runAdaptation: "Exécuter l'adaptation après la classification :"
   runAdaptationYesUsing: "en utilisant {0} avec les derniers paramètres pour chaque classe d'exercice connue"

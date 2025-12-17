@@ -89,13 +89,17 @@ def adaptation_creation(
     *,
     by_chunk: typing.Callable[[classification.AdaptationCreationByChunk], T1] | None,
     by_sandbox_batch: typing.Callable[[sandbox.adaptation.AdaptationCreationBySandboxBatch], T2] | None,
-) -> T1 | T2:
+    by_textbook: typing.Callable[[textbooks.AdaptationCreationByTextbook], T3] | None,
+) -> T1 | T2 | T3:
     if isinstance(adaptation_creation, classification.AdaptationCreationByChunk):
         assert by_chunk is not None
         return by_chunk(adaptation_creation)
     elif isinstance(adaptation_creation, sandbox.adaptation.AdaptationCreationBySandboxBatch):
         assert by_sandbox_batch is not None
         return by_sandbox_batch(adaptation_creation)
+    elif isinstance(adaptation_creation, textbooks.AdaptationCreationByTextbook):
+        assert by_textbook is not None
+        return by_textbook(adaptation_creation)
     else:
         assert False
 

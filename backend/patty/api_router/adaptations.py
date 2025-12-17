@@ -5,10 +5,12 @@ from typing import Literal
 import typing
 
 import fastapi
+from starlette import status
 
 from . import previewable_exercise
 from .. import adaptation
 from .. import classification
+from ..retry import RetryableError
 from ..sandbox import adaptation as sandbox_adaptation
 from .. import database_utils
 from .. import dispatching as dispatch
@@ -155,6 +157,11 @@ async def post_adaptation_adjustment(
         response = await exercise_adaptation.model.complete(
             messages, exercise_adaptation.settings.response_specification.make_response_format()
         )
+    except RetryableError:
+        raise fastapi.HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=[dict(type="retryable", msg="LLM service temporarily unavailable")],
+        )
     except adaptation.llm.InvalidJsonLlmException as error:
         raw_conversation = error.raw_conversation
         assistant_response: adaptation.assistant_responses.Response = adaptation.assistant_responses.InvalidJsonError(
@@ -243,6 +250,7 @@ def retry_adaptation(id: str, session: database_utils.SessionDependable) -> None
         by_sandbox_batch=lambda ac: sandbox_adaptation.AdaptationCreationBySandboxBatch(
             at=now, sandbox_adaptation_batch=ac.sandbox_adaptation_batch
         ),
+        by_textbook=lambda ac: textbooks.AdaptationCreationByTextbook(at=now, textbook=ac.textbook),
     )
     new_adaptation = adaptation.Adaptation(
         created=new_created,
@@ -341,6 +349,14 @@ def make_api_adaptation_belongs_to(
             ),
             by_sandbox_batch=lambda ac: ApiAdaptation.BelongsToAdaptationBatch(
                 kind="adaptation-batch", id=str(ac.sandbox_adaptation_batch.id)
+            ),
+            by_textbook=lambda ac: ApiAdaptation.BelongsToTextbook(
+                kind="textbook",
+                id=str(ac.textbook.id),
+                title=ac.textbook.title,
+                page=dispatch.exercise_location(
+                    adaptation_.exercise.location, textbook=lambda el: el.page_number, maybe_page_and_number=None
+                ),
             ),
         ),
         by_page_extraction=lambda ec: dispatch.page_extraction_creation(

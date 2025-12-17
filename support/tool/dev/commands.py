@@ -36,6 +36,7 @@ def clean(force: bool) -> None:
                 "support/dev-env/backend/annotated-pdf-pages/",
                 "support/dev-env/backend/exercise-images/",
                 "support/dev-env/backend/external-exercises/",
+                "support/dev-env/backend/lessons/",
                 "support/dev-env/backend/home-config/",
                 "support/dev-env/backend/home-local/",
                 "support/dev-env/backend/pdf-files/",
@@ -44,6 +45,7 @@ def clean(force: bool) -> None:
                 "support/dev-env/frontend/cache/",
                 "support/prod/backend/exercise-images/",
                 "support/prod/backend/external-exercises/",
+                "support/prod/backend/lessons/",
                 "support/prod/backend/pdf-files/",
                 "support/prod/db/backups/",
             ]

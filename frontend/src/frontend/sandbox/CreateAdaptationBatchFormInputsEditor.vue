@@ -2,7 +2,7 @@
 
 <script lang="ts">
 export function parseExerciseFileName(fileName: string) {
-  const match = fileName.match(/P(\d+)Ex(\d+)\..*/)
+  const match = fileName.match(/P(\d+)Ex(.+)\..*/)
   if (match === null) {
     return { pageNumber: null, exerciseNumber: null }
   }

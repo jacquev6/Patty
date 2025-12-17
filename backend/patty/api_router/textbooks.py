@@ -212,6 +212,14 @@ class GetTextbookResponse(ApiModel):
 
     ranges: list[Range]
 
+    class Lesson(ApiModel):
+        id: str
+        page_number: int
+        original_file_name: str
+        marked_as_removed: bool
+
+    lessons: list[Lesson]
+
 
 @router.get("/textbooks/{id}")
 async def get_textbook(id: str, session: database_utils.SessionDependable) -> GetTextbookResponse:
@@ -238,6 +246,8 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
                     marked_as_removed=location.marked_as_removed,
                 )
             )
+        elif isinstance(exercise.created, exercises.ExerciseCreationByUser):
+            pages_with_exercises.add(location.page_number)
 
     needs_refresh = False
     ranges = []
@@ -335,6 +345,16 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         for sha256, extracted_textbook_pages in extracted_textbook_pages_by_pdf.items()
     }
 
+    lessons = [
+        GetTextbookResponse.Lesson(
+            id=str(lesson.id),
+            page_number=lesson.page_number,
+            original_file_name=lesson.original_file_name,
+            marked_as_removed=lesson.marked_as_removed,
+        )
+        for lesson in textbook.lessons
+    ]
+
     return GetTextbookResponse(
         id=str(textbook.id),
         needs_refresh=needs_refresh,
@@ -347,6 +367,7 @@ async def get_textbook(id: str, session: database_utils.SessionDependable) -> Ge
         pages_with_exercises=sorted(pages_with_exercises),
         external_exercises=external_exercises_,
         ranges=sorted(ranges, key=lambda r: (r.textbook_first_page_number, r.pages_count, r.id)),
+        lessons=lessons,
         single_pdf=single_pdf,
         known_pdfs=known_pdfs,
     )
@@ -491,6 +512,62 @@ async def get_textbook_page(id: str, number: int, session: database_utils.Sessio
                     marked_as_removed=location.marked_as_removed,
                 )
             )
+        elif isinstance(exercise, adaptation.AdaptableExercise) and isinstance(
+            exercise.created, exercises.ExerciseCreationByUser
+        ):
+            latest_classification = exercise.latest_classification
+
+            exercise_class = (
+                latest_classification.exercise_class.name
+                if latest_classification is not None and latest_classification.exercise_class is not None
+                else None
+            )
+
+            exercise_class_has_settings = (
+                latest_classification is not None
+                and latest_classification.exercise_class is not None
+                and latest_classification.exercise_class.latest_strategy_settings is not None
+            )
+
+            if exercise_class is None:
+                needs_refresh = True
+
+            if exercise_class is None:
+                classification_status = previewable_exercise.ClassificationInProgress(kind="inProgress")
+            elif isinstance(latest_classification, classification.ClassificationByUser):
+                classification_status = previewable_exercise.ReclassifiedByUser(
+                    kind="byUser",
+                    by=latest_classification.username,
+                    exercise_class=exercise_class,
+                    class_has_settings=exercise_class_has_settings,
+                )
+            else:
+                classification_status = previewable_exercise.ClassifiedByModel(
+                    kind="byModel", exercise_class=exercise_class, class_has_settings=exercise_class_has_settings
+                )
+
+            latest_adaptation = exercise.latest_adaptation
+            if latest_adaptation is None:
+                adaptation_status = previewable_exercise.AdaptationNotStarted(kind="notStarted")
+            else:
+                adaptation_status = previewable_exercise.make_api_adaptation_status(latest_adaptation)
+
+            if adaptation_status.kind == "inProgress":
+                needs_refresh = True
+
+            exercises_.append(
+                GetTextbookPageResponse.AdaptableExercise(
+                    kind="adaptable",
+                    id=str(exercise.id),
+                    page_number=location.page_number,
+                    exercise_number=location.exercise_number,
+                    full_text=exercise.full_text,
+                    images_urls=previewable_exercise.gather_images_urls("http", exercise),
+                    classification_status=classification_status,
+                    adaptation_status=adaptation_status,
+                    marked_as_removed=location.marked_as_removed,
+                )
+            )
 
     page_id = str(page_extractions.pop().id) if len(page_extractions) == 1 else None
 
@@ -573,6 +650,45 @@ def put_textbook_exercises_removed(
         for adaptation_ in exercise.unordered_adaptations:
             adaptation_.approved_by = None
             adaptation_.approved_at = None
+
+
+class PostTextbookLessonRequest(ApiModel):
+    creator: str
+    page_number: int
+    original_file_name: str
+
+
+class PostTextbookLessonResponse(ApiModel):
+    put_url: str
+
+
+@router.post("/textbooks/{textbook_id}/lessons")
+def post_textbook_lessons(
+    textbook_id: str, req: PostTextbookLessonRequest, session: database_utils.SessionDependable
+) -> PostTextbookLessonResponse:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    lesson = textbooks.Lesson(
+        created_at=now,
+        created_by=req.creator,
+        textbook=textbook,
+        page_number=req.page_number,
+        original_file_name=req.original_file_name,
+        marked_as_removed=False,
+    )
+    session.add(lesson)
+    session.flush()
+    return PostTextbookLessonResponse(put_url=file_storage.lessons.get_put_url(str(lesson.id)))
+
+
+@router.put("/textbooks/{textbook_id}/lessons/{lesson_id}/removed")
+def put_textbook_lessons_removed(
+    textbook_id: str, lesson_id: str, removed: bool, session: database_utils.SessionDependable
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    lesson = get_by_id(session, textbooks.Lesson, lesson_id)
+    assert lesson.textbook == textbook
+    lesson.marked_as_removed = removed
 
 
 class PostTextbookRangesRequest(ApiModel):
@@ -661,3 +777,74 @@ def put_textbook_pages_removed(
     page = get_by_id(session, textbooks.PageExtractionCreationByTextbook, page_id)
     assert page.textbook_extraction_batch.textbook == textbook
     page.marked_as_removed = removed
+
+
+class PostTextbookManualExercisesChunksRequest(ApiModel):
+    creator: str
+
+    model_for_adaptation: adaptation.llm.ConcreteModel
+
+    class Exercise(ApiModel):
+        page_number: int
+        exercise_number: str
+        exercise_class: str
+        full_text: str
+
+    exercises: list[Exercise]
+
+
+@router.post("/textbooks/{textbook_id}/manual-exercises-chunks")
+def post_textbook_manual_exercises_chunks(
+    textbook_id: str,
+    req: PostTextbookManualExercisesChunksRequest,
+    session: database_utils.SessionDependable = database_utils.SessionDependable(),
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    for exercise_req in req.exercises:
+        exercise = adaptation.AdaptableExercise(
+            created=exercises.ExerciseCreationByUser(at=now, username=req.creator),
+            location=textbooks.ExerciseLocationTextbook(
+                textbook=textbook,
+                page_number=exercise_req.page_number,
+                exercise_number=exercise_req.exercise_number,
+                marked_as_removed=False,
+            ),
+            full_text=exercise_req.full_text,
+            instruction_hint_example_text=None,
+            statement_text=None,
+        )
+        session.add(exercise)
+
+        exercise_class = (
+            session.execute(
+                sql.select(adaptation.ExerciseClass).where(adaptation.ExerciseClass.name == exercise_req.exercise_class)
+            )
+            .scalars()
+            .first()
+        )
+        if exercise_class is None or exercise_class.latest_strategy_settings is None:
+            raise fastapi.HTTPException(status_code=400, detail="Exercise class not found")
+
+        classification_ = classification.ClassificationByUser(
+            exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
+        )
+        session.add(classification_)
+
+        assert exercise_class.latest_strategy_settings.exercise_class == exercise_class
+
+        adaptation_ = adaptation.Adaptation(
+            created=textbooks.AdaptationCreationByTextbook(at=now, textbook=textbook),
+            exercise=exercise,
+            model=req.model_for_adaptation,
+            settings=exercise_class.latest_strategy_settings,
+            raw_llm_conversations=[],
+            initial_assistant_response=None,
+            initial_timing=None,
+            adjustments=[],
+            manual_edit=None,
+            approved_by=None,
+            approved_at=None,
+        )
+        session.add(adaptation_)

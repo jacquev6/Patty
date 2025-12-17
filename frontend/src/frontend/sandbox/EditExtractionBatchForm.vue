@@ -14,7 +14,6 @@ import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptedExerciseJsonSchemaDetails from '@/frontend/common/AdaptedExerciseJsonSchemaDetails.vue'
 import MarkDown from '$/MarkDown.vue'
 import { useApiConstantsStore } from '@/frontend/ApiConstantsStore'
-import classificationCamembert20250520 from '@/frontend/sandbox/ClassificationCamembert20250520'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 import assert from '$/assert'
 
@@ -27,7 +26,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { d } = useI18n({ useScope: 'global' })
 const apiConstantsStore = useApiConstantsStore()
 const client = useAuthenticatedClient()
 
@@ -139,19 +137,12 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       <p>
         {{ t('runClassification') }}
         <template v-if="extractionBatch.runClassification">
-          <I18nT keypath="runClassificationYesUsing">
-            <code>{{ classificationCamembert20250520.fileName }}</code>
-            <span>{{ classificationCamembert20250520.providedBy }}</span>
-            <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span>
-          </I18nT>
+          {{ t('runClassificationYesUsing') }}
         </template>
         <template v-else>
           <template v-if="editingRunClassification">
-            <I18nT keypath="runClassificationYesUsing">
-              <code>{{ classificationCamembert20250520.fileName }}</code>
-              <span>{{ classificationCamembert20250520.providedBy }}</span>
-              <span>{{ d(classificationCamembert20250520.providedOn, 'long-date') }}</span> </I18nT
-            >: <button @click="submitClassification">{{ t('submit') }}</button>
+            {{ t('runClassificationYesUsing') }}:
+            <button @click="submitClassification">{{ t('submit') }}</button>
           </template>
           <template v-else>
             {{ t('no') }}
@@ -291,7 +282,7 @@ en:
   zipDataForAdaptedExercises: JSON/ZIP data for adapted exercises
   followUps: Follow-ups
   runClassification: "Run classification after extraction:"
-  runClassificationYesUsing: "yes, using {0}, provided by {1} by e-mail on {2}"
+  runClassificationYesUsing: "yes"
   runAdaptation: "Run adaptations after classification:"
   runAdaptationYesUsing: "yes, using {0} with the latest settings for each known exercise class"
   runAdaptationUsingProvider: "provider"
@@ -331,7 +322,7 @@ fr:
   zipDataForAdaptedExercises: les données JSON/ZIP des exercices adaptés
   followUps: Étapes suivantes
   runClassification: "Exécuter la classification après l'extraction :"
-  runClassificationYesUsing: "oui, avec {0}, fourni par {1} par e-mail le {2}"
+  runClassificationYesUsing: "oui"
   runAdaptation: "Exécuter les adaptations après la classification :"
   runAdaptationYesUsing: "oui, avec {0} avec les derniers paramètres pour chaque classe d'exercice connue"
   runAdaptationUsingProvider: "fournisseur"

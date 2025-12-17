@@ -80,6 +80,12 @@ assert not DATABASE_BACKUPS_URL.endswith("/")
 EXTERNAL_EXERCISES_URL = os.environ["PATTY_EXTERNAL_EXERCISES_URL"]
 assert not EXTERNAL_EXERCISES_URL.endswith("/")
 
+# URL prefix where Patty will store files for lessons (Word, PDF).
+# Required.
+# Looks like: `s3://bucket/path/to/lessons` or `file:///absolute/path/to/lessons`.
+LESSONS_URL = os.environ["PATTY_LESSONS_URL"]
+assert not LESSONS_URL.endswith("/")
+
 # URL prefix where Patty will store textbook PDF files.
 # Required.
 # Looks like: `s3://bucket/path/to/pdfs` or `file:///absolute/path/to/pdfs`.

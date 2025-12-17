@@ -250,6 +250,7 @@ class DevelopmentCycle:
                             "password",
                             "PATTY_EXTERNAL_EXERCISES_URL",
                             "PATTY_IMAGES_DETECTION_MODEL_2025_09_15_PATH",
+                            "PATTY_LESSONS_URL",
                             "PATTY_MISTRALAI_API_KEY",
                             "PATTY_SMTP_*",
                             "PATTY_SUBMISSION_DAEMON_PULSE_MONITORING_URL",

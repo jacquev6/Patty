@@ -504,6 +504,32 @@ describe('The exported data for a textbook', () => {
     })
   })
 
+  it('has working links to lessons', () => {
+    visit('/textbook-1')
+    cy.get("input[data-cy='lessons']").selectFile('e2e-tests/inputs/P57Leçon.docx')
+    cy.get('.busy').should('not.exist')
+
+    visitExport('/api/export/textbook/1.html')
+    cy.get('[data-cy="page-number-filter"]').type('57')
+    cy.get('a').should('have.length', 1)
+    cy.get('a').eq(0).should('have.text', 'Leçon - Word')
+
+    cy.task('deleteFolder', Cypress.config('downloadsFolder'))
+    cy.readFile(`${Cypress.config('downloadsFolder')}/P57Leçon.docx`).should('not.exist')
+    cy.get('a').eq(0).click()
+    cy.readFile('e2e-tests/inputs/P57Leçon.docx').then((expected) => {
+      const downloadedName = (() => {
+        if (Cypress.browser.name === 'firefox') {
+          return `${Cypress.config('downloadsFolder')}/P57Leçon.docx`
+        } else {
+          // Why, oh why? (Probably the 'ç'.)
+          return `${Cypress.config('downloadsFolder')}/download`
+        }
+      })()
+      cy.readFile(downloadedName).should('deep.equal', expected)
+    })
+  })
+
   it('the adapted exercises can be downloaded as zip', () => {
     cy.task('deleteFolder', Cypress.config('downloadsFolder'))
     cy.readFile(`${Cypress.config('downloadsFolder')}/Dummy Textbook Title-adapted-exercises.zip`).should('not.exist')

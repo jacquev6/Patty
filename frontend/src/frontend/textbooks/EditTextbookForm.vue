@@ -2,14 +2,17 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
 
 import { type Textbook, useAuthenticatedClient } from '@/frontend/ApiClient'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import EditTextbookFormCreateExternalExerciseForm from './EditTextbookFormCreateExternalExerciseForm.vue'
+import EditTextbookFormCreateLessonForm from './EditTextbookFormCreateLessonForm.vue'
 import EditTextbookFormAddPdfRangeForm from './EditTextbookFormAddPdfRangeForm.vue'
 import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
 import WhiteSpace from '$/WhiteSpace.vue'
-import { computed } from 'vue'
+import InputForNumberOrNull from '@/reusable/InputForNumberOrNull.vue'
 
 const props = defineProps<{
   textbook: Textbook
@@ -21,12 +24,20 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const client = useAuthenticatedClient()
+const router = useRouter()
 
 const authenticationTokenStore = useAuthenticationTokenStore()
 
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
     params: { path: { textbook_id: props.textbook.id, exercise_id }, query: { removed } },
+  })
+  emit('textbook-updated')
+}
+
+async function removeLesson(lesson_id: string, removed: boolean) {
+  await client.PUT('/api/textbooks/{textbook_id}/lessons/{lesson_id}/removed', {
+    params: { path: { textbook_id: props.textbook.id, lesson_id }, query: { removed } },
   })
   emit('textbook-updated')
 }
@@ -59,6 +70,8 @@ const retryablePages = computed(
       status: { kind: 'error' }
     })[],
 )
+
+const pageForMissingExercises = ref<number | null>(null)
 </script>
 
 <template>
@@ -112,6 +125,23 @@ const retryablePages = computed(
       </li>
     </ul>
   </template>
+  <h2>{{ t('addMissingExercises') }}</h2>
+  <p>
+    <label>
+      {{ t('addMissingExercisesOnPage') }} <InputForNumberOrNull type="number" v-model="pageForMissingExercises" />:
+      <button
+        :disabled="pageForMissingExercises === null"
+        @click="
+          router.push({
+            name: 'add-manual-exercises',
+            params: { textbookId: textbook.id, pageNumber: pageForMissingExercises },
+          })
+        "
+      >
+        {{ t('addMissingExercisesGo') }}
+      </button>
+    </label>
+  </p>
   <h2 v-if="textbook.singlePdf === null">{{ t('newTextbookPdf') }}</h2>
   <h2 v-else>{{ t('importNewPages') }}</h2>
   <EditTextbookFormAddPdfRangeForm :textbook />
@@ -197,6 +227,19 @@ const retryablePages = computed(
       <button @click="removeExercise(externalExercise.id, true)">{{ t('remove') }}</button>
     </h3>
   </template>
+  <h2>{{ t('newLessons') }}</h2>
+  <EditTextbookFormCreateLessonForm :textbookId="textbook.id" @textbookUpdated="emit('textbook-updated')" />
+  <h2>{{ t('existingLessons') }}</h2>
+  <template v-for="lesson in textbook.lessons">
+    <h3 v-if="lesson.markedAsRemoved">
+      <span class="removed">{{ lesson.originalFileName }}</span> ({{ t('removed') }})
+      <button @click="removeLesson(lesson.id, false)">{{ t('reAdd') }}</button>
+    </h3>
+    <h3 v-else>
+      {{ lesson.originalFileName }}
+      <button @click="removeLesson(lesson.id, true)">{{ t('remove') }}</button>
+    </h3>
+  </template>
 </template>
 
 <style scoped>
@@ -237,6 +280,9 @@ en:
   pagesWithErrors: "Pages with extraction errors"
   instructionsForPagesWithErrors: You can try removing these pages then start the extraction again.
   importNewPages: Import new pages (PDF)
+  addMissingExercises: Add missing exercises
+  addMissingExercisesOnPage: "Add missing exercises on page"
+  addMissingExercisesGo: Go
   newTextbookPdf: New textbook PDF
   existingTextbookPdfs: Existing textbook PDFs
   inProgress: "(in progress, will refresh when done)"
@@ -245,6 +291,8 @@ en:
   unknownError: Unknown error
   newExternalExercises: New external exercise(s)
   existingExternalExercises: Existing external exercises
+  newLessons: New lesson(s)
+  existingLessons: Existing lessons
   exercise: Exercise
   page: Page
   reAdd: Re-add
@@ -265,6 +313,9 @@ fr:
   pagesWithErrors: "Pages avec des erreurs d'extraction"
   instructionsForPagesWithErrors: "Vous pouvez essayer d'enlever ces pages puis d'en recommencer l'extraction."
   importNewPages: Importer de nouvelles pages (PDF)
+  addMissingExercises: Ajouter des exercices manquants
+  addMissingExercisesOnPage: "Ajouter des exercices manquants sur la page"
+  addMissingExercisesGo: Valider
   newTextbookPdf: Nouveau PDF de manuel
   existingTextbookPdfs: PDF de manuel existants
   inProgress: "(en cours, se mettra à jour quand terminé)"
@@ -273,6 +324,8 @@ fr:
   unknownError: Erreur inconnue
   newExternalExercises: Nouvel exercice externe
   existingExternalExercises: Exercices externes existants
+  newLessons: Nouvelle leçon
+  existingLessons: Leçons existantes
   exercise: Exercice
   page: Page
   reAdd: Rajouter

@@ -2,6 +2,7 @@
 
 import { createRouter, createWebHashHistory } from 'vue-router'
 import _ from 'lodash'
+import { createI18n } from 'vue-i18n'
 
 import TextbookExportExercisesList from './ExercisesList.vue'
 import TextbookExportExerciseView from './ExerciseView.vue'
@@ -34,7 +35,7 @@ const router = createRouter({
   ],
 })
 
-const global = { plugins: [router] }
+const global = { plugins: [router, createI18n({ legacy: false, locale: 'fr' })] }
 
 describe('TextbookExportExercisesList', () => {
   beforeEach(() => {
@@ -44,6 +45,7 @@ describe('TextbookExportExercisesList', () => {
   it('renders 4 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
+        lessons: [],
         exercises: _.range(1, 5).map((i) => ({
           kind: 'adapted' as const,
           exerciseId: `P22Ex${i}`,
@@ -62,6 +64,7 @@ describe('TextbookExportExercisesList', () => {
   it('renders 10 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
+        lessons: [],
         exercises: _.range(1, 11).map((i) => ({
           kind: 'adapted' as const,
           exerciseId: `P22Ex${i}`,
@@ -85,6 +88,7 @@ describe('TextbookExportExercisesList', () => {
   it('renders 100 links', () => {
     cy.mount(TextbookExportExercisesList, {
       props: {
+        lessons: [],
         exercises: _.range(1, 101).map((i) => ({
           kind: 'adapted' as const,
           exerciseId: `P22Ex${i}`,

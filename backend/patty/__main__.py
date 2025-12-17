@@ -565,7 +565,7 @@ def json_to_html_script() -> None:
         yield '            "studentAnswersStorageKey": hashlib.md5(json.dumps(exercise_dump, separators=(",", ":"), indent=None).encode()).hexdigest(),'
         yield '            "adaptedExercise": exercise_dump,'
         yield "        })"
-        yield '    data = {"title": textbook.title, "exercises": exercises}'
+        yield '    data = {"title": textbook.title, "lessons": [], "exercises": exercises}'
         yield ""
         yield "    return template.replace("
         yield '        "##TO_BE_SUBSTITUTED_TEXTBOOK_EXPORT_DATA##",'
@@ -649,15 +649,15 @@ def run_submission_daemon(pause: float, max_retries: int) -> None:
         last_time = time.monotonic()
         current_retries = 0
         while True:
-            if time.monotonic() >= last_time + 60:
-                last_time = time.monotonic()
-                if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
-                    logs.log("Calling pulse monitoring URL")
-                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
-
             done_something = False
             can_retry = current_retries < max_retries
             try:
+                if time.monotonic() >= last_time + 60:
+                    last_time = time.monotonic()
+                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                        logs.log("Calling pulse monitoring URL")
+                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
                     # in each session to commit progress as soon as possible.
@@ -679,7 +679,6 @@ def run_submission_daemon(pause: float, max_retries: int) -> None:
             except Exception:  # Pokemon programming: gotta catch 'em all
                 logs.log("UNEXPECTED ERROR reached daemon level")
                 traceback.print_exc()
-                assert not done_something
 
             if done_something:
                 current_retries = 0

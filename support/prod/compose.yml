@@ -28,6 +28,7 @@ services:
       - ./backend/classification-models:/classification-models
       - ./backend/images-detection-models:/images-detection-models
       - ./backend/external-exercises:/external-exercises
+      - ./backend/lessons:/lessons
       - ./backend/pdf-files:/pdf-files
       - ./backend/exercise-images:/exercise-images
       - ./db/backups:/db-backups
@@ -45,6 +46,7 @@ services:
       - ./backend/classification-models:/classification-models
       - ./backend/images-detection-models:/images-detection-models
       - ./backend/external-exercises:/external-exercises
+      - ./backend/lessons:/lessons
       - ./backend/pdf-files:/pdf-files
       - ./backend/exercise-images:/exercise-images
       - ./db/backups:/db-backups
@@ -100,6 +102,7 @@ services:
       - ./backend/classification-models:/classification-models
       - ./backend/images-detection-models:/images-detection-models
       - ./backend/external-exercises:/external-exercises
+      - ./backend/lessons:/lessons
       - ./backend/pdf-files:/pdf-files
       - ./backend/exercise-images:/exercise-images
       - ./db/backups:/db-backups

@@ -14,3 +14,4 @@ existingAdaptation: Adaptation {id}
 newTextbook: New textbook
 existingTextbook: '{title}'
 textbookPage: 'Page {number}'
+addManualExercisesToPage: Manual exercises addition

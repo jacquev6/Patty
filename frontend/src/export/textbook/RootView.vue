@@ -24,8 +24,16 @@ export type Exercise =
       data: string
     }
 
+export type Lesson = {
+  kind: 'lesson'
+  pageNumber: number
+  originalFileName: string
+  data: string
+}
+
 export type Data = {
   title: string
+  lessons: Lesson[]
   exercises: Exercise[]
 }
 

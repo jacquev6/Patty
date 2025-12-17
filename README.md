@@ -1,13 +1,13 @@
 <!-- Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net> -->
 
-*Patty* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
+The *MALIN platform* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
 
 This README is designed to be read linearly once, from start to end.
-It starts at a high level then goes into more and more details regarding *Patty*'s functionality and technical design, and gives pointers about how to continue *Patty*'s development.
+It starts at a high level then goes into more and more details regarding the *MALIN platform*'s functionality and technical design, and gives pointers about how to continue its development.
 
 # Authors & Licensing
 
-*Patty*'s authors are, in `random.shuffle` order:
+The *MALIN platform*'s authors are, in `random.shuffle` order:
 
 - [Elise Lincker](https://github.com/eliselinc/) (classification)
 - [Mohamed Amine Lasheb](https://aminelasheb.github.io/) (extraction)
@@ -25,16 +25,16 @@ It's often easier for them to type on a keyboard or use a mouse.
 Some non-profit organizations and teachers have been "adapting" exercises from textbooks into digital formats more usable by pupils.
 This is a long and tedious process, which limits the amount of available adapted exercises.
 
-The MALIN project aims to automate this adaptation process, and *Patty* is an attempt towards this goal.
-*Patty* takes as input the PDF version of a textbook, uses various AI tools to extract and adapt the exercises, and outputs an HTML file containing the adapted exercises.
+The MALIN project aims to automate this adaptation process, and the *MALIN platform* is an attempt towards this goal.
+It takes as input the PDF version of a textbook, uses various AI tools to extract and adapt the exercises, and outputs an HTML file containing the adapted exercises.
 This file is autonomous: it can be copied on any computer, and opened in a web browser without internet connectivity.
 
-*Patty* also has "sandbox" features to help engineering the LLM prompts used for extraction and adaptation.
+The *MALIN platform* also has "sandbox" features to help engineering the LLM prompts used for extraction and adaptation.
 This functionality is described after the main pipeline description.
 
 # Pipeline
 
-Here are the steps *Patty* performs to adapt exercises from a textbook.
+Here are the steps the *MALIN platform* performs to adapt exercises from a textbook.
 
 ```mermaid
 flowchart
@@ -85,9 +85,11 @@ flowchart
   adapt_exercises --> ADAPTED_EXERCISES
   export[[Export]]
   EXTERNAL_EXERCISES[\External exercises/]
+  LESSONS[\Lessons/]
   EXTRACTED_ILLUSTRATIONS --> export
   ADAPTED_EXERCISES --> export
   EXTERNAL_EXERCISES --> export
+  LESSONS --> export
   HTML_FILE[/Autonomous HTML file\]
   export --> HTML_FILE
   render[[Render]]
@@ -101,7 +103,7 @@ The input PDF file is first converted to PNG files, one image per page.
 ## Illustrations detection
 
 Some exercises may have illustrations (*e.g.* when the pupils have to describe objects in a picture).
-*Patty* starts by detecting illustrations in the PDF pages, and extracting them.
+The *MALIN platform* starts by detecting illustrations in the PDF pages, and extracting them.
 
 Illustrations are extracted and stored for later use in the "export" step.
 They are also annotated on the page images, to let the extraction LLM (in next step) know about them.
@@ -128,7 +130,7 @@ Different adaptation prompts are used depending on the exercise category determi
 ## Export
 
 Adapted exercises are bundled (in JSON form) into a standalone HTML file.
-Extracted images and external exercises (*e.g.* Microsoft Word or Excel files) are also included in this file.
+Extracted images, external exercises (*e.g.* Microsoft Word or Excel files), and lessons (Microsoft Word or PDF files) are also included in this file.
 
 ## Rendering and use
 
@@ -137,7 +139,7 @@ Pupils' answers are recorded in their browser's local storage to be later checke
 
 # Sandbox functionality
 
-*Patty*'s sandbox features let users experiment with different LLM prompts for the extraction and adaptation steps.
+The *MALIN platform*'s sandbox features let users experiment with different LLM prompts for the extraction and adaptation steps.
 
 Sandbox users can create batches at three levels: extraction, classification, and adaptation, allowing them to change the prompts used for each step.
 
@@ -147,7 +149,7 @@ Sandbox features are intended for the MALIN team, and will be hidden from regula
 
 # Technical design
 
-*Patty* is made of these services:
+The *MALIN platform* is made of these services:
 
 ```mermaid
 flowchart LR
@@ -219,7 +221,7 @@ The dump files can be used to restore the database in case of data loss.
 
 # External services
 
-*Patty* relies on a few external services configured through environment variables.
+The *MALIN platform* relies on a few external services configured through environment variables.
 
 This section gives an overview of these services and the names of the main environment variables used to configure them.
 These variables are documented in details in `./backend/patty/settings.py`.
@@ -250,6 +252,7 @@ Several kinds of files are stored durably:
 - uploaded textbook PDFs, to be processed by the daemon
 - extracted illustrations, to be included in the exported HTML files
 - external exercises files (Microsoft Word, Excel, *etc.*), for the same reason
+- lessons files (Microsoft Word or PDF), for the same reason
 
 Conceptually, these files are an extension of the database.
 Technically, they can't be stored in the database itself, so they are stored in an external storage service instead.
@@ -264,21 +267,21 @@ If S3 is used for any of these, then S3 credentials must be provided through `AW
 
 ## Monitoring
 
-*Patty* should be monitored as an HTTP application.
+The *MALIN platform* should be monitored as an HTTP application.
 
 In addition, it supports [pulse monitoring](https://updown.io/doc/how-pulse-cron-monitoring-works) for its cron-like and polling processes.
 *E.g.* a failure in the submission daemon can be detected by setting up the `PATTY_SUBMISSION_DAEMON_PULSE_MONITORING_URL` environment variable.
 
 ## Mailing
 
-When a crash is detected in the frontend, *Patty* records the error, and can send an email to the development team.
+When a crash is detected in the frontend, the *MALIN platform* records the error, and can send an email to the development team.
 This is configured through the `PATTY_SMTP_*` environment variables.
 
 # Development
 
 ## Dependencies
 
-To start developing *Patty*, you only need Bash, Git, Python (with `venv`) and Docker (with `docker compose`) on your machine.
+To start developing the *MALIN platform*, you only need Bash, Git, Python (with `venv`) and Docker (with `docker compose`) on your machine.
 
 Start by `git`-cloning this repository and navigate to the repository directory.
 
@@ -306,10 +309,10 @@ Use `./dev.sh --help` to list other commands available.
 
 `./prod.sh preview` runs a production-like environment locally.
 
-Currently, *Patty* uses Docker images owned by [@jacquev6](https://hub.docker.com/repositories/jacquev6).
-For future deployments of Patty you'll need to change that and publish your new equivalent Docker images elsewhere.
+Currently, the *MALIN platform* uses Docker images owned by [@jacquev6](https://hub.docker.com/repositories/jacquev6).
+For future deployments of the *MALIN platform* you'll need to change that and publish your new equivalent Docker images elsewhere.
 
-All current Patty Docker images are named `jacquev6/patty`, and tagged according to their role and versions:
+All current *MALIN platform* Docker images are named `jacquev6/patty`, and tagged according to their role and versions:
 - `jacquev6/patty:preview-backend` and `jacquev6/patty:preview-frontend` for the preview environment, built during `./prod.sh preview`
 - `jacquev6/patty:YYYYMMDD-HHMMSS-backend` and `jacquev6/patty:YYYYMMDD-HHMMSS-frontend` for production, where `YYYYMMDD-HHMMSS` is the timestamp of the build, built and published during `./prod.sh publish` (see below)
 - (and `jacquev6/patty:dev-backend` and `jacquev6/patty:dev-frontend` for the development environment, built during `./dev.sh run`)
@@ -404,7 +407,7 @@ It's organized with the following sub-directories:
 
 ### Frontend entry point
 
-The entry point for *Patty*'s main user interface is `./frontend/src/frontend/index.html`.
+The entry point for the *MALIN platform*'s main user interface is `./frontend/src/frontend/index.html`.
 Its Vue application (*incl.* configuration for routing, i18n, *etc.*) is in `./frontend/src/frontend/main.ts`.
 
 Here are some important sub-directories in `./frontend/src/frontend/`:

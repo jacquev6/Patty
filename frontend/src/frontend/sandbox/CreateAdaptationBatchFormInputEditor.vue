@@ -96,7 +96,7 @@ en:
   exercise: exercise
 fr:
   input: Entrée
-  emptyIgnored: "(vide, ignoré)"
+  emptyIgnored: "(vide, ignorée)"
   page: Page
   exercise: exercice
 </i18n>
