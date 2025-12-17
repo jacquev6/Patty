@@ -299,7 +299,7 @@ const columns = computed(() => {
               <li v-if="adaptation.llmStatus.error !== 'unknown'">{{ t('askAdjustment') }}</li>
               <li v-if="adaptation.llmStatus.error === 'invalid-json'">{{ t('editJson') }}</li>
               <li v-else-if="adaptation.llmStatus.error === 'not-json'">{{ t('editResponse') }}</li>
-              <li v-else-if="adaptation.llmStatus.error === 'unknown'">{{ t('askVincent') }}</li>
+              <li v-else-if="adaptation.llmStatus.error === 'unknown'">{{ t('retry') }}</li>
               <li v-else>BUG: {{ ((status: never) => status)(adaptation.llmStatus) }}</li>
             </ul>
           </template>
@@ -447,7 +447,7 @@ en:
   askAdjustment: ask the LLM for an adjustment
   editJson: edit the JSON manually to make it conform to the schema
   editResponse: edit the response manually to make it correct JSON that conforms to the schema
-  askVincent: ask Vincent Jacques to investigate
+  retry: retry
   manualEditError: Error in manually edited exercise
   manualNotJson: The manually edited exercise is not correct JSON.
   manualInvalidJson: The manually edited exercise does not validate against the adapted exercise schema.
@@ -480,7 +480,7 @@ fr:
   askAdjustment: demander un ajustement au LLM
   editJson: éditer le JSON manuellement pour le rendre conforme au schéma
   editResponse: éditer la réponse manuellement pour qu'elle soit un JSON correct conforme au schéma
-  askVincent: demander à Vincent Jacques d'enquêter
+  retry: réessayer
   manualEditError: Erreur dans l'exercice édité manuellement
   manualNotJson: L'exercice édité manuellement n'est pas un JSON correct.
   manualInvalidJson: L'exercice édité manuellement ne valide pas contre le schéma d'exercice adapté.

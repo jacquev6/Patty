@@ -11,7 +11,7 @@ describe("Patty's error catcher", () => {
   it('catches failed assertion', () => {
     cy.get('button:contains("Assert")').click()
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.get('h1:contains("Error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -24,7 +24,7 @@ describe("Patty's error catcher", () => {
   it('catches dereferencing undefined', () => {
     cy.get('button:contains("Dereference undefined")').click()
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.get('h1:contains("Error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -38,7 +38,7 @@ describe("Patty's error catcher", () => {
   it('catches dereferencing null', () => {
     cy.get('button:contains("Dereference null")').click()
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.get('h1:contains("Error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -52,7 +52,7 @@ describe("Patty's error catcher", () => {
   it('catches unhandled rejection', () => {
     cy.get('button:contains("Unhandled rejection")').click()
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.get('h1:contains("Error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -65,7 +65,7 @@ describe("Patty's error catcher", () => {
   it('catches exception', () => {
     cy.get('button:contains("Throw exception")').click()
 
-    cy.get('h1:contains("There was a bug")').should('exist')
+    cy.get('h1:contains("Error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -78,7 +78,7 @@ describe("Patty's error catcher", () => {
   it('catches network error', () => {
     cy.get('button:contains("Network error")').click()
 
-    cy.get('h1:contains("There was a network error")').should('exist')
+    cy.get('h1:contains("Network error")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre')
@@ -96,7 +96,7 @@ describe("Patty's error catcher", () => {
   it('reports repeated undefined only once', () => {
     cy.get('button:contains("Repeated undefined")').click()
 
-    cy.get('h1:contains("There was a bug"):contains("(10 occurrences)")').should('exist')
+    cy.get('h1:contains("Error"):contains("(10 occurrences)")').should('exist')
 
     cy.visit('/errors')
     cy.get('pre').should('have.length', 1)

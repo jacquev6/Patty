@@ -1,9 +1,6 @@
 // Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 const ClassificationCamembert20250520 = {
-  fileName: 'classification_camembert.pt',
-  providedBy: 'Elise',
-  providedOn: new Date('2025-05-20'),
   classesProduced: [
     'Associe',
     'AssocieCoche',
