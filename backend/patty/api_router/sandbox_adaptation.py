@@ -381,6 +381,8 @@ def put_adaptable_exercise_class(
     if exercise_class is None:
         raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
 
+    latest_adaptation = exercise.latest_adaptation
+
     session.add(
         classification.ClassificationByUser(
             exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
@@ -391,12 +393,10 @@ def put_adaptable_exercise_class(
         adaptation_model: adaptation.llm.ConcreteModel | None = None
         created: adaptation.AdaptationCreation | None = None
 
-        latest_adaptation = exercise.latest_adaptation
         if latest_adaptation is not None:
-            some_previous_adaptation = exercise.unordered_adaptations[0]
-            adaptation_model = some_previous_adaptation.model
+            adaptation_model = latest_adaptation.model
             created = dispatch.adaptation_creation(
-                some_previous_adaptation.created,
+                latest_adaptation.created,
                 by_chunk=lambda ac: classification.AdaptationCreationByChunk(
                     at=now, classification_chunk=ac.classification_chunk
                 ),

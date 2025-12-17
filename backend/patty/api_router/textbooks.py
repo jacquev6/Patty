@@ -832,6 +832,8 @@ def post_textbook_manual_exercises_chunks(
         )
         session.add(classification_)
 
+        assert exercise_class.latest_strategy_settings.exercise_class == exercise_class
+
         adaptation_ = adaptation.Adaptation(
             created=textbooks.AdaptationCreationByTextbook(at=now, textbook=textbook),
             exercise=exercise,
