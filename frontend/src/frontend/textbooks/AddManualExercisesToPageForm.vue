@@ -76,7 +76,7 @@ async function submit() {
   <p>
     <button :disabled @click="submit">{{ t('submit') }}</button>
   </p>
-  <AddManualExercisesToPageFormInputsEditor headers="h2" :exerciseClasses v-model="inputs" />
+  <AddManualExercisesToPageFormInputsEditor headers="h2" :pageNumber :exerciseClasses v-model="inputs" />
 </template>
 
 <i18n lang="yaml">

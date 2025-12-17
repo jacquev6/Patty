@@ -3,20 +3,95 @@
 <script setup lang="ts">
 import { useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import * as zip from '@zip.js/zip.js'
+import _ from 'lodash'
 
 import AddManualExercisesToPageFormInputEditor, {
   type InputWithFile,
 } from './AddManualExercisesToPageFormInputEditor.vue'
 import assert from '$/assert'
+import { parseExerciseFileName } from '@/frontend/sandbox/CreateAdaptationBatchFormInputsEditor.vue'
 
-defineProps<{
+const props = defineProps<{
   headers: string
+  pageNumber: number
   exerciseClasses: string[]
 }>()
 
 const { t } = useI18n()
 
 const inputs = defineModel<InputWithFile[]>({ required: true })
+
+function readFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      assert(typeof reader.result === 'string')
+      resolve(reader.result)
+    }
+    reader.onerror = reject
+    reader.readAsText(file)
+  })
+}
+
+async function openFiles(event: Event) {
+  const files = (event.target as HTMLInputElement).files
+  assert(files !== null)
+
+  const fileInputs: InputWithFile[] = []
+  for (let index = 0; index < files.length; index++) {
+    const file = files.item(index)
+    assert(file !== null)
+    if (file.name.endsWith('.txt')) {
+      const { pageNumber, exerciseNumber } = parseExerciseFileName(file.name)
+      if (pageNumber === props.pageNumber && exerciseNumber !== null) {
+        const text = await readFile(file)
+        fileInputs.push({
+          inputFile: file.name,
+          exerciseNumber,
+          exerciseClass: null,
+          text,
+        })
+      }
+    } else if (file.name.endsWith('.zip')) {
+      const zipReader = new zip.ZipReader(new zip.BlobReader(file))
+      for (const entry of await zipReader.getEntries()) {
+        assert(entry.getData !== undefined)
+        if (entry.filename.endsWith('.txt')) {
+          const { pageNumber, exerciseNumber } = parseExerciseFileName(entry.filename)
+          if (pageNumber === props.pageNumber && exerciseNumber !== null) {
+            const text = await entry.getData(new zip.TextWriter())
+            fileInputs.push({
+              inputFile: `${entry.filename} in ${file.name}`,
+              exerciseNumber,
+              exerciseClass: null,
+              text,
+            })
+          }
+        }
+      }
+    }
+  }
+
+  const sortedInputs = _.sortBy(fileInputs, [
+    'pageNumber',
+    ({ exerciseNumber }) => {
+      if (exerciseNumber === null) {
+        return 0
+      } else {
+        const asNumber = parseInt(exerciseNumber)
+        if (isNaN(asNumber)) {
+          return 0
+        } else {
+          return asNumber
+        }
+      }
+    },
+    'exerciseNumber',
+  ])
+
+  inputs.value.splice(0, inputs.value.length, ...sortedInputs)
+}
 
 const editors = useTemplateRef<InstanceType<typeof AddManualExercisesToPageFormInputEditor>[]>('editors')
 
@@ -44,7 +119,7 @@ watch(
 <template>
   <p>
     {{ t('openFiles') }}
-    <input data-cy="input-files" type="file" multiple="true" accept=".txt,.zip" />
+    <input data-cy="input-files" type="file" multiple="true" @change="openFiles" accept=".txt,.zip" />
   </p>
   <template v-for="index in inputs.length">
     <AddManualExercisesToPageFormInputEditor

@@ -585,6 +585,54 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('div.busy').should('exist')
     cy.get('div.busy', { timeout: 10000 }).should('not.exist')
   })
+
+  it('loads manual exercises from several text files', () => {
+    cy.visit('/textbook-1/page-6/new-adaptations')
+    cy.get('input[type=file]').selectFile([
+      'e2e-tests/inputs/P6Ex8.txt',
+      'e2e-tests/inputs/P6Ex14.txt',
+      'e2e-tests/inputs/P16Ex4.txt', // Ignored because wrong page
+    ])
+    cy.get('h2:contains("Input")').should('have.length', 3)
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '8')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('[data-cy="input-exercise-number"]').eq(1).should('have.value', '14')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+  })
+
+  it('loads manual exercises from a zip file', () => {
+    cy.visit('/textbook-1/page-6/new-adaptations')
+    cy.get('input[type=file]').selectFile('e2e-tests/inputs/test.zip')
+    cy.get('h2:contains("Input")').should('have.length', 3)
+    cy.get('[data-cy="input-exercise-number"]').eq(0).should('have.value', '8')
+    cy.get('[data-cy="input-exercise-class"]').eq(0).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(0)
+      .should(
+        'have.value',
+        'Complète avec "le soleil" ou "la voiture"\na. Le lit du chat est réchauffé par ...\nb. Le bruit de ... a réveillé le chien.\n',
+      )
+    cy.get('[data-cy="input-exercise-number"]').eq(1).should('have.value', '14')
+    cy.get('[data-cy="input-exercise-class"]').eq(1).should('have.value', '--')
+    cy.get('[data-cy="input-text"]')
+      .eq(1)
+      .should(
+        'have.value',
+        'Complète avec "les chats" ou "les chiens"\na. Les souris sont chassées par ...\nb. Les chats sont chassés par ...\n',
+      )
+  })
 })
 
 describe('The edition form for multi-PDFs textbooks - with a PDF range', () => {
