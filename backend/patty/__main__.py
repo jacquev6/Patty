@@ -649,15 +649,15 @@ def run_submission_daemon(pause: float, max_retries: int) -> None:
         last_time = time.monotonic()
         current_retries = 0
         while True:
-            if time.monotonic() >= last_time + 60:
-                last_time = time.monotonic()
-                if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
-                    logs.log("Calling pulse monitoring URL")
-                    requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
-
             done_something = False
             can_retry = current_retries < max_retries
             try:
+                if time.monotonic() >= last_time + 60:
+                    last_time = time.monotonic()
+                    if settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL is not None:
+                        logs.log("Calling pulse monitoring URL")
+                        requests.post(settings.SUBMISSION_DAEMON_PULSE_MONITORING_URL)
+
                 with database_utils.Session(engine) as session:
                     # Do only one thing (extract XOR classify XOR adapt)
                     # in each session to commit progress as soon as possible.
