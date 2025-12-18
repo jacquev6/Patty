@@ -2,7 +2,7 @@
 
 The *MALIN platform* is a web application designed to help the MALIN team experiment with adapting exercises using LLMs and other AI tools.
 
-This README is designed to be read linearly once, from start to end.
+This README is designed to be read linearly at least once, from start to end.
 It starts at a high level then goes into more and more details regarding the *MALIN platform*'s functionality and technical design, and gives pointers about how to continue its development.
 
 # Authors & Licensing
@@ -198,7 +198,7 @@ It routes all requests for paths starting with `/api/` to the backend API server
 The backend API server is implemented in Python using [FastAPI](https://fastapi.tiangolo.com/) and [SQLAlchemy](https://www.sqlalchemy.org/)'s ORM to interact with the database.
 
 It only performs quick operations.
-Longer operations are just recorded in the DB as "needing to be performed", and are later executed by the submission daemon.
+Longer operations are just recorded in the DB as "needing to be performed", and are later executed by the submission daemon (see below).
 
 It runs in a [Uvicorn](https://www.uvicorn.org/) server, both in development and production, with auto-reload enabled in development.
 
