@@ -1,5 +1,6 @@
 # Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
+import json
 import traceback
 import typing
 
@@ -56,14 +57,14 @@ async def submit_adaptation(can_retry: bool, adaptation: db.Adaptation) -> None:
             response = await adaptation.model.complete(messages, response_format)
     except llm.InvalidJsonLlmException as error:
         logs.log(f"Error 'invalid JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-        adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = assistant_responses.InvalidJsonError(
+        raw_llm_conversations = [error.raw_conversation]
+        initial_assistant_response: assistant_responses.Response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
         logs.log(f"Error 'not JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-        adaptation.raw_llm_conversations = [error.raw_conversation]
-        adaptation.initial_assistant_response = assistant_responses.NotJsonError(
+        raw_llm_conversations = [error.raw_conversation]
+        initial_assistant_response = assistant_responses.NotJsonError(
             kind="error", error="not-json", text=error.text
         )
     except RetryableError:
@@ -72,16 +73,25 @@ async def submit_adaptation(can_retry: bool, adaptation: db.Adaptation) -> None:
             raise
         else:
             logs.log(f"Too many RETRYABLE ERRORS on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-            adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
+            raw_llm_conversations = []
+            initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
     except Exception:
         logs.log(f"UNEXPECTED ERROR on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-        adaptation.initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
+        raw_llm_conversations = []
+        initial_assistant_response = assistant_responses.UnknownError(kind="error", error="unknown")
         traceback.print_exc()
     else:
         logs.log(f"Success on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-        adaptation.raw_llm_conversations = [response.raw_conversation]
-        adaptation.initial_assistant_response = assistant_responses.Success(
+        raw_llm_conversations = [response.raw_conversation]
+        initial_assistant_response = assistant_responses.Success(
             kind="success", exercise=Exercise.model_validate(response.message.content.model_dump())
         )
     finally:
+        try:
+            json.dumps(raw_llm_conversations)
+        except TypeError:
+            logs.log(f"Raw conversation not JSON-serializable: {raw_llm_conversations}")
+            raw_llm_conversations = ["Error: conversation not JSON-serializable"]
+        adaptation.raw_llm_conversations = raw_llm_conversations
+        adaptation.initial_assistant_response = initial_assistant_response
         adaptation.initial_timing = timing

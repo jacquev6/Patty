@@ -1,6 +1,7 @@
 # Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 import datetime
+import json
 from typing import Literal
 import typing
 
@@ -177,6 +178,12 @@ async def post_adaptation_adjustment(
         assistant_response = adaptation.assistant_responses.Success(
             kind="success", exercise=adaptation.adapted.Exercise.model_validate(response.message.content.model_dump())
         )
+
+    try:
+        json.dumps(raw_conversation)
+    except TypeError:
+        print("Raw conversation not JSON-serializable:", raw_conversation)
+        raw_conversation = "Error: conversation not JSON-serializable"
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)
     raw_llm_conversations.append(raw_conversation)
