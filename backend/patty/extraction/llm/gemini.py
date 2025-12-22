@@ -19,7 +19,7 @@ client = google.genai.Client(api_key=settings.GEMINIAI_KEY)
 
 class GeminiModel(Model):
     provider: Literal["gemini"]
-    name: Literal["gemini-2.0-flash", "gemini-2.5-flash"]
+    name: Literal["gemini-2.0-flash", "gemini-2.5-flash", "gemini-3-flash-preview"]
 
     def do_extract(self, prompt: str, image: PIL.Image.Image) -> str:
         contents: list[google.genai.types.ContentUnion] = [prompt, image]

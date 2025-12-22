@@ -35,7 +35,7 @@ client = google.genai.Client(api_key=settings.GEMINIAI_KEY)
 
 class GeminiModel(Model):
     provider: typing.Literal["gemini"]
-    name: typing.Literal["gemini-2.0-flash", "gemini-2.5-flash"]
+    name: typing.Literal["gemini-2.0-flash", "gemini-2.5-flash", "gemini-3-flash-preview"]
 
     async def do_complete(
         self,
