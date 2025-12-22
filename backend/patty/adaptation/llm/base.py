@@ -6,7 +6,6 @@ import json
 
 import pydantic
 
-from ... import logs
 from ...any_json import JsonDict
 
 
@@ -93,8 +92,6 @@ class Model(abc.ABC, pydantic.BaseModel):
         response_format: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T] | JsonSchemaResponseFormat[T],
     ) -> CompletionResponse[T]:
         (raw_conversation, response) = await self.do_complete(messages, response_format)
-
-        logs.log_for_issue_129(f"Raw conversation: {json.dumps(raw_conversation)}")
 
         try:
             parsed_content = try_hard_to_json_loads(response)

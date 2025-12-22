@@ -205,13 +205,3 @@ try:
     )
 except KeyError:
     OUTBOUND_MAILING = None
-
-
-#################
-# Miscellaneous #
-#################
-
-# Enable special logging and behavior to help investigate issue #129.
-# Optional.
-# Keep unset.
-INVESTIGATING_ISSUE_129 = os.environ.get("PATTY_INVESTIGATING_ISSUE_129", "false") == "true"
