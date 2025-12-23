@@ -60,7 +60,7 @@ const schema = computedAsync(async () => {
 }, {})
 
 async function submitAdaptationsWithRecentSettings() {
-  await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
+  await client.POST('/api/extraction-batches/{id}/submit-adaptations-with-recent-settings', {
     params: { path: { id: props.extractionBatch.id } },
   })
   emit('batch-updated')

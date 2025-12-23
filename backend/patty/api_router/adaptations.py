@@ -17,7 +17,7 @@ from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
 from .. import textbooks
-from ..any_json import JsonList
+from ..any_json import JsonList, JsonType
 from ..api_utils import ApiModel, get_by_id
 
 
@@ -164,7 +164,7 @@ async def post_adaptation_adjustment(
             detail=[dict(type="retryable", msg="LLM service temporarily unavailable")],
         )
     except adaptation.llm.InvalidJsonLlmException as error:
-        raw_conversation = error.raw_conversation
+        raw_conversation: JsonType = error.raw_conversation
         assistant_response: adaptation.assistant_responses.Response = adaptation.assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )

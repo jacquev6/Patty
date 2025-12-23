@@ -6,12 +6,12 @@ import typing
 
 import sqlalchemy as sql
 
-
 from . import assistant_responses
 from . import llm
 from . import orm_models as db
 from .. import database_utils
 from .. import logs
+from ..any_json import JsonList
 from ..retry import RetryableError
 from .adapted import Exercise
 
@@ -57,16 +57,14 @@ async def submit_adaptation(can_retry: bool, adaptation: db.Adaptation) -> None:
             response = await adaptation.model.complete(messages, response_format)
     except llm.InvalidJsonLlmException as error:
         logs.log(f"Error 'invalid JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
-        raw_llm_conversations = [error.raw_conversation]
+        raw_llm_conversations: JsonList = [error.raw_conversation]
         initial_assistant_response: assistant_responses.Response = assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
     except llm.NotJsonLlmException as error:
         logs.log(f"Error 'not JSON' on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")
         raw_llm_conversations = [error.raw_conversation]
-        initial_assistant_response = assistant_responses.NotJsonError(
-            kind="error", error="not-json", text=error.text
-        )
+        initial_assistant_response = assistant_responses.NotJsonError(kind="error", error="not-json", text=error.text)
     except RetryableError:
         if can_retry:
             logs.log(f"RETRYABLE ERROR on adaptation {adaptation.id} in {timing.elapsed:.1f} seconds")

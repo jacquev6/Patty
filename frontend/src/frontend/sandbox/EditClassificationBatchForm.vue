@@ -38,7 +38,7 @@ async function submitAdaptation() {
 }
 
 async function submitAdaptationsWithRecentSettings() {
-  await client.POST(`/api/classification-batches/{id}/submit-adaptations-with-recent-settings`, {
+  await client.POST('/api/classification-batches/{id}/submit-adaptations-with-recent-settings', {
     params: { path: { id: props.classificationBatch.id } },
   })
 
