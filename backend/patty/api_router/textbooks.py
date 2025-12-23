@@ -824,15 +824,64 @@ def post_textbook_manual_exercises_chunks(
             .scalars()
             .first()
         )
-        if exercise_class is None or exercise_class.latest_strategy_settings is None:
-            raise fastapi.HTTPException(status_code=400, detail="Exercise class not found")
+        if exercise_class is None:
+            raise fastapi.HTTPException(status_code=404, detail="Exercise class not found")
 
         classification_ = classification.ClassificationByUser(
             exercise=exercise, at=now, username=req.creator, exercise_class=exercise_class
         )
         session.add(classification_)
 
-        assert exercise_class.latest_strategy_settings.exercise_class == exercise_class
+        if exercise_class.latest_strategy_settings is not None:
+            assert exercise_class.latest_strategy_settings.exercise_class == exercise_class
+
+            adaptation_ = adaptation.Adaptation(
+                created=textbooks.AdaptationCreationByTextbook(at=now, textbook=textbook),
+                exercise=exercise,
+                model=req.model_for_adaptation,
+                settings=exercise_class.latest_strategy_settings,
+                raw_llm_conversations=[],
+                initial_assistant_response=None,
+                initial_timing=None,
+                adjustments=[],
+                manual_edit=None,
+                approved_by=None,
+                approved_at=None,
+            )
+            session.add(adaptation_)
+
+
+class SubmitAdaptationsWithRecentSettingsRequest(ApiModel):
+    model_for_adaptation: adaptation.llm.ConcreteModel
+
+
+@router.post("/textbooks/{textbook_id}/page/{page_number}/submit-adaptations-with-recent-settings")
+def submit_adaptations_with_recent_settings_in_classification_batch(
+    textbook_id: str,
+    page_number: int,
+    req: SubmitAdaptationsWithRecentSettingsRequest,
+    session: database_utils.SessionDependable,
+) -> None:
+    textbook = get_by_id(session, textbooks.Textbook, textbook_id)
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    for exercise_location in session.execute(
+        sql.select(textbooks.ExerciseLocationTextbook).where(
+            textbooks.ExerciseLocationTextbook.textbook == textbook,
+            textbooks.ExerciseLocationTextbook.page_number == page_number,
+        )
+    ).scalars():
+        exercise = exercise_location.exercise
+        if not isinstance(exercise, adaptation.AdaptableExercise):
+            continue
+        if exercise.latest_adaptation is not None:
+            continue
+        latest_classification = exercise.latest_classification
+        if latest_classification is None or latest_classification.exercise_class is None:
+            continue
+        exercise_class = latest_classification.exercise_class
+        if exercise_class.latest_strategy_settings is None:
+            continue
 
         adaptation_ = adaptation.Adaptation(
             created=textbooks.AdaptationCreationByTextbook(at=now, textbook=textbook),

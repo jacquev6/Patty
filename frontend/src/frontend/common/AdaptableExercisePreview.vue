@@ -14,10 +14,12 @@ import { useTemplateRef } from 'vue'
 import AdaptableExercisePreview_LeftColumn from './AdaptableExercisePreviewLeftColumn.vue'
 import AdaptableExercisePreview_RightColumn from './AdaptableExercisePreviewRightColumn.vue'
 import FixedColumns from '$/FixedColumns.vue'
+import { type AdaptationLlmModel } from '@/frontend/ApiClient'
 
 defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   context: Context
+  availableAdaptationLlmModels: AdaptationLlmModel[]
   index: number | null
   exercise: PreviewableExercise
 }>()
@@ -26,6 +28,7 @@ const emit = defineEmits<{
   (e: 'exercise-removed'): void
   (e: 'batch-updated'): void
   (e: 'submit-extractions-with-recent-settings'): void
+  (e: 'submit-extractions-with-recent-settings-using', model: AdaptationLlmModel): void
 }>()
 
 const rightColumn = useTemplateRef('rightColumn')
@@ -51,7 +54,11 @@ const rightColumn = useTemplateRef('rightColumn')
           :headerLevel
           :exercise
           :context
+          :availableAdaptationLlmModels
           @submitExtractionsWithRecentSettings="emit('submit-extractions-with-recent-settings')"
+          @submitExtractionsWithRecentSettingsUsing="
+            (model: AdaptationLlmModel) => emit('submit-extractions-with-recent-settings-using', model)
+          "
         />
       </template>
     </FixedColumns>

@@ -207,7 +207,13 @@ describe('The creation form for textbooks with "v3" extraction strategy', () => 
 describe('The edition form for multi-PDFs textbooks - empty', () => {
   beforeEach(() => {
     cy.viewport(1600, 800)
-    loadFixtures(['dummy-textbook', 'dummy-extraction-strategy-v2', 'dummy-coche-exercise-classes'])
+    loadFixtures([
+      'dummy-textbook',
+      'dummy-extraction-strategy-v2',
+      'dummy-coche-exercise-classes',
+      'dummy-no-settings-exercise-class',
+      'dummy-adaptation',
+    ])
     ignoreResizeObserverLoopError()
     visit('/textbook-1')
   })
@@ -340,7 +346,7 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
 
     cy.visit('/')
     cy.get('a:contains("Dummy Textbook Title")').should('exist')
-    cy.get('a:contains("Batch")').should('not.exist')
+    cy.get('a:contains("Batch")').should('have.length', 1) // Only the fixture, no other batch was created
   })
 
   it('adds and removes external exercises', () => {
@@ -565,6 +571,35 @@ describe('The edition form for multi-PDFs textbooks - empty', () => {
     cy.get('div.exercise').eq(1).should('contain.text', 'Exercice 7')
     cy.get('div.exercise').eq(2).should('not.be.visible')
     cy.get('div.exercise').eq(3).should('not.be.visible')
+  })
+
+  it('adds a manual exercise with a class with no adaptation settings', () => {
+    cy.visit('/textbook-1/page-40/new-adaptations')
+    cy.get('[data-cy="input-exercise-number"]').clear().type('5')
+    cy.get('[data-cy="input-exercise-class"]').select('NoSettings')
+    cy.get('[data-cy="input-text"]').type(
+      'This is a manually-added exercise with a class without adaptation settings.',
+      { delay: 0 },
+    )
+    cy.get('button:contains("Submit")').click()
+
+    cy.location('pathname').should('equal', '/textbook-1/page-40')
+    cy.get('p:contains("Exercise class NoSettings does not have adaptation settings yet.")').should('exist')
+
+    cy.visit('/new-adaptation-batch')
+    cy.get('[data-cy="settings-name"]').type('NoSettings', { delay: 0 })
+    cy.get('button:contains("Submit")').click()
+    cy.location('pathname').should('equal', '/adaptation-batch-2')
+    cy.get('div.busy').should('not.exist')
+
+    cy.visit('/textbook-1/page-40')
+    cy.get(
+      'p:contains("Exercise class NoSettings did not have adaptation settings when this exercise was created.")',
+    ).should('exist')
+    cy.get('button:contains("Submit all adaptations")').click()
+    cy.get('div.busy').should('exist')
+    cy.get('div.busy', { timeout: 10000 }).should('not.exist')
+    cy.get('p:contains("not have adaptation settings")').should('not.exist')
   })
 
   it('fixes manual exercise class', () => {

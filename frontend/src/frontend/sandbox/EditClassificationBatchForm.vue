@@ -135,6 +135,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       context="classification"
       :index
       :exercise
+      :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
       @batchUpdated="emit('batch-updated')"
       @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
     />

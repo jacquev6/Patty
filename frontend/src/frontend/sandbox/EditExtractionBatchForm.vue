@@ -223,6 +223,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
               <AdaptableExercisePreview
                 :headerLevel="3"
                 context="extraction"
+                :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
                 :index="null"
                 :exercise
                 @batchUpdated="emit('batch-updated')"

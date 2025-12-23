@@ -8,6 +8,7 @@ import ResizableColumns from '$/ResizableColumns.vue'
 import AdaptationStrategyEditor from '@/frontend/common/AdaptationStrategyEditor.vue'
 import { useAuthenticationTokenStore } from '@/frontend/basic/AuthenticationTokenStore'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
+import { useApiConstantsStore } from '../ApiConstantsStore'
 
 defineProps<{
   adaptationBatch: AdaptationBatch
@@ -15,6 +16,7 @@ defineProps<{
 
 const { t } = useI18n()
 const authenticationTokenStore = useAuthenticationTokenStore()
+const apiConstantsStore = useApiConstantsStore()
 
 const columns = [
   { name: 'col-1', width: 1 },
@@ -80,6 +82,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
         v-for="(exercise, index) in adaptationBatch.exercises"
         :headerLevel="2"
         context="adaptation"
+        :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
         :index
         :exercise
       />

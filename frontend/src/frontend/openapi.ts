@@ -622,6 +622,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/textbooks/{textbook_id}/page/{page_number}/submit-adaptations-with-recent-settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Submit Adaptations With Recent Settings In Classification Batch */
+    post: operations['submit_adaptations_with_recent_settings_in_classification_batch_api_textbooks__textbook_id__page__page_number__submit_adaptations_with_recent_settings_post']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/textbooks/{textbook_id}/pages/{page_id}/removed': {
     parameters: {
       query?: never
@@ -2558,6 +2575,15 @@ export interface components {
        */
       whitespace: true
     }
+    /** SubmitAdaptationsWithRecentSettingsRequest */
+    SubmitAdaptationsWithRecentSettingsRequest: {
+      /** Modelforadaptation */
+      modelForAdaptation:
+        | components['schemas']['patty__adaptation__llm__dummy__DummyModel']
+        | components['schemas']['MistralAiModel']
+        | components['schemas']['OpenAiModel']
+        | components['schemas']['GeminiModel']
+    }
     /** SuccessV1 */
     SuccessV1: {
       /** Exercises */
@@ -4299,6 +4325,42 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': components['schemas']['PostTextbookManualExercisesChunksRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': null
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  submit_adaptations_with_recent_settings_in_classification_batch_api_textbooks__textbook_id__page__page_number__submit_adaptations_with_recent_settings_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        textbook_id: string
+        page_number: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SubmitAdaptationsWithRecentSettingsRequest']
       }
     }
     responses: {
