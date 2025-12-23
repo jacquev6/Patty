@@ -1,6 +1,7 @@
 # Copyright 2025 Vincent Jacques <vincent@vincent-jacques.net>
 
 import datetime
+import json
 from typing import Literal
 import typing
 
@@ -16,7 +17,7 @@ from .. import database_utils
 from .. import dispatching as dispatch
 from .. import exercises
 from .. import textbooks
-from ..any_json import JsonList
+from ..any_json import JsonList, JsonType
 from ..api_utils import ApiModel, get_by_id
 
 
@@ -163,7 +164,7 @@ async def post_adaptation_adjustment(
             detail=[dict(type="retryable", msg="LLM service temporarily unavailable")],
         )
     except adaptation.llm.InvalidJsonLlmException as error:
-        raw_conversation = error.raw_conversation
+        raw_conversation: JsonType = error.raw_conversation
         assistant_response: adaptation.assistant_responses.Response = adaptation.assistant_responses.InvalidJsonError(
             kind="error", error="invalid-json", parsed=error.parsed
         )
@@ -177,6 +178,12 @@ async def post_adaptation_adjustment(
         assistant_response = adaptation.assistant_responses.Success(
             kind="success", exercise=adaptation.adapted.Exercise.model_validate(response.message.content.model_dump())
         )
+
+    try:
+        json.dumps(raw_conversation)
+    except TypeError:
+        print("Raw conversation not JSON-serializable:", raw_conversation)
+        raw_conversation = "Error: conversation not JSON-serializable"
 
     raw_llm_conversations = list(exercise_adaptation.raw_llm_conversations)
     raw_llm_conversations.append(raw_conversation)

@@ -60,7 +60,7 @@ const schema = computedAsync(async () => {
 }, {})
 
 async function submitAdaptationsWithRecentSettings() {
-  await client.POST(`/api/extraction-batches/{id}/submit-adaptations-with-recent-settings`, {
+  await client.POST('/api/extraction-batches/{id}/submit-adaptations-with-recent-settings', {
     params: { path: { id: props.extractionBatch.id } },
   })
   emit('batch-updated')
@@ -223,6 +223,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
               <AdaptableExercisePreview
                 :headerLevel="3"
                 context="extraction"
+                :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
                 :index="null"
                 :exercise
                 @batchUpdated="emit('batch-updated')"

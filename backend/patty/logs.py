@@ -7,7 +7,6 @@ import typing
 
 # @todo Use standard `logging` module
 
-from . import settings
 from .api_utils import ApiModel
 
 
@@ -33,8 +32,3 @@ def timer() -> typing.Generator[TimingData, None, None]:
 
 def log(message: str) -> None:
     print(datetime.datetime.now(), message, flush=True)
-
-
-def log_for_issue_129(message: str) -> None:
-    if settings.INVESTIGATING_ISSUE_129:
-        log(message)

@@ -666,6 +666,7 @@ describe('AdaptableExercisePreview', () => {
           context,
           index,
           exercise,
+          availableAdaptationLlmModels: [{ provider: 'dummy', name: 'dummy-1' }],
         },
         global: {
           plugins: [

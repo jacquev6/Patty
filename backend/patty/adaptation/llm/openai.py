@@ -9,7 +9,6 @@ import openai.types.chat
 import openai.types.shared_params
 import pydantic
 
-from ... import logs
 from ... import settings
 from ...any_json import JsonDict
 from ...test_utils import costs_money
@@ -60,11 +59,9 @@ class OpenAiModel(Model):
     async def __do_complete__json_schema(
         self, messages: list[openai.types.chat.ChatCompletionMessageParam], response_format: type[T]
     ) -> tuple[JsonDict, str]:
-        with logs.timer() as t:
-            response = await client.beta.chat.completions.parse(
-                model=self.name, messages=messages, response_format=response_format
-            )
-        logs.log_for_issue_129(f"'openai.AsyncOpenAI.beta.chat.completions.parse' took {t.elapsed:.1f} seconds")
+        response = await client.beta.chat.completions.parse(
+            model=self.name, messages=messages, response_format=response_format
+        )
         # @todo Work out the magic happening in the call above, and that does not happen in:
         # response = await client.chat.completions.create(
         #     model=self.name,
@@ -89,11 +86,9 @@ class OpenAiModel(Model):
         response_format_: JsonFromTextResponseFormat[T] | JsonObjectResponseFormat[T],
     ) -> tuple[JsonDict, str]:
         response_format = self.__make_response_format(response_format_)
-        with logs.timer() as t:
-            response = await client.chat.completions.create(
-                model=self.name, messages=messages, response_format=response_format
-            )
-        logs.log_for_issue_129(f"'openai.AsyncOpenAI.chat.completions.create' took {t.elapsed:.1f} seconds")
+        response = await client.chat.completions.create(
+            model=self.name, messages=messages, response_format=response_format
+        )
         raw_conversation = dict(
             method="openai.AsyncOpenAI.chat.completions.create",
             messages=messages,

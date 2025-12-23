@@ -1462,6 +1462,15 @@ class FixturesCreator:
         self.create_dummy_branch(name="CocheMot", system_prompt="Blah blah coche mot.")
         self.create_dummy_branch(name="CochePhrase", system_prompt="Blah blah coche phrase.")
 
+    def create_dummy_no_settings_exercise_class(self) -> None:
+        self.add(
+            adaptation.ExerciseClass(
+                created=classification.ExerciseClassCreationByUser(at=created_at, username="Patty"),
+                name="NoSettings",
+                latest_strategy_settings=None,
+            )
+        )
+
     def create_dummy_expression_ecrite_exercise_class(self) -> None:
         self.create_dummy_branch(name="ExpressionEcrite", system_prompt="Blah blah expression écrite.")
 

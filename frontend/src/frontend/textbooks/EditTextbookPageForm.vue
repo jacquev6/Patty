@@ -5,11 +5,12 @@ import { useI18n } from 'vue-i18n'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useAuthenticatedClient, type Textbook, type TextbookPage } from '../ApiClient'
+import { useAuthenticatedClient, type Textbook, type TextbookPage, type AdaptationLlmModel } from '../ApiClient'
 import AdaptableExercisePreview from '@/frontend/common/AdaptableExercisePreview.vue'
 import BugMarker from '@/reusable/BugMarker.vue'
 import WhiteSpace from '@/reusable/WhiteSpace.vue'
 import assert from '$/assert'
+import { useApiConstantsStore } from '../ApiConstantsStore'
 
 const props = defineProps<{
   textbook: Textbook
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const client = useAuthenticatedClient()
 const router = useRouter()
+const apiConstantsStore = useApiConstantsStore()
 
 async function removeExercise(exercise_id: string, removed: boolean) {
   await client.PUT('/api/textbooks/{textbook_id}/exercises/{exercise_id}/removed', {
@@ -71,6 +73,15 @@ const exercisesToShow = computed({
     exercisesToShowRequestedByUser.value = v
   },
 })
+
+async function submitAdaptationsWithRecentSettingsUsing(model: AdaptationLlmModel) {
+  await client.POST('/api/textbooks/{textbook_id}/page/{page_number}/submit-adaptations-with-recent-settings', {
+    params: { path: { textbook_id: props.textbook.id, page_number: props.page.number } },
+    body: { modelForAdaptation: model },
+  })
+
+  emit('textbook-updated')
+}
 </script>
 
 <template>
@@ -137,10 +148,12 @@ const exercisesToShow = computed({
         v-else-if="exercise.kind === 'adaptable'"
         :headerLevel="2"
         context="textbook"
+        :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
         :index="null"
         :exercise
         @exerciseRemoved="() => removeExercise(exercise.id, true)"
         @batchUpdated="emit('textbook-updated')"
+        @submitExtractionsWithRecentSettingsUsing="submitAdaptationsWithRecentSettingsUsing"
       />
       <template v-else-if="exercise.kind === 'external'">
         <h2>

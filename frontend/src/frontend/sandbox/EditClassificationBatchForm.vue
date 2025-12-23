@@ -38,7 +38,7 @@ async function submitAdaptation() {
 }
 
 async function submitAdaptationsWithRecentSettings() {
-  await client.POST(`/api/classification-batches/{id}/submit-adaptations-with-recent-settings`, {
+  await client.POST('/api/classification-batches/{id}/submit-adaptations-with-recent-settings', {
     params: { path: { id: props.classificationBatch.id } },
   })
 
@@ -135,6 +135,7 @@ function showDuration(timing: { start: number; end: number | null } | null): str
       context="classification"
       :index
       :exercise
+      :availableAdaptationLlmModels="apiConstantsStore.availableAdaptationLlmModels"
       @batchUpdated="emit('batch-updated')"
       @submitExtractionsWithRecentSettings="submitAdaptationsWithRecentSettings"
     />

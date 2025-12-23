@@ -45,6 +45,7 @@ def get_available_adaptation_llm_models() -> (
                 adaptation.llm.DummyModel(provider="dummy", name="dummy-for-images"),
                 ["text", "json-object", "json-schema"],
             ),
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-3-flash-preview"), ["text", "json-object"]),
             (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
             (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
             (
@@ -94,6 +95,7 @@ def get_available_adaptation_llm_models() -> (
         ]
     else:
         return [
+            (adaptation.llm.GeminiModel(provider="gemini", name="gemini-3-flash-preview"), ["text", "json-object"]),
             (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.5-flash"), ["text", "json-object"]),
             (adaptation.llm.GeminiModel(provider="gemini", name="gemini-2.0-flash"), ["text", "json-object"]),
             (

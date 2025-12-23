@@ -6,25 +6,31 @@ import { computed, ref, watch } from 'vue'
 import { useMagicKeys } from '@vueuse/core'
 
 import { type PreviewableExercise, type Context } from './AdaptableExercisePreview.vue'
-
 import BugMarker from '$/BugMarker.vue'
 import BusyBox from '$/BusyBox.vue'
 import MiniatureScreen from '$/MiniatureScreen.vue'
 import AdaptedExerciseRenderer from '@/adapted-exercise/AdaptedExerciseRenderer.vue'
+import LlmModelSelector from '@/frontend/common/LlmModelSelector.vue'
+import { type AdaptationLlmModel } from '@/frontend/ApiClient'
+import WhiteSpace from '@/reusable/WhiteSpace.vue'
 
 const props = defineProps<{
   headerLevel: 1 | 2 | 3 | 4 | 5 | 6
   exercise: PreviewableExercise
   context: Context
+  availableAdaptationLlmModels: AdaptationLlmModel[]
 }>()
 
 const emit = defineEmits<{
   (e: 'submit-extractions-with-recent-settings'): void
+  (e: 'submit-extractions-with-recent-settings-using', model: AdaptationLlmModel): void
 }>()
 
 const { t } = useI18n()
 
 const header = computed(() => `h${props.headerLevel}`)
+
+const modelForAdaptation = ref<AdaptationLlmModel>(props.availableAdaptationLlmModels[0])
 
 const fullScreen = ref(false)
 const { Escape } = useMagicKeys()
@@ -61,6 +67,21 @@ defineExpose({
         </p>
         <p v-if="context === 'extraction' || context === 'classification'">
           <button @click="emit('submit-extractions-with-recent-settings')">{{ t('submitSimilarAdaptations') }}</button>
+        </p>
+        <p v-else-if="context === 'textbook'">
+          <I18nT keypath="useModelToSubmitSimilarAdaptations">
+            <LlmModelSelector
+              :availableLlmModels="availableAdaptationLlmModels"
+              :disabled="false"
+              v-model="modelForAdaptation"
+            >
+              <template #provider><WhiteSpace /></template>
+            </LlmModelSelector>
+
+            <button @click="emit('submit-extractions-with-recent-settings-using', modelForAdaptation)">
+              {{ t('submitSimilarAdaptations') }}
+            </button>
+          </I18nT>
         </p>
       </template>
       <template v-else>
@@ -119,6 +140,7 @@ en:
   adaptationNotRequested: Adaptation was not requested.
   exerciseClassHasNoSettings: "Exercise class {0} does not have adaptation settings yet."
   exerciseClassHadNoSettings: "Exercise class {0} did not have adaptation settings when this exercise was created."
+  useModelToSubmitSimilarAdaptations: 'Use {0} to {1}'
   submitSimilarAdaptations: Submit all adaptations in the same case
   errorWithLLM: Error with the LLM
   llmInvalidJson: The LLM returned a JSON response that does not validate against the adapted exercise schema.
@@ -129,6 +151,7 @@ fr:
   adaptationNotRequested: L'adaptation n'a pas été demandée.
   exerciseClassHasNoSettings: "La classe d'exercice {0} n'a pas encore de paramètres d'adaptation."
   exerciseClassHadNoSettings: "La classe d'exercice {0} n'avait pas de paramètres d'adaptation lorsque cet exercice a été créé."
+  useModelToSubmitSimilarAdaptations: 'Utiliser {0} pour {1}'
   submitSimilarAdaptations: Soumettre toutes les adaptations dans le même cas
   errorWithLLM: Erreur avec le LLM
   llmInvalidJson: Le LLM a renvoyé une réponse JSON qui ne correspond pas au schéma d'exercice adapté.

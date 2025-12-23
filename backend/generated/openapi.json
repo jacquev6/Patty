@@ -1926,7 +1926,8 @@
           "name": {
             "enum": [
               "gemini-2.0-flash",
-              "gemini-2.5-flash"
+              "gemini-2.5-flash",
+              "gemini-3-flash-preview"
             ],
             "title": "Name",
             "type": "string"
@@ -4744,6 +4745,33 @@
           "splitWordInput"
         ],
         "title": "StatementComponents",
+        "type": "object"
+      },
+      "SubmitAdaptationsWithRecentSettingsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "modelForAdaptation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/patty__adaptation__llm__dummy__DummyModel"
+              },
+              {
+                "$ref": "#/components/schemas/MistralAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/OpenAiModel"
+              },
+              {
+                "$ref": "#/components/schemas/GeminiModel"
+              }
+            ],
+            "title": "Modelforadaptation"
+          }
+        },
+        "required": [
+          "modelForAdaptation"
+        ],
+        "title": "SubmitAdaptationsWithRecentSettingsRequest",
         "type": "object"
       },
       "SuccessV1": {
@@ -7942,6 +7970,70 @@
           }
         ],
         "summary": "Post Textbook Manual Exercises Chunks"
+      }
+    },
+    "/api/textbooks/{textbook_id}/page/{page_number}/submit-adaptations-with-recent-settings": {
+      "post": {
+        "operationId": "submit_adaptations_with_recent_settings_in_classification_batch_api_textbooks__textbook_id__page__page_number__submit_adaptations_with_recent_settings_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "textbook_id",
+            "required": true,
+            "schema": {
+              "title": "Textbook Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "page_number",
+            "required": true,
+            "schema": {
+              "title": "Page Number",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAdaptationsWithRecentSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Submit Adaptations With Recent Settings In Classification Batch Api Textbooks  Textbook Id  Page  Page Number  Submit Adaptations With Recent Settings Post",
+                  "type": "null"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Submit Adaptations With Recent Settings In Classification Batch"
       }
     },
     "/api/textbooks/{textbook_id}/pages/{page_id}/removed": {
